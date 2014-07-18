@@ -1,0 +1,343 @@
+<!DOCTYPE html>
+
+<html>
+<head>
+  <title>App View</title>
+  <meta http-equiv="content-type" content="text/html; charset=UTF-8">
+  <meta name="viewport" content="width=device-width, target-densitydpi=160dpi, initial-scale=1.0; maximum-scale=1.0; user-scalable=0;">
+  <link rel="stylesheet" media="all" href="docco.css" />
+</head>
+<body>
+  <div id="container">
+    <div id="background"></div>
+    
+      <ul id="jump_to">
+        <li>
+          <a class="large" href="javascript:void(0);">Jump To &hellip;</a>
+          <a class="small" href="javascript:void(0);">+</a>
+          <div id="jump_wrapper">
+          <div id="jump_page">
+            
+              
+              <a class="source" href="collections.forms.html">
+                collections.forms.coffee
+              </a>
+            
+              
+              <a class="source" href="collections.pages.html">
+                collections.pages.coffee
+              </a>
+            
+              
+              <a class="source" href="main.html">
+                main.coffee
+              </a>
+            
+              
+              <a class="source" href="models.database.html">
+                models.database.coffee
+              </a>
+            
+              
+              <a class="source" href="models.file.html">
+                models.file.coffee
+              </a>
+            
+              
+              <a class="source" href="models.form.html">
+                models.form.coffee
+              </a>
+            
+              
+              <a class="source" href="models.page.html">
+                models.page.coffee
+              </a>
+            
+              
+              <a class="source" href="routes.router.html">
+                routes.router.coffee
+              </a>
+            
+              
+              <a class="source" href="test.collections.forms.spec.html">
+                test.collections.forms.spec.coffee
+              </a>
+            
+              
+              <a class="source" href="test.collections.pages.spec.html">
+                test.collections.pages.spec.coffee
+              </a>
+            
+              
+              <a class="source" href="test.models.file.spec.html">
+                test.models.file.spec.coffee
+              </a>
+            
+              
+              <a class="source" href="test.models.form.spec.html">
+                test.models.form.spec.coffee
+              </a>
+            
+              
+              <a class="source" href="test.models.page.spec.html">
+                test.models.page.spec.coffee
+              </a>
+            
+              
+              <a class="source" href="test.routers.router.spec.html">
+                test.routers.router.spec.coffee
+              </a>
+            
+              
+              <a class="source" href="test.spec.test.html">
+                test.spec.test.coffee
+              </a>
+            
+              
+              <a class="source" href="test.specrunner.html">
+                test.specrunner.coffee
+              </a>
+            
+              
+              <a class="source" href="test.utils.indexeddb-utils.spec.html">
+                test.utils.indexeddb-utils.spec.coffee
+              </a>
+            
+              
+              <a class="source" href="test.views.app.spec.html">
+                test.views.app.spec.coffee
+              </a>
+            
+              
+              <a class="source" href="test.views.basepage.spec.html">
+                test.views.basepage.spec.coffee
+              </a>
+            
+              
+              <a class="source" href="test.views.form-add.spec.html">
+                test.views.form-add.spec.coffee
+              </a>
+            
+              
+              <a class="source" href="test.views.form.spec.html">
+                test.views.form.spec.coffee
+              </a>
+            
+              
+              <a class="source" href="test.views.forms-browse.spec.html">
+                test.views.forms-browse.spec.coffee
+              </a>
+            
+              
+              <a class="source" href="test.views.mainmenu.spec.html">
+                test.views.mainmenu.spec.coffee
+              </a>
+            
+              
+              <a class="source" href="test.views.page.spec.html">
+                test.views.page.spec.coffee
+              </a>
+            
+              
+              <a class="source" href="test.views.pages.spec.html">
+                test.views.pages.spec.coffee
+              </a>
+            
+              
+              <a class="source" href="utils.indexeddb-utils.html">
+                utils.indexeddb-utils.coffee
+              </a>
+            
+              
+              <a class="source" href="views.app.html">
+                views.app.coffee
+              </a>
+            
+              
+              <a class="source" href="views.basepage.html">
+                views.basepage.coffee
+              </a>
+            
+              
+              <a class="source" href="views.form-add.html">
+                views.form-add.coffee
+              </a>
+            
+              
+              <a class="source" href="views.form.html">
+                views.form.coffee
+              </a>
+            
+              
+              <a class="source" href="views.forms-browse.html">
+                views.forms-browse.coffee
+              </a>
+            
+              
+              <a class="source" href="views.mainmenu.html">
+                views.mainmenu.coffee
+              </a>
+            
+              
+              <a class="source" href="views.page.html">
+                views.page.coffee
+              </a>
+            
+              
+              <a class="source" href="views.pages.html">
+                views.pages.coffee
+              </a>
+            
+          </div>
+        </li>
+      </ul>
+    
+    <ul class="sections">
+        
+        
+        
+        <li id="section-1">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-1">&#182;</a>
+              </div>
+              <h1 id="app-view">App View</h1>
+<p>  AppView is the Dative application core.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>
+define [
+  <span class="hljs-string">'jquery'</span>,
+  <span class="hljs-string">'lodash'</span>,
+  <span class="hljs-string">'backbone'</span>,
+  <span class="hljs-string">'views/mainmenu'</span>,
+  <span class="hljs-string">'views/pages'</span>,
+  <span class="hljs-string">'views/form-add'</span>
+], <span class="hljs-function"><span class="hljs-params">($, _, Backbone, MainMenuView, PagesView, FormAddView)</span> -&gt;</span>
+
+  <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">AppView</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">Backbone</span>.<span class="hljs-title">View</span></span>
+    <span class="hljs-attribute">template</span>: JST[<span class="hljs-string">'app/scripts/templates/app.ejs'</span>]
+    <span class="hljs-attribute">el</span>: <span class="hljs-string">'#oldclientapp'</span>
+    <span class="hljs-attribute">subviews</span>:
+      <span class="hljs-attribute">pagesView</span>: PagesView
+      <span class="hljs-attribute">formAddView</span>: FormAddView
+    <span class="hljs-attribute">activeSubview</span>: <span class="hljs-literal">null</span>
+
+    <span class="hljs-attribute">initialize</span>:<span class="hljs-function"> -&gt;</span></pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-2">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-2">&#182;</a>
+              </div>
+              <p>Get the jQuery UI colors</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>      <span class="hljs-property">@jQueryUIColors</span> = $.getJQueryUIColors()</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-3">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-3">&#182;</a>
+              </div>
+              <p>Main menu triggers custom events — handle them here</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>      <span class="hljs-property">@mainMenuView</span> = <span class="hljs-keyword">new</span> MainMenuView()
+      <span class="hljs-property">@mainMenuView</span>.parent = @
+
+      <span class="hljs-property">@mainMenuView</span>.<span class="hljs-literal">on</span> <span class="hljs-string">'request:pages'</span>, <span class="hljs-property">@activatePagesView</span>, @
+      <span class="hljs-property">@mainMenuView</span>.<span class="hljs-literal">on</span> <span class="hljs-string">'request:formAdd'</span>, <span class="hljs-property">@activateFormAddView</span>, @
+
+      <span class="hljs-property">@render</span>()
+
+
+    <span class="hljs-attribute">render</span>:<span class="hljs-function"> -&gt;</span>
+      <span class="hljs-property">@$el</span>.html <span class="hljs-property">@template</span>()
+      <span class="hljs-property">@mainMenuView</span>.setElement(<span class="hljs-string">'#mainmenu'</span>).render()
+      <span class="hljs-property">@matchWindowDimensions</span>()</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-4">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-4">&#182;</a>
+              </div>
+              <p>Call render on the active subview, setting its el to ‘#appview’</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>    <span class="hljs-attribute">renderSubview</span>:<span class="hljs-function"> -&gt;</span>
+      <span class="hljs-property">@activeSubview</span>.render()
+
+    <span class="hljs-attribute">activateFormAddView</span>:<span class="hljs-function"> -&gt;</span>
+      <span class="hljs-property">@activeSubview</span> = <span class="hljs-property">@subviews</span>[<span class="hljs-string">'formAddView'</span>]
+      <span class="hljs-keyword">if</span> <span class="hljs-keyword">not</span> <span class="hljs-property">@activeSubview</span>.initialized
+        <span class="hljs-property">@activeSubview</span> = <span class="hljs-keyword">new</span> <span class="hljs-property">@activeSubview</span>()
+        <span class="hljs-property">@activeSubview</span>.parent = @
+        <span class="hljs-property">@subviews</span>[<span class="hljs-string">'formAddView'</span>] = <span class="hljs-property">@activeSubview</span>
+      <span class="hljs-property">@activeSubview</span>.setElement <span class="hljs-string">'#appview'</span>
+      <span class="hljs-property">@renderSubview</span>()</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-5">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-5">&#182;</a>
+              </div>
+              <p>Make the pagesView the active subview of the app and render it</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>    <span class="hljs-attribute">activatePagesView</span>:<span class="hljs-function"> -&gt;</span>
+      <span class="hljs-property">@activeSubview</span> = <span class="hljs-property">@subviews</span>[<span class="hljs-string">'pagesView'</span>]
+      <span class="hljs-keyword">if</span> <span class="hljs-keyword">not</span> <span class="hljs-property">@activeSubview</span>.initialized
+        <span class="hljs-property">@activeSubview</span> = <span class="hljs-keyword">new</span> <span class="hljs-property">@activeSubview</span>()
+        <span class="hljs-property">@activeSubview</span>.parent = @
+        <span class="hljs-property">@subviews</span>[<span class="hljs-string">'pagesView'</span>] = <span class="hljs-property">@activeSubview</span>
+      <span class="hljs-property">@activeSubview</span>.setElement <span class="hljs-string">'#appview'</span>
+      <span class="hljs-property">@renderSubview</span>()</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-6">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-6">&#182;</a>
+              </div>
+              <p>Size the #appview div relative to the window size</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>    <span class="hljs-attribute">matchWindowDimensions</span>:<span class="hljs-function"> -&gt;</span>
+      appView = @
+      <span class="hljs-property">@$</span>(<span class="hljs-string">'#appview'</span>).css <span class="hljs-attribute">height</span>: $(<span class="hljs-built_in">window</span>).height() - <span class="hljs-number">50</span>
+      $(<span class="hljs-built_in">window</span>).resize<span class="hljs-function"> -&gt;</span>
+        appView.$(<span class="hljs-string">'#appview'</span>).css <span class="hljs-attribute">height</span>: $(<span class="hljs-built_in">window</span>).height() - <span class="hljs-number">50</span></pre></div></div>
+            
+        </li>
+        
+    </ul>
+  </div>
+</body>
+</html>

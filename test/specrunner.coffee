@@ -1,0 +1,36 @@
+#/*global require*/
+
+require.config
+
+  shim:
+    backbone: ["lodash", "jquery"]
+    backboneindexeddb: ['backbone']
+
+  paths:
+    jquery: '../bower_components/jquery/dist/jquery'
+    backbone: '../bower_components/backbone/backbone'
+    lodash: '../bower_components/lodash/dist/lodash'
+    underscore: '../bower_components/lodash/dist/lodash.underscore'
+    backboneindexeddb:
+      '../bower_components/indexeddb-backbonejs-adapter/backbone-indexeddb'
+    bootstrap: '../bower_components/sass-bootstrap/dist/js/bootstrap'
+    text: '../bower_components/requirejs-text/text'
+    jqueryui: '../bower_components/jqueryui/jquery-ui'
+    superfish: '../bower_components/superfish/dist/js/superfish'
+    igt: '../scripts/jquery-extensions/igt'
+    jqueryuicolors: '../scripts/jquery-extensions/jqueryui-colors'
+    sfjquimatch: '../scripts/jquery-extensions/superfish-jqueryui-match'
+    # Supersubs plugin removed in v1.6 of superfish. See
+    # https://github.com/joeldbirch/superfish.
+    supersubs: '../bower_components/superfish/dist/js/supersubs'
+
+specs = [
+  'backboneindexeddb'
+  'spec/models/form.js'
+  'spec/collections/forms.js'
+  'spec/utils/indexeddb-utils.js'
+]
+
+require specs, ->
+    mocha.run()
+

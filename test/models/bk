@@ -1,0 +1,8 @@
+# global beforeEach, describe, it, assert, expect
+define ['../../scripts/models/form'], (FormModel) ->
+  describe 'Form Model', ->
+    it "has default value", ->
+      formModel = new FormModel()
+      expect(model).to.be.ok
+      expect(model.get("title")).to.equal ""
+

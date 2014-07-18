@@ -1,0 +1,23 @@
+{
+  "name": "dative",
+  "version": "0.0.0",
+  "dependencies": {
+    "sass-bootstrap": "~3.0.2",
+    "jquery": "~2.1.1",
+    "jqueryui": "~1.11",
+    "lodash": "~2.4.1",
+    "backbone": "~1.1.0",
+    "requirejs": "~2.1.10",
+    "requirejs-text": "~2.0.10",
+    "modernizr": "~2.7.1",
+    "superfish": "~1.7.4",
+    "backbone-relational": "~0.8.8",
+    "eco": "~1.1",
+    "marionette": "~2.0.1",
+    "indexeddb-backbonejs-adapter": "*"
+  },
+  "devDependencies": {
+    "mocha": "*",
+    "chai": "*"
+  }
+}

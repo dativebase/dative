@@ -1,0 +1,538 @@
+<!DOCTYPE html>
+
+<html>
+<head>
+  <title>views.mainmenu.coffee</title>
+  <meta http-equiv="content-type" content="text/html; charset=UTF-8">
+  <meta name="viewport" content="width=device-width, target-densitydpi=160dpi, initial-scale=1.0; maximum-scale=1.0; user-scalable=0;">
+  <link rel="stylesheet" media="all" href="docco.css" />
+</head>
+<body>
+  <div id="container">
+    <div id="background"></div>
+    
+      <ul id="jump_to">
+        <li>
+          <a class="large" href="javascript:void(0);">Jump To &hellip;</a>
+          <a class="small" href="javascript:void(0);">+</a>
+          <div id="jump_wrapper">
+          <div id="jump_page">
+            
+              
+              <a class="source" href="collections.forms.html">
+                collections.forms.coffee
+              </a>
+            
+              
+              <a class="source" href="collections.pages.html">
+                collections.pages.coffee
+              </a>
+            
+              
+              <a class="source" href="main.html">
+                main.coffee
+              </a>
+            
+              
+              <a class="source" href="models.database.html">
+                models.database.coffee
+              </a>
+            
+              
+              <a class="source" href="models.file.html">
+                models.file.coffee
+              </a>
+            
+              
+              <a class="source" href="models.form.html">
+                models.form.coffee
+              </a>
+            
+              
+              <a class="source" href="models.page.html">
+                models.page.coffee
+              </a>
+            
+              
+              <a class="source" href="routes.router.html">
+                routes.router.coffee
+              </a>
+            
+              
+              <a class="source" href="test.collections.forms.spec.html">
+                test.collections.forms.spec.coffee
+              </a>
+            
+              
+              <a class="source" href="test.collections.pages.spec.html">
+                test.collections.pages.spec.coffee
+              </a>
+            
+              
+              <a class="source" href="test.models.file.spec.html">
+                test.models.file.spec.coffee
+              </a>
+            
+              
+              <a class="source" href="test.models.form.spec.html">
+                test.models.form.spec.coffee
+              </a>
+            
+              
+              <a class="source" href="test.models.page.spec.html">
+                test.models.page.spec.coffee
+              </a>
+            
+              
+              <a class="source" href="test.routers.router.spec.html">
+                test.routers.router.spec.coffee
+              </a>
+            
+              
+              <a class="source" href="test.spec.test.html">
+                test.spec.test.coffee
+              </a>
+            
+              
+              <a class="source" href="test.specrunner.html">
+                test.specrunner.coffee
+              </a>
+            
+              
+              <a class="source" href="test.utils.indexeddb-utils.spec.html">
+                test.utils.indexeddb-utils.spec.coffee
+              </a>
+            
+              
+              <a class="source" href="test.views.app.spec.html">
+                test.views.app.spec.coffee
+              </a>
+            
+              
+              <a class="source" href="test.views.basepage.spec.html">
+                test.views.basepage.spec.coffee
+              </a>
+            
+              
+              <a class="source" href="test.views.form-add.spec.html">
+                test.views.form-add.spec.coffee
+              </a>
+            
+              
+              <a class="source" href="test.views.form.spec.html">
+                test.views.form.spec.coffee
+              </a>
+            
+              
+              <a class="source" href="test.views.forms-browse.spec.html">
+                test.views.forms-browse.spec.coffee
+              </a>
+            
+              
+              <a class="source" href="test.views.mainmenu.spec.html">
+                test.views.mainmenu.spec.coffee
+              </a>
+            
+              
+              <a class="source" href="test.views.page.spec.html">
+                test.views.page.spec.coffee
+              </a>
+            
+              
+              <a class="source" href="test.views.pages.spec.html">
+                test.views.pages.spec.coffee
+              </a>
+            
+              
+              <a class="source" href="utils.indexeddb-utils.html">
+                utils.indexeddb-utils.coffee
+              </a>
+            
+              
+              <a class="source" href="views.app.html">
+                views.app.coffee
+              </a>
+            
+              
+              <a class="source" href="views.basepage.html">
+                views.basepage.coffee
+              </a>
+            
+              
+              <a class="source" href="views.form-add.html">
+                views.form-add.coffee
+              </a>
+            
+              
+              <a class="source" href="views.form.html">
+                views.form.coffee
+              </a>
+            
+              
+              <a class="source" href="views.forms-browse.html">
+                views.forms-browse.coffee
+              </a>
+            
+              
+              <a class="source" href="views.mainmenu.html">
+                views.mainmenu.coffee
+              </a>
+            
+              
+              <a class="source" href="views.page.html">
+                views.page.coffee
+              </a>
+            
+              
+              <a class="source" href="views.pages.html">
+                views.pages.coffee
+              </a>
+            
+          </div>
+        </li>
+      </ul>
+    
+    <ul class="sections">
+        
+          <li id="title">
+              <div class="annotation">
+                  <h1>views.mainmenu.coffee</h1>
+              </div>
+          </li>
+        
+        
+        
+        <li id="section-1">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-1">&#182;</a>
+              </div>
+              
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>define [
+  <span class="hljs-string">'jquery'</span>
+  <span class="hljs-string">'lodash'</span>
+  <span class="hljs-string">'backbone'</span>
+  <span class="hljs-string">'templates'</span>
+  <span class="hljs-string">'jqueryui'</span>
+  <span class="hljs-string">'superfish'</span>
+  <span class="hljs-string">'supersubs'</span>
+  <span class="hljs-string">'sfjquimatch'</span>
+], <span class="hljs-function"><span class="hljs-params">( $, _, Backbone, JST)</span> -&gt;</span>
+
+  <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">MainMenuView</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">Backbone</span>.<span class="hljs-title">View</span></span>
+
+    <span class="hljs-attribute">tagName</span>: <span class="hljs-string">'div'</span>
+    <span class="hljs-attribute">className</span>: <span class="hljs-string">'mainmenu'</span>
+    <span class="hljs-attribute">template</span>: JST[<span class="hljs-string">'app/scripts/templates/mainmenu.ejs'</span>]
+
+    <span class="hljs-attribute">initialize</span>:<span class="hljs-function"> -&gt;</span></pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-2">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-2">&#182;</a>
+              </div>
+              <p>render</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>    <span class="hljs-attribute">render</span>:<span class="hljs-function"> -&gt;</span></pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-3">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-3">&#182;</a>
+              </div>
+              <p>Match jQuery UI colors and insert menu template.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>      <span class="hljs-property">@$el</span>.css(<span class="hljs-property">@parent</span>.jQueryUIColors.def).html <span class="hljs-property">@template</span>()</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-4">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-4">&#182;</a>
+              </div>
+              <p>Superfish transmogrifies menu</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>      <span class="hljs-property">@superfishify</span>()</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-5">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-5">&#182;</a>
+              </div>
+              <p>Vivify menu buttons</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>      <span class="hljs-property">@bindClickToEventTrigger</span>()</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-6">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-6">&#182;</a>
+              </div>
+              <p>Keyboard shortcuts</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>      <span class="hljs-property">@shortcutConfig</span>()</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-7">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-7">&#182;</a>
+              </div>
+              <p>Superfish jQuery plugin turns mainmenu <ul> into a menubar</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>    <span class="hljs-attribute">superfishify</span>:<span class="hljs-function"> -&gt;</span>
+      <span class="hljs-property">@$</span>(<span class="hljs-string">'.sf-menu'</span>).supersubs(<span class="hljs-attribute">minWidth</span>: <span class="hljs-number">12</span>, <span class="hljs-attribute">maxWidth</span>: <span class="hljs-number">27</span>, <span class="hljs-attribute">extraWidth</span>: <span class="hljs-number">2</span>)
+        .superfish(<span class="hljs-attribute">autoArrows</span>: <span class="hljs-literal">false</span>)
+        .superfishJQueryUIMatch(<span class="hljs-property">@parent</span>.jQueryUIColors)</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-8">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-8">&#182;</a>
+              </div>
+              <p>configureMenuEvents</p>
+<ol>
+<li>bind menu item click to data-event trigger</li>
+<li>bind data-shortcut keypress event to data-event trigger
+3.
+Bind menu item clicks to trigger of the data-event attr’s event</li>
+</ol>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>    <span class="hljs-attribute">bindClickToEventTrigger</span>:<span class="hljs-function"> -&gt;</span>
+      mainmenuView = @
+      <span class="hljs-property">@$</span>(<span class="hljs-string">'[data-event]'</span>).each<span class="hljs-function"> -&gt;</span>
+        $(@).click<span class="hljs-function"> -&gt;</span>
+          <span class="hljs-built_in">console</span>.log <span class="hljs-string">'clicked '</span> + $(@).attr(<span class="hljs-string">'data-event'</span>) <span class="hljs-keyword">if</span> debugMode
+          mainmenuView.trigger $(@).attr(<span class="hljs-string">'data-event'</span>)</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-9">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-9">&#182;</a>
+              </div>
+              <p>Configure keyboard shortcuts</p>
+<ol>
+<li>Bind shortcut keystrokes to the appropriate events.</li>
+<li>Modify the menu items so that shortcuts abbreviations are displayed.</li>
+</ol>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>    <span class="hljs-attribute">shortcutConfig</span>:<span class="hljs-function"> -&gt;</span>
+      mainmenuView = @
+      $(<span class="hljs-string">'[data-shortcut][data-event]'</span>).each<span class="hljs-function"> -&gt;</span>
+        event = $(@).attr <span class="hljs-string">'data-event'</span>
+        shortcut = $(@).attr <span class="hljs-string">'data-shortcut'</span>
+        mainmenuView.bindShortcutToEventTrigger shortcut, event
+        $(@).append $(<span class="hljs-string">'&lt;span&gt;'</span>).addClass(<span class="hljs-string">'float-right'</span>).text(
+          mainmenuView.getShortcutAbbreviation(shortcut))</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-10">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-10">&#182;</a>
+              </div>
+              <p>Bind keyboard shortcut to event to triggering of event</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>    <span class="hljs-attribute">bindShortcutToEventTrigger</span>: <span class="hljs-function"><span class="hljs-params">(shortcutString, eventName)</span> -&gt;</span></pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-11">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-11">&#182;</a>
+              </div>
+              <p>Map for ‘ctrl+A’ would be {ctrlKey: true, shortcutKey: 65}</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>      map = <span class="hljs-property">@getShortcutMap</span> shortcutString
+      mainmenuView = @</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-12">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-12">&#182;</a>
+              </div>
+              <p>Bind the keydown event to the function</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>      $<span class="hljs-function"><span class="hljs-params">(<span class="hljs-built_in">document</span>)</span>.<span class="hljs-title">keydown</span> <span class="hljs-params">(event)</span> -&gt;</span>
+        <span class="hljs-keyword">if</span> event.ctrlKey <span class="hljs-keyword">is</span> map.ctrlKey <span class="hljs-keyword">and</span>
+        event.altKey <span class="hljs-keyword">is</span> map.altKey <span class="hljs-keyword">and</span>
+        event.shiftKey <span class="hljs-keyword">is</span> map.shiftKey <span class="hljs-keyword">and</span>
+        event.which <span class="hljs-keyword">is</span> map.shortcutKey
+          <span class="hljs-built_in">console</span>.log <span class="hljs-string">'keyboard shortcut '</span> + eventName <span class="hljs-keyword">if</span> debugMode
+          mainmenuView.trigger eventName</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-13">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-13">&#182;</a>
+              </div>
+              <p>Return a shortcut object from a shortcut string.
+Shortcut Map for a shortcut string like ‘ctrl+A’ would be
+{ctrlKey: true, shortcutKey: 65}</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>    <span class="hljs-attribute">getShortcutMap</span>: <span class="hljs-function"><span class="hljs-params">(shortcutString)</span> -&gt;</span>
+      shortcutArray = shortcutString.split <span class="hljs-string">'+'</span></pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-14">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-14">&#182;</a>
+              </div>
+              <p>Returns the codes for the arrow symbols or else the character code</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>      <span class="hljs-function"><span class="hljs-title">getShortcutCode</span> = <span class="hljs-params">(shortcutAsString)</span> -&gt;</span>
+        <span class="hljs-keyword">switch</span> shortcutAsString
+          <span class="hljs-keyword">when</span> <span class="hljs-string">'rArrow'</span> <span class="hljs-keyword">then</span> <span class="hljs-number">39</span>
+          <span class="hljs-keyword">when</span> <span class="hljs-string">'lArrow'</span> <span class="hljs-keyword">then</span> <span class="hljs-number">37</span>
+          <span class="hljs-keyword">when</span> <span class="hljs-string">'uArrow'</span> <span class="hljs-keyword">then</span> <span class="hljs-number">38</span>
+          <span class="hljs-keyword">when</span> <span class="hljs-string">'dArrow'</span> <span class="hljs-keyword">then</span> <span class="hljs-number">40</span>
+          <span class="hljs-keyword">else</span> shortcutAsString.toUpperCase().charCodeAt <span class="hljs-number">0</span>
+
+      <span class="hljs-attribute">ctrlKey</span>: <span class="hljs-string">'ctrl'</span> <span class="hljs-keyword">in</span> shortcutArray
+      <span class="hljs-attribute">altKey</span>: <span class="hljs-string">'alt'</span> <span class="hljs-keyword">in</span> shortcutArray
+      <span class="hljs-attribute">shiftKey</span>: <span class="hljs-string">'shift'</span> <span class="hljs-keyword">in</span> shortcutArray
+      <span class="hljs-attribute">shortcutKey</span>: getShortcutCode shortcutArray.pop()</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-15">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-15">&#182;</a>
+              </div>
+              <p>Return a shortcut abbreviation from a shortcuts string.
+Use unicode symbols for modifier keys.
+E.g., “ctrl+a” =&gt; “\u2303A”, “alt+rArrow” =&gt; “\u2325\u2192”</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>    <span class="hljs-attribute">getShortcutAbbreviation</span>: <span class="hljs-function"><span class="hljs-params">(shortcutString)</span> -&gt;</span>
+      shortcutArray = shortcutString.split <span class="hljs-string">'+'</span></pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-16">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-16">&#182;</a>
+              </div>
+              <p>Return an abbreviation of the shortcut key</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>      <span class="hljs-function"><span class="hljs-title">getShortcutKeyAbbrev</span> = <span class="hljs-params">(shortcutString)</span> -&gt;</span>
+        <span class="hljs-keyword">switch</span> shortcutString
+          <span class="hljs-keyword">when</span> <span class="hljs-string">'rArrow'</span> <span class="hljs-keyword">then</span> <span class="hljs-string">'\u2192'</span>
+          <span class="hljs-keyword">when</span> <span class="hljs-string">'lArrow'</span> <span class="hljs-keyword">then</span> <span class="hljs-string">'\u2190'</span>
+          <span class="hljs-keyword">when</span> <span class="hljs-string">'uArrow'</span> <span class="hljs-keyword">then</span> <span class="hljs-string">'\u2191'</span>
+          <span class="hljs-keyword">when</span> <span class="hljs-string">'dArrow'</span> <span class="hljs-keyword">then</span> <span class="hljs-string">'\u2193'</span>
+          <span class="hljs-keyword">else</span> shortcutString[<span class="hljs-number">0</span>].toUpperCase()</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-17">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-17">&#182;</a>
+              </div>
+              <p>Get meta characters and shortcut key in an ordered list</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>      [
+        <span class="hljs-keyword">if</span> <span class="hljs-string">'ctrl'</span> <span class="hljs-keyword">in</span> shortcutArray <span class="hljs-keyword">then</span> <span class="hljs-string">'\u2303'</span> <span class="hljs-keyword">else</span> <span class="hljs-string">''</span>
+        <span class="hljs-keyword">if</span> <span class="hljs-string">'alt'</span> <span class="hljs-keyword">in</span> shortcutArray <span class="hljs-keyword">then</span> <span class="hljs-string">'\u2325'</span> <span class="hljs-keyword">else</span> <span class="hljs-string">''</span>
+        <span class="hljs-keyword">if</span> <span class="hljs-string">'shift'</span> <span class="hljs-keyword">in</span> shortcutArray <span class="hljs-keyword">then</span> <span class="hljs-string">'\u21E7'</span> <span class="hljs-keyword">else</span> <span class="hljs-string">''</span>
+        getShortcutKeyAbbrev shortcutArray.pop()
+      ].join <span class="hljs-string">''</span></pre></div></div>
+            
+        </li>
+        
+    </ul>
+  </div>
+</body>
+</html>
