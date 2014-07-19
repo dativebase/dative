@@ -33,7 +33,7 @@ module.exports = (grunt) ->
         livereload: true
       coffee:
         files: ['<%= yeoman.app %>/scripts/{,*/}*.coffee']
-        tasks: ['coffee:dist']
+        tasks: ['copy:coffee', 'coffee:dist']
       coffeeTest:
         #files: ['test/spec/{,*/}*.coffee']
         files: ['test/**/*.coffee']
@@ -128,12 +128,14 @@ module.exports = (grunt) ->
 
     coffee:
       dist:
+        options:
+          sourceMap: true
         files: [
           # rather than compiling multiple files here you should
           # require them into your main .coffee file
           expand: true
-          cwd: '<%= yeoman.app %>/scripts'
-          src: '{,*/}*.coffee'
+          cwd: '.tmp/scripts'
+          src: '**/*.coffee'
           dest: '.tmp/scripts'
           ext: '.js'
         ]
@@ -157,7 +159,7 @@ module.exports = (grunt) ->
         src: '<%= yeoman.app %>/scripts/**/*.coffee'
       options:
         no_tabs:
-          level: 'ignore'
+          level: 'error'
         indentation:
           level: 'ignore' # Unfortunately, coffeelint and requirejs's define callbacks don't play well together
         no_trailing_whitespace:
@@ -167,7 +169,7 @@ module.exports = (grunt) ->
         no_plusplus:
           level: 'warn'
         no_implicit_parens:
-          level: 'ignore'
+          level: 'error'
         max_line_length:
           level: 'ignore'
 
@@ -266,6 +268,14 @@ module.exports = (grunt) ->
         ]
 
     copy:
+      coffee:
+        files: [
+          expand: true
+          dot: true
+          cwd: '<%= yeoman.app %>/scripts'
+          dest: '.tmp/scripts'
+          src: '**/*.coffee'
+        ]
       dist:
         files: [
           expand: true
@@ -344,6 +354,7 @@ module.exports = (grunt) ->
 
     grunt.task.run [
       'clean:server'
+      'copy:coffee'
       'coffee:dist'
       'createDefaultTemplate'
       'jst'
@@ -353,7 +364,7 @@ module.exports = (grunt) ->
       'watch'
     ]
 
-  grunt.registerTask 'coffeeDist', ['coffee:dist']
+  grunt.registerTask 'coffeeDist', ['copy:coffee', 'coffee:dist']
 
   grunt.registerTask 'test', (isConnected) ->
     isConnected = Boolean(isConnected)
@@ -386,7 +397,7 @@ module.exports = (grunt) ->
     'concat'
     'cssmin'
     'uglify'
-    'copy'
+    'copy:dist'
     'rev'
     'usemin'
   ]
