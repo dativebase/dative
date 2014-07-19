@@ -169,7 +169,7 @@ module.exports = (grunt) ->
         no_plusplus:
           level: 'warn'
         no_implicit_parens:
-          level: 'error'
+          level: 'warn'
         max_line_length:
           level: 'ignore'
 
