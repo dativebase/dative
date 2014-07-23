@@ -99,7 +99,7 @@ To serve the app with livereload, run:
 The serve task generates source map files that Chrome's developer tools can
 recognize. This means that you can view the CoffeeScript source in the browser
 and can set breakpoints, etc. For some docs on CoffeeScript source maps and
-JavaScript debuggin in Chrome, see:
+JavaScript debugging in Chrome, see:
 
 - http://www.html5rocks.com/en/tutorials/developertools/sourcemaps/
 - https://developer.chrome.com/devtools/docs/javascript-debugging
@@ -140,9 +140,7 @@ and build tasks in succession.
 
 The [CoffeeScript styleguide](https://github.com/polarmobile/coffeescript-style-guide)
 should be followed. Adherence to the second principle of *The Zen of Python* is
-advised:
-
-    Explicit is better than implicit.
+advised: "Explicit is better than implicit."
 
 A baseline test for decent CoffeeScript is to run `grunt lint` and ensure that
 there are no errors. For now I have configured grunt-coffeelint to allow
