@@ -343,7 +343,9 @@ module.exports = (grunt) ->
     if target is 'test'
       return grunt.task.run [
         'clean:server'
-        'coffee'
+        'copy:coffee'
+        'coffee:dist'
+        'coffee:test'
         'createDefaultTemplate'
         'jst'
         #'compass:server'
