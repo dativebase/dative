@@ -1,21 +1,38 @@
-###
-  Functionality for interacting with IndexedDB.
-
-  Based heavily upon Matt West's IndexedDB example todo application:
-
-      http://blog.teamtreehouse.com/create-your-own-to-do-app-with-html5-and-indexeddb
-
-  Defines a LingSyncIDB class that simplifies IndexedDB interactions.
-
-###
+# Functionality for interacting with IndexedDB.
+#
+# Based heavily upon Matt West's IndexedDB example todo application:
+#
+#     http://blog.teamtreehouse.com/create-your-own-to-do-app-with-html5-and-indexeddb
+#
+# Defines a LingSyncIDB class that simplifies IndexedDB interactions.
+#
+# See also the IndexedDB API spec:
+#
+#    http://www.w3.org/TR/IndexedDB/
+#
+# API to implement (basically a rewrite of the OLD's Atom-based API)
+# search {query: {filter: [], order_by: []}, paginator: {}}
+# new_search
+# index (get all; order_by and pagination params, optional)
+# create :param Object form:
+# update :param Number id: :param Object form:
+# delete :param Number id:
+# show :param Number id:
 
 define (require) ->
 
+  {clone} = require './utils'
+
+  # A wrapper around IndexedDB with LingSync conveniences.
   class LingSyncIDB
 
+    # :param String id: name of the IndexedDB database as defined in
+    #   `models/database`.
+    # :param String version: IDB version, for migrations.
     constructor: (@id, @version) ->
       @indexedDB = window.indexedDB or window.webkitIndexedDB or \
         window.mozIndexedDB or window.msIndexedDB
+      @IDBKeyRange = window.IDBKeyRange or window.webkitIDBKeyRange
       @datastore = null
 
     s4: ->
@@ -25,101 +42,115 @@ define (require) ->
       "#{@s4()}#{@s4()}-#{@s4()}-#{@s4()}-#{@s4()}-#{@s4()}#{@s4()}#{@s4()}"
 
     # Open a connection to the datastore
-    open: (callback) ->
+    open: (handler) ->
+      if @datastore instanceof IDBDatabase
+        return handler.onsuccess()
       request = @indexedDB.open @id, @version
 
       # Handle datastore upgrades.
-      request.onupgradeneeded = (e) ->
-        db = e.target.result
-        e.target.transaction.onerror = @onerror
+      # TODO: write tests to handle upgrades
+      request.onupgradeneeded = (event) ->
+        db = event.target.result
+        event.target.transaction.onerror = handler.onerror
         if db.objectStoreNames.contains 'forms'
           db.deleteObjectStore 'forms'
-        #store = db.createObjectStore 'forms', keyPath: 'timestamp'
         store = db.createObjectStore 'forms'
 
-      # Handle successful datastore access.
-      request.onsuccess = (e) =>
-        @datastore = e.target.result
-        callback()
+      request.onsuccess = (event) =>
+        @datastore = event.target.result
+        handler.onsuccess()
+      request.onerror = handler.onerror
 
-      # Handle errors when opening the datastore.
-      request.onerror = ->
-        callback false
+    defaultHandler:
+      onsuccess: (->)
+      onerror: (->)
 
-    # Fetch all of the form items in the datastore.
-    #   @param {function} callback A function that will be executed once the items
-    #   have been retrieved. Will be passed a param with an array of the form
-    #   items.
-    fetchForms: (callback) ->
-      db = @datastore
-      transaction = db.transaction ['forms'], 'readwrite'
-      objStore = transaction.objectStore 'forms'
-      keyRange = IDBKeyRange.lowerBound 0
+    # Retrieve a single item via its key.
+    show: (key, handler, options) ->
+      @open @defaultHandler
+      transaction = @datastore.transaction [options.storeName], 'readwrite'
+      objStore = transaction.objectStore options.storeName
+      request = objStore.get key
+      request.onsuccess = (event) ->
+        handler.onsuccess event.target.result
+      request.onerror = handler.onerror
+
+    # Retrieve all items from a given store
+    # TODO: allow for order_by and pagination options.
+    index: (handler, options) ->
+      @open @defaultHandler
+      transaction = @datastore.transaction [options.storeName], 'readwrite'
+      objStore = transaction.objectStore options.storeName
+      keyRange = @IDBKeyRange.lowerBound 0
       cursorRequest = objStore.openCursor keyRange
-      forms = []
+      items = []
 
-      transaction.oncomplete = (e) ->
-        # Execute the callback function.
-        callback forms
+      transaction.oncomplete = (event) ->
+        handler.onsuccess items
 
-      cursorRequest.onsuccess = (e) ->
-        result = e.target.result
+      cursorRequest.onsuccess = (event) ->
+        result = event.target.result
         if not result
           return
-        forms.push result.value
+        items.push result.value
         result.continue()
 
-      cursorRequest.onerror = @onerror
+      cursorRequest.onerror = handler.onerror
 
-    # Create a new form item.
-    #   @param {object} formObject The form data.
-    createForm: (formObject, callback) ->
-      # Get a reference to the db.
-      db = @datastore
-      # Initiate a new transaction.
-      transaction = db.transaction ['forms'], 'readwrite'
-      # Get the datastore.
-      objStore = transaction.objectStore 'forms'
-      # Create a timestamp for the form item.
-      timestamp = new Date().getTime()
+    # Create a new item.
+    # :param Object itemObject: the item data.
+    create: (itemObject, handler, options) ->
+      @open(
+        onsuccess: =>
+          transaction = @datastore.transaction [options.storeName], 'readwrite'
+          objStore = transaction.objectStore options.storeName
+          itemObject.id = @guid()
+          request = objStore.put itemObject, itemObject.id
+          request.onsuccess = ->
+            handler.onsuccess itemObject
+          request.onerror = handler.onerror
+        onerror: handler.onerror
+      )
 
-      # Create an object for the form item.
-      formObject.timestamp = timestamp
-      formObject.id = @guid()
+    # Update an existing item
+    # Note: error if `key` does not correspond to an existing item.
+    update: (key, newObject, handler, options) ->
+      @open @defaultHandler
+      @open(
+        onsuccess: =>
+          transaction = @datastore.transaction [options.storeName], 'readwrite'
+          objStore = transaction.objectStore options.storeName
+          getRequest = objStore.get key
+          getRequest.onsuccess = (event) ->
+            objectToEnter = _.extend event.target.result, newObject
+            putRequest = objStore.put objectToEnter, key
+            putRequest.onsuccess = ->
+              handler.onsuccess objectToEnter
+            putRequest.onerror = ->
+              handler.onerror "Update request failed"
+          getRequest.onerror = ->
+            handler.onerror "There is no #{options.storeName} with key #{key}"
+        onerror: handler.onerror
+      )
 
-      # Create the datastore request.
-      request = objStore.put formObject, formObject.id
+    # Delete an item.
+    # :param Object itemObject: the form data.
+    delete: (key, handler, options) ->
+      @open @defaultHandler
+      transaction = @datastore.transaction [options.storeName], 'readwrite'
+      objStore = transaction.objectStore options.storeName
+      request = objStore.delete key
+      request.onsuccess = handler.onsuccess
+      request.onerror = handler.onerror
 
-      # Handle a successful datastore put.
-      request.onsuccess = (e) ->
-        # Execute the callback function.
-        callback formObject
-
-      # Handle errors.
-      request.onerror = @onerror
-
-    # Delete a form item.
-    #   @param {int} id The timestamp (id) of the form item to be deleted.
-    #   @param {function} callback A callback function that will be executed if
-    #   the delete is successful.
-    deleteForm: (id, callback) ->
-      db = @datastore
-      transaction = db.transaction ['forms'], 'readwrite'
-      objStore = transaction.objectStore 'forms'
-      request = objStore.delete id
-
-      request.onsuccess = (e) ->
-        callback()
-
-      request.onerror = (e) ->
-        console.log e
-
-    # General error handler
-    onerror: ->
-      console.log 'Generic LingSyncIDB error method called'
+    # Search across forms.
+    # TODO: model the query object on the OLD's search API
+    search: (query, handler, options) ->
+      @open @defaultHandler
 
     # Delete entire indexedDB database.
     # FIXME: this messes up the indexedDB database in ways I don't understand...
+    # WARNING: do not use this!
     deleteDatabase: (callback) ->
       try
         request = @indexedDB.deleteDatabase @id
@@ -135,4 +166,48 @@ define (require) ->
         @id = @id + '.' + @guid()
         callback false
 
+
+  # An form store-specific interface to a LingSyncIDB instance.
+  class FormStore
+
+    # Requires a LingSyncIDB instance
+    constructor: (@db) ->
+
+    # Create a new form.
+    # :param Object formObject: the form data.
+    create: (formObject, handler, options) ->
+      options ?= {}
+      options.storeName = 'forms'
+      @db.create formObject, handler, options
+
+    # Get all forms.
+    index: (handler, options) ->
+      options ?= {}
+      options.storeName = 'forms'
+      @db.index handler, options
+
+    # Get a form by id.
+    show: (formId, handler, options) ->
+      options ?= {}
+      options.storeName = 'forms'
+      @db.show formId, handler, options
+
+    # Update a form.
+    update: (formId, formObject, handler, options) ->
+      options ?= {}
+      options.storeName = 'forms'
+      @db.update formId, formObject, handler, options
+
+    # Delete a form.
+    delete: (formId, handler, options) ->
+      options ?= {}
+      options.storeName = 'forms'
+      @db.delete formId, handler, options
+
+    search: (query, handler, options) ->
+
+
+  # The Object that we export.
+  LingSyncIDB: LingSyncIDB
+  FormStore: FormStore
 
