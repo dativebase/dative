@@ -195,6 +195,18 @@ ul.fieldset label {
 .fieldset textarea {
     display: inline-block;
 }
+.ui-selectmenu-button:focus,
+.ui-button:focus,
+.ms-selectable:focus,
+.ms-list:focus,
+.ms-selection:focus,
+textarea:focus {
+    outline: none !important;
+    /*border:1px solid red;
+    box-shadow: 0 0 10px #719ECE;*/
+    box-shadow: 0 0 10px orange !important;
+}
+
 ul.fieldset textarea,
 ul.fieldset input[type="text"],
 ul.fieldset input[type="password"],
@@ -209,8 +221,8 @@ ul.fieldset select[name="source"] {
     padding: 7px 10px 5px 10px;
     margin-top: 0px;
     margin-bottom: 0px;
-    height: 30px;
-    min-height: 30px;
+    height: 16px;
+    min-height: 16px;
     -moz-border-radius: 6px;
     -webkit-border-radius: 6px;
     -khtml-border-radius: 6px;
@@ -232,9 +244,9 @@ ul.fieldset input[type="password"] {
     padding: 6px 10px 6px 10px;
 }
 ul.fieldset textarea {
-    width: 550px;
-    max-width: 550px;
-    min-width: 550px;
+    width: 526px;
+    max-width: 526px;
+    min-width: 526px;
 }
 ul.fieldset select[name="elicitationMethod"],
 ul.fieldset select[name="syntacticCategory"],
@@ -247,13 +259,13 @@ ul.fieldset select[name="source"] {
     min-width: 548px;
 }
 
-ul.fieldset select[name="keywords"]+button {
+ul.fieldset select[name="tags"]+button {
     padding: 0px 0px 3px 9px;
 }
 
 ul.fieldset select+div, /* div siblings of selects are jquery.ui.selectmenu creatures */
 .old-forms-browse-interface select+div,
-button.insertGlossFieldButton,
+button.insertTranslationFieldButton,
 button.removeMe,
 input[type="submit"],
 button {
@@ -267,11 +279,18 @@ li.center {
     text-align: center;
 }
 
-li.newGloss textarea,
-li.newGloss button {
-    margin-left: 4px;
+li.newTranslation span.ui-selectmenu-button,
+li.newTranslation textarea,
+li.newTranslation button {
+    margin-left: 3px;
 }
-li.newGloss div {
+
+span.ui-selectmenu-button {
+    vertical-align: top;
+    height: 28px;
+}
+
+li.newTranslation div {
     margin-left: 3px;
 }
 
@@ -281,14 +300,14 @@ div.ui-selectmenu-menu li a {
 }
 
 ul.fieldset textarea.transcription {
-    width: 494px;
-    max-width: 494px;
-    min-width: 494px;
+    width: 473px;
+    max-width: 473px;
+    min-width: 473px;
 }
-ul.fieldset textarea.gloss {
-    width: 461px;
-    max-width: 461px;
-    min-width: 461px;
+ul.fieldset textarea.translation {
+    width: 441px;
+    max-width: 441px;
+    min-width: 441px;
 }
 
 ul.fieldset select,
@@ -326,3 +345,30 @@ div.document a {
 h1 {
     font-size: large;
 }
+
+
+.tags-multiselect {
+    height: 102px;
+}
+
+.ms-container {
+    width: 548px;
+}
+
+.ms-container .ms-selectable,
+.ms-container .ms-selection {
+    background: transparent;
+}
+
+.ms-container .ms-list{
+  -webkit-border-radius: 6px;
+  -moz-border-radius: 6px;
+  border-radius: 6px;
+  height: 100px;
+  background: white;
+}
+
+.sf-menu a.sf-with-ul {
+    padding-right: 12px;
+}
+

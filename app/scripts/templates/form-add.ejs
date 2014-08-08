@@ -1,2 +1,90 @@
-<p>Your content here.</p>
+<div id='old-page-header' class='ui-widget-header ui-corner-top'>
+  <div class='old-page-header-title'><%= headerTitle %></div>
+  <div class='old-page-header-widgets'></div>
+</div>
+
+<div id='old-page-body'>
+  <form action="form/add_ajax" method="post" class="formAdd">
+    <ul class="fieldset">
+      <li>
+        <label for="transcription">Transcription</label>
+        <select name="grammaticality" class="grammaticality">
+        </select>
+        <textarea rows="1" name="transcription" class="transcription" id="transcription"
+          maxlength="255"></textarea>
+      </li>
+      <li>
+        <label for="morphemeBreak">Morpheme Break</label>
+        <textarea name="morphemeBreak" maxlength="255"></textarea>
+      </li>
+      <li>
+        <label for="morphemeGloss">Morpheme Gloss</label>
+        <textarea name="morphemeGloss" maxlength="255"></textarea>
+      </li>
+      <li>
+        <label for="translations-0.transcription">Translation</label>
+        <select name="translations-0.grammaticality" class="grammaticality">
+        </select>
+        <textarea name="translations-0.transcription" maxlength="255"
+          class="translation"></textarea>
+        <button class="insertTranslationFieldButton"
+          title="Add another translation.">Add Translation</button>
+      </li>
+    </ul>
+
+    <ul class="fieldset">
+      <li>
+        <label for="comments">General Comments</label>
+        <textarea name="comments"></textarea>
+      </li>
+      <li>
+        <label for="speakerComments">Speaker Comments</label>
+        <textarea name="speakerComments"></textarea>
+      </li>
+      <li>
+        <label for="elicitationMethod">Elicitation Method</label>
+        <select name="elicitationMethod" id="elicitationMethod"></select>
+      </li>
+      <li>
+        <div class="tags-multiselect">
+          <label for="tags">Tags</label>
+          <select name="tags" multiple="multiple"></select>
+        </div>
+      </li>
+      <li>
+        <label for="syntacticCategory">Category</label>
+        <select name="syntacticCategory"></select>
+      </li>
+    </ul>
+
+    <ul class="fieldset">
+      <li>
+        <label for="speaker">Speaker</label>
+        <select name="speaker"></select>
+      </li>
+      <li>
+        <label for="elicitor">Elicitor</label>
+        <select name="elicitor"></select>
+      </li>
+      <li>
+        <label for="verifier">Verifier</label>
+        <select name="verifier"></select>
+      </li>
+      <li>
+        <label for="source">Source</label>
+        <select name="source"></select>
+      </li>
+      <li>
+        <label for="dateElicited">Date Elicited</label>
+        <input type="text" name="dateElicited" class="dateElicited"/>
+      </li>
+    </ul>
+
+    <ul class="fieldset">
+      <li class="center">
+        <input type="submit" value="Add Form" />
+      </li>
+    </ul>
+  </form>
+</div>
 

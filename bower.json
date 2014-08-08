@@ -14,7 +14,10 @@
     "backbone-relational": "~0.8.8",
     "eco": "~1.1",
     "marionette": "~2.0.1",
-    "indexeddb-backbonejs-adapter": "*"
+    "indexeddb-backbonejs-adapter": "*",
+    "multiselect": "*",
+    "jakobmattsson-jquery-elastic": "*",
+    "better-elastic-textarea": "*"
   },
   "devDependencies": {
     "mocha": "*",

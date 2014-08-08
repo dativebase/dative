@@ -28,7 +28,7 @@ define [
       @mainMenuView.parent = @
 
       @mainMenuView.on 'request:pages', @activatePagesView, @
-      @mainMenuView.on 'request:formAdd', @activateFormAddView, @
+      @mainMenuView.on 'formAdd', @activateFormAddView, @
 
       @render()
 
@@ -66,5 +66,6 @@ define [
       appView = @
       @$('#appview').css height: $(window).height() - 50
       $(window).resize ->
+        console.log 'window resized'
         appView.$('#appview').css height: $(window).height() - 50
 

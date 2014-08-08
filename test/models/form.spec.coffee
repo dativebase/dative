@@ -5,26 +5,116 @@ define (require) ->
   FormModel = require('../../../scripts/models/form')
   database = require('../../../scripts/models/database')
 
-  describe 'Form Model', ->
+  describe.only 'Form Model', ->
 
     describe 'General behaviour', ->
 
       it 'has default values', ->
         form = new FormModel()
+        console.log form.get('transcription')
         expect(form.get('transcription')).to.equal ''
-        expect(form.get('translation')).to.equal ''
-        expect(form.get('schemaType')).to.equal 'relational'
-        expect(form.get('storageType')).to.equal 'local'
+        expect(form.get('translations')).to.be.an 'array'
+        expect(form.get('translations')).to.be.empty
+        expect(form.get('id')).to.be.null
 
       it 'can set values', ->
         form = new FormModel()
-        form.set('transcription', 'oki')
-        form.set {translation: 'hello', schemaType: 'norel'}
+        form.set 'transcription', 'oki'
+        form.set translations: ['hello']
         expect(form.get('transcription')).to.equal 'oki'
-        expect(form.get('translation')).to.equal 'hello'
-        expect(form.get('schemaType')).to.equal 'norel'
+        expect(form.get('translations')).to.contain 'hello'
 
-    describe 'IndexedDB behaviour', ->
+    describe 'OLD REST AJAX behaviour', ->
+
+      it 'makes appropriate AJAX requests', ->
+        ajaxSpy = sinon.spy()
+        form = new FormModel(
+          transcription: 'chien'
+          translations: ['dog', 'hound']
+        )
+        form.sync = ajaxSpy
+        expect(ajaxSpy).not.to.have.been.called
+        form.save()
+        expect(ajaxSpy).to.have.been.calledOnce
+
+      it 'makes appropriate AJAX requests (stub of FormModel.sync)', ->
+        sinon.stub FormModel::, 'sync'
+        form = new FormModel(
+          transcription: 'chien'
+          translations: ['dog', 'hound']
+        )
+        form.save()
+        expect(FormModel::.sync).to.have.been.calledOnce
+        expect(FormModel::.sync).to.have.been.calledWith 'create', form
+        FormModel::.sync.restore()
+
+      it 'makes appropriate AJAX requests (stub of Backbone.sync)', ->
+        sinon.stub Backbone, 'sync'
+        form = new FormModel(
+          transcription: 'chien'
+          translations: ['dog', 'hound']
+        )
+        form.save()
+        expect(Backbone.sync).to.have.been.calledOnce
+        expect(Backbone.sync).to.have.been.calledWith 'create', form
+        #console.log Backbone.sync.getCall(0).args[2]
+        Backbone.sync.restore()
+
+      it 'makes appropriate AJAX requests (with Sinon fake server)', (done) ->
+        # This test illustrates how to use Sinon to inspect requests and how to
+        # return fake responses.
+        #
+        # References:
+        # - http://sinonjs.org/docs/#server
+        # - http://philfreo.com/blog/how-to-unit-test-ajax-requests-with-qunit-and-sinon-js/
+
+        # Undo backbone-indexeddb's meddling
+        idbSync = Backbone.sync
+        Backbone.sync = Backbone.ajaxSync
+
+        requests = []
+        xhr = sinon.useFakeXMLHttpRequest()
+        xhr.onCreate = (xhr) ->
+          requests.push xhr
+
+        form = new FormModel(
+          transcription: 'chien'
+          translations: ['dog', 'hound']
+        )
+        expect(requests).to.be.empty
+        form.save({}, {
+          success: (model, response, options) ->
+            expect(response.msg).to.equal 'Good create request!'
+            console.log 'Got to success callback in form.save()'
+            done()
+          ,
+          error: (model, response, options) ->
+            expect(false).to.be.ok
+            done()
+        })
+
+        request = requests[0]
+        expect(requests.length).to.equal 1
+        expect(request.method).to.equal 'POST'
+        expect(request.url).to.equal FormModel::.url
+
+        requestBody = JSON.parse request.requestBody
+        expect(requestBody.transcription).to.equal 'chien'
+        expect(requestBody.translations).to.contain 'dog', 'hound'
+        expect(requestBody.id).to.be.null
+
+        console.log request.requestHeaders
+
+        request.respond(200, {"Content-Type": "application/json"},
+          JSON.stringify({msg: 'Good create request!'}))
+
+        Backbone.sync = idbSync
+        xhr.restore()
+
+        console.log 'Got to end'
+        done()
+
+    describe.skip 'IndexedDB behaviour', ->
 
       it 'has an indexeddb database', ->
         form = new FormModel()
@@ -160,10 +250,7 @@ define (require) ->
               expect(false).to.be.ok # should be able to save
               done()
 
-    describe 'Relational Backbone behaviour', ->
+    describe.skip 'Relational Backbone behaviour', ->
 
       it 'can be converted to a relational data structure', ->
-
-#508
-
 

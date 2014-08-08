@@ -10,7 +10,9 @@ require.config
     jqueryui: ['jquery']
     superfish: ['jquery']
     supersubs: ['jquery']
+    multiselect: ['jquery', 'jqueryui']
     backboneindexeddb: ['backbone']
+    jqueryelastic: ['jquery']
 
   paths:
     jquery: '../bower_components/jquery/dist/jquery'
@@ -29,11 +31,16 @@ require.config
     # Supersubs plugin removed in v1.6 of superfish. See
     # https://github.com/joeldbirch/superfish.
     supersubs: '../bower_components/superfish/dist/js/supersubs'
+    multiselect: '../bower_components/multiselect/js/jquery.multi-select'
+    jqueryelastic: '../bower_components/jakobmattsson-jquery-elastic/jquery.elastic.source'
+    #betterelastictextarea: '../bower_components/better-elastic-textarea/dist/better-elastic-textarea'
 
 require [
     'views/app',
     'routes/router'
     'backboneindexeddb'
+    'multiselect'
+    'jqueryelastic'
   ], (AppView, Workspace) ->
     new Workspace()
     Backbone.history.start()
