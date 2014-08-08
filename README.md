@@ -18,6 +18,7 @@ Its high-level goals are:
   - [FLEx](http://fieldworks.sil.org/flex/)
   - [EOPAS](http://www.eopas.org/)
 
+![Gratuitous screenshot](dative-screenshot.png)
 
 ## For Developers
 
