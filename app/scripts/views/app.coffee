@@ -6,12 +6,14 @@ define [
   'jquery',
   'lodash',
   'backbone',
+  'views/base',
   'views/mainmenu',
   'views/pages',
   'views/form-add'
-], ($, _, Backbone, MainMenuView, PagesView, FormAddView) ->
+], ($, _, Backbone, BaseView, MainMenuView, PagesView, FormAddView) ->
 
-  class AppView extends Backbone.View
+  class AppView extends BaseView
+
     template: JST['app/scripts/templates/app.ejs']
     el: '#oldclientapp'
     subviews:
@@ -20,18 +22,14 @@ define [
     activeSubview: null
 
     initialize: ->
-      # Get the jQuery UI colors
-      @jQueryUIColors = $.getJQueryUIColors()
 
       # Main menu triggers custom events -- handle them here
       @mainMenuView = new MainMenuView()
-      @mainMenuView.parent = @
 
-      @mainMenuView.on 'request:pages', @activatePagesView, @
-      @mainMenuView.on 'formAdd', @activateFormAddView, @
+      @mainMenuView.on '_request:pages', @activatePagesView, @
+      @mainMenuView.on 'f_ormAdd', @activateFormAddView, @
 
       @render()
-
 
     render: ->
       @$el.html @template()
@@ -63,9 +61,7 @@ define [
 
     # Size the #appview div relative to the window size
     matchWindowDimensions: ->
-      appView = @
       @$('#appview').css height: $(window).height() - 50
-      $(window).resize ->
-        console.log 'window resized'
-        appView.$('#appview').css height: $(window).height() - 50
+      $(window).resize =>
+        @$('#appview').css height: $(window).height() - 50
 

@@ -197,21 +197,18 @@ ul.fieldset label {
 }
 .ui-selectmenu-button:focus,
 .ui-button:focus,
-.ms-selectable:focus,
 .ms-list:focus,
-.ms-selection:focus,
+input:focus,
 textarea:focus {
     outline: none !important;
-    /*border:1px solid red;
-    box-shadow: 0 0 10px #719ECE;*/
     box-shadow: 0 0 10px orange !important;
 }
 
 ul.fieldset textarea,
 ul.fieldset input[type="text"],
 ul.fieldset input[type="password"],
-ul.fieldset select[name="elicitationMethod"],
-ul.fieldset select[name="syntacticCategory"],
+ul.fieldset select[name="elicitation_method"],
+ul.fieldset select[name="syntactic_category"],
 ul.fieldset select[name="speaker"],
 ul.fieldset select[name="elicitor"],
 ul.fieldset select[name="verifier"],
@@ -229,8 +226,8 @@ ul.fieldset select[name="source"] {
     border-radius: 6px;
 }
 ul.fieldset textarea,
-ul.fieldset select[name="elicitationMethod"],
-ul.fieldset select[name="syntacticCategory"],
+ul.fieldset select[name="elicitation_method"],
+ul.fieldset select[name="syntactic_category"],
 ul.fieldset select[name="speaker"],
 ul.fieldset select[name="elicitor"],
 ul.fieldset select[name="verifier"],
@@ -248,8 +245,8 @@ ul.fieldset textarea {
     max-width: 526px;
     min-width: 526px;
 }
-ul.fieldset select[name="elicitationMethod"],
-ul.fieldset select[name="syntacticCategory"],
+ul.fieldset select[name="elicitation_method"],
+ul.fieldset select[name="syntactic_category"],
 ul.fieldset select[name="speaker"],
 ul.fieldset select[name="elicitor"],
 ul.fieldset select[name="verifier"],

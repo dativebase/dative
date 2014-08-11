@@ -1,9 +1,11 @@
 define [
-  'jquery',
-  'lodash',
-  'backbone',
+  'jquery'
+  'lodash'
+  'backbone'
+  'utils/utils'
   'views/basepage'
-], ($, _, Backbone, BasePageView) ->
+  'models/form'
+], ($, _, Backbone, utils, BasePageView, FormModel) ->
 
   # Form Add View
   # --------------
@@ -14,53 +16,134 @@ define [
     template: JST['app/scripts/templates/form-add.ejs']
 
     initialize: ->
+      console.log 'FormAddView initialized.'
       @initialized = true
       #@listenTo @model, 'change', @render
       #@listenTo @model, 'destroy', @remove
       #@render()
+      #
+      # TODO: figure out why the following does NOT work...
+      # http://stackoverflow.com/questions/9883009/backbone-js-multiple-delegateevents-for-view
+      # http://jsfiddle.net/derickbailey/hFAAC/
+      #myEvents = ['change', 'input', 'selectmenuchange']
+      #eventsCommand = { }
+      #for event in myEvents:
+      #  eventsCommand[event] = setToModel
+      #@delegateEvents events
+
+    events:
+      'change': 'setToModel' # fires when multi-select changes
+      'input': 'setToModel' # fires when an input, textarea or date-picker changes
+      'selectmenuchange': 'setToModel' # fires when a selectmenu changes
+      'menuselect': 'setToModel' # fires when the tags multi-select changes (not working?...)
+
+    # Set the state of the "add a form" HTML form on the model.
+    setToModel: ->
+      modelObject = @getModelObjectFromAddForm()
+      console.log modelObject
+      @model?.set modelObject
+
+    # Extract data in the inputs of the HTML "Add a Form" form and
+    # convert them to an object
+    getModelObjectFromAddForm: ->
+      modelObject = {}
+      for fieldObject in $('form.formAdd').serializeArray()
+        # The challenge here is to take form fields with names like
+        # 'translations-1.grammaticality' and use them to produce lists
+        # of objects like
+        # modelObject['translations'] = [..., {grammaticality: ...}]
+
+        # First, make an object with indices as keys:
+        # modelObject['translations'] = {0: ..., 1: {grammaticality: ...}}
+        if fieldObject.name.split('-').length is 2
+          [attr, tmp] = fieldObject.name.split '-'
+          [index, subAttr] = tmp.split '.'
+          if attr of modelObject
+            attrVal = modelObject[attr]
+          else
+            attrVal = modelObject[attr] = {}
+          if index of attrVal
+            tmp = attrVal[index]
+          else
+            tmp = attrVal[index] = {}
+          tmp[subAttr] = fieldObject.value
+        else
+          modelObject[fieldObject.name] = fieldObject.value
+
+      # Second step is to convert the object with index keys into
+      # an array.
+      for attr of modelObject
+        if utils.type(modelObject[attr]) is 'object'
+          array = []
+          for key of (k for k of modelObject[attr]).sort()
+            array.push modelObject[attr][key]
+          modelObject[attr] = array
+
+      # The tags multi-select value needs to be explicitly extracted
+      modelObject.tags = $('form.formAdd select[name=tags]').val()
+
+      modelObject
 
     render: ->
-      params =
-        headerTitle: 'Add a Form'
+      params = headerTitle: 'Add a Form'
+      _.extend params, @model.toJSON()
       @$el.html @template(params)
       @matchHeights()
-
       body = $('#old-page-body')
+      @_populateSelectFields body
+      @_guify body
+      @_addModel body
 
-      # Populate Form Add Interface Select Fields. That is, populate the select
-      # fields of the Add Form interface with options received from the server
-      # via Ajax.
-      @populateAddInterfaceSelectFields body
+    # Add the data from the associated model to the <select>s, i.e. preserve
+    # state across views. (Note that the values of textareas and text inputs
+    # are inserted via the templating system.)
+    _addModel: (context) ->
 
-      @enableAddNewTranslationFieldButton body
+      # grammaticality selectmenus for translations >= 1
+      for translation, index in @model.get('translations')
+        if index > 0
+          $('button.insertTranslationFieldButton', context).click()
+        $("select[name='translations-#{index}.grammaticality']")
+          .val(translation.grammaticality)
+          .selectmenu 'refresh', true
+        $("textarea[name='translations-#{index}.transcription']")
+          .val(translation.transcription)
 
+      # other selectmenus
+      for attrName in ['grammaticality', 'elicitation_method',
+        'syntactic_category', 'speaker', 'elicitor', 'verifier', 'source']
+        if @model.get(attrName)
+          $("select[name=#{attrName}]", context)
+            .val(@model.get(attrName))
+            .selectmenu 'refresh', true
+
+      # tags multiSelect (see http://loudev.com/)
+      if @model.get('tags')
+        $('select[name="tags"]', context)
+          .multiSelect 'select', @model.get('tags')
+
+    # Transform the vanilla HTML into GUI jQueryUI sugar
+    _guify: (context) ->
+      @_enableAddNewTranslationFieldButton context
       selectmenuWidth = 548
-      $('select.grammaticality', body).selectmenu width: 50
-      $('button.insertTranslationFieldButton', body)
+      @_gramSelect = $('select.grammaticality', context).selectmenu width: 50
+      $('button.insertTranslationFieldButton', context)
         .button({icons: {primary: 'ui-icon-plus'}, text: false})
-      $('input[type="submit"]', body).button()
-      #$('select[name="elicitationMethod"]', body).selectmenu width: selectmenuWidth
-      #$('select[name="tags"]', body).hide()
-      #$('select[name="syntacticCategory"]', body).selectmenu width: selectmenuWidth
-      #$('select[name="speaker"]', body).selectmenu width: selectmenuWidth
-      #$('select[name="elicitor"]', body).selectmenu width: selectmenuWidth
-      #$('select[name="verifier"]', body).selectmenu width: selectmenuWidth
-      #$('select[name="source"]', body).selectmenu width: 200
-      $('input[name="dateElicited"]', body).datepicker(
+      $('input[type="submit"]', context).button()
+      $('input[name="date_elicited"]', context).datepicker(
         appendText: "<span style='margin: 0 10px;'>mm/dd/yyyy</span>"
         autoSize: true
       )
-      $('select, input, textarea', body)
-        .css("border-color", @parent.jQueryUIColors.defBo)
+      $('select, input, textarea', context)
+        .css "border-color", FormAddView.jQueryUIColors.defBo
 
-      # TODO: figure out what this does ...
-      $('textarea.transcription', body)
+      $('textarea.transcription', context)
         .focus(->
-          window.scrollTo(0, 0)
+          window.scrollTo 0, 0
         )
 
       # CTRL + <Return> in the form submits the form
-      $('form.formAdd', body).keydown((event) ->
+      $('form.formAdd', context).keydown((event) ->
         if event.ctrlKey and event.which is 13
           event.preventDefault()
           $('input[type="submit"]', @).click()
@@ -68,57 +151,28 @@ define [
 
       # <Return> in a text input submits the form. The only text input is the
       # date picker.
-      $('form.formAdd input[type="text"]', body)
+      $('form.formAdd input[type="text"]', context)
         .keydown((event) ->
           if event.which is 13
             event.preventDefault()
-            $('form.formAdd input[type="submit"]', body).click()
+            $('form.formAdd input[type="submit"]', context).click()
         )
 
       $('#transcription').focus()
 
       # Do this, otherwise jquery-elastic erratically increases textarea height ...
-      $('textarea', body).css height: '16px'
+      $('textarea', context).css height: '16px'
 
-    populateAddInterfaceSelectFields: (context) ->
+    # Insert options into the select fields in the "Add a Form" form.
+    _populateSelectFields: (context) ->
+
+      # TODO: create an abstraction to hold secondary and meta-data,
+      # i.e., an interface that returns users, speakers, elicitation methods, etc.
+      # The API exposed should gracefully handle complications like client-side caching
+      # with asynchronous RESTful sync and initial RESTful requests.
       #$.get('form/get_form_options_ajax', null, updateAddInterface, 'json');
 
-      # Fake formAddOptions object for testing ...
-      formAddOptions =
-        grammaticalities: ['', '*', '?', '#']
-        elicitationMethods: [
-          [0, 'volunteered']
-          [1, 'translation']
-        ]
-        tags: [
-          [0, 'imperfective']
-          [1, 'habitual']
-          [2, 'frog']
-          [3, 'banana']
-          [4, 'helicopter']
-          [5, 'fish']
-          [6, 'spoon']
-          [7, 'politician']
-          [8, 'freak']
-          [9, 'dingo']
-        ]
-        categories: [
-          [0, 'N']
-          [1, 'V']
-        ]
-        speakers: [
-          [0, 'Jeff Bridges']
-          [1, 'Leonard Cohen']
-        ]
-        users: [
-          [0, 'Mac Daddy']
-          [1, 'Paddy Wagon']
-        ]
-        sources: [
-          [0, 'Frantz (1995)']
-          [1, 'Chomsky (1965)']
-        ]
-
+      formAddOptions = @_fakeFormAddOptions
       updateAddInterface = (formAddOptions, statusText) =>
         if statusText is 'success'
           # Save the formAddOptions for later,
@@ -134,11 +188,11 @@ define [
               .append($('<option>').attr('value', @[0]).text(@[0])))
           $('select.grammaticality', context).selectmenu width: 50
 
-          # Populate & GUI-ify elicitationMethod
-          $.each(formAddOptions.elicitationMethods, () ->
-            $('select[name="elicitationMethod"]', context)
+          # Populate & GUI-ify elicitation_method
+          $.each(formAddOptions.elicitation_methods, () ->
+            $('select[name="elicitation_method"]', context)
               .append($('<option>').attr('value', @[0]).text(@[1])))
-          $('select[name="elicitationMethod"]', context).selectmenu()
+          $('select[name="elicitation_method"]', context).selectmenu()
 
           # Populate & GUI-ify tags
           tagsSelect = $('select[name="tags"]', context)
@@ -151,14 +205,14 @@ define [
           # BUG: why is this putting focus on speaker comments?
           $('div.tags-multiselect').on('keydown', (e) ->
             if e.shiftKey and e.which is 9
-              $('#elicitationMethod-button').focus()
+              $('#elicitation_method-button').focus()
           )
 
           # Populate category
           $.each(formAddOptions.categories, ->
-            $('select[name="syntacticCategory"]', context)
+            $('select[name="syntactic_category"]', context)
               .append($('<option>').attr('value', @[0]).text(@[1])))
-          $('select[name="syntacticCategory"]', context).selectmenu()
+          $('select[name="syntactic_category"]', context).selectmenu()
 
           # Populate speaker
           $.each(formAddOptions.speakers, ->
@@ -182,25 +236,26 @@ define [
       updateAddInterface(formAddOptions, "success")
 
 
-    enableAddNewTranslationFieldButton: (context) ->
+    # jQuery footwork to make the "+" ("add a new translation field") button work
+    _enableAddNewTranslationFieldButton: (context) ->
       self = @
       $('button.insertTranslationFieldButton', context)
         .data('translationFieldCount', 0)
         .click((event) ->
           event.preventDefault()
           $(@).data('translationFieldCount', $(@).data('translationFieldCount') + 1)
-          name = 'translations-' + $(@).data('translationFieldCount')
+          name = "translations-#{$(@).data('translationFieldCount')}"
           $('<li>').appendTo($(@).closest('ul')).hide()
             .addClass("newTranslation")
             .data('index', $(@).data('translationFieldCount'))
-            .append($('<label>').attr('for', name + '.translation').text('Translation'))
+            .append($('<label>').attr('for', "#{name}.transcription").text('Translation'))
             .append($('<select>')
-              .attr(name: name + '.grammaticality')
+              .attr(name: "#{name}.grammaticality")
               .addClass('grammaticality'))
             .append($('<textarea>')
-              .attr(name: name + '.translation', maxlength: '255')
+              .attr(name: "#{name}.transcription", maxlength: '255')
               .addClass('translation')
-              .css("border-color", self.parent.jQueryUIColors.defBo))
+              .css("border-color", FormAddView.jQueryUIColors.defBo))
             .append($('<button>').addClass('removeMe')
               .attr(title: 'Remove this translation field.')
               .text('Remove Me')
@@ -211,10 +266,10 @@ define [
                 $(@).removeClass('ui-state-focus')))
             .slideDown('medium')
           $.each(self.formAddOptions.grammaticalities, ->
-            $('[name="' + name + '.grammaticality"]')
+            $("[name=\"#{name}.grammaticality\"]")
               .append($('<option>').attr('value', @[0]).text(@[0])))
-          $('[name="' + name + '.grammaticality"]').selectmenu({width: 50})
-          $('[name="' + name + '.translation"]').elastic({compactOnBlur: false})
+          $("[name=\"#{name}.grammaticality\"]").selectmenu width: 50
+          $("[name=\"#{name}.transcription\"]").elastic(compactOnBlur: false)
             .css height: '16px'
           $('button.removeMe').click((event) ->
             event.preventDefault()
@@ -223,4 +278,45 @@ define [
               $(@).remove())
           )
         )
+
+    # Fake formAddOptions object for development purposes.
+    _fakeFormAddOptions:
+      grammaticalities: ['', '*', '?', '#']
+      elicitation_methods: [
+        [0, '']
+        [1, 'volunteered']
+        [2, 'translation']
+      ]
+      tags: [
+        [0, 'imperfective']
+        [1, 'habitual']
+        [2, 'frog']
+        [3, 'banana']
+        [4, 'helicopter']
+        [5, 'fish']
+        [6, 'spoon']
+        [7, 'politician']
+        [8, 'freak']
+        [9, 'dingo']
+      ]
+      categories: [
+        [0, '']
+        [1, 'N']
+        [2, 'V']
+      ]
+      speakers: [
+        [0, '']
+        [1, 'Jeff Bridges']
+        [2, 'Leonard Cohen']
+      ]
+      users: [
+        [0, '']
+        [1, 'Mac Daddy']
+        [2, 'Paddy Wagon']
+      ]
+      sources: [
+        [0, '']
+        [1, 'Frantz (1995)']
+        [2, 'Chomsky (1965)']
+      ]
 

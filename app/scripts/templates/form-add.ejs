@@ -10,23 +10,31 @@
         <label for="transcription">Transcription</label>
         <select name="grammaticality" class="grammaticality">
         </select>
-        <textarea rows="1" name="transcription" class="transcription" id="transcription"
-          maxlength="255"></textarea>
+        <textarea rows="1" name="transcription" class="transcription
+        form-add-input" id="transcription"
+        maxlength="255"><%= transcription %></textarea>
       </li>
       <li>
-        <label for="morphemeBreak">Morpheme Break</label>
-        <textarea name="morphemeBreak" maxlength="255"></textarea>
+        <label for="morpheme_break">Morpheme Break</label>
+        <textarea name="morpheme_break"
+        maxlength="255"><%= morpheme_break %></textarea>
       </li>
       <li>
-        <label for="morphemeGloss">Morpheme Gloss</label>
-        <textarea name="morphemeGloss" maxlength="255"></textarea>
+        <label for="morpheme_gloss">Morpheme Gloss</label>
+        <textarea name="morpheme_gloss"
+        maxlength="255"><%= morpheme_gloss %></textarea>
       </li>
       <li>
         <label for="translations-0.transcription">Translation</label>
         <select name="translations-0.grammaticality" class="grammaticality">
         </select>
         <textarea name="translations-0.transcription" maxlength="255"
-          class="translation"></textarea>
+          class="translation"
+          <% if (translations[0]) { %>
+            ><%= translations[0].transcription %></textarea>
+          <% } else { %>
+            ></textarea>
+          <% } %>
         <button class="insertTranslationFieldButton"
           title="Add another translation.">Add Translation</button>
       </li>
@@ -35,15 +43,15 @@
     <ul class="fieldset">
       <li>
         <label for="comments">General Comments</label>
-        <textarea name="comments"></textarea>
+        <textarea name="comments"><%= comments %></textarea>
       </li>
       <li>
-        <label for="speakerComments">Speaker Comments</label>
-        <textarea name="speakerComments"></textarea>
+        <label for="speaker_comments">Speaker Comments</label>
+        <textarea name="speaker_comments"><%= speaker_comments %></textarea>
       </li>
       <li>
-        <label for="elicitationMethod">Elicitation Method</label>
-        <select name="elicitationMethod" id="elicitationMethod"></select>
+        <label for="elicitation_method">Elicitation Method</label>
+        <select name="elicitation_method" id="elicitation_method"></select>
       </li>
       <li>
         <div class="tags-multiselect">
@@ -52,8 +60,8 @@
         </div>
       </li>
       <li>
-        <label for="syntacticCategory">Category</label>
-        <select name="syntacticCategory"></select>
+        <label for="syntactic_category">Category</label>
+        <select name="syntactic_category"></select>
       </li>
     </ul>
 
@@ -75,8 +83,9 @@
         <select name="source"></select>
       </li>
       <li>
-        <label for="dateElicited">Date Elicited</label>
-        <input type="text" name="dateElicited" class="dateElicited"/>
+        <label for="date_elicited">Date Elicited</label>
+        <input type="text" name="date_elicited" class="dateElicited"
+        value="<%= date_elicited %>"/>
       </li>
     </ul>
 

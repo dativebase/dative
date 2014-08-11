@@ -41,6 +41,8 @@ require [
     'backboneindexeddb'
     'multiselect'
     'jqueryelastic'
+    'jqueryuicolors'
+    'sfjquimatch'
   ], (AppView, Workspace) ->
     new Workspace()
     Backbone.history.start()

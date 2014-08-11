@@ -3,24 +3,29 @@ define [
   'lodash'
   'backbone'
   'templates'
+  'views/base'
+  'views/pages'
+  'views/form-add'
+  'models/form'
   'jqueryui'
   'superfish'
   'supersubs'
   'sfjquimatch'
-], ( $, _, Backbone, JST) ->
+], ( $, _, Backbone, JST, BaseView, PagesView, FormAddView, FormModel) ->
 
-  class MainMenuView extends Backbone.View
+  class MainMenuView extends BaseView
 
     tagName: 'div'
     className: 'mainmenu'
     template: JST['app/scripts/templates/mainmenu.ejs']
 
     initialize: ->
+      @on 'request:pages', @showPagesView, @
+      @on 'formAdd', @showFormAddView, @
 
-    # render
     render: ->
       # Match jQuery UI colors and insert menu template.
-      @$el.css(@parent.jQueryUIColors.def).html @template()
+      @$el.css(MainMenuView.jQueryUIColors.def).html @template()
 
       # Superfish transmogrifies menu
       @superfishify()
@@ -31,11 +36,30 @@ define [
       # Keyboard shortcuts
       @shortcutConfig()
 
+    showFormAddView: ->
+      @_visibleView?.close()
+      if not @_formAddView
+        @_formAddView = new FormAddView(model: new FormModel())
+      @_visibleView = @_formAddView
+      @_renderVisibleView()
+
+    showPagesView: ->
+      @_visibleView?.close()
+      if not @_pagesView
+        @_pagesView = new PagesView()
+      @_visibleView = @_pagesView
+      @_renderVisibleView()
+
+    _renderVisibleView: ->
+      @_visibleView.setElement '#appview'
+      @_visibleView.render()
+      @rendered @_visibleView
+
     # Superfish jQuery plugin turns mainmenu <ul> into a menubar
     superfishify: ->
       @$('.sf-menu').supersubs(minWidth: 12, maxWidth: 27, extraWidth: 2)
         .superfish(autoArrows: false)
-        .superfishJQueryUIMatch(@parent.jQueryUIColors)
+        .superfishJQueryUIMatch(MainMenuView.jQueryUIColors)
 
     # configureMenuEvents
     # 1. bind menu item click to data-event trigger
@@ -46,7 +70,7 @@ define [
       mainmenuView = @
       @$('[data-event]').each ->
         $(@).click ->
-          console.log 'clicked ' + $(@).attr('data-event') if debugMode
+          console.log "clicked #{$(@).attr('data-event')}" if MainMenuView?.debugMode
           mainmenuView.trigger $(@).attr('data-event')
 
     # Configure keyboard shortcuts
@@ -73,7 +97,7 @@ define [
         event.altKey is map.altKey and
         event.shiftKey is map.shiftKey and
         event.which is map.shortcutKey
-          console.log 'keyboard shortcut ' + eventName if debugMode
+          console.log "keyboard shortcut #{eventName}" if MainMenuView?.debugMode
           mainmenuView.trigger eventName
 
     # Return a shortcut object from a shortcut string.

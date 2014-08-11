@@ -26,6 +26,13 @@ define [
       #idbSync: Backbone.sync
       #sync: Backbone.ajaxSync
 
+      initialize: ->
+        console.log 'New FormModel created.'
+        @.on 'change', @iChanged
+
+      iChanged: ->
+        console.log 'I changed (i am a form model :))'
+
       #url: 'http://www.onlinelinguisticdatabase.org/'
       url: 'http://www.fake-old-url.org/'
 
