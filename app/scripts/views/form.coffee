@@ -1,17 +1,31 @@
-class FormView extends Backbone.View
+define [
+  'jquery'
+  'lodash'
+  'backbone'
+  'views/base'
+], ($, _, Backbone, BaseView) ->
 
-  template: JST['app/scripts/templates/form.ejs']
+  # Form View
+  # ---------
+  #
+  # For displaying individual forms with an IGT interface.
 
-  tagName: 'div'
+  class FormView extends BaseView
 
-  id: ''
+    template: JST['app/scripts/templates/form.ejs']
 
-  className: ''
+    tagName: 'div'
 
-  events: {}
+    id: ''
 
-  initialize: () ->
-    @listenTo @model, 'change', @render
+    className: ''
 
-  render: () ->
-    @$el.html @template(@model.toJSON())
+    events: {}
+
+    initialize: () ->
+      @listenTo @model, 'change', @render
+
+    render: () ->
+      console.log 'render called in FormView'
+      @$el.html @template(@model.toJSON())
+      this

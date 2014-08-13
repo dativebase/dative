@@ -2,8 +2,9 @@ define [
     'underscore'
     'backbone'
     './database'
+    'models/base'
     #'backboneindexeddb'
-  ], (_, Backbone, database) ->
+  ], (_, Backbone, database, BaseModel) ->
 
     # Form Model
     # ----------
@@ -21,20 +22,15 @@ define [
     # - LingSync compatibility
     # - client-side storage via indexeddb
 
-    class FormModel extends Backbone.Model
+    class FormModel extends BaseModel
 
       #idbSync: Backbone.sync
       #sync: Backbone.ajaxSync
 
       initialize: ->
-        console.log 'New FormModel created.'
-        @.on 'change', @iChanged
-
-      iChanged: ->
-        console.log 'I changed (i am a form model :))'
 
       #url: 'http://www.onlinelinguisticdatabase.org/'
-      url: 'http://www.fake-old-url.org/'
+      #url: 'http://www.fake-old-url.org/'
 
       # Backbone-IndexedDB requires `database` and `storeName`
       database: database

@@ -4,14 +4,25 @@ define [
   'backbone'
   'templates'
   'views/base'
+  'views/login-dialog'
   'views/pages'
   'views/form-add'
+  'views/forms'
+  'models/application-settings'
   'models/form'
+  'collections/forms'
   'jqueryui'
   'superfish'
   'supersubs'
   'sfjquimatch'
-], ( $, _, Backbone, JST, BaseView, PagesView, FormAddView, FormModel) ->
+], ( $, _, Backbone, JST, BaseView, LoginDialogView, PagesView, FormAddView,
+  FormsView, ApplicationSettingsModel, FormModel, FormsCollection) ->
+
+
+  # Main Menu View
+  # This is the spine of the application. There is only one of these and it
+  # controls the creation and rendering of all of the subviews that control
+  # the content in the body of the page.
 
   class MainMenuView extends BaseView
 
@@ -20,8 +31,29 @@ define [
     template: JST['app/scripts/templates/mainmenu.ejs']
 
     initialize: ->
-      @on 'request:pages', @showPagesView, @
-      @on 'formAdd', @showFormAddView, @
+
+      # One login dialog
+      @loginDialog = new LoginDialogView()
+      @loginDialog.render()
+
+      # One application settings object
+      @applicationSettings = new ApplicationSettingsModel()
+
+      @listenTo @, 'request:pages', @showPagesView
+      @listenTo @, 'request:formAdd', @showFormAddView
+      @listenTo @, 'request:formsBrowse', @showFormsView
+      @listenTo @, 'request:openLoginDialogBox', @toggleLoginDialog
+      @listenTo @applicationSettings, 'change:loggedIn', @loggedInChanged
+
+    loggedInChanged: ->
+      console.log 'appsetchanged'
+      @_initializeLoginButton()
+      if @applicationSettings and @loginDialog.isOpen()
+        @loginDialog.close()
+      console.log 'appsetchanged2'
+
+    events:
+      'click a.old-authenticated': 'toggleLoginDialog'
 
     render: ->
       # Match jQuery UI colors and insert menu template.
@@ -30,21 +62,48 @@ define [
       # Superfish transmogrifies menu
       @superfishify()
 
+      # Login button
+      @_initializeLoginButton()
+
       # Vivify menu buttons
       @bindClickToEventTrigger()
 
       # Keyboard shortcuts
       @shortcutConfig()
 
-    showFormAddView: ->
+    # When a view closes, it's good to be able to keep track of
+    # its focused element so that it can be returned to a past state.
+    _rememberFocusedElement: ->
+      focusedElement = $(document.activeElement)
+      if focusedElement
+        focusedElementId = focusedElement.attr('id')
+        if focusedElementId
+          @_visibleView?.focusedElementId = focusedElementId
+        else if /ms-list/.test focusedElement.attr('class')
+          @_visibleView?.focusedElementId = 'ms-tags .ms-list'
+        else
+          console.log 'focused element has no id' if MainMenuView.debugMode?
+
+    _closeVisibleView: ->
+      @_rememberFocusedElement()
       @_visibleView?.close()
+
+    showFormAddView: ->
+      @_closeVisibleView()
       if not @_formAddView
         @_formAddView = new FormAddView(model: new FormModel())
       @_visibleView = @_formAddView
       @_renderVisibleView()
 
+    showFormsView: ->
+      @_closeVisibleView()
+      if not @_formsView
+        @_formsView = new FormsView(collection: new FormsCollection())
+      @_visibleView = @_formsView
+      @_renderVisibleView()
+
     showPagesView: ->
-      @_visibleView?.close()
+      @_closeVisibleView()
       if not @_pagesView
         @_pagesView = new PagesView()
       @_visibleView = @_pagesView
@@ -97,7 +156,9 @@ define [
         event.altKey is map.altKey and
         event.shiftKey is map.shiftKey and
         event.which is map.shortcutKey
-          console.log "keyboard shortcut #{eventName}" if MainMenuView?.debugMode
+          console.log "keyboard shortcut #{eventName}" if MainMenuView.debugMode?
+          event.preventDefault()
+          event.stopPropagation()
           mainmenuView.trigger eventName
 
     # Return a shortcut object from a shortcut string.
@@ -140,4 +201,19 @@ define [
         if 'shift' in shortcutArray then '\u21E7' else ''
         getShortcutKeyAbbrev shortcutArray.pop()
       ].join ''
+
+    # Initialize login/logout icon/button
+    _initializeLoginButton: ->
+      text = 'Login'
+      icon = 'ui-icon-locked'
+      if @applicationSettings.get 'loggedIn'
+        text = 'Logout'
+        icon = 'ui-icon-unlocked'
+      @$('a.old-authenticated').text(text)
+        .button({icons: {primary: icon}, text: false})
+        .css('border-color', MainMenuView.jQueryUIColors.defBa)
+
+    # Open/close the login dialog box
+    toggleLoginDialog: ->
+      if @loginDialog.isOpen() then @loginDialog.close() else @loginDialog.open()
 

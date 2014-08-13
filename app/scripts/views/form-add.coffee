@@ -16,20 +16,6 @@ define [
     template: JST['app/scripts/templates/form-add.ejs']
 
     initialize: ->
-      console.log 'FormAddView initialized.'
-      @initialized = true
-      #@listenTo @model, 'change', @render
-      #@listenTo @model, 'destroy', @remove
-      #@render()
-      #
-      # TODO: figure out why the following does NOT work...
-      # http://stackoverflow.com/questions/9883009/backbone-js-multiple-delegateevents-for-view
-      # http://jsfiddle.net/derickbailey/hFAAC/
-      #myEvents = ['change', 'input', 'selectmenuchange']
-      #eventsCommand = { }
-      #for event in myEvents:
-      #  eventsCommand[event] = setToModel
-      #@delegateEvents events
 
     events:
       'change': 'setToModel' # fires when multi-select changes
@@ -39,8 +25,9 @@ define [
 
     # Set the state of the "add a form" HTML form on the model.
     setToModel: ->
+      console.log 'in setToModel'
       modelObject = @getModelObjectFromAddForm()
-      console.log modelObject
+      console.log "in setToModel; verifier is #{modelObject.verifier}"
       @model?.set modelObject
 
     # Extract data in the inputs of the HTML "Add a Form" form and
@@ -93,6 +80,14 @@ define [
       @_populateSelectFields body
       @_guify body
       @_addModel body
+      @_setFocus()
+
+    _setFocus: ->
+      if @focusedElementId?
+        @$("##{@focusedElementId}").first().focus()
+      else
+        $('#transcription').focus()
+
 
     # Add the data from the associated model to the <select>s, i.e. preserve
     # state across views. (Note that the values of textareas and text inputs
@@ -113,6 +108,8 @@ define [
       for attrName in ['grammaticality', 'elicitation_method',
         'syntactic_category', 'speaker', 'elicitor', 'verifier', 'source']
         if @model.get(attrName)
+          if attrName is 'verifier'
+            console.log "In _addModel; verifier should be #{@model.get(attrName)}"
           $("select[name=#{attrName}]", context)
             .val(@model.get(attrName))
             .selectmenu 'refresh', true
@@ -157,8 +154,6 @@ define [
             event.preventDefault()
             $('form.formAdd input[type="submit"]', context).click()
         )
-
-      $('#transcription').focus()
 
       # Do this, otherwise jquery-elastic erratically increases textarea height ...
       $('textarea', context).css height: '16px'
@@ -245,15 +240,20 @@ define [
           event.preventDefault()
           $(@).data('translationFieldCount', $(@).data('translationFieldCount') + 1)
           name = "translations-#{$(@).data('translationFieldCount')}"
+          transcriptionId = "#{name.replace('-', '')}transcription"
+          grammaticalityId = "#{name.replace('-', '')}grammaticality"
           $('<li>').appendTo($(@).closest('ul')).hide()
             .addClass("newTranslation")
             .data('index', $(@).data('translationFieldCount'))
             .append($('<label>').attr('for', "#{name}.transcription").text('Translation'))
             .append($('<select>')
-              .attr(name: "#{name}.grammaticality")
+              .attr(name: "#{name}.grammaticality", id: grammaticalityId)
               .addClass('grammaticality'))
             .append($('<textarea>')
-              .attr(name: "#{name}.transcription", maxlength: '255')
+              .attr(
+                name: "#{name}.transcription"
+                maxlength: '255'
+                id: transcriptionId)
               .addClass('translation')
               .css("border-color", FormAddView.jQueryUIColors.defBo))
             .append($('<button>').addClass('removeMe')
@@ -264,7 +264,13 @@ define [
                 $(@).addClass('ui-state-focus'))
               .blur(->
                 $(@).removeClass('ui-state-focus')))
-            .slideDown('medium')
+            .slideDown('medium', ->
+              # Focus the field if it was focused before
+              if self._focusedElementId? is transcriptionId
+                $("##{transcriptionId}").focus()
+              else if self._focusedElementId? is grammaticalityId
+                $("##{grammaticalityId}").focus()
+            )
           $.each(self.formAddOptions.grammaticalities, ->
             $("[name=\"#{name}.grammaticality\"]")
               .append($('<option>').attr('value', @[0]).text(@[0])))
@@ -313,6 +319,8 @@ define [
         [0, '']
         [1, 'Mac Daddy']
         [2, 'Paddy Wagon']
+        [3, 'Abba Face']
+        [4, 'Zacharia Murphy']
       ]
       sources: [
         [0, '']

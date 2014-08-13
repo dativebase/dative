@@ -18,7 +18,7 @@ define [
     initialize: ->
       @initialized = true
       @pagesCollection.on 'reset', @render, @
-      @pagesCollection.fetch()
+      #@pagesCollection.fetch()
 
     render: ->
       @$el.html @template(headerTitle: 'Pages')

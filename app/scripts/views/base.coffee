@@ -27,8 +27,16 @@ define [
     # currently in use.
     @jQueryUIColors: $.getJQueryUIColors()
 
+    # TODO: figure out where/how to store/persist user settings
+    @userSettings:
+      formItemsPerPage: 10
+
     trim: (string) ->
+      console.log 'in trim!'
+      console.log "got |#{string}|"
       string.replace /^\s+|\s+$/g, ''
+      console.log "returning |#{string}|"
+      string
 
     snake2camel: (string) ->
       string.replace(/(_[a-z])/g, ($1) ->
@@ -58,4 +66,12 @@ define [
     # Deregisters a subview that has been manually closed by this view
     closed: (subView) ->
       @_renderedSubViews = _(@_renderedSubViews).without subView
+
+    # Show Spinner Indicator (http://www.ajaxload.info/)
+    showSpinner: ->
+      $('body').append($('<img>')
+        .attr('src': 'images/ajax-loader.gif', 'id': 'spinner'))
+
+    hideSpinner: ->
+      $('#spinner').remove()
 
