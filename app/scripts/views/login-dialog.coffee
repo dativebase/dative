@@ -14,6 +14,15 @@ define [
     template: JST['app/scripts/templates/login-dialog.ejs']
 
     initialize: ->
+      @listenTo Backbone, 'authenticate:fail', @authenticateFail
+
+    # OLD server responds with validation errors as well as authentication
+    # errors. Authentication form should handle as much validation as possible,
+    # preventing a request to the server when data are invalid.
+    authenticateFail: (failObject) ->
+      console.log 'in login dialog view'
+      console.log 'authenticate fail'
+      console.log failObject
 
     events:
       'click #old-login-request-button': 'login'
@@ -26,7 +35,7 @@ define [
 
     # Transform the login dialog HTML to a jQueryUI dialog box.
     _dialogify: ->
-      console.log 'in dialogify'
+
       @$el.find('.old-login-dialog input').css('border-color',
         LoginDialogView.jQueryUIColors.defBo)
       @$('.old-login-dialog').dialog(
@@ -34,10 +43,10 @@ define [
               text: 'Forgot password'
               click: @openForgotPasswordDialogBox
             ,
-              text: 'Cancel'
+              text: 'Logout'
               click: =>
-                #$(this).dialog 'close'
-                @close()
+                #@close()
+                @logout()
             ,
               text: 'Login'
               click: =>
@@ -58,6 +67,7 @@ define [
       # Bind the Enter key to the "Login" button of the login dialog box
       @$('.old-login-dialog-widget input')
         .bind('keydown.loginWithEnter', (event) ->
+          console.log 'LOGIN DIALOG IS LISTENING TO THAT RETURN'
           if event.which is 13
             event.stopImmediatePropagation()
             event.stopPropagation()
@@ -111,13 +121,18 @@ define [
 
     # Let the application settings model handle the authentication attempt
     login: ->
+      console.log 'in login method of login dialog'
 
       username = @wrappedDialogBox.find('input[name=username]').val()
       password = @wrappedDialogBox.find('input[name=password]').val()
 
       # Trigger a global authenticate event that the ApplicationSettingsModel
       # will handle...
-      Backbone.trigger 'authenticate', username, password
+      Backbone.trigger 'authenticate:login', username, password
+
+    logout: ->
+
+      Backbone.trigger 'authenticate:logout'
 
     openForgotPasswordDialogBox: ->
       console.log 'You want to display the forgot password dialog.'

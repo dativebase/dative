@@ -5,6 +5,7 @@ define [
   'templates'
   'views/base'
   'views/login-dialog'
+  'views/application-settings'
   'views/pages'
   'views/form-add'
   'views/forms'
@@ -15,8 +16,9 @@ define [
   'superfish'
   'supersubs'
   'sfjquimatch'
-], ( $, _, Backbone, JST, BaseView, LoginDialogView, PagesView, FormAddView,
-  FormsView, ApplicationSettingsModel, FormModel, FormsCollection) ->
+], ( $, _, Backbone, JST, BaseView, LoginDialogView, ApplicationSettingsView,
+  PagesView, FormAddView, FormsView, ApplicationSettingsModel, FormModel,
+  FormsCollection) ->
 
 
   # Main Menu View
@@ -37,20 +39,21 @@ define [
       @loginDialog.render()
 
       # One application settings object
+      # TODO: fetch this from localStorage, if exists
       @applicationSettings = new ApplicationSettingsModel()
 
       @listenTo @, 'request:pages', @showPagesView
       @listenTo @, 'request:formAdd', @showFormAddView
       @listenTo @, 'request:formsBrowse', @showFormsView
       @listenTo @, 'request:openLoginDialogBox', @toggleLoginDialog
+      @listenTo @, 'request:applicationSettings', @showApplicationSettingsView
       @listenTo @applicationSettings, 'change:loggedIn', @loggedInChanged
 
+    # applicationSettings.loggedIn has changed: change the main menu accordingly
     loggedInChanged: ->
-      console.log 'appsetchanged'
-      @_initializeLoginButton()
+      @_refreshLoginButton()
       if @applicationSettings and @loginDialog.isOpen()
         @loginDialog.close()
-      console.log 'appsetchanged2'
 
     events:
       'click a.old-authenticated': 'toggleLoginDialog'
@@ -63,7 +66,7 @@ define [
       @superfishify()
 
       # Login button
-      @_initializeLoginButton()
+      @_refreshLoginButton()
 
       # Vivify menu buttons
       @bindClickToEventTrigger()
@@ -74,6 +77,7 @@ define [
     # When a view closes, it's good to be able to keep track of
     # its focused element so that it can be returned to a past state.
     _rememberFocusedElement: ->
+      console.log 'HERE I SET FOCUSED ELEMENT ID IN MAIN MENU'
       focusedElement = $(document.activeElement)
       if focusedElement
         focusedElementId = focusedElement.attr('id')
@@ -86,13 +90,23 @@ define [
 
     _closeVisibleView: ->
       @_rememberFocusedElement()
-      @_visibleView?.close()
+      if @_visibleView
+        @_visibleView.close()
+        @closed @_visibleView
 
     showFormAddView: ->
       @_closeVisibleView()
       if not @_formAddView
         @_formAddView = new FormAddView(model: new FormModel())
       @_visibleView = @_formAddView
+      @_renderVisibleView()
+
+    showApplicationSettingsView: ->
+      @_closeVisibleView()
+      if not @_applicationSettingsView
+        @_applicationSettingsView = new ApplicationSettingsView(
+          model: @applicationSettings)
+      @_visibleView = @_applicationSettingsView
       @_renderVisibleView()
 
     showFormsView: ->
@@ -203,13 +217,15 @@ define [
       ].join ''
 
     # Initialize login/logout icon/button
-    _initializeLoginButton: ->
+    _refreshLoginButton: ->
       text = 'Login'
       icon = 'ui-icon-locked'
+      title = 'login'
       if @applicationSettings.get 'loggedIn'
         text = 'Logout'
         icon = 'ui-icon-unlocked'
-      @$('a.old-authenticated').text(text)
+        title = 'logout'
+      @$('a.old-authenticated').text(text).attr('title', title)
         .button({icons: {primary: icon}, text: false})
         .css('border-color', MainMenuView.jQueryUIColors.defBa)
 

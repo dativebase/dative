@@ -1,6 +1,7 @@
 body {
     font-family: Lucida Grande, Lucida Sans, Arial, sans-serif;
     margin: 0;
+    font-size: 12px;
 }
 div.mainmenu,
 div#mainmenu {
@@ -11,6 +12,7 @@ div#mainmenu {
     top: 0;
     z-index: 100;
     white-space: nowrap;
+    font-size: 15px;
 }
 #oldclientapp
 {
@@ -53,6 +55,7 @@ div#mainmenu {
     margin: 1px;
 }
 .old-page-header-title {
+    font-size: 13px;
 }
 .old-forms-actions {
     text-align: left;
@@ -104,7 +107,9 @@ div#mainmenu {
     width: 880px;
     height: 39px;
 }
-.old-pagin-nav {
+.old-pagin-nav,
+.old-page-header-widgets
+{
     text-align: center;
     margin-top: 5px;
 }
@@ -153,6 +158,13 @@ div#mainmenu {
 .old-login-dialog-widget .old-login-failed {
     padding: 5px;
 }
+.old-login-dialog-widget,
+#appview
+{
+    box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.5);
+    -webkit-box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.5);
+    -moz-box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.5);
+}
 div.heading {
 }
 
@@ -180,7 +192,8 @@ ul.fieldset label {
     vertical-align: top;
     font-size: 12px;
 }
-.formAdd ul.fieldset label {
+.formAdd ul.fieldset label,
+.applicationSettingsForm ul.fieldset label {
     width: 150px;
 }
 .loginLogin ul.fieldset label {
@@ -212,7 +225,8 @@ ul.fieldset select[name="syntactic_category"],
 ul.fieldset select[name="speaker"],
 ul.fieldset select[name="elicitor"],
 ul.fieldset select[name="verifier"],
-ul.fieldset select[name="source"] {
+ul.fieldset select[name="source"],
+div.input-display {
     border-style: solid;
     border-width: 1px;
     padding: 7px 10px 5px 10px;
@@ -224,6 +238,9 @@ ul.fieldset select[name="source"] {
     -webkit-border-radius: 6px;
     -khtml-border-radius: 6px;
     border-radius: 6px;
+}
+div.input-display {
+  display: inline-block;
 }
 ul.fieldset textarea,
 ul.fieldset select[name="elicitation_method"],
@@ -240,7 +257,9 @@ ul.fieldset input[type="password"] {
     margin-right: 0;
     padding: 6px 10px 6px 10px;
 }
-ul.fieldset textarea {
+ul.fieldset textarea,
+form.applicationSettingsForm input,
+div.input-display {
     width: 526px;
     max-width: 526px;
     min-width: 526px;
@@ -255,7 +274,6 @@ ul.fieldset select[name="source"] {
     max-width: 548px;
     min-width: 548px;
 }
-
 ul.fieldset select[name="tags"]+button {
     padding: 0px 0px 3px 9px;
 }

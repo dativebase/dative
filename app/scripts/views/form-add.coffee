@@ -25,9 +25,7 @@ define [
 
     # Set the state of the "add a form" HTML form on the model.
     setToModel: ->
-      console.log 'in setToModel'
       modelObject = @getModelObjectFromAddForm()
-      console.log "in setToModel; verifier is #{modelObject.verifier}"
       @model?.set modelObject
 
     # Extract data in the inputs of the HTML "Add a Form" form and
@@ -142,6 +140,7 @@ define [
       # CTRL + <Return> in the form submits the form
       $('form.formAdd', context).keydown((event) ->
         if event.ctrlKey and event.which is 13
+          console.log 'FORM ADD IS LISTENING TO THAT RETURN!'
           event.preventDefault()
           $('input[type="submit"]', @).click()
       )

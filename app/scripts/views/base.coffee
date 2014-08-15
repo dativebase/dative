@@ -59,13 +59,18 @@ define [
     rendered: (subView) ->
       if not @_renderedSubViews?
         @_renderedSubViews = []
+        console.log '@_renderedSubViews initialized'
+        console.log @_renderedSubViews
       if subView not in @_renderedSubViews
         @_renderedSubViews.push subView
       return subView
 
     # Deregisters a subview that has been manually closed by this view
     closed: (subView) ->
-      @_renderedSubViews = _(@_renderedSubViews).without subView
+      console.log '@_renderedSubViews after a closed call'
+      console.log @_renderedSubViews
+      #@_renderedSubViews = _(@_renderedSubViews).without subView
+      @_renderedSubViews = _.without @_renderedSubViews, subView
 
     # Show Spinner Indicator (http://www.ajaxload.info/)
     showSpinner: ->

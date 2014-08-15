@@ -16,33 +16,15 @@ define [
 
       url = options.url or throw new Error 'A URL is required for CORS requests'
       method = options.method or 'GET'
-      payload = JSON.stringify(options.payload) or null
+      payload = JSON.stringify(options.payload) or "{}"
 
       [onload, onerror, onloadstart, onabort, onprogress, ontimeout,
       onloadend] =  @_getHandlers options
 
-
       xhr = @_getXHR url, method
 
-      # Cross-browser XHR getter
-      # From http://www.html5rocks.com/en/tutorials/cors/
-      xhr = new XMLHttpRequest()
-      # Check if the XMLHttpRequest object has a "withCredentials" property.
-      # "withCredentials" only exists on XMLHTTPRequest2 objects.
-      if 'withCredentials' of xhr
-        xhr.open method, url, true
-      # Otherwise, check if XDomainRequest. XDomainRequest only exists in IE,
-      # and is IE's way of making CORS requests.
-      else if typeof XDomainRequest isnt 'undefined'
-        xhr = new XDomainRequest()
-        xhr.open method, url
-      # Otherwise, CORS is not supported by the browser.
-      else
-        xhr = null
-
-      if not xhr?
-        throw new Error 'CORS is not supported by this browser. Try Chrome or
-          Firefox'
+      console.log 'in cors'
+      console.log "url: #{url}"
 
       xhr.withCredentials = true
       xhr.send(payload)
@@ -74,6 +56,7 @@ define [
       else
         throw new Error 'CORS is not supported by this browser. Try Chrome or
           Firefox'
+      xhr
 
     # Get default request handlers for those not supplied; also, modify some
     # of the handlers so that they receive an object representation of the
@@ -107,7 +90,10 @@ define [
     _jsonify: (callback) ->
       (xhrProgressEvent) ->
         xhr = xhrProgressEvent.currentTarget
-        responseJSON = JSON.parse xhr.responseText
+        try
+          responseJSON = JSON.parse xhr.responseText
+        catch error
+          responseJSON = xhr.responseText
         callback responseJSON, xhr
 
 
