@@ -24,9 +24,6 @@ define [
     # See http://stackoverflow.com/questions/5761349/backbone-js-able-to-do-rest-and-localstorage?lq=1
     # for ideas
     sync: ->
-      console.log 'Sync'
-      console.log 'Sync'
-      console.log 'Sync'
 
     constructor: ->
       @listenTo Backbone, 'authenticate:login', @authenticate
@@ -39,35 +36,44 @@ define [
     # TODO: encapsulate the LingSync authentication request.
     authenticate: (username, password) ->
 
+      taskId = @guid()
+      Backbone.trigger 'longTask:register', 'authenticating', taskId
       @cors(
         method: 'POST'
         url: "#{@getURL()}login/authenticate"
         payload: username: username, password: password
         onload: (responseJSON) =>
+          Backbone.trigger 'longTask:deregister', taskId
+          Backbone.trigger 'authenticate:end'
           if responseJSON.authenticated
-            @set 'loggedIn', true
-            console.log 'Successfully authenticated'
+            @set username: username, loggedIn: true
+            Backbone.trigger 'authenticate:success'
           else
             Backbone.trigger 'authenticate:fail', responseJSON
-            console.log "Failed to authenticate:
-              #{JSON.stringify(responseJSON)}"
         onerror: (responseJSON) ->
           Backbone.trigger 'authenticate:fail', responseJSON
-          console.log 'Error when attempting to authenticate'
+          Backbone.trigger 'longTask:deregister', taskId
+          Backbone.trigger 'authenticate:end'
       )
 
     logout: ->
 
+      taskId = @guid()
+      Backbone.trigger 'longTask:register', 'logout', taskId
       @cors(
         url: "#{@getURL()}login/logout"
         onload: (responseJSON) =>
+          Backbone.trigger 'authenticate:end'
+          Backbone.trigger 'longTask:deregister', taskId
           if not responseJSON.authenticated
             @set 'loggedIn', false
-            console.log 'Successfully logged out'
+            Backbone.trigger 'logout:success'
           else
-            console.log 'Failed to log out :('
+            Backbone.trigger 'logout:fail'
         onerror: (responseJSON) =>
-          console.log 'Error when attempting to log out'
+          Backbone.trigger 'authenticate:end'
+          Backbone.trigger 'longTask:deregister', taskId
+          Backbone.trigger 'logout:fail'
       )
 
     # Return our URL by combining serverURL and serverPort, if specified
@@ -83,13 +89,10 @@ define [
         url: "#{url}#{port and ':' + port or ''}/speakers"
         onload: (responseJSON) =>
           if utils.type(responseJSON) is 'array'
-            console.log 'We are logged in'
             @set 'loggedIn', true
           else
-            console.log 'We are NOT logged in'
             @set 'loggedIn', false
         onerror: (responseJSON) =>
-          console.log 'We are NOT logged in (error in getting speakers)'
           @set 'loggedIn', false
       )
 
@@ -105,7 +108,6 @@ define [
 
         loggedIn: false
         username: null
-        password: null
 
         # Right now I'm focusing on server-side persistence to an OLD RESTful web
         # service. The next step will be persistence to a LingSync corpus, then

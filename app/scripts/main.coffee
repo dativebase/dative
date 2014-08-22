@@ -34,6 +34,8 @@ require.config
     multiselect: '../bower_components/multiselect/js/jquery.multi-select'
     jqueryelastic: '../bower_components/jakobmattsson-jquery-elastic/jquery.elastic.source'
     #betterelastictextarea: '../bower_components/better-elastic-textarea/dist/better-elastic-textarea'
+    spin: '../bower_components/spin.js/spin'
+    jqueryspin: '../bower_components/spin.js/jquery.spin'
 
 require [
     'views/app',
@@ -43,6 +45,7 @@ require [
     'jqueryelastic'
     'jqueryuicolors'
     'sfjquimatch'
+    'jqueryspin'
   ], (AppView, Workspace) ->
     new Workspace()
     Backbone.history.start()

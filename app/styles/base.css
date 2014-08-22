@@ -68,8 +68,10 @@ div#mainmenu {
     border-width: 1px;
     border-color: transparent;
 }
-.old-form-object:hover {
-    cursor: pointer;
+.old-form-object:hover,
+ul.sf-menu li a
+{
+    cursor: default;
 }
 
 .old-form-secondary-data {
@@ -159,11 +161,21 @@ div#mainmenu {
     padding: 5px;
 }
 .old-login-dialog-widget,
-#appview
+#appview,
+.progress-widget,
+.notifier
 {
-    box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.5);
-    -webkit-box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.5);
-    -moz-box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.5);
+    box-shadow: 5px 5px 10px rgba(0, 0, 0, 0.5);
+    -webkit-box-shadow: 5px 5px 10px rgba(0, 0, 0, 0.5);
+    -moz-box-shadow: 5px 5px 10px rgba(0, 0, 0, 0.5);
+}
+ul.sf-menu li ul
+{
+    box-shadow: 5px 5px 10px rgba(0, 0, 0, 0.5);
+    -webkit-box-shadow: 5px 5px 10px rgba(0, 0, 0, 0.5);
+    -moz-box-shadow: 5px 5px 10px rgba(0, 0, 0, 0.5);
+    border-bottom-right-radius: 6px;
+    border-bottom-left-radius: 6px;
 }
 div.heading {
 }
@@ -385,5 +397,57 @@ h1 {
 
 .sf-menu a.sf-with-ul {
     padding-right: 12px;
+}
+
+#progress-widget-container,
+#notifier-container
+{
+    position: relative;
+}
+.progress-widget,
+.notifier
+{
+    position: absolute;
+    top: 0;
+    min-height: 40px;
+    width: 100px;
+    margin: 20px;
+    padding: 20px;
+}
+.progress-widget
+{
+    left: 0;
+}
+
+.notifier
+{
+    right: 0;
+}
+
+.pulse1
+{
+    /*box-shadow: -1px -1px 5px rgba(50, 50, 50, 0.75);*/
+    box-shadow: 0px 0px 5px rgba(255, 0, 0, 1);
+    transition: all 0.8s ease;
+}
+.pulse2
+{
+    box-shadow: 0px 0px 15px rgba(255, 0, 0, 1);
+    /*box-shadow: -1px -1px 13px rgba(50, 50, 50, 0.75);*/
+}
+
+.progress-widget-tasks
+{
+    margin-top: 80px;
+}
+.progress-widget-tasks ul li,
+.notifier ul li
+{
+    margin-bottom: 10px;
+}
+
+.loggedInUsername
+{
+    vertical-align: bottom;
 }
 

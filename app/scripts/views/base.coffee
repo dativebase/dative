@@ -2,7 +2,8 @@ define [
   'jquery'
   'lodash'
   'backbone'
-], ($, _, Backbone) ->
+  'utils/utils'
+], ($, _, Backbone, utils) ->
 
   # Base View
   # --------------
@@ -79,4 +80,6 @@ define [
 
     hideSpinner: ->
       $('#spinner').remove()
+
+    guid: utils.guid
 

@@ -3,14 +3,17 @@
 #   AppView is the Dative application core.
 
 define [
-  'jquery',
-  'lodash',
-  'backbone',
-  'views/base',
-  'views/mainmenu',
-  'views/pages',
+  'jquery'
+  'lodash'
+  'backbone'
+  'views/base'
+  'views/mainmenu'
+  'views/progress-widget'
+  'views/notifier'
+  'views/pages'
   'views/form-add'
-], ($, _, Backbone, BaseView, MainMenuView, PagesView, FormAddView) ->
+], ($, _, Backbone, BaseView, MainMenuView, ProgressWidgetView, NotifierView,
+PagesView, FormAddView) ->
 
   class AppView extends BaseView
 
@@ -26,10 +29,16 @@ define [
       # Main menu triggers custom events -- handle them here
       @mainMenuView = new MainMenuView()
 
-      @mainMenuView.on '_request:pages', @activatePagesView, @
-      @mainMenuView.on 'f_ormAdd', @activateFormAddView, @
-
       @render()
+
+      # One progress widget
+      @progressWidget = new ProgressWidgetView()
+      @progressWidget.setElement '#progress-widget-container'
+      @progressWidget.render()
+
+      # One notifier
+      @notifier = new NotifierView()
+      @notifier.setElement '#notifier-container'
 
     render: ->
       @$el.html @template()

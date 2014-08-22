@@ -1,7 +1,8 @@
 define [
   'underscore'
   'backbone'
-], (_, Backbone) ->
+  'utils/utils'
+], (_, Backbone, utils) ->
 
   # Base Model
   # ----------
@@ -96,6 +97,7 @@ define [
           responseJSON = xhr.responseText
         callback responseJSON, xhr
 
+    guid: utils.guid
 
     ###
 

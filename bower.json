@@ -17,7 +17,8 @@
     "indexeddb-backbonejs-adapter": "*",
     "multiselect": "*",
     "jakobmattsson-jquery-elastic": "*",
-    "better-elastic-textarea": "*"
+    "better-elastic-textarea": "*",
+    "spin.js": "*"
   },
   "devDependencies": {
     "mocha": "*",

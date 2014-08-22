@@ -4,6 +4,7 @@ define [
   'backbone'
   'templates'
   'views/base'
+  'views/progress-widget'
   'views/login-dialog'
   'views/application-settings'
   'views/pages'
@@ -16,10 +17,9 @@ define [
   'superfish'
   'supersubs'
   'sfjquimatch'
-], ( $, _, Backbone, JST, BaseView, LoginDialogView, ApplicationSettingsView,
-  PagesView, FormAddView, FormsView, ApplicationSettingsModel, FormModel,
-  FormsCollection) ->
-
+], ( $, _, Backbone, JST, BaseView, ProgressWidgetView, LoginDialogView,
+  ApplicationSettingsView, PagesView, FormAddView, FormsView,
+  ApplicationSettingsModel, FormModel, FormsCollection) ->
 
   # Main Menu View
   # This is the spine of the application. There is only one of these and it
@@ -34,13 +34,13 @@ define [
 
     initialize: ->
 
-      # One login dialog
-      @loginDialog = new LoginDialogView()
-      @loginDialog.render()
-
       # One application settings object
       # TODO: fetch this from localStorage, if exists
       @applicationSettings = new ApplicationSettingsModel()
+
+      # One login dialog
+      @loginDialog = new LoginDialogView(model: @applicationSettings)
+      @loginDialog.render()
 
       @listenTo @, 'request:pages', @showPagesView
       @listenTo @, 'request:formAdd', @showFormAddView
@@ -52,8 +52,6 @@ define [
     # applicationSettings.loggedIn has changed: change the main menu accordingly
     loggedInChanged: ->
       @_refreshLoginButton()
-      if @applicationSettings and @loginDialog.isOpen()
-        @loginDialog.close()
 
     events:
       'click a.old-authenticated': 'toggleLoginDialog'
@@ -221,13 +219,16 @@ define [
       text = 'Login'
       icon = 'ui-icon-locked'
       title = 'login'
+      username = ''
       if @applicationSettings.get 'loggedIn'
         text = 'Logout'
         icon = 'ui-icon-unlocked'
         title = 'logout'
+        username = @applicationSettings.get 'username'
       @$('a.old-authenticated').text(text).attr('title', title)
         .button({icons: {primary: icon}, text: false})
         .css('border-color', MainMenuView.jQueryUIColors.defBa)
+      @$('.loggedInUsername').text username
 
     # Open/close the login dialog box
     toggleLoginDialog: ->

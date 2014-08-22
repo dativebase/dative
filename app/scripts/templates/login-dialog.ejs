@@ -1,15 +1,19 @@
 <div class='old-login-dialog'>
-  <form action="login/authenticate" method="post" class="loginLogin">
-    <ul class="fieldset">
+  <form action='login/authenticate' method='post' class='loginLogin'>
+    <ul class='fieldset'>
       <li>
-        <label for="username">Username</label>
-        <input type="text" name="username" class="username" tabindex=1 />
-        <span class='ui-state-error ui-corner-all old-login-failed'></span>
+        <label for='username'>Username</label>*
+        <input type='text' id='username' name='username' class='username'
+            tabindex=1 />
+        <span class='ui-state-error ui-corner-all old-login-failed'
+          id='username-error'></span>
       </li>
       <li>
-        <label for="password">Password</label>
-        <input type="password" name="password" class="password" tabindex=1 />
-        <span class='ui-state-error ui-corner-all old-login-failed'></span>
+        <label for='password'>Password</label>*
+        <input type='password' id='password' name='password' class='password'
+            tabindex=1 />
+        <span class='ui-state-error ui-corner-all old-login-failed'
+          id='password-error'></span>
       </li>
     </ul>
   </form>

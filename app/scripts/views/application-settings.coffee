@@ -18,7 +18,7 @@ define [
     template: JST['app/scripts/templates/application-settings-header.ejs']
 
     events:
-      'dblclick .input-display': 'edit'
+      'click .input-display': 'edit'
       'click button.edit': 'edit'
       'click button.save': 'save'
       'click button.view': 'view'
@@ -54,7 +54,7 @@ define [
     # Render edit view, close display view
     edit: (event) ->
       console.log 'IN EDIT'
-      @_removeTextSelection() # remove selected text glitch
+      #@_removeTextSelection() # remove selected text glitch (only necessary with double click event)
       @_rememberDBLClickedElement()
       @displayView.close()
       @closed @displayView

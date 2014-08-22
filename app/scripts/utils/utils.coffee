@@ -43,7 +43,13 @@ define (require) ->
     }
     return classToType[Object.prototype.toString.call(obj)]
 
+  s4 = ->
+    (((1 + Math.random()) * 0x10000) | 0).toString(16).substring 1
+
+  guid = ->
+    "#{s4()}#{s4()}-#{s4()}-#{s4()}-#{s4()}-#{s4()}#{s4()}#{s4()}"
 
   clone: clone
   type: type
+  guid: guid
 
