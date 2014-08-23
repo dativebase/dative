@@ -4,21 +4,10 @@ define [
   'backbone'
   'templates'
   'views/base'
-  'views/progress-widget'
-  'views/login-dialog'
-  'views/application-settings'
-  'views/pages'
-  'views/form-add'
-  'views/forms'
-  'models/application-settings'
-  'models/form'
-  'collections/forms'
   'superfish'
   'supersubs'
   'sfjquimatch'
-], ( $, _, Backbone, JST, BaseView, ProgressWidgetView, LoginDialogView,
-  ApplicationSettingsView, PagesView, FormAddView, FormsView,
-  ApplicationSettingsModel, FormModel, FormsCollection) ->
+], ( $, _, Backbone, JST, BaseView) ->
 
   # Main Menu View
   # --------------
