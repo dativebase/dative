@@ -130,8 +130,8 @@ define [
 
     render: ->
       @$el.html @template headerTitle: 'ApplicationSettings'
-      @displayView.setElement '#old-page-body'
-      @editView.setElement '#old-page-body'
+      @displayView.setElement '#dative-page-body'
+      @editView.setElement '#dative-page-body'
       @view()
       @_guify()
       @_viewButtons()

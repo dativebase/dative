@@ -13,7 +13,6 @@ define [
   'models/application-settings'
   'models/form'
   'collections/forms'
-  'jqueryui'
   'superfish'
   'supersubs'
   'sfjquimatch'
@@ -22,9 +21,9 @@ define [
   ApplicationSettingsModel, FormModel, FormsCollection) ->
 
   # Main Menu View
-  # This is the spine of the application. There is only one of these and it
-  # controls the creation and rendering of all of the subviews that control
-  # the content in the body of the page.
+  # --------------
+  #
+  # The drop-down menu which is always at the top of a Dative application.
 
   class MainMenuView extends BaseView
 
@@ -33,98 +32,17 @@ define [
     template: JST['app/scripts/templates/mainmenu.ejs']
 
     initialize: ->
-
-      # One application settings object
-      # TODO: fetch this from localStorage, if exists
-      @applicationSettings = new ApplicationSettingsModel()
-
-      # One login dialog
-      @loginDialog = new LoginDialogView(model: @applicationSettings)
-      @loginDialog.render()
-
-      @listenTo @, 'request:pages', @showPagesView
-      @listenTo @, 'request:formAdd', @showFormAddView
-      @listenTo @, 'request:formsBrowse', @showFormsView
-      @listenTo @, 'request:openLoginDialogBox', @toggleLoginDialog
-      @listenTo @, 'request:applicationSettings', @showApplicationSettingsView
-      @listenTo @applicationSettings, 'change:loggedIn', @loggedInChanged
-
-    # applicationSettings.loggedIn has changed: change the main menu accordingly
-    loggedInChanged: ->
-      @_refreshLoginButton()
+      @listenTo @model, 'change:loggedIn', @_refreshLoginButton
 
     events:
-      'click a.old-authenticated': 'toggleLoginDialog'
+      'click a.dative-authenticated': 'toggleLoginDialog'
 
     render: ->
-      # Match jQuery UI colors and insert menu template.
-      @$el.css(MainMenuView.jQueryUIColors.def).html @template()
-
-      # Superfish transmogrifies menu
-      @superfishify()
-
-      # Login button
+      @$el.css(MainMenuView.jQueryUIColors.def).html @template() # match jQueryUI colors
+      @superfishify() # Superfish transmogrifies menu
       @_refreshLoginButton()
-
-      # Vivify menu buttons
-      @bindClickToEventTrigger()
-
-      # Keyboard shortcuts
-      @shortcutConfig()
-
-    # When a view closes, it's good to be able to keep track of
-    # its focused element so that it can be returned to a past state.
-    _rememberFocusedElement: ->
-      console.log 'HERE I SET FOCUSED ELEMENT ID IN MAIN MENU'
-      focusedElement = $(document.activeElement)
-      if focusedElement
-        focusedElementId = focusedElement.attr('id')
-        if focusedElementId
-          @_visibleView?.focusedElementId = focusedElementId
-        else if /ms-list/.test focusedElement.attr('class')
-          @_visibleView?.focusedElementId = 'ms-tags .ms-list'
-        else
-          console.log 'focused element has no id' if MainMenuView.debugMode?
-
-    _closeVisibleView: ->
-      @_rememberFocusedElement()
-      if @_visibleView
-        @_visibleView.close()
-        @closed @_visibleView
-
-    showFormAddView: ->
-      @_closeVisibleView()
-      if not @_formAddView
-        @_formAddView = new FormAddView(model: new FormModel())
-      @_visibleView = @_formAddView
-      @_renderVisibleView()
-
-    showApplicationSettingsView: ->
-      @_closeVisibleView()
-      if not @_applicationSettingsView
-        @_applicationSettingsView = new ApplicationSettingsView(
-          model: @applicationSettings)
-      @_visibleView = @_applicationSettingsView
-      @_renderVisibleView()
-
-    showFormsView: ->
-      @_closeVisibleView()
-      if not @_formsView
-        @_formsView = new FormsView(collection: new FormsCollection())
-      @_visibleView = @_formsView
-      @_renderVisibleView()
-
-    showPagesView: ->
-      @_closeVisibleView()
-      if not @_pagesView
-        @_pagesView = new PagesView()
-      @_visibleView = @_pagesView
-      @_renderVisibleView()
-
-    _renderVisibleView: ->
-      @_visibleView.setElement '#appview'
-      @_visibleView.render()
-      @rendered @_visibleView
+      @bindClickToEventTrigger() # Vivify menu buttons
+      @shortcutConfig() # Keyboard shortcuts
 
     # Superfish jQuery plugin turns mainmenu <ul> into a menubar
     superfishify: ->
@@ -132,35 +50,34 @@ define [
         .superfish(autoArrows: false)
         .superfishJQueryUIMatch(MainMenuView.jQueryUIColors)
 
-    # configureMenuEvents
-    # 1. bind menu item click to data-event trigger
-    # 2. bind data-shortcut keypress event to data-event trigger
-    # 3.
-    # Bind menu item clicks to trigger of the data-event attr's event
+    # Menu item clicks and keyboard shortcut behaviours are all defined in the
+    # data-event and data-shortcut attributes of the <li>s specified in the
+    # template. The following functionality creates the appropriate bindings.
+
+    # Bind main menu item clicks to the triggering of the appropriate events.
     bindClickToEventTrigger: ->
-      mainmenuView = @
+      self = @
       @$('[data-event]').each ->
         $(@).click ->
-          console.log "clicked #{$(@).attr('data-event')}" if MainMenuView?.debugMode
-          mainmenuView.trigger $(@).attr('data-event')
+          self.trigger $(@).attr('data-event')
 
     # Configure keyboard shortcuts
     # 1. Bind shortcut keystrokes to the appropriate events.
-    # 2. Modify the menu items so that shortcuts abbreviations are displayed.
+    # 2. Modify the menu items so that shortcut abbreviations are displayed.
     shortcutConfig: ->
-      mainmenuView = @
+      self = @
       $('[data-shortcut][data-event]').each ->
         event = $(@).attr 'data-event'
         shortcut = $(@).attr 'data-shortcut'
-        mainmenuView.bindShortcutToEventTrigger shortcut, event
+        self.bindShortcutToEventTrigger shortcut, event
         $(@).append $('<span>').addClass('float-right').text(
-          mainmenuView.getShortcutAbbreviation(shortcut))
+          self.getShortcutAbbreviation(shortcut))
 
-    # Bind keyboard shortcut to event to triggering of event
+    # Bind keyboard shortcut to triggering of event
     bindShortcutToEventTrigger: (shortcutString, eventName) ->
       # Map for 'ctrl+A' would be {ctrlKey: true, shortcutKey: 65}
       map = @getShortcutMap shortcutString
-      mainmenuView = @
+      self = @
 
       # Bind the keydown event to the function
       $(document).keydown (event) ->
@@ -168,10 +85,9 @@ define [
         event.altKey is map.altKey and
         event.shiftKey is map.shiftKey and
         event.which is map.shortcutKey
-          console.log "keyboard shortcut #{eventName}" if MainMenuView.debugMode?
           event.preventDefault()
           event.stopPropagation()
-          mainmenuView.trigger eventName
+          self.trigger eventName
 
     # Return a shortcut object from a shortcut string.
     # Shortcut Map for a shortcut string like 'ctrl+A' would be
@@ -220,17 +136,17 @@ define [
       icon = 'ui-icon-locked'
       title = 'login'
       username = ''
-      if @applicationSettings.get 'loggedIn'
+      if @model.get 'loggedIn'
         text = 'Logout'
         icon = 'ui-icon-unlocked'
         title = 'logout'
-        username = @applicationSettings.get 'username'
-      @$('a.old-authenticated').text(text).attr('title', title)
+        username = @model.get 'username'
+      @$('a.dative-authenticated').text(text).attr('title', title)
         .button({icons: {primary: icon}, text: false})
         .css('border-color', MainMenuView.jQueryUIColors.defBa)
       @$('.loggedInUsername').text username
 
-    # Open/close the login dialog box
+    # Tell the login dialog box to toggle itself.
     toggleLoginDialog: ->
-      if @loginDialog.isOpen() then @loginDialog.close() else @loginDialog.open()
+      Backbone.trigger 'loginDialog:toggle'
 

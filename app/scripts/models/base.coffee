@@ -24,9 +24,6 @@ define [
 
       xhr = @_getXHR url, method
 
-      console.log 'in cors'
-      console.log "url: #{url}"
-
       xhr.withCredentials = true
       xhr.send(payload)
 

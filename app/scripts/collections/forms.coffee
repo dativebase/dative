@@ -46,7 +46,7 @@ define [
         if fetchType is 'authenticate'
           url = 'http://127.0.0.1:5000/login/authenticate'
           method = 'POST'
-          payload = JSON.stringify(username: 'old-rest-username', password: 'password')
+          payload = JSON.stringify(username: 'dative-rest-username', password: 'password')
         else if fetchType is 'forms_new'
           url = 'http://127.0.0.1:5000/forms/new'
         console.log url

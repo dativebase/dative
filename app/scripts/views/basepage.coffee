@@ -9,9 +9,8 @@ define [
   # --------------
   #
   # This is the view that all Dative views should inherit from, assuming
-  # they are pages, i.e., they have #old-page-header and #old-page-body divs
+  # they are pages, i.e., they have #dative-page-header and #dative-page-body divs
 
-  # The DOM element for summarizing the pages of and OLD app
   class BasePageView extends BaseView
 
     tagName:  'div'
@@ -26,13 +25,13 @@ define [
       @$el.html @template()
       @matchHeights()
 
-    # Page Views contain a header div (#old-page-header) and a body div
-    # (#old-page-body).  matchHeights keeps the body height constant
+    # Page Views contain a header div (#dative-page-header) and a body div
+    # (#dative-page-body).  matchHeights keeps the body height constant
     # relative to its parent's height, even when window resizes.
     matchHeights: ->
-      pageBody = $('#old-page-body')[0]
+      pageBody = $('#dative-page-body')[0]
       parent = $(pageBody).parent()
-      pageHeader = $('#old-page-header')
+      pageHeader = $('#dative-page-header')
       margin = parseInt $(pageBody).css('margin')
       hasVerticalScrollBar = @hasVerticalScrollBar
       $(pageBody).css 'height',

@@ -74,7 +74,7 @@ define [
       _.extend params, @model.toJSON()
       @$el.html @template(params)
       @matchHeights()
-      body = $('#old-page-body')
+      body = $('#dative-page-body')
       @_populateSelectFields body
       @_guify body
       @_addModel body

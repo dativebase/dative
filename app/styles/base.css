@@ -14,7 +14,7 @@ div#mainmenu {
     white-space: nowrap;
     font-size: 15px;
 }
-#oldclientapp
+#dative-client-app
 {
 }
 #appview
@@ -22,7 +22,7 @@ div#mainmenu {
     margin: 10px auto;
     width: 900px;
 }
-#old-page-body {
+#dative-page-body {
     margin: 10px;
     overflow-y: auto;
 }
@@ -30,17 +30,17 @@ div#mainmenu {
     font-size: 100%;
 }
 
-.old-authenticated {
+.dative-authenticated {
     width: 16px;
     height: 16px;
     margin-top: 3px;
 }
-#old-page {
+#dative-page {
     margin: 40px auto 15px auto;
     width: 900px;
 }
-#old-page-header,
-.old-widget-header {
+#dative-page-header,
+.dative-widget-header {
     font-weight: normal;
     text-align: center;
     border: 0 none;
@@ -48,87 +48,87 @@ div#mainmenu {
     padding: 5px 10px;
 }
 
-.old-widget-header button,
-.old-widget-header select+div,
-.old-page-header button,
-.old-page-header select+div {
+.dative-widget-header button,
+.dative-widget-header select+div,
+.dative-page-header button,
+.dative-page-header select+div {
     margin: 1px;
 }
-.old-page-header-title {
+.dative-page-header-title {
     font-size: 13px;
 }
-.old-forms-actions {
+.dative-forms-actions {
     text-align: left;
     margin-top: 5px;
 }
-.old-form-object {
+.dative-form-object {
     font-size: inherit;
     padding: 10px;
     border-style: solid;
     border-width: 1px;
     border-color: transparent;
 }
-.old-form-object:hover,
+.dative-form-object:hover,
 ul.sf-menu li a
 {
     cursor: default;
 }
 
-.old-form-secondary-data {
+.dative-form-secondary-data {
     font-size: 11px;
     padding: 10px 0;
 }
-.old-form-buttons {
+.dative-form-buttons {
     margin-bottom: 10px;
 }
-.old-forms-view-one-interface .old-widget-body,
-.old-forms-browse-interface .old-widget-body {
+.dative-forms-view-one-interface .dative-widget-body,
+.dative-forms-browse-interface .dative-widget-body {
     position: relative;
     padding: 10px;
 }
-.old-form-secondary-data-label {
+.dative-form-secondary-data-label {
     display: inline-block;
     width: 150px;
     text-align: right;
     margin-right: 10px;
     vertical-align: top;
 }
-.old-form-secondary-data-content {
+.dative-form-secondary-data-content {
     display: inline-block;
     width: 500px;
 }
-.old-form-secondary-data > div {
+.dative-form-secondary-data > div {
     margin: 5px 0;
 }
-.old-pagin-items {
+.dative-pagin-items {
     padding: 0 40px 39px 40px;
 }
-.old-pagin-nav-bottom {
+.dative-pagin-nav-bottom {
     position: absolute;
     bottom: 0;
     width: 880px;
     height: 39px;
 }
-.old-pagin-nav,
-.old-page-header-widgets
+.dative-pagin-nav,
+.dative-page-header-widgets
 {
     text-align: center;
     margin-top: 5px;
 }
-.old-pagin-ipp {
+.dative-pagin-ipp {
     margin: 10px 0;
     text-align: center;
 }
-.old-pagin-item {
+.dative-pagin-item {
     font: inherit;
     color: inherit;
     padding: 10px 0;
 }
-.old-pagin-item-index {
+.dative-pagin-item-index {
     vertical-align: top;
     padding-right: 10px;
 }
-.old-pagin-item-content {
+.dative-pagin-item-content {
     width: 700px;
 }
 #spinner {
@@ -146,21 +146,21 @@ ul.sf-menu li a
 .float-left{
     float: left;
 }
-.old-val-err-widget {
+.dative-val-err-widget {
     width: 16px;
     display: inline-block;
     cursor: pointer;
 }
-.old-explanation {
+.dative-explanation {
     max-width: 200px;
     overflow-y: auto;
     padding: 5px;
     z-index: 2000;
 }
-.old-login-dialog-widget .old-login-failed {
+.dative-login-dialog-widget .dative-login-failed {
     padding: 5px;
 }
-.old-login-dialog-widget,
+.dative-login-dialog-widget,
 #appview,
 .progress-widget,
 .notifier
@@ -291,7 +291,7 @@ ul.fieldset select[name="tags"]+button {
 }
 
 ul.fieldset select+div, /* div siblings of selects are jquery.ui.selectmenu creatures */
-.old-forms-browse-interface select+div,
+.dative-forms-browse-interface select+div,
 button.insertTranslationFieldButton,
 button.removeMe,
 input[type="submit"],
@@ -357,7 +357,7 @@ button.ui-multiselect {
     top: 1px;
 }
 
-.old-form-transcription {
+.dative-form-transcription {
     font-style: italic;
 }
 

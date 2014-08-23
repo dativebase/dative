@@ -24,13 +24,12 @@ define [
 
     render: (options) ->
       console.log 'render called on FormsView'
-      @showSpinner() # Tell the user something is happening
 
       # Forms list's DOM real estate
       params = headerTitle: 'Forms'
       @$el.html @template(params)
       @matchHeights()
-      body = $('#old-page-body')
+      body = $('#dative-page-body')
 
       # Tell the paginator how many items_per_page we want
       options = options or {}
@@ -52,7 +51,5 @@ define [
       #curl --cookie-jar my-cookies.txt --header "Content-Type: application/json" --data '{"username": "admin", "password": "adminA_1"}' http://127.0.0.1:5000/login/authenticate
 
       @collection.each((model) =>
-        @$('#old-page-body').append(new FormView({model: model}).render().$el))
-
-      @hideSpinner()
+        @$('#dative-page-body').append(new FormView({model: model}).render().$el))
 

@@ -24,6 +24,7 @@ define [
       @listenTo Backbone, 'authenticate:fail', @authenticateFail
       @listenTo Backbone, 'authenticate:end', @authenticateEnd
       @listenTo Backbone, 'authenticate:success', @authenticateSuccess
+      @listenTo Backbone, 'loginDialog:toggle', @toggle
       @listenTo @model, 'change:loggedIn', @disableButtons
 
     disableButtons: ->
@@ -53,7 +54,7 @@ define [
       @disableButtons()
 
     events:
-      'click #old-login-request-button': 'login'
+      'click #dative-login-request-button': 'login'
       'keyup #username': 'validate'
       'keyup #password': 'validate'
       'keydown #username': 'loginWithEnter'
@@ -67,9 +68,9 @@ define [
     # Transform the login dialog HTML to a jQueryUI dialog box.
     _dialogify: ->
 
-      @$('.old-login-dialog input').css('border-color',
+      @$('.dative-login-dialog input').css('border-color',
         LoginDialogView.jQueryUIColors.defBo)
-      @$('.old-login-dialog').dialog(
+      @$('.dative-login-dialog').dialog(
           buttons: [
               text: 'Forgot password'
               click: @openForgotPasswordDialogBox
@@ -85,21 +86,21 @@ define [
                 @login()
               id: 'login'
           ]
-          dialogClass: 'old-login-dialog-widget'
+          dialogClass: 'dative-login-dialog-widget'
           title: 'Login'
           width: 400
           open: =>
             @submitAttempted = false
-            @$('.old-login-dialog-widget button').each(->
+            @$('.dative-login-dialog-widget button').each(->
               $(this).attr('tabindex', 1))
-            @$('.old-login-dialog-widget span.old-login-failed').text('').hide()
+            @$('.dative-login-dialog-widget span.dative-login-failed').text('').hide()
           beforeClose: =>
             @submitAttempted = false
             @cleanUpLoginDialogBox(clearFields: true, removeFocus: true)
           autoOpen: false
         )
 
-      @wrappedDialogBox = @$('.old-login-dialog')
+      @wrappedDialogBox = @$('.dative-login-dialog')
 
     loginWithEnter: (event) ->
       if event.which is 13
@@ -124,20 +125,20 @@ define [
 
       # Clear the input fields, if requested
       if options.clearFields
-        @$('.old-login-dialog-widget input').val('')
+        @$('.dative-login-dialog-widget input').val('')
 
       # Remove focus, if requested
       if options.removeFocus
-        @$('.old-login-dialog-widget input').blur()
+        @$('.dative-login-dialog-widget input').blur()
 
       # Remove any validation error icons and explain widgets
-      @$('.old-val-err-widget, .old-explanation').remove()
+      @$('.dative-val-err-widget, .dative-explanation').remove()
 
       # Remove any invalid credentials notifications
-      @$('.old-login-dialog-widget span.old-login-failed').text('').hide()
+      @$('.dative-login-dialog-widget span.dative-login-failed').text('').hide()
 
       # Restore the default border color of the input fields
-      @$('.old-login-dialog-widget input')
+      @$('.dative-login-dialog-widget input')
         .css('border-color', LoginDialogView.jQueryUIColors.defBo)
 
     # Let ApplicationSettingsModel handle the authentication attempt
@@ -149,6 +150,7 @@ define [
         @$('#login').button 'disable'
         Backbone.trigger 'authenticate:login', username, password
 
+    # Validate and return field values as object.
     validate: ->
 
       fields =
@@ -168,4 +170,7 @@ define [
 
     openForgotPasswordDialogBox: ->
       console.log 'You want to display the forgot password dialog.'
+
+    toggle: ->
+      if @isOpen() then @close() else @open()
 
