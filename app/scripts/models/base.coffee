@@ -11,18 +11,30 @@ define [
 
   class BaseModel extends Backbone.Model
 
+    cors: (options={}) ->
+      try
+        @_cors options
+      catch error
+        if options.onerror
+          options.onerror error: error
+        else
+          console.log "Error requesting #{options.method} #{options.url}."
+          console.log error
+
     # Perform a CORS request, sending JSON to and receiving JSON from a RESTful
     # web service
-    cors: (options={}) ->
+    _cors: (options={}) ->
 
       url = options.url or throw new Error 'A URL is required for CORS requests'
       method = options.method or 'GET'
+      timeout = options.timeout or undefined
       payload = JSON.stringify(options.payload) or "{}"
 
       [onload, onerror, onloadstart, onabort, onprogress, ontimeout,
-      onloadend] =  @_getHandlers options
+      onloadend] =  @_getHandlers options, method, url
 
       xhr = @_getXHR url, method
+      if timeout then xhr.timeout = timeout
 
       xhr.withCredentials = true
       xhr.send(payload)
@@ -59,7 +71,7 @@ define [
     # Get default request handlers for those not supplied; also, modify some
     # of the handlers so that they receive an object representation of the
     # response body.
-    _getHandlers: (options) ->
+    _getHandlers: (options, method, url) ->
 
       onload = @_jsonify(options.onload or ->
         console.log "Successful request to #{method} #{url}.")
