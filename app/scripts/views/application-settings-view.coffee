@@ -16,7 +16,6 @@ define [
     render: ->
       @$el.html @template(@model.attributes)
       @_guify()
-      #@_setFocus()
 
     _guify: ->
       @$('div.input-display')
@@ -25,21 +24,9 @@ define [
         .focus(-> $(@).addClass('ui-state-hover').addClass('ui-state-active'))
         .mouseout(-> $(@).removeClass('ui-state-hover').removeClass('ui-state-active'))
         .blur(-> $(@).removeClass('ui-state-hover').removeClass('ui-state-active'))
-      @$('button.edit').button().keypress((e) =>
-        if e.which is 13
-          e.preventDefault()
+      @$('button.edit').button().keypress((event) =>
+        if event.which in [13, 32]
+          event.preventDefault()
           Backbone.trigger 'applicationSettings:edit'
       )
-
-    _setFocus: ->
-      console.log 'IN VIEW SET FOCUS'
-      if @focusedElementId
-        console.log 'WE HAVE FOCUSED ELEMENT ID!'
-        @$("##{@focusedElementId}").first().focus().select()
-      else
-        console.log 'WE WILL FOCUS FIRST BUTTON'
-        console.log $('button.edit').first()
-        $('button.edit').first().focus()
-
-
 

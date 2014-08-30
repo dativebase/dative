@@ -35,6 +35,8 @@ define [
     initialize: ->
 
       @applicationSettings = new ApplicationSettingsModel()
+      @applicationSettings.fetch()
+
       @mainMenuView = new MainMenuView(model: @applicationSettings)
       @loginDialog = new LoginDialogView(model: @applicationSettings)
       @progressWidget = new ProgressWidgetView()
@@ -52,7 +54,7 @@ define [
 
       @$el.html @template()
       @mainMenuView.setElement('#mainmenu').render()
-      @loginDialog.render()
+      @loginDialog.setElement('body').render()
       @progressWidget.setElement('#progress-widget-container').render()
       @notifier.setElement '#notifier-container'
 
@@ -119,5 +121,5 @@ define [
 
     # Open/close the login dialog box
     toggleLoginDialog: ->
-      if @loginDialog.isOpen() then @loginDialog.close() else @loginDialog.open()
+      Backbone.trigger 'loginDialog:toggle'
 

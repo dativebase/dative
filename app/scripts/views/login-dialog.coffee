@@ -15,9 +15,6 @@ define [
 
   class LoginDialogView extends BaseView
 
-    # Appended to the body since it's a dialog box
-    el: 'body'
-
     template: JST['app/scripts/templates/login-dialog.ejs']
 
     initialize: ->
@@ -30,17 +27,22 @@ define [
     disableButtons: ->
       if @model.get 'loggedIn'
         @$('#login').button 'disable'
-        @$('#logout').button 'enable'
+        @$('#logout').button('enable').focus()
         @$('#forgot-password').button 'disable'
-        @$('#username').prop 'disabled', true
-        @$('#password').prop 'disabled', true
+        @$('.dative-login-dialog-widget .username').attr 'disabled', true
+        @$('.dative-login-dialog-widget .password').attr 'disabled', true
       else
         @$('#login').button 'enable'
         @$('#logout').button 'disable'
         @$('#forgot-password').button 'enable'
-        @$('#username').prop 'disabled', false
-        @$('#password').prop 'disabled', false
-        @$('#username').focus()
+        @$('.dative-login-dialog-widget .username').removeAttr 'disabled'
+        @$('.dative-login-dialog-widget .password').removeAttr 'disabled'
+        if @model.get 'username'
+          @$('.dative-login-dialog-widget .password').focus()
+        else
+          @$('.dative-login-dialog-widget .username').focus()
+      if @model.get 'username'
+        @$('.dative-login-dialog-widget .username').val @model.get 'username'
 
     # OLD server responds with validation errors as well as authentication
     # errors. Authentication form should handle as much validation as possible,
@@ -55,13 +57,13 @@ define [
 
     events:
       'click #dative-login-request-button': 'login'
-      'keyup #username': 'validate'
-      'keyup #password': 'validate'
-      'keydown #username': 'loginWithEnter'
-      'keydown #password': 'loginWithEnter'
+      'keyup .dative-login-dialog-widget .username': 'validate'
+      'keydown .dative-login-dialog-widget .username': 'loginWithEnter'
+      'keyup .dative-login-dialog-widget .password': 'validate'
+      'keydown .dative-login-dialog-widget .password': 'loginWithEnter'
 
     render: ->
-      @$el.append @template()
+      @$el.append @template(@model.attributes)
       @_dialogify()
       @disableButtons()
 
@@ -111,6 +113,7 @@ define [
 
     open: ->
       @wrappedDialogBox.dialog 'open'
+      @disableButtons()
 
     close: ->
       @wrappedDialogBox.dialog 'close'
@@ -125,11 +128,11 @@ define [
 
       # Clear the input fields, if requested
       if options.clearFields
-        @$('.dative-login-dialog-widget input').val('')
+        @$('.dative-login-dialog-widget .password').val ''
 
       # Remove focus, if requested
-      if options.removeFocus
-        @$('.dative-login-dialog-widget input').blur()
+      #if options.removeFocus
+      #@$('.dative-login-dialog-widget input').blur()
 
       # Remove any validation error icons and explain widgets
       @$('.dative-val-err-widget, .dative-explanation').remove()
@@ -154,8 +157,8 @@ define [
     validate: ->
 
       fields =
-        username: @$('#username').val() or false
-        password: @$('#password').val() or false
+        username: @$('.dative-login-dialog-widget .username').val() or false
+        password: @$('.dative-login-dialog-widget .password').val() or false
       for name, value of fields
         if value then @$("##{name}-error").hide()
       if @submitAttempted

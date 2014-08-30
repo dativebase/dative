@@ -43,7 +43,6 @@ define [
 
     # Render display view, close edit view
     view: ->
-      console.log 'IN VIEW'
       @editView.close()
       @closed @editView
       @displayView.render()
@@ -53,7 +52,6 @@ define [
 
     # Render edit view, close display view
     edit: (event) ->
-      console.log 'IN EDIT'
       #@_removeTextSelection() # remove selected text glitch (only necessary with double click event)
       @_rememberDBLClickedElement()
       @displayView.close()
@@ -65,9 +63,8 @@ define [
 
     # Save to localStorage, render display view
     save: (event) ->
-      console.log 'IN SAVE'
       applicationSettingsObject = @getModelObjectFromApplicationSettingsForm()
-      @model.save()
+      @model.save applicationSettingsObject
       @view()
 
     # Extract data in the inputs of the HTML "Add a Form" form and
@@ -93,29 +90,26 @@ define [
         @view()
 
     _keyboardControl: (event) ->
-      console.log 'keypress'
       if event.which is 27
         try
           class_ = $(event.target).attr('class')
-          console.log class_
           if /dative-input/.test(class_)
             event.stopPropagation()
-            console.log 'DATIVE INPUT'
             @view()
         catch error
-          console.log 'error'
       else if event.which is 13
         event.preventDefault()
         event.stopPropagation()
         try
           class_ = $(event.target).attr('class')
-          if /input-display/.test(class_)
+          if /input-display/.test class_
             event.preventDefault()
             event.stopPropagation()
-            console.log 'INPUT DISPLAY'
             @edit()
           else if /dative-input/.test class_
             @save()
+      else
+        console.log event.which
 
     # Remove text selection caused by double click
     _removeTextSelection: ->
@@ -142,19 +136,12 @@ define [
       @$('button.save').button()
 
     _setFocus: (viewType) ->
-      console.log 'IN SET FOCUS'
       if @focusedElementId
-        console.log 'FOCUSED ELEMENT ID'
         @$("##{@focusedElementId}").first().focus().select()
       else
         if viewType is 'view'
-          console.log 'FOCUSING THE EDIT BUTTON'
           $('button.edit').first().focus()
         else if viewType is 'edit'
-          console.log 'FOCUSING THE INPUT BUTTON'
           $('input').first().focus()
-        else
-          console.log 'NO CONDITIONS APPLY IN FOCUS'
-          console.log @_renderedSubViews
 
 
