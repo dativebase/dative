@@ -1,7 +1,7 @@
 define [
   'underscore'
   'backbone'
-  'utils/utils'
+  './../utils/utils'
 ], (_, Backbone, utils) ->
 
   # Base Model

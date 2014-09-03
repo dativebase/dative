@@ -2,10 +2,10 @@ define [
   'jquery'
   'lodash'
   'backbone'
-  'templates'
-  'views/base'
-  'views/application-settings-view'
-  'views/application-settings-edit'
+  './../templates'
+  './base'
+  './application-settings-view'
+  './application-settings-edit'
 ], ( $, _, Backbone, JST, BaseView, ApplicationSettingsDisplayView,
   ApplicationSettingsEditView) ->
 

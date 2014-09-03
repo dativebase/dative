@@ -2,8 +2,8 @@ define [
   'jquery'
   'lodash'
   'backbone'
-  'templates'
-  'views/base'
+  './../templates'
+  './base'
 ], ($, _, Backbone, JST, BaseView) ->
 
   # Notifier

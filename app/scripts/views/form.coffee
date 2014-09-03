@@ -2,7 +2,7 @@ define [
   'jquery'
   'lodash'
   'backbone'
-  'views/base'
+  './base'
 ], ($, _, Backbone, BaseView) ->
 
   # Form View

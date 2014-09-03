@@ -2,7 +2,7 @@ define [
     'underscore'
     'backbone'
     './database'
-    'models/base'
+    './base'
     #'backboneindexeddb'
   ], (_, Backbone, database, BaseModel) ->
 
@@ -29,6 +29,7 @@ define [
 
       initialize: ->
 
+      url: 'fakeurl' # Backbone throws 'A "url" property or function must be specified' if this is not present.
       #url: 'http://www.onlinelinguisticdatabase.org/'
       #url: 'http://www.fake-old-url.org/'
 

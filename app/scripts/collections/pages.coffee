@@ -1,7 +1,7 @@
 define [
     'lodash',
     'backbone',
-    'models/page'
+    './../models/page'
   ], (_, Backbone, PageModel) ->
 
     class PagesCollection extends Backbone.Collection

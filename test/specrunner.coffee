@@ -3,8 +3,15 @@
 require.config
 
   shim:
+    lodash:
+      exports: '_'
     backbone: ["lodash", "jquery"]
+    jqueryui: ['jquery']
+    superfish: ['jquery']
+    supersubs: ['jquery']
+    multiselect: ['jquery', 'jqueryui']
     backboneindexeddb: ['backbone']
+    jqueryelastic: ['jquery']
 
   paths:
     jquery: '../bower_components/jquery/dist/jquery'
@@ -23,12 +30,22 @@ require.config
     # Supersubs plugin removed in v1.6 of superfish. See
     # https://github.com/joeldbirch/superfish.
     supersubs: '../bower_components/superfish/dist/js/supersubs'
+    multiselect: '../bower_components/multiselect/js/jquery.multi-select'
+    jqueryelastic: '../bower_components/jakobmattsson-jquery-elastic/jquery.elastic.source'
+    spin: '../bower_components/spin.js/spin'
+    jqueryspin: '../bower_components/spin.js/jquery.spin'
 
 specs = [
   'backboneindexeddb'
-  'spec/models/form.js'
-  'spec/collections/forms.js'
-  'spec/utils/indexeddb-utils.js'
+  'multiselect'
+  'jqueryelastic'
+  'jqueryuicolors'
+  'sfjquimatch'
+  'jqueryspin'
+  #'spec/models/form.js'
+  #'spec/collections/forms.js'
+  #'spec/utils/indexeddb-utils.js'
+  'spec/views/app.js'
 ]
 
 require specs, ->

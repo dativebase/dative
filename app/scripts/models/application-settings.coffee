@@ -1,8 +1,8 @@
 define [
   'underscore'
   'backbone'
-  'models/base'
-  'utils/utils'
+  './base'
+  './../utils/utils'
 ], (_, Backbone, BaseModel, utils) ->
 
   # Application Settings

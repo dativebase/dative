@@ -2,9 +2,9 @@ define [
   'jquery'
   'lodash'
   'backbone'
-  'utils/utils'
-  'views/basepage'
-  'models/form'
+  './../utils/utils'
+  './basepage'
+  './../models/form'
 ], ($, _, Backbone, utils, BasePageView, FormModel) ->
 
   # Form Add View

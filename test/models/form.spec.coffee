@@ -5,7 +5,7 @@ define (require) ->
   FormModel = require('../../../scripts/models/form')
   database = require('../../../scripts/models/database')
 
-  describe.only 'Form Model', ->
+  describe 'Form Model', ->
 
     describe 'General behaviour', ->
 
@@ -85,7 +85,6 @@ define (require) ->
         form.save({}, {
           success: (model, response, options) ->
             expect(response.msg).to.equal 'Good create request!'
-            console.log 'Got to success callback in form.save()'
             done()
           ,
           error: (model, response, options) ->
@@ -111,7 +110,6 @@ define (require) ->
         Backbone.sync = idbSync
         xhr.restore()
 
-        console.log 'Got to end'
         done()
 
     describe.skip 'IndexedDB behaviour', ->

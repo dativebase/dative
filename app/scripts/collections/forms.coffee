@@ -1,8 +1,8 @@
 define [
     'lodash',
     'backbone',
-    'models/form'
-    'models/database'
+    './../models/form'
+    './../models/database'
     'backboneindexeddb'
   ], (_, Backbone, FormModel, database) ->
 

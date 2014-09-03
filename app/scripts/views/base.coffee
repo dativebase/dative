@@ -2,7 +2,7 @@ define [
   'jquery'
   'lodash'
   'backbone'
-  'utils/utils'
+  './../utils/utils'
 ], ($, _, Backbone, utils) ->
 
   # Base View
