@@ -1,11 +1,10 @@
 define [
-  'jquery'
-  'lodash'
   'backbone'
-  './../utils/utils'
   './basepage'
   './../models/form'
-], ($, _, Backbone, utils, BasePageView, FormModel) ->
+  'multiselect'
+  'jqueryelastic'
+], (Backbone, BasePageView, FormModel) ->
 
   # Form Add View
   # --------------
@@ -58,7 +57,7 @@ define [
       # Second step is to convert the object with index keys into
       # an array.
       for attr of modelObject
-        if utils.type(modelObject[attr]) is 'object'
+        if @utils.type(modelObject[attr]) is 'object'
           array = []
           for key of (k for k of modelObject[attr]).sort()
             array.push modelObject[attr][key]

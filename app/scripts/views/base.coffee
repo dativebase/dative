@@ -1,9 +1,8 @@
 define [
-  'jquery'
-  'lodash'
   'backbone'
   './../utils/utils'
-], ($, _, Backbone, utils) ->
+  'jqueryuicolors'
+], (Backbone, utils) ->
 
   # Base View
   # --------------
@@ -66,4 +65,6 @@ define [
       @_renderedSubViews = _.without @_renderedSubViews, subView
 
     guid: utils.guid
+
+    utils: utils
 

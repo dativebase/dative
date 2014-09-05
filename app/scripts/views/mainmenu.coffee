@@ -1,13 +1,11 @@
 define [
-  'jquery'
-  'lodash'
   'backbone'
   './../templates'
   './base'
   'superfish'
   'supersubs'
   'sfjquimatch'
-], ( $, _, Backbone, JST, BaseView) ->
+], (Backbone, JST, BaseView) ->
 
   # Main Menu View
   # --------------
@@ -47,7 +45,8 @@ define [
     bindClickToEventTrigger: ->
       self = @
       @$('[data-event]').each ->
-        $(@).click ->
+        $(@).click (event) ->
+          event.stopPropagation()
           self.trigger $(@).attr('data-event')
 
     # Configure keyboard shortcuts

@@ -3,15 +3,20 @@
 require.config
 
   shim:
+    jquery:
+      exports: '$'
     lodash:
       exports: '_'
-    backbone: ["lodash", "jquery"]
+    backbone:
+      exports: 'Backbone'
+      deps: ['lodash', 'jquery']
     jqueryui: ['jquery']
+    backboneindexeddb: ['backbone']
+    multiselect: ['jquery', 'jqueryui']
+    jqueryelastic: ['jquery']
+    jqueryuicolors: ['jquery', 'jqueryui']
     superfish: ['jquery']
     supersubs: ['jquery']
-    multiselect: ['jquery', 'jqueryui']
-    backboneindexeddb: ['backbone']
-    jqueryelastic: ['jquery']
 
   paths:
     jquery: '../bower_components/jquery/dist/jquery'
@@ -36,16 +41,13 @@ require.config
     jqueryspin: '../bower_components/spin.js/jquery.spin'
 
 specs = [
-  'backboneindexeddb'
-  'multiselect'
-  'jqueryelastic'
-  'jqueryuicolors'
-  'sfjquimatch'
-  'jqueryspin'
-  #'spec/models/form.js'
+  'spec/models/form.js'
   #'spec/collections/forms.js'
   #'spec/utils/indexeddb-utils.js'
   'spec/views/app.js'
+  'spec/views/mainmenu.js'
+  #'spec/models/base.js'
+  #'spec/models/form.js'
 ]
 
 require specs, ->

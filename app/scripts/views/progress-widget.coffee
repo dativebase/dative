@@ -1,10 +1,8 @@
 define [
-  'jquery'
-  'lodash'
   'backbone'
-  './../templates'
   './base'
-], ( $, _, Backbone, JST, BaseView) ->
+  'jqueryspin'
+], (Backbone, BaseView) ->
 
   # Progress Widget View
   # --------------------

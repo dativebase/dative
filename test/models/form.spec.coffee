@@ -11,16 +11,23 @@ define (require) ->
 
       it 'has default values', ->
         form = new FormModel()
-        console.log form.get('transcription')
         expect(form.get('transcription')).to.equal ''
-        expect(form.get('translations')).to.be.an 'array'
-        expect(form.get('translations')).to.be.empty
+        expect(form.get('translations')).to.be.an('array').and
+          .to.be.empty
         expect(form.get('id')).to.be.null
 
       it 'can set values', ->
         form = new FormModel()
         form.set 'transcription', 'oki'
         form.set translations: ['hello']
+        expect(form.get('transcription')).to.equal 'oki'
+        expect(form.get('translations')).to.contain 'hello'
+
+      it 'sets passed attributes', ->
+        form = new FormModel(
+          transcription: 'oki'
+          translations: ['hello']
+        )
         expect(form.get('transcription')).to.equal 'oki'
         expect(form.get('translations')).to.contain 'hello'
 
