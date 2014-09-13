@@ -4,15 +4,20 @@
 require.config
 
   shim:
+    jquery:
+      exports: '$'
     lodash:
       exports: '_'
-    backbone: ["lodash", "jquery"]
+    backbone:
+      exports: 'Backbone'
+      deps: ['lodash', 'jquery']
     jqueryui: ['jquery']
+    backboneindexeddb: ['backbone']
+    multiselect: ['jquery', 'jqueryui']
+    jqueryelastic: ['jquery']
+    jqueryuicolors: ['jquery', 'jqueryui']
     superfish: ['jquery']
     supersubs: ['jquery']
-    multiselect: ['jquery', 'jqueryui']
-    backboneindexeddb: ['backbone']
-    jqueryelastic: ['jquery']
 
   paths:
     jquery: '../bower_components/jquery/dist/jquery'

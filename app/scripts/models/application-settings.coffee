@@ -44,6 +44,7 @@ define [
     # Attempt to authenticate with the passed-in credentials
     # TODO: encapsulate the LingSync authentication request.
     authenticate: (username, password) ->
+      console.log 'AUTHENTICATE CLALED'
 
       taskId = @guid()
       Backbone.trigger 'longTask:register', 'authenticating', taskId
@@ -53,6 +54,7 @@ define [
         timeout: 3000
         payload: username: username, password: password
         onload: (responseJSON) =>
+          console.log 'onload callback called'
           Backbone.trigger 'longTask:deregister', taskId
           Backbone.trigger 'authenticate:end'
           if responseJSON.authenticated
@@ -61,10 +63,12 @@ define [
           else
             Backbone.trigger 'authenticate:fail', responseJSON
         onerror: (responseJSON) ->
+          console.log 'onerror callback called'
           Backbone.trigger 'authenticate:fail', responseJSON
           Backbone.trigger 'longTask:deregister', taskId
           Backbone.trigger 'authenticate:end'
         ontimeout: ->
+          console.log 'ontimeout callback called'
           Backbone.trigger 'authenticate:fail', error: 'Request timed out'
           Backbone.trigger 'longTask:deregister', taskId
           Backbone.trigger 'authenticate:end'

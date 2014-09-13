@@ -11,10 +11,14 @@ define [
 
   class BaseModel extends Backbone.Model
 
+    vocal: true
+
     cors: (options={}) ->
       try
+        console.log 'trying a cool cors lite'
         @_cors options
       catch error
+        console.log 'cught errorz'
         if options.onerror
           options.onerror error: error
         else
@@ -74,24 +78,24 @@ define [
     _getHandlers: (options, method, url) ->
 
       onload = @_jsonify(options.onload or ->
-        console.log "Successful request to #{method} #{url}.")
+        console.log "Successful request to #{method} #{url}.") if @vocal
       onerror = @_jsonify(options.onerror or ->
-        console.log "Error requesting #{method} #{url}.")
+        console.log "Error requesting #{method} #{url}.") if @vocal
 
       # Default non-standard request handlers (JSON.parse response bodies?)
       onloadstart = options.onloadstart or ->
-        console.log 'onloadstart: the request has started'
+        console.log 'onloadstart: the request has started' if @vocal
       onabort = options.onabort or ->
         console.log 'onabort: the request has been aborted. For instance, by
-          invoking the abort() method.'
+          invoking the abort() method.' if @vocal
       onprogress = options.onprogress or ->
-        console.log 'onprogress: while loading and sending data.'
+        console.log 'onprogress: while loading and sending data.' if @vocal
       ontimeout = options.ontimeout or ->
         console.log 'ontimeout: author-specified timeout has passed before the
-          request could complete.'
+          request could complete.' if @vocal
       onloadend = options.onloadend or ->
         console.log 'onloadend: the request has completed (either in success
-          or failure).'
+          or failure).' if @vocal
 
       [onload, onerror, onloadstart, onabort, onprogress, ontimeout, onloadend]
 

@@ -64,7 +64,6 @@ define (require) ->
         form.save()
         expect(Backbone.sync).to.have.been.calledOnce
         expect(Backbone.sync).to.have.been.calledWith 'create', form
-        #console.log Backbone.sync.getCall(0).args[2]
         Backbone.sync.restore()
 
       it 'makes appropriate AJAX requests (with Sinon fake server)', (done) ->

@@ -25,7 +25,7 @@ define [
     render: ->
       @$el.html(@template(messages: @messages)).fadeIn(
         complete: =>
-          duration = @messages.length * 2000
+          duration = @messages.length * 4000
           @messages = []
           @$el.fadeOut duration
       )

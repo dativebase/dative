@@ -162,9 +162,11 @@ define (require) ->
         .$('a.dative-authenticated span.ui-button-icon-primary')
       expect($iconSpan.attr('class')).to.contain 'ui-icon-locked'
 
-    it 'fires the  event when the login icon is clicked.', ->
+    it 'fires Backbone-wide loginDialog:toggle event when the login icon is clicked.', ->
       # NOTE: It's necessary to set the spy on the prototype before the
-      # main menu object has been created, cf. http://stackoverflow.com/questions/9113186/backbone-js-click-event-spy-is-not-getting-called-using-jasmine-js-and-sinon-js
+      # main menu object has been created.
+      # Cf. http://stackoverflow.com/questions/9113186/backbone-js-click-event-spy-is-not-getting-called-using-jasmine-js-and-sinon-js
+      # For additional discussion, see pp. 117-119 of Backbone.js Testing.
       loginDialogToggleEventSpy = sinon.spy()
       toggleLoginDialogSpy = sinon.spy MainMenuView::, 'toggleLoginDialog'
       mainMenuView = new MainMenuView(

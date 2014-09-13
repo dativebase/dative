@@ -29,20 +29,20 @@ define [
     # (#dative-page-body).  matchHeights keeps the body height constant
     # relative to its parent's height, even when window resizes.
     matchHeights: ->
-      pageBody = $('#dative-page-body')[0]
-      parent = $(pageBody).parent()
-      pageHeader = $('#dative-page-header')
-      margin = parseInt $(pageBody).css('margin')
+      pageBody = @$('#dative-page-body')[0]
+      parent = @$(pageBody).parent()
+      pageHeader = @$('#dative-page-header')
+      margin = parseInt @$(pageBody).css('margin')
       hasVerticalScrollBar = @hasVerticalScrollBar
-      $(pageBody).css 'height',
+      @$(pageBody).css 'height',
         parent.innerHeight() - pageHeader.outerHeight() - (margin * 2)
       if hasVerticalScrollBar pageBody
-        $(pageBody).css 'padding-right', 10
-      $(window).resize ->
-        $(pageBody).css 'height',
+        @$(pageBody).css 'padding-right', 10
+      @$(window).resize ->
+        @$(pageBody).css 'height',
           parent.innerHeight() - pageHeader.outerHeight() - (margin * 2)
         if hasVerticalScrollBar pageBody
-          $(pageBody).css 'padding-right', 10
+          @$(pageBody).css 'padding-right', 10
 
     # Return true if elm has a vertical scrollbar
     hasVerticalScrollBar: (elm) ->

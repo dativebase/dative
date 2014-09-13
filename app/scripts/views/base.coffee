@@ -33,7 +33,6 @@ define [
 
     trim: (string) ->
       string.replace /^\s+|\s+$/g, ''
-      string
 
     snake2camel: (string) ->
       string.replace(/(_[a-z])/g, ($1) ->
@@ -47,6 +46,7 @@ define [
     close: ->
       @$el.empty()
       @undelegateEvents()
+      @stopListening()
       if @_renderedSubViews?
         for renderedSubView in @_renderedSubViews
           renderedSubView.close()

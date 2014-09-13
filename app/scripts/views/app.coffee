@@ -1,6 +1,4 @@
 define [
-  'jquery'
-  'lodash'
   'backbone'
   './../templates'
   './base'
@@ -15,7 +13,7 @@ define [
   './../models/application-settings'
   './../models/form'
   './../collections/forms'
-], ($, _, Backbone, JST, BaseView, MainMenuView, ProgressWidgetView,
+], (Backbone, JST, BaseView, MainMenuView, ProgressWidgetView,
   NotifierView, LoginDialogView, ApplicationSettingsView, PagesView,
   FormAddView, FormsView, ApplicationSettingsModel, FormModel,
   FormsCollection) ->
@@ -23,22 +21,26 @@ define [
   # App View
   # --------
   #
-  # This is the spine of the application. There is only one of these and it
-  # controls the creation and rendering of all of the subviews that control
-  # the content in the body of the page.
+  # This is the spine of the application. Only one AppView object is created
+  # and it controls the creation and rendering of all of the subviews that
+  # control the content in the body of the page.
 
   class AppView extends BaseView
 
     template: JST['app/scripts/templates/app.ejs']
     el: '#dative-client-app'
 
-    initialize: ->
+    initialize: (options) ->
 
-      @applicationSettings = new ApplicationSettingsModel()
-      @applicationSettings.fetch()
+      # Allowing an app settings model in the options facilitates testing.
+      if options?.applicationSettings
+        @applicationSettings = options.applicationSettings
+      else
+        @applicationSettings = new ApplicationSettingsModel()
+        @applicationSettings.fetch()
 
-      @mainMenuView = new MainMenuView(model: @applicationSettings)
-      @loginDialog = new LoginDialogView(model: @applicationSettings)
+      @mainMenuView = new MainMenuView model: @applicationSettings
+      @loginDialog = new LoginDialogView model: @applicationSettings
       @progressWidget = new ProgressWidgetView()
       @notifier = new NotifierView()
 
@@ -46,17 +48,21 @@ define [
       @listenTo @mainMenuView, 'request:formAdd', @showFormAddView
       @listenTo @mainMenuView, 'request:formsBrowse', @showFormsView
       @listenTo @mainMenuView, 'request:openLoginDialogBox', @toggleLoginDialog
-      @listenTo @mainMenuView, 'request:applicationSettings', @showApplicationSettingsView
+      @listenTo @mainMenuView, 'request:applicationSettings',
+        @showApplicationSettingsView
 
       @render()
 
     render: ->
-
       @$el.html @template()
-      @mainMenuView.setElement('#mainmenu').render()
-      @loginDialog.setElement('body').render()
-      @progressWidget.setElement('#progress-widget-container').render()
-      @notifier.setElement '#notifier-container'
+      @mainMenuView.setElement(@$('#mainmenu')).render()
+      @loginDialog.setElement(@$('#login-dialog-container')).render()
+      @progressWidget.setElement(@$('#progress-widget-container')).render()
+      @notifier.setElement @$('#notifier-container')
+      @rendered @mainMenuView
+      @rendered @loginDialog
+      @rendered @progressWidget
+      @rendered @notifier # Notifier self-renders but we register it as rendered anyways so that we can clean up after it if `.close` is ever called
 
       @matchWindowDimensions()
 
@@ -70,8 +76,9 @@ define [
     # its focused element so that it can be returned to a past state.
     _rememberFocusedElement: ->
       focusedElement = $(document.activeElement)
+      #focusedElement = @$ ':focus'
       if focusedElement
-        focusedElementId = focusedElement.attr('id')
+        focusedElementId = focusedElement.attr 'id'
         if focusedElementId
           @_visibleView?.focusedElementId = focusedElementId
         else if /ms-list/.test focusedElement.attr('class')
@@ -115,7 +122,7 @@ define [
       @_renderVisibleView()
 
     _renderVisibleView: ->
-      @_visibleView.setElement '#appview'
+      @_visibleView.setElement @$('#appview')
       @_visibleView.render()
       @rendered @_visibleView
 
