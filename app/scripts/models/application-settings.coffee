@@ -17,7 +17,7 @@ define [
     save: (attributes, options) ->
       urlChanged = false
       if attributes
-        if attributes.serverURL isnt @get 'sererURL' or
+        if attributes.serverURL isnt @get 'serverURL' or
         attributes.serverPort isnt @get 'serverPort'
           urlChanged = true
         @set attributes
@@ -103,7 +103,7 @@ define [
     getURL: ->
       serverURL = @get 'serverURL'
       serverPort = @get 'serverPort'
-      url = "#{serverURL}#{serverPort and ':' + serverPort or ''}/"
+      url = "http://#{serverURL}#{serverPort and ':' + serverPort or ''}/"
 
     # Check if we are already logged in by requesting the speakers collection.
     # (NOTE: this is an OLD-specific, somewhat arbitrary means of testing for
@@ -114,7 +114,7 @@ define [
       url = @get 'serverURL'
       port = @get 'serverPort'
       @cors(
-        url: "#{url}#{port and ':' + port or ''}/speakers"
+        url: "http://#{url}#{port and ':' + port or ''}/speakers"
         timeout: 3000
         onload: (responseJSON) =>
           Backbone.trigger 'longTask:deregister', taskId

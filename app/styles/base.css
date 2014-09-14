@@ -238,7 +238,7 @@ ul.fieldset select[name="speaker"],
 ul.fieldset select[name="elicitor"],
 ul.fieldset select[name="verifier"],
 ul.fieldset select[name="source"],
-div.input-display {
+div.dative-display {
     border-style: solid;
     border-width: 1px;
     padding: 7px 10px 5px 10px;
@@ -251,7 +251,7 @@ div.input-display {
     -khtml-border-radius: 6px;
     border-radius: 6px;
 }
-div.input-display {
+div.dative-display {
   display: inline-block;
 }
 ul.fieldset textarea,
@@ -271,7 +271,7 @@ ul.fieldset input[type="password"] {
 }
 ul.fieldset textarea,
 form.applicationSettingsForm input,
-div.input-display {
+div.dative-display {
     width: 526px;
     max-width: 526px;
     min-width: 526px;

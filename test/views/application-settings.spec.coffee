@@ -87,6 +87,19 @@ define (require) ->
         # `save` calls `view`
         expect(@appSetView.view.callCount).to.equal 6
 
+      it 'listens to its model', ->
+        expect(@appSetView.edit).not.to.have.been.called
+        expect(@appSetView.view).to.have.been.calledOnce
+        expect(@appSetView.save).not.to.have.been.called
+        expect(@appSetView._keyboardControl)
+          .not.to.have.been.called
+        @appSetView.model.set 'serverURL', 'www.google.ca'
+        expect(@appSetView.edit).not.to.have.been.called
+        expect(@appSetView.view).to.have.been.calledTwice
+        expect(@appSetView.save).not.to.have.been.called
+        expect(@appSetView._keyboardControl)
+          .not.to.have.been.called
+
       it 'listens to DOM events', ->
         expect(@appSetView.edit).not.to.have.been.called
         expect(@appSetView.view).to.have.been.calledOnce
@@ -94,12 +107,38 @@ define (require) ->
         expect(@appSetView._keyboardControl)
           .not.to.have.been.called
 
-        @appSetView.edit()
-        @appSetView.$('.view').click()
+        @appSetView.$('.edit').click()
+        expect(@appSetView.edit).to.have.been.calledOnce
+        expect(@appSetView.view).to.have.been.calledOnce
+        expect(@appSetView.save).not.to.have.been.called
+        expect(@appSetView._keyboardControl)
+          .not.to.have.been.called
 
+        @appSetView.$('.view').click()
         expect(@appSetView.edit).to.have.been.calledOnce
         expect(@appSetView.view).to.have.been.calledTwice
         expect(@appSetView.save).not.to.have.been.called
+        expect(@appSetView._keyboardControl)
+          .not.to.have.been.called
+
+        @appSetView.$('.edit').click()
+        expect(@appSetView.edit).to.have.been.calledTwice
+        expect(@appSetView.view).to.have.been.calledTwice
+        expect(@appSetView.save).not.to.have.been.called
+        expect(@appSetView._keyboardControl)
+          .not.to.have.been.called
+
+        @appSetView.$('.save').click()
+        expect(@appSetView.edit).to.have.been.calledTwice
+        expect(@appSetView.view).to.have.been.calledThrice
+        expect(@appSetView.save).to.have.been.calledOnce
+        expect(@appSetView._keyboardControl)
+          .not.to.have.been.called
+
+        @appSetView.$('.dative-display').click()
+        expect(@appSetView.edit).to.have.been.calledThrice
+        expect(@appSetView.view).to.have.been.calledThrice
+        expect(@appSetView.save).to.have.been.calledOnce
         expect(@appSetView._keyboardControl)
           .not.to.have.been.called
 
@@ -113,7 +152,7 @@ define (require) ->
         expect(@appSetView._keyboardControl).not.to.have.been.called
         keydownEvent = fixtures.window().$.Event 'keydown'
         keydownEvent.which = 95 # *not* a shortcut key
-        @appSetView.$('.input-display').eq(0).trigger keydownEvent
+        @appSetView.$('.dative-display').eq(0).trigger keydownEvent
         expect(@appSetView._keyboardControl).to.have.been.calledOnce
         expect(@appSetView.edit.callCount).to.equal editCountInit
         expect(@appSetView.view.callCount).to.equal viewCountInit
@@ -122,7 +161,7 @@ define (require) ->
         # Pressing <Esc> in view mode does nothing
         keydownEvent.which = 27
         #@appSetView.$('#serverURL').trigger keydownEvent
-        @appSetView.$('.input-display').eq(0).trigger keydownEvent
+        @appSetView.$('.dative-display').eq(0).trigger keydownEvent
         expect(@appSetView._keyboardControl).to.have.been.calledTwice
         expect(@appSetView.edit.callCount).to.equal editCountInit
         expect(@appSetView.view.callCount).to.equal viewCountInit
@@ -151,7 +190,7 @@ define (require) ->
         # Pressing <Enter> in view mode on a data display item brings us to
         # edit mode
         #@appSetView.$('#serverURL').trigger keydownEvent
-        @appSetView.$('.input-display').eq(0).trigger keydownEvent
+        @appSetView.$('.dative-display').eq(0).trigger keydownEvent
         expect(@appSetView._keyboardControl.callCount).to.equal 4
         expect(@appSetView.edit.callCount).to.equal editCountInit + 1
         expect(@appSetView.view.callCount).to.equal viewCountInit

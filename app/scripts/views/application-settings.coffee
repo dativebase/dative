@@ -16,12 +16,13 @@ define [
     template: JST['app/scripts/templates/application-settings-header.ejs']
 
     events:
-      'click .input-display': 'edit'
-      'click button.edit': 'edit'
-      'click button.save': 'save'
-      'click button.view': 'view'
+      'click .dative-display': 'clickEdit'
+      'click button.edit': 'clickEdit'
+      'click button.save': 'clickSave'
+      'click button.view': 'clickView'
       'keydown .dative-input': '_keyboardControl'
-      'keydown .input-display': '_keyboardControl'
+      'keydown .dative-display': '_keyboardControl'
+      'keydown button': '_keyboardControl'
 
     initialize: ->
       @displayView = new ApplicationSettingsDisplayView model: @model
@@ -36,8 +37,6 @@ define [
       @displayView.setElement @$('#dative-page-body')
       @editView.setElement @$('#dative-page-body')
       @view()
-      @_guify()
-      @_viewButtons()
 
     # Render display view, close edit view
     view: ->
@@ -45,24 +44,41 @@ define [
       @closed @editView
       @displayView.render()
       @rendered @displayView
+      @_guify()
       @_viewButtons()
       @_setFocus 'view'
 
+    clickView: (event) ->
+      event.preventDefault()
+      event.stopPropagation()
+      @view()
+
     # Render edit view, close display view
-    edit: (event) ->
-      @_rememberClickedElement()
+    edit: ->
       @displayView.close()
       @closed @displayView
       @editView.render()
       @rendered @editView
+      @_guify()
       @_editButtons()
       @_setFocus 'edit'
 
+    clickEdit: (event) ->
+      @_rememberTarget event
+      event.preventDefault()
+      event.stopPropagation()
+      @edit()
+
     # Save to localStorage, render display view
-    save: (event) ->
+    save: ->
       applicationSettingsObject = @_getModelObjectFromForm()
       @model.save applicationSettingsObject
       @view()
+
+    clickSave: (event) ->
+      event.preventDefault()
+      event.stopPropagation()
+      @save()
 
     # Extract data in the inputs of the HTML "Add a Form" form and
     # convert them to an object
@@ -83,12 +99,12 @@ define [
       @$('button.save').hide()
 
     _keyboardControl: (event) ->
-      console.log "in kb contr with #{event.which}"
+      @_rememberTarget event
       # <Esc> on input field calls `view`
       if event.which is 27
         try
-          class_ = $(event.target).attr 'class'
-          if /dative-input/.test class_
+          classes = $(event.target).attr('class').split /\s+/
+          if 'dative-input' in classes
             event.stopPropagation()
             @view()
         catch error
@@ -97,33 +113,43 @@ define [
         event.preventDefault()
         event.stopPropagation()
         try
-          class_ = $(event.target).attr 'class'
-          if /input-display/.test class_
-            event.preventDefault()
-            event.stopPropagation()
+          classes = $(event.target).attr('class').split /\s+/
+          if 'dative-display' in classes
             @edit()
-          else if /dative-input/.test class_
+          else if 'dative-input' in classes
+            @save()
+          else if 'view' in classes
+            @view()
+          else if 'edit' in classes
+            @edit()
+          else if 'save' in classes
             @save()
 
-    _rememberClickedElement: ->
+    _guify: ->
+      @$('button').button().attr('tabindex', '1')
+      @$('select, input, textarea, div.dative-display')
+        .css("border-color", ApplicationSettingsView.jQueryUIColors.defBo)
+        .attr('tabindex', '1')
+      @$('div.dative-display')
+        .mouseover(-> $(@).addClass('ui-state-hover').addClass('ui-state-active'))
+        .focus(-> $(@).addClass('ui-state-hover').addClass('ui-state-active'))
+        .mouseout(-> $(@).removeClass('ui-state-hover').removeClass('ui-state-active'))
+        .blur(-> $(@).removeClass('ui-state-hover').removeClass('ui-state-active'))
+
+    _rememberTarget: (event) ->
       try
-        @$('ul.fieldset li').each (index, el) =>
-          if $.contains el, event.target
+        @$('.dative-input-display').each (index, el) =>
+          if el is event.target
             @focusedElementIndex = index
 
-    _guify: ->
-      @$('button.edit').button()
-      @$('button.view').button()
-      @$('button.save').button()
-
     _setFocus: (viewType) ->
-      if @focusedElementIndex
-        @$('ul.fieldset li').eq(@focusedElementIndex).find('input')
-          .first().focus().select()
+      if @focusedElementIndex?
+        nthElement = @$('.dative-input-display').eq @focusedElementIndex
+        nthElement.focus().select()
       else
         if viewType is 'view'
           @$('button.edit').first().focus()
         else if viewType is 'edit'
-          @$('input').first().focus()
+          @$('input').first().focus().select()
 
 
