@@ -10,23 +10,17 @@ define [
   #
   # The application settings are persisted *very simply* using HTML's
   # localStorage. (Got frustrated with Backbone.LocalStorage, and, anyways,
-  # the overhead seems unnecessary.
+  # the overhead seems unnecessary.)
 
   class ApplicationSettingsModel extends BaseModel
 
-    save: (attributes, options) ->
-      urlChanged = false
-      if attributes
-        if attributes.serverURL isnt @get 'serverURL' or
-        attributes.serverPort isnt @get 'serverPort'
-          urlChanged = true
-        @set attributes
-      else
-        attributes = @attributes
-      if urlChanged
+    save: ->
+      localStorage.setItem 'dativeApplicationSettings',
+        JSON.stringify(@attributes)
+
+    urlChanged: ->
+      if 'serverURL' of @changed or 'serverPort' of @changed
         @checkIfLoggedIn()
-        attributes.loggedIn = @get 'loggedIn'
-      localStorage.dativeApplicationSettings = JSON.stringify attributes
 
     fetch: ->
       if localStorage.dativeApplicationSettings
@@ -35,17 +29,14 @@ define [
     constructor: ->
       @listenTo Backbone, 'authenticate:login', @authenticate
       @listenTo Backbone, 'authenticate:logout', @logout
+      @on 'change', @urlChanged
       if not Modernizr.localstorage
         throw new Error 'localStorage unavailable in this browser, please upgrade.'
-      BaseModel.apply @, arguments
-      #@set 'loggedIn', @checkIfLoggedIn()
-      @checkIfLoggedIn()
+      super
 
     # Attempt to authenticate with the passed-in credentials
     # TODO: encapsulate the LingSync authentication request.
     authenticate: (username, password) ->
-      console.log 'AUTHENTICATE CLALED'
-
       taskId = @guid()
       Backbone.trigger 'longTask:register', 'authenticating', taskId
       @cors(
@@ -54,7 +45,6 @@ define [
         timeout: 3000
         payload: username: username, password: password
         onload: (responseJSON) =>
-          console.log 'onload callback called'
           Backbone.trigger 'longTask:deregister', taskId
           Backbone.trigger 'authenticate:end'
           if responseJSON.authenticated
@@ -63,19 +53,16 @@ define [
           else
             Backbone.trigger 'authenticate:fail', responseJSON
         onerror: (responseJSON) ->
-          console.log 'onerror callback called'
           Backbone.trigger 'authenticate:fail', responseJSON
           Backbone.trigger 'longTask:deregister', taskId
           Backbone.trigger 'authenticate:end'
         ontimeout: ->
-          console.log 'ontimeout callback called'
           Backbone.trigger 'authenticate:fail', error: 'Request timed out'
           Backbone.trigger 'longTask:deregister', taskId
           Backbone.trigger 'authenticate:end'
       )
 
     logout: ->
-
       taskId = @guid()
       Backbone.trigger 'longTask:register', 'logout', taskId
       @cors(
@@ -103,7 +90,7 @@ define [
     getURL: ->
       serverURL = @get 'serverURL'
       serverPort = @get 'serverPort'
-      url = "http://#{serverURL}#{serverPort and ':' + serverPort or ''}/"
+      url = "#{serverURL}#{serverPort and ':' + serverPort or ''}/"
 
     # Check if we are already logged in by requesting the speakers collection.
     # (NOTE: this is an OLD-specific, somewhat arbitrary means of testing for
@@ -114,7 +101,7 @@ define [
       url = @get 'serverURL'
       port = @get 'serverPort'
       @cors(
-        url: "http://#{url}#{port and ':' + port or ''}/speakers"
+        url: "#{url}#{port and ':' + port or ''}/speakers"
         timeout: 3000
         onload: (responseJSON) =>
           Backbone.trigger 'longTask:deregister', taskId

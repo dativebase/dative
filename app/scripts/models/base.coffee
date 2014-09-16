@@ -15,14 +15,11 @@ define [
 
     cors: (options={}) ->
       try
-        console.log 'trying a cool cors lite'
         @_cors options
       catch error
-        console.log 'cught errorz'
         if options.onerror
           options.onerror error: error
         else
-          console.log "Error requesting #{options.method} #{options.url}."
           console.log error
 
     # Perform a CORS request, sending JSON to and receiving JSON from a RESTful
@@ -30,7 +27,6 @@ define [
     _cors: (options={}) ->
 
       url = options.url or throw new Error 'A URL is required for CORS requests'
-      console.log "url is #{url}"
       method = options.method or 'GET'
       timeout = options.timeout or undefined
       payload = JSON.stringify(options.payload) or "{}"
@@ -38,15 +34,11 @@ define [
       [onload, onerror, onloadstart, onabort, onprogress, ontimeout,
       onloadend] =  @_getHandlers options, method, url
 
-      console.log 'about to get XHR'
       xhr = @_getXHR url, method
-      console.log 'got XHR'
       if timeout then xhr.timeout = timeout
 
       xhr.withCredentials = true
-      console.log 'about to send payload'
       xhr.send(payload)
-      console.log 'payload sent'
 
       xhr.onload = onload
       xhr.onerror = onerror
@@ -61,7 +53,6 @@ define [
     # From http://www.html5rocks.com/en/tutorials/cors/
     _getXHR: (url, method) ->
 
-      console.log "url in _getXHR is #{url}"
       xhr = new XMLHttpRequest()
       # Check if the XMLHttpRequest object has a "withCredentials" property.
       # "withCredentials" only exists on XMLHTTPRequest2 objects.

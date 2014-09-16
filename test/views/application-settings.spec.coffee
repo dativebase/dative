@@ -67,6 +67,7 @@ define (require) ->
       ApplicationSettingsView::.view.restore()
       ApplicationSettingsView::.save.restore()
       ApplicationSettingsView::._keyboardControl.restore()
+      ApplicationSettingsModel::._checkIfLoggedIn.restore()
 
     describe 'Event responsivity', ->
 
@@ -84,8 +85,8 @@ define (require) ->
 
         expect(@appSetView.edit).to.have.been.calledOnce
         expect(@appSetView.save).to.have.been.calledThrice
-        # `save` calls `view`
-        expect(@appSetView.view.callCount).to.equal 6
+        # `save` only calls `view` if the model has changed
+        expect(@appSetView.view).to.have.been.calledThrice
 
       it 'listens to its model', ->
         expect(@appSetView.edit).not.to.have.been.called
@@ -121,23 +122,23 @@ define (require) ->
         expect(@appSetView._keyboardControl)
           .not.to.have.been.called
 
-        @appSetView.$('.edit').click()
+        @appSetView.$('.edit').first().click()
         expect(@appSetView.edit).to.have.been.calledTwice
         expect(@appSetView.view).to.have.been.calledTwice
         expect(@appSetView.save).not.to.have.been.called
         expect(@appSetView._keyboardControl)
           .not.to.have.been.called
 
-        @appSetView.$('.save').click()
+        @appSetView.$('.save').first().click()
         expect(@appSetView.edit).to.have.been.calledTwice
-        expect(@appSetView.view).to.have.been.calledThrice
+        expect(@appSetView.view).to.have.been.calledTwice
         expect(@appSetView.save).to.have.been.calledOnce
         expect(@appSetView._keyboardControl)
           .not.to.have.been.called
 
-        @appSetView.$('.dative-display').click()
+        @appSetView.$('.dative-display').first().click()
         expect(@appSetView.edit).to.have.been.calledThrice
-        expect(@appSetView.view).to.have.been.calledThrice
+        expect(@appSetView.view).to.have.been.calledTwice
         expect(@appSetView.save).to.have.been.calledOnce
         expect(@appSetView._keyboardControl)
           .not.to.have.been.called
@@ -160,7 +161,6 @@ define (require) ->
 
         # Pressing <Esc> in view mode does nothing
         keydownEvent.which = 27
-        #@appSetView.$('#serverURL').trigger keydownEvent
         @appSetView.$('.dative-display').eq(0).trigger keydownEvent
         expect(@appSetView._keyboardControl).to.have.been.calledTwice
         expect(@appSetView.edit.callCount).to.equal editCountInit
@@ -169,7 +169,6 @@ define (require) ->
 
         # Pressing <Esc> in edit mode returns us to view mode
         @appSetView.edit()
-        #@appSetView.$('#serverURL').trigger keydownEvent
         @appSetView.$('.dative-input').eq(0).trigger keydownEvent
         expect(@appSetView._keyboardControl).to.have.been.calledThrice
         expect(@appSetView.edit.callCount).to.equal editCountInit + 1
@@ -189,7 +188,6 @@ define (require) ->
 
         # Pressing <Enter> in view mode on a data display item brings us to
         # edit mode
-        #@appSetView.$('#serverURL').trigger keydownEvent
         @appSetView.$('.dative-display').eq(0).trigger keydownEvent
         expect(@appSetView._keyboardControl.callCount).to.equal 4
         expect(@appSetView.edit.callCount).to.equal editCountInit + 1
@@ -199,10 +197,32 @@ define (require) ->
 
         # Pressing <Enter> in edit mode on an input calls `save`, which calls
         # `view`
-        #@appSetView.$('#serverURL').trigger keydownEvent
         @appSetView.$('.dative-input').eq(0).trigger keydownEvent
         expect(@appSetView._keyboardControl.callCount).to.equal 5
         expect(@appSetView.edit.callCount).to.equal editCountInit
-        expect(@appSetView.view.callCount).to.equal viewCountInit + 1
+        expect(@appSetView.view.callCount).to.equal viewCountInit
         expect(@appSetView.save.callCount).to.equal saveCountInit + 1
+
+    describe 'Saves state', ->
+
+      it 'saves form data to its model, triggering events in other views', ->
+
+        editCountInit = @appSetView.edit.callCount
+        viewCountInit = @appSetView.view.callCount
+        saveCountInit = @appSetView.save.callCount
+
+        expect(@appSetView.edit).not.to.have.been.called
+        expect(@appSetView.view).to.have.been.calledOnce
+        expect(@appSetView.save).not.to.have.been.called
+
+        # Go to edit view, change the server url, and click 'Save'
+        @appSetView.edit()
+        @appSetView.$('[name="serverURL"]').val 'http://www.google.com/'
+        @appSetView.$('.save').first().click()
+
+        expect(@appSetView.edit).to.have.been.calledOnce
+        expect(@appSetView.view).to.have.been.calledTwice
+        expect(@appSetView.save).to.have.been.calledOnce
+        expect(@appSetView.$('label[for="serverURL"]').next())
+          .to.have.text 'http://www.google.com/'
 

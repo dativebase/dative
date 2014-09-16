@@ -71,9 +71,13 @@ define [
 
     # Save to localStorage, render display view
     save: ->
+      console.log 'in save'
       applicationSettingsObject = @_getModelObjectFromForm()
+      console.log 'set to begin'
+      @model.once 'change', -> console.log 'model changed, I saved'
+      @model.set applicationSettingsObject
+      console.log 'set done'
       @model.save applicationSettingsObject
-      @view()
 
     clickSave: (event) ->
       event.preventDefault()
@@ -151,5 +155,4 @@ define [
           @$('button.edit').first().focus()
         else if viewType is 'edit'
           @$('input').first().focus().select()
-
 
