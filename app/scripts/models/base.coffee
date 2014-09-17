@@ -100,7 +100,7 @@ define [
     # as JSON as its first argument (and the XHR as its second).
     _jsonify: (callback) ->
       (xhrProgressEvent) ->
-        xhr = xhrProgressEvent.currentTarget
+        xhr = xhrProgressEvent.target # previously had `.currentTarget` ...
         try
           responseJSON = JSON.parse xhr.responseText
         catch error

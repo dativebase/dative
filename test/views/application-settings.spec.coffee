@@ -67,7 +67,6 @@ define (require) ->
       ApplicationSettingsView::.view.restore()
       ApplicationSettingsView::.save.restore()
       ApplicationSettingsView::._keyboardControl.restore()
-      ApplicationSettingsModel::._checkIfLoggedIn.restore()
 
     describe 'Event responsivity', ->
 

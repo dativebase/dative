@@ -43,12 +43,12 @@ require.config
 specs = [
   #'spec/models/form.js' # FAILING
   #'spec/collections/forms.js' # FAILING
-  #'spec/utils/indexeddb-utils.js'
-  #'spec/views/base.js'
-  #'spec/views/app.js'
-  #'spec/views/mainmenu.js'
-  #'spec/views/application-settings.js'
-  #'spec/models/base.js'
+  'spec/utils/indexeddb-utils.js'
+  'spec/views/base.js'
+  'spec/views/app.js'
+  'spec/views/mainmenu.js'
+  'spec/views/application-settings.js'
+  'spec/models/base.js'
   'spec/models/application-settings.js'
 ]
 

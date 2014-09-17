@@ -14,25 +14,25 @@ define [
 
   class ApplicationSettingsModel extends BaseModel
 
+    constructor: ->
+      @listenTo Backbone, 'authenticate:login', @authenticate
+      @listenTo Backbone, 'authenticate:logout', @logout
+      @on 'change', @_urlChanged
+      if not Modernizr.localstorage
+        throw new Error 'localStorage unavailable in this browser, please upgrade.'
+      super
+
     save: ->
       localStorage.setItem 'dativeApplicationSettings',
         JSON.stringify(@attributes)
 
-    urlChanged: ->
-      if 'serverURL' of @changed or 'serverPort' of @changed
-        @checkIfLoggedIn()
-
     fetch: ->
-      if localStorage.dativeApplicationSettings
-        @set JSON.parse(localStorage.dativeApplicationSettings)
+      if localStorage.getItem 'dativeApplicationSettings'
+        @set JSON.parse(localStorage.getItem('dativeApplicationSettings'))
 
-    constructor: ->
-      @listenTo Backbone, 'authenticate:login', @authenticate
-      @listenTo Backbone, 'authenticate:logout', @logout
-      @on 'change', @urlChanged
-      if not Modernizr.localstorage
-        throw new Error 'localStorage unavailable in this browser, please upgrade.'
-      super
+    _urlChanged: ->
+      if @hasChanged('serverURL') or @hasChanged('serverPort')
+        @checkIfLoggedIn()
 
     # Attempt to authenticate with the passed-in credentials
     # TODO: encapsulate the LingSync authentication request.
