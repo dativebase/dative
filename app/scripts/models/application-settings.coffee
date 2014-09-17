@@ -41,7 +41,7 @@ define [
       Backbone.trigger 'longTask:register', 'authenticating', taskId
       @cors(
         method: 'POST'
-        url: "#{@getURL()}login/authenticate"
+        url: "#{@_getURL()}login/authenticate"
         timeout: 3000
         payload: username: username, password: password
         onload: (responseJSON) =>
@@ -62,11 +62,12 @@ define [
           Backbone.trigger 'authenticate:end'
       )
 
+    # TODO: encapsulate the LingSync logout request.
     logout: ->
       taskId = @guid()
       Backbone.trigger 'longTask:register', 'logout', taskId
       @cors(
-        url: "#{@getURL()}login/logout"
+        url: "#{@_getURL()}login/logout"
         timeout: 3000
         onload: (responseJSON) =>
           Backbone.trigger 'authenticate:end'
@@ -87,7 +88,7 @@ define [
       )
 
     # Return our URL by combining serverURL and serverPort, if specified
-    getURL: ->
+    _getURL: ->
       serverURL = @get 'serverURL'
       serverPort = @get 'serverPort'
       url = "#{serverURL}#{serverPort and ':' + serverPort or ''}/"

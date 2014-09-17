@@ -58,14 +58,14 @@ define (require) ->
       it 'assembles a full URL from `serverURL` and `serverPort`', ->
         @appSett.set 'serverURL', 'http://localhost'
         @appSett.set 'serverPort', '8000'
-        expect(@appSett.getURL()).to.equal 'http://localhost:8000/'
+        expect(@appSett._getURL()).to.equal 'http://localhost:8000/'
 
         @appSett.set 'serverURL', 'http://www.google.com'
         @appSett.set 'serverPort', ''
-        expect(@appSett.getURL()).to.equal 'http://www.google.com/'
+        expect(@appSett._getURL()).to.equal 'http://www.google.com/'
 
         @appSett.set 'serverPort', undefined
-        expect(@appSett.getURL()).to.equal 'http://www.google.com/'
+        expect(@appSett._getURL()).to.equal 'http://www.google.com/'
 
     describe 'localStorage behaviour', ->
 
@@ -161,13 +161,11 @@ define (require) ->
         expect(@appSett.get('loggedIn')).to.be.true
 
         # Simulate an unsuccessful request
-        # NOTE: this is an impossible response scenario given the OLD's API:
-        # a failed authentication request will always return 400 or 401 (or 500).
-        # See https://github.com/jrwdunham/old/blob/master/onlinelinguisticdatabase/controllers/login.py
         @appSett.set 'loggedIn', false
-        @appSett.authenticate 'badUsername', 'badPassword'
-        responseText = JSON.stringify authenticated: false
-        @requests[@requests.length - 1].respond 200,
+        @appSett.authenticate 'goodUsername', 'goodPassword'
+        responseText = JSON.stringify
+          error: 'The username and password provided are not valid.'
+        @requests[@requests.length - 1].respond 401,
           {"Content-Type": "application/json"},
           responseText
         # All relevant events are fired except SUCCESS
@@ -176,22 +174,6 @@ define (require) ->
         expect(authenticateEndSpy).to.have.been.calledTwice
         expect(authenticateSuccessSpy).to.have.been.calledOnce
         expect(authenticateFailSpy).to.have.been.calledOnce
-        expect(@appSett.get('username')).to.equal 'goodUsername' # stays unchanged
-        expect(@appSett.get('loggedIn')).to.be.false
-
-        # Simulate an error response
-        @appSett.authenticate 'goodUsername', 'goodPassword'
-        responseText = JSON.stringify
-          error: 'The username and password provided are not valid.'
-        @requests[@requests.length - 1].respond 401,
-          {"Content-Type": "application/json"},
-          responseText
-        # All relevant events are fired except SUCCESS
-        expect(longTaskRegisterSpy).to.have.been.calledThrice
-        expect(longTaskDeregisterSpy).to.have.been.calledThrice
-        expect(authenticateEndSpy).to.have.been.calledThrice
-        expect(authenticateSuccessSpy).to.have.been.calledOnce
-        expect(authenticateFailSpy).to.have.been.calledTwice
         expect(@appSett.get('username')).to.equal 'goodUsername' # stays unchanged
         expect(@appSett.get('loggedIn')).to.be.false
 

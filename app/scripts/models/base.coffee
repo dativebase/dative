@@ -1,8 +1,7 @@
 define [
-  'underscore'
   'backbone'
   './../utils/utils'
-], (_, Backbone, utils) ->
+], (Backbone, utils) ->
 
   # Base Model
   # ----------
@@ -52,7 +51,6 @@ define [
     # Return a new XHR (cross-browser-wise)
     # From http://www.html5rocks.com/en/tutorials/cors/
     _getXHR: (url, method) ->
-
       xhr = new XMLHttpRequest()
       # Check if the XMLHttpRequest object has a "withCredentials" property.
       # "withCredentials" only exists on XMLHTTPRequest2 objects.
@@ -73,7 +71,6 @@ define [
     # of the handlers so that they receive an object representation of the
     # response body.
     _getHandlers: (options, method, url) ->
-
       onload = @_jsonify(options.onload or ->
         console.log "Successful request to #{method} #{url}.") if @vocal
       onerror = @_jsonify(options.onerror or ->

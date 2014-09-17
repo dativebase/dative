@@ -71,12 +71,8 @@ define [
 
     # Save to localStorage, render display view
     save: ->
-      console.log 'in save'
       applicationSettingsObject = @_getModelObjectFromForm()
-      console.log 'set to begin'
-      @model.once 'change', -> console.log 'model changed, I saved'
       @model.set applicationSettingsObject
-      console.log 'set done'
       @model.save applicationSettingsObject
 
     clickSave: (event) ->
