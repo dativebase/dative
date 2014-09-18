@@ -70,6 +70,7 @@ define [
     matchWindowDimensions: ->
       @$('#appview').css height: $(window).height() - 50
       $(window).resize =>
+        console.log 'window resize in AppView'
         @$('#appview').css height: $(window).height() - 50
 
     # When a view closes, it's good to be able to keep track of

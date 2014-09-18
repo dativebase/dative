@@ -1,16 +1,16 @@
 define [
   'backbone'
-  './basepage'
+  './base'
   './../models/form'
   'multiselect'
   'jqueryelastic'
-], (Backbone, BasePageView, FormModel) ->
+], (Backbone, BaseView, FormModel) ->
 
   # Form Add View
   # --------------
 
   # The DOM element for adding a new form
-  class FormAddView extends BasePageView
+  class FormAddView extends BaseView
 
     template: JST['app/scripts/templates/form-add.ejs']
 

@@ -68,3 +68,25 @@ define [
 
     utils: utils
 
+    # Cause #dative-page-header to maintain a constant height relative to the
+    # window height.
+    matchHeights: ->
+      pageBody = @$ '#dative-page-body'
+      parent = @$(pageBody).parent()
+      pageHeader = @$ '#dative-page-header'
+      marginTop = parseInt pageBody.css('margin-top')
+      marginBottom = parseInt pageBody.css('margin-bottom')
+      @_matchHeights pageBody, parent, pageHeader, marginTop, marginBottom
+      $(window).resize =>
+        @_matchHeights pageBody, parent, pageHeader, marginTop, marginBottom
+
+    _matchHeights: (pageBody, parent, pageHeader, marginTop, marginBottom) ->
+      newHeight = parent.innerHeight() - pageHeader.outerHeight() - marginTop -
+        marginBottom
+      pageBody.css 'height', newHeight
+      if @_hasVerticalScrollBar pageBody then pageBody.css 'padding-right', 10
+
+    # Return true if element has a vertical scrollbar
+    _hasVerticalScrollBar: (el) ->
+      if el.clientHeight < el.scrollHeight then true else false
+

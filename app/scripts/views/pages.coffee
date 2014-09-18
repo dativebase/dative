@@ -3,15 +3,17 @@ define [
   'lodash',
   'backbone',
   './../collections/pages',
-  './basepage',
+  './base',
   './page'
-], ($, _, Backbone, pagesCollection, BasePageView, PageView) ->
+], ($, _, Backbone, pagesCollection, BaseView, PageView) ->
 
   # Pages View
   # --------------
 
   # The DOM element for summarizing the pages of a Dative app
-  class PagesView extends BasePageView
+  class PagesView extends BaseView
+
+    template: JST['app/scripts/templates/basepage.ejs']
 
     pagesCollection: pagesCollection
 
@@ -28,7 +30,7 @@ define [
     # Append a single page item to the #dative-page-body div of the pages view.
     addOne: (pageModel) ->
       pageView = new PageView(model: pageModel)
-      $('#dative-page-body').append pageView.render().el
+      @$('#dative-page-body').append pageView.render().el
 
     # Add all items in **pagesCollection** at once.
     addAll: ->

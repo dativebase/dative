@@ -1,20 +1,18 @@
 define [
-  'jquery'
-  'lodash'
   'backbone'
   './../utils/utils'
-  './basepage'
+  './base'
   './form'
-], ($, _, Backbone, utils, BasePageView, FormView) ->
+], (Backbone, utils, BaseView, FormView) ->
 
   # Forms View
   # -----------
   #
   # Displays a list of forms.
 
-  class FormsView extends BasePageView
+  class FormsView extends BaseView
 
-    template: JST['app/scripts/templates/forms.ejs']
+    template: JST['app/scripts/templates/basepage.ejs']
 
     initialize: ->
       #@collection.fetch()
