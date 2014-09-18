@@ -48,6 +48,7 @@ specs = [
   'spec/views/app.js'
   'spec/views/mainmenu.js'
   'spec/views/application-settings.js'
+  'spec/views/login-dialog.js'
   'spec/models/base.js'
   'spec/models/application-settings.js'
 ]

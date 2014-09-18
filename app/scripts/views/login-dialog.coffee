@@ -1,10 +1,8 @@
 define [
-  'jquery'
-  'lodash'
   'backbone'
   './../templates'
   './base'
-], ($, _, Backbone, JST, BaseView) ->
+], (Backbone, JST, BaseView) ->
 
   # LoginDialogView
   # ---------------
@@ -24,25 +22,38 @@ define [
       @listenTo Backbone, 'loginDialog:toggle', @toggle
       @listenTo @model, 'change:loggedIn', @disableButtons
 
+    events:
+      'keyup .dative-login-dialog-widget .username': 'validate'
+      'keydown .dative-login-dialog-widget .username': 'submitWithEnter'
+      'keyup .dative-login-dialog-widget .password': 'validate'
+      'keydown .dative-login-dialog-widget .password': 'submitWithEnter'
+
+    render: ->
+      @$el.append @template(@model.attributes)
+      @$source = @$ '.dative-login-dialog' # outer DIV from template
+      @$target = @$ '.dative-login-dialog-target' # outer DIV to which jQueryUI dialog appends
+      @_dialogify()
+      @disableButtons()
+
     disableButtons: ->
       if @model.get 'loggedIn'
-        $('.dative-login-dialog-widget .login').button 'disable'
-        $('.dative-login-dialog-widget .logout').button('enable').focus()
-        $('.dative-login-dialog-widget .forgot-password').button 'disable'
-        $('.dative-login-dialog-widget .username').attr 'disabled', true
-        $('.dative-login-dialog-widget .password').attr 'disabled', true
+        @$target.find('.login').button('disable').end()
+          .find('.logout').button('enable').focus().end()
+          .find('.forgot-password').button('disable').end()
+          .find('.username').attr('disabled', true).end()
+          .find('.password').attr('disabled', true)
       else
-        $('.dative-login-dialog-widget .login').button 'enable'
-        $('.dative-login-dialog-widget .logout').button 'disable'
-        $('.dative-login-dialog-widget .forgot-password').button 'enable'
-        $('.dative-login-dialog-widget .username').removeAttr 'disabled'
-        $('.dative-login-dialog-widget .password').removeAttr 'disabled'
+        @$target.find('.login').button('enable').end()
+          .find('.logout').button('disable').end()
+          .find('.forgot-password').button('enable').end()
+          .find('.username').removeAttr('disabled').end()
+          .find('.password').removeAttr('disabled').end()
         if @model.get 'username'
-          $('.dative-login-dialog-widget .password').focus()
+          @$target.find('.password').focus()
         else
-          $('.dative-login-dialog-widget .username').focus()
+          @$target.find('.username').focus()
       if @model.get 'username'
-        $('.dative-login-dialog-widget .username').val @model.get 'username'
+        @$target.find('.username').val @model.get('username')
 
     # OLD server responds with validation errors as well as authentication
     # errors. Authentication form should handle as much validation as possible,
@@ -50,106 +61,67 @@ define [
     authenticateFail: (failObject) ->
 
     authenticateSuccess: ->
-      @close()
+      @dialogClose()
 
     authenticateEnd: ->
       @disableButtons()
 
-    events:
-      #'click #dative-login-request-button': 'login'
-      'keyup .dative-login-dialog-widget .username': 'validate'
-      'keydown .dative-login-dialog-widget .username': 'loginWithEnter'
-      'keyup .dative-login-dialog-widget .password': 'validate'
-      'keydown .dative-login-dialog-widget .password': 'loginWithEnter'
-
-    render: ->
-      @$el.append @template(@model.attributes)
-      @_dialogify()
-      @disableButtons()
-
     # Transform the login dialog HTML to a jQueryUI dialog box.
     _dialogify: ->
-
-      $('.dative-login-dialog input').css('border-color',
+      @$source.find('input').css('border-color',
         LoginDialogView.jQueryUIColors.defBo)
-      $('.dative-login-dialog').dialog(
+      @$source.dialog
         buttons: [
             text: 'Forgot password'
-            click: @openForgotPasswordDialogBox
-            #id: 'forgot-password'
+            click: => @openForgotPasswordDialogBox
             class: 'forgot-password'
           ,
             text: 'Logout'
-            click: =>
-              @logout()
-            #id: 'logout'
+            click: => @logout()
             class: 'logout'
           ,
             text: 'Login'
-            click: =>
-              @login()
-            #id: 'login'
+            click: => @login()
             class: 'login'
         ]
         dialogClass: 'dative-login-dialog-widget'
         title: 'Login'
         width: 400
         open: =>
+          self = this
           @submitAttempted = false
-          $('.dative-login-dialog-widget button').each(->
-            $(this).attr('tabindex', 1))
-          $('.dative-login-dialog-widget span.dative-login-failed').text('').hide()
+          @$target.find('button').each(->
+            self.$(this).attr('tabindex', 1))
+          @$target.find('span.dative-login-failed').text('').hide()
         beforeClose: =>
           @submitAttempted = false
-          @cleanUpLoginDialogBox(clearFields: true, removeFocus: true)
+          @_clean()
         autoOpen: false
-      )
+        appendTo: @$target
 
-      $('.dative-login-dialog-widget').find('.username, .password')
-        .keyup(=> @validate())
-        .keydown((event) => @loginWithEnter(event))
-
-      @wrappedDialogBox = $('.dative-login-dialog')
-
-    loginWithEnter: (event) ->
+    submitWithEnter: (event) ->
       if event.which is 13
         event.stopPropagation()
-        disabled = $(".dative-login-dialog-widget .login" ).button 'option', 'disabled'
+        disabled = @$target.find('.login' ).button 'option', 'disabled'
         if not disabled
-          $('.dative-login-dialog-widget .login').click()
+          @$target.find('.login').click()
 
-    open: ->
-      @wrappedDialogBox.dialog 'open'
+    dialogOpen: ->
+      @$source.dialog 'open'
       @disableButtons()
 
-    close: ->
-      @wrappedDialogBox.dialog 'close'
+    dialogClose: ->
+      @$source.dialog 'close'
 
     isOpen: ->
-      @wrappedDialogBox.dialog 'isOpen'
+      @$source.dialog 'isOpen'
 
     # Clean Up Login Dialog Box -- remove validation error widgets, unbind shortcuts
-    cleanUpLoginDialogBox: (options) ->
-
-      options = options or {}
-
-      # Clear the input fields, if requested
-      if options.clearFields
-        $('.dative-login-dialog-widget .password').val ''
-
-      # Remove focus, if requested
-      #if options.removeFocus
-      #$('.dative-login-dialog-widget input').blur()
-
-      # Remove any validation error icons and explain widgets
-      $('.dative-val-err-widget, .dative-explanation').remove()
-
-      # Remove any invalid credentials notifications
-      $('.dative-login-dialog-widget span.dative-login-failed').text('').hide()
-
-      # Restore the default border color of the input fields
-      $('.dative-login-dialog-widget input')
-        .css('border-color', LoginDialogView.jQueryUIColors.defBo)
+    _clean: ->
+      @$target.find('.password').val('').end()
+        .find('.dative-val-err-widget, .dative-explanation').remove().end()
+        .find('span.dative-login-failed').text('').hide().end()
+        .find('input').css('border-color', LoginDialogView.jQueryUIColors.defBo)
 
     # Let ApplicationSettingsModel handle the authentication attempt
     login: ->
@@ -157,30 +129,30 @@ define [
       @submitAttempted = true
       {username, password} = @validate()
       if username and password
-        $('.dative-login-dialog-widget .login').button 'disable'
+        @$target.find('.login').button 'disable'
         Backbone.trigger 'authenticate:login', username, password
 
     # Validate and return field values as object.
     validate: ->
 
       fields =
-        username: $('.dative-login-dialog-widget .username').val() or false
-        password: $('.dative-login-dialog-widget .password').val() or false
+        username: @$target.find('.username').val() or false
+        password: @$target.find('.password').val() or false
       for name, value of fields
-        if value then $("##{name}-error").hide()
+        if value then @$(".#{name}-error").first().hide()
       if @submitAttempted
         for name, value of fields
-          if not value then $("##{name}-error").show().text 'required'
+          if not value then @$(".#{name}-error").first().show().text 'required'
       fields
 
     logout: ->
 
-      $('.dative-login-dialog-widget .logout').button 'disable'
+      @$target.find('.logout').button 'disable'
       Backbone.trigger 'authenticate:logout'
 
     openForgotPasswordDialogBox: ->
       console.log 'You want to display the forgot password dialog.'
 
     toggle: ->
-      if @isOpen() then @close() else @open()
+      if @isOpen() then @dialogClose() else @dialogOpen()
 
