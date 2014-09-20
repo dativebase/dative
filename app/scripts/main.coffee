@@ -41,6 +41,7 @@ require.config
     #betterelastictextarea: '../bower_components/better-elastic-textarea/dist/better-elastic-textarea'
     spin: '../bower_components/spin.js/spin'
     jqueryspin: '../bower_components/spin.js/jquery.spin'
+    perfectscrollbar: '../bower_components/perfect-scrollbar/src/perfect-scrollbar'
 
 require [
     'views/app',

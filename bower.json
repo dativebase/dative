@@ -18,7 +18,8 @@
     "multiselect": "*",
     "jakobmattsson-jquery-elastic": "*",
     "better-elastic-textarea": "*",
-    "spin.js": "*"
+    "spin.js": "*",
+    "perfect-scrollbar": "*"
   },
   "devDependencies": {
     "mocha": "*",

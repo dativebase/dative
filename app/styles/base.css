@@ -24,12 +24,12 @@ div#mainmenu {
 }
 #dative-page-body {
     margin: 10px;
-    overflow-y: auto;
+    overflow: hidden;
+    position: relative;
 }
 .ui-widget {
     font-size: 100%;
 }
-
 .dative-authenticated {
     width: 16px;
     height: 16px;

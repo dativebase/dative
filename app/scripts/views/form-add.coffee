@@ -4,6 +4,7 @@ define [
   './../models/form'
   'multiselect'
   'jqueryelastic'
+  'perfectscrollbar'
 ], (Backbone, BaseView, FormModel) ->
 
   # Form Add View
@@ -116,8 +117,8 @@ define [
         $('select[name="tags"]', context)
           .multiSelect 'select', @model.get('tags')
 
-    # Transform the vanilla HTML into GUI jQueryUI sugar
     _guify: (context) ->
+      @$('#dative-page-body').perfectScrollbar()
       @_enableAddNewTranslationFieldButton context
       selectmenuWidth = 548
       @_gramSelect = $('select.grammaticality', context).selectmenu width: 50
