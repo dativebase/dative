@@ -25,16 +25,16 @@ define (require) ->
 
     afterEach ->
       @checkIfLoggedInStub.reset()
-      ApplicationSettingsModel::.save.reset()
-      ApplicationSettingsModel::.authenticate.reset()
-      ApplicationSettingsModel::.logout.reset()
+      ApplicationSettingsModel::save.reset()
+      ApplicationSettingsModel::authenticate.reset()
+      ApplicationSettingsModel::logout.reset()
 
     after ->
       @xhr.restore()
       @clock.restore()
-      ApplicationSettingsModel::.save.restore()
-      ApplicationSettingsModel::.authenticate.restore()
-      ApplicationSettingsModel::.logout.restore()
+      ApplicationSettingsModel::save.restore()
+      ApplicationSettingsModel::authenticate.restore()
+      ApplicationSettingsModel::logout.restore()
 
     describe 'General behaviour', ->
 

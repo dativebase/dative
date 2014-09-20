@@ -1,11 +1,9 @@
 define [
-  'jquery',
-  'lodash',
   'backbone',
   './../collections/pages',
   './base',
   './page'
-], ($, _, Backbone, pagesCollection, BaseView, PageView) ->
+], (Backbone, pagesCollection, BaseView, PageView) ->
 
   # Pages View
   # --------------

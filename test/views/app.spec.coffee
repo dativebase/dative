@@ -52,21 +52,21 @@ define (require) ->
       @appView.close()
       @appView.remove()
 
-      AppView::.render.reset()
-      AppView::.showPagesView.reset()
-      AppView::.showFormAddView.reset()
-      AppView::.showFormsView.reset()
-      AppView::.toggleLoginDialog.reset()
-      AppView::.showApplicationSettingsView.reset()
+      AppView::render.reset()
+      AppView::showPagesView.reset()
+      AppView::showFormAddView.reset()
+      AppView::showFormsView.reset()
+      AppView::toggleLoginDialog.reset()
+      AppView::showApplicationSettingsView.reset()
 
     after ->
 
-      AppView::.render.restore()
-      AppView::.showPagesView.restore()
-      AppView::.showFormAddView.restore()
-      AppView::.showFormsView.restore()
-      AppView::.toggleLoginDialog.restore()
-      AppView::.showApplicationSettingsView.restore()
+      AppView::render.restore()
+      AppView::showPagesView.restore()
+      AppView::showFormAddView.restore()
+      AppView::showFormsView.restore()
+      AppView::toggleLoginDialog.restore()
+      AppView::showApplicationSettingsView.restore()
 
     describe 'Initialization', ->
 

@@ -55,18 +55,18 @@ define (require) ->
       @appSetView.remove()
 
       # Reset spies
-      ApplicationSettingsView::.edit.reset()
-      ApplicationSettingsView::.view.reset()
-      ApplicationSettingsView::.save.reset()
-      ApplicationSettingsView::._keyboardControl.reset()
+      ApplicationSettingsView::edit.reset()
+      ApplicationSettingsView::view.reset()
+      ApplicationSettingsView::save.reset()
+      ApplicationSettingsView::_keyboardControl.reset()
 
     after ->
 
       # Restore spied-on methods
-      ApplicationSettingsView::.edit.restore()
-      ApplicationSettingsView::.view.restore()
-      ApplicationSettingsView::.save.restore()
-      ApplicationSettingsView::._keyboardControl.restore()
+      ApplicationSettingsView::edit.restore()
+      ApplicationSettingsView::view.restore()
+      ApplicationSettingsView::save.restore()
+      ApplicationSettingsView::_keyboardControl.restore()
 
     describe 'Event responsivity', ->
 

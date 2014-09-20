@@ -180,5 +180,5 @@ define (require) ->
       $('a.dative-authenticated').first().click()
       expect(toggleLoginDialogSpy).to.have.been.calledOnce
       expect(loginDialogToggleEventSpy).to.have.been.calledOnce
-      MainMenuView::.toggleLoginDialog.restore()
+      MainMenuView::toggleLoginDialog.restore()
 

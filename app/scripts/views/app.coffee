@@ -70,7 +70,6 @@ define [
     matchWindowDimensions: ->
       @$('#appview').css height: $(window).height() - 50
       $(window).resize =>
-        console.log 'window resize in AppView'
         @$('#appview').css height: $(window).height() - 50
 
     # When a view closes, it's good to be able to keep track of
@@ -111,7 +110,10 @@ define [
     showFormsView: ->
       @_closeVisibleView()
       if not @_formsView
-        @_formsView = new FormsView(collection: new FormsCollection())
+        console.log 'HAD TO CREATE A NEW FORMS VIEW'
+        @_formsView = new FormsView
+          collection: new FormsCollection()
+          applicationSettings: @applicationSettings
       @_visibleView = @_formsView
       @_renderVisibleView()
 

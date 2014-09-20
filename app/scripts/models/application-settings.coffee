@@ -149,3 +149,5 @@ define [
       # Schema type will become relevant later on ...
       schemaType: "relational" # "relational" or "nosql"
 
+      itemsPerPage: 10
+

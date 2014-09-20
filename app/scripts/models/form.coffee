@@ -38,12 +38,12 @@ define [
       storeName: 'forms'
 
       defaults: =>
-        @oldFormSchema
+        @oldFormSchema()
 
       # OLD 1.0a1 Form schema
       # The comments after each line are the Python/SQLAlchemy column constraints and definitions
       #__tablename__ = "form"
-      oldFormSchema:
+      oldFormSchema: ->
         id: null # integer, primary key
         UUID: null # an implicit primary key (used for versioning)
         transcription: "" # Column(Unicode(255), nullable=False)
@@ -66,14 +66,14 @@ define [
         status: "" # Column(Unicode(40), default=u'tested')  # u'tested' vs. u'requires testing'
 
         # Many-to-one relations
-        elicitor: null # relation('User', primaryjoin='Form.elicitor_id==User.id') elicitor_id: null # Column(Integer, ForeignKey('user.id', ondelete='SET NULL'))
-        enterer: null # relation('User', primaryjoin='Form.enterer_id==User.id') enterer_id: null # Column(Integer, ForeignKey('user.id', ondelete='SET NULL'))
-        modifier: null # relation('User', primaryjoin='Form.modifier_id==User.id') modifier_id: null # Column(Integer, ForeignKey('user.id', ondelete='SET NULL'))
-        verifier: null # relation('User', primaryjoin='Form.verifier_id==User.id') verifier_id: null # Column(Integer, ForeignKey('user.id', ondelete='SET NULL'))
-        speaker: null # relation('Speaker') speaker_id: null # Column(Integer, ForeignKey('speaker.id', ondelete='SET NULL'))
-        elicitation_method: null # relation('ElicitationMethod') elicitationmethod_id: null # Column(Integer, ForeignKey('elicitationmethod.id', ondelete='SET NULL'))
-        syntactic_category: null # relation('SyntacticCategory', backref='forms') syntacticcategory_id: null # Column(Integer, ForeignKey('syntacticcategory.id', ondelete='SET NULL'))
-        source: null # relation('Source') source_id: null # Column(Integer, ForeignKey('source.id', ondelete='SET NULL'))
+        elicitor: @defaultOLDJSONUser # relation('User', primaryjoin='Form.elicitor_id==User.id') elicitor_id: null # Column(Integer, ForeignKey('user.id', ondelete='SET NULL'))
+        enterer: @defaultOLDJSONUser # relation('User', primaryjoin='Form.enterer_id==User.id') enterer_id: null # Column(Integer, ForeignKey('user.id', ondelete='SET NULL'))
+        modifier: @defaultOLDJSONUser # relation('User', primaryjoin='Form.modifier_id==User.id') modifier_id: null # Column(Integer, ForeignKey('user.id', ondelete='SET NULL'))
+        verifier: @defaultOLDJSONUser # relation('User', primaryjoin='Form.verifier_id==User.id') verifier_id: null # Column(Integer, ForeignKey('user.id', ondelete='SET NULL'))
+        speaker: @defaultOLDJSONSpeaker # relation('Speaker') speaker_id: null # Column(Integer, ForeignKey('speaker.id', ondelete='SET NULL'))
+        elicitation_method: @defaultOLDJSONElicitationMethod# relation('ElicitationMethod') elicitationmethod_id: null # Column(Integer, ForeignKey('elicitationmethod.id', ondelete='SET NULL'))
+        syntactic_category: @defaultOLDJSONSyntacticCategory() # relation('SyntacticCategory', backref='forms') syntacticcategory_id: null # Column(Integer, ForeignKey('syntacticcategory.id', ondelete='SET NULL'))
+        source: @defaultOLDJSONSource# relation('Source') source_id: null # Column(Integer, ForeignKey('source.id', ondelete='SET NULL'))
 
         # One-to-many relations
         translations: [] # relation('Translation', backref='form', cascade='all, delete, delete-orphan')
@@ -150,7 +150,7 @@ define [
         id: null
         name: null
 
-      defaultOLDJSONSyntacticCategory:
+      defaultOLDJSONSyntacticCategory: ->
         id: null
         name: null
 
@@ -189,7 +189,7 @@ define [
         syntax: null # = UnicodeString(max=1023)
         semantics: null # = UnicodeString(max=1023)
         status: null # = OneOf(h.form_statuses)
-        elicitation_method: null # = ValidOLDModelObject(model_name='ElicitationMethod')
+        elicitation_method: @defaultOLDJSONElicitationMethod # = ValidOLDModelObject(model_name='ElicitationMethod')
         syntactic_category: null # = ValidOLDModelObject(model_name='SyntacticCategory')
         speaker: null # = ValidOLDModelObject(model_name='Speaker')
         elicitor: null # = ValidOLDModelObject(model_name='User')
