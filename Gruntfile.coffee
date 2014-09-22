@@ -197,30 +197,49 @@ module.exports = (grunt) ->
           # `name` and `out` is set by grunt-usemin
           baseUrl: '.tmp/scripts'
           optimize: 'none'
+          shim:
+            jquery:
+              exports: '$'
+            lodash:
+              exports: '_'
+            backbone:
+              exports: 'Backbone'
+              deps: ['lodash', 'jquery']
+            jqueryui: ['jquery']
+            backboneindexeddb: ['backbone']
+            multiselect: ['jquery', 'jqueryui']
+            jqueryelastic: ['jquery']
+            jqueryuicolors: ['jquery', 'jqueryui']
+            superfish: ['jquery']
+            supersubs: ['jquery']
+            perfectscrollbar: ['jquery']
           paths:
-            #'templates': '../../.tmp/scripts/templates'
-            'jquery': '../../<%= yeoman.app %>/bower_components/jquery/dist/jquery'
-            'jqueryui': '../../<%= yeoman.app %>/bower_components/jqueryui/jquery-ui'
-            'superfish': '../../<%= yeoman.app %>/bower_components/superfish/dist/js/superfish'
-            'supersubs': '../../<%= yeoman.app %>/bower_components/superfish/dist/js/supersubs'
-            #'underscore': '../../<%= yeoman.app %>/bower_components/lodash/dist/lodash'
-            'lodash': '../../<%= yeoman.app %>/bower_components/lodash/dist/lodash'
-            'underscore': '../../<%= yeoman.app %>/bower_components/underscore/underscore'
-            'backbone': '../../<%= yeoman.app %>/bower_components/backbone/backbone'
-            'igt': '../../<%= yeoman.app %>/scripts/jquery-extensions/igt'
-            'jqueryuicolors': '../../<%= yeoman.app %>/scripts/jquery-extensions/jqueryui-colors'
-            'sfjquimatch': '../../<%= yeoman.app %>/scripts/jquery-extensions/superfish-jqueryui-match'
-            'multiselect': '../../<%= yeoman.app %>/bower_components/multiselect/js/jquery.multi-select'
-            'jqueryelastic': '../../<%= yeoman.app %>/bower_components/jakobmattsson-jquery-elastic/jquery.elastic.source'
-            'spin': '../../<%= yeoman.app %>/bower_components/spin.js/spin'
-            'jqueryspin': '../../<%= yeoman.app %>/bower_components/spin.js/jquery.spin'
-            'perfectscrollbar': '../../<%= yeoman.app %>/bower_components/perfect-scrollbar/src/perfect-scrollbar'
+            jquery: '../../<%= yeoman.app %>/bower_components/jquery/dist/jquery'
+            backbone: '../../<%= yeoman.app %>/bower_components/backbone/backbone'
+            lodash: '../../<%= yeoman.app %>/bower_components/lodash/dist/lodash'
+            underscore: '../../<%= yeoman.app %>/bower_components/lodash/dist/lodash.underscore'
+            backboneindexeddb: '../../<%= yeoman.app %>/bower_components/indexeddb-backbonejs-adapter/backbone-indexeddb'
+            bootstrap: '../../<%= yeoman.app %>/bower_components/sass-bootstrap/dist/js/bootstrap'
+            text: '../../<%= yeoman.app %>/bower_components/requirejs-text/text'
+            jqueryui: '../../<%= yeoman.app %>/bower_components/jqueryui/jquery-ui'
+            superfish: '../../<%= yeoman.app %>/bower_components/superfish/dist/js/superfish'
+            igt: '../../<%= yeoman.app %>/scripts/query-extensions/igt'
+            jqueryuicolors: '../../<%= yeoman.app %>/scripts/jquery-extensions/jqueryui-colors'
+            sfjquimatch: '../../<%= yeoman.app %>/scripts/jquery-extensions/superfish-jqueryui-match'
+            supersubs: '../../<%= yeoman.app %>/bower_components/superfish/dist/js/supersubs'
+            multiselect: '../../<%= yeoman.app %>/bower_components/multiselect/js/jquery.multi-select'
+            jqueryelastic: '../../<%= yeoman.app %>/bower_components/jakobmattsson-jquery-elastic/jquery.elastic.source'
+            spin: '../../<%= yeoman.app %>/bower_components/spin.js/spin'
+            jqueryspin: '../../<%= yeoman.app %>/bower_components/spin.js/jquery.spin'
+            perfectscrollbar: '../../<%= yeoman.app %>/bower_components/perfect-scrollbar/src/perfect-scrollbar'
+
           # TODO: Figure out how to make sourcemaps work with grunt-usemin
           # https://github.com/yeoman/grunt-usemin/issues/30
           #generateSourceMaps: true
           # required to support SourceMaps
           # http://requirejs.org/docs/errors.html#sourcemapcomments
           preserveLicenseComments: false
+          findNestedDependencies: true
           useStrict: true
           wrap: true
           #uglify2: {} # https://github.com/mishoo/UglifyJS2
@@ -409,7 +428,8 @@ module.exports = (grunt) ->
 
   grunt.registerTask 'build', [
     'clean:dist'
-    'coffee'
+    'copy:coffee'
+    'coffee:dist'
     #'createDefaultTemplate'
     #'jst'
     'eco'
