@@ -1,6 +1,6 @@
 <div id='dative-page-header' class='ui-widget-header ui-corner-top'>
   <div class='dative-page-header-title'>
-    Browse (<%= paginator.itemCount %> forms, <%=paginator.pageCount %> pages)
+    Browse (<%= @paginator.itemCount %> forms, <%= @paginator.pageCount %> pages)
   </div>
   <div class='dative-page-header-widgets'></div>
 </div>
@@ -8,5 +8,4 @@
   <div class='dative-pagin-items'></div>
   <div class='dative-pagin-nav dative-pagin-nav-bottom'></div>
 </div>
-
 

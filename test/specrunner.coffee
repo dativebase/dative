@@ -17,6 +17,7 @@ require.config
     jqueryuicolors: ['jquery', 'jqueryui']
     superfish: ['jquery']
     supersubs: ['jquery']
+    perfectscrollbar: ['jquery']
 
   paths:
     jquery: '../bower_components/jquery/dist/jquery'
@@ -39,6 +40,7 @@ require.config
     jqueryelastic: '../bower_components/jakobmattsson-jquery-elastic/jquery.elastic.source'
     spin: '../bower_components/spin.js/spin'
     jqueryspin: '../bower_components/spin.js/jquery.spin'
+    perfectscrollbar: '../bower_components/perfect-scrollbar/src/perfect-scrollbar'
 
 specs = [
   #'spec/models/form.js' # FAILING

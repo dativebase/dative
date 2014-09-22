@@ -16,14 +16,13 @@
     <div class='phonetic-transcription
         old-form-phoneticTranscription'></div>
     <div class='transcription old-form-transcription'>
-      <%= transcription %>
+      <%= @transcription %>
     </div>
     <div class='morpheme-break old-form-morphemeBreak'></div>
     <div class='morpheme-gloss old-form-morphemeGloss'></div>
   </div>
   <div class='form-translations-data old-form-glosses'>
-    <% for(var i=0; i<translations.length; i++) { %>
-      <% var translation = translations[i]; %>
+    <% for translation in @translations: %>
       <div class='translation old-form-gloss'>
         <span class='translation-grammaticality old-form-gloss-gram'>
           <%= translation.grammaticality %>
@@ -32,7 +31,7 @@
           <%= translation.transcription %>
         </span>
       </div>
-    <% } %>
+    <% end %>
   </div>
 </div>
 
@@ -42,28 +41,28 @@
     <div class='form-secondary-data-label
       old-form-secondary-data-label'>id</div>
     <div class='form-secondary-data-content
-      old-form-secondary-data-content'><%= id %></div>
+      old-form-secondary-data-content'><%= @id %></div>
   </div>
 
   <div class='form-comments old-form-comments'>
     <div class='form-secondary-data-label
       old-form-secondary-data-label'>comments</div>
     <div class='form-secondary-data-content
-      old-form-secondary-data-content'><%= comments %></div>
+      old-form-secondary-data-content'><%= @comments %></div>
   </div>
 
   <div class='form-speaker-comments old-form-speakerComments'>
     <div class='form-secondary-data-label
       old-form-secondary-data-label'>speaker comments</div>
     <div class='form-secondary-data-content
-      old-form-secondary-data-content'><%= speaker_comments %></div>
+      old-form-secondary-data-content'><%= @speaker_comments %></div>
   </div>
 
   <div class='form-elicitation-method old-form-elicitationMethod'>
     <div class='form-secondary-data-label
       old-form-secondary-data-label'>elicitation method</div>
     <div class='form-secondary-data-content
-      old-form-secondary-data-content'><%= elicitation_method %></div>
+      old-form-secondary-data-content'><%= @elicitation_method %></div>
   </div>
 
   <div class='form-tags old-form-keywords'>
@@ -71,9 +70,9 @@
       old-form-secondary-data-label'>tags</div>
     <div class='form-secondary-data-content
       old-form-secondary-data-content'>
-      <% for(var i=0; i<tags.length; i++) { %>
-        <div class='form-tag old-form-keyword'><%= tags[i].name %></div>
-      <% } %>
+      <% for tag in @tags: %>
+        <div class='form-tag old-form-keyword'><%= tag.name %></div>
+      <% end %>
     </div>
   </div>
 
@@ -82,21 +81,21 @@
     <div class='form-secondary-data-label
       old-form-secondary-data-label'>syntactic category string</div>
     <div class='form-secondary-data-content
-      old-form-secondary-data-content'><%= syntactic_category_string %></div>
+      old-form-secondary-data-content'><%= @syntactic_category_string %></div>
   </div>
 
   <div class='form-syntactic-category old-form-syntacticCategory'>
     <div class='form-secondary-data-label
       old-form-secondary-data-label'>syntactic category</div>
     <div class='form-secondary-data-content
-      old-form-secondary-data-content'><%= syntactic_category.name %></div>
+      old-form-secondary-data-content'><%= @syntactic_category.name %></div>
   </div>
 
   <div class='form-speaker old-form-speaker'>
     <div class='form-secondary-data-label
       old-form-secondary-data-label'>speaker</div>
     <div class='form-secondary-data-content old-form-secondary-data-content'>
-      <%= speaker.first_name + ' ' + speaker.last_name %>
+      <%= "#{@speaker.first_name} #{@speaker.last_name}" %>
     </div>
   </div>
 
@@ -104,7 +103,7 @@
     <div class='form-secondary-data-label
       old-form-secondary-data-label'>elicitor</div>
     <div class='form-secondary-data-content old-form-secondary-data-content'>
-      <%= elicitor.first_name + ' ' + elicitor.last_name %>
+      <%= "#{@elicitor.first_name} #{@elicitor.last_name}" %>
     </div>
   </div>
 
@@ -112,7 +111,7 @@
     <div class='form-secondary-data-label
       old-form-secondary-data-label'>verifier</div>
     <div class='form-secondary-data-content old-form-secondary-data-content'>
-      <%= verifier.first_name + ' ' + verifier.last_name %>
+      <%= "#{@verifier.first_name} #{@verifier.last_name}" %>
     </div>
   </div>
 
@@ -120,7 +119,7 @@
     <div class='form-secondary-data-label
       old-form-secondary-data-label'>source</div>
     <div class='form-secondary-data-content old-form-secondary-data-content'>
-      <%= source.author + ' (' + source.year + ')' %>
+      <%= "#{@source.author} (#{@source.year})" %>
     </div>
   </div>
 
@@ -128,32 +127,33 @@
     <div class='form-secondary-data-label
       old-form-secondary-data-label'>elicited</div>
     <div class='form-secondary-data-content
-      old-form-secondary-data-content'><%= date_elicited %></div>
+      old-form-secondary-data-content'><%= @date_elicited %></div>
   </div>
 
   <div class='form-datetime-entered old-form-datetimeEntered'>
     <div class='form-secondary-data-label
       old-form-secondary-data-label'>entered</div>
     <div class='form-secondary-data-content
-      old-form-secondary-data-content'><%= datetime_entered %></div>
+      old-form-secondary-data-content'><%= @datetime_entered %></div>
   </div>
 
   <div class='form-datetime-modified old-form-datetimeModified'>
     <div class='form-secondary-data-label
       old-form-secondary-data-label'>last modified</div>
     <div class='form-secondary-data-content
-      old-form-secondary-data-content'><%= datetime_modified %></div>
+      old-form-secondary-data-content'><%= @datetime_modified %></div>
   </div>
 
   <div class='form-files old-form-files'>
     <div class='form-secondary-data-label
       old-form-secondary-data-label'>files</div>
     <div class='form-secondary-data-content old-form-secondary-data-content'>
-      <% for(var i=0; i<files.length; i++) { %>
-        <div class='form-file old-form-file'><%= files[i].name %></div>
-      <% } %>
+      <% for file in @files: %>
+        <div class='form-file old-form-file'><%= files.name %></div>
+      <% end %>
     </div>
   </div>
 
 </div>
+
 

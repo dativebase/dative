@@ -1,8 +1,9 @@
 define [
   'backbone'
   './base'
+  './../templates/progress-widget'
   'jqueryspin'
-], (Backbone, BaseView) ->
+], (Backbone, BaseView, progressWidgetTemplate) ->
 
   # Progress Widget View
   # --------------------
@@ -11,7 +12,7 @@ define [
 
   class ProgressWidgetView extends BaseView
 
-    template: JST['app/scripts/templates/progress-widget.ejs']
+    template: progressWidgetTemplate
     spinnerId: '#progress-widget-spinner'
 
     initialize: ->

@@ -55,6 +55,9 @@ module.exports = (grunt) ->
       jst:
         files: ['<%= yeoman.app %>/scripts/templates/*.ejs']
         tasks: ['jst']
+      eco:
+        files: ['<%= yeoman.app %>/scripts/templates/*.eco']
+        tasks: ['eco']
       test:
         files: ['<%= yeoman.app %>/scripts/{,*/}*.js', 'test/spec/**/*.js']
         tasks: ['test:true']
@@ -195,7 +198,7 @@ module.exports = (grunt) ->
           baseUrl: '.tmp/scripts'
           optimize: 'none'
           paths:
-            'templates': '../../.tmp/scripts/templates'
+            #'templates': '../../.tmp/scripts/templates'
             'jquery': '../../<%= yeoman.app %>/bower_components/jquery/dist/jquery'
             'jqueryui': '../../<%= yeoman.app %>/bower_components/jqueryui/jquery-ui'
             'superfish': '../../<%= yeoman.app %>/bower_components/superfish/dist/js/superfish'
@@ -207,6 +210,11 @@ module.exports = (grunt) ->
             'igt': '../../<%= yeoman.app %>/scripts/jquery-extensions/igt'
             'jqueryuicolors': '../../<%= yeoman.app %>/scripts/jquery-extensions/jqueryui-colors'
             'sfjquimatch': '../../<%= yeoman.app %>/scripts/jquery-extensions/superfish-jqueryui-match'
+            'multiselect': '../../<%= yeoman.app %>/bower_components/multiselect/js/jquery.multi-select'
+            'jqueryelastic': '../../<%= yeoman.app %>/bower_components/jakobmattsson-jquery-elastic/jquery.elastic.source'
+            'spin': '../../<%= yeoman.app %>/bower_components/spin.js/spin'
+            'jqueryspin': '../../<%= yeoman.app %>/bower_components/spin.js/jquery.spin'
+            'perfectscrollbar': '../../<%= yeoman.app %>/bower_components/perfect-scrollbar/src/perfect-scrollbar'
           # TODO: Figure out how to make sourcemaps work with grunt-usemin
           # https://github.com/yeoman/grunt-usemin/issues/30
           #generateSourceMaps: true
@@ -318,6 +326,16 @@ module.exports = (grunt) ->
         files:
           '.tmp/scripts/templates.js': ['<%= yeoman.app %>/scripts/templates/*.ejs']
 
+    eco:
+      options:
+        amd: true
+      files:
+        expand: true
+        cwd: '<%= yeoman.app %>/scripts/templates'
+        src: ['*.eco']
+        dest: '.tmp/scripts/templates'
+        ext: '.js'
+
     rev:
       dist:
         files:
@@ -346,8 +364,9 @@ module.exports = (grunt) ->
         'copy:coffee'
         'coffee:dist'
         'coffee:test'
-        'createDefaultTemplate'
-        'jst'
+        #'createDefaultTemplate'
+        #'jst'
+        'eco'
         #'compass:server'
         'connect:test'
         'open:test'
@@ -358,8 +377,9 @@ module.exports = (grunt) ->
       'clean:server'
       'copy:coffee'
       'coffee:dist'
-      'createDefaultTemplate'
-      'jst'
+      #'createDefaultTemplate'
+      #'jst'
+      'eco'
       #'compass:server'
       'connect:livereload'
       'open:server'
@@ -373,8 +393,9 @@ module.exports = (grunt) ->
     testTasks = [
       'clean:server'
       'coffee'
-      'createDefaultTemplate'
-      'jst'
+      #'createDefaultTemplate'
+      #'jst'
+      'eco'
       #'compass'
       'connect:test'
       'mocha'
@@ -389,8 +410,9 @@ module.exports = (grunt) ->
   grunt.registerTask 'build', [
     'clean:dist'
     'coffee'
-    'createDefaultTemplate'
-    'jst'
+    #'createDefaultTemplate'
+    #'jst'
+    'eco'
     #'compass:dist'
     'useminPrepare'
     'requirejs'

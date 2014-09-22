@@ -18,6 +18,7 @@ require.config
     jqueryuicolors: ['jquery', 'jqueryui']
     superfish: ['jquery']
     supersubs: ['jquery']
+    perfectscrollbar: ['jquery']
 
   paths:
     jquery: '../bower_components/jquery/dist/jquery'

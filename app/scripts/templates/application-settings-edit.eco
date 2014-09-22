@@ -4,35 +4,35 @@
     <li>
       <label for="serverURL">Server URL</label>
       <input type="text" name="serverURL" class="dative-input
-        dative-input-display" value="<%= serverURL %>" />
+        dative-input-display" value="<%= @serverURL %>" />
     </li>
 
     <li>
       <label for="serverPort">Server port</label>
       <input type="text" name="serverPort" class="dative-input
-        dative-input-display" value="<%= serverPort %>" />
+        dative-input-display" value="<%= @serverPort %>" />
     </li>
 
     <li>
       <label for="loggedIn">Logged in</label>
-      <div class="dative-display dative-input-display"><%= loggedIn %></div>
+      <div class="dative-display dative-input-display"><%= @loggedIn %></div>
     </li>
 
     <li>
       <label for="username">Username</label>
-      <div class="dative-display dative-input-display"><%= username %></div>
+      <div class="dative-display dative-input-display"><%= @username %></div>
     </li>
 
     <li>
       <label for="persistenceType">Persistence type</label>
       <input type="text" name="persistenceType" class="dative-input
-        dative-input-display" value="<%= persistenceType %>" />
+        dative-input-display" value="<%= @persistenceType %>" />
     </li>
 
     <li>
       <label for="schemaType">Schema type</label>
       <input type="text" name="schemaType" class="dative-input
-        dative-input-display" value="<%= schemaType %>" />
+        dative-input-display" value="<%= @schemaType %>" />
     </li>
 
     <li class="center">
@@ -42,3 +42,4 @@
 
   </ul>
 </form>
+

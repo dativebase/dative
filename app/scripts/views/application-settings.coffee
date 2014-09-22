@@ -1,11 +1,11 @@
 define [
   'backbone'
-  './../templates'
   './base'
   './application-settings-view'
   './application-settings-edit'
-], (Backbone, JST, BaseView, ApplicationSettingsDisplayView,
-  ApplicationSettingsEditView) ->
+  './../templates/application-settings-header'
+], (Backbone, BaseView, ApplicationSettingsDisplayView,
+  ApplicationSettingsEditView, applicationSettingsHeaderTemplate) ->
 
   # Application Settings View
   # -------------------------
@@ -13,7 +13,7 @@ define [
   class ApplicationSettingsView extends BaseView
 
     tagName: 'div'
-    template: JST['app/scripts/templates/application-settings-header.ejs']
+    template: applicationSettingsHeaderTemplate
 
     events:
       'click .dative-display': 'clickEdit'

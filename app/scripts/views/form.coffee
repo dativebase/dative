@@ -1,7 +1,8 @@
 define [
   'backbone'
   './base'
-], (Backbone, BaseView) ->
+  './../templates/form'
+], (Backbone, BaseView, formTemplate) ->
 
   # Form View
   # ---------
@@ -16,7 +17,7 @@ define [
 
   class FormView extends BaseView
 
-    template: JST['app/scripts/templates/form.ejs']
+    template: formTemplate
     tagName: 'div'
     className: 'igt-form old-form-object ui-corner-all'
     #tagName: 'table'

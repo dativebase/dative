@@ -1,6 +1,5 @@
 define [
   'backbone'
-  './../templates'
   './base'
   './mainmenu'
   './progress-widget'
@@ -13,13 +12,15 @@ define [
   './../models/application-settings'
   './../models/form'
   './../collections/forms'
-], (Backbone, JST, BaseView, MainMenuView, ProgressWidgetView,
+  './../templates/app'
+], (Backbone, BaseView, MainMenuView, ProgressWidgetView,
   NotifierView, LoginDialogView, ApplicationSettingsView, PagesView,
   FormAddView, FormsView, ApplicationSettingsModel, FormModel,
-  FormsCollection) ->
+  FormsCollection, appTemplate) ->
 
   # App View
   # --------
+  #
   #
   # This is the spine of the application. Only one AppView object is created
   # and it controls the creation and rendering of all of the subviews that
@@ -27,7 +28,7 @@ define [
 
   class AppView extends BaseView
 
-    template: JST['app/scripts/templates/app.ejs']
+    template: appTemplate
     el: '#dative-client-app'
 
     initialize: (options) ->

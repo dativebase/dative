@@ -1,8 +1,7 @@
 define [
-    'jquery',
-    'lodash',
     'backbone'
-  ], ($, _, Backbone) ->
+    './../templates/page'
+  ], (Backbone, pageTemplate) ->
 
     # Page Item View
     # --------------
@@ -11,7 +10,7 @@ define [
       tagName:  'div'
 
       # Cache the template function for a single item.
-      template: JST['app/scripts/templates/page.ejs']
+      template: pageTemplate
 
       initialize: ->
         @model.on 'change', @render, @

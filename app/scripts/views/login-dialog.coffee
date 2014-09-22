@@ -1,8 +1,8 @@
 define [
   'backbone'
-  './../templates'
   './base'
-], (Backbone, JST, BaseView) ->
+  './../templates/login-dialog'
+], (Backbone, BaseView, loginDialogTemplate) ->
 
   # LoginDialogView
   # ---------------
@@ -13,7 +13,7 @@ define [
 
   class LoginDialogView extends BaseView
 
-    template: JST['app/scripts/templates/login-dialog.ejs']
+    template: loginDialogTemplate
 
     initialize: ->
       @listenTo Backbone, 'authenticate:fail', @_authenticateFail

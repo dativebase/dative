@@ -2,10 +2,11 @@ define [
   'backbone'
   './base'
   './../models/form'
+  './../templates/form-add'
   'multiselect'
   'jqueryelastic'
   'perfectscrollbar'
-], (Backbone, BaseView, FormModel) ->
+], (Backbone, BaseView, FormModel, formAddTemplate) ->
 
   # Form Add View
   # --------------
@@ -13,7 +14,7 @@ define [
   # The DOM element for adding a new form
   class FormAddView extends BaseView
 
-    template: JST['app/scripts/templates/form-add.ejs']
+    template: formAddTemplate
 
     initialize: ->
 

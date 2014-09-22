@@ -2,9 +2,9 @@ define [
   'jquery'
   'lodash'
   'backbone'
-  './../templates'
   './base'
-], ($, _, Backbone, JST, BaseView) ->
+  './../templates/notifier'
+], ($, _, Backbone, BaseView, notifierTemplate) ->
 
   # Notifier
   # ---------------
@@ -13,7 +13,7 @@ define [
 
   class NotifierView extends BaseView
 
-    template: JST['app/scripts/templates/notifier.ejs']
+    template: notifierTemplate
 
     initialize: ->
       @messages = []

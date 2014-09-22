@@ -1,9 +1,10 @@
 define [
   'backbone',
-  './../collections/pages',
   './base',
   './page'
-], (Backbone, pagesCollection, BaseView, PageView) ->
+  './../collections/pages',
+  './../templates/basepage'
+], (Backbone, BaseView, PageView, PagesCollection, basepageTemplate) ->
 
   # Pages View
   # --------------
@@ -11,9 +12,9 @@ define [
   # The DOM element for summarizing the pages of a Dative app
   class PagesView extends BaseView
 
-    template: JST['app/scripts/templates/basepage.ejs']
+    template: basepageTemplate
 
-    pagesCollection: pagesCollection
+    pagesCollection: PagesCollection
 
     initialize: ->
       @initialized = true

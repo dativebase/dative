@@ -2,7 +2,8 @@ define [
   'backbone'
   './base'
   './form'
-], (Backbone, BaseView, FormView) ->
+  './../templates/forms'
+], (Backbone, BaseView, FormView, formsTemplate) ->
 
   # Forms View
   # -----------
@@ -11,8 +12,7 @@ define [
 
   class FormsView extends BaseView
 
-    template: JST['app/scripts/templates/forms.ejs']
-    #template: JST['app/scripts/templates/basepage.ejs']
+    template: formsTemplate
 
     initialize: (options) ->
       @applicationSettings = options.applicationSettings or {}

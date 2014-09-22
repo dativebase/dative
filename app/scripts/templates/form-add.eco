@@ -1,5 +1,5 @@
 <div id='dative-page-header' class='ui-widget-header ui-corner-top'>
-  <div class='dative-page-header-title'><%= headerTitle %></div>
+  <div class='dative-page-header-title'><%= @headerTitle %></div>
   <div class='dative-page-header-widgets'></div>
 </div>
 
@@ -12,17 +12,17 @@
         </select>
         <textarea rows="1" name="transcription" class="transcription
         form-add-input" id="transcription"
-        maxlength="255"><%= transcription %></textarea>
+        maxlength="255"><%= @transcription %></textarea>
       </li>
       <li>
         <label for="morpheme_break">Morpheme Break</label>
         <textarea name="morpheme_break" id="morpheme_break"
-        maxlength="255"><%= morpheme_break %></textarea>
+        maxlength="255"><%= @morpheme_break %></textarea>
       </li>
       <li>
         <label for="morpheme_gloss">Morpheme Gloss</label>
         <textarea name="morpheme_gloss" id="morpheme_gloss"
-        maxlength="255"><%= morpheme_gloss %></textarea>
+        maxlength="255"><%= @morpheme_gloss %></textarea>
       </li>
       <li>
         <label for="translations-0.transcription">Translation</label>
@@ -32,11 +32,11 @@
         <textarea name="translations-0.transcription"
           id="translations0transcription" maxlength="255"
           class="translation"
-          <% if (translations[0]) { %>
-            ><%= translations[0].transcription %></textarea>
-          <% } else { %>
+          <% if @translations[0]: %>
+            ><%= @translations[0].transcription %></textarea>
+          <% else: %>
             ></textarea>
-          <% } %>
+          <% end %>
         <button class="insertTranslationFieldButton"
           title="Add another translation.">Add Translation</button>
       </li>
@@ -45,12 +45,12 @@
     <ul class="fieldset">
       <li>
         <label for="comments">General Comments</label>
-        <textarea name="comments" id="comments"><%= comments %></textarea>
+        <textarea name="comments" id="comments"><%= @comments %></textarea>
       </li>
       <li>
         <label for="speaker_comments">Speaker Comments</label>
         <textarea name="speaker_comments" id="speaker_comments"
-        ><%= speaker_comments %></textarea>
+        ><%= @speaker_comments %></textarea>
       </li>
       <li>
         <label for="elicitation_method">Elicitation Method</label>
@@ -88,7 +88,7 @@
       <li>
         <label for="date_elicited">Date Elicited</label>
         <input type="text" name="date_elicited" id="date_elicited"
-          class="dateElicited" value="<%= date_elicited %>"/>
+          class="dateElicited" value="<%= @date_elicited %>"/>
       </li>
     </ul>
 
@@ -99,4 +99,5 @@
     </ul>
   </form>
 </div>
+
 
