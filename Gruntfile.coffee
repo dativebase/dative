@@ -194,10 +194,19 @@ module.exports = (grunt) ->
       dist:
         # Options: https://github.com/jrburke/r.js/blob/master/build/example.build.js
         options:
-          # `name` and `out` is set by grunt-usemin
           baseUrl: '.tmp/scripts'
           optimize: 'none'
-          shim:
+          preserveLicenseComments: false
+          useStrict: true
+          name: 'main'
+          out: '<%= yeoman.dist %>/scripts/main.js'
+          mainConfigFile: '.tmp/scripts/main.js'
+          # TODO: Figure out how to make sourcemaps work with grunt-usemin
+          # https://github.com/yeoman/grunt-usemin/issues/30
+          #generateSourceMaps: true
+          # required to support SourceMaps
+          # http://requirejs.org/docs/errors.html#sourcemapcomments
+          shim_:
             jquery:
               exports: '$'
             lodash:
@@ -213,19 +222,21 @@ module.exports = (grunt) ->
             superfish: ['jquery']
             supersubs: ['jquery']
             perfectscrollbar: ['jquery']
-          paths:
+
+          paths_:
             jquery: '../../<%= yeoman.app %>/bower_components/jquery/dist/jquery'
             backbone: '../../<%= yeoman.app %>/bower_components/backbone/backbone'
             lodash: '../../<%= yeoman.app %>/bower_components/lodash/dist/lodash'
             underscore: '../../<%= yeoman.app %>/bower_components/lodash/dist/lodash.underscore'
-            backboneindexeddb: '../../<%= yeoman.app %>/bower_components/indexeddb-backbonejs-adapter/backbone-indexeddb'
+            backboneindexeddb:
+              '../../<%= yeoman.app %>/bower_components/indexeddb-backbonejs-adapter/backbone-indexeddb'
             bootstrap: '../../<%= yeoman.app %>/bower_components/sass-bootstrap/dist/js/bootstrap'
             text: '../../<%= yeoman.app %>/bower_components/requirejs-text/text'
             jqueryui: '../../<%= yeoman.app %>/bower_components/jqueryui/jquery-ui'
             superfish: '../../<%= yeoman.app %>/bower_components/superfish/dist/js/superfish'
-            igt: '../../<%= yeoman.app %>/scripts/query-extensions/igt'
-            jqueryuicolors: '../../<%= yeoman.app %>/scripts/jquery-extensions/jqueryui-colors'
-            sfjquimatch: '../../<%= yeoman.app %>/scripts/jquery-extensions/superfish-jqueryui-match'
+            igt: '../../<%= yeoman.app%>/scripts/jquery-extensions/igt'
+            jqueryuicolors: '../../<%= yeoman.app%>/scripts/jquery-extensions/jqueryui-colors'
+            sfjquimatch: '../../<%= yeoman.app%>/scripts/jquery-extensions/superfish-jqueryui-match'
             supersubs: '../../<%= yeoman.app %>/bower_components/superfish/dist/js/supersubs'
             multiselect: '../../<%= yeoman.app %>/bower_components/multiselect/js/jquery.multi-select'
             jqueryelastic: '../../<%= yeoman.app %>/bower_components/jakobmattsson-jquery-elastic/jquery.elastic.source'
@@ -233,17 +244,6 @@ module.exports = (grunt) ->
             jqueryspin: '../../<%= yeoman.app %>/bower_components/spin.js/jquery.spin'
             perfectscrollbar: '../../<%= yeoman.app %>/bower_components/perfect-scrollbar/src/perfect-scrollbar'
 
-          # TODO: Figure out how to make sourcemaps work with grunt-usemin
-          # https://github.com/yeoman/grunt-usemin/issues/30
-          #generateSourceMaps: true
-          # required to support SourceMaps
-          # http://requirejs.org/docs/errors.html#sourcemapcomments
-          preserveLicenseComments: false
-          findNestedDependencies: true
-          useStrict: true
-          wrap: true
-          #uglify2: {} # https://github.com/mishoo/UglifyJS2
-          #
     useminPrepare:
       html: '<%= yeoman.app %>/index.html'
       options: 
@@ -317,6 +317,16 @@ module.exports = (grunt) ->
             'bower_components/sass-bootstrap/fonts/*.*'
           ]
         ]
+      disttmp:
+        files: [
+          expand: true
+          dot: true
+          cwd: '<%= yeoman.app %>'
+          dest: '.tmp'
+          src: [
+            'bower_components/{,*/}*.*'
+          ]
+        ]
       docco:
         files: [
             expand: true
@@ -333,6 +343,17 @@ module.exports = (grunt) ->
             rename: (dest, src) ->
               return dest + 'test.' + src.replace(/\//g, '.')
         ]
+      requirejs:
+        src: '<%= yeoman.app %>/bower_components/requirejs/require.js'
+        dest: '<%= yeoman.dist %>/bower_components/requirejs/require.js'
+
+    uglify:
+      dist:
+        files:
+          '<%= yeoman.dist %>/scripts/main.js': ['<%= yeoman.dist %>/scripts/main.js']
+      requirejs:
+        files:
+          '<%= yeoman.dist %>/scripts/bower_components/requirejs/require.js': ['<%= yeoman.dist %>/scripts/bower_components/requirejs/require.js']
 
     bower:
       all:
@@ -427,21 +448,23 @@ module.exports = (grunt) ->
       grunt.task.run testTasks
 
   grunt.registerTask 'build', [
-    'clean:dist'
-    'copy:coffee'
-    'coffee:dist'
-    #'createDefaultTemplate'
-    #'jst'
-    'eco'
+    'clean:dist' # remove everything in dist/ and .tmp/
+    'copy:coffee' # copy all .coffee files in app/scripts/ to .tmp/scripts/
+    'coffee:dist' # convert all .coffee files in .tmp/scripts to .js in situ
+    'eco' # convert all .eco files in app/scripts/templates/ to .js files in .tmp/scripts/templates/
     #'compass:dist'
     'useminPrepare'
+    #'copy:disttmp' # copy files (and dir structures) in app/, app/images/, app/styles/ and app/bower_components to dist/
     'requirejs'
     'imagemin'
     'htmlmin'
     'concat'
     'cssmin'
-    'uglify'
+    'uglify:dist'
     'copy:dist'
+    'copy:requirejs'
+    'uglify:requirejs'
+    'uglify:generated'
     'rev'
     'usemin'
   ]
