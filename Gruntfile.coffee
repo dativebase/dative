@@ -33,7 +33,7 @@ module.exports = (grunt) ->
         livereload: true
       coffee:
         files: ['<%= yeoman.app %>/scripts/{,*/}*.coffee']
-        tasks: ['copy:coffee', 'coffee:dist']
+        tasks: ['copy:coffee', 'coffee:serve']
       coffeeTest:
         #files: ['test/spec/{,*/}*.coffee']
         files: ['test/**/*.coffee']
@@ -130,9 +130,21 @@ module.exports = (grunt) ->
           urls: ['http://localhost:<%= connect.test.options.port %>/index.html']
 
     coffee:
-      dist:
+      serve:
         options:
           sourceMap: true
+        files: [
+          # rather than compiling multiple files here you should
+          # require them into your main .coffee file
+          expand: true
+          cwd: '.tmp/scripts'
+          src: '**/*.coffee'
+          dest: '.tmp/scripts'
+          ext: '.js'
+        ]
+      dist:
+        options:
+          sourceMap: false
         files: [
           # rather than compiling multiple files here you should
           # require them into your main .coffee file
@@ -200,7 +212,8 @@ module.exports = (grunt) ->
           useStrict: true
           name: 'main'
           out: '<%= yeoman.dist %>/scripts/main.js'
-          mainConfigFile: '.tmp/scripts/main.js'
+          generateSourceMaps: false
+          #mainConfigFile: '.tmp/scripts/main.js'
           # TODO: Figure out how to make sourcemaps work with grunt-usemin
           # https://github.com/yeoman/grunt-usemin/issues/30
           #generateSourceMaps: true
@@ -218,7 +231,7 @@ module.exports = (grunt) ->
             backboneindexeddb: ['backbone']
             multiselect: ['jquery', 'jqueryui']
             jqueryelastic: ['jquery']
-            jqueryuicolors: ['jquery', 'jqueryui']
+            jqueryuicolors: ['jquery']
             superfish: ['jquery']
             supersubs: ['jquery']
             perfectscrollbar: ['jquery']
@@ -264,7 +277,7 @@ module.exports = (grunt) ->
           dest: '<%= yeoman.dist %>/images'
         ]
 
-    cssmin:
+    cssmin_: # commented out for debugging ...
       dist:
         files:
           '<%= yeoman.dist %>/styles/main.css': [
@@ -324,9 +337,15 @@ module.exports = (grunt) ->
           cwd: '<%= yeoman.app %>'
           dest: '.tmp'
           src: [
-            'bower_components/{,*/}*.*'
+            'bower_components/{,**/}*.*'
+            'scripts/jquery-extensions/{,**/}*.*'
           ]
         ]
+      distrequirejs: # from https://github.com/yeoman/grunt-usemin/issues/192
+        expand: true,
+        cwd: '<%= yeoman.app %>/bower_components/requirejs/',
+        dest: '<%= yeoman.dist %>/scripts/vendor/',
+        src: ['require.js']
       docco:
         files: [
             expand: true
@@ -347,7 +366,7 @@ module.exports = (grunt) ->
         src: '<%= yeoman.app %>/bower_components/requirejs/require.js'
         dest: '<%= yeoman.dist %>/bower_components/requirejs/require.js'
 
-    uglify:
+    uglify_: # altered for debugging purposes.
       dist:
         files:
           '<%= yeoman.dist %>/scripts/main.js': ['<%= yeoman.dist %>/scripts/main.js']
@@ -380,12 +399,27 @@ module.exports = (grunt) ->
       dist:
         files:
           src: [
-            '<%= yeoman.dist %>/scripts/{,*/}*.js'
+            '<%= yeoman.dist %>/scripts/{,*/!(require)}*.js' # Add exception not to change name of copied file during "rev" task (added only !(require) exception), cf. https://github.com/yeoman/grunt-usemin/issues/192
             '<%= yeoman.dist %>/styles/{,*/}*.css',
             '<%= yeoman.dist %>/images/{,*/}*.{png,jpg,jpeg,gif,webp}',
             '/styles/fonts/{,*/}*.*',
             'bower_components/sass-bootstrap/fonts/*.*'
           ]
+
+    # Replace script tag in index.html, to call require.js from new path using grunt-regex-replace plugin:
+    # See https://github.com/yeoman/grunt-usemin/issues/192
+    'regex-replace':
+      dist:
+        src: ['<%= yeoman.dist %>/index.html'],
+        actions: [
+          name: 'requirejs-newpath',
+          search: '<script data-main=".*" src="bower_components/requirejs/require.js"></script>',
+          replace: (match) ->
+            regex = /scripts\/.*main/
+            result = regex.exec(match)
+            '<script data-main="' + result[0] + '" src="scripts/vendor/require.js"></script>'
+          flags: 'g'
+        ]
 
   grunt.registerTask 'createDefaultTemplate', ->
     grunt.file.write '.tmp/scripts/templates.js', 'this.JST = this.JST || {}'
@@ -402,7 +436,7 @@ module.exports = (grunt) ->
       return grunt.task.run [
         'clean:server'
         'copy:coffee'
-        'coffee:dist'
+        'coffee:serve'
         'coffee:test'
         #'createDefaultTemplate'
         #'jst'
@@ -416,7 +450,7 @@ module.exports = (grunt) ->
     grunt.task.run [
       'clean:server'
       'copy:coffee'
-      'coffee:dist'
+      'coffee:serve'
       #'createDefaultTemplate'
       #'jst'
       'eco'
@@ -452,21 +486,28 @@ module.exports = (grunt) ->
     'copy:coffee' # copy all .coffee files in app/scripts/ to .tmp/scripts/
     'coffee:dist' # convert all .coffee files in .tmp/scripts to .js in situ
     'eco' # convert all .eco files in app/scripts/templates/ to .js files in .tmp/scripts/templates/
-    #'compass:dist'
-    'useminPrepare'
-    #'copy:disttmp' # copy files (and dir structures) in app/, app/images/, app/styles/ and app/bower_components to dist/
-    'requirejs'
-    'imagemin'
-    'htmlmin'
-    'concat'
+    #'compass:dist' # commented out because not currently using compass
+    'useminPrepare' # read the `build` comments in index.html and dynamically generate concat, uglify, and or cssmin `generated` tasks.
+    'copy:disttmp' # my copy task: copies bower_components and jquery-extensions to .tmp. I am unsure if this is necessary ...
+    'copy:distrequirejs' # copy require.js into dist/scripts/vendor/, see https://github.com/yeoman/grunt-usemin/issues/192
+    'requirejs' # creates a single dist/scripts/main.js file containing all of my JavaScript
     'cssmin'
-    'uglify:dist'
-    'copy:dist'
-    'copy:requirejs'
-    'uglify:requirejs'
-    'uglify:generated'
-    'rev'
-    'usemin'
+    'imagemin' #
+    'htmlmin' #
+    'concat' # task configured by `useminPrepare` above.
+    #'uglify:dist'
+    #'copy:dist'
+    #'copy:requirejs'
+    #'uglify:requirejs'
+    #'uglify:generated' # JavaScript minification
+    'rev' # Use the rev task together with yeoman/grunt-usemin for cache busting of static files in your app. This allows them to be cached forever by the browser. See https://github.com/cbas/grunt-rev
+    'usemin' # usemin:html and usemin:css tasks; the first renames the references to `main.js`, `modernizr.js` and `main.css`
+    'regex-replace:dist' # change `src="bower_components/requirejs/require.js"` to `src="scripts/vendor/require.js"></script>` in dist/index.html
+    # Issues:
+    # 1. need dist/bower_components/requirejs/require.js. I feel like I should NOT
+    # need this though ...
+    # Comments like `//# sourceMappingURL=router.js.map` need to be removed. Why
+    # are they here in the first place?
   ]
 
   grunt.registerTask 'default', ['jshint', 'test', 'build']
