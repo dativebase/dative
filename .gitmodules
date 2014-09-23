@@ -1,0 +1,3 @@
+[submodule "app/scripts/jquery-extensions/superfish"]
+	path = app/scripts/jquery-extensions/superfish
+	url = https://github.com/jrwdunham/superfish.git
