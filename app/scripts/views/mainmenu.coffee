@@ -1,11 +1,12 @@
 define [
+  'jquery'
   'backbone'
   './base'
   './../templates/mainmenu'
   'superfish'
   'supersubs'
   'sfjquimatch'
-], (Backbone, BaseView, mainmenuTemplate) ->
+], ($, Backbone, BaseView, mainmenuTemplate) ->
 
   # Main Menu View
   # --------------

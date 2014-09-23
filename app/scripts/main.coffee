@@ -11,13 +11,11 @@ require.config
     backbone:
       exports: 'Backbone'
       deps: ['lodash', 'jquery']
+    #jqueryui: ['../bower_components/jquery/dist/jquery']
     jqueryui: ['jquery']
     backboneindexeddb: ['backbone']
     multiselect: ['jquery', 'jqueryui']
     jqueryelastic: ['jquery']
-    jqueryuicolors: ['jquery', 'jqueryui']
-    superfish: ['jquery']
-    supersubs: ['jquery']
     perfectscrollbar: ['jquery']
 
   paths:
