@@ -11,13 +11,11 @@ require.config
     backbone:
       exports: 'Backbone'
       deps: ['lodash', 'jquery']
+    #jqueryui: ['../bower_components/jquery/dist/jquery']
     jqueryui: ['jquery']
     backboneindexeddb: ['backbone']
     multiselect: ['jquery', 'jqueryui']
     jqueryelastic: ['jquery']
-    jqueryuicolors: ['jquery', 'jqueryui']
-    superfish: ['jquery']
-    supersubs: ['jquery']
     perfectscrollbar: ['jquery']
 
   paths:
@@ -30,13 +28,17 @@ require.config
     bootstrap: '../bower_components/sass-bootstrap/dist/js/bootstrap'
     text: '../bower_components/requirejs-text/text'
     jqueryui: '../bower_components/jqueryui/jquery-ui'
-    superfish: '../bower_components/superfish/dist/js/superfish'
+    superfish: 'jquery-extensions/superfish'
+    #superfish: '../bower_components/superfish/dist/js/superfish'
+    #superfish: 'jquery-extensions/superfish/dist/js/superfish'
     igt: 'jquery-extensions/igt'
     jqueryuicolors: 'jquery-extensions/jqueryui-colors'
     sfjquimatch: 'jquery-extensions/superfish-jqueryui-match'
     # Supersubs plugin removed in v1.6 of superfish. See
     # https://github.com/joeldbirch/superfish.
-    supersubs: '../bower_components/superfish/dist/js/supersubs'
+    supersubs: 'jquery-extensions/supersubs'
+    #supersubs: '../bower_components/superfish/dist/js/supersubs'
+    #supersubs: 'jquery-extensions/superfish/dist/js/supersubs'
     multiselect: '../bower_components/multiselect/js/jquery.multi-select'
     jqueryelastic: '../bower_components/jakobmattsson-jquery-elastic/jquery.elastic.source'
     #betterelastictextarea: '../bower_components/better-elastic-textarea/dist/better-elastic-textarea'

@@ -1,8 +1,9 @@
 define [
   'backbone'
+  'jquery'
   './../utils/utils'
   'jqueryuicolors'
-], (Backbone, utils) ->
+], (Backbone, $, utils) ->
 
   # Base View
   # --------------
