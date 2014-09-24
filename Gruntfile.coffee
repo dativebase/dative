@@ -231,9 +231,6 @@ module.exports = (grunt) ->
             backboneindexeddb: ['backbone']
             multiselect: ['jquery', 'jqueryui']
             jqueryelastic: ['jquery']
-            jqueryuicolors: ['jquery']
-            superfish: ['jquery']
-            supersubs: ['jquery']
             perfectscrollbar: ['jquery']
 
           paths_:
@@ -246,11 +243,15 @@ module.exports = (grunt) ->
             bootstrap: '../../<%= yeoman.app %>/bower_components/sass-bootstrap/dist/js/bootstrap'
             text: '../../<%= yeoman.app %>/bower_components/requirejs-text/text'
             jqueryui: '../../<%= yeoman.app %>/bower_components/jqueryui/jquery-ui'
-            superfish: '../../<%= yeoman.app %>/bower_components/superfish/dist/js/superfish'
+            superfish: '../../<%= yeoman.app%>/scripts/jquery-extensions/superfish'
+            #superfish: '../../<%= yeoman.app%>/scripts/jquery-extensions/superfish/dist/js/superfish'
+            #superfish: '../../<%= yeoman.app %>/bower_components/superfish/dist/js/superfish'
             igt: '../../<%= yeoman.app%>/scripts/jquery-extensions/igt'
             jqueryuicolors: '../../<%= yeoman.app%>/scripts/jquery-extensions/jqueryui-colors'
             sfjquimatch: '../../<%= yeoman.app%>/scripts/jquery-extensions/superfish-jqueryui-match'
-            supersubs: '../../<%= yeoman.app %>/bower_components/superfish/dist/js/supersubs'
+            supersubs: '../../<%= yeoman.app%>/scripts/jquery-extensions/supersubs'
+            #supersubs: '../../<%= yeoman.app%>/scripts/jquery-extensions/superfish/dist/js/supersubs'
+            #supersubs: '../../<%= yeoman.app %>/bower_components/superfish/dist/js/supersubs'
             multiselect: '../../<%= yeoman.app %>/bower_components/multiselect/js/jquery.multi-select'
             jqueryelastic: '../../<%= yeoman.app %>/bower_components/jakobmattsson-jquery-elastic/jquery.elastic.source'
             spin: '../../<%= yeoman.app %>/bower_components/spin.js/spin'
