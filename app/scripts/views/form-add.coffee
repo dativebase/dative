@@ -27,6 +27,11 @@ define [
     # Set the state of the "add a form" HTML form on the model.
     setToModel: ->
       modelObject = @getModelObjectFromAddForm()
+      tobesaved = new FieldDB.Document(modelObject)
+      tobesaved.dbname = "jrwdunham-firstcorpus"
+      tobesaved.url = FieldDB.Database.BASE_DB_URL
+      tobesaved.save()
+
       @model?.set modelObject
 
     # Extract data in the inputs of the HTML "Add a Form" form and
