@@ -28,8 +28,8 @@ define [
     setToModel: ->
       modelObject = @getModelObjectFromAddForm()
       tobesaved = new FieldDB.Document(modelObject)
-      tobesaved.dbname = "jrwdunham-firstcorpus"
-      tobesaved.url = FieldDB.Database.BASE_DB_URL
+      tobesaved.dbname = tobesaved.application.currentFieldDB.dbname
+      tobesaved.url = tobesaved.application.currentFieldDB.url + "/"+ tobesaved.dbname
       tobesaved.save()
 
       @model?.set modelObject
