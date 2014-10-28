@@ -19,7 +19,8 @@
     "jakobmattsson-jquery-elastic": "*",
     "better-elastic-textarea": "*",
     "spin.js": "*",
-    "perfect-scrollbar": "*"
+    "perfect-scrollbar": "*",
+    "fielddb": "~2.0.2"
   },
   "devDependencies": {
     "mocha": "*",
