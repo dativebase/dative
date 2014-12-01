@@ -2,6 +2,12 @@
   <ul class="fieldset">
 
     <li>
+      <label for="serverType">Server Type</label>
+      <input type="text" name="serverType" class="dative-input
+        dative-input-display" value="<%= @serverType %>" />
+    </li>
+
+    <li>
       <label for="serverURL">Server URL</label>
       <input type="text" name="serverURL" class="dative-input
         dative-input-display" value="<%= @serverURL %>" />
