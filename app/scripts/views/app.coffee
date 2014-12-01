@@ -65,6 +65,10 @@ define [
       @rendered @progressWidget
       @rendered @notifier # Notifier self-renders but we register it as rendered anyways so that we can clean up after it if `.close` is ever called
 
+      FieldDB.FieldDBObject.application = @applicationSettings
+      FieldDB.FieldDBObject.application.currentFieldDB = new FieldDB.Corpus()
+      FieldDB.FieldDBObject.application.currentFieldDB.loadOrCreateCorpusByPouchName("jrwdunham-firstcorpus")
+      FieldDB.FieldDBObject.application.currentFieldDB.url = FieldDB.FieldDBObject.application.currentFieldDB.BASE_DB_URL
       @matchWindowDimensions()
 
     # Size the #appview div relative to the window size
