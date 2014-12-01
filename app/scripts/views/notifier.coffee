@@ -15,7 +15,7 @@ define [
 
     template: notifierTemplate
 
-    initialize: ->
+    initialize: (@applicationSettings) ->
       @messages = []
       @listenTo Backbone, 'authenticate:fail', @authenticateFail
       @listenTo Backbone, 'authenticate:success', @authenticateSuccess
@@ -31,7 +31,18 @@ define [
       )
 
     authenticateFail: (errorObj) ->
-      @messages.push "Failed to authenticate: #{errorObj.error}"
+      # CouchDB returns {error: "unauthorized", reason: "Name or password is
+      #   incorrect."}
+      # OLD returns {error: "The username and password provided are not valid."}
+      message = 'Failed to authenticate'
+      if errorObj
+        if @applicationSettings.get('serverType') is 'old'
+          message = "#{message}: #{errorObj.error}"
+        else
+          message = "#{message}: #{errorObj.reason}"
+      else
+        message = "#{message}."
+      @messages.push message
       @render()
 
     authenticateSuccess: ->

@@ -43,7 +43,7 @@ define [
       @mainMenuView = new MainMenuView model: @applicationSettings
       @loginDialog = new LoginDialogView model: @applicationSettings
       @progressWidget = new ProgressWidgetView()
-      @notifier = new NotifierView()
+      @notifier = new NotifierView(@applicationSettings)
 
       @listenTo @mainMenuView, 'request:pages', @showPagesView
       @listenTo @mainMenuView, 'request:formAdd', @showFormAddView
