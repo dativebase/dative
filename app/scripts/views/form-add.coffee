@@ -27,11 +27,12 @@ define [
     # Set the state of the "add a form" HTML form on the model.
     setToModel: ->
       modelObject = @getModelObjectFromAddForm()
-      tobesaved = new FieldDB.Document(modelObject)
-      tobesaved.dbname = tobesaved.application.currentFieldDB.dbname
-      tobesaved.url = tobesaved.application.currentFieldDB.url + "/"+ tobesaved.dbname
-      tobesaved.save()
-
+      # FieldDB stuff commented out until it can be better incorporated.
+      # Note: form model should *not* be saved on every minute change.
+      # tobesaved = new FieldDB.Document(modelObject)
+      # tobesaved.dbname = tobesaved.application.currentFieldDB.dbname
+      # tobesaved.url = tobesaved.application.currentFieldDB.url + "/"+ tobesaved.dbname
+      # tobesaved.save()
       @model?.set modelObject
 
     # Extract data in the inputs of the HTML "Add a Form" form and
