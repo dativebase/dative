@@ -2,9 +2,8 @@
   <ul class="fieldset">
 
     <li>
-      <label for="serverType">Server Type</label>
-      <input type="text" name="serverType" class="dative-input
-        dative-input-display" value="<%= @serverType %>" />
+      <label for="serverType">Server type</label>
+      <select name="serverType" class="serverType"></select>
     </li>
 
     <li>
@@ -27,18 +26,6 @@
     <li>
       <label for="username">Username</label>
       <div class="dative-display dative-input-display"><%= @username %></div>
-    </li>
-
-    <li>
-      <label for="persistenceType">Persistence type</label>
-      <input type="text" name="persistenceType" class="dative-input
-        dative-input-display" value="<%= @persistenceType %>" />
-    </li>
-
-    <li>
-      <label for="schemaType">Schema type</label>
-      <input type="text" name="schemaType" class="dative-input
-        dative-input-display" value="<%= @schemaType %>" />
     </li>
 
     <li class="center">

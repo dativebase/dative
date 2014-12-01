@@ -295,7 +295,8 @@ ul.fieldset select[name="syntactic_category"],
 ul.fieldset select[name="speaker"],
 ul.fieldset select[name="elicitor"],
 ul.fieldset select[name="verifier"],
-ul.fieldset select[name="source"] {
+ul.fieldset select[name="source"],
+ul.fieldset select[name="serverType"] {
     width: 548px;
     max-width: 548px;
     min-width: 548px;

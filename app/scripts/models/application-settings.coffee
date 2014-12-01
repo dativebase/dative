@@ -43,7 +43,7 @@ define [
       url = "#{@_getURL()}login/authenticate"
       payload = username: username, password: password
       success = (r) -> r.authenticated is true
-      if @get('serverType') is 'lingsync'
+      if @get('serverType') is 'LingSync'
         url = "#{@_getURL()}_session"
         payload = name: username, password: password
         success = (r) -> r.ok is true
@@ -79,7 +79,7 @@ define [
       method = 'GET'
       logoutBoolean = 'authenticated'
       success = (r) -> r.authenticated is false
-      if @get('serverType') is 'lingsync'
+      if @get('serverType') is 'LingSync'
         url = "#{@_getURL()}_session"
         method = 'DELETE'
         success = (r) -> r.ok is true
@@ -152,7 +152,7 @@ define [
 
     defaults: ->
 
-      serverType: 'lingsync' # other option 'old'
+      serverType: 'LingSync' # other option 'OLD'
 
       # URL of the server where the data are stored (LingSync corpus or OLD web
       # service)

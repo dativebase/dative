@@ -4,6 +4,7 @@ define [
   './application-settings-view'
   './application-settings-edit'
   './../templates/application-settings-header'
+  'perfectscrollbar'
 ], (Backbone, BaseView, ApplicationSettingsDisplayView,
   ApplicationSettingsEditView, applicationSettingsHeaderTemplate) ->
 
@@ -16,12 +17,11 @@ define [
     template: applicationSettingsHeaderTemplate
 
     events:
-      'click .dative-display': 'clickEdit'
+      'click .dative-input-display.dative-display': 'clickEdit'
       'click button.edit': 'clickEdit'
       'click button.save': 'clickSave'
       'click button.view': 'clickView'
-      'keydown .dative-input': '_keyboardControl'
-      'keydown .dative-display': '_keyboardControl'
+      'keydown .dative-input-display': '_keyboardControl'
       'keydown button': '_keyboardControl'
 
     initialize: ->
@@ -34,8 +34,10 @@ define [
 
     render: ->
       @$el.html @template headerTitle: 'Application Settings'
-      @displayView.setElement @$('#dative-page-body')
-      @editView.setElement @$('#dative-page-body')
+      @matchHeights()
+      @_body = @$ '#dative-page-body'
+      @displayView.setElement @_body
+      @editView.setElement @_body
       @view()
 
     # Render display view, close edit view
@@ -59,7 +61,9 @@ define [
       @closed @displayView
       @editView.render()
       @rendered @editView
+      @_populateSelectFields()
       @_guify()
+      @_addModel()
       @_editButtons()
       @_setFocus 'edit'
 
@@ -104,6 +108,8 @@ define [
       if event.which is 27
         try
           classes = $(event.target).attr('class').split /\s+/
+          console.log 'Esc called on input'
+          console.log classes
           if 'dative-input' in classes
             event.stopPropagation()
             @view()
@@ -125,16 +131,33 @@ define [
           else if 'save' in classes
             @save()
 
+    _populateSelectFields: ->
+      for serverType in ['LingSync', 'OLD']
+        @$('select[name="serverType"]', @_body)
+          .append($('<option>').attr('value', serverType).text(serverType))
+
     _guify: ->
-      @$('button').button().attr('tabindex', '1')
-      @$('select, input, textarea, div.dative-display')
+      @_body.perfectScrollbar()
+      @$('button').button().attr('tabindex', '0')
+      @$('select, input, textarea, div.dative-input-display,
+        span.ui-selectmenu-button')
         .css("border-color", ApplicationSettingsView.jQueryUIColors.defBo)
-        .attr('tabindex', '1')
-      @$('div.dative-display')
-        .mouseover(-> $(@).addClass('ui-state-hover').addClass('ui-state-active'))
+        .attr('tabindex', '0')
+      @$('select[name="serverType"]', @_body).selectmenu()
+      @$('.ui-selectmenu-button').addClass 'dative-input dative-input-display'
+      @$('div.dative-input-display')
+        .mouseover(->
+          $(@).addClass('ui-state-hover').addClass('ui-state-active'))
         .focus(-> $(@).addClass('ui-state-hover').addClass('ui-state-active'))
-        .mouseout(-> $(@).removeClass('ui-state-hover').removeClass('ui-state-active'))
-        .blur(-> $(@).removeClass('ui-state-hover').removeClass('ui-state-active'))
+        .mouseout(->
+          $(@).removeClass('ui-state-hover').removeClass('ui-state-active'))
+        .blur(->
+          $(@).removeClass('ui-state-hover').removeClass('ui-state-active'))
+
+    _addModel: ->
+      @$('select[name="serverType"]', @_body)
+        .val(@model.get('serverType'))
+        .selectmenu 'refresh', true
 
     _rememberTarget: (event) ->
       try
@@ -144,11 +167,11 @@ define [
 
     _setFocus: (viewType) ->
       if @focusedElementIndex?
-        nthElement = @$('.dative-input-display').eq @focusedElementIndex
-        nthElement.focus().select()
+        @$('.dative-input-display').eq(@focusedElementIndex)
+          .focus().select()
       else
         if viewType is 'view'
           @$('button.edit').first().focus()
         else if viewType is 'edit'
-          @$('input').first().focus().select()
+          @$('select, input').first().focus().select()
 
