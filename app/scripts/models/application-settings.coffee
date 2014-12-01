@@ -132,16 +132,10 @@ define [
         onload: (responseJSON) =>
           Backbone.trigger 'longTask:deregister', taskId
           Backbone.trigger 'authenticate:end'
-          #console.log 'checking if logged in response:'
-          #console.log responseJSON
-          #if utils.type(responseJSON) is 'array'
           if success(responseJSON)
             @set 'loggedIn', true
             Backbone.trigger 'authenticate:success'
           else
-            console.log 'failed to authenticate'
-            console.log responseJSON
-            console.log url
             @set 'loggedIn', false
             Backbone.trigger 'authenticate:fail'
         onerror: (responseJSON) =>
