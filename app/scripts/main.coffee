@@ -17,6 +17,8 @@ require.config
     multiselect: ['jquery', 'jqueryui']
     jqueryelastic: ['jquery']
     perfectscrollbar: ['jquery']
+    superfish: ['jquery']
+    supersubs: ['jquery']
 
   paths:
     jquery: '../bower_components/jquery/dist/jquery'
