@@ -36,6 +36,11 @@ define [
       xhr = @_getXHR url, method
       if timeout then xhr.timeout = timeout
 
+      # Set content-type
+      # Note: apparently "You cannot add custom headers to an XDR object", cf.
+      # http://stackoverflow.com/questions/2657180/setting-headers-in-xdomainrequest-or-activexobjectmicrosoft-xmlhttp #
+      xhr.setRequestHeader 'Content-Type', 'application/json;charset=UTF-8'
+
       xhr.withCredentials = true
       xhr.send(payload)
 

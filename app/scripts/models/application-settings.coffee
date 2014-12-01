@@ -35,19 +35,28 @@ define [
         @checkIfLoggedIn()
 
     # Attempt to authenticate with the passed-in credentials
-    # TODO: encapsulate the LingSync authentication request.
+    # TODO: responseJSON from CouchDB also returns an array of roles; use it.
     authenticate: (username, password) ->
       taskId = @guid()
       Backbone.trigger 'longTask:register', 'authenticating', taskId
+
+      url = "#{@_getURL()}login/authenticate"
+      payload = username: username, password: password
+      success = (r) -> r.authenticated is true
+      if @get('serverType') is 'lingsync'
+        url = "#{@_getURL()}_session"
+        payload = name: username, password: password
+        success = (r) -> r.ok is true
+
       @cors(
         method: 'POST'
-        url: "#{@_getURL()}login/authenticate"
         timeout: 3000
-        payload: username: username, password: password
+        url: url
+        payload: payload
         onload: (responseJSON) =>
           Backbone.trigger 'longTask:deregister', taskId
           Backbone.trigger 'authenticate:end'
-          if responseJSON.authenticated
+          if success(responseJSON)
             @set username: username, loggedIn: true
             Backbone.trigger 'authenticate:success'
           else
@@ -62,17 +71,27 @@ define [
           Backbone.trigger 'authenticate:end'
       )
 
-    # TODO: encapsulate the LingSync logout request.
     logout: ->
       taskId = @guid()
       Backbone.trigger 'longTask:register', 'logout', taskId
+
+      url = "#{@_getURL()}login/logout"
+      method = 'GET'
+      logoutBoolean = 'authenticated'
+      success = (r) -> r.authenticated is false
+      if @get('serverType') is 'lingsync'
+        url = "#{@_getURL()}_session"
+        method = 'DELETE'
+        success = (r) -> r.ok is true
+
       @cors(
-        url: "#{@_getURL()}login/logout"
+        url: url
+        method: method
         timeout: 3000
         onload: (responseJSON) =>
           Backbone.trigger 'authenticate:end'
           Backbone.trigger 'longTask:deregister', taskId
-          if not responseJSON.authenticated
+          if success(responseJSON)
             @set 'loggedIn', false
             Backbone.trigger 'logout:success'
           else
@@ -91,23 +110,29 @@ define [
     _getURL: ->
       serverURL = @get 'serverURL'
       serverPort = @get 'serverPort'
-      url = "#{serverURL}#{serverPort and ':' + serverPort or ''}/"
+      "#{serverURL}#{serverPort and ':' + serverPort or ''}/"
 
-    # Check if we are already logged in by requesting the speakers collection.
-    # (NOTE: this is an OLD-specific, somewhat arbitrary means of testing for
-    # authentication.)
+    # Check if we are already logged in.
     checkIfLoggedIn: ->
       taskId = @guid()
       Backbone.trigger 'longTask:register', 'checking if already logged in', taskId
-      url = @get 'serverURL'
-      port = @get 'serverPort'
+
+      if @get('serverType') is 'old'
+        # TODO: this shouldn't be a speakers request: this should return
+        # username of logged in user. I need to change the OLD API in that case ...
+        url = "#{@_getURL()}speakers"
+        success = (r) -> utils.type(r) is 'array'
+      else
+        url = "#{@_getURL()}_session"
+        success = (r) -> r?.ok is true
+
       @cors(
-        url: "#{url}#{port and ':' + port or ''}/speakers"
+        url: url
         timeout: 3000
         onload: (responseJSON) =>
           Backbone.trigger 'longTask:deregister', taskId
           Backbone.trigger 'authenticate:end'
-          if utils.type(responseJSON) is 'array'
+          if success(responseJSON)
             @set 'loggedIn', true
             Backbone.trigger 'authenticate:success'
           else
@@ -126,6 +151,8 @@ define [
       )
 
     defaults: ->
+
+      serverType: 'lingsync' # other option 'old'
 
       # URL of the server where the data are stored (LingSync corpus or OLD web
       # service)
