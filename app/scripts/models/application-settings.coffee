@@ -164,6 +164,12 @@ define [
       loggedIn: false
       username: ''
 
+      # corpora: ['corpus 1', 'corpus 2'] # corpora I have access to.
+      corpora: [] # corpora I have access to.
+      corpus: null # corpora I most recently accessed.
+
+      # Note: the following attributes are not currently being used (displayed)
+
       # Right now I'm focusing on server-side persistence to an OLD RESTful web
       # service. The next step will be persistence to a LingSync corpus, then
       # client-side (indexedDB) persistence, and, finally, progressively

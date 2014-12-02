@@ -23,6 +23,7 @@ define [
       'click button.view': 'clickView'
       'keydown .dative-input-display': '_keyboardControl'
       'keydown button': '_keyboardControl'
+      'selectmenuchange .serverType': '_corpusSelectVisibility'
 
     initialize: ->
       @displayView = new ApplicationSettingsDisplayView model: @model
@@ -108,8 +109,6 @@ define [
       if event.which is 27
         try
           classes = $(event.target).attr('class').split /\s+/
-          console.log 'Esc called on input'
-          console.log classes
           if 'dative-input' in classes
             event.stopPropagation()
             @view()
@@ -137,14 +136,22 @@ define [
           .append($('<option>').attr('value', serverType).text(serverType))
 
     _guify: ->
-      @_body.perfectScrollbar()
+
+      # Franklin could button buttons and perfectScrollbar.
       @$('button').button().attr('tabindex', '0')
-      @$('select, input, textarea, div.dative-input-display,
-        span.ui-selectmenu-button')
-        .css("border-color", ApplicationSettingsView.jQueryUIColors.defBo)
-        .attr('tabindex', '0')
-      @$('select[name="serverType"]', @_body).selectmenu()
+      @_body.perfectScrollbar()
+
+      @_selectmenuify()
+      @_hoverStateFieldDisplay() # make data display react to focus & hover
+      @_tabindicesNaught() # active elements have tabindex=0
+      @_toggleCorpusSelect() # corpora only displayed for LingSync
+
+    _selectmenuify: ->
+      @$('select', @_body).selectmenu()
       @$('.ui-selectmenu-button').addClass 'dative-input dative-input-display'
+
+    # Make active elements have tabindex=0
+    _hoverStateFieldDisplay: ->
       @$('div.dative-input-display')
         .mouseover(->
           $(@).addClass('ui-state-hover').addClass('ui-state-active'))
@@ -153,6 +160,21 @@ define [
           $(@).removeClass('ui-state-hover').removeClass('ui-state-active'))
         .blur(->
           $(@).removeClass('ui-state-hover').removeClass('ui-state-active'))
+
+    # Tabindices=0 and jQueryUI colors
+    _tabindicesNaught: ->
+      @$('button, select, input, textarea, div.dative-input-display,
+        span.ui-selectmenu-button')
+        .css("border-color", ApplicationSettingsView.jQueryUIColors.defBo)
+        .attr('tabindex', '0')
+
+
+    # Only display corpus select for LingSync
+    _toggleCorpusSelect: ->
+      if @model.get('serverType') is 'LingSync'
+        @$('li.corpusSelect').show()
+      else
+        @$('li.corpusSelect').hide()
 
     _addModel: ->
       @$('select[name="serverType"]', @_body)
@@ -174,4 +196,10 @@ define [
           @$('button.edit').first().focus()
         else if viewType is 'edit'
           @$('select, input').first().focus().select()
+
+    _corpusSelectVisibility: (event, ui) ->
+      if ui.item.value is 'LingSync'
+        @$('li.corpusSelect').slideDown('medium')
+      else
+        @$('li.corpusSelect').slideUp('medium')
 

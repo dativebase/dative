@@ -6,6 +6,19 @@
       <select name="serverType" class="serverType"></select>
     </li>
 
+    <li class="corpusSelect">
+      <label for="corpus">Corpus</label>
+      <select name="corpus" class="corpus">
+      <% if not @corpora.length: %>
+        <option value="noCorpus">login to access corpus list</option>
+      <% else: %>
+        <% for corpus in @corpora: %>
+            <option value="<%= corpus %>"><%= corpus %></option>
+        <% end %>
+      <% end %>
+      </select>
+    </li>
+
     <li>
       <label for="serverURL">Server URL</label>
       <input type="text" name="serverURL" class="dative-input
@@ -20,12 +33,12 @@
 
     <li>
       <label for="loggedIn">Logged in</label>
-      <div class="dative-display dative-input-display"><%= @loggedIn %></div>
+      <div class="dative-display"><%= @loggedIn %></div>
     </li>
 
     <li>
       <label for="username">Username</label>
-      <div class="dative-display dative-input-display"><%= @username %></div>
+      <div class="dative-display"><%= @username %></div>
     </li>
 
     <li class="center">
@@ -34,5 +47,6 @@
     </li>
 
   </ul>
+
 </form>
 

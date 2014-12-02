@@ -6,6 +6,12 @@
       <div class="dative-display dative-input-display"><%= @serverType %></div>
     </li>
 
+    <li class="corpusSelect">
+      <label for="corpus">Corpus</label>
+      <div class="dative-display dative-input-display"
+        ><%= @corpus or 'no LingSync corpus selected' %></div>
+    </li>
+
     <li>
       <label for="serverURL">Server URL</label>
       <div class="dative-display dative-input-display"><%= @serverURL %></div>
