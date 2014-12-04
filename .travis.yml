@@ -37,7 +37,9 @@ script: grunt
 
 env:
   global:
-    - "FTP_USER=user"
-    - "FTP_PASSWORD=password"
+    - secure: "idG10uJCHMoQLlySdGjCq+F/UUvCPs6f/gqR8srtIAb7oxdZ25P/jU7yESi+rDwZh9GcB7hNwM2MlonoGZKXlkTGxnSt8e9OMQ2PJuchUspZp5Dt62Ubc+CXo/cwiV4kUP9AqPWqQX45sZu5AxbiP2awdKPSmY+cC8409ml/ozI="
+    - secure: "ULfKxRZxlujo9Dvsj7RLkMrymO2Cw7bm5FpWBqcDGewYOkSyiitqxSc3kolU8kAzgOhjJaplPmGLCi79WRc1aDDLUGyWCMaSzGQYenlj7pYJTsCh7Ql3ByjpZ3R7UYS3whs954+1VhNd40UObnQ3V/dB1SbgCjUVspll4VLUfJU="
+    - secure: "PapdPR5sQG5bmjYhaAkEnJccR8anv9V7/oRn3Q4XhHiXjWKoA5ErFOLiMV+iEpuMMYJsbNH7cizO+dq7lKN8Ngh5OEWUkrL36Luqh9RGdk/2PO0wOmWyWC24AR5nLDELHNRMp5Vxwy5rDr3zAdyJvBeL4YM5JnPnHzwwt/rfmpU="
+
 after_success:
-    "curl --ftp-create-dirs -T uploadfilename -u $FTP_USER:$FTP_PASSWORD ftp://sitename.com/directory/myfile"
+    "curl --ftp-create-dirs -T README.md -u $USERNAME:$PASSWORD $SERVER_PATH/beta"
