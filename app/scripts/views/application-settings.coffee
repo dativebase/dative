@@ -4,6 +4,7 @@ define [
   './application-settings-view'
   './application-settings-edit'
   './../templates/application-settings-header'
+  'perfectscrollbar'
 ], (Backbone, BaseView, ApplicationSettingsDisplayView,
   ApplicationSettingsEditView, applicationSettingsHeaderTemplate) ->
 
@@ -16,13 +17,13 @@ define [
     template: applicationSettingsHeaderTemplate
 
     events:
-      'click .dative-display': 'clickEdit'
+      'click .dative-input-display.dative-display': 'clickEdit'
       'click button.edit': 'clickEdit'
       'click button.save': 'clickSave'
       'click button.view': 'clickView'
-      'keydown .dative-input': '_keyboardControl'
-      'keydown .dative-display': '_keyboardControl'
+      'keydown .dative-input-display': '_keyboardControl'
       'keydown button': '_keyboardControl'
+      'selectmenuchange .serverType': '_corpusSelectVisibility'
 
     initialize: ->
       @displayView = new ApplicationSettingsDisplayView model: @model
@@ -34,8 +35,10 @@ define [
 
     render: ->
       @$el.html @template headerTitle: 'Application Settings'
-      @displayView.setElement @$('#dative-page-body')
-      @editView.setElement @$('#dative-page-body')
+      @matchHeights()
+      @_body = @$ '#dative-page-body'
+      @displayView.setElement @_body
+      @editView.setElement @_body
       @view()
 
     # Render display view, close edit view
@@ -59,7 +62,9 @@ define [
       @closed @displayView
       @editView.render()
       @rendered @editView
+      @_populateSelectFields()
       @_guify()
+      @_addModel()
       @_editButtons()
       @_setFocus 'edit'
 
@@ -72,8 +77,9 @@ define [
     # Save to localStorage, render display view
     save: ->
       applicationSettingsObject = @_getModelObjectFromForm()
-      @model.set applicationSettingsObject
+      #@model.set applicationSettingsObject
       @model.save applicationSettingsObject
+      @view()
 
     clickSave: (event) ->
       event.preventDefault()
@@ -125,16 +131,56 @@ define [
           else if 'save' in classes
             @save()
 
+    _populateSelectFields: ->
+      for serverType in ['FieldDB', 'OLD']
+        @$('select[name="serverType"]', @_body)
+          .append($('<option>').attr('value', serverType).text(serverType))
+
     _guify: ->
-      @$('button').button().attr('tabindex', '1')
-      @$('select, input, textarea, div.dative-display')
-        .css("border-color", ApplicationSettingsView.jQueryUIColors.defBo)
-        .attr('tabindex', '1')
-      @$('div.dative-display')
-        .mouseover(-> $(@).addClass('ui-state-hover').addClass('ui-state-active'))
+
+      # Franklin could button buttons and perfectScrollbar.
+      @$('button').button().attr('tabindex', '0')
+      @_body.perfectScrollbar()
+
+      @_selectmenuify()
+      @_hoverStateFieldDisplay() # make data display react to focus & hover
+      @_tabindicesNaught() # active elements have tabindex=0
+      @_toggleCorpusSelect() # corpora only displayed for FieldDB
+
+    _selectmenuify: ->
+      @$('select', @_body).selectmenu()
+      @$('.ui-selectmenu-button').addClass 'dative-input dative-input-display'
+
+    # Make active elements have tabindex=0
+    _hoverStateFieldDisplay: ->
+      @$('div.dative-input-display')
+        .mouseover(->
+          $(@).addClass('ui-state-hover').addClass('ui-state-active'))
         .focus(-> $(@).addClass('ui-state-hover').addClass('ui-state-active'))
-        .mouseout(-> $(@).removeClass('ui-state-hover').removeClass('ui-state-active'))
-        .blur(-> $(@).removeClass('ui-state-hover').removeClass('ui-state-active'))
+        .mouseout(->
+          $(@).removeClass('ui-state-hover').removeClass('ui-state-active'))
+        .blur(->
+          $(@).removeClass('ui-state-hover').removeClass('ui-state-active'))
+
+    # Tabindices=0 and jQueryUI colors
+    _tabindicesNaught: ->
+      @$('button, select, input, textarea, div.dative-input-display,
+        span.ui-selectmenu-button')
+        .css("border-color", ApplicationSettingsView.jQueryUIColors.defBo)
+        .attr('tabindex', '0')
+
+
+    # Only display corpus select for FieldDB
+    _toggleCorpusSelect: ->
+      if @model.get('serverType') is 'FieldDB'
+        @$('li.corpusSelect').show()
+      else
+        @$('li.corpusSelect').hide()
+
+    _addModel: ->
+      @$('select[name="serverType"]', @_body)
+        .val(@model.get('serverType'))
+        .selectmenu 'refresh', true
 
     _rememberTarget: (event) ->
       try
@@ -144,11 +190,17 @@ define [
 
     _setFocus: (viewType) ->
       if @focusedElementIndex?
-        nthElement = @$('.dative-input-display').eq @focusedElementIndex
-        nthElement.focus().select()
+        @$('.dative-input-display').eq(@focusedElementIndex)
+          .focus().select()
       else
         if viewType is 'view'
           @$('button.edit').first().focus()
         else if viewType is 'edit'
-          @$('input').first().focus().select()
+          @$('select, input').first().focus().select()
+
+    _corpusSelectVisibility: (event, ui) ->
+      if ui.item.value is 'FieldDB'
+        @$('li.corpusSelect').slideDown('medium')
+      else
+        @$('li.corpusSelect').slideUp('medium')
 

@@ -4,7 +4,7 @@
 #
 #     http://blog.teamtreehouse.com/create-your-own-to-do-app-with-html5-and-indexeddb
 #
-# Defines a LingSyncIDB class that simplifies IndexedDB interactions.
+# Defines a FieldDBIDB class that simplifies IndexedDB interactions.
 #
 # See also the IndexedDB API spec:
 #
@@ -23,8 +23,8 @@ define (require) ->
 
   {clone} = require './utils'
 
-  # A wrapper around IndexedDB with LingSync conveniences.
-  class LingSyncIDB
+  # A wrapper around IndexedDB with FieldDB conveniences.
+  class FieldDBIDB
 
     # :param String id: name of the IndexedDB database as defined in
     #   `models/database`.
@@ -167,10 +167,10 @@ define (require) ->
         callback false
 
 
-  # An form store-specific interface to a LingSyncIDB instance.
+  # An form store-specific interface to a FieldDBIDB instance.
   class FormStore
 
-    # Requires a LingSyncIDB instance
+    # Requires a FieldDBIDB instance
     constructor: (@db) ->
 
     # Create a new form.
@@ -208,6 +208,6 @@ define (require) ->
 
 
   # The Object that we export.
-  LingSyncIDB: LingSyncIDB
+  FieldDBIDB: FieldDBIDB
   FormStore: FormStore
 
