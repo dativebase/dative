@@ -109,7 +109,7 @@ module.exports = (grunt) ->
       doctmp: '.doctmp'
       docs: 'docs'
 
-    jshint: 
+    jshint:
       options:
         jshintrc: '.jshintrc'
         reporter: require('jshint-stylish')
@@ -227,13 +227,13 @@ module.exports = (grunt) ->
           #
     useminPrepare:
       html: '<%= yeoman.app %>/index.html'
-      options: 
+      options:
         dest: '<%= yeoman.dist %>'
 
     usemin:
       html: ['<%= yeoman.dist %>/{,*/}*.html']
       css: ['<%= yeoman.dist %>/styles/{,*/}*.css']
-      options: 
+      options:
         dirs: ['<%= yeoman.dist %>']
 
     imagemin:
@@ -431,4 +431,6 @@ module.exports = (grunt) ->
   grunt.registerTask 'lint', 'coffeelint'
 
   grunt.registerTask 'docs', ['clean:docs', 'clean:doctmp', 'copy:docco', 'docco', 'clean:doctmp']
+
+  grunt.registerTask 'deploy', ['jshint']
 
