@@ -1,6 +1,6 @@
 'use strict'
 LIVERELOAD_PORT = 35729
-SERVER_PORT = 9000
+SERVER_PORT = 9001
 lrSnippet = require('connect-livereload')({port: LIVERELOAD_PORT})
 mountFolder = (connect, dir) ->
   connect.static(require('path').resolve(dir))
@@ -117,6 +117,7 @@ module.exports = (grunt) ->
         'Gruntfile.js'
         '<%= yeoman.app %>/scripts/{,*/}*.js'
         '!<%= yeoman.app %>/scripts/vendor/*'
+        '!<%= yeoman.app %>/scripts/jquery-extensions/*'
         'test/spec/{,*/}*.js'
       ]
 
