@@ -9,7 +9,7 @@
     <li class="corpusSelect">
       <label for="corpus">Corpus</label>
       <div class="dative-display dative-input-display"
-        ><%= @corpus or 'no LingSync corpus selected' %></div>
+        ><%= @corpus or 'no corpus selected' %></div>
     </li>
 
     <li>

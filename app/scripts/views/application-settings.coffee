@@ -77,8 +77,9 @@ define [
     # Save to localStorage, render display view
     save: ->
       applicationSettingsObject = @_getModelObjectFromForm()
-      @model.set applicationSettingsObject
+      #@model.set applicationSettingsObject
       @model.save applicationSettingsObject
+      @view()
 
     clickSave: (event) ->
       event.preventDefault()
@@ -131,7 +132,7 @@ define [
             @save()
 
     _populateSelectFields: ->
-      for serverType in ['LingSync', 'OLD']
+      for serverType in ['FieldDB', 'OLD']
         @$('select[name="serverType"]', @_body)
           .append($('<option>').attr('value', serverType).text(serverType))
 
@@ -144,7 +145,7 @@ define [
       @_selectmenuify()
       @_hoverStateFieldDisplay() # make data display react to focus & hover
       @_tabindicesNaught() # active elements have tabindex=0
-      @_toggleCorpusSelect() # corpora only displayed for LingSync
+      @_toggleCorpusSelect() # corpora only displayed for FieldDB
 
     _selectmenuify: ->
       @$('select', @_body).selectmenu()
@@ -169,9 +170,9 @@ define [
         .attr('tabindex', '0')
 
 
-    # Only display corpus select for LingSync
+    # Only display corpus select for FieldDB
     _toggleCorpusSelect: ->
-      if @model.get('serverType') is 'LingSync'
+      if @model.get('serverType') is 'FieldDB'
         @$('li.corpusSelect').show()
       else
         @$('li.corpusSelect').hide()
@@ -198,7 +199,7 @@ define [
           @$('select, input').first().focus().select()
 
     _corpusSelectVisibility: (event, ui) ->
-      if ui.item.value is 'LingSync'
+      if ui.item.value is 'FieldDB'
         @$('li.corpusSelect').slideDown('medium')
       else
         @$('li.corpusSelect').slideUp('medium')

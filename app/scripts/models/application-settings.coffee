@@ -23,6 +23,8 @@ define [
       super
 
     save: ->
+      if arguments.length
+        @set.apply @, arguments
       localStorage.setItem 'dativeApplicationSettings',
         JSON.stringify(@attributes)
 
@@ -34,127 +36,189 @@ define [
       if @hasChanged('serverURL') or @hasChanged('serverPort')
         @checkIfLoggedIn()
 
-    # Attempt to authenticate with the passed-in credentials
-    # TODO: responseJSON from CouchDB also returns an array of roles; use it.
-    authenticate: (username, password) ->
-      taskId = @guid()
-      Backbone.trigger 'longTask:register', 'authenticating', taskId
-
-      url = "#{@_getURL()}login/authenticate"
-      payload = username: username, password: password
-      success = (r) -> r.authenticated is true
-      if @get('serverType') is 'LingSync'
-        url = "#{@_getURL()}_session"
-        payload = name: username, password: password
-        success = (r) -> r.ok is true
-
-      @cors(
-        method: 'POST'
-        timeout: 3000
-        url: url
-        payload: payload
-        onload: (responseJSON) =>
-          Backbone.trigger 'longTask:deregister', taskId
-          Backbone.trigger 'authenticate:end'
-          if success(responseJSON)
-            @set username: username, loggedIn: true
-            Backbone.trigger 'authenticate:success'
-          else
-            Backbone.trigger 'authenticate:fail', responseJSON
-        onerror: (responseJSON) ->
-          Backbone.trigger 'authenticate:fail', responseJSON
-          Backbone.trigger 'longTask:deregister', taskId
-          Backbone.trigger 'authenticate:end'
-        ontimeout: ->
-          Backbone.trigger 'authenticate:fail', error: 'Request timed out'
-          Backbone.trigger 'longTask:deregister', taskId
-          Backbone.trigger 'authenticate:end'
-      )
-
-    logout: ->
-      taskId = @guid()
-      Backbone.trigger 'longTask:register', 'logout', taskId
-
-      url = "#{@_getURL()}login/logout"
-      method = 'GET'
-      logoutBoolean = 'authenticated'
-      success = (r) -> r.authenticated is false
-      if @get('serverType') is 'LingSync'
-        url = "#{@_getURL()}_session"
-        method = 'DELETE'
-        success = (r) -> r.ok is true
-
-      @cors(
-        url: url
-        method: method
-        timeout: 3000
-        onload: (responseJSON) =>
-          Backbone.trigger 'authenticate:end'
-          Backbone.trigger 'longTask:deregister', taskId
-          if success(responseJSON)
-            @set 'loggedIn', false
-            Backbone.trigger 'logout:success'
-          else
-            Backbone.trigger 'logout:fail'
-        onerror: (responseJSON) =>
-          Backbone.trigger 'authenticate:end'
-          Backbone.trigger 'longTask:deregister', taskId
-          Backbone.trigger 'logout:fail'
-        ontimeout: ->
-          Backbone.trigger 'logout:fail', error: 'Request timed out'
-          Backbone.trigger 'longTask:deregister', taskId
-          Backbone.trigger 'authenticate:end'
-      )
-
     # Return our URL by combining serverURL and serverPort, if specified
     _getURL: ->
       serverURL = @get 'serverURL'
       serverPort = @get 'serverPort'
       "#{serverURL}#{serverPort and ':' + serverPort or ''}/"
 
-    # Check if we are already logged in.
-    checkIfLoggedIn: ->
-      taskId = @guid()
-      Backbone.trigger 'longTask:register', 'checking if already logged in', taskId
+    _authenticateAttemptDone: (taskId) ->
+      Backbone.trigger 'longTask:deregister', taskId
+      Backbone.trigger 'authenticate:end'
 
-      if @get('serverType') is 'old'
-        # TODO: this shouldn't be a speakers request: this should return
-        # username of logged in user. I need to change the OLD API in that case ...
-        url = "#{@_getURL()}speakers"
-        success = (r) -> utils.type(r) is 'array'
+
+    # Login (a.k.a. authenticate)
+    #=========================================================================
+
+    # Attempt to authenticate with the passed-in credentials
+    authenticate: (username, password) ->
+      if @get('serverType') is 'FieldDB'
+        @_authenticateFieldDB username: username, password: password
       else
-        url = "#{@_getURL()}_session"
-        success = (r) -> r?.ok is true
+        @_authenticateOLD username: username, password: password
 
+    _authenticateOLD: (credentials) ->
+      taskId = @guid()
+      Backbone.trigger 'longTask:register', 'authenticating', taskId
       @cors(
-        url: url
+        method: 'POST'
         timeout: 3000
+        url: "#{@_getURL()}login/authenticate"
+        payload: credentials
         onload: (responseJSON) =>
-          Backbone.trigger 'longTask:deregister', taskId
-          Backbone.trigger 'authenticate:end'
-          if success(responseJSON)
-            @set 'loggedIn', true
+          @_authenticateAttemptDone taskId
+          if responseJSON.authenticated is true
+            @save username: credentials.username, loggedIn: true
             Backbone.trigger 'authenticate:success'
           else
-            @set 'loggedIn', false
+            Backbone.trigger 'authenticate:fail', responseJSON
+        onerror: (responseJSON) =>
+          Backbone.trigger 'authenticate:fail', responseJSON
+          @_authenticateAttemptDone taskId
+        ontimeout: =>
+          Backbone.trigger 'authenticate:fail', error: 'Request timed out'
+          @_authenticateAttemptDone taskId
+      )
+
+    # This is based on the FieldDB AngularJS ("Spreadsheet") source, i.e.,
+    # https://github.com/OpenSourceFieldlinguistics/FieldDB/blob/master/\
+    #   angular_client/modules/core/app/scripts/directives/\
+    #   fielddb-authentication.js
+    _authenticateFieldDB: (credentials) ->
+      taskId = @guid()
+      Backbone.trigger 'longTask:register', 'authenticating', taskId
+      url = @_getURL()
+      url = url.substring(-1, url.length - 1)
+      FieldDB.Database::BASE_AUTH_URL = url
+      FieldDB.Database::login(credentials).then(
+        (user) =>
+          # TODO: insert a test on the `user` object here.
+          @save username: credentials.username, loggedIn: true
+          Backbone.trigger 'authenticate:success'
+          user = new FieldDB.User(user)
+          # TODO: store the returned user somewhere
+        ,
+        (reason) ->
+          Backbone.trigger 'authenticate:fail', reason
+      ).catch(
+        ->
+          Backbone.trigger 'authenticate:fail', {reason: 'An error occurred'}
+      ).done(
+        =>
+          @_authenticateAttemptDone taskId
+      )
+
+
+    # Logout
+    #=========================================================================
+
+    logout: ->
+      if @get('serverType') is 'FieldDB'
+        @_logoutFieldDB()
+      else
+        @_logoutOLD()
+
+    _logoutOLD: ->
+      taskId = @guid()
+      Backbone.trigger 'longTask:register', 'logout', taskId
+      @cors(
+        url: "#{@_getURL()}login/logout"
+        method: 'GET'
+        timeout: 3000
+        onload: (responseJSON) =>
+          @_authenticateAttemptDone taskId
+          if responseJSON.authenticated is false
+            @save 'loggedIn', false
+            Backbone.trigger 'logout:success'
+          else
+            Backbone.trigger 'logout:fail'
+        onerror: (responseJSON) =>
+          @_authenticateAttemptDone taskId
+          Backbone.trigger 'logout:fail'
+        ontimeout: =>
+          @_authenticateAttemptDone taskId
+          Backbone.trigger 'logout:fail', error: 'Request timed out'
+      )
+
+    _logoutFieldDB: ->
+      taskId = @guid()
+      Backbone.trigger 'longTask:register', 'logout', taskId
+      FieldDB.Database::logout().then(
+        (responseJSON) =>
+          if responseJSON.ok is true
+            @save 'loggedIn', false
+            Backbone.trigger 'logout:success'
+          else
+            Backbone.trigger 'logout:fail'
+        ,
+        (reason) ->
+          Backbone.trigger 'logout:fail', reason
+      ).done(=> @_authenticateAttemptDone taskId)
+
+
+    # Check if logged in
+    #=========================================================================
+
+    # Check if we are already logged in.
+    checkIfLoggedIn: ->
+      #@fetch()
+      if @get('serverType') is 'FieldDB'
+        @_checkIfLoggedInFieldDB()
+      else
+        @_checkIfLoggedInOLD()
+
+    _checkIfLoggedInOLD: ->
+      taskId = @guid()
+      Backbone.trigger('longTask:register', 'checking if already logged in',
+        taskId)
+      @cors(
+        url: "#{@_getURL()}speakers"
+        timeout: 3000
+        onload: (responseJSON) =>
+          @_authenticateAttemptDone(taskId)
+          if utils.type(responseJSON) is 'array'
+            @save 'loggedIn', true
+            Backbone.trigger 'authenticate:success'
+          else
+            @save 'loggedIn', false
             Backbone.trigger 'authenticate:fail'
         onerror: (responseJSON) =>
-          @set 'loggedIn', false
+          @save 'loggedIn', false
           Backbone.trigger 'authenticate:fail', responseJSON
-          Backbone.trigger 'longTask:deregister', taskId
-          Backbone.trigger 'authenticate:end'
+          @_authenticateAttemptDone(taskId)
         ontimeout: =>
-          @set 'loggedIn', false
+          @save 'loggedIn', false
           Backbone.trigger 'authenticate:fail', error: 'Request timed out'
-          Backbone.trigger 'longTask:deregister', taskId
-          Backbone.trigger 'authenticate:end'
+          @_authenticateAttemptDone(taskId)
       )
+
+    _checkIfLoggedInFieldDB: ->
+      taskId = @guid()
+      Backbone.trigger('longTask:register', 'checking if already logged in',
+        taskId)
+      FieldDB.Database::resumeAuthenticationSession().then(
+        (sessionInfo) =>
+          if sessionInfo.ok and sessionInfo.userCtx.name
+            @save 'loggedIn', true
+            Backbone.trigger 'authenticate:success'
+          else
+            @save 'loggedIn', false
+            Backbone.trigger 'authenticate:fail'
+        ,
+        (reason) =>
+          @save 'loggedIn', false
+          Backbone.trigger 'authenticate:fail', reason
+      ).done(=> @_authenticateAttemptDone taskId)
+
+
+    # Defaults
+    #=========================================================================
 
     defaults: ->
 
-      serverType: 'LingSync' # other option 'OLD'
+      serverType: 'FieldDB' # other option 'OLD'
 
-      # URL of the server where the data are stored (LingSync corpus or OLD web
+      # URL of the server where the data are stored (FieldDB corpus or OLD web
       # service)
       #serverURL: "http://www.onlinelinguisticdatabase.org/" # ... as an example
       serverURL: 'http://127.0.0.1'
@@ -171,12 +235,12 @@ define [
       # Note: the following attributes are not currently being used (displayed)
 
       # Right now I'm focusing on server-side persistence to an OLD RESTful web
-      # service. The next step will be persistence to a LingSync corpus, then
+      # service. The next step will be persistence to a FieldDB corpus, then
       # client-side (indexedDB) persistence, and, finally, progressively
       # improved dual-layer persistence (i.e., client and server). An
       # interesting possibility would be to enable Dative to provide a single
       # simultaneous interface to multiple web services, e.g., multiple OLD web
-      # services and multiple LingSync corpora...
+      # services and multiple FieldDB corpora...
       persistenceType: "server" # "server", "client", or "dual"
 
       # Schema type will become relevant later on ...
