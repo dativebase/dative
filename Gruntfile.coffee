@@ -261,6 +261,7 @@ module.exports = (grunt) ->
             spin: '../../<%= yeoman.app %>/bower_components/spin.js/spin'
             jqueryspin: '../../<%= yeoman.app %>/bower_components/spin.js/jquery.spin'
             perfectscrollbar: '../../<%= yeoman.app %>/bower_components/perfect-scrollbar/src/perfect-scrollbar'
+            fielddb: '../../<%= yeoman.app %>/bower_components/fielddb/fielddb'
 
     useminPrepare:
       html: '<%= yeoman.app %>/index.html'
