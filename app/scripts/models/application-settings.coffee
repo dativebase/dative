@@ -216,7 +216,7 @@ define [
 
     defaults: ->
 
-      serverType: 'FieldDB' # other option 'OLD'
+      serverType: 'OLD' # other option 'FieldDB'
 
       # URL of the server where the data are stored (FieldDB corpus or OLD web
       # service)
