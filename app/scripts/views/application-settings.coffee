@@ -169,7 +169,6 @@ define [
         .css("border-color", ApplicationSettingsView.jQueryUIColors.defBo)
         .attr('tabindex', '0')
 
-
     # Only display corpus select for FieldDB
     _toggleCorpusSelect: ->
       if @model.get('serverType') is 'FieldDB'

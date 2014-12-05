@@ -171,10 +171,12 @@ ul.sf-menu li a
     padding: 5px;
     z-index: 2000;
 }
-.dative-login-dialog-widget .dative-login-failed {
+.dative-login-dialog-widget .dative-login-failed,
+.dative-register-dialog-widget .dative-register-failed {
     padding: 5px;
 }
 .dative-login-dialog-widget,
+.dative-register-dialog-widget,
 #appview,
 .progress-widget,
 .notifier
@@ -222,8 +224,10 @@ ul.fieldset label {
 .applicationSettingsForm ul.fieldset label {
     width: 150px;
 }
-.loginLogin ul.fieldset label {
-    width: 61px;
+.loginLogin ul.fieldset label,
+.registerForm ul.fieldset label {
+    /*width: 61px;*/
+    width: 120px;
 }
 .fieldset label,
 .fieldset input[type="text"],
@@ -469,5 +473,14 @@ h1 {
 }
 .ui-buttonset .ui-button {
     margin-right: -4px;
+}
+
+.ui-dialog .ui-dialog-titlebar {
+  line-height: normal;
+}
+
+form.registerForm input,
+form.registerForm select{
+  width: 230px;
 }
 

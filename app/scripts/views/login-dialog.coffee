@@ -43,6 +43,10 @@ define [
         autoOpen: false
         appendTo: @$target
         buttons: [
+            text: 'Register'
+            click: => @registerAccount()
+            class: 'register'
+          ,
             text: 'Forgot password'
             click: => @forgotPassword()
             class: 'forgot-password'
@@ -141,4 +145,7 @@ define [
 
     forgotPassword: ->
       Backbone.trigger 'authenticate:forgot-password'
+
+    registerAccount: ->
+      @trigger 'request:openRegisterDialogBox'
 
