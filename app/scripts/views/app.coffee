@@ -5,6 +5,7 @@ define [
   './progress-widget'
   './notifier'
   './login-dialog'
+  './register-dialog'
   './application-settings'
   './pages'
   './form-add'
@@ -14,8 +15,8 @@ define [
   './../collections/forms'
   './../templates/app'
 ], (Backbone, BaseView, MainMenuView, ProgressWidgetView,
-  NotifierView, LoginDialogView, ApplicationSettingsView, PagesView,
-  FormAddView, FormsView, ApplicationSettingsModel, FormModel,
+  NotifierView, LoginDialogView, RegisterDialogView, ApplicationSettingsView,
+  PagesView, FormAddView, FormsView, ApplicationSettingsModel, FormModel,
   FormsCollection, appTemplate) ->
 
   # App View
@@ -42,6 +43,7 @@ define [
 
       @mainMenuView = new MainMenuView model: @applicationSettings
       @loginDialog = new LoginDialogView model: @applicationSettings
+      @registerDialog = new RegisterDialogView model: @applicationSettings
       @progressWidget = new ProgressWidgetView()
       @notifier = new NotifierView(@applicationSettings)
 
@@ -49,6 +51,8 @@ define [
       @listenTo @mainMenuView, 'request:formAdd', @showFormAddView
       @listenTo @mainMenuView, 'request:formsBrowse', @showFormsView
       @listenTo @mainMenuView, 'request:openLoginDialogBox', @toggleLoginDialog
+      @listenTo @mainMenuView, 'request:openRegisterDialogBox', @toggleRegisterDialog
+      @listenTo @loginDialog, 'request:openRegisterDialogBox', @toggleRegisterDialog
       @listenTo @mainMenuView, 'request:applicationSettings',
         @showApplicationSettingsView
 
@@ -58,10 +62,12 @@ define [
       @$el.html @template()
       @mainMenuView.setElement(@$('#mainmenu')).render()
       @loginDialog.setElement(@$('#login-dialog-container')).render()
+      @registerDialog.setElement(@$('#register-dialog-container')).render()
       @progressWidget.setElement(@$('#progress-widget-container')).render()
       @notifier.setElement @$('#notifier-container')
       @rendered @mainMenuView
       @rendered @loginDialog
+      @rendered @registerDialog
       @rendered @progressWidget
       @rendered @notifier # Notifier self-renders but we register it as rendered anyways so that we can clean up after it if `.close` is ever called
 
@@ -139,4 +145,8 @@ define [
     # Open/close the login dialog box
     toggleLoginDialog: ->
       Backbone.trigger 'loginDialog:toggle'
+
+    # Open/close the register dialog box
+    toggleRegisterDialog: ->
+      Backbone.trigger 'registerDialog:toggle'
 

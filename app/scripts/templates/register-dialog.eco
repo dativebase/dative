@@ -1,0 +1,59 @@
+<div class='dative-register-dialog'>
+  <form action='register' method='post' class='registerForm'>
+    <ul class='fieldset'>
+
+      <li class="serverSelect">
+        <label for="server">Server *</label>
+        <select name="server" class="server">
+        <% if not @servers.length: %>
+          <option value="noServer">configure a server in Application
+          Settings</option>
+        <% else: %>
+          <% for server in @servers: %>
+              <option value="<%= server.url %>"><%= server.name %></option>
+          <% end %>
+        <% end %>
+        </select>
+        <span class='ui-state-error ui-corner-all dative-register-failed
+          server-error'></span>
+      </li>
+
+      <li>
+        <label for='username'>Username *</label>
+        <input type='text' name='username' class='username'
+            tabindex=1 id="big" />
+        <span class='ui-state-error ui-corner-all dative-register-failed
+          username-error'></span>
+      </li>
+
+      <li>
+        <label for='password'>Password *</label>
+        <input type='password' name='password' class='password'
+            tabindex=1 />
+        <span class='ui-state-error ui-corner-all dative-register-failed
+          password-error'></span>
+      </li>
+
+      <li>
+        <label for='passwordConfirm'>Confirm password *</label>
+        <input type='password' name='passwordConfirm' class='passwordConfirm'
+            tabindex=1 />
+        <span class='ui-state-error ui-corner-all dative-register-failed
+          passwordConfirm-error'></span>
+      </li>
+
+      <li>
+        <label for='email'>E-mail *</label>
+        <input type='text' name='email' class='email'
+            tabindex=1 />
+        <span class='ui-state-error ui-corner-all dative-register-failed
+          email-error'></span>
+      </li>
+
+    </ul>
+  </form>
+</div>
+
+<div class='dative-register-dialog-target'><div>
+
+

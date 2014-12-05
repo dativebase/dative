@@ -17,6 +17,7 @@ define [
     constructor: ->
       @listenTo Backbone, 'authenticate:login', @authenticate
       @listenTo Backbone, 'authenticate:logout', @logout
+      @listenTo Backbone, 'authenticate:register', @register
       @on 'change', @_urlChanged
       if not Modernizr.localstorage
         throw new Error 'localStorage unavailable in this browser, please upgrade.'
@@ -211,6 +212,13 @@ define [
       ).done(=> @_authenticateAttemptDone taskId)
 
 
+    # Register a new user
+    #=========================================================================
+
+    register: ->
+      console.log 'you want to register a new user'
+
+
     # Defaults
     #=========================================================================
 
@@ -231,6 +239,20 @@ define [
       # corpora: ['corpus 1', 'corpus 2'] # corpora I have access to.
       corpora: [] # corpora I have access to.
       corpus: null # corpora I most recently accessed.
+
+      servers: [
+          name: 'OLD Development Server'
+          type: 'OLD'
+          url: 'http://127.0.0.1:5000'
+        ,
+          name: 'FieldDB Development Server 1'
+          type: 'FieldDB'
+          url: 'https://localhost:3183'
+        ,
+          name: 'FieldDB Development Server 2'
+          type: 'FieldDB'
+          url: 'https://localhost:3181'
+      ]
 
       # Note: the following attributes are not currently being used (displayed)
 
