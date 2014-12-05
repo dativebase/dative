@@ -47,12 +47,12 @@ require.config
     spin: '../bower_components/spin.js/spin'
     jqueryspin: '../bower_components/spin.js/jquery.spin'
     perfectscrollbar: '../bower_components/perfect-scrollbar/src/perfect-scrollbar'
-    fielddb: '../bower_components/fielddb/fielddb'
+    #fielddb: '../bower_components/fielddb/fielddb'
 
 require [
     'views/app',
     'routes/router'
-    'fielddb'
+    #'fielddb'
     'backboneindexeddb'
     'multiselect'
     'jqueryelastic'

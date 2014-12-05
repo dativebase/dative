@@ -1,7 +1,7 @@
 define [
   'backbone'
   './../utils/utils'
-  './../../bower_components/fielddb/fielddb'
+  #'./../../bower_components/fielddb/fielddb'
 ], (Backbone, utils) ->
 
   # Base Model

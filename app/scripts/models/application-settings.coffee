@@ -85,6 +85,9 @@ define [
     #   angular_client/modules/core/app/scripts/directives/\
     #   fielddb-authentication.js
     _authenticateFieldDB: (credentials) ->
+      return
+
+    __authenticateFieldDB: (credentials) ->
       taskId = @guid()
       Backbone.trigger 'longTask:register', 'authenticating', taskId
       url = @_getURL()
@@ -141,6 +144,9 @@ define [
       )
 
     _logoutFieldDB: ->
+      return
+
+    __logoutFieldDB: ->
       taskId = @guid()
       Backbone.trigger 'longTask:register', 'logout', taskId
       FieldDB.Database::logout().then(
@@ -193,6 +199,9 @@ define [
       )
 
     _checkIfLoggedInFieldDB: ->
+      return
+
+    __checkIfLoggedInFieldDB: ->
       taskId = @guid()
       Backbone.trigger('longTask:register', 'checking if already logged in',
         taskId)
