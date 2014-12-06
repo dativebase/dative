@@ -34,11 +34,15 @@ define [
         @set JSON.parse(localStorage.getItem('dativeApplicationSettings'))
 
     _urlChanged: ->
-      if @hasChanged('serverURL') or @hasChanged('serverPort')
+      if @hasChanged('activeServer') or @hasChanged('servers')
         @checkIfLoggedIn()
 
-    # Return our URL by combining serverURL and serverPort, if specified
     _getURL: ->
+      @get 'activeServer'
+
+    # Return our URL by combining serverURL and serverPort, if specified
+    # WARN: deprecated.
+    __getURL: ->
       serverURL = @get 'serverURL'
       serverPort = @get 'serverPort'
       "#{serverURL}#{serverPort and ':' + serverPort or ''}/"
@@ -53,7 +57,7 @@ define [
 
     # Attempt to authenticate with the passed-in credentials
     authenticate: (username, password) ->
-      if @get('serverType') is 'FieldDB'
+      if @get('activeServer').type is 'FieldDB'
         @_authenticateFieldDB username: username, password: password
       else
         @_authenticateOLD username: username, password: password
@@ -114,7 +118,7 @@ define [
     #=========================================================================
 
     logout: ->
-      if @get('serverType') is 'FieldDB'
+      if @get('activeServer').type is 'FieldDB'
         @_logoutFieldDB()
       else
         @_logoutOLD()
@@ -163,7 +167,7 @@ define [
     # Check if we are already logged in.
     checkIfLoggedIn: ->
       #@fetch()
-      if @get('serverType') is 'FieldDB'
+      if @get('activeServer').type is 'FieldDB'
         @_checkIfLoggedInFieldDB()
       else
         @_checkIfLoggedInOLD()
@@ -224,35 +228,31 @@ define [
 
     defaults: ->
 
-      serverType: 'OLD' # other option 'FieldDB'
-
-      # URL of the server where the data are stored (FieldDB corpus or OLD web
-      # service)
-      #serverURL: "http://www.onlinelinguisticdatabase.org/" # ... as an example
-      serverURL: 'http://127.0.0.1'
-
-      serverPort: '5000' # default: null
-
+      activeServer: 'http://127.0.0.1:5000'
       loggedIn: false
       username: ''
-
-      # corpora: ['corpus 1', 'corpus 2'] # corpora I have access to.
-      corpora: [] # corpora I have access to.
-      corpus: null # corpora I most recently accessed.
 
       servers: [
           name: 'OLD Development Server'
           type: 'OLD'
           url: 'http://127.0.0.1:5000'
+          corpora: []
+          corpus: null
         ,
           name: 'FieldDB Development Server 1'
           type: 'FieldDB'
           url: 'https://localhost:3183'
+          corpora: []
+          corpus: null
         ,
           name: 'FieldDB Development Server 2'
           type: 'FieldDB'
           url: 'https://localhost:3181'
+          corpora: []
+          corpus: null
       ]
+
+      serverTypes: ['FieldDB', 'OLD']
 
       # Note: the following attributes are not currently being used (displayed)
 

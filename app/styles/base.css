@@ -47,11 +47,14 @@ div#mainmenu {
     border-bottom: solid 1px grey;
     padding: 5px 10px;
 }
+.dative-widget-header {
+    height: 31px;
+}
 
 .dative-widget-header button,
 .dative-widget-header select+div,
-.dative-page-header button,
-.dative-page-header select+div {
+#dative-page-header button,
+#dative-page-header select+div {
     margin: 1px;
 }
 .dative-page-header-title {
@@ -73,8 +76,7 @@ div#mainmenu {
     display: block;
 }
 .dative-form-object:hover,
-.igt-form:hover
-{
+.igt-form:hover {
     cursor: pointer;
 }
 ul.sf-menu li a
@@ -123,10 +125,17 @@ ul.sf-menu li a
     height: 39px;
 }
 .dative-pagin-nav,
-.dative-page-header-widgets
+.dative-page-header-widgets,
+.dative-widget-header-buttons
 {
     text-align: center;
     margin-top: 5px;
+    height: 31px;
+}
+div.dative-widget-header-title
+{
+    display: inline-block;
+    width: 100px;
 }
 .dative-pagin-ipp {
     margin: 10px 0;
@@ -172,7 +181,8 @@ ul.sf-menu li a
     z-index: 2000;
 }
 .dative-login-dialog-widget .dative-login-failed,
-.dative-register-dialog-widget .dative-register-failed {
+.dative-register-dialog-widget .dative-register-failed,
+.dative-register-failed {
     padding: 5px;
 }
 .dative-login-dialog-widget,
@@ -194,6 +204,14 @@ ul.sf-menu li ul
     border-bottom-left-radius: 6px;
 }
 div.heading {
+}
+
+div.dative-widget-center {
+    margin: 0 auto;
+}
+span.dative-triangle-icon,
+.dative-icon {
+    position: absolute;
 }
 
 /*** Form input styles ***/
@@ -220,10 +238,16 @@ ul.fieldset label {
     vertical-align: top;
     font-size: 12px;
 }
-.formAdd ul.fieldset label,
-.applicationSettingsForm ul.fieldset label {
+.formAdd ul.fieldset label {
     width: 150px;
 }
+.applicationSettingsForm ul.fieldset label {
+    width: 144px;
+}
+.server-config-widget ul.fieldset label {
+    width: 75px;
+}
+
 .loginLogin ul.fieldset label,
 .registerForm ul.fieldset label {
     /*width: 61px;*/
@@ -301,7 +325,8 @@ ul.fieldset select[name="elicitor"],
 ul.fieldset select[name="verifier"],
 ul.fieldset select[name="source"],
 ul.fieldset select[name="corpus"],
-ul.fieldset select[name="serverType"] {
+ul.fieldset select[name="serverType"],
+ul.fieldset select[name="activeServer"] {
     width: 548px;
     max-width: 548px;
     min-width: 548px;
@@ -482,5 +507,15 @@ h1 {
 form.registerForm input,
 form.registerForm select{
   width: 230px;
+}
+
+div.server-config-widget {
+  width: 548px;
+}
+
+div.server-config-widget input {
+  max-width: 300px;
+  min-width: 300px;
+  width: 300px;
 }
 

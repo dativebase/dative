@@ -24,6 +24,8 @@ define [
       'keydown .dative-input-display': '_keyboardControl'
       'keydown button': '_keyboardControl'
       'selectmenuchange .serverType': '_corpusSelectVisibility'
+      'click .server-config-widget button.toggle-appear': '_toggleServerConfig'
+      'click .server-config-widget button.add-server': '_addServer'
 
     initialize: ->
       @displayView = new ApplicationSettingsDisplayView model: @model
@@ -34,12 +36,21 @@ define [
       @listenTo @model, 'change', @view
 
     render: ->
-      @$el.html @template headerTitle: 'Application Settings'
+      params = _.extend {headerTitle: 'Application Settings'}, @model.attributes
+      @$el.html @template(params)
       @matchHeights()
-      @_body = @$ '#dative-page-body'
-      @displayView.setElement @_body
-      @editView.setElement @_body
-      @view()
+      @pageBody = @$ '#dative-page-body'
+      @$serverConfigWidget = @pageBody.find '.server-config-widget'
+
+      @_populateSelectFields()
+      @_guify()
+      @_addModel()
+      @_editButtons()
+
+      #@displayView.setElement @pageBody
+      #@editView.setElement @pageBody
+      #@view()
+      #@edit()
 
     # Render display view, close edit view
     view: ->
@@ -95,14 +106,14 @@ define [
       modelObject
 
     _editButtons: ->
-      @$('button.edit').hide()
-      @$('button.view').show()
-      @$('button.save').show()
+      @$('button.edit').button 'disable'
+      @$('button.save').button 'enable'
+      #@$('button.view').show()
 
     _viewButtons: ->
-      @$('button.edit').show()
-      @$('button.view').hide()
-      @$('button.save').hide()
+      @$('button.edit').button 'enable'
+      @$('button.save').button 'disable'
+      #@$('button.view').hide()
 
     _keyboardControl: (event) ->
       @_rememberTarget event
@@ -120,6 +131,7 @@ define [
         event.stopPropagation()
         try
           classes = $(event.target).attr('class').split /\s+/
+          console.log classes
           if 'dative-display' in classes
             @edit()
           else if 'dative-input' in classes
@@ -130,25 +142,60 @@ define [
             @edit()
           else if 'save' in classes
             @save()
+          else if 'toggle-appear' in classes
+            @_toggleServerConfig()
+          else if 'add-server' in classes
+            @_addServer()
 
     _populateSelectFields: ->
       for serverType in ['FieldDB', 'OLD']
-        @$('select[name="serverType"]', @_body)
+        @$('select[name="serverType"]', @pageBody)
           .append($('<option>').attr('value', serverType).text(serverType))
 
     _guify: ->
 
-      # Franklin could button buttons and perfectScrollbar.
       @$('button').button().attr('tabindex', '0')
-      @_body.perfectScrollbar()
+
+      # Main Page GUIfication
+
+      @$('button.edit').button({icons: {primary: 'ui-icon-pencil'}, text:
+        false})
+      @$('button.save').button({icons: {primary: 'ui-icon-disk'}, text: false})
+
+      # Server Configuration Widget
+      # TODO: create a "Dative Inner Widget" factory based on this server widget.
+
+      @$serverConfigWidget.find('.dative-widget-header-title')
+        .position
+          my: 'center'
+          at: 'center'
+          of: @$serverConfigWidget.find '.dative-widget-header'
+
+      dog = @$('.server-config-widget')
+      # @$('.server-config-widget').find('button.toggle-appear').button({icons: {primary: 'ui-icon-triangle-1-e'}, text: false})
+      dog.find('button.toggle-appear').button({icons: {primary: 'ui-icon-triangle-1-e'}, text: false})
+
+      @$serverConfigWidget.find('button.add-server')
+        .button
+          icons: {primary: 'ui-icon-plusthick'}
+          text: false
+
+      @$serverConfigWidget.find('button.save-server')
+        .button
+          icons: {primary: 'ui-icon-disk'},
+          text: false
+
+      @pageBody.perfectScrollbar()
 
       @_selectmenuify()
       @_hoverStateFieldDisplay() # make data display react to focus & hover
       @_tabindicesNaught() # active elements have tabindex=0
       @_toggleCorpusSelect() # corpora only displayed for FieldDB
 
+      @$('div.server-config-widget-body').hide()
+
     _selectmenuify: ->
-      @$('select', @_body).selectmenu()
+      @$('select', @pageBody).selectmenu()
       @$('.ui-selectmenu-button').addClass 'dative-input dative-input-display'
 
     # Make active elements have tabindex=0
@@ -177,7 +224,7 @@ define [
         @$('li.corpusSelect').hide()
 
     _addModel: ->
-      @$('select[name="serverType"]', @_body)
+      @$('select[name="serverType"]', @pageBody)
         .val(@model.get('serverType'))
         .selectmenu 'refresh', true
 
@@ -202,4 +249,33 @@ define [
         @$('li.corpusSelect').slideDown('medium')
       else
         @$('li.corpusSelect').slideUp('medium')
+
+    _toggleServerConfig: (event) ->
+
+      if event
+        event.preventDefault()
+        event.stopPropagation()
+
+      $toggleAppearButton = @$serverConfigWidget.find('.toggle-appear')
+      toggleAppearButtonIcons = $toggleAppearButton.button('option', 'icons')
+      if toggleAppearButtonIcons.primary is 'ui-icon-triangle-1-e'
+        $toggleAppearButton
+          .button 'option', icons: primary: 'ui-icon-triangle-1-s'
+      else
+        $toggleAppearButton
+          .button 'option', icons: primary: 'ui-icon-triangle-1-e'
+
+      @$serverConfigWidget.find('.dative-widget-body')
+        .slideToggle
+          complete: =>
+            $firstInput = @$serverConfigWidget.find('input[name=name]').first()
+            if $firstInput.is(':visible')
+              $firstInput.focus()
+
+    _addServer: (event) ->
+      if event
+        event.preventDefault()
+        event.stopPropagation()
+      console.log 'you want to add a server'
+
 
