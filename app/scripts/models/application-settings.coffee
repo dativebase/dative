@@ -53,8 +53,6 @@ define [
             error reason: 'Unable to save to localStorage.'
         when 'read'
           if localStorage.getItem key
-            console.log 'applicationSettings model active server name in localStorage'
-            console.log JSON.parse(localStorage.getItem(key)).activeServer.name
             success JSON.parse(localStorage.getItem(key))
           else
             error reason: "There is no #{key} in localStorage."
@@ -215,9 +213,6 @@ define [
     # Check if we are already logged in.
     checkIfLoggedIn: ->
       #@fetch()
-      console.log 'in checkIfLoggedIn'
-      console.log @get 'activeServer'
-      console.log @attributes
       if @get('activeServer').type is 'FieldDB'
         @_checkIfLoggedInFieldDB()
       else
@@ -285,6 +280,7 @@ define [
         type: Backbone.HasOne
         key: 'activeServer'
         relatedModel: ServerModel
+        includeInJSON: 'id'
     ]
 
     # Defaults
@@ -293,6 +289,7 @@ define [
     defaults: ->
 
       server1 =
+        id: @guid()
         name: 'OLD Development Server'
         type: 'OLD'
         url: 'http://127.0.0.1:5000'
@@ -300,6 +297,7 @@ define [
         corpus: null
 
       server2 =
+        id: @guid()
         name: 'FieldDB Development Server 1'
         type: 'FieldDB'
         url: 'https://localhost:3183'
@@ -307,13 +305,15 @@ define [
         corpus: null
 
       server3 =
+        id: @guid()
         name: 'FieldDB Development Server 2'
         type: 'FieldDB'
         url: 'https://localhost:3181'
         corpora: []
         corpus: null
 
-      activeServer: server1
+      id: @guid()
+      activeServer: server1.id
       loggedIn: false
       username: ''
       servers: [server1, server2, server3]

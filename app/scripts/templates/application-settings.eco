@@ -19,8 +19,9 @@
           <option value="noServer">configure a server in Application
             Settings</option>
         <% else: %>
-          <% @servers.each (server) ->: %>
-            <option value="<%= server.get 'url' %>"
+          <% @servers.each (server) =>: %>
+            <% if server.get('id') is @activeServer.get('id') then selected = 'selected' else selected = '' %>
+            <option value="<%= server.get 'id' %>" <%= selected %>
               ><%= server.get 'name' %></option>
           <% end %>
         <% end %>

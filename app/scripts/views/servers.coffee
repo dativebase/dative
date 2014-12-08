@@ -39,8 +39,12 @@ define [
       @$widgetBody.append container
       @
 
-    _getFormData: ->
-      s._getFormData() for s in @serverViews
+    setFromGUI: ->
+      updatedServerModels = []
+      for serverView in @serverViews
+        serverView.setFromGUI()
+        updatedServerModels.push serverView.model
+      @collection.add updatedServerModels
 
     _addServer: (event) ->
       if event

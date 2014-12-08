@@ -23,15 +23,9 @@ define [
       'keydown button.delete-server': '_keyboardControl'
       'click button.delete-server': '_deleteServer'
 
-    _getFormData: ->
-      formData = {}
-      #@$(selector).val() for selector in ['input[name=name]', 'input[name=url]', 'select[name=type]']
-      @$('input, select').each ->
-        # console.log 'have an input'
-        # console.log $(@).val()
-        formData[$(@).attr('name')] = $(@).val()
-      formData
-
+    setFromGUI: ->
+      @$('input, select').each (index, element) =>
+        @model.set($(element).attr('name'), $(element).val())
 
     render: ->
       # TODO: the template needs to know the possible server types ...

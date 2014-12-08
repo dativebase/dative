@@ -10,13 +10,6 @@ define [
 
   class ServerModel extends BaseRelationalModel
 
-    initialize: ->
-      console.log 'ServerModel initialized'
-      #@on 'all', @tmp
-
-    tmp: (event) ->
-      console.log "#{event} was triggered on ServerModel"
-
     idAttribute: 'id'
 
     defaults: ->

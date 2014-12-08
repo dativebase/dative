@@ -34,22 +34,17 @@ define [
 
     initialize: (options) ->
 
+      # console.log 'THESE ARE THE APPLICATION SETTINGS DEFAULTS'
+      # console.log JSON.stringify(ApplicationSettingsModel::defaults(), undefined, 2)
+
       # Allowing an app settings model in the options facilitates testing.
       if options?.applicationSettings
         @applicationSettings = options.applicationSettings
       else
         @applicationSettings = new ApplicationSettingsModel()
-        console.log 'applicationSettings model active server name prior to `fetch`'
-        console.log @applicationSettings.get('activeServer').get('name')
-        @applicationSettings.fetch(
-            success: ->
-              console.log 'fetch app settings success'
-          ,
-            error: ->
-              console.log 'fetch app settings error'
-        )
-        console.log 'applicationSettings model active server name after `fetch`'
-        console.log @applicationSettings.get('activeServer').get('name')
+        # console.log 'applicationSettings instance with defaults'
+        # console.log JSON.stringify(@applicationSettings.toJSON(), undefined, 2)
+        #@applicationSettings.fetch()
 
       @mainMenuView = new MainMenuView model: @applicationSettings
       @loginDialog = new LoginDialogView model: @applicationSettings
@@ -133,7 +128,6 @@ define [
     showFormsView: ->
       @_closeVisibleView()
       if not @_formsView
-        console.log 'HAD TO CREATE A NEW FORMS VIEW'
         @_formsView = new FormsView
           collection: new FormsCollection()
           applicationSettings: @applicationSettings

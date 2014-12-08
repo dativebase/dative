@@ -38,20 +38,30 @@ define [
       @pageBody = @$ '#dative-page-body'
       @_guify()
 
-    save: ->
-      # Will always be considered new since it has no id attribute
-      console.log "ApplicationSettingsModel is new? #{@model.isNew()}"
-      @model.save @_getFormData()
-
     clickSave: (event) ->
       event.preventDefault()
       event.stopPropagation()
       @save()
 
+    save: ->
+      preState = @model.toJSON()
+      @setFromGUI()
+      postState = @model.toJSON()
+      stateChanged = not _.isEqual(preState, postState)
+      if stateChanged
+        console.log 'WILL SAVE'
+      else
+        console.log 'WILL NOT SAVE, STATE NOT CHANGED'
+
+    setFromGUI: ->
+      @model.set 'activeServer', @$('select[name=activeServer]').val()
+      @serversView.setFromGUI()
+
     _getFormData: ->
       #activeServer: @$('select[name=activeServer]').val()
+
       activeServer: @model.get('servers').findWhere(
-        url: @$('select[name=activeServer]').val())
+        id: @$('select[name=activeServer]').val())
       servers: @serversView._getFormData()
 
     _editButtons: ->
