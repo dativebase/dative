@@ -46,9 +46,9 @@ div#mainmenu {
     border: 0 none;
     border-bottom: solid 1px grey;
     padding: 5px 10px;
-}
-.dative-widget-header {
     height: 31px;
+    /* TEST */
+    position: relative;
 }
 
 .dative-widget-header button,
@@ -132,10 +132,13 @@ ul.sf-menu li a
     margin-top: 5px;
     height: 31px;
 }
-div.dative-widget-header-title
+div.dative-widget-header-title,
+div.dative-page-header-title
 {
     display: inline-block;
-    width: 100px;
+    position: absolute;
+    top: 15px;
+    /*width: 100px;*/
 }
 .dative-pagin-ipp {
     margin: 10px 0;
@@ -509,8 +512,19 @@ form.registerForm select{
   width: 230px;
 }
 
+div.servers-config-widget,
 div.server-config-widget {
-  width: 548px;
+  margin-top: 20px;
+  margin-bottom: 20px;
+}
+div.servers-config-widget {
+  width: 600px;
+}
+div.server-config-widget {
+  width: 560px;
+  /*width: 400px;*/
+  margin-top: 20px;
+  margin-bottom: 20px;
 }
 
 div.server-config-widget input {

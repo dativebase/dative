@@ -1,12 +1,10 @@
 define [
   'backbone'
   './base'
-  './application-settings-view'
-  './application-settings-edit'
-  './../templates/application-settings-header'
+  './servers'
+  './../templates/application-settings'
   'perfectscrollbar'
-], (Backbone, BaseView, ApplicationSettingsDisplayView,
-  ApplicationSettingsEditView, applicationSettingsHeaderTemplate) ->
+], (Backbone, BaseView, ServersView, applicationSettingsTemplate) ->
 
   # Application Settings View
   # -------------------------
@@ -14,22 +12,16 @@ define [
   class ApplicationSettingsView extends BaseView
 
     tagName: 'div'
-    template: applicationSettingsHeaderTemplate
+    template: applicationSettingsTemplate
 
     events:
-      'click .dative-input-display.dative-display': 'clickEdit'
-      'click button.edit': 'clickEdit'
       'click button.save': 'clickSave'
-      'click button.view': 'clickView'
       'keydown .dative-input-display': '_keyboardControl'
       'keydown button': '_keyboardControl'
       'selectmenuchange .serverType': '_corpusSelectVisibility'
-      'click .server-config-widget button.toggle-appear': '_toggleServerConfig'
-      'click .server-config-widget button.add-server': '_addServer'
 
     initialize: ->
-      @displayView = new ApplicationSettingsDisplayView model: @model
-      @editView = new ApplicationSettingsEditView model: @model
+      @serversView = new ServersView collection: @model.get('servers')
       @listenTo Backbone, 'applicationSettings:edit', @edit
       @listenTo Backbone, 'applicationSettings:view', @view
       @listenTo Backbone, 'applicationSettings:save', @save
@@ -38,72 +30,29 @@ define [
     render: ->
       params = _.extend {headerTitle: 'Application Settings'}, @model.attributes
       @$el.html @template(params)
+
+      @serversView.setElement(@$('li.server-config-container').first()).render()
+      @rendered @serversView
+
       @matchHeights()
       @pageBody = @$ '#dative-page-body'
-      @$serverConfigWidget = @pageBody.find '.server-config-widget'
-
-      @_populateSelectFields()
       @_guify()
-      @_addModel()
-      @_editButtons()
 
-      #@displayView.setElement @pageBody
-      #@editView.setElement @pageBody
-      #@view()
-      #@edit()
-
-    # Render display view, close edit view
-    view: ->
-      @editView.close()
-      @closed @editView
-      @displayView.render()
-      @rendered @displayView
-      @_guify()
-      @_viewButtons()
-      @_setFocus 'view'
-
-    clickView: (event) ->
-      event.preventDefault()
-      event.stopPropagation()
-      @view()
-
-    # Render edit view, close display view
-    edit: ->
-      @displayView.close()
-      @closed @displayView
-      @editView.render()
-      @rendered @editView
-      @_populateSelectFields()
-      @_guify()
-      @_addModel()
-      @_editButtons()
-      @_setFocus 'edit'
-
-    clickEdit: (event) ->
-      @_rememberTarget event
-      event.preventDefault()
-      event.stopPropagation()
-      @edit()
-
-    # Save to localStorage, render display view
     save: ->
-      applicationSettingsObject = @_getModelObjectFromForm()
-      #@model.set applicationSettingsObject
-      @model.save applicationSettingsObject
-      @view()
+      # Will always be considered new since it has no id attribute
+      console.log "ApplicationSettingsModel is new? #{@model.isNew()}"
+      @model.save @_getFormData()
 
     clickSave: (event) ->
       event.preventDefault()
       event.stopPropagation()
       @save()
 
-    # Extract data in the inputs of the HTML "Add a Form" form and
-    # convert them to an object
-    _getModelObjectFromForm: ->
-      modelObject = {}
-      for fieldObject in @$('form.applicationSettingsForm').serializeArray()
-        modelObject[fieldObject.name] = fieldObject.value
-      modelObject
+    _getFormData: ->
+      #activeServer: @$('select[name=activeServer]').val()
+      activeServer: @model.get('servers').findWhere(
+        url: @$('select[name=activeServer]').val())
+      servers: @serversView._getFormData()
 
     _editButtons: ->
       @$('button.edit').button 'disable'
@@ -131,7 +80,6 @@ define [
         event.stopPropagation()
         try
           classes = $(event.target).attr('class').split /\s+/
-          console.log classes
           if 'dative-display' in classes
             @edit()
           else if 'dative-input' in classes
@@ -142,8 +90,6 @@ define [
             @edit()
           else if 'save' in classes
             @save()
-          else if 'toggle-appear' in classes
-            @_toggleServerConfig()
           else if 'add-server' in classes
             @_addServer()
 
@@ -156,34 +102,15 @@ define [
 
       @$('button').button().attr('tabindex', '0')
 
+      @$('.dative-page-header-title').first()
+        .position
+          of: @$('.dative-page-header-title').first().parent()
+
       # Main Page GUIfication
 
       @$('button.edit').button({icons: {primary: 'ui-icon-pencil'}, text:
         false})
       @$('button.save').button({icons: {primary: 'ui-icon-disk'}, text: false})
-
-      # Server Configuration Widget
-      # TODO: create a "Dative Inner Widget" factory based on this server widget.
-
-      @$serverConfigWidget.find('.dative-widget-header-title')
-        .position
-          my: 'center'
-          at: 'center'
-          of: @$serverConfigWidget.find '.dative-widget-header'
-
-      dog = @$('.server-config-widget')
-      # @$('.server-config-widget').find('button.toggle-appear').button({icons: {primary: 'ui-icon-triangle-1-e'}, text: false})
-      dog.find('button.toggle-appear').button({icons: {primary: 'ui-icon-triangle-1-e'}, text: false})
-
-      @$serverConfigWidget.find('button.add-server')
-        .button
-          icons: {primary: 'ui-icon-plusthick'}
-          text: false
-
-      @$serverConfigWidget.find('button.save-server')
-        .button
-          icons: {primary: 'ui-icon-disk'},
-          text: false
 
       @pageBody.perfectScrollbar()
 
@@ -249,33 +176,4 @@ define [
         @$('li.corpusSelect').slideDown('medium')
       else
         @$('li.corpusSelect').slideUp('medium')
-
-    _toggleServerConfig: (event) ->
-
-      if event
-        event.preventDefault()
-        event.stopPropagation()
-
-      $toggleAppearButton = @$serverConfigWidget.find('.toggle-appear')
-      toggleAppearButtonIcons = $toggleAppearButton.button('option', 'icons')
-      if toggleAppearButtonIcons.primary is 'ui-icon-triangle-1-e'
-        $toggleAppearButton
-          .button 'option', icons: primary: 'ui-icon-triangle-1-s'
-      else
-        $toggleAppearButton
-          .button 'option', icons: primary: 'ui-icon-triangle-1-e'
-
-      @$serverConfigWidget.find('.dative-widget-body')
-        .slideToggle
-          complete: =>
-            $firstInput = @$serverConfigWidget.find('input[name=name]').first()
-            if $firstInput.is(':visible')
-              $firstInput.focus()
-
-    _addServer: (event) ->
-      if event
-        event.preventDefault()
-        event.stopPropagation()
-      console.log 'you want to add a server'
-
 

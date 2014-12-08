@@ -39,7 +39,17 @@ define [
         @applicationSettings = options.applicationSettings
       else
         @applicationSettings = new ApplicationSettingsModel()
-        @applicationSettings.fetch()
+        console.log 'applicationSettings model active server name prior to `fetch`'
+        console.log @applicationSettings.get('activeServer').get('name')
+        @applicationSettings.fetch(
+            success: ->
+              console.log 'fetch app settings success'
+          ,
+            error: ->
+              console.log 'fetch app settings error'
+        )
+        console.log 'applicationSettings model active server name after `fetch`'
+        console.log @applicationSettings.get('activeServer').get('name')
 
       @mainMenuView = new MainMenuView model: @applicationSettings
       @loginDialog = new LoginDialogView model: @applicationSettings

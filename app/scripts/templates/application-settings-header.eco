@@ -55,49 +55,6 @@
 
   </ul>
 
-  <div class="dative-widget-center server-config-widget ui-widget
-    ui-widget-content ui-corner-all">
-
-    <div class="ui-widget-header ui-corner-top dative-widget-header">
-
-      <div class='dative-widget-header-title'>Servers</div>
-
-      <button class="float-left toggle-appear"></button>
-      <button class="float-left add-server" title="new server"></button>
-      <button class="float-left save-server" title="save server"></button>
-
-    </div>
-
-    <div class="buffer" style="height:10px;"></div>
-
-    <div class="server-config-widget-body dative-widget-body">
-
-      <ul class="fieldset">
-
-        <li>
-          <% for server in @servers: %>
-            <ul class="fieldset">
-              <li>
-                <label for="name">Name</label>
-                <input type="text" name="name" class="dative-input
-                  dative-input-display" value="<%= server.name %>" />
-              </li>
-              <li>
-                <label for="url">URL</label>
-                <input type="text" name="url" class="dative-input
-                  dative-input-display" value="<%= server.url %>" />
-              </li>
-              <li>
-                <label for="type">Type</label>
-                <input type="text" name="type" class="dative-input
-                  dative-input-display" value="<%= server.type %>" />
-              </li>
-            </ul>
-          <% end %>
-        </li>
-      </ul>
-    </div>
-  </div>
 
 </form>
 

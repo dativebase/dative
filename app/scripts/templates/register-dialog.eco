@@ -9,8 +9,9 @@
           <option value="noServer">configure a server in Application
           Settings</option>
         <% else: %>
-          <% for server in @servers: %>
-              <option value="<%= server.url %>"><%= server.name %></option>
+          <% @servers.each (server, index) ->: %>
+            <option value="<%= server.get('url') %>"
+              ><%= server.get('name') %></option>
           <% end %>
         <% end %>
         </select>

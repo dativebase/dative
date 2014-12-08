@@ -1,0 +1,42 @@
+
+  <div class="dative-widget-header ui-widget-header ui-corner-top">
+
+    <div class='dative-widget-header-title'>Server</div>
+
+    <button class="float-left delete-server"
+      title="delete server configuration"></button>
+
+  </div>
+
+  <div class="dative-widget-body">
+
+    <ul class="fieldset">
+
+      <li>
+        <label for="name">Name</label>
+        <input type="text" name="name" class="dative-input
+          dative-input-display" value="<%= @name %>" />
+      </li>
+
+      <li>
+        <label for="url">URL</label>
+        <input type="text" name="url" class="dative-input
+          dative-input-display" value="<%= @url %>" />
+      </li>
+
+      <li>
+        <label for="type">Type</label>
+        <select name="type" class="dative-input dative-input-display">
+          <% for type in ['OLD', 'FieldDB']: %>
+            <% if type is @type: %>
+              <option value="<%= type %>" selected><%= type %></option>
+            <% else: %>
+              <option value="<%= type %>"><%= type %></option>
+            <% end %>
+          <% end %>
+        </select>
+      </li>
+
+    </ul>
+  </div>
+

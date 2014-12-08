@@ -19,6 +19,7 @@ require.config
     perfectscrollbar: ['jquery']
     superfish: ['jquery']
     supersubs: ['jquery']
+    backbonerelational: ['backbone']
 
   paths:
     jquery: '../bower_components/jquery/dist/jquery'
@@ -48,6 +49,7 @@ require.config
     jqueryspin: '../bower_components/spin.js/jquery.spin'
     perfectscrollbar: '../bower_components/perfect-scrollbar/src/perfect-scrollbar'
     fielddb: '../bower_components/fielddb/fielddb'
+    backbonerelational: '../bower_components/backbone-relational/backbone-relational'
 
 require [
     'views/app',

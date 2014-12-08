@@ -1,39 +1,87 @@
 define [
   'underscore'
   'backbone'
-  './base'
+  './base-relational'
+  './server'
+  './../collections/servers'
   './../utils/utils'
-], (_, Backbone, BaseModel, utils) ->
+], (_, Backbone, BaseRelationalModel, ServerModel, ServersCollection, utils) ->
 
-  # Application Settings
-  # --------------------
+  # Application Settings Model
+  # --------------------------
   #
   # The application settings are persisted *very simply* using HTML's
   # localStorage. (Got frustrated with Backbone.LocalStorage, and, anyways,
   # the overhead seems unnecessary.)
 
-  class ApplicationSettingsModel extends BaseModel
+  class ApplicationSettingsModel extends BaseRelationalModel
 
     constructor: ->
       @listenTo Backbone, 'authenticate:login', @authenticate
       @listenTo Backbone, 'authenticate:logout', @logout
       @listenTo Backbone, 'authenticate:register', @register
       @on 'change', @_urlChanged
+      #@on 'all', @say
       if not Modernizr.localstorage
         throw new Error 'localStorage unavailable in this browser, please upgrade.'
       super
 
-    save: ->
+    say: (eventName) ->
+      console.log "#{eventName} was triggered"
+
+    @localStorageKey: 'dativeApplicationSettings'
+
+    localStorageSync: (method, model, options) ->
+      key = model.constructor.localStorageKey
+      success = (result) ->
+        if options.success then options.success result
+      error = (result) ->
+        if options.error then options.error result
+      switch method
+        when 'create'
+          try
+            model.set 'id', @guid()
+            localStorage.setItem(key, JSON.stringify(model.toJSON()))
+            success(model.toJSON())
+          catch
+            error reason: 'Unable to save to localStorage.'
+        when 'update'
+          try
+            localStorage.setItem(key, JSON.stringify(model.toJSON()))
+            success(model.toJSON())
+          catch
+            error reason: 'Unable to save to localStorage.'
+        when 'read'
+          if localStorage.getItem key
+            console.log 'applicationSettings model active server name in localStorage'
+            console.log JSON.parse(localStorage.getItem(key)).activeServer.name
+            success JSON.parse(localStorage.getItem(key))
+          else
+            error reason: "There is no #{key} in localStorage."
+        when 'delete'
+          if localStorage.getItem key
+            result = JSON.parse localStorage.getItem(key)
+            localStorage.removeItem key
+            success result
+          else
+            error reason: "There is no #{key} in localStorage."
+
+    sync: ->
+      @localStorageSync.apply @, arguments
+
+    _save: ->
+      # TODO compare state with incoming and trigger `change` event, if necessary.
       if arguments.length
         @set.apply @, arguments
       localStorage.setItem 'dativeApplicationSettings',
         JSON.stringify(@attributes)
 
-    fetch: ->
+    _fetch: ->
       if localStorage.getItem 'dativeApplicationSettings'
         @set JSON.parse(localStorage.getItem('dativeApplicationSettings'))
 
     _urlChanged: ->
+      return # TODO DEBUGGING
       if @hasChanged('activeServer') or @hasChanged('servers')
         @checkIfLoggedIn()
 
@@ -65,7 +113,7 @@ define [
     _authenticateOLD: (credentials) ->
       taskId = @guid()
       Backbone.trigger 'longTask:register', 'authenticating', taskId
-      @cors(
+      BaseModel.cors.request(
         method: 'POST'
         timeout: 3000
         url: "#{@_getURL()}login/authenticate"
@@ -126,7 +174,7 @@ define [
     _logoutOLD: ->
       taskId = @guid()
       Backbone.trigger 'longTask:register', 'logout', taskId
-      @cors(
+      BaseModel.cors.request(
         url: "#{@_getURL()}login/logout"
         method: 'GET'
         timeout: 3000
@@ -167,6 +215,9 @@ define [
     # Check if we are already logged in.
     checkIfLoggedIn: ->
       #@fetch()
+      console.log 'in checkIfLoggedIn'
+      console.log @get 'activeServer'
+      console.log @attributes
       if @get('activeServer').type is 'FieldDB'
         @_checkIfLoggedInFieldDB()
       else
@@ -176,7 +227,7 @@ define [
       taskId = @guid()
       Backbone.trigger('longTask:register', 'checking if already logged in',
         taskId)
-      @cors(
+      BaseModel.cors.request(
         url: "#{@_getURL()}speakers"
         timeout: 3000
         onload: (responseJSON) =>
@@ -223,50 +274,51 @@ define [
       console.log 'you want to register a new user'
 
 
+    idAttribute: 'id'
+
+    relations: [
+        type: Backbone.HasMany
+        key: 'servers'
+        relatedModel: ServerModel
+        collectionType: ServersCollection
+      ,
+        type: Backbone.HasOne
+        key: 'activeServer'
+        relatedModel: ServerModel
+    ]
+
     # Defaults
     #=========================================================================
 
     defaults: ->
 
-      activeServer: 'http://127.0.0.1:5000'
+      server1 =
+        name: 'OLD Development Server'
+        type: 'OLD'
+        url: 'http://127.0.0.1:5000'
+        corpora: []
+        corpus: null
+
+      server2 =
+        name: 'FieldDB Development Server 1'
+        type: 'FieldDB'
+        url: 'https://localhost:3183'
+        corpora: []
+        corpus: null
+
+      server3 =
+        name: 'FieldDB Development Server 2'
+        type: 'FieldDB'
+        url: 'https://localhost:3181'
+        corpora: []
+        corpus: null
+
+      activeServer: server1
       loggedIn: false
       username: ''
-
-      servers: [
-          name: 'OLD Development Server'
-          type: 'OLD'
-          url: 'http://127.0.0.1:5000'
-          corpora: []
-          corpus: null
-        ,
-          name: 'FieldDB Development Server 1'
-          type: 'FieldDB'
-          url: 'https://localhost:3183'
-          corpora: []
-          corpus: null
-        ,
-          name: 'FieldDB Development Server 2'
-          type: 'FieldDB'
-          url: 'https://localhost:3181'
-          corpora: []
-          corpus: null
-      ]
-
+      servers: [server1, server2, server3]
       serverTypes: ['FieldDB', 'OLD']
-
-      # Note: the following attributes are not currently being used (displayed)
-
-      # Right now I'm focusing on server-side persistence to an OLD RESTful web
-      # service. The next step will be persistence to a FieldDB corpus, then
-      # client-side (indexedDB) persistence, and, finally, progressively
-      # improved dual-layer persistence (i.e., client and server). An
-      # interesting possibility would be to enable Dative to provide a single
-      # simultaneous interface to multiple web services, e.g., multiple OLD web
-      # services and multiple FieldDB corpora...
-      persistenceType: "server" # "server", "client", or "dual"
-
-      # Schema type will become relevant later on ...
-      schemaType: "relational" # "relational" or "nosql"
-
       itemsPerPage: 10
+
+  ApplicationSettingsModel.setup()
 
