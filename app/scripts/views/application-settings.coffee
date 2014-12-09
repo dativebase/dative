@@ -26,7 +26,9 @@ define [
 
     initialize: ->
       # Subviews
-      @serversView = new ServersView collection: @model.get('servers')
+      @serversView = new ServersView
+        collection: @model.get('servers')
+        serverTypes: @model.get('serverTypes')
       @activeServerView = new ActiveServerView model: @model
 
       @listenTo Backbone, 'applicationSettings:edit', @edit

@@ -18,6 +18,7 @@ define [
     initialize: ->
       @listenTo @model.get('servers'), 'change', @serverChanged
       @listenTo @model.get('servers'), 'add', @newServerAdded
+      @listenTo @model.get('servers'), 'remove', @serverRemoved
 
     render: ->
       context =
@@ -33,12 +34,15 @@ define [
         .selectmenu('refresh')
 
     newServerAdded: (newServerModel) ->
-      console.log 'new server added'
-      console.log newServerModel
       newOptionElement = $('<option/>',
         value: newServerModel.get('id')
         text: newServerModel.get('name'))
       @$('select.activeServer').prepend(newOptionElement)
+        .selectmenu('refresh')
+
+    serverRemoved: (serverModel) ->
+      @$('select.activeServer')
+        .find("option[value=#{serverModel.get('id')}]").remove().end()
         .selectmenu('refresh')
 
     setFromGUI: ->

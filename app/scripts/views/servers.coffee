@@ -17,10 +17,27 @@ define [
     tagName: 'div'
     template: serversTemplate
 
-    initialize: ->
+    initialize: (options) ->
+      @listenTo Backbone, 'removeServerView', @_removeServerView
+
+      @serverTypes = options.serverTypes
       @serverViews = []
       @collection.each (server) =>
-        @serverViews.push(new ServerView(model: server))
+        newServerView = new ServerView
+          model: server
+          serverTypes: @serverTypes
+        @serverViews.push newServerView
+
+    _removeServerView: (serverView) ->
+      # 1. find serverView in @serverViews and remove it
+      # 2. 
+      console.log '_removeServerView called'
+      console.log serverView
+      console.log "@serverViews.length: #{@serverViews.length}"
+      @serverViews = _.without @serverViews, serverView
+      serverView.close()
+      @closed serverView
+      console.log "@serverViews.length: #{@serverViews.length}"
 
     events:
       'keydown button.toggle-appear': '_keyboardControl'
@@ -53,7 +70,9 @@ define [
       @_openServerConfig()
       serverModel = new ServerModel()
       @collection.unshift serverModel
-      serverView = new ServerView model: serverModel
+      serverView = new ServerView
+        model: serverModel
+        serverTypes: @serverTypes
       @serverViews.unshift serverView
       serverView.render().$el.prependTo(@$widgetBody).hide().slideDown('slow')
       @rendered serverView

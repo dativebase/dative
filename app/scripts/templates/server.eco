@@ -1,3 +1,5 @@
+<div class="server-config-widget dative-widget-center ui-widget
+  ui-widget-content ui-corner-all">
 
   <div class="dative-widget-header ui-widget-header ui-corner-top">
 
@@ -27,7 +29,7 @@
       <li>
         <label for="type">Type</label>
         <select name="type" class="dative-input dative-input-display">
-          <% for type in ['OLD', 'FieldDB']: %>
+          <% for type in @serverTypes: %>
             <% if type is @type: %>
               <option value="<%= type %>" selected><%= type %></option>
             <% else: %>
@@ -39,4 +41,5 @@
 
     </ul>
   </div>
+</div>
 

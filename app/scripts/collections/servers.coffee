@@ -11,17 +11,8 @@ define [
     model: ServerModel
 
     initialize: ->
-      #@on 'all', @tmp
-      @on 'destroy', @_removeModel
+      @on 'removeme', @_removeModel
 
-    tmp: (event) ->
-      console.log arguments
-      console.log "#{event} was triggered on servers collection"
-
-    sync: (method, collection, options) ->
-      console.log 'you, my friend are trying to sync a servers collection.'
-
-    _removeModel: (model, collection, options) ->
-      console.log 'in servers collection, model destroy event triggered.'
-      #@remove model
+    _removeModel: (model) ->
+      @remove model
 

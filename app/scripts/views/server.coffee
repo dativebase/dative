@@ -9,15 +9,10 @@ define [
 
   class ServerView extends BaseView
 
-    tagName: 'div'
-    className: "server-config-widget dative-widget-center ui-widget ui-widget-content ui-corner-all"
     template: serverTemplate
 
-    #initialize: ->
-    #  @listenTo @model, 'remove', @_destroyModelView
-
-    _destroyModelView: ->
-      console.log 'want to destroy this view'
+    initialize: (options) ->
+      @serverTypes = options.serverTypes
 
     events:
       'keydown button.delete-server': '_keyboardControl'
@@ -25,11 +20,11 @@ define [
 
     setFromGUI: ->
       @$('input, select').each (index, element) =>
-        @model.set($(element).attr('name'), $(element).val())
+        @model.set $(element).attr('name'), $(element).val()
 
     render: ->
-      # TODO: the template needs to know the possible server types ...
-      @$el.html @template(@model.attributes)
+      context = _.extend @model.attributes, serverTypes: @serverTypes
+      @$el.html @template(context)
       @_guify()
       @
 
@@ -37,8 +32,9 @@ define [
       if event
         event.preventDefault()
         event.stopPropagation()
-      @model.destroy()
-      @$el.slideUp =>
+      @$el.slideUp 'medium', =>
+        @model.trigger 'removeme', @model
+        Backbone.trigger 'removeServerView', @
         @remove()
 
     # Save to localStorage, render display view
