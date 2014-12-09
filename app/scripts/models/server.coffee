@@ -13,6 +13,7 @@ define [
     idAttribute: 'id'
 
     defaults: ->
+      id: @guid()
       name: ''
       type: 'OLD' # 'OLD' or 'FieldDB'
       url: '' # must be unique

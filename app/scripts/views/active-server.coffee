@@ -16,7 +16,8 @@ define [
     template: activeServerTemplate
 
     initialize: ->
-      @listenTo @model.get('servers'), 'change', @refresh
+      @listenTo @model.get('servers'), 'change', @serverChanged
+      @listenTo @model.get('servers'), 'add', @newServerAdded
 
     render: ->
       context =
@@ -25,10 +26,19 @@ define [
       @$el.html @template(context)
       @$('select.activeServer').selectmenu()
 
-    refresh: (serverModel) ->
+    serverChanged: (serverModel) ->
       @$('select.activeServer')
         .find("option[value=#{serverModel.get('id')}]")
           .text(serverModel.get('name')).end()
+        .selectmenu('refresh')
+
+    newServerAdded: (newServerModel) ->
+      console.log 'new server added'
+      console.log newServerModel
+      newOptionElement = $('<option/>',
+        value: newServerModel.get('id')
+        text: newServerModel.get('name'))
+      @$('select.activeServer').prepend(newOptionElement)
         .selectmenu('refresh')
 
     setFromGUI: ->
