@@ -2,9 +2,10 @@ define [
   'backbone'
   './base'
   './servers'
+  './active-server'
   './../templates/application-settings'
   'perfectscrollbar'
-], (Backbone, BaseView, ServersView, applicationSettingsTemplate) ->
+], (Backbone, BaseView, ServersView, ActiveServerView, applicationSettingsTemplate) ->
 
   # Application Settings View
   # -------------------------
@@ -19,20 +20,31 @@ define [
       'keydown .dative-input-display': '_keyboardControl'
       'keydown button': '_keyboardControl'
       'selectmenuchange .serverType': '_corpusSelectVisibility'
+      'keyup input': 'setFromGUI'
+      'selectmenuchange': 'setFromGUI'
+      'click': 'setFromGUI'
 
     initialize: ->
+      # Subviews
       @serversView = new ServersView collection: @model.get('servers')
+      @activeServerView = new ActiveServerView model: @model
+
       @listenTo Backbone, 'applicationSettings:edit', @edit
       @listenTo Backbone, 'applicationSettings:view', @view
       @listenTo Backbone, 'applicationSettings:save', @save
-      @listenTo @model, 'change', @view
 
     render: ->
       params = _.extend {headerTitle: 'Application Settings'}, @model.attributes
       @$el.html @template(params)
 
-      @serversView.setElement(@$('li.server-config-container').first()).render()
+      @serversView.setElement @$('li.server-config-container').first()
+      @activeServerView.setElement @$('li.active-server').first()
+
+      @serversView.render()
+      @activeServerView.render()
+
       @rendered @serversView
+      @rendered @activeServerView
 
       @matchHeights()
       @pageBody = @$ '#dative-page-body'
@@ -54,6 +66,7 @@ define [
         console.log 'WILL NOT SAVE, STATE NOT CHANGED'
 
     setFromGUI: ->
+      console.log 'setFromGUI called in applicationSettings view'
       @model.set 'activeServer', @$('select[name=activeServer]').val()
       @serversView.setFromGUI()
 
