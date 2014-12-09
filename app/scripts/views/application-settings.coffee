@@ -24,7 +24,11 @@ define [
       'selectmenuchange': 'setFromGUI'
       'click': 'setFromGUI'
 
-    initialize: ->
+    initialize: (arg) ->
+      modelState = @model.toJSON()
+      console.log JSON.stringify(modelState, undefined, 2)
+      console.log 'the argument to application settings view initialize is ...'
+      console.log arg
       # Subviews
       @serversView = new ServersView
         collection: @model.get('servers')
@@ -60,6 +64,10 @@ define [
     save: ->
       preState = @model.toJSON()
       @setFromGUI()
+      console.log @model.collection
+      #@model.collection.save()
+      @model.save()
+
       postState = @model.toJSON()
       stateChanged = not _.isEqual(preState, postState)
       if stateChanged

@@ -7,6 +7,9 @@ define [
   # Active Server View
   # ------------------
   #
+  # Purpose: the "Active Server" select reflects the state of the servers
+  # collection.
+  #
   # A view dedicated to a single jQueryUI selectmenu which indicates the active
   # server. The model is the entire `applicationSettings` instance initialized
   # in `app.coffee`.

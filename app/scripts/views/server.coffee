@@ -20,6 +20,7 @@ define [
 
     setFromGUI: ->
       @$('input, select').each (index, element) =>
+        console.log "Setting #{$(element).attr('name')} to #{$(element).val()}"
         @model.set $(element).attr('name'), $(element).val()
 
     render: ->

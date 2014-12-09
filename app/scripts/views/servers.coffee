@@ -59,7 +59,15 @@ define [
     setFromGUI: ->
       updatedServerModels = []
       for serverView in @serverViews
+        console.log '\n\n'
+        console.log 'in setFromGUI in Servers View'
+        console.log 'server model before `setFromGUI()`'
+        console.log JSON.stringify(serverView.model.attributes, undefined, 2)
         serverView.setFromGUI()
+        console.log '\n'
+        console.log 'server model after `setFromGUI()`'
+        console.log JSON.stringify(serverView.model.toJSON(), undefined, 2)
+        console.log '\n\n'
         updatedServerModels.push serverView.model
       @collection.add updatedServerModels
 

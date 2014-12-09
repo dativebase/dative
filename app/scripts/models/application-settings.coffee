@@ -5,6 +5,7 @@ define [
   './server'
   './../collections/servers'
   './../utils/utils'
+  'backbonelocalstorage'
 ], (_, Backbone, BaseRelationalModel, ServerModel, ServersCollection, utils) ->
 
   # Application Settings Model
@@ -16,67 +17,14 @@ define [
 
   class ApplicationSettingsModel extends BaseRelationalModel
 
-    constructor: ->
+    constructor: (arg) ->
       @listenTo Backbone, 'authenticate:login', @authenticate
       @listenTo Backbone, 'authenticate:logout', @logout
       @listenTo Backbone, 'authenticate:register', @register
       @on 'change', @_urlChanged
-      #@on 'all', @say
       if not Modernizr.localstorage
         throw new Error 'localStorage unavailable in this browser, please upgrade.'
       super
-
-    say: (eventName) ->
-      console.log "#{eventName} was triggered"
-
-    @localStorageKey: 'dativeApplicationSettings'
-
-    localStorageSync: (method, model, options) ->
-      key = model.constructor.localStorageKey
-      success = (result) ->
-        if options.success then options.success result
-      error = (result) ->
-        if options.error then options.error result
-      switch method
-        when 'create'
-          try
-            model.set 'id', @guid()
-            localStorage.setItem(key, JSON.stringify(model.toJSON()))
-            success(model.toJSON())
-          catch
-            error reason: 'Unable to save to localStorage.'
-        when 'update'
-          try
-            localStorage.setItem(key, JSON.stringify(model.toJSON()))
-            success(model.toJSON())
-          catch
-            error reason: 'Unable to save to localStorage.'
-        when 'read'
-          if localStorage.getItem key
-            success JSON.parse(localStorage.getItem(key))
-          else
-            error reason: "There is no #{key} in localStorage."
-        when 'delete'
-          if localStorage.getItem key
-            result = JSON.parse localStorage.getItem(key)
-            localStorage.removeItem key
-            success result
-          else
-            error reason: "There is no #{key} in localStorage."
-
-    sync: ->
-      @localStorageSync.apply @, arguments
-
-    _save: ->
-      # TODO compare state with incoming and trigger `change` event, if necessary.
-      if arguments.length
-        @set.apply @, arguments
-      localStorage.setItem 'dativeApplicationSettings',
-        JSON.stringify(@attributes)
-
-    _fetch: ->
-      if localStorage.getItem 'dativeApplicationSettings'
-        @set JSON.parse(localStorage.getItem('dativeApplicationSettings'))
 
     _urlChanged: ->
       return # TODO DEBUGGING
@@ -263,11 +211,16 @@ define [
 
 
     # Register a new user
-    #=========================================================================
+    # =========================================================================
 
     register: ->
       console.log 'you want to register a new user'
 
+
+    # Backbone-relational stuff
+    # =========================================================================
+    #
+    # See http://backbonerelational.org/#RelationalModel-relations
 
     idAttribute: 'id'
 
@@ -276,6 +229,7 @@ define [
         key: 'servers'
         relatedModel: ServerModel
         collectionType: ServersCollection
+        includeInJSON: ['id', 'name', 'type', 'url']
       ,
         type: Backbone.HasOne
         key: 'activeServer'
@@ -293,24 +247,18 @@ define [
         name: 'OLD Development Server'
         type: 'OLD'
         url: 'http://127.0.0.1:5000'
-        corpora: []
-        corpus: null
 
       server2 =
         id: @guid()
         name: 'FieldDB Development Server 1'
         type: 'FieldDB'
         url: 'https://localhost:3183'
-        corpora: []
-        corpus: null
 
       server3 =
         id: @guid()
         name: 'FieldDB Development Server 2'
         type: 'FieldDB'
         url: 'https://localhost:3181'
-        corpora: []
-        corpus: null
 
       id: @guid()
       activeServer: server1.id

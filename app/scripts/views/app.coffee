@@ -13,11 +13,12 @@ define [
   './../models/application-settings'
   './../models/form'
   './../collections/forms'
+  './../collections/application-settings'
   './../templates/app'
 ], (Backbone, BaseView, MainMenuView, ProgressWidgetView,
   NotifierView, LoginDialogView, RegisterDialogView, ApplicationSettingsView,
   PagesView, FormAddView, FormsView, ApplicationSettingsModel, FormModel,
-  FormsCollection, appTemplate) ->
+  FormsCollection, ApplicationSettingsCollection, appTemplate) ->
 
   # App View
   # --------
@@ -34,18 +35,7 @@ define [
 
     initialize: (options) ->
 
-      # console.log 'THESE ARE THE APPLICATION SETTINGS DEFAULTS'
-      # console.log JSON.stringify(ApplicationSettingsModel::defaults(), undefined, 2)
-
-      # Allowing an app settings model in the options facilitates testing.
-      if options?.applicationSettings
-        @applicationSettings = options.applicationSettings
-      else
-        @applicationSettings = new ApplicationSettingsModel()
-        # console.log 'applicationSettings instance with defaults'
-        # console.log JSON.stringify(@applicationSettings.toJSON(), undefined, 2)
-        #@applicationSettings.fetch()
-
+      @getApplicationSettings options
       @mainMenuView = new MainMenuView model: @applicationSettings
       @loginDialog = new LoginDialogView model: @applicationSettings
       @registerDialog = new RegisterDialogView model: @applicationSettings
@@ -83,6 +73,23 @@ define [
       # FieldDB.FieldDBObject.application.currentFieldDB.url = FieldDB.FieldDBObject.application.currentFieldDB.BASE_DB_URL
 
       @matchWindowDimensions()
+
+    # Set `@applicationSettings` and `@applicationSettingsCollection`
+    getApplicationSettings: (options) ->
+      @applicationSettingsCollection = new ApplicationSettingsCollection()
+      # Allowing an app settings model in the options facilitates testing.
+      if options?.applicationSettings
+        @applicationSettings = options.applicationSettings
+        @applicationSettingsCollection.add @applicationSettings
+      else
+        @applicationSettingsCollection.fetch()
+        if @applicationSettingsCollection.length
+          console.log 'got app settings from localStorage.'
+          @applicationSettings = @applicationSettingsCollection.at 0
+        else
+          console.log 'new app settings created.'
+          @applicationSettings = new ApplicationSettingsModel()
+          @applicationSettingsCollection.add @applicationSettings
 
     # Size the #appview div relative to the window size
     matchWindowDimensions: ->

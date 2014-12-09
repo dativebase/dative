@@ -13,21 +13,22 @@ require.config
       deps: ['lodash', 'jquery']
     #jqueryui: ['../bower_components/jquery/dist/jquery']
     jqueryui: ['jquery']
-    backboneindexeddb: ['backbone']
+    # backboneindexeddb: ['backbone']
     multiselect: ['jquery', 'jqueryui']
     jqueryelastic: ['jquery']
     perfectscrollbar: ['jquery']
     superfish: ['jquery']
     supersubs: ['jquery']
     backbonerelational: ['backbone']
+    backbonelocalstorage: ['backbone']
 
   paths:
     jquery: '../bower_components/jquery/dist/jquery'
     backbone: '../bower_components/backbone/backbone'
     lodash: '../bower_components/lodash/dist/lodash'
     underscore: '../bower_components/lodash/dist/lodash.underscore'
-    backboneindexeddb:
-      '../bower_components/indexeddb-backbonejs-adapter/backbone-indexeddb'
+    # backboneindexeddb:
+    #   '../bower_components/indexeddb-backbonejs-adapter/backbone-indexeddb'
     bootstrap: '../bower_components/sass-bootstrap/dist/js/bootstrap'
     text: '../bower_components/requirejs-text/text'
     jqueryui: '../bower_components/jqueryui/jquery-ui'
@@ -50,12 +51,13 @@ require.config
     perfectscrollbar: '../bower_components/perfect-scrollbar/src/perfect-scrollbar'
     fielddb: '../bower_components/fielddb/fielddb'
     backbonerelational: '../bower_components/backbone-relational/backbone-relational'
+    backbonelocalstorage: '../bower_components/backbone.localStorage/backbone.localStorage'
 
 require [
     'views/app',
     'routes/router'
     'fielddb'
-    'backboneindexeddb'
+    #'backboneindexeddb'
     'multiselect'
     'jqueryelastic'
     'jqueryuicolors'
