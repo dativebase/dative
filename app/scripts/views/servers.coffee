@@ -50,6 +50,7 @@ define [
       if event
         event.preventDefault()
         event.stopPropagation()
+      @_openServerConfig()
       serverModel = new ServerModel()
       @collection.unshift serverModel
       serverView = new ServerView model: serverModel
@@ -87,6 +88,10 @@ define [
             $firstInput = @$('input[name=name]').first()
             if $firstInput.is(':visible')
               $firstInput.focus()
+
+    _openServerConfig: ->
+      if not @$('.dative-widget-body').is(':visible')
+        @_toggleServerConfig()
 
     _rememberTarget: (event) ->
       try
