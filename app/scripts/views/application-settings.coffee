@@ -20,15 +20,16 @@ define [
       'keydown .dative-input-display': '_keyboardControl'
       'keydown button': '_keyboardControl'
       'selectmenuchange .serverType': '_corpusSelectVisibility'
-      'keyup input': 'setFromGUI'
-      'selectmenuchange': 'setFromGUI'
-      'click': 'setFromGUI'
+      'keyup input': 'setModelFromGUI'
+      'selectmenuchange': 'setModelFromGUI'
+      'click': 'setModelFromGUI'
+
+      'focus input': 'scrollToFocusedInput'
+      'focus button': 'scrollToFocusedInput'
+      'focus .ui-selectmenu-button': 'scrollToFocusedInput'
 
     initialize: (arg) ->
-      modelState = @model.toJSON()
-      console.log JSON.stringify(modelState, undefined, 2)
-      console.log 'the argument to application settings view initialize is ...'
-      console.log arg
+
       # Subviews
       @serversView = new ServersView
         collection: @model.get('servers')
@@ -38,6 +39,11 @@ define [
       @listenTo Backbone, 'applicationSettings:edit', @edit
       @listenTo Backbone, 'applicationSettings:view', @view
       @listenTo Backbone, 'applicationSettings:save', @save
+      @listenTo @model.get('activeServer'), 'change:url', @activeServerURLChanged
+
+    activeServerURLChanged: ->
+      #console.log 'active server url has changed'
+      return
 
     render: ->
       params = _.extend {headerTitle: 'Application Settings'}, @model.attributes
@@ -55,6 +61,7 @@ define [
       @matchHeights()
       @pageBody = @$ '#dative-page-body'
       @_guify()
+      @
 
     clickSave: (event) ->
       event.preventDefault()
@@ -62,23 +69,12 @@ define [
       @save()
 
     save: ->
-      preState = @model.toJSON()
-      @setFromGUI()
-      console.log @model.collection
-      #@model.collection.save()
+      @setModelFromGUI()
       @model.save()
 
-      postState = @model.toJSON()
-      stateChanged = not _.isEqual(preState, postState)
-      if stateChanged
-        console.log 'WILL SAVE'
-      else
-        console.log 'WILL NOT SAVE, STATE NOT CHANGED'
-
-    setFromGUI: ->
-      console.log 'setFromGUI called in applicationSettings view'
+    setModelFromGUI: ->
       @model.set 'activeServer', @$('select[name=activeServer]').val()
-      @serversView.setFromGUI()
+      @serversView.setCollectionFromGUI()
 
     _getFormData: ->
       #activeServer: @$('select[name=activeServer]').val()
@@ -209,4 +205,24 @@ define [
         @$('li.corpusSelect').slideDown('medium')
       else
         @$('li.corpusSelect').slideUp('medium')
+
+    # Alter the scroll position so that the focused UI element is centered.
+    scrollToFocusedInput: (event) ->
+      # Small bug: if you tab really fast through the inputs, the scroll
+      # animations will be queued and all jumpy. Calling `.stop` as below
+      # does nof fix the issue.
+      # @$('input, button, .ui-selectmenu-button').stop('fx', true, false)
+
+      $element = $ event.currentTarget
+
+      # Get the true offset of the element
+      initialScrollTop = @pageBody.scrollTop()
+      @pageBody.scrollTop 0
+      trueOffset = $element.offset().top
+      @pageBody.scrollTop initialScrollTop
+
+      windowHeight = $(window).height()
+      desiredOffset = windowHeight / 2
+      scrollTop = trueOffset - desiredOffset
+      @pageBody.animate {scrollTop: scrollTop}, 250
 

@@ -11,22 +11,28 @@ define [
   # Application Settings Model
   # --------------------------
   #
-  # The application settings are persisted *very simply* using HTML's
-  # localStorage. (Got frustrated with Backbone.LocalStorage, and, anyways,
-  # the overhead seems unnecessary.)
+  # Holds server configuration and (in the future) other stuff.
+  # Persisted in the browser using localStorage (Backbone.localStorage)
+  #
+  # Uses Backbone-relational to facilitate the auto-generation of sub-models
+  # and sub-collections. See the `relations` attribute.
+  #
+  # Also contains the authentication logic.
 
   class ApplicationSettingsModel extends BaseRelationalModel
 
-    constructor: (arg) ->
+    constructor: ->
       @listenTo Backbone, 'authenticate:login', @authenticate
       @listenTo Backbone, 'authenticate:logout', @logout
       @listenTo Backbone, 'authenticate:register', @register
-      @on 'change', @_urlChanged
+
+      #@on 'change', @_urlChanged
       if not Modernizr.localstorage
         throw new Error 'localStorage unavailable in this browser, please upgrade.'
       super
 
     _urlChanged: ->
+      console.log 'url has changed'
       return # TODO DEBUGGING
       if @hasChanged('activeServer') or @hasChanged('servers')
         @checkIfLoggedIn()

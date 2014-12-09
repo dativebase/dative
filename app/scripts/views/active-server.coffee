@@ -48,6 +48,6 @@ define [
         .find("option[value=#{serverModel.get('id')}]").remove().end()
         .selectmenu('refresh')
 
-    setFromGUI: ->
+    setModelFromGUI: ->
       @model.set 'activeServer', @$('select[name=activeServer]').val()
 

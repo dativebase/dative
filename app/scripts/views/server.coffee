@@ -18,9 +18,8 @@ define [
       'keydown button.delete-server': '_keyboardControl'
       'click button.delete-server': '_deleteServer'
 
-    setFromGUI: ->
+    setModelFromGUI: ->
       @$('input, select').each (index, element) =>
-        console.log "Setting #{$(element).attr('name')} to #{$(element).val()}"
         @model.set $(element).attr('name'), $(element).val()
 
     render: ->
@@ -37,21 +36,6 @@ define [
         @model.trigger 'removeme', @model
         Backbone.trigger 'removeServerView', @
         @remove()
-
-    # Save to localStorage, render display view
-    save: ->
-      console.log 'You want to save this server model', @model.attributes
-      # TODO: direct save or delegate to collection?
-
-    # Extract data in the inputs of the HTML "Add a Form" form and
-    # convert them to an object
-    _getModelObjectFromForm: ->
-      modelObject = {}
-      for $element in @$('input, select')
-        modelObject[$element.attr('name')] = 'a'
-      # for fieldObject in @$('form.applicationSettingsForm').serializeArray()
-      # modelObject[fieldObject.name] = fieldObject.value
-      modelObject
 
     _keyboardControl: (event) ->
       @_rememberTarget event
