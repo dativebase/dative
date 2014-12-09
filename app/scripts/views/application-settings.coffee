@@ -61,6 +61,7 @@ define [
       @matchHeights()
       @pageBody = @$ '#dative-page-body'
       @_guify()
+      @_setFocus()
       @
 
     clickSave: (event) ->
@@ -186,19 +187,18 @@ define [
 
     _rememberTarget: (event) ->
       try
-        @$('.dative-input-display').each (index, el) =>
+        @$('button, .ui-selectmenu-button, input').each (index, el) =>
           if el is event.target
             @focusedElementIndex = index
+            return false # break out of jQuery each loop
 
     _setFocus: (viewType) ->
       if @focusedElementIndex?
-        @$('.dative-input-display').eq(@focusedElementIndex)
+        #@$('.dative-input-display').eq(@focusedElementIndex)
+        @$('button, .ui-selectmenu-button, input').eq(@focusedElementIndex)
           .focus().select()
       else
-        if viewType is 'view'
-          @$('button.edit').first().focus()
-        else if viewType is 'edit'
-          @$('select, input').first().focus().select()
+        @$('.ui-selectmenu-button').first().focus()
 
     _corpusSelectVisibility: (event, ui) ->
       if ui.item.value is 'FieldDB'

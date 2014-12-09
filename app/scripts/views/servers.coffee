@@ -28,16 +28,12 @@ define [
           serverTypes: @serverTypes
         @serverViews.push newServerView
 
+      @bodyVisible = false
+
     _removeServerView: (serverView) ->
-      # 1. find serverView in @serverViews and remove it
-      # 2. 
-      console.log '_removeServerView called'
-      console.log serverView
-      console.log "@serverViews.length: #{@serverViews.length}"
       @serverViews = _.without @serverViews, serverView
       serverView.close()
       @closed serverView
-      console.log "@serverViews.length: #{@serverViews.length}"
 
     events:
       'keydown button.toggle-appear': '_keyboardControl'
@@ -81,11 +77,14 @@ define [
 
       @$('button').button().attr('tabindex', '0')
 
-      @$('.dative-widget-body').first().hide()
+      triangleIcon = 'ui-icon-triangle-1-s'
+      if not @bodyVisible
+        @$('.dative-widget-body').first().hide()
+        triangleIcon = 'ui-icon-triangle-1-e'
 
       @$('button.toggle-appear')
         .button
-          icons: {primary: 'ui-icon-triangle-1-e'}
+          icons: {primary: triangleIcon}
           text: false
 
       @$('button.add-server')
@@ -107,6 +106,7 @@ define [
             $firstInput = @$('input[name=name]').first()
             if $firstInput.is(':visible')
               $firstInput.focus()
+            @bodyVisible = @$('.dative-widget-body').is(':visible')
 
     _openServerConfig: ->
       if not @$('.dative-widget-body').is(':visible')

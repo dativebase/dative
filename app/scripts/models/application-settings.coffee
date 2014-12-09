@@ -250,21 +250,21 @@ define [
 
       server1 =
         id: @guid()
+        name: 'FieldDB Development Server'
+        type: 'FieldDB'
+        url: 'https://localhost:3183'
+
+      server2 =
+        id: @guid()
         name: 'OLD Development Server'
         type: 'OLD'
         url: 'http://127.0.0.1:5000'
 
-      server2 =
-        id: @guid()
-        name: 'FieldDB Development Server 1'
-        type: 'FieldDB'
-        url: 'https://localhost:3183'
-
       server3 =
         id: @guid()
-        name: 'FieldDB Development Server 2'
+        name: 'FieldDB Production Server'
         type: 'FieldDB'
-        url: 'https://localhost:3181'
+        url: 'https://auth.lingsync.org'
 
       id: @guid()
       activeServer: server1.id
