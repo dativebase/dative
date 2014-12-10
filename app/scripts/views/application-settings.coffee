@@ -26,8 +26,8 @@ define [
       'focus input': 'scrollToFocusedInput'
       'focus button': 'scrollToFocusedInput'
       # BUG: if you scroll to a selectmenu you've just clicked on, the select
-      # dropdown # will be left hanging in the place where you originally
-      # clicked it.
+      # dropdown will be left hanging in the place where you originally
+      # clicked it. So I've disabled "scroll-to-focus" for selectmenus for now.
       #'focus .ui-selectmenu-button': 'scrollToFocusedInput'
 
     initialize: ->
@@ -134,7 +134,7 @@ define [
 
     _guify: ->
 
-      @$('button').button().attr('tabindex', '0')
+      @$('button').button().attr('tabindex', 0)
 
       @$('.dative-page-header-title').first()
         .position
@@ -176,7 +176,7 @@ define [
       @$('button, select, input, textarea, div.dative-input-display,
         span.ui-selectmenu-button')
         .css("border-color", ApplicationSettingsView.jQueryUIColors.defBo)
-        .attr('tabindex', '0')
+        .attr('tabindex', 0)
 
     _addModel: ->
       @$('select[name="serverType"]', @pageBody)

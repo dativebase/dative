@@ -45,7 +45,6 @@ define [
 
     # Cleanly closes this view and all of it's rendered subviews
     close: ->
-      console.log "close was called on", @
       @$el.empty()
       @undelegateEvents()
       @stopListening()

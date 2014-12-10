@@ -77,7 +77,7 @@ define [
 
     _guify: ->
 
-      @$('button').button().attr('tabindex', '0')
+      @$('button').button().attr('tabindex', 0)
 
       triangleIcon = 'ui-icon-triangle-1-s'
       if not @bodyVisible

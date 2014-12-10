@@ -18,19 +18,37 @@ define [
 
     template: activeServerTemplate
 
+    initialize: (options) ->
+      @width = options.width or 540
+      @label = options.label or 'Active Server'
+
+    events:
+      'selectmenuchange': 'setModelFromGUI'
+
     listenToEvents: ->
       @listenTo @model.get('servers'), 'add', @newServerAdded
       @listenTo @model.get('servers'), 'remove', @serverRemoved
       @listenTo @model.get('servers'), 'change', @serverChanged
+      @listenTo @model, 'change:activeServer', @activeServerChanged
+      @delegateEvents()
 
     render: ->
       context =
+        label: @label
         activeServerId: @model.get('activeServer')?.get('id')
         servers: @model.get('servers').toJSON()
       @$el.html @template(context)
-      @$('select.activeServer').selectmenu()
+      @$('select.activeServer').selectmenu width: @width
       @listenToEvents()
       @
+
+    activeServerChanged: ->
+      activeServer = @model.get 'activeServer'
+      if activeServer
+        @$('select.activeServer').val activeServer.get('id')
+      else
+        @$('select.activeServer').val 'null'
+      @$('select.activeServer').selectmenu 'refresh'
 
     serverChanged: (serverModel) ->
       @$('select.activeServer')

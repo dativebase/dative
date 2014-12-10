@@ -3,7 +3,7 @@
 
   <div class="dative-widget-header ui-widget-header ui-corner-top">
 
-    <div class='dative-widget-header-title'>Server</div>
+    <div class='dative-widget-header-title'><%= @headerTitle %></div>
 
     <button class="float-left delete-server"
       title="delete server configuration"></button>

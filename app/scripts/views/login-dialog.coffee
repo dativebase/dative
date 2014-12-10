@@ -1,8 +1,9 @@
 define [
   'backbone'
   './base'
+  './active-server'
   './../templates/login-dialog'
-], (Backbone, BaseView, loginDialogTemplate) ->
+], (Backbone, BaseView, ActiveServerView, loginDialogTemplate) ->
 
   # LoginDialogView
   # ---------------
@@ -21,6 +22,8 @@ define [
       @listenTo Backbone, 'authenticate:success', @_authenticateSuccess
       @listenTo Backbone, 'loginDialog:toggle', @toggle
       @listenTo @model, 'change:loggedIn', @_disableButtons
+      @activeServerView = new ActiveServerView
+        model: @model, width: 139, label: 'Server *'
 
     events:
       'keyup .dative-login-dialog-widget .username': 'validate'
@@ -30,10 +33,17 @@ define [
 
     render: ->
       @$el.append @template()
+      @renderActiveServerView()
       @$source = @$ '.dative-login-dialog' # outer DIV from template
       @$target = @$ '.dative-login-dialog-target' # outer DIV to which jQueryUI dialog appends
       @_dialogify()
       @_disableButtons()
+      @
+
+    renderActiveServerView: ->
+      @activeServerView.setElement @$('li.active-server').first()
+      @activeServerView.render()
+      @rendered @activeServerView
 
     # Transform the login dialog HTML to a jQueryUI dialog box.
     _dialogify: ->
@@ -63,9 +73,10 @@ define [
         title: 'Login'
         width: 400
         create: =>
-          @$target.find('button').attr('tabindex', 1).end()
-            .find('input').css('border-color',
-              LoginDialogView.jQueryUIColors.defBo)
+          @$target.find('button, .ui-selectmenu-button').attr('tabindex', 0)
+            .end()
+            .find('input')
+              .css('border-color', LoginDialogView.jQueryUIColors.defBo)
         open: =>
           @_initializeDialog()
           @_disableButtons()

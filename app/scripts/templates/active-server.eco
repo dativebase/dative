@@ -1,4 +1,4 @@
-<label for="activeServer">Active Server</label>
+<label for="activeServer"><%= @label %></label>
 <select name="activeServer" class="activeServer">
   <option value="null">--</option>
   <% for server in @servers: %>

@@ -1,16 +1,17 @@
 define [
   'backbone'
   './base'
+  './active-server'
   './../templates/register-dialog'
-], (Backbone, BaseView, registerDialogTemplate) ->
+], (Backbone, BaseView, ActiveServerView, registerDialogTemplate) ->
 
   # RegisterDialogView
   # ------------------
   #
   # This is a dialog box for registering an account on a Dative backend server
   # (web service), i.e., FieldDB. For the OLD it should be a message to contact
-  # an administrator of an OLD web service, or better a contact form. It is a
-  # draggable box created using jQueryUI's # .dialog()
+  # an administrator of an OLD web service or, better yet, a contact form. It
+  # is a draggable box created using jQueryUI's `.dialog()`.
 
   class RegisterDialogView extends BaseView
 
@@ -22,6 +23,8 @@ define [
       @listenTo Backbone, 'authenticate:success', @_authenticateSuccess
       @listenTo Backbone, 'registerDialog:toggle', @toggle
       @listenTo @model, 'change:loggedIn', @_disableButtons
+      @activeServerView = new ActiveServerView
+        model: @model, width: 252, label: 'Server *'
 
     events:
       'keyup .dative-register-dialog-widget .username': 'validate'
@@ -35,12 +38,17 @@ define [
 
     render: ->
       @$el.append @template(@model.attributes)
+      @renderActiveServerView()
       @$source = @$ '.dative-register-dialog' # outer DIV from template
       @$target = @$ '.dative-register-dialog-target' # outer DIV to which jQueryUI dialog appends
       @_dialogify()
       @_disableButtons()
+      @
 
-      # <select name="server" class="server">
+    renderActiveServerView: ->
+      @activeServerView.setElement @$('li.active-server').first()
+      @activeServerView.render()
+      @rendered @activeServerView
 
     # Transform the register dialog HTML to a jQueryUI dialog box.
     _dialogify: ->
@@ -60,7 +68,7 @@ define [
         width: 500
         minWidth: 500
         create: =>
-          @$target.find('button').attr('tabindex', 1).end()
+          @$target.find('button').attr('tabindex', 0).end()
             .find('input').css('border-color',
               RegisterDialogView.jQueryUIColors.defBo)
         open: =>
@@ -98,7 +106,7 @@ define [
       @$('button, select, input, textarea, div.dative-input-display,
         span.ui-selectmenu-button')
         .css("border-color", RegisterDialogView.jQueryUIColors.defBo)
-        .attr('tabindex', '0')
+        .attr('tabindex', 0)
 
     # OLD server responds with validation errors as well as authentication
     # errors. Authentication form should handle as much validation as possible,

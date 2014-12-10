@@ -11,7 +11,7 @@ define [
 
     template: serverTemplate
 
-    initialize: (options) ->
+    initialize: ->
       @applicationSettingsModel = @model.collection.applicationSettings
       @serverTypes = @applicationSettingsModel.get 'serverTypes'
 
@@ -26,8 +26,10 @@ define [
 
     activeServerChanged: ->
       if @active()
+        @$('.dative-widget-header-title').text 'Active Server'
         @$('.dative-widget-body').addClass 'ui-state-highlight'
       else
+        @$('.dative-widget-header-title').text 'Server'
         @$('.dative-widget-body').removeClass 'ui-state-highlight'
 
     active: ->
@@ -38,9 +40,10 @@ define [
         @model.set $(element).attr('name'), $(element).val()
 
     render: ->
+      headerTitle = if @active() then 'Active Server' else 'Server'
       context = _.extend(
         @model.attributes
-        {serverTypes: @serverTypes, isActive: @active()})
+        {serverTypes: @serverTypes, isActive: @active(), headerTitle: headerTitle})
       @$el.html @template(context)
       @_guify()
       @listenToEvents()
@@ -69,7 +72,7 @@ define [
 
     _guify: ->
 
-      @$('button').button().attr('tabindex', '0')
+      @$('button').button().attr('tabindex', 0)
 
       @$('button.delete-server')
         .button
@@ -94,7 +97,7 @@ define [
     _tabindicesNaught: ->
       @$('select, input')
         .css("border-color", @constructor.jQueryUIColors.defBo)
-        .attr('tabindex', '0')
+        .attr('tabindex', 0)
 
     _rememberTarget: (event) ->
       try
