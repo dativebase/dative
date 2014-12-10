@@ -138,6 +138,8 @@ define [
 
       @$('.dative-page-header-title').first()
         .position
+          my: 'center'
+          at: 'center'
           of: @$('.dative-page-header-title').first().parent()
 
       # Main Page GUIfication

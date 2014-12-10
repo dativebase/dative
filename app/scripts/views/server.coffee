@@ -87,7 +87,7 @@ define [
       #@_hoverStateFieldDisplay() # make data display react to focus & hover
 
     _selectmenuify: ->
-      @$('select').selectmenu width: 300
+      @$('select').selectmenu width: 320
       @$('.ui-selectmenu-button').addClass 'dative-input dative-input-display'
 
     # Tabindices=0 and jQueryUI colors
