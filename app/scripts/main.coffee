@@ -67,6 +67,12 @@ require [
     new Workspace()
     Backbone.history.start()
     window.debugMode = false
+
+    # Overriding FieldDB's `bug` which creates a JS `alert()`.
+    # TODO @cesine: is there a better way to override this FieldDB behaviour?
+    FieldDB.FieldDBObject.bug = (message) ->
+      console.log message
+
     $ ->
       new AppView()
 

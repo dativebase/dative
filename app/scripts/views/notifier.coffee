@@ -36,10 +36,13 @@ define [
       # OLD returns {error: "The username and password provided are not valid."}
       message = 'Failed to authenticate'
       if errorObj
-        if @applicationSettings.get('serverType') is 'OLD'
-          message = "#{message}: #{errorObj.error}"
+        if @applicationSettings.get('activeServer')?.get('type') is 'OLD'
+          if errorObj.error
+            message = "#{message}: #{errorObj.error}."
+          else
+            message = "#{message}: reason unknown."
         else
-          message = "#{message}: #{errorObj.reason}"
+          message = "#{message}: #{errorObj}."
       else
         message = "#{message}."
       @messages.push message

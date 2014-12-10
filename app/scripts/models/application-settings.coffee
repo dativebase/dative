@@ -21,15 +21,21 @@ define [
 
   class ApplicationSettingsModel extends BaseRelationalModel
 
-    constructor: ->
+    initialize: ->
       @listenTo Backbone, 'authenticate:login', @authenticate
       @listenTo Backbone, 'authenticate:logout', @logout
       @listenTo Backbone, 'authenticate:register', @register
-
-      #@on 'change', @_urlChanged
+      @listenTo @, 'change:activeServer', @activeServerChanged
+      if @get('activeServer')
+        @listenTo @get('activeServer'), 'change:url', @activeServerURLChanged
       if not Modernizr.localstorage
         throw new Error 'localStorage unavailable in this browser, please upgrade.'
-      super
+
+    activeServerChanged: ->
+      console.log 'active server has changed says the app settings model'
+
+    activeServerURLChanged: ->
+      console.log 'active server URL has changed says the app settings model'
 
     _urlChanged: ->
       console.log 'url has changed'
@@ -38,7 +44,8 @@ define [
         @checkIfLoggedIn()
 
     _getURL: ->
-      @get 'activeServer'
+      url = @get('activeServer')?.get('url')
+      if url.slice(-1) is '/' then url.slice(0, -1) else url
 
     # Return our URL by combining serverURL and serverPort, if specified
     # WARN: deprecated.
@@ -57,7 +64,7 @@ define [
 
     # Attempt to authenticate with the passed-in credentials
     authenticate: (username, password) ->
-      if @get('activeServer').type is 'FieldDB'
+      if @get('activeServer')?.get('type') is 'FieldDB'
         @_authenticateFieldDB username: username, password: password
       else
         @_authenticateOLD username: username, password: password
@@ -65,10 +72,10 @@ define [
     _authenticateOLD: (credentials) ->
       taskId = @guid()
       Backbone.trigger 'longTask:register', 'authenticating', taskId
-      BaseModel.cors.request(
+      BaseRelationalModel.cors.request(
         method: 'POST'
         timeout: 3000
-        url: "#{@_getURL()}login/authenticate"
+        url: "#{@_getURL()}/login/authenticate"
         payload: credentials
         onload: (responseJSON) =>
           @_authenticateAttemptDone taskId
@@ -92,16 +99,14 @@ define [
     _authenticateFieldDB: (credentials) ->
       taskId = @guid()
       Backbone.trigger 'longTask:register', 'authenticating', taskId
-      url = @_getURL()
-      url = url.substring(-1, url.length - 1)
-      FieldDB.Database::BASE_AUTH_URL = url
+      FieldDB.Database::BASE_AUTH_URL = @_getURL()
       FieldDB.Database::login(credentials).then(
         (user) =>
-          # TODO: insert a test on the `user` object here.
+          # TODO @jrwdunham: insert a test on the `user` object here.
           @save username: credentials.username, loggedIn: true
           Backbone.trigger 'authenticate:success'
           user = new FieldDB.User(user)
-          # TODO: store the returned user somewhere
+          # TODO @jrwdunham: store the returned user somewhere
         ,
         (reason) ->
           Backbone.trigger 'authenticate:fail', reason
@@ -118,7 +123,7 @@ define [
     #=========================================================================
 
     logout: ->
-      if @get('activeServer').type is 'FieldDB'
+      if @get('activeServer')?.get('type') is 'FieldDB'
         @_logoutFieldDB()
       else
         @_logoutOLD()
@@ -126,8 +131,8 @@ define [
     _logoutOLD: ->
       taskId = @guid()
       Backbone.trigger 'longTask:register', 'logout', taskId
-      BaseModel.cors.request(
-        url: "#{@_getURL()}login/logout"
+      BaseRelationalModel.cors.request(
+        url: "#{@_getURL()}/login/logout"
         method: 'GET'
         timeout: 3000
         onload: (responseJSON) =>
@@ -148,6 +153,7 @@ define [
     _logoutFieldDB: ->
       taskId = @guid()
       Backbone.trigger 'longTask:register', 'logout', taskId
+      FieldDB.Database::BASE_AUTH_URL = @_getURL()
       FieldDB.Database::logout().then(
         (responseJSON) =>
           if responseJSON.ok is true
@@ -167,7 +173,7 @@ define [
     # Check if we are already logged in.
     checkIfLoggedIn: ->
       #@fetch()
-      if @get('activeServer').type is 'FieldDB'
+      if @get('activeServer')?.get('type') is 'FieldDB'
         @_checkIfLoggedInFieldDB()
       else
         @_checkIfLoggedInOLD()
@@ -176,8 +182,8 @@ define [
       taskId = @guid()
       Backbone.trigger('longTask:register', 'checking if already logged in',
         taskId)
-      BaseModel.cors.request(
-        url: "#{@_getURL()}speakers"
+      BaseRelationalModel.cors.request(
+        url: "#{@_getURL()}/speakers"
         timeout: 3000
         onload: (responseJSON) =>
           @_authenticateAttemptDone(taskId)

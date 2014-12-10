@@ -72,3 +72,9 @@ define [
       if selectedValue is 'null' then selectedValue is null
       @model.set 'activeServer', selectedValue
 
+    disable: ->
+      @$('select.activeServer').selectmenu 'disable'
+
+    enable: ->
+      @$('select.activeServer').selectmenu 'enable'
+

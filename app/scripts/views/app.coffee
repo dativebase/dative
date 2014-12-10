@@ -84,10 +84,8 @@ define [
       else
         @applicationSettingsCollection.fetch()
         if @applicationSettingsCollection.length
-          console.log 'got app settings from localStorage.'
           @applicationSettings = @applicationSettingsCollection.at 0
         else
-          console.log 'new app settings created.'
           @applicationSettings = new ApplicationSettingsModel()
           @applicationSettingsCollection.add @applicationSettings
 
