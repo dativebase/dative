@@ -10,7 +10,11 @@
 
   </div>
 
-  <div class="dative-widget-body">
+  <% if @isActive: %>
+    <div class="dative-widget-body ui-state-highlight">
+  <% else: %>
+    <div class="dative-widget-body">
+  <% end %>
 
     <ul class="fieldset">
 

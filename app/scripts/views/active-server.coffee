@@ -42,8 +42,7 @@ define [
       newOptionElement = $('<option/>',
         value: newServerModel.get('id')
         text: newServerModel.get('name'))
-      @$('select.activeServer').prepend(newOptionElement)
-        .selectmenu('refresh')
+      @$('select.activeServer option[value=null]').after(newOptionElement)
 
     serverRemoved: (serverModel) ->
       @$('select.activeServer')
@@ -51,6 +50,7 @@ define [
         .selectmenu('refresh')
 
     setModelFromGUI: ->
-      selectedValue = @$('select[name=activeServer]').val() or null
+      selectedValue = @$('select[name=activeServer]').val()
+      if selectedValue is 'null' then selectedValue is null
       @model.set 'activeServer', selectedValue
 

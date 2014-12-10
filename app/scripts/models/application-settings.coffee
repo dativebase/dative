@@ -236,6 +236,8 @@ define [
         relatedModel: ServerModel
         collectionType: ServersCollection
         includeInJSON: ['id', 'name', 'type', 'url']
+        reverseRelation:
+          key: 'applicationSettings'
       ,
         type: Backbone.HasOne
         key: 'activeServer'

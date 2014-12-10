@@ -12,21 +12,35 @@ define [
     template: serverTemplate
 
     initialize: (options) ->
-      @serverTypes = options.serverTypes
+      @applicationSettingsModel = @model.collection.applicationSettings
+      @serverTypes = @applicationSettingsModel.get 'serverTypes'
 
     events:
       'keydown button.delete-server': '_keyboardControl'
       'click button.delete-server': '_deleteServer'
 
     listenToEvents: ->
+      @listenTo @applicationSettingsModel, 'change:activeServer',
+        @activeServerChanged
       @delegateEvents()
+
+    activeServerChanged: ->
+      if @active()
+        @$('.dative-widget-body').addClass 'ui-state-highlight'
+      else
+        @$('.dative-widget-body').removeClass 'ui-state-highlight'
+
+    active: ->
+      @model is @model.collection.applicationSettings.get 'activeServer'
 
     setModelFromGUI: ->
       @$('input, select').each (index, element) =>
         @model.set $(element).attr('name'), $(element).val()
 
     render: ->
-      context = _.extend @model.attributes, serverTypes: @serverTypes
+      context = _.extend(
+        @model.attributes
+        {serverTypes: @serverTypes, isActive: @active()})
       @$el.html @template(context)
       @_guify()
       @listenToEvents()

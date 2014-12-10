@@ -25,7 +25,10 @@ define [
 
       'focus input': 'scrollToFocusedInput'
       'focus button': 'scrollToFocusedInput'
-      'focus .ui-selectmenu-button': 'scrollToFocusedInput'
+      # BUG: if you scroll to a selectmenu you've just clicked on, the select
+      # dropdown # will be left hanging in the place where you originally
+      # clicked it.
+      #'focus .ui-selectmenu-button': 'scrollToFocusedInput'
 
     initialize: ->
       @serversView = new ServersView
