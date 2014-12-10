@@ -315,7 +315,7 @@ ul.fieldset input[type="password"] {
     padding: 6px 10px 6px 10px;
 }
 ul.fieldset textarea,
-form.applicationSettingsForm input,
+div.applicationSettingsForm input,
 div.dative-display {
     width: 526px;
     max-width: 526px;

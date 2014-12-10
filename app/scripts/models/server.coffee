@@ -20,5 +20,6 @@ define [
       corpora: [] # array of objects
       corpus: '' # object
 
+  # Backbone-relational + CoffeeScript requirement:
   ServerModel.setup()
 

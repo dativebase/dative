@@ -1,14 +1,11 @@
 <label for="activeServer">Active Server</label>
 <select name="activeServer" class="activeServer">
-  <% if not @servers.length: %>
-    <option value="noServer">configure a server in Application Settings</option>
-  <% else: %>
-    <% for server in @servers: %>
-      <% if server.id is @activeServerId: %>
-        <option value="<%= server.id %>" selected ><%= server.name %></option>
-      <% else: %>
-        <option value="<%= server.id %>"><%= server.name %></option>
-      <% end %>
+  <option value="">--</option>
+  <% for server in @servers: %>
+    <% if server.id is @activeServerId: %>
+      <option value="<%= server.id %>" selected ><%= server.name %></option>
+    <% else: %>
+      <option value="<%= server.id %>"><%= server.name %></option>
     <% end %>
   <% end %>
 </select>

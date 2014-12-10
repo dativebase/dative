@@ -18,8 +18,6 @@ define [
     template: serversTemplate
 
     initialize: (options) ->
-      @listenTo Backbone, 'removeServerView', @_removeServerView
-
       @serverTypes = options.serverTypes
       @serverViews = []
       @collection.each (server) =>
@@ -27,8 +25,11 @@ define [
           model: server
           serverTypes: @serverTypes
         @serverViews.push newServerView
-
       @bodyVisible = false
+
+    listenToEvents: ->
+      @listenTo Backbone, 'removeServerView', @_removeServerView
+      @delegateEvents()
 
     _removeServerView: (serverView) ->
       @serverViews = _.without @serverViews, serverView
@@ -50,6 +51,7 @@ define [
         container.appendChild serverView.render().el
         @rendered serverView
       @$widgetBody.append container
+      @listenToEvents()
       @
 
     setCollectionFromGUI: ->

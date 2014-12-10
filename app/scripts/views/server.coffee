@@ -18,6 +18,9 @@ define [
       'keydown button.delete-server': '_keyboardControl'
       'click button.delete-server': '_deleteServer'
 
+    listenToEvents: ->
+      @delegateEvents()
+
     setModelFromGUI: ->
       @$('input, select').each (index, element) =>
         @model.set $(element).attr('name'), $(element).val()
@@ -26,6 +29,7 @@ define [
       context = _.extend @model.attributes, serverTypes: @serverTypes
       @$el.html @template(context)
       @_guify()
+      @listenToEvents()
       @
 
     _deleteServer: (event) ->

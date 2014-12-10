@@ -18,17 +18,19 @@ define [
 
     template: activeServerTemplate
 
-    initialize: ->
-      @listenTo @model.get('servers'), 'change', @serverChanged
+    listenToEvents: ->
       @listenTo @model.get('servers'), 'add', @newServerAdded
       @listenTo @model.get('servers'), 'remove', @serverRemoved
+      @listenTo @model.get('servers'), 'change', @serverChanged
 
     render: ->
       context =
-        activeServerId: @model.get('activeServer').get('id')
+        activeServerId: @model.get('activeServer')?.get('id')
         servers: @model.get('servers').toJSON()
       @$el.html @template(context)
       @$('select.activeServer').selectmenu()
+      @listenToEvents()
+      @
 
     serverChanged: (serverModel) ->
       @$('select.activeServer')
@@ -49,5 +51,6 @@ define [
         .selectmenu('refresh')
 
     setModelFromGUI: ->
-      @model.set 'activeServer', @$('select[name=activeServer]').val()
+      selectedValue = @$('select[name=activeServer]').val() or null
+      @model.set 'activeServer', selectedValue
 

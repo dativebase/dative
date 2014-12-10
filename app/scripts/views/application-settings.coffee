@@ -19,7 +19,6 @@ define [
       'click button.save': 'clickSave'
       'keydown .dative-input-display': '_keyboardControl'
       'keydown button': '_keyboardControl'
-      'selectmenuchange .serverType': '_corpusSelectVisibility'
       'keyup input': 'setModelFromGUI'
       'selectmenuchange': 'setModelFromGUI'
       'click': 'setModelFromGUI'
@@ -28,18 +27,19 @@ define [
       'focus button': 'scrollToFocusedInput'
       'focus .ui-selectmenu-button': 'scrollToFocusedInput'
 
-    initialize: (arg) ->
-
-      # Subviews
+    initialize: ->
       @serversView = new ServersView
         collection: @model.get('servers')
         serverTypes: @model.get('serverTypes')
       @activeServerView = new ActiveServerView model: @model
 
+    listenToEvents: ->
       @listenTo Backbone, 'applicationSettings:edit', @edit
       @listenTo Backbone, 'applicationSettings:view', @view
       @listenTo Backbone, 'applicationSettings:save', @save
-      @listenTo @model.get('activeServer'), 'change:url', @activeServerURLChanged
+      if @model.get('activeServer')
+        @listenTo @model.get('activeServer'), 'change:url', @activeServerURLChanged
+      @delegateEvents()
 
     activeServerURLChanged: ->
       #console.log 'active server url has changed'
@@ -62,6 +62,7 @@ define [
       @pageBody = @$ '#dative-page-body'
       @_guify()
       @_setFocus()
+      @listenToEvents()
       @
 
     clickSave: (event) ->
@@ -147,7 +148,6 @@ define [
       @_selectmenuify()
       @_hoverStateFieldDisplay() # make data display react to focus & hover
       @_tabindicesNaught() # active elements have tabindex=0
-      @_toggleCorpusSelect() # corpora only displayed for FieldDB
 
       @$('div.server-config-widget-body').hide()
 
@@ -173,13 +173,6 @@ define [
         .css("border-color", ApplicationSettingsView.jQueryUIColors.defBo)
         .attr('tabindex', '0')
 
-    # Only display corpus select for FieldDB
-    _toggleCorpusSelect: ->
-      if @model.get('serverType') is 'FieldDB'
-        @$('li.corpusSelect').show()
-      else
-        @$('li.corpusSelect').hide()
-
     _addModel: ->
       @$('select[name="serverType"]', @pageBody)
         .val(@model.get('serverType'))
@@ -199,12 +192,6 @@ define [
           .focus().select()
       else
         @$('.ui-selectmenu-button').first().focus()
-
-    _corpusSelectVisibility: (event, ui) ->
-      if ui.item.value is 'FieldDB'
-        @$('li.corpusSelect').slideDown('medium')
-      else
-        @$('li.corpusSelect').slideUp('medium')
 
     # Alter the scroll position so that the focused UI element is centered.
     scrollToFocusedInput: (event) ->

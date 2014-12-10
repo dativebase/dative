@@ -1,49 +1,21 @@
 <div id='dative-page-header' class='ui-widget-header ui-corner-top'>
 
   <div class='dative-page-header-title'><%= @headerTitle %></div>
-  <!-- <button class="float-left edit" title="edit"></span> -->
   <button class="float-left save" title="save"></span>
 
 </div>
 
 <div id='dative-page-body'>
-
-  <form id="applicationSettingsForm" action="" method=""
-    class="applicationSettingsForm">
+  <div class="applicationSettingsForm">
     <ul class="fieldset">
 
-      <li class="active-server"> </li>
+      <li class="active-server"></li>
 
-      <li class="corpusSelect">
-        <label for="corpus">Corpus</label>
-        <select name="corpus" class="corpus">
-        <% if @activeServer.get('corpora').length: %>
-          <% for corpus in activeServer.get('corpora'): %>
-            <option value="<%= corpus %>"><%= corpus %></option>
-          <% end %>
-        <% else: %>
-          <option value="noCorpus">login to access corpus list</option>
-        <% end %>
-        </select>
-      </li>
+      <li class="active-corpus"></li>
 
       <li class="server-config-container"></li>
 
-      <!--
-      <li>
-        <label for="loggedIn">Logged in</label>
-        <div class="dative-display"><%= @loggedIn %></div>
-      </li>
-
-      <li>
-        <label for="username">Username</label>
-        <div class="dative-display"><%= @username %></div>
-      </li>
-      -->
-
     </ul>
-
-</form>
-
+  </div>
 </div>
 
