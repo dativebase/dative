@@ -13,11 +13,12 @@ define [
   './../models/application-settings'
   './../models/form'
   './../collections/forms'
+  './../collections/application-settings'
   './../templates/app'
 ], (Backbone, BaseView, MainMenuView, ProgressWidgetView,
   NotifierView, LoginDialogView, RegisterDialogView, ApplicationSettingsView,
   PagesView, FormAddView, FormsView, ApplicationSettingsModel, FormModel,
-  FormsCollection, appTemplate) ->
+  FormsCollection, ApplicationSettingsCollection, appTemplate) ->
 
   # App View
   # --------
@@ -34,13 +35,7 @@ define [
 
     initialize: (options) ->
 
-      # Allowing an app settings model in the options facilitates testing.
-      if options?.applicationSettings
-        @applicationSettings = options.applicationSettings
-      else
-        @applicationSettings = new ApplicationSettingsModel()
-        @applicationSettings.fetch()
-
+      @getApplicationSettings options
       @mainMenuView = new MainMenuView model: @applicationSettings
       @loginDialog = new LoginDialogView model: @applicationSettings
       @registerDialog = new RegisterDialogView model: @applicationSettings
@@ -78,6 +73,21 @@ define [
       # FieldDB.FieldDBObject.application.currentFieldDB.url = FieldDB.FieldDBObject.application.currentFieldDB.BASE_DB_URL
 
       @matchWindowDimensions()
+
+    # Set `@applicationSettings` and `@applicationSettingsCollection`
+    getApplicationSettings: (options) ->
+      @applicationSettingsCollection = new ApplicationSettingsCollection()
+      # Allowing an app settings model in the options facilitates testing.
+      if options?.applicationSettings
+        @applicationSettings = options.applicationSettings
+        @applicationSettingsCollection.add @applicationSettings
+      else
+        @applicationSettingsCollection.fetch()
+        if @applicationSettingsCollection.length
+          @applicationSettings = @applicationSettingsCollection.at 0
+        else
+          @applicationSettings = new ApplicationSettingsModel()
+          @applicationSettingsCollection.add @applicationSettings
 
     # Size the #appview div relative to the window size
     matchWindowDimensions: ->
@@ -123,7 +133,6 @@ define [
     showFormsView: ->
       @_closeVisibleView()
       if not @_formsView
-        console.log 'HAD TO CREATE A NEW FORMS VIEW'
         @_formsView = new FormsView
           collection: new FormsCollection()
           applicationSettings: @applicationSettings

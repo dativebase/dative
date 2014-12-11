@@ -1,47 +1,45 @@
 define [
   'underscore'
   'backbone'
-  './base'
+  './base-relational'
+  './server'
+  './../collections/servers'
   './../utils/utils'
-], (_, Backbone, BaseModel, utils) ->
+  'backbonelocalstorage'
+], (_, Backbone, BaseRelationalModel, ServerModel, ServersCollection, utils) ->
 
-  # Application Settings
-  # --------------------
+  # Application Settings Model
+  # --------------------------
   #
-  # The application settings are persisted *very simply* using HTML's
-  # localStorage. (Got frustrated with Backbone.LocalStorage, and, anyways,
-  # the overhead seems unnecessary.)
+  # Holds server configuration and (in the future) other stuff.
+  # Persisted in the browser using localStorage (Backbone.localStorage)
+  #
+  # Uses Backbone-relational to facilitate the auto-generation of sub-models
+  # and sub-collections. See the `relations` attribute.
+  #
+  # Also contains the authentication logic.
 
-  class ApplicationSettingsModel extends BaseModel
+  class ApplicationSettingsModel extends BaseRelationalModel
 
-    constructor: ->
+    initialize: ->
       @listenTo Backbone, 'authenticate:login', @authenticate
       @listenTo Backbone, 'authenticate:logout', @logout
       @listenTo Backbone, 'authenticate:register', @register
-      @on 'change', @_urlChanged
+      @listenTo @, 'change:activeServer', @activeServerChanged
+      if @get('activeServer')
+        @listenTo @get('activeServer'), 'change:url', @activeServerURLChanged
       if not Modernizr.localstorage
         throw new Error 'localStorage unavailable in this browser, please upgrade.'
-      super
 
-    save: ->
-      if arguments.length
-        @set.apply @, arguments
-      localStorage.setItem 'dativeApplicationSettings',
-        JSON.stringify(@attributes)
+    activeServerChanged: ->
+      #console.log 'active server has changed says the app settings model'
 
-    fetch: ->
-      if localStorage.getItem 'dativeApplicationSettings'
-        @set JSON.parse(localStorage.getItem('dativeApplicationSettings'))
+    activeServerURLChanged: ->
+      #console.log 'active server URL has changed says the app settings model'
 
-    _urlChanged: ->
-      if @hasChanged('serverURL') or @hasChanged('serverPort')
-        @checkIfLoggedIn()
-
-    # Return our URL by combining serverURL and serverPort, if specified
     _getURL: ->
-      serverURL = @get 'serverURL'
-      serverPort = @get 'serverPort'
-      "#{serverURL}#{serverPort and ':' + serverPort or ''}/"
+      url = @get('activeServer')?.get('url')
+      if url.slice(-1) is '/' then url.slice(0, -1) else url
 
     _authenticateAttemptDone: (taskId) ->
       Backbone.trigger 'longTask:deregister', taskId
@@ -53,7 +51,7 @@ define [
 
     # Attempt to authenticate with the passed-in credentials
     authenticate: (username, password) ->
-      if @get('serverType') is 'FieldDB'
+      if @get('activeServer')?.get('type') is 'FieldDB'
         @_authenticateFieldDB username: username, password: password
       else
         @_authenticateOLD username: username, password: password
@@ -61,10 +59,10 @@ define [
     _authenticateOLD: (credentials) ->
       taskId = @guid()
       Backbone.trigger 'longTask:register', 'authenticating', taskId
-      @cors(
+      BaseRelationalModel.cors.request(
         method: 'POST'
         timeout: 3000
-        url: "#{@_getURL()}login/authenticate"
+        url: "#{@_getURL()}/login/authenticate"
         payload: credentials
         onload: (responseJSON) =>
           @_authenticateAttemptDone taskId
@@ -88,16 +86,14 @@ define [
     _authenticateFieldDB: (credentials) ->
       taskId = @guid()
       Backbone.trigger 'longTask:register', 'authenticating', taskId
-      url = @_getURL()
-      url = url.substring(-1, url.length - 1)
-      FieldDB.Database::BASE_AUTH_URL = url
+      FieldDB.Database::BASE_AUTH_URL = @_getURL()
       FieldDB.Database::login(credentials).then(
         (user) =>
-          # TODO: insert a test on the `user` object here.
+          # TODO @jrwdunham: insert a test on the `user` object here.
           @save username: credentials.username, loggedIn: true
           Backbone.trigger 'authenticate:success'
           user = new FieldDB.User(user)
-          # TODO: store the returned user somewhere
+          # TODO @jrwdunham: store the returned user somewhere
         ,
         (reason) ->
           Backbone.trigger 'authenticate:fail', reason
@@ -114,7 +110,7 @@ define [
     #=========================================================================
 
     logout: ->
-      if @get('serverType') is 'FieldDB'
+      if @get('activeServer')?.get('type') is 'FieldDB'
         @_logoutFieldDB()
       else
         @_logoutOLD()
@@ -122,8 +118,8 @@ define [
     _logoutOLD: ->
       taskId = @guid()
       Backbone.trigger 'longTask:register', 'logout', taskId
-      @cors(
-        url: "#{@_getURL()}login/logout"
+      BaseRelationalModel.cors.request(
+        url: "#{@_getURL()}/login/logout"
         method: 'GET'
         timeout: 3000
         onload: (responseJSON) =>
@@ -144,13 +140,15 @@ define [
     _logoutFieldDB: ->
       taskId = @guid()
       Backbone.trigger 'longTask:register', 'logout', taskId
+      FieldDB.Database::BASE_AUTH_URL = @_getURL()
       FieldDB.Database::logout().then(
         (responseJSON) =>
           if responseJSON.ok is true
             @save 'loggedIn', false
             Backbone.trigger 'logout:success'
           else
-            Backbone.trigger 'logout:fail'
+            Backbone.trigger 'logout:fail',
+              "server #{@_getURL()} did not accept logout request."
         ,
         (reason) ->
           Backbone.trigger 'logout:fail', reason
@@ -162,8 +160,7 @@ define [
 
     # Check if we are already logged in.
     checkIfLoggedIn: ->
-      #@fetch()
-      if @get('serverType') is 'FieldDB'
+      if @get('activeServer')?.get('type') is 'FieldDB'
         @_checkIfLoggedInFieldDB()
       else
         @_checkIfLoggedInOLD()
@@ -172,8 +169,8 @@ define [
       taskId = @guid()
       Backbone.trigger('longTask:register', 'checking if already logged in',
         taskId)
-      @cors(
-        url: "#{@_getURL()}speakers"
+      BaseRelationalModel.cors.request(
+        url: "#{@_getURL()}/speakers"
         timeout: 3000
         onload: (responseJSON) =>
           @_authenticateAttemptDone(taskId)
@@ -213,10 +210,68 @@ define [
 
 
     # Register a new user
-    #=========================================================================
+    # =========================================================================
 
-    register: ->
-      console.log 'you want to register a new user'
+    # `RegisterDialogView` should never allow an OLD registration attempt.
+    register: (params) ->
+      if @get('activeServer')?.get('type') is 'FieldDB'
+        @_registerFieldDB params
+
+    _registerFieldDB: (params) ->
+      taskId = @guid()
+      Backbone.trigger 'longTask:register', 'registering a new user', taskId
+
+      params.authUrl = @_getURL()
+      # TODO @cesine: `appVersionWhenCreated`: should it be Dative current version?
+      params.appVersionWhenCreated = 'placeholder'
+
+      BaseRelationalModel.cors.request(
+        url: "#{@_getURL()}/register"
+        payload: params
+        method: 'POST'
+        timeout: 10000 # FieldDB auth can take some time to register a new user ...
+        onload: (responseJSON) =>
+          @_authenticateAttemptDone taskId
+          # TODO @cesine: what other kinds of responses to registration requests
+          # can the auth service make?
+          if responseJSON.user?
+            Backbone.trigger 'register:success', responseJSON
+          else
+            Backbone.trigger 'register:fail', responseJSON.userFriendlyErrors
+        onerror: (responseJSON) =>
+          @_authenticateAttemptDone taskId
+          Backbone.trigger 'register:fail', 'server responded with error'
+        ontimeout: =>
+          @_authenticateAttemptDone taskId
+          Backbone.trigger 'register:fail', 'Request timed out'
+      )
+
+
+    # Backbone-relational stuff
+    # =========================================================================
+    #
+    # This is useful because it auto-creates a model hierachy; e.g.,
+    # `@get('activeServer')` returns a `ServerModel` instance and
+    # `@get('servers')` returns a `ServerCollection` instance.
+    #
+    # See http://backbonerelational.org/#RelationalModel-relations
+
+    idAttribute: 'id'
+
+    relations: [
+        type: Backbone.HasMany
+        key: 'servers'
+        relatedModel: ServerModel
+        collectionType: ServersCollection
+        includeInJSON: ['id', 'name', 'type', 'url']
+        reverseRelation:
+          key: 'applicationSettings'
+      ,
+        type: Backbone.HasOne
+        key: 'activeServer'
+        relatedModel: ServerModel
+        includeInJSON: 'id'
+    ]
 
 
     # Defaults
@@ -224,49 +279,38 @@ define [
 
     defaults: ->
 
-      serverType: 'OLD' # other option 'FieldDB'
+      server1 =
+        id: @guid()
+        name: 'FieldDB Development'
+        type: 'FieldDB'
+        url: 'https://localhost:3183'
 
-      # URL of the server where the data are stored (FieldDB corpus or OLD web
-      # service)
-      #serverURL: "http://www.onlinelinguisticdatabase.org/" # ... as an example
-      serverURL: 'http://127.0.0.1'
+      server2 =
+        id: @guid()
+        name: 'OLD Development'
+        type: 'OLD'
+        url: 'http://127.0.0.1:5000'
 
-      serverPort: '5000' # default: null
+      server3 =
+        id: @guid()
+        name: 'FieldDB'
+        type: 'FieldDB'
+        url: 'https://auth.lingsync.org'
 
+      server4 =
+        id: @guid()
+        name: 'OLD'
+        type: 'OLD'
+        url: 'http://www.onlinelinguisticdatabase.org'
+
+      id: @guid()
+      activeServer: server1.id
       loggedIn: false
       username: ''
-
-      # corpora: ['corpus 1', 'corpus 2'] # corpora I have access to.
-      corpora: [] # corpora I have access to.
-      corpus: null # corpora I most recently accessed.
-
-      servers: [
-          name: 'OLD Development Server'
-          type: 'OLD'
-          url: 'http://127.0.0.1:5000'
-        ,
-          name: 'FieldDB Development Server 1'
-          type: 'FieldDB'
-          url: 'https://localhost:3183'
-        ,
-          name: 'FieldDB Development Server 2'
-          type: 'FieldDB'
-          url: 'https://localhost:3181'
-      ]
-
-      # Note: the following attributes are not currently being used (displayed)
-
-      # Right now I'm focusing on server-side persistence to an OLD RESTful web
-      # service. The next step will be persistence to a FieldDB corpus, then
-      # client-side (indexedDB) persistence, and, finally, progressively
-      # improved dual-layer persistence (i.e., client and server). An
-      # interesting possibility would be to enable Dative to provide a single
-      # simultaneous interface to multiple web services, e.g., multiple OLD web
-      # services and multiple FieldDB corpora...
-      persistenceType: "server" # "server", "client", or "dual"
-
-      # Schema type will become relevant later on ...
-      schemaType: "relational" # "relational" or "nosql"
-
+      servers: [server1, server2, server3, server4]
+      serverTypes: ['FieldDB', 'OLD']
       itemsPerPage: 10
+
+  # Backbone-relational requires this when using CoffeeScript
+  ApplicationSettingsModel.setup()
 

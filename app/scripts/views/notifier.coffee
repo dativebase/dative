@@ -4,7 +4,8 @@ define [
   'backbone'
   './base'
   './../templates/notifier'
-], ($, _, Backbone, BaseView, notifierTemplate) ->
+  './../utils/utils'
+], ($, _, Backbone, BaseView, notifierTemplate, utils) ->
 
   # Notifier
   # ---------------
@@ -21,6 +22,8 @@ define [
       @listenTo Backbone, 'authenticate:success', @authenticateSuccess
       @listenTo Backbone, 'logout:fail', @logoutFail
       @listenTo Backbone, 'logout:success', @logoutSuccess
+      @listenTo Backbone, 'register:fail', @registerFail
+      @listenTo Backbone, 'register:success', @registerSuccess
 
     render: ->
       @$el.html(@template(messages: @messages)).fadeIn(
@@ -30,16 +33,33 @@ define [
           @$el.fadeOut duration
       )
 
+    registerFail: (reason) ->
+      message = "Could not register a new user. #{reason}"
+      @messages.push message
+      @render()
+
+    registerSuccess: ->
+      @messages.push 'Registration succeeded.'
+      @render()
+
     authenticateFail: (errorObj) ->
+      # TODO @jrwdunham: simplify the messaging system so that a "reason" is always
+      # returned and not sometimes a reason string and sometimes an object.
       # CouchDB returns {error: "unauthorized", reason: "Name or password is
       #   incorrect."}
       # OLD returns {error: "The username and password provided are not valid."}
       message = 'Failed to authenticate'
       if errorObj
-        if @applicationSettings.get('serverType') is 'OLD'
-          message = "#{message}: #{errorObj.error}"
+        if @applicationSettings.get('activeServer')?.get('type') is 'OLD'
+          if errorObj.error
+            message = "#{message}: #{errorObj.error}."
+          else
+            message = "#{message}: reason unknown."
         else
-          message = "#{message}: #{errorObj.reason}"
+          if utils.type(errorObj) is 'object' # FieldDB API returns string, not object (always?)
+            message = "#{message}: reason unknown."
+          else
+            message = "#{message}: #{errorObj}."
       else
         message = "#{message}."
       @messages.push message

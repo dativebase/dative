@@ -2,52 +2,52 @@
   <form action='register' method='post' class='registerForm'>
     <ul class='fieldset'>
 
-      <li class="serverSelect">
-        <label for="server">Server *</label>
-        <select name="server" class="server">
-        <% if not @servers.length: %>
-          <option value="noServer">configure a server in Application
-          Settings</option>
-        <% else: %>
-          <% for server in @servers: %>
-              <option value="<%= server.url %>"><%= server.name %></option>
-          <% end %>
-        <% end %>
-        </select>
-        <span class='ui-state-error ui-corner-all dative-register-failed
-          server-error'></span>
-      </li>
+      <li class="active-server"></li>
 
-      <li>
+      <li class='fielddb'>
         <label for='username'>Username *</label>
         <input type='text' name='username' class='username'
-            tabindex=1 id="big" />
-        <span class='ui-state-error ui-corner-all dative-register-failed
-          username-error'></span>
+            tabindex=0 id="big" />
+        <span class='dative-register-validation ui-state-error ui-corner-all
+          username-validation'></span>
       </li>
 
-      <li>
+      <li class='fielddb'>
         <label for='password'>Password *</label>
         <input type='password' name='password' class='password'
-            tabindex=1 />
-        <span class='ui-state-error ui-corner-all dative-register-failed
-          password-error'></span>
+            tabindex=0 />
+        <span class='ui-state-error ui-corner-all dative-register-validation
+          password-validation'></span>
       </li>
 
-      <li>
+      <li class='fielddb'>
         <label for='passwordConfirm'>Confirm password *</label>
         <input type='password' name='passwordConfirm' class='passwordConfirm'
-            tabindex=1 />
-        <span class='ui-state-error ui-corner-all dative-register-failed
-          passwordConfirm-error'></span>
+            tabindex=0 />
+        <span class='ui-state-error ui-corner-all dative-register-validation
+          passwordConfirm-validation'></span>
       </li>
 
-      <li>
+      <li class='fielddb'>
         <label for='email'>E-mail *</label>
         <input type='text' name='email' class='email'
-            tabindex=1 />
-        <span class='ui-state-error ui-corner-all dative-register-failed
-          email-error'></span>
+            tabindex=0 />
+        <span class='ui-state-error ui-corner-all dative-register-validation
+          email-validation'></span>
+      </li>
+
+      <li class='old register-info'>
+        <span>OLD web services do not allow self-registration. To register,
+        please contact an administrator of a particular OLD web service (or set
+        up your own OLD). See the <a
+        href="http://www.onlinelinguisticdatabase.org/">OLD website</a> to find
+        an administrator. Read the <a
+        href="http://online-linguistic-database.readthedocs.org/en/latest/"
+        >documentation</a> to set up an OLD.</span>
+      </li>
+
+      <li class='none register-info'>
+        <span>Please select a FieldDB web server to register with.</span>
       </li>
 
     </ul>
