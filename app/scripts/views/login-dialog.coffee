@@ -169,5 +169,4 @@ define [
 
     logoutSuccess: ->
       @focusAppropriateInput()
-      #@$target.find('.username').focus()
 

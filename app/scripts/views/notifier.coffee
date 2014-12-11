@@ -4,7 +4,8 @@ define [
   'backbone'
   './base'
   './../templates/notifier'
-], ($, _, Backbone, BaseView, notifierTemplate) ->
+  './../utils/utils'
+], ($, _, Backbone, BaseView, notifierTemplate, utils) ->
 
   # Notifier
   # ---------------
@@ -42,7 +43,10 @@ define [
           else
             message = "#{message}: reason unknown."
         else
-          message = "#{message}: #{errorObj}."
+          if utils.type(errorObj) is 'object' # FieldDB API returns string, not object (always?)
+            message = "#{message}: reason unknown."
+          else
+            message = "#{message}: #{errorObj}."
       else
         message = "#{message}."
       @messages.push message

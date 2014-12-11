@@ -533,3 +533,15 @@ div.server-config-widget input {
   width: 300px;
 }
 
+div.dative-register-dialog li.register-info span {
+  text-align: justify;
+  text-justify: inter-word;
+  line-height: 130%;
+  margin-left: 130px;
+  margin-top: 10px;
+  display: inline-block;
+  width: 240px;
+  max-width: 240px;
+  min-width: 240px;
+}
+

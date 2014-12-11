@@ -4,7 +4,7 @@
 
       <li class="active-server"></li>
 
-      <li>
+      <li class='fielddb'>
         <label for='username'>Username *</label>
         <input type='text' name='username' class='username'
             tabindex=0 id="big" />
@@ -12,7 +12,7 @@
           username-error'></span>
       </li>
 
-      <li>
+      <li class='fielddb'>
         <label for='password'>Password *</label>
         <input type='password' name='password' class='password'
             tabindex=0 />
@@ -20,7 +20,7 @@
           password-error'></span>
       </li>
 
-      <li>
+      <li class='fielddb'>
         <label for='passwordConfirm'>Confirm password *</label>
         <input type='password' name='passwordConfirm' class='passwordConfirm'
             tabindex=0 />
@@ -28,12 +28,26 @@
           passwordConfirm-error'></span>
       </li>
 
-      <li>
+      <li class='fielddb'>
         <label for='email'>E-mail *</label>
         <input type='text' name='email' class='email'
             tabindex=0 />
         <span class='ui-state-error ui-corner-all dative-register-failed
           email-error'></span>
+      </li>
+
+      <li class='old register-info'>
+        <span>OLD web services do not allow self-registration. To register,
+        please contact an administrator of a particular OLD web service (or set
+        up your own OLD). See the <a
+        href="http://www.onlinelinguisticdatabase.org/">OLD website</a> to find
+        an administrator. Read the <a
+        href="http://online-linguistic-database.readthedocs.org/en/latest/"
+        >documentation</a> to set up an OLD.</span>
+      </li>
+
+      <li class='none register-info'>
+        <span>Please select a FieldDB web server to register with.</span>
       </li>
 
     </ul>

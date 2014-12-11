@@ -18,13 +18,59 @@ define [
     template: registerDialogTemplate
 
     initialize: ->
-      @listenTo Backbone, 'authenticate:fail', @_authenticateFail
-      @listenTo Backbone, 'authenticate:end', @_authenticateEnd
-      @listenTo Backbone, 'authenticate:success', @_authenticateSuccess
       @listenTo Backbone, 'registerDialog:toggle', @toggle
-      @listenTo @model, 'change:loggedIn', @_disableButtons
+      @listenTo @model, 'change:activeServer', @serverDependentRegistration
       @activeServerView = new ActiveServerView
         model: @model, width: 252, label: 'Server *'
+
+    serverDependentRegistration: ->
+      serverType = @model.get('activeServer')?.get 'type'
+      switch serverType
+        when 'OLD' then @oldHelp()
+        when 'FieldDB' then @registrationActive()
+        else @registrationInactive()
+
+    registrationActive: ->
+      @showInputs()
+      @hideOLDHelpText()
+      @hideGeneralHelpText()
+      @enableRegisterButton()
+
+    oldHelp: ->
+      @hideInputs()
+      @showOLDHelpText()
+      @hideGeneralHelpText()
+      @disableRegisterButton()
+
+    registrationInactive: ->
+      @hideInputs()
+      @hideOLDHelpText()
+      @showGeneralHelpText()
+      @disableRegisterButton()
+
+    showInputs: ->
+      @$('.fielddb').stop().slideDown duration: 'medium', queue: false
+
+    hideInputs: ->
+      @$('.fielddb').stop().slideUp()
+
+    showOLDHelpText: ->
+      @$('.old').stop().slideDown duration: 'medium', queue: false
+
+    hideOLDHelpText: ->
+      @$('.old').stop().slideUp duration: 'medium', queue: false
+
+    showGeneralHelpText: ->
+      @$('.none').stop().slideDown duration: 'medium', queue: false
+
+    hideGeneralHelpText: ->
+      @$('.none').stop().slideUp duration: 'medium', queue: false
+
+    enableRegisterButton: ->
+      @$('button.register').button 'enable'
+
+    disableRegisterButton: ->
+      @$('button.register').button 'disable'
 
     events:
       'keyup .dative-register-dialog-widget .username': 'validate'
@@ -42,7 +88,6 @@ define [
       @$source = @$ '.dative-register-dialog' # outer DIV from template
       @$target = @$ '.dative-register-dialog-target' # outer DIV to which jQueryUI dialog appends
       @_dialogify()
-      @_disableButtons()
       @
 
     renderActiveServerView: ->
@@ -73,7 +118,6 @@ define [
               RegisterDialogView.jQueryUIColors.defBo)
         open: =>
           @_initializeDialog()
-          @_disableButtons()
           @_selectmenuify()
           @_tabindicesNaught()
 
@@ -82,20 +126,6 @@ define [
       @$target.find('.password.passwordConfirm').val('').end()
         .find('span.dative-register-failed').text('').hide()
       @$target.find('.ui-selectmenu-button').focus()
-
-    _disableButtons: ->
-      if @model.get 'loggedIn'
-        @$target.find('.register').button('disable').end()
-          .find('.logout').button('enable').focus().end()
-          .find('.forgot-password').button('disable').end()
-          .find('.username').attr('disabled', true).end()
-          .find('.password').attr('disabled', true)
-      else
-        @$target.find('.register').button('enable').end()
-          .find('.logout').button('disable').end()
-          .find('.forgot-password').button('enable').end()
-          .find('.username').removeAttr('disabled').end()
-          .find('.password').removeAttr('disabled').end()
 
     _selectmenuify: ->
       @$target.find('select').selectmenu width: 252
@@ -107,15 +137,6 @@ define [
         span.ui-selectmenu-button')
         .css("border-color", RegisterDialogView.jQueryUIColors.defBo)
         .attr('tabindex', 0)
-
-    # OLD server responds with validation errors as well as authentication
-    # errors. Authentication form should handle as much validation as possible,
-    # preventing a request to the server when data are invalid.
-    _authenticateFail: (failObject) ->
-
-    _authenticateSuccess: -> @dialogClose()
-
-    _authenticateEnd: -> @_disableButtons()
 
     _submitWithEnter: (event) ->
       if event.which is 13
@@ -136,6 +157,12 @@ define [
     # TODO: username and password character restrictions
     # TODO: email validation
     # TODO: password and passwordConfirm must match
+    # - required attributes: serverId, username, password, passwordConfirm,
+    #   email.
+    # - password must equal passwordConfirm
+    # TODO @jrwdunham: clean the username with feedback in the register
+    # dialog view.
+    # TODO @jrwdunham: `appVersionWhenCreated`: Dative current version?
     validate: ->
       fields =
         server: @$target.find('.server').val() or false
@@ -149,6 +176,19 @@ define [
         for name, value of fields
           if not value then @$(".#{name}-error").first().show().text 'required'
       fields
+
+    # notificationMessage = ["We have automatically changed your requested",
+    # "username to '#{username}' instead. \n\n(The username you have",
+    # "chosen isn't very safe for urls, which means your corpora would be",
+    # "potentially inaccessible in old browsers)"].join ' '
+
+    # TODO @jrwdunham: clean the username and notify user of how it will be
+    # stored in FieldDB.
+    usernameConvertAlert: (username) ->
+      convertedUsername = username
+        .trim().toLowerCase().replace /[^0-9a-z]/g, ""
+      if convertedUsername is not username then convertedUsername
+
 
     register: ->
       @_submitAttempted = true
