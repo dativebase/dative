@@ -184,8 +184,8 @@ div.dative-page-header-title
     z-index: 2000;
 }
 .dative-login-dialog-widget .dative-login-failed,
-.dative-register-dialog-widget .dative-register-failed,
-.dative-register-failed {
+.dative-register-dialog-widget .dative-register-validation,
+.dative-register-validation {
     padding: 5px;
 }
 .dative-login-dialog-widget,
@@ -545,3 +545,11 @@ div.dative-register-dialog li.register-info span {
   min-width: 240px;
 }
 
+div.dative-register-dialog div.dative-register-info {
+  position: absolute;
+  /*max-height: 40px;*/
+  overflow: none;
+  width: auto;
+  max-height: 20px;
+  display: inline-table;
+}

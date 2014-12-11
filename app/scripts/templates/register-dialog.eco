@@ -8,32 +8,32 @@
         <label for='username'>Username *</label>
         <input type='text' name='username' class='username'
             tabindex=0 id="big" />
-        <span class='ui-state-error ui-corner-all dative-register-failed
-          username-error'></span>
+        <span class='dative-register-validation ui-state-error ui-corner-all
+          username-validation'></span>
       </li>
 
       <li class='fielddb'>
         <label for='password'>Password *</label>
         <input type='password' name='password' class='password'
             tabindex=0 />
-        <span class='ui-state-error ui-corner-all dative-register-failed
-          password-error'></span>
+        <span class='ui-state-error ui-corner-all dative-register-validation
+          password-validation'></span>
       </li>
 
       <li class='fielddb'>
         <label for='passwordConfirm'>Confirm password *</label>
         <input type='password' name='passwordConfirm' class='passwordConfirm'
             tabindex=0 />
-        <span class='ui-state-error ui-corner-all dative-register-failed
-          passwordConfirm-error'></span>
+        <span class='ui-state-error ui-corner-all dative-register-validation
+          passwordConfirm-validation'></span>
       </li>
 
       <li class='fielddb'>
         <label for='email'>E-mail *</label>
         <input type='text' name='email' class='email'
             tabindex=0 />
-        <span class='ui-state-error ui-corner-all dative-register-failed
-          email-error'></span>
+        <span class='ui-state-error ui-corner-all dative-register-validation
+          email-validation'></span>
       </li>
 
       <li class='old register-info'>

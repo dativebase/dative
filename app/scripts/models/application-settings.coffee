@@ -32,27 +32,14 @@ define [
         throw new Error 'localStorage unavailable in this browser, please upgrade.'
 
     activeServerChanged: ->
-      console.log 'active server has changed says the app settings model'
+      #console.log 'active server has changed says the app settings model'
 
     activeServerURLChanged: ->
-      console.log 'active server URL has changed says the app settings model'
-
-    _urlChanged: ->
-      console.log 'url has changed'
-      return # TODO DEBUGGING
-      if @hasChanged('activeServer') or @hasChanged('servers')
-        @checkIfLoggedIn()
+      #console.log 'active server URL has changed says the app settings model'
 
     _getURL: ->
       url = @get('activeServer')?.get('url')
       if url.slice(-1) is '/' then url.slice(0, -1) else url
-
-    # Return our URL by combining serverURL and serverPort, if specified
-    # WARN: deprecated.
-    __getURL: ->
-      serverURL = @get 'serverURL'
-      serverPort = @get 'serverPort'
-      "#{serverURL}#{serverPort and ':' + serverPort or ''}/"
 
     _authenticateAttemptDone: (taskId) ->
       Backbone.trigger 'longTask:deregister', taskId
@@ -160,7 +147,8 @@ define [
             @save 'loggedIn', false
             Backbone.trigger 'logout:success'
           else
-            Backbone.trigger 'logout:fail'
+            Backbone.trigger 'logout:fail',
+              "server #{@_getURL()} did not accept logout request."
         ,
         (reason) ->
           Backbone.trigger 'logout:fail', reason
@@ -224,74 +212,47 @@ define [
     # Register a new user
     # =========================================================================
 
-    register: ->
-      return
+    # `RegisterDialogView` should never allow an OLD registration attempt.
+    register: (params) ->
       if @get('activeServer')?.get('type') is 'FieldDB'
-        @_registerFieldDB()
-      else
-        @_registerOLD()
-
-    _registerOLD: ->
-      console.log 'you want to register with the OLD.'
+        @_registerFieldDB params
 
     _registerFieldDB: (params) ->
       taskId = @guid()
       Backbone.trigger 'longTask:register', 'registering a new user', taskId
 
-      # TODO @jrwdunham: validation in the register dialog view.
-      # - required attributes: serverId, username, password, passwordConfirm,
-      #   email.
-      # - password must equal passwordConfirm
-
-      # Clean params
-      params.email = params.email.trim()
-      params.password = params.password.trim()
-      params.passwordConfirm = params.passwordConfirm.trim()
-      params.serverCode = params.serverId
       params.authUrl = @_getURL()
+      # TODO @cesine: `appVersionWhenCreated`: should it be Dative current version?
       params.appVersionWhenCreated = 'placeholder'
-
-      # TODO @jrwdunham: clean the username with feedback in the register
-      # dialog view.
-      originalUsername = params.username
-      params.username = originalUsername
-        .trim().toLowerCase().replace /[^0-9a-z]/g, ""
-      if params.username is not originalUsername
-        notificationMessage = ["We have automatically changed your requested",
-          "username to '#{username}' instead. \n\n(The username you have",
-          "chosen isn't very safe for urls, which means your corpora would be",
-          "potentially inaccessible in old browsers)"].join ' '
-
-      # TODO @cesine: what is the `appVersionWhenCreated` parameter used for when
-      # requesting the registration of a new user? I think it references the
-      # version of the spreadsheet app used when the registration request was
-      # made.
 
       BaseRelationalModel.cors.request(
         url: "#{@_getURL()}/register"
+        payload: params
         method: 'POST'
-        timeout: 3000
+        timeout: 10000 # FieldDB auth can take some time to register a new user ...
         onload: (responseJSON) =>
           @_authenticateAttemptDone taskId
-          console.log 'successful register request'
-          console.log JSON.stringify(responseJSON, undefined, 2)
-          # TODO: test `responseJSON` and call one of the following based on this:
-          # Backbone.trigger 'register:success'
-          # Backbone.trigger 'register:fail'
+          # TODO @cesine: what other kinds of responses to registration requests
+          # can the auth service make?
+          if responseJSON.user?
+            Backbone.trigger 'register:success', responseJSON
+          else
+            Backbone.trigger 'register:fail', responseJSON.userFriendlyErrors
         onerror: (responseJSON) =>
           @_authenticateAttemptDone taskId
-          console.log 'failed register request'
-          console.log JSON.stringify(responseJSON, undefined, 2)
-          Backbone.trigger 'register:fail'
+          Backbone.trigger 'register:fail', 'server responded with error'
         ontimeout: =>
           @_authenticateAttemptDone taskId
-          Backbone.trigger 'register:fail', error: 'Request timed out'
+          Backbone.trigger 'register:fail', 'Request timed out'
       )
-
 
 
     # Backbone-relational stuff
     # =========================================================================
+    #
+    # This is useful because it auto-creates a model hierachy; e.g.,
+    # `@get('activeServer')` returns a `ServerModel` instance and
+    # `@get('servers')` returns a `ServerCollection` instance.
     #
     # See http://backbonerelational.org/#RelationalModel-relations
 
@@ -311,6 +272,7 @@ define [
         relatedModel: ServerModel
         includeInJSON: 'id'
     ]
+
 
     # Defaults
     #=========================================================================
@@ -349,5 +311,6 @@ define [
       serverTypes: ['FieldDB', 'OLD']
       itemsPerPage: 10
 
+  # Backbone-relational requires this when using CoffeeScript
   ApplicationSettingsModel.setup()
 
