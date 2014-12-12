@@ -8,8 +8,8 @@ require.config
       exports: '$'
     lodash:
       exports: '_'
-    FieldDB:
-      exports: 'FieldDB'
+    # FieldDB:
+    #   exports: 'FieldDB'
     backbone:
       exports: 'Backbone'
       deps: ['lodash', 'jquery']
@@ -47,21 +47,21 @@ require.config
     spin: '../bower_components/spin.js/spin'
     jqueryspin: '../bower_components/spin.js/jquery.spin'
     perfectscrollbar: '../bower_components/perfect-scrollbar/src/perfect-scrollbar'
-    FieldDB: '../bower_components/fielddb/fielddb'
+    # FieldDB: '../bower_components/fielddb/fielddb'
     backbonerelational: '../bower_components/backbone-relational/backbone-relational'
     backbonelocalstorage: '../bower_components/backbone.localStorage/backbone.localStorage'
 
 require [
     'views/app',
     'routes/router'
-    'FieldDB'
+    # 'FieldDB'
     #'backboneindexeddb'
     'multiselect'
     'jqueryelastic'
     'jqueryuicolors'
     'sfjquimatch'
     'jqueryspin'
-  ], (AppView, Workspace, FieldDB) ->
+  ], (AppView, Workspace) ->
     new Workspace()
     Backbone.history.start()
     window.debugMode = false
