@@ -2,7 +2,7 @@ define [
     'backbone',
     './../models/form'
     './../models/database'
-    'backboneindexeddb'
+    #'backboneindexeddb' # WARN: conflicts with backbone.localStorage and/or backbone.relational
   ], (Backbone, FormModel, database) ->
 
     class FormsCollection extends Backbone.Collection

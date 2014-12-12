@@ -22,8 +22,7 @@ Its high-level goals are:
 
 ## For Developers
 
-Dative is open source, is just beginning, and is under active development. If
-you would like to contribute, let us know.
+Dative is open source, just beginning, and under active development.
 
 
 ### Technologies
@@ -55,7 +54,56 @@ Then install the Bower dependencies for the app and the tests:
     $ bower install
     $ cd test
     $ bower install
-    a cd ..
+    $ cd ..
+
+
+### Serve, test, build, etc.
+
+To serve the app with livereload, run:
+
+    $ grunt serve
+
+The serve task generates source map files that Chrome's developer tools can
+recognize. This means that you can view the CoffeeScript source in the browser
+and can set breakpoints, etc. For some docs on CoffeeScript source maps and
+JavaScript debugging in Chrome, see:
+
+- http://www.html5rocks.com/en/tutorials/developertools/sourcemaps/
+- https://developer.chrome.com/devtools/docs/javascript-debugging
+
+To run the tests and view the Mocha print-out in the browser, run:
+
+    $ grunt serve:test
+
+After running the above command, the browser will automatically refresh
+whenever a source file or a test file is saved. This allows you to code with
+constant updates showing which tests are passing.
+
+To build the app in the dist/ directory:
+
+    $ grunt build
+
+To build the app in the dist/ directory and serve the result:
+
+    $ grunt serve:dist
+
+To validate the CoffeeScript using coffeelint:
+
+    $ grunt lint
+
+To run the tests and view the results in the command line (*currently
+not working*):
+
+    $ grunt test
+
+To generate the docco HTML docs using the comments in your source files:
+
+    $ grunt docs
+
+The above command generates files in the docs/ directory. Because docco
+overwrites files of the same name in different directories, I have configured
+the Gruntfile to rename each file for doc generation using the file's path.
+
 
 
 #### Compass/Sass Complications
@@ -89,52 +137,6 @@ cooperating with Ruby/Compass, I have (at present) commented out the calls to
 the compass Grunt task in the Gruntfile. If we decide that using SCSS is
 important at a later time, it may be necessary to delve into this
 Debian/Compass issue further.
-
-
-### Serve, test, build, etc.
-
-To serve the app with livereload, run:
-
-    $ grunt serve
-
-The serve task generates source map files that Chrome's developer tools can
-recognize. This means that you can view the CoffeeScript source in the browser
-and can set breakpoints, etc. For some docs on CoffeeScript source maps and
-JavaScript debugging in Chrome, see:
-
-- http://www.html5rocks.com/en/tutorials/developertools/sourcemaps/
-- https://developer.chrome.com/devtools/docs/javascript-debugging
-
-To run the tests and view the Mocha print-out in the browser, run:
-
-    $ grunt serve:test
-
-After running the above command, the browser will automatically refresh
-whenever a source file or a test file is saved. This allows you to code with
-constant updates showing which tests are passing.
-
-To run the tests and view the results in the command line:
-
-    $ grunt test
-
-To build the app in the dist/ directory:
-
-    $ grunt build
-
-To validate your CoffeeScript using coffeelint:
-
-    $ grunt lint
-
-To generate the docco HTML docs using the comments in your source files:
-
-    $ grunt docs
-
-The above command generates files in the docs/ directory. Because docco
-overwrites files of the same name in different directories, I have configured
-the Gruntfile to rename each file for doc generation using the file's path.
-
-Running `grunt` without arguments will run the default task which runs the test
-and build tasks in succession.
 
 
 ### Coding Conventions

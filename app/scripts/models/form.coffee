@@ -19,7 +19,7 @@ define [
     # Future development:
     #
     # - relationality via backbone-relational
-    # - LingSync compatibility
+    # - FieldDB compatibility
     # - client-side storage via indexeddb
 
     class FormModel extends BaseModel

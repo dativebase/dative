@@ -27,6 +27,12 @@ define [
     # Set the state of the "add a form" HTML form on the model.
     setToModel: ->
       modelObject = @getModelObjectFromAddForm()
+      # FieldDB stuff commented out until it can be better incorporated.
+      # Note: form model should *not* be saved on every minute change.
+      # tobesaved = new FieldDB.Document(modelObject)
+      # tobesaved.dbname = tobesaved.application.currentFieldDB.dbname
+      # tobesaved.url = tobesaved.application.currentFieldDB.url + "/"+ tobesaved.dbname
+      # tobesaved.save()
       @model?.set modelObject
 
     # Extract data in the inputs of the HTML "Add a Form" form and
@@ -107,8 +113,6 @@ define [
       for attrName in ['grammaticality', 'elicitation_method',
         'syntactic_category', 'speaker', 'elicitor', 'verifier', 'source']
         if @model.get(attrName)
-          if attrName is 'verifier'
-            console.log "In _addModel; verifier should be #{@model.get(attrName)}"
           $("select[name=#{attrName}]", context)
             .val(@model.get(attrName))
             .selectmenu 'refresh', true
@@ -141,7 +145,6 @@ define [
       # CTRL + <Return> in the form submits the form
       $('form.formAdd', context).keydown((event) ->
         if event.ctrlKey and event.which is 13
-          console.log 'FORM ADD IS LISTENING TO THAT RETURN!'
           event.preventDefault()
           $('input[type="submit"]', @).click()
       )

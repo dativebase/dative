@@ -33,7 +33,7 @@ module.exports = (grunt) ->
         livereload: true
       coffee:
         files: ['<%= yeoman.app %>/scripts/{,*/}*.coffee']
-        tasks: ['copy:coffee', 'coffee:dist']
+        tasks: ['copy:coffee', 'coffee:serve']
       coffeeTest:
         #files: ['test/spec/{,*/}*.coffee']
         files: ['test/**/*.coffee']
@@ -109,6 +109,10 @@ module.exports = (grunt) ->
       doctmp: '.doctmp'
       docs: 'docs'
 
+      # Don't know why dist/bower_components/ is created (...). In any case,
+      # I'm just cleaning it up hackily like so.
+      postdist: ['<%= yeoman.dist %>/bower_components']
+
     jshint: 
       options:
         jshintrc: '.jshintrc'
@@ -130,9 +134,21 @@ module.exports = (grunt) ->
           urls: ['http://localhost:<%= connect.test.options.port %>/index.html']
 
     coffee:
-      dist:
+      serve:
         options:
           sourceMap: true
+        files: [
+          # rather than compiling multiple files here you should
+          # require them into your main .coffee file
+          expand: true
+          cwd: '.tmp/scripts'
+          src: '**/*.coffee'
+          dest: '.tmp/scripts'
+          ext: '.js'
+        ]
+      dist:
+        options:
+          sourceMap: false
         files: [
           # rather than compiling multiple files here you should
           # require them into your main .coffee file
@@ -194,41 +210,73 @@ module.exports = (grunt) ->
       dist:
         # Options: https://github.com/jrburke/r.js/blob/master/build/example.build.js
         options:
-          # `name` and `out` is set by grunt-usemin
           baseUrl: '.tmp/scripts'
           optimize: 'none'
-          paths:
-            #'templates': '../../.tmp/scripts/templates'
-            'jquery': '../../<%= yeoman.app %>/bower_components/jquery/dist/jquery'
-            'jqueryui': '../../<%= yeoman.app %>/bower_components/jqueryui/jquery-ui'
-            'superfish': '../../<%= yeoman.app %>/bower_components/superfish/dist/js/superfish'
-            'supersubs': '../../<%= yeoman.app %>/bower_components/superfish/dist/js/supersubs'
-            #'underscore': '../../<%= yeoman.app %>/bower_components/lodash/dist/lodash'
-            'lodash': '../../<%= yeoman.app %>/bower_components/lodash/dist/lodash'
-            'underscore': '../../<%= yeoman.app %>/bower_components/underscore/underscore'
-            'backbone': '../../<%= yeoman.app %>/bower_components/backbone/backbone'
-            'igt': '../../<%= yeoman.app %>/scripts/jquery-extensions/igt'
-            'jqueryuicolors': '../../<%= yeoman.app %>/scripts/jquery-extensions/jqueryui-colors'
-            'sfjquimatch': '../../<%= yeoman.app %>/scripts/jquery-extensions/superfish-jqueryui-match'
-            'multiselect': '../../<%= yeoman.app %>/bower_components/multiselect/js/jquery.multi-select'
-            'jqueryelastic': '../../<%= yeoman.app %>/bower_components/jakobmattsson-jquery-elastic/jquery.elastic.source'
-            'spin': '../../<%= yeoman.app %>/bower_components/spin.js/spin'
-            'jqueryspin': '../../<%= yeoman.app %>/bower_components/spin.js/jquery.spin'
-            'perfectscrollbar': '../../<%= yeoman.app %>/bower_components/perfect-scrollbar/src/perfect-scrollbar'
+          preserveLicenseComments: false
+          useStrict: true
+          name: 'main'
+          out: '<%= yeoman.dist %>/scripts/main.js'
+          generateSourceMaps: false
+          #mainConfigFile: '.tmp/scripts/main.js'
           # TODO: Figure out how to make sourcemaps work with grunt-usemin
           # https://github.com/yeoman/grunt-usemin/issues/30
           #generateSourceMaps: true
           # required to support SourceMaps
           # http://requirejs.org/docs/errors.html#sourcemapcomments
-          preserveLicenseComments: false
-          useStrict: true
-          wrap: true
-          #uglify2: {} # https://github.com/mishoo/UglifyJS2
-          #
+          shim_:
+            jquery:
+              exports: '$'
+            lodash:
+              exports: '_'
+            backbone:
+              exports: 'Backbone'
+              deps: ['lodash', 'jquery']
+            jqueryui: ['jquery']
+            backboneindexeddb: ['backbone']
+            multiselect: ['jquery', 'jqueryui']
+            jqueryelastic: ['jquery']
+            perfectscrollbar: ['jquery']
+
+          paths_:
+            jquery: '../../<%= yeoman.app %>/bower_components/jquery/dist/jquery'
+            backbone: '../../<%= yeoman.app %>/bower_components/backbone/backbone'
+            lodash: '../../<%= yeoman.app %>/bower_components/lodash/dist/lodash'
+            underscore: '../../<%= yeoman.app %>/bower_components/lodash/dist/lodash.underscore'
+            backboneindexeddb:
+              '../../<%= yeoman.app %>/bower_components/indexeddb-backbonejs-adapter/backbone-indexeddb'
+            bootstrap: '../../<%= yeoman.app %>/bower_components/sass-bootstrap/dist/js/bootstrap'
+            text: '../../<%= yeoman.app %>/bower_components/requirejs-text/text'
+            jqueryui: '../../<%= yeoman.app %>/bower_components/jqueryui/jquery-ui'
+            superfish: '../../<%= yeoman.app%>/scripts/jquery-extensions/superfish'
+            #superfish: '../../<%= yeoman.app%>/scripts/jquery-extensions/superfish/dist/js/superfish'
+            #superfish: '../../<%= yeoman.app %>/bower_components/superfish/dist/js/superfish'
+            igt: '../../<%= yeoman.app%>/scripts/jquery-extensions/igt'
+            jqueryuicolors: '../../<%= yeoman.app%>/scripts/jquery-extensions/jqueryui-colors'
+            sfjquimatch: '../../<%= yeoman.app%>/scripts/jquery-extensions/superfish-jqueryui-match'
+            supersubs: '../../<%= yeoman.app%>/scripts/jquery-extensions/supersubs'
+            #supersubs: '../../<%= yeoman.app%>/scripts/jquery-extensions/superfish/dist/js/supersubs'
+            #supersubs: '../../<%= yeoman.app %>/bower_components/superfish/dist/js/supersubs'
+            multiselect: '../../<%= yeoman.app %>/bower_components/multiselect/js/jquery.multi-select'
+            jqueryelastic: '../../<%= yeoman.app %>/bower_components/jakobmattsson-jquery-elastic/jquery.elastic.source'
+            spin: '../../<%= yeoman.app %>/bower_components/spin.js/spin'
+            jqueryspin: '../../<%= yeoman.app %>/bower_components/spin.js/jquery.spin'
+            perfectscrollbar: '../../<%= yeoman.app %>/bower_components/perfect-scrollbar/src/perfect-scrollbar'
+            fielddb: '../../<%= yeoman.app %>/bower_components/fielddb/fielddb'
+
     useminPrepare:
       html: '<%= yeoman.app %>/index.html'
       options: 
         dest: '<%= yeoman.dist %>'
+        # Next 5 lines from http://stackoverflow.com/questions/20509145/managing-images-in-bower-packages-using-grunt?lq=1
+        # "Next, the flow configuration tells usemin to skip the concat step for
+        # css files. This is because cssmin does a concatenation itself, and
+        # cssmin needs to know the origin of the css files in order to do the
+        # relative-path correction for referenced resources."
+        flow_:
+          steps:
+            js: ['concat', 'uglify']
+            css: ['cssmin']
+          post: {}
 
     usemin:
       html: ['<%= yeoman.dist %>/{,*/}*.html']
@@ -245,14 +293,18 @@ module.exports = (grunt) ->
           dest: '<%= yeoman.dist %>/images'
         ]
 
-    cssmin:
+    # A config for cssmin is unnecessary since that created by useminPrepare works
+    # fine. Hence the name change to `cssmin_' here.
+    cssmin_:
       dist:
         files:
           '<%= yeoman.dist %>/styles/main.css': [
             '.tmp/styles/{,*/}*.css'
             '<%= yeoman.app %>/styles/{,*/}*.css'
-            '<%= yeoman.app %>/bower_components/jqueryui/themes/le-frog/jquery-ui.css'
+            '<%= yeoman.app %>/bower_components/jqueryui/themes/eggplant/jquery-ui.css'
           ]
+        options:
+          root: '<% yeoman.app %>' # This is where `bower_components/` is to be found
 
     htmlmin:
       dist:
@@ -296,8 +348,37 @@ module.exports = (grunt) ->
             'images/{,*/}*.{webp,gif}'
             'styles/fonts/{,*/}*.*'
             'bower_components/sass-bootstrap/fonts/*.*'
+            'bower_components/jqueryui/**/*.{png,jpg,jpeg,gif,webp,svg,eot,ttf,woff}' # added, cf. http://stackoverflow.com/questions/20509145/managing-images-in-bower-packages-using-grunt?lq=1
           ]
         ]
+      disttmp:
+        files: [
+          expand: true
+          dot: true
+          cwd: '<%= yeoman.app %>'
+          dest: '.tmp'
+          src: [
+            'bower_components/{,**/}*.*'
+            'scripts/jquery-extensions/{,**/}*.*'
+          ]
+        ]
+      # Copy jQueryUI images to dist/styles/images/
+      distJQueryUIImages:
+        files: [
+          expand: true
+          dot: true
+          cwd: '<%= yeoman.app %>'
+          dest: '<%= yeoman.dist %>/styles/images'
+          flatten: true # CRUCIAL!!!
+          src: [
+            'bower_components/jqueryui/**/*.{png,jpg,jpeg,gif,webp,svg,eot,ttf,woff}' # added, cf. http://stackoverflow.com/questions/20509145/managing-images-in-bower-packages-using-grunt?lq=1
+          ]
+        ]
+      distrequirejs: # from https://github.com/yeoman/grunt-usemin/issues/192
+        expand: true,
+        cwd: '<%= yeoman.app %>/bower_components/requirejs/',
+        dest: '<%= yeoman.dist %>/scripts/vendor/',
+        src: ['require.js']
       docco:
         files: [
             expand: true
@@ -314,6 +395,17 @@ module.exports = (grunt) ->
             rename: (dest, src) ->
               return dest + 'test.' + src.replace(/\//g, '.')
         ]
+      requirejs:
+        src: '<%= yeoman.app %>/bower_components/requirejs/require.js'
+        dest: '<%= yeoman.dist %>/bower_components/requirejs/require.js'
+
+    uglify: # altered for debugging purposes.
+      dist_:
+        files:
+          '<%= yeoman.dist %>/scripts/main.js': ['<%= yeoman.dist %>/scripts/main.js']
+      requirejs:
+        files:
+          '<%= yeoman.dist %>/scripts/vendor/require.js': ['<%= yeoman.dist %>/scripts/vendor/require.js']
 
     bower:
       all:
@@ -340,12 +432,28 @@ module.exports = (grunt) ->
       dist:
         files:
           src: [
-            '<%= yeoman.dist %>/scripts/{,*/}*.js'
+            '<%= yeoman.dist %>/scripts/{,*/!(require)}*.js' # Add exception not to change name of copied file during "rev" task (added only !(require) exception), cf. https://github.com/yeoman/grunt-usemin/issues/192
             '<%= yeoman.dist %>/styles/{,*/}*.css',
             '<%= yeoman.dist %>/images/{,*/}*.{png,jpg,jpeg,gif,webp}',
             '/styles/fonts/{,*/}*.*',
             'bower_components/sass-bootstrap/fonts/*.*'
+            'bower_components/**/*.{png,jpg,jpeg,gif,webp,svg,eot,ttf,woff}' # added, cf. http://stackoverflow.com/questions/20509145/managing-images-in-bower-packages-using-grunt?lq=1
           ]
+
+    # Replace script tag in index.html, to call require.js from new path using grunt-regex-replace plugin:
+    # See https://github.com/yeoman/grunt-usemin/issues/192
+    'regex-replace':
+      dist:
+        src: ['<%= yeoman.dist %>/index.html'],
+        actions: [
+          name: 'requirejs-newpath',
+          search: '<script data-main=".*" src="bower_components/requirejs/require.js"></script>',
+          replace: (match) ->
+            regex = /scripts\/.*main/
+            result = regex.exec(match)
+            '<script data-main="' + result[0] + '" src="scripts/vendor/require.js"></script>'
+          flags: 'g'
+        ]
 
   grunt.registerTask 'createDefaultTemplate', ->
     grunt.file.write '.tmp/scripts/templates.js', 'this.JST = this.JST || {}'
@@ -362,7 +470,7 @@ module.exports = (grunt) ->
       return grunt.task.run [
         'clean:server'
         'copy:coffee'
-        'coffee:dist'
+        'coffee:serve'
         'coffee:test'
         #'createDefaultTemplate'
         #'jst'
@@ -376,7 +484,7 @@ module.exports = (grunt) ->
     grunt.task.run [
       'clean:server'
       'copy:coffee'
-      'coffee:dist'
+      'coffee:serve'
       #'createDefaultTemplate'
       #'jst'
       'eco'
@@ -408,22 +516,67 @@ module.exports = (grunt) ->
       grunt.task.run testTasks
 
   grunt.registerTask 'build', [
-    'clean:dist'
-    'coffee'
-    #'createDefaultTemplate'
-    #'jst'
+    'clean:dist' # remove everything in dist/ and .tmp/
+    'copy:coffee' # copy all .coffee files in app/scripts/ to .tmp/scripts/
+    'coffee:dist' # convert all .coffee files in .tmp/scripts to .js in situ
+
+    # eco: convert all .eco files in app/scripts/templates/ to .js files in
+    # .tmp/scripts/templates/
     'eco'
-    #'compass:dist'
+
+    #'compass:dist' # commented out because not currently using compass
+
+    # useminPrepare: read the `build` comments in index.html and dynamically
+    # generate concat, uglify, and or cssmin `generated` tasks.
     'useminPrepare'
+
+    # copy:disttmp: my copy task: copies bower_components and jquery-extensions
+    # to .tmp. This seems to be necessary: SHOW FAILM MSG: ... Error: ENOENT,
+    # no such file or directory '.tmp/bower_components/lodash/dist/lodash.js'
+    'copy:disttmp'
+
+    # copy:distJQueryUIImages: my other copy task: copies images in
+    # bower_components/jqueryui/ to dist/.
+    'copy:distJQueryUIImages'
+
+    # copy:distrequirejs: copy require.js into dist/scripts/vendor/, see
+    # https://github.com/yeoman/grunt-usemin/issues/192 #
+    'copy:distrequirejs'
+
+    # requirejs: creates a single dist/scripts/main.js file containing all of
+    # my JavaScript
     'requirejs'
+
     'imagemin'
     'htmlmin'
-    'concat'
-    'cssmin'
-    'uglify'
-    'copy:dist'
+    'concat' # task configured by `useminPrepare` above.
+
+    'cssmin' # Concatenate all CSS files into one, configured by useminPrepare
+
+    #'uglify:dist'
+    #'copy:dist'
+    #'copy:requirejs'
+    #'uglify:requirejs'
+    'uglify' # JavaScript minification
+    'uglify:requirejs' # minify dist/scripts/vendor/require.js
+
+    # rev: Use the rev task together with yeoman/grunt-usemin for cache busting
+    # of static files in your app. This allows them to be cached forever by the
+    # browser. See https://github.com/cbas/grunt-rev
     'rev'
+
+    # usemin': two subtasks are configured by useminPrepare: usemin:html and
+    # usemin:css tasks; the first renames the references to `main.js`,
+    # `modernizr.js` and `main.css` # #
     'usemin'
+
+    # regex-replace:dist: change `src="bower_components/requirejs/require.js"`
+    # to `src="scripts/vendor/require.js"></script>` in dist/index.html #
+    'regex-replace:dist' # change `src="bower_components/requirejs/require.js"` to `src="scripts/vendor/require.js"></script>` in dist/index.html
+
+    # I don't know why dist/bower_components/ is created (...). In any case,
+    # I'm just cleaning it up hackily like so.
+    'clean:postdist'
   ]
 
   grunt.registerTask 'default', ['jshint', 'test', 'build']
