@@ -18,6 +18,8 @@ require.config
     superfish: ['jquery']
     supersubs: ['jquery']
     perfectscrollbar: ['jquery']
+    backbonerelational: ['backbone']
+    backbonelocalstorage: ['backbone']
 
   paths:
     jquery: '../bower_components/jquery/dist/jquery'
@@ -41,6 +43,9 @@ require.config
     spin: '../bower_components/spin.js/spin'
     jqueryspin: '../bower_components/spin.js/jquery.spin'
     perfectscrollbar: '../bower_components/perfect-scrollbar/src/perfect-scrollbar'
+    fielddb: '../bower_components/fielddb/fielddb'
+    backbonerelational: '../bower_components/backbone-relational/backbone-relational'
+    backbonelocalstorage: '../bower_components/backbone.localStorage/backbone.localStorage'
 
 specs = [
   #'spec/models/form.js' # FAILING

@@ -232,6 +232,10 @@ module.exports = (grunt) ->
             multiselect: ['jquery', 'jqueryui']
             jqueryelastic: ['jquery']
             perfectscrollbar: ['jquery']
+            superfish: ['jquery']
+            supersubs: ['jquery']
+            backbonerelational: ['backbone']
+            backbonelocalstorage: ['backbone']
 
           paths_:
             jquery: '../../<%= yeoman.app %>/bower_components/jquery/dist/jquery'
@@ -258,6 +262,8 @@ module.exports = (grunt) ->
             jqueryspin: '../../<%= yeoman.app %>/bower_components/spin.js/jquery.spin'
             perfectscrollbar: '../../<%= yeoman.app %>/bower_components/perfect-scrollbar/src/perfect-scrollbar'
             fielddb: '../../<%= yeoman.app %>/bower_components/fielddb/fielddb'
+            backbonerelational: '../../<%= yeoman.app %>/bower_components/backbone-relational/backbone-relational'
+            backbonelocalstorage: '../../<%= yeoman.app %>/bower_components/backbone.localStorage/backbone.localStorage'
 
     useminPrepare:
       html: '<%= yeoman.app %>/index.html'
