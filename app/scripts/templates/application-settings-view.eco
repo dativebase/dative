@@ -1,43 +1,41 @@
-  <form class="applicationSettingsForm">
-    <ul class="fieldset">
+<form class="applicationSettingsForm">
+  <ul class="fieldset">
 
-      <li>
-        <label for="serverURL">Server URL</label>
-        <div class="dative-display dative-input-display"><%= @serverURL %></div>
-      </li>
+    <li>
+      <label for="serverType">Server type</label>
+      <div class="dative-display dative-input-display"><%= @serverType %></div>
+    </li>
 
-      <li>
-        <label for="serverPort">Server port</label>
-        <div class="dative-display dative-input-display"><%= @serverPort %></div>
-      </li>
+    <li class="corpusSelect">
+      <label for="corpus">Corpus</label>
+      <div class="dative-display dative-input-display"
+        ><%= @corpus or 'no corpus selected' %></div>
+    </li>
 
-      <li>
-        <label for="loggedIn">Logged in</label>
-        <div class="dative-display dative-input-display"><%= @loggedIn %></div>
-      </li>
+    <li>
+      <label for="serverURL">Server URL</label>
+      <div class="dative-display dative-input-display"><%= @serverURL %></div>
+    </li>
 
-      <li>
-        <label for="username">Username</label>
-        <div class="dative-display dative-input-display"><%= @username %></div>
-      </li>
+    <li>
+      <label for="serverPort">Server port</label>
+      <div class="dative-display dative-input-display"><%= @serverPort %></div>
+    </li>
 
-      <li>
-        <label for="persistenceType">Persistence type</label>
-        <div class="dative-display dative-input-display"><%= @persistenceType %></div>
-      </li>
+    <li>
+      <label for="loggedIn">Logged in</label>
+      <div class="dative-display"><%= @loggedIn %></div>
+    </li>
 
-      <li>
-        <label for="schemaType">Schema type</label>
-        <div class="dative-display dative-input-display"><%= @schemaType %></div>
-      </li>
+    <li>
+      <label for="username">Username</label>
+      <div class="dative-display"><%= @username %></div>
+    </li>
 
-      <li class="center">
-        <button class="edit">Edit</button>
-      </li>
-
-  </ul>
-  </form>
+    <li class="center">
+      <button class="edit">Edit</button>
+    </li>
 
   </ul>
-  </form>
+</form>
 

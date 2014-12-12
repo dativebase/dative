@@ -7,6 +7,8 @@
             </li>
             <li><a data-event="request:pages" data-shortcut="ctrl+p">Pages</a>
             </li>
+            <li><a data-event="request:openRegisterDialogBox">Register</a>
+            </li>
         </ul>
     </li>
     <li><a data-event="request:formsBrowse">Forms</a>
