@@ -45,4 +45,4 @@ env:
 
 after_success:
     - echo $TRAVIS_BRANCH
-    - "ncftpput -R -v -u $USERNAME -p $PASSWORD $SERVER_PATH dist /beta" || echo " ncftpput failed" &&  exit 4
+    - "ncftpput -R -v -u $USERNAME -p $PASSWORD $SERVER_PATH dist /beta || echo ' ncftpput failed' &&  exit 4 "
