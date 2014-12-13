@@ -41,8 +41,8 @@ env:
   global:
     - secure: "idG10uJCHMoQLlySdGjCq+F/UUvCPs6f/gqR8srtIAb7oxdZ25P/jU7yESi+rDwZh9GcB7hNwM2MlonoGZKXlkTGxnSt8e9OMQ2PJuchUspZp5Dt62Ubc+CXo/cwiV4kUP9AqPWqQX45sZu5AxbiP2awdKPSmY+cC8409ml/ozI="
     - secure: "ULfKxRZxlujo9Dvsj7RLkMrymO2Cw7bm5FpWBqcDGewYOkSyiitqxSc3kolU8kAzgOhjJaplPmGLCi79WRc1aDDLUGyWCMaSzGQYenlj7pYJTsCh7Ql3ByjpZ3R7UYS3whs954+1VhNd40UObnQ3V/dB1SbgCjUVspll4VLUfJU="
-    - secure: "PQZA5cLfK1kVAC/rg6AKysw6PqtDImQ28xWdKMU1ZAQAI2jy9LtUUCwU+fvAIT4VK0ceI1TQLX9ERRndSfsHe4iA4TUfKRo1Gt1YehHs89c5dWrogFNL1IMqMdNbjaHenddzBxgY3mhT+CjlhaSzSA79hcPEivtlt/n+/SMOgfU="
+    - secure: "mKbgZojla1lpQWj9/rWGC3ffOmxDMnwrIsZQMf0Si7rgv2m93I7lSeoBxEHzR8fZ6ew2oyMxWwzq7s1S8fUx3yNlk8n1eAC6iv19pkwACDoSpRxUlyKcR28my4kLB4nLYukJO3sHNFHd+ih3vITCrwa5iBp0pBe39YxpapQT9is="
 
 after_success:
     - echo $TRAVIS_BRANCH
-    - "ncftpput -R -v -u $USERNAME -p $PASSWORD $SERVER_PATH dist /beta || echo ' deploy failed' &&  exit 4 "
+    - "ncftpput -R -v -u $USERNAME -p $PASSWORD $SERVER /beta dist || echo ' deploy failed' &&  exit 4 "
