@@ -105,6 +105,7 @@ module.exports = (grunt) ->
 
     clean:
       dist: ['.tmp', '<%= yeoman.dist %>/*']
+      postdist: ['<%= yeoman.dist %>/bower_components']
       server: '.tmp'
       doctmp: '.doctmp'
       docs: 'docs'
@@ -117,6 +118,7 @@ module.exports = (grunt) ->
         'Gruntfile.js'
         '<%= yeoman.app %>/scripts/{,*/}*.js'
         '!<%= yeoman.app %>/scripts/vendor/*'
+        '!<%= yeoman.app %>/scripts/jquery-extensions/*'
         'test/spec/{,*/}*.js'
       ]
 
@@ -572,7 +574,7 @@ module.exports = (grunt) ->
 
     # I don't know why dist/bower_components/ is created (...). In any case,
     # I'm just cleaning it up hackily like so.
-    'clean:postdist'
+    # 'clean:postdist'
   ]
 
   grunt.registerTask 'default', ['jshint', 'test', 'build']
@@ -581,5 +583,5 @@ module.exports = (grunt) ->
 
   grunt.registerTask 'docs', ['clean:docs', 'clean:doctmp', 'copy:docco', 'docco', 'clean:doctmp']
 
-  grunt.registerTask 'deploy', ['jshint']
+  grunt.registerTask 'deploy', ['jshint', 'build']
 
