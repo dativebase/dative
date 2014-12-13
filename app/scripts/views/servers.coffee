@@ -37,8 +37,8 @@ define [
       @closed serverView
 
     events:
-      'keydown button.toggle-appear': '_keyboardControl'
-      'keydown button.add-server': '_keyboardControl'
+      'keydown button.toggle-appear': 'toggleAppearKeys'
+      'keydown button.add-server': 'addServerKeys'
       'click button.toggle-appear': '_toggleServerConfig'
       'click button.add-server': '_addServer'
 
@@ -114,24 +114,34 @@ define [
       if not @$('.dative-widget-body').is(':visible')
         @_toggleServerConfig()
 
+    _closeServerConfig: ->
+      if @$('.dative-widget-body').is(':visible')
+        @_toggleServerConfig()
+
     _rememberTarget: (event) ->
       try
         @$('.dative-input-display').each (index, el) =>
           if el is event.target
             @focusedElementIndex = index
 
-    _keyboardControl: (event) ->
+    stopEvent: (event) ->
+      event.preventDefault()
+      event.stopPropagation()
+
+    toggleAppearKeys: (event) ->
       @_rememberTarget event
-      # <Enter> on input calls `save`, on data display calls `edit`
-      if event.which is 13
-        event.preventDefault()
-        event.stopPropagation()
-        try
-          classes = $(event.target).attr('class').split /\s+/
-          if 'toggle-appear' in classes
-            @_toggleServerConfig()
-          else if 'add-server' in classes
-            @_addServer()
+      if event.which in [13, 37, 38, 39, 40] then @stopEvent event
+      switch event.which
+        when 13 # Enter
+          @_toggleServerConfig()
+        when 37, 38 # left and up arrows
+          @_closeServerConfig()
+        when 39, 40 # right and down arrows
+          @_openServerConfig()
 
-
+    addServerKeys: (event) ->
+      @_rememberTarget event
+      if event.which is 13 # Enter
+        @stopEvent event
+        @_addServer()
 
