@@ -43,6 +43,20 @@
         </select>
       </li>
 
+      <li class="serverCode">
+        <label for="serverCode">Server code</label>
+        <select name="serverCode" class="serverCode dative-input dative-input-display">
+          <% for serverCode in @serverCodes: %>
+            <% if serverCode is @serverCode: %>
+              <option value="<%= serverCode %>" selected
+                ><%= serverCode %></option>
+            <% else: %>
+              <option value="<%= serverCode %>"><%= serverCode %></option>
+            <% end %>
+          <% end %>
+        </select>
+      </li>
+
     </ul>
   </div>
 </div>
