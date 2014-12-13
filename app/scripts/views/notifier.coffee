@@ -59,7 +59,7 @@ define [
           if utils.type(errorObj) is 'object' # FieldDB API returns string, not object (always?)
             message = "#{message}: reason unknown."
           else
-            message = "#{message}: #{errorObj}."
+            message = "#{message}: #{errorObj}"
       else
         message = "#{message}."
       @messages.push message
