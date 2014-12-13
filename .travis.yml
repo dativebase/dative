@@ -9,9 +9,9 @@ node_js:
 #   - sh -e /etc/init.d/xvfb start
 
 # whitelist
-# branches:
-#  only:
-#    - master
+branches:
+ only:
+   - master
 
 notifications:
   email:
@@ -44,8 +44,8 @@ env:
     - secure: "mKbgZojla1lpQWj9/rWGC3ffOmxDMnwrIsZQMf0Si7rgv2m93I7lSeoBxEHzR8fZ6ew2oyMxWwzq7s1S8fUx3yNlk8n1eAC6iv19pkwACDoSpRxUlyKcR28my4kLB4nLYukJO3sHNFHd+ih3vITCrwa5iBp0pBe39YxpapQT9is="
 
 after_success:
-  on:
-    branch: master
+  # on:
+  #   branch: master
     - echo $TRAVIS_BRANCH
     - touch "dist/deployed at `Date`"
     - "ncftpput -R -u $USERNAME -p $PASSWORD $SERVER /beta dist/*"
