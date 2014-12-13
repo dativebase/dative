@@ -3,15 +3,15 @@
 define (require) ->
 
   database = require '../../../scripts/models/database'
-  {LingSyncIDB, FormStore} = require '../../../scripts/utils/indexeddb-utils'
+  {FieldDBIDB, FormStore} = require '../../../scripts/utils/indexeddb-utils'
   {clone} = require '../../../scripts/utils/utils'
 
-  databaseId = database.id # 'lingsync-database'
+  databaseId = database.id # 'fielddb-database'
   databaseVersion = database.migrations[..].pop().version # 1
-  lingSyncIDB = new LingSyncIDB databaseId, databaseVersion
+  fieldDBIDB = new FieldDBIDB databaseId, databaseVersion
 
 
-  describe 'LingSyncIDB class', ->
+  describe 'FieldDBIDB class', ->
 
     @timeout 10000
 
@@ -24,17 +24,17 @@ define (require) ->
 
     it 'can open a connection to the indexedDB database', (done) ->
 
-      expect(lingSyncIDB.datastore).to.be.null
+      expect(fieldDBIDB.datastore).to.be.null
 
       # An open database has an appropriate datastore attribute
       openHandler = _.extend (clone optimistHandler),
         onsuccess: ->
-          expect(lingSyncIDB.datastore).is.an.instanceof IDBDatabase
-          expect(v for k, v of lingSyncIDB.datastore.objectStoreNames)
+          expect(fieldDBIDB.datastore).is.an.instanceof IDBDatabase
+          expect(v for k, v of fieldDBIDB.datastore.objectStoreNames)
             .to.contain 'forms'
           done()
 
-      lingSyncIDB.open openHandler
+      fieldDBIDB.open openHandler
 
     it 'can create a form', (done) ->
 
@@ -43,7 +43,7 @@ define (require) ->
           expect(formObject.transcription).to.equal 'monkey'
           done()
 
-      lingSyncIDB.create(
+      fieldDBIDB.create(
         {transcription: 'monkey', translation: 'singe'},
         createHandler,
         storeName: 'forms'
@@ -55,7 +55,7 @@ define (require) ->
       indexHandler = _.extend (clone optimistHandler),
         onsuccess: (formsArray) =>
           @initialCount = formsArray.length
-          lingSyncIDB.create(
+          fieldDBIDB.create(
             {transcription: 'dog', translation: 'chien'},
             createHandler, storeName: 'forms')
 
@@ -63,7 +63,7 @@ define (require) ->
       createHandler = _.extend (clone optimistHandler),
         onsuccess: (formObject) =>
           expect(formObject.transcription).to.equal 'dog'
-          lingSyncIDB.create(
+          fieldDBIDB.create(
             {transcription: 'cat', translation: 'chat'},
             createHandler2, storeName: 'forms')
 
@@ -71,7 +71,7 @@ define (require) ->
       createHandler2 = _.extend (clone optimistHandler),
         onsuccess: (formObject) =>
           expect(formObject.transcription).to.equal 'cat'
-          lingSyncIDB.index indexHandler2, storeName: 'forms'
+          fieldDBIDB.index indexHandler2, storeName: 'forms'
 
       # Count forms now, request delete
       indexHandler2 = _.extend (clone optimistHandler), 
@@ -81,7 +81,7 @@ define (require) ->
           done()
 
       # Start by requesting all forms
-      lingSyncIDB.index indexHandler, storeName: 'forms'
+      fieldDBIDB.index indexHandler, storeName: 'forms'
 
     it 'can retrieve a specific form', (done) ->
 
@@ -89,7 +89,7 @@ define (require) ->
       indexHandler = _.extend (clone optimistHandler),
         onsuccess: (formsArray) =>
           @initialCount = formsArray.length
-          lingSyncIDB.create(
+          fieldDBIDB.create(
             {transcription: 'dog', translation: 'chien'},
             createHandler, storeName: 'forms')
 
@@ -98,7 +98,7 @@ define (require) ->
         onsuccess: (formObject) =>
           @firstForm = formObject
           expect(formObject.transcription).to.equal 'dog'
-          lingSyncIDB.create(
+          fieldDBIDB.create(
             {transcription: 'cat', translation: 'chat'},
             createHandler2, storeName: 'forms')
 
@@ -106,7 +106,7 @@ define (require) ->
       createHandler2 = _.extend (clone optimistHandler),
         onsuccess: (formObject) =>
           expect(formObject.transcription).to.equal 'cat'
-          lingSyncIDB.show @firstForm.id, showHandler, storeName: 'forms'
+          fieldDBIDB.show @firstForm.id, showHandler, storeName: 'forms'
 
       # Expect correct form to have been retrieved
       showHandler = _.extend (clone optimistHandler),
@@ -115,7 +115,7 @@ define (require) ->
           done()
 
       # Start by requesting all forms
-      lingSyncIDB.index indexHandler, storeName: 'forms'
+      fieldDBIDB.index indexHandler, storeName: 'forms'
 
     it 'can update a form', (done) ->
 
@@ -124,21 +124,21 @@ define (require) ->
         onsuccess: (formObject) =>
           @initialForm = formObject
           expect(formObject.transcription).to.equal 'our form'
-          lingSyncIDB.index indexHandler, storeName: 'forms'
+          fieldDBIDB.index indexHandler, storeName: 'forms'
 
       # Count forms, request update
       indexHandler = _.extend (clone optimistHandler),
         onsuccess: (formsArray) =>
           @afterCreateCount = formsArray.length
           updatedForm = _.extend @initialForm, transcription: 'our form modified'
-          lingSyncIDB.update(@initialForm.id, updatedForm, updateHandler,
+          fieldDBIDB.update(@initialForm.id, updatedForm, updateHandler,
             storeName: 'forms')
 
       # Request form count
       updateHandler = _.extend (clone optimistHandler),
         onsuccess: (updatedFormObject) =>
           expect(updatedFormObject.transcription).to.equal 'our form modified'
-          lingSyncIDB.index indexHandler2, storeName: 'forms'
+          fieldDBIDB.index indexHandler2, storeName: 'forms'
 
       # Verify form count has not changed
       indexHandler2 = _.extend (clone optimistHandler),
@@ -147,7 +147,7 @@ define (require) ->
           done()
 
       # Start by creating a form
-      lingSyncIDB.create(
+      fieldDBIDB.create(
         {transcription: 'our form', translation: 'notre forme'},
         createHandler,
         storeName: 'forms'
@@ -159,7 +159,7 @@ define (require) ->
       indexHandler = _.extend (clone optimistHandler),
         onsuccess: (formsArray) =>
           @initialCount = formsArray.length
-          lingSyncIDB.create(
+          fieldDBIDB.create(
             {transcription: 'monkey', translation: 'singe'},
             createHandler,
             storeName: 'forms'
@@ -170,18 +170,18 @@ define (require) ->
         onsuccess: (formObject) =>
           @ourForm = formObject
           expect(formObject.transcription).to.equal 'monkey'
-          lingSyncIDB.index indexHandler2, storeName: 'forms'
+          fieldDBIDB.index indexHandler2, storeName: 'forms'
 
       # Count forms now, request delete
       indexHandler2 = _.extend (clone optimistHandler), 
         onsuccess: (formsArray) =>
           @afterCreateCount = formsArray.length
-          lingSyncIDB.delete @ourForm.id, deleteHandler, storeName: 'forms'
+          fieldDBIDB.delete @ourForm.id, deleteHandler, storeName: 'forms'
 
       # Request form count
       deleteHandler = _.extend (clone optimistHandler),
         onsuccess: (formObject) =>
-          lingSyncIDB.index indexHandler3, storeName: 'forms'
+          fieldDBIDB.index indexHandler3, storeName: 'forms'
 
       # Verify counts
       indexHandler3 = _.extend (clone optimistHandler),
@@ -192,7 +192,7 @@ define (require) ->
           done()
 
       # Start by requesting all forms
-      lingSyncIDB.index indexHandler, storeName: 'forms'
+      fieldDBIDB.index indexHandler, storeName: 'forms'
 
     it 'can delete all forms', (done) ->
 
@@ -206,8 +206,8 @@ define (require) ->
       # Delete all, request all
       deleteAllForms = =>
         for form in @initialForms
-          lingSyncIDB.delete form.id, optimistHandler, storeName: 'forms'
-        lingSyncIDB.index indexHandler2, storeName: 'forms'
+          fieldDBIDB.delete form.id, optimistHandler, storeName: 'forms'
+        fieldDBIDB.index indexHandler2, storeName: 'forms'
 
       # Count forms now, expect none
       indexHandler2 = _.extend (clone optimistHandler),
@@ -216,14 +216,14 @@ define (require) ->
           done()
 
       # Start by requesting all forms
-      lingSyncIDB.index indexHandler, storeName: 'forms'
+      fieldDBIDB.index indexHandler, storeName: 'forms'
 
 
 
 
   describe 'FormStore class', ->
 
-    formStore = new FormStore lingSyncIDB
+    formStore = new FormStore fieldDBIDB
 
     @timeout 1000
 

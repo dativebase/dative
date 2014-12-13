@@ -49,7 +49,14 @@ define (require) ->
   guid = ->
     "#{s4()}#{s4()}-#{s4()}-#{s4()}-#{s4()}-#{s4()}#{s4()}#{s4()}"
 
+  # Email validator. This is the second regex of the second answer to
+  # http://stackoverflow.com/questions/46155/validate-email-address-in-javascript
+  emailIsValid = (email) ->
+    regex = /[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?/
+    return regex.test(email)
+
   clone: clone
   type: type
   guid: guid
+  emailIsValid: emailIsValid
 

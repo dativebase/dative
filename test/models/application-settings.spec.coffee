@@ -115,9 +115,9 @@ define (require) ->
         @appSett.save()
         expect(@appSett.checkIfLoggedIn).to.have.been.calledThrice
 
-    describe 'RESTful behaviour', ->
+    describe 'OLD RESTful behaviour', ->
 
-      it 'makes authentication requests', ->
+      it 'makes authentication requests to an OLD web service', ->
 
         # Verify that the request is as expected
         expect(@requests).to.have.length 0
@@ -212,7 +212,7 @@ define (require) ->
         Backbone.on 'authenticate:success', authenticateSuccessSpy
         Backbone.on 'authenticate:fail', authenticateFailSpy
 
-      it 'makes logout requests', ->
+      it 'makes logout requests to an OLD web service', ->
 
         # Verify that the logout request is as expected
         @appSett.logout()
@@ -268,6 +268,13 @@ define (require) ->
         Backbone.on 'authenticate:end', authenticateEndSpy
         Backbone.on 'authenticate:success', logoutSuccessSpy
         Backbone.on 'authenticate:fail', logoutFailSpy
+
+    describe 'FieldDB RESTful behaviour', ->
+
+      it 'makes authentication requests to FieldDB web services', ->
+
+      it 'makes logout requests to FieldDB web services', ->
+
 
     describe 'Event responsivity', ->
 

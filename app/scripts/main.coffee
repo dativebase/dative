@@ -15,18 +15,22 @@ require.config
       deps: ['lodash', 'jquery']
     #jqueryui: ['../bower_components/jquery/dist/jquery']
     jqueryui: ['jquery']
-    backboneindexeddb: ['backbone']
+    # backboneindexeddb: ['backbone']
     multiselect: ['jquery', 'jqueryui']
     jqueryelastic: ['jquery']
     perfectscrollbar: ['jquery']
+    superfish: ['jquery']
+    supersubs: ['jquery']
+    backbonerelational: ['backbone']
+    backbonelocalstorage: ['backbone']
 
   paths:
     jquery: '../bower_components/jquery/dist/jquery'
     backbone: '../bower_components/backbone/backbone'
     lodash: '../bower_components/lodash/dist/lodash'
     underscore: '../bower_components/lodash/dist/lodash.underscore'
-    backboneindexeddb:
-      '../bower_components/indexeddb-backbonejs-adapter/backbone-indexeddb'
+    # backboneindexeddb:
+    #   '../bower_components/indexeddb-backbonejs-adapter/backbone-indexeddb'
     bootstrap: '../bower_components/sass-bootstrap/dist/js/bootstrap'
     text: '../bower_components/requirejs-text/text'
     jqueryui: '../bower_components/jqueryui/jquery-ui'
@@ -65,6 +69,12 @@ require [
     new Workspace()
     Backbone.history.start()
     window.debugMode = false
+
+    # Overriding FieldDB's `bug` which creates a JS `alert()`.
+    # TODO @cesine: is there a better way to override this FieldDB behaviour?
+    FieldDB.FieldDBObject.bug = (message) ->
+      console.log message
+
     $ ->
       new AppView()
 
