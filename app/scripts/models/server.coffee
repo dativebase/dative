@@ -15,8 +15,9 @@ define [
     defaults: ->
       id: @guid()
       name: ''
-      type: 'OLD' # 'OLD' or 'FieldDB'
+      type: 'FieldDB' # 'OLD' or 'FieldDB'
       url: '' # must be unique
+      serverCode: 'production' # FieldDB-specific; see `model/application-settings` for the list.
       corpora: [] # array of objects
       corpus: '' # object
 

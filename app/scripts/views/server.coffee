@@ -14,15 +14,23 @@ define [
     initialize: ->
       @applicationSettingsModel = @model.collection.applicationSettings
       @serverTypes = @applicationSettingsModel.get 'serverTypes'
+      @serverCodes = @applicationSettingsModel.get 'fieldDBServerCodes'
 
     events:
       'keydown button.delete-server': '_keyboardControl'
       'click button.delete-server': '_deleteServer'
+      'selectmenuchange': 'toggleServerCodeSelect'
 
     listenToEvents: ->
       @listenTo @applicationSettingsModel, 'change:activeServer',
         @activeServerChanged
       @delegateEvents()
+
+    toggleServerCodeSelect: ->
+      if @$('select[name=type]').first().val() is 'FieldDB'
+        @$('li.serverCode').slideDown()
+      else
+        @$('li.serverCode').slideUp()
 
     activeServerChanged: ->
       if @active()
@@ -41,9 +49,14 @@ define [
 
     render: ->
       headerTitle = if @active() then 'Active Server' else 'Server'
-      context = _.extend(
-        @model.attributes
-        {serverTypes: @serverTypes, isActive: @active(), headerTitle: headerTitle})
+      context = _.extend(@model.attributes
+        {
+          serverTypes: @serverTypes,
+          serverCodes: @serverCodes,
+          isActive: @active(),
+          headerTitle: headerTitle
+        }
+      )
       @$el.html @template(context)
       @_guify()
       @listenToEvents()
@@ -85,6 +98,7 @@ define [
           text: false
 
       @_selectmenuify()
+      if @model.get('type') is 'OLD' then @$('li.serverCode').hide()
       @_tabindicesNaught() # active elements have tabindex=0
 
       #@_hoverStateFieldDisplay() # make data display react to focus & hover

@@ -21,23 +21,22 @@ define [
     initialize: ->
       @listenTo Backbone, 'registerDialog:toggle', @toggle
       @listenTo @model, 'change:activeServer', @serverDependentRegistration
+      @listenTo @model.get('activeServer'), 'change:type', @serverDependentRegistration
       @listenTo Backbone, 'authenticate:end', @registerEnd
-      @listenTo Backbone, 'register:fail', @registerFail
       @listenTo Backbone, 'register:success', @registerSuccess
 
       @activeServerView = new ActiveServerView
         model: @model, width: 252, label: 'Server *'
 
-
-    registerFail: (reason) ->
-      console.log "The register attempt failed. Reason #{reason}"
-
     registerEnd: ->
       @enableRegisterButton()
 
     registerSuccess: (responseJSON) ->
-      console.log 'The register attempt succeeded.'
-      console.log JSON.stringify(responseJSON, undefined, 2)
+      @dialogClose()
+      {serverCode, username, password, email} = @validate()
+      # AppView will listen to this and tell login to open with values from
+      # register.
+      Backbone.trigger 'loginSuggest', username, password
 
     # WARN: `input` event requires a modern browser; `keyup` is almost as good.
     events:
@@ -67,6 +66,9 @@ define [
     getActiveServerType: ->
       @model.get('activeServer')?.get 'type'
 
+    getActiveServerCode: ->
+      @model.get('activeServer')?.get 'serverCode'
+
     submitWithEnter: (event) ->
       if event.which is 13
         event.preventDefault()
@@ -79,18 +81,12 @@ define [
     # Backbone.trigger 'longTask:deregister', taskId
     # Backbone.trigger 'authenticate:end'
     register: ->
-      console.log '\nWe tried to register'
       @_submitAttempted = true
       params = @validate()
       {serverCode, username, password, email} = params
       if serverCode and username and password and email
-        console.log 'registration about to commence\n'
         @$target.find('.register').button 'disable'
         Backbone.trigger 'authenticate:register', params
-
-    registerRequestComplete: ->
-      # re-enable the register button, IF validation passes...
-      return
 
 
     # Modal dialog-specific stuff (jQueryUI)
@@ -229,7 +225,7 @@ define [
     validateServerCode: ->
       serverType = @getActiveServerType()
       if serverType is 'FieldDB'
-        @$target.find('.activeServer').val()
+        @getActiveServerCode()
       else
         null
 
