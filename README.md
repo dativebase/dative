@@ -1,3 +1,4 @@
+[![Build Status](https://travis-ci.org/cesine/dative.svg?branch=master)](https://travis-ci.org/cesine/dative)
 # Dative: a GUI for LingSync
 
 

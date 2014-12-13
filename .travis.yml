@@ -26,10 +26,12 @@ env:
 
 before_install:
   # Download and configure deps
-  npm install -g grunt-cli &&
-  npm install -g bower &&
-  npm install -g jasmine-node &&
-  npm install
+  - echo Y | sudo apt-get install ncftpput
+  - npm install -g grunt-cli
+  - npm install -g bower
+  - npm install -g jasmine-node
+  - npm install
+  - bower install
 before_script:
   # Make sure the emulator has started before running tests
 
@@ -42,4 +44,5 @@ env:
     - secure: "PQZA5cLfK1kVAC/rg6AKysw6PqtDImQ28xWdKMU1ZAQAI2jy9LtUUCwU+fvAIT4VK0ceI1TQLX9ERRndSfsHe4iA4TUfKRo1Gt1YehHs89c5dWrogFNL1IMqMdNbjaHenddzBxgY3mhT+CjlhaSzSA79hcPEivtlt/n+/SMOgfU="
 
 after_success:
-    "curl --ftp-create-dirs -T README.md -u $USERNAME:$PASSWORD $SERVER_PATH/beta/README.md"
+    - echo $TRAVIS_BRANCH
+    - "ncftpput -R -v -u $USERNAME -p $PASSWORD $SERVER_PATH dist /beta" || echo " ncftpput failed" &&  exit 4
