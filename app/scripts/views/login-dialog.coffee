@@ -138,6 +138,14 @@ define [
 
     toggle: -> if @isOpen() then @dialogClose() else @dialogOpen()
 
+    dialogOpenWithDefaults: (defaults) ->
+      @dialogOpen()
+      username = defaults.username or ''
+      password = defaults.password or ''
+      @$target.find('.username').val username
+      @$target.find('.password').val password
+      if not @model.get 'loddedIn' then @$target.find('.login').focus()
+
     # Validate and return field values as object.
     validate: ->
       fields =

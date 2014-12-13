@@ -284,6 +284,7 @@ define [
         name: 'FieldDB Development'
         type: 'FieldDB'
         url: 'https://localhost:3183'
+        serverCode: 'localhost'
 
       server2 =
         id: @guid()
@@ -296,6 +297,7 @@ define [
         name: 'FieldDB'
         type: 'FieldDB'
         url: 'https://auth.lingsync.org'
+        serverCode: 'production'
 
       server4 =
         id: @guid()
@@ -309,6 +311,15 @@ define [
       username: ''
       servers: [server1, server2, server3, server4]
       serverTypes: ['FieldDB', 'OLD']
+      fieldDBServerCodes: [
+        'localhost'
+        'testing'
+        'beta'
+        'production'
+        'mcgill'
+        'concordia'
+        'dyslexdisorth'
+      ]
       itemsPerPage: 10
 
   # Backbone-relational requires this when using CoffeeScript

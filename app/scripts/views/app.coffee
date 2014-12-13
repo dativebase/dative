@@ -46,12 +46,18 @@ define [
       @listenTo @mainMenuView, 'request:formAdd', @showFormAddView
       @listenTo @mainMenuView, 'request:formsBrowse', @showFormsView
       @listenTo @mainMenuView, 'request:openLoginDialogBox', @toggleLoginDialog
-      @listenTo @mainMenuView, 'request:openRegisterDialogBox', @toggleRegisterDialog
-      @listenTo @loginDialog, 'request:openRegisterDialogBox', @toggleRegisterDialog
+      @listenTo @mainMenuView, 'request:openRegisterDialogBox',
+        @toggleRegisterDialog
+      @listenTo @loginDialog, 'request:openRegisterDialogBox',
+        @toggleRegisterDialog
       @listenTo @mainMenuView, 'request:applicationSettings',
         @showApplicationSettingsView
+      @listenTo Backbone, 'loginSuggest', @openLoginDialogWithDefaults
 
       @render()
+
+    openLoginDialogWithDefaults: (username, password) ->
+      @loginDialog.dialogOpenWithDefaults username: username, password: password
 
     render: ->
       @$el.html @template()
