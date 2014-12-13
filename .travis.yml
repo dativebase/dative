@@ -26,7 +26,7 @@ env:
 
 before_install:
   # Download and configure deps
-  - sudo apt-get install ncftpput
+  - sudo apt-get install ncftp
   - npm install -g grunt-cli
   - npm install -g bower
   - npm install -g jasmine-node
@@ -45,4 +45,4 @@ env:
 
 after_success:
     - echo $TRAVIS_BRANCH
-    - "ncftpput -R -v -u $USERNAME -p $PASSWORD $SERVER_PATH dist /beta || echo ' ncftpput failed' &&  exit 4 "
+    - "ncftp -R -v -u $USERNAME -p $PASSWORD $SERVER_PATH dist /beta || echo ' ncftp failed' &&  exit 4 "
