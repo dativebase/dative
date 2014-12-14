@@ -1,0 +1,10 @@
+<div class="dative-page-name"><%= @name %></div>
+
+<% if @html: %>
+    <%= @html %>
+    <div>ggg html</div>
+<% else: %>
+    <div class="dative-page-content">X<%= @content %></div>
+    <div>fff html</div>
+<% end %>
+

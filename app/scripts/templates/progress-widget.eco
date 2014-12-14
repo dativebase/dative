@@ -1,0 +1,11 @@
+<div class='progress-widget ui-widget ui-widget-content ui-corner-all'>
+  <div id='progress-widget-spinner' class='progress-widget-spinner'>
+  </div>
+  <div class='progress-widget-tasks'>
+    <ul>
+    </ul>
+  <div>
+</div>
+
+
+

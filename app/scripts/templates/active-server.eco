@@ -1,0 +1,12 @@
+<label for="activeServer"><%= @label %></label>
+<select name="activeServer" class="activeServer">
+  <option value="null">--</option>
+  <% for server in @servers: %>
+    <% if server.id is @activeServerId: %>
+      <option value="<%= server.id %>" selected ><%= server.name %></option>
+    <% else: %>
+      <option value="<%= server.id %>"><%= server.name %></option>
+    <% end %>
+  <% end %>
+</select>
+

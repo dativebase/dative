@@ -17,6 +17,9 @@ require.config
     jqueryuicolors: ['jquery', 'jqueryui']
     superfish: ['jquery']
     supersubs: ['jquery']
+    perfectscrollbar: ['jquery']
+    backbonerelational: ['backbone']
+    backbonelocalstorage: ['backbone']
 
   paths:
     jquery: '../bower_components/jquery/dist/jquery'
@@ -39,17 +42,22 @@ require.config
     jqueryelastic: '../bower_components/jakobmattsson-jquery-elastic/jquery.elastic.source'
     spin: '../bower_components/spin.js/spin'
     jqueryspin: '../bower_components/spin.js/jquery.spin'
+    perfectscrollbar: '../bower_components/perfect-scrollbar/src/perfect-scrollbar'
+    fielddb: '../bower_components/fielddb/fielddb'
+    backbonerelational: '../bower_components/backbone-relational/backbone-relational'
+    backbonelocalstorage: '../bower_components/backbone.localStorage/backbone.localStorage'
 
 specs = [
-  #'spec/models/form.js'
-  #'spec/collections/forms.js'
-  #'spec/utils/indexeddb-utils.js'
+  #'spec/models/form.js' # FAILING
+  #'spec/collections/forms.js' # FAILING
+  'spec/utils/indexeddb-utils.js'
   'spec/views/base.js'
   'spec/views/app.js'
   'spec/views/mainmenu.js'
   'spec/views/application-settings.js'
-  #'spec/models/base.js'
-  #'spec/models/form.js'
+  'spec/views/login-dialog.js'
+  'spec/models/base.js'
+  'spec/models/application-settings.js'
 ]
 
 require specs, ->

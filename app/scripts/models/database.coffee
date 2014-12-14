@@ -4,8 +4,8 @@ define [
   ], (_, Backbone) ->
 
     database =
-      id: "lingsync-database"
-      description: "IndexedDB database to hold LingSync data locally in the web
+      id: "fielddb-database"
+      description: "IndexedDB database to hold FieldDB data locally in the web
         browser"
       nolog: true # tell backbone-indexeddb to shut up
       migrations: [

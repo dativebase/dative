@@ -1,11 +1,11 @@
 define [
   'backbone'
-  './../templates'
   './base'
   './mainmenu'
   './progress-widget'
   './notifier'
   './login-dialog'
+  './register-dialog'
   './application-settings'
   './pages'
   './form-add'
@@ -13,13 +13,16 @@ define [
   './../models/application-settings'
   './../models/form'
   './../collections/forms'
-], (Backbone, JST, BaseView, MainMenuView, ProgressWidgetView,
-  NotifierView, LoginDialogView, ApplicationSettingsView, PagesView,
-  FormAddView, FormsView, ApplicationSettingsModel, FormModel,
-  FormsCollection) ->
+  './../collections/application-settings'
+  './../templates/app'
+], (Backbone, BaseView, MainMenuView, ProgressWidgetView,
+  NotifierView, LoginDialogView, RegisterDialogView, ApplicationSettingsView,
+  PagesView, FormAddView, FormsView, ApplicationSettingsModel, FormModel,
+  FormsCollection, ApplicationSettingsCollection, appTemplate) ->
 
   # App View
   # --------
+  #
   #
   # This is the spine of the application. Only one AppView object is created
   # and it controls the creation and rendering of all of the subviews that
@@ -27,44 +30,70 @@ define [
 
   class AppView extends BaseView
 
-    template: JST['app/scripts/templates/app.ejs']
+    template: appTemplate
     el: '#dative-client-app'
 
     initialize: (options) ->
 
-      # Allowing an app settings model in the options facilitates testing.
-      if options?.applicationSettings
-        @applicationSettings = options.applicationSettings
-      else
-        @applicationSettings = new ApplicationSettingsModel()
-        @applicationSettings.fetch()
-
+      @getApplicationSettings options
       @mainMenuView = new MainMenuView model: @applicationSettings
       @loginDialog = new LoginDialogView model: @applicationSettings
+      @registerDialog = new RegisterDialogView model: @applicationSettings
       @progressWidget = new ProgressWidgetView()
-      @notifier = new NotifierView()
+      @notifier = new NotifierView(@applicationSettings)
 
       @listenTo @mainMenuView, 'request:pages', @showPagesView
       @listenTo @mainMenuView, 'request:formAdd', @showFormAddView
       @listenTo @mainMenuView, 'request:formsBrowse', @showFormsView
       @listenTo @mainMenuView, 'request:openLoginDialogBox', @toggleLoginDialog
+      @listenTo @mainMenuView, 'request:openRegisterDialogBox',
+        @toggleRegisterDialog
+      @listenTo @loginDialog, 'request:openRegisterDialogBox',
+        @toggleRegisterDialog
       @listenTo @mainMenuView, 'request:applicationSettings',
         @showApplicationSettingsView
+      @listenTo Backbone, 'loginSuggest', @openLoginDialogWithDefaults
 
       @render()
+
+    openLoginDialogWithDefaults: (username, password) ->
+      @loginDialog.dialogOpenWithDefaults username: username, password: password
 
     render: ->
       @$el.html @template()
       @mainMenuView.setElement(@$('#mainmenu')).render()
       @loginDialog.setElement(@$('#login-dialog-container')).render()
+      @registerDialog.setElement(@$('#register-dialog-container')).render()
       @progressWidget.setElement(@$('#progress-widget-container')).render()
       @notifier.setElement @$('#notifier-container')
       @rendered @mainMenuView
       @rendered @loginDialog
+      @rendered @registerDialog
       @rendered @progressWidget
       @rendered @notifier # Notifier self-renders but we register it as rendered anyways so that we can clean up after it if `.close` is ever called
 
+      # FieldDB stuff commented out until it can be better incorporated
+      # FieldDB.FieldDBObject.application = @applicationSettings
+      # FieldDB.FieldDBObject.application.currentFieldDB = new FieldDB.Corpus()
+      # FieldDB.FieldDBObject.application.currentFieldDB.loadOrCreateCorpusByPouchName("jrwdunham-firstcorpus")
+      # FieldDB.FieldDBObject.application.currentFieldDB.url = FieldDB.FieldDBObject.application.currentFieldDB.BASE_DB_URL
+
       @matchWindowDimensions()
+
+    # Set `@applicationSettings` and `@applicationSettingsCollection`
+    getApplicationSettings: (options) ->
+      @applicationSettingsCollection = new ApplicationSettingsCollection()
+      # Allowing an app settings model in the options facilitates testing.
+      if options?.applicationSettings
+        @applicationSettings = options.applicationSettings
+        @applicationSettingsCollection.add @applicationSettings
+      else
+        @applicationSettingsCollection.fetch()
+        if @applicationSettingsCollection.length
+          @applicationSettings = @applicationSettingsCollection.at 0
+        else
+          @applicationSettings = new ApplicationSettingsModel()
+          @applicationSettingsCollection.add @applicationSettings
 
     # Size the #appview div relative to the window size
     matchWindowDimensions: ->
@@ -110,7 +139,9 @@ define [
     showFormsView: ->
       @_closeVisibleView()
       if not @_formsView
-        @_formsView = new FormsView(collection: new FormsCollection())
+        @_formsView = new FormsView
+          collection: new FormsCollection()
+          applicationSettings: @applicationSettings
       @_visibleView = @_formsView
       @_renderVisibleView()
 
@@ -129,4 +160,8 @@ define [
     # Open/close the login dialog box
     toggleLoginDialog: ->
       Backbone.trigger 'loginDialog:toggle'
+
+    # Open/close the register dialog box
+    toggleRegisterDialog: ->
+      Backbone.trigger 'registerDialog:toggle'
 

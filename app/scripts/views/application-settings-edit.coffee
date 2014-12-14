@@ -1,15 +1,15 @@
 define [
   'backbone'
-  './../templates'
   './base'
-], (Backbone, JST, BaseView) ->
+  './../templates/application-settings-edit'
+], (Backbone, BaseView, applicationSettingsEditTemplate) ->
 
   # Application Settings Edit View
   # ---------------------------------
 
   class ApplicationSettingsEditView extends BaseView
 
-    template: JST['app/scripts/templates/application-settings-edit.ejs']
+    template: applicationSettingsEditTemplate
 
     render: ->
       @$el.html @template(@model.attributes)

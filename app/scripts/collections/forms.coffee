@@ -1,27 +1,25 @@
 define [
-    'lodash',
     'backbone',
     './../models/form'
     './../models/database'
-    'backboneindexeddb'
-  ], (_, Backbone, FormModel, database) ->
+    #'backboneindexeddb' # WARN: conflicts with backbone.localStorage and/or backbone.relational
+  ], (Backbone, FormModel, database) ->
 
     class FormsCollection extends Backbone.Collection
 
+      # Backbone-IndexedDB stuff
       database: database
       storeName: 'forms'
       model: FormModel
       url: 'http://127.0.0.1:5002'
 
-      fetch: ->
-        console.log 'fetch'
-        #@_fakeFetch()
-        @_corsFetch()
+      # Overriding `fetch` (for now...)
+      fetch: (options) ->
+        @_fakeFetch()
+        #@_corsFetch()
 
       _fakeFetch: ->
-
-        console.log 'in fake fetch'
-        @set(new @model(
+        fakeFormModel1 = new @model
           transcription: 'chien'
           translations: [
               transcription: 'dog'
@@ -31,8 +29,10 @@ define [
               transcription: 'wolf'
               grammaticality: '*'
           ]
-        ))
-        console.log 'called set in FormsCollection'
+        fakeFormModel2 = new @model
+          transcription: 'chat'
+          translations: [transcription: 'cat']
+        @set [fakeFormModel1, fakeFormModel2]
 
       _corsFetch: ->
 
@@ -50,7 +50,7 @@ define [
         else if fetchType is 'forms_new'
           url = 'http://127.0.0.1:5000/forms/new'
         console.log url
-        xhr = @model::.createCORSRequest method, url
+        xhr = @model::createCORSRequest method, url
         if not xhr
           throw new Error 'CORS not supported'
         xhr.withCredentials = true

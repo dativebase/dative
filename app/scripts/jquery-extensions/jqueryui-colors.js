@@ -1,4 +1,3 @@
-'use strict';
 /* getJQueryUIColors -- jQuery extension, AMD-compatible
  *
  *  Function: returns an object detailing the jQuery UI colors used on the
@@ -10,7 +9,18 @@
  *  
  */
 
-define(['jquery'], function($) {
+(function (root, factory) {
+    'use strict';
+    if (typeof define === 'function' && define.amd) {
+        // AMD. Register as an anonymous module depending on jQuery.
+        define(['jquery', 'jqueryui'], function($){
+            factory($);
+        });
+    } else {
+        // No AMD. Register plugin with global jQuery object.
+        factory(root.jQuery);
+    }
+}(this, function ($) {
 
     // Get the jQuery UI theme's colors (and east single triangle bg image)
     $.getJQueryUIColors = function () {
@@ -75,4 +85,4 @@ define(['jquery'], function($) {
         return colors;
     };
 
-});
+}));

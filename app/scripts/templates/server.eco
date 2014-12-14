@@ -1,0 +1,63 @@
+<div class="server-config-widget dative-widget-center ui-widget
+  ui-widget-content ui-corner-all">
+
+  <div class="dative-widget-header ui-widget-header ui-corner-top">
+
+    <div class='dative-widget-header-title'><%= @headerTitle %></div>
+
+    <button class="float-left delete-server"
+      title="delete server configuration"></button>
+
+  </div>
+
+  <% if @isActive: %>
+    <div class="dative-widget-body ui-state-highlight">
+  <% else: %>
+    <div class="dative-widget-body">
+  <% end %>
+
+    <ul class="fieldset">
+
+      <li>
+        <label for="name">Name</label>
+        <input type="text" name="name" class="dative-input
+          dative-input-display" value="<%= @name %>" />
+      </li>
+
+      <li>
+        <label for="url">URL</label>
+        <input type="text" name="url" class="dative-input
+          dative-input-display" value="<%= @url %>" />
+      </li>
+
+      <li>
+        <label for="type">Type</label>
+        <select name="type" class="dative-input dative-input-display">
+          <% for type in @serverTypes: %>
+            <% if type is @type: %>
+              <option value="<%= type %>" selected><%= type %></option>
+            <% else: %>
+              <option value="<%= type %>"><%= type %></option>
+            <% end %>
+          <% end %>
+        </select>
+      </li>
+
+      <li class="serverCode">
+        <label for="serverCode">Server code</label>
+        <select name="serverCode" class="serverCode dative-input dative-input-display">
+          <% for serverCode in @serverCodes: %>
+            <% if serverCode is @serverCode: %>
+              <option value="<%= serverCode %>" selected
+                ><%= serverCode %></option>
+            <% else: %>
+              <option value="<%= serverCode %>"><%= serverCode %></option>
+            <% end %>
+          <% end %>
+        </select>
+      </li>
+
+    </ul>
+  </div>
+</div>
+

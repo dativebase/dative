@@ -24,12 +24,12 @@ div#mainmenu {
 }
 #dative-page-body {
     margin: 10px;
-    overflow-y: auto;
+    overflow: hidden;
+    position: relative;
 }
 .ui-widget {
     font-size: 100%;
 }
-
 .dative-authenticated {
     width: 16px;
     height: 16px;
@@ -46,12 +46,15 @@ div#mainmenu {
     border: 0 none;
     border-bottom: solid 1px grey;
     padding: 5px 10px;
+    height: 31px;
+    /* TEST */
+    position: relative;
 }
 
 .dative-widget-header button,
 .dative-widget-header select+div,
-.dative-page-header button,
-.dative-page-header select+div {
+#dative-page-header button,
+#dative-page-header select+div {
     margin: 1px;
 }
 .dative-page-header-title {
@@ -61,24 +64,33 @@ div#mainmenu {
     text-align: left;
     margin-top: 5px;
 }
-.dative-form-object {
+.dative-form-object,
+.igt-form {
     font-size: inherit;
     padding: 10px;
     border-style: solid;
     border-width: 1px;
     border-color: transparent;
+    position: relative;
+    top: -11px;
+    display: block;
 }
 .dative-form-object:hover,
+.igt-form:hover {
+    cursor: pointer;
+}
 ul.sf-menu li a
 {
     cursor: default;
 }
 
-.dative-form-secondary-data {
+.dative-form-secondary-data ,
+.form-secondary-data {
     font-size: 11px;
     padding: 10px 0;
 }
-.dative-form-buttons {
+.dative-form-buttons ,
+.form-buttons {
     margin-bottom: 10px;
 }
 .dative-forms-view-one-interface .dative-widget-body,
@@ -86,18 +98,21 @@ ul.sf-menu li a
     position: relative;
     padding: 10px;
 }
-.dative-form-secondary-data-label {
+.dative-form-secondary-data-label ,
+.form-secondary-data-label {
     display: inline-block;
     width: 150px;
     text-align: right;
     margin-right: 10px;
     vertical-align: top;
 }
-.dative-form-secondary-data-content {
+.dative-form-secondary-data-content ,
+.form-secondary-data-content {
     display: inline-block;
     width: 500px;
 }
-.dative-form-secondary-data > div {
+.dative-form-secondary-data > div ,
+.form-secondary-data > div {
     margin: 5px 0;
 }
 .dative-pagin-items {
@@ -110,10 +125,20 @@ ul.sf-menu li a
     height: 39px;
 }
 .dative-pagin-nav,
-.dative-page-header-widgets
+.dative-page-header-widgets,
+.dative-widget-header-buttons
 {
     text-align: center;
     margin-top: 5px;
+    height: 31px;
+}
+div.dative-widget-header-title,
+div.dative-page-header-title
+{
+    display: inline-block;
+    position: absolute;
+    top: 15px;
+    /*width: 100px;*/
 }
 .dative-pagin-ipp {
     margin: 10px 0;
@@ -123,6 +148,7 @@ ul.sf-menu li a
     font: inherit;
     color: inherit;
     padding: 10px 0;
+    margin: 12px;
 }
 .dative-pagin-item-index {
     vertical-align: top;
@@ -157,10 +183,13 @@ ul.sf-menu li a
     padding: 5px;
     z-index: 2000;
 }
-.dative-login-dialog-widget .dative-login-failed {
+.dative-login-dialog-widget .dative-login-failed,
+.dative-register-dialog-widget .dative-register-validation,
+.dative-register-validation {
     padding: 5px;
 }
 .dative-login-dialog-widget,
+.dative-register-dialog-widget,
 #appview,
 .progress-widget,
 .notifier
@@ -178,6 +207,14 @@ ul.sf-menu li ul
     border-bottom-left-radius: 6px;
 }
 div.heading {
+}
+
+div.dative-widget-center {
+    margin: 0 auto;
+}
+span.dative-triangle-icon,
+.dative-icon {
+    position: absolute;
 }
 
 /*** Form input styles ***/
@@ -204,12 +241,20 @@ ul.fieldset label {
     vertical-align: top;
     font-size: 12px;
 }
-.formAdd ul.fieldset label,
-.applicationSettingsForm ul.fieldset label {
+.formAdd ul.fieldset label {
     width: 150px;
 }
-.loginLogin ul.fieldset label {
-    width: 61px;
+.applicationSettingsForm ul.fieldset label {
+    width: 144px;
+}
+.server-config-widget ul.fieldset label {
+    width: 75px;
+}
+
+.loginLogin ul.fieldset label,
+.registerForm ul.fieldset label {
+    /*width: 61px;*/
+    width: 120px;
 }
 .fieldset label,
 .fieldset input[type="text"],
@@ -270,7 +315,7 @@ ul.fieldset input[type="password"] {
     padding: 6px 10px 6px 10px;
 }
 ul.fieldset textarea,
-form.applicationSettingsForm input,
+div.applicationSettingsForm input,
 div.dative-display {
     width: 526px;
     max-width: 526px;
@@ -281,7 +326,10 @@ ul.fieldset select[name="syntactic_category"],
 ul.fieldset select[name="speaker"],
 ul.fieldset select[name="elicitor"],
 ul.fieldset select[name="verifier"],
-ul.fieldset select[name="source"] {
+ul.fieldset select[name="source"],
+ul.fieldset select[name="corpus"],
+ul.fieldset select[name="serverType"],
+ul.fieldset select[name="activeServer"] {
     width: 548px;
     max-width: 548px;
     min-width: 548px;
@@ -357,7 +405,8 @@ button.ui-multiselect {
     top: 1px;
 }
 
-.dative-form-transcription {
+.dative-form-transcription ,
+.form-primary-data .transcription {
     font-style: italic;
 }
 
@@ -450,4 +499,57 @@ h1 {
 {
     vertical-align: bottom;
 }
+.ui-buttonset .ui-button {
+    margin-right: -4px;
+}
 
+.ui-dialog .ui-dialog-titlebar {
+  line-height: normal;
+}
+
+form.registerForm input,
+form.registerForm select{
+  width: 230px;
+}
+
+div.servers-config-widget,
+div.server-config-widget {
+  margin-top: 20px;
+  margin-bottom: 20px;
+}
+div.servers-config-widget {
+  width: 600px;
+}
+div.server-config-widget {
+  width: 560px;
+  /*width: 400px;*/
+  margin-top: 20px;
+  margin-bottom: 20px;
+}
+
+div.server-config-widget input {
+  max-width: 300px;
+  min-width: 300px;
+  width: 300px;
+}
+
+div.dative-register-dialog li.register-info span {
+  text-align: justify;
+  text-justify: inter-word;
+  line-height: 130%;
+  margin-left: 130px;
+  margin-top: 10px;
+  display: inline-block;
+  width: 240px;
+  max-width: 240px;
+  min-width: 240px;
+}
+
+div.dative-register-dialog div.dative-register-info {
+  position: absolute;
+  /*max-height: 40px;*/
+  overflow: none;
+  width: auto;
+  max-height: 20px;
+  display: inline-table;
+}

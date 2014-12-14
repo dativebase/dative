@@ -1,0 +1,75 @@
+<div id='dative-page-header' class='ui-widget-header ui-corner-top'>
+  <div class='dative-page-header-title'><%= @headerTitle %></div>
+  <div class='dative-page-header-widgets'>
+    <button class="float-left edit" title="edit"></span>
+    <button class="float-left save" title="save"></span>
+  </div>
+</div>
+<div id='dative-page-body'>
+
+
+
+<form id="applicationSettingsForm" action="" method="" class="applicationSettingsForm">
+  <ul class="fieldset">
+
+    <% activeServer = (s for s in @servers when s.url is @activeServer)[0] %>
+
+    <li class="serverSelect">
+      <label for="activeServer">Active Server *</label>
+      <select name="activeServer" class="activeServer">
+      <% if not @servers.length: %>
+        <option value="noServer">configure a server in Application
+          Settings</option>
+      <% else: %>
+        <% for server in @servers: %>
+          <option value="<%= server.url %>"><%= server.name %></option>
+        <% end %>
+      <% end %>
+      </select>
+    </li>
+
+    <li class="corpusSelect">
+      <label for="corpus">Corpus</label>
+      <select name="corpus" class="corpus">
+      <% if not activeServer.corpora.length: %>
+        <option value="noCorpus">login to access corpus list</option>
+      <% else: %>
+        <% for corpus in activeServer.corpora: %>
+            <option value="<%= corpus %>"><%= corpus %></option>
+        <% end %>
+      <% end %>
+      </select>
+    </li>
+
+    <!--
+    <li>
+      <label for="loggedIn">Logged in</label>
+      <div class="dative-display"><%= @loggedIn %></div>
+    </li>
+
+    <li>
+      <label for="username">Username</label>
+      <div class="dative-display"><%= @username %></div>
+    </li>
+    -->
+
+  </ul>
+
+
+</form>
+
+
+
+
+
+
+
+
+
+
+
+
+
+</div>
+
+

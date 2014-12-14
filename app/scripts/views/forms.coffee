@@ -1,55 +1,74 @@
 define [
-  'jquery'
-  'lodash'
   'backbone'
-  './../utils/utils'
-  './basepage'
+  './base'
   './form'
-], ($, _, Backbone, utils, BasePageView, FormView) ->
+  './../templates/forms'
+], (Backbone, BaseView, FormView, formsTemplate) ->
 
   # Forms View
   # -----------
   #
   # Displays a list of forms.
 
-  class FormsView extends BasePageView
+  class FormsView extends BaseView
 
-    template: JST['app/scripts/templates/forms.ejs']
+    template: formsTemplate
 
-    initialize: ->
-      #@collection.fetch()
-      #console.log @collection.length
-      @listenTo @collection, 'change', @renderModelViews
-      @listenTo @collection, 'add', @renderModelViews
+    initialize: (options) ->
+      @applicationSettings = options.applicationSettings or {}
+      #@listenTo @collection, 'change', @_renderCollection
+      #@listenTo @collection, 'add', @_renderCollection
+      @_renderedFormViews = []
 
-    render: (options) ->
-      console.log 'render called on FormsView'
-
-      # Forms list's DOM real estate
-      params = headerTitle: 'Forms'
+    render: ->
+      console.log 'IN RENDER OF FORMS VIEW'
+      params =
+        paginator:
+          itemCount: 2
+          pageCount: 1
       @$el.html @template(params)
       @matchHeights()
-      body = $('#dative-page-body')
+      @collection.fetch
+        itemsPerPage: @applicationSettings.get 'itemsPerPage'
+      @_renderCollection()
 
-      # Tell the paginator how many items_per_page we want
-      options = options or {}
-      _.extend options, items_per_page: FormsView.userSettings.formItemsPerPage
-
-      # Tell the forms collection to fetch its data
-      # The collection currently overrides .fetch() with a CORS request ...
-      @collection.fetch()
-
-      # TODO: bind the collection's 'change' event to the construction and 
+      # TODO: bind the collection's 'change' event to the construction and
       # rendering of all of the models (in the page of paginator)
 
       # Asynchronous GET request
       #$.get('form/browse_ajax', options, OLD.forms.handlePaginatorResponse, 'json');
 
-    renderModelViews: ->
+    # See this `curl` command for what the OLD API returns:
+    # curl --cookie-jar my-cookies.txt --header "Content-Type: application/json" --data '{"username": "admin", "password": "adminA_1"}' http://127.0.0.1:5000/login/authenticate
+    _renderCollection: ->
+      console.log '_renderCollection called'
+      @$('.dative-pagin-items').html ''
+      @_closeRenderedForms()
+      @collection.each (model, index) => @_appendView(model, index)
 
-      console.log 'change event on collection triggered'
-      #curl --cookie-jar my-cookies.txt --header "Content-Type: application/json" --data '{"username": "admin", "password": "adminA_1"}' http://127.0.0.1:5000/login/authenticate
+    _closeRenderedForms: ->
+      while @_renderedFormViews.length
+        formView = @_renderedFormViews.pop()
+        formView.close()
+        @closed formView
 
-      @collection.each((model) =>
-        @$('#dative-page-body').append(new FormView({model: model}).render().$el))
+    _appendView: (model, index) ->
+      formView = new FormView model: model
+      formView.render()
+      @_renderedFormViews.push formView
+      @rendered formView
+      @$('.dative-pagin-items').append @_paginItemTable(formView.$el, index)
+
+    # Return the form view wrapped in a pagination item <table>
+    _paginItemTable: (formView$el, index) ->
+      $('<table>')
+        .addClass('dative-pagin-item')
+        .append($('<tbody>')
+          .append($('<tr>')
+            .append($('<td>')
+              .addClass('dative-pagin-item-index')
+              .text("(#{index + 1})"))
+            .append($('<td>')
+              .addClass('dative-pagin-item-content')
+              .html(formView$el))))
 

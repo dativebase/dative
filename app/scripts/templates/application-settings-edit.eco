@@ -1,0 +1,92 @@
+<form id="applicationSettingsForm" action="" method="" class="applicationSettingsForm">
+  <ul class="fieldset">
+
+    <% activeServer = (s for s in @servers when s.url is @activeServer)[0] %>
+
+    <li class="serverSelect">
+      <label for="activeServer">Active Server *</label>
+      <select name="activeServer" class="activeServer">
+      <% if not @servers.length: %>
+        <option value="noServer">configure a server in Application
+          Settings</option>
+      <% else: %>
+        <% for server in @servers: %>
+          <option value="<%= server.url %>"><%= server.name %></option>
+        <% end %>
+      <% end %>
+      </select>
+    </li>
+
+    <li class="corpusSelect">
+      <label for="corpus">Corpus</label>
+      <select name="corpus" class="corpus">
+      <% if not activeServer.corpora.length: %>
+        <option value="noCorpus">login to access corpus list</option>
+      <% else: %>
+        <% for corpus in activeServer.corpora: %>
+            <option value="<%= corpus %>"><%= corpus %></option>
+        <% end %>
+      <% end %>
+      </select>
+    </li>
+
+    <!--
+    <li>
+      <label for="loggedIn">Logged in</label>
+      <div class="dative-display"><%= @loggedIn %></div>
+    </li>
+
+    <li>
+      <label for="username">Username</label>
+      <div class="dative-display"><%= @username %></div>
+    </li>
+    -->
+
+  </ul>
+
+  <div class="dative-widget-center server-config-widget ui-widget
+    ui-widget-content ui-corner-all">
+
+    <div class="ui-widget-header ui-corner-top dative-widget-header">
+
+      <div class='dative-widget-header-title'>Servers</div>
+
+      <button class="float-left toggle-appear"></button>
+      <button class="float-left add-server" title="new server"></button>
+      <button class="float-left save-server" title="save server"></button>
+
+    </div>
+
+    <div class="buffer" style="height:10px;"></div>
+
+    <div class="server-config-widget-body dative-widget-body">
+
+      <ul class="fieldset">
+
+        <li>
+          <% for server in @servers: %>
+            <ul class="fieldset">
+              <li>
+                <label for="name">Name</label>
+                <input type="text" name="name" class="dative-input
+                  dative-input-display" value="<%= server.name %>" />
+              </li>
+              <li>
+                <label for="url">URL</label>
+                <input type="text" name="url" class="dative-input
+                  dative-input-display" value="<%= server.url %>" />
+              </li>
+              <li>
+                <label for="type">Type</label>
+                <input type="text" name="type" class="dative-input
+                  dative-input-display" value="<%= server.type %>" />
+              </li>
+            </ul>
+          <% end %>
+        </li>
+      </ul>
+    </div>
+  </div>
+
+</form>
+

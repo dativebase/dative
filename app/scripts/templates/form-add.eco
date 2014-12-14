@@ -1,0 +1,103 @@
+<div id='dative-page-header' class='ui-widget-header ui-corner-top'>
+  <div class='dative-page-header-title'><%= @headerTitle %></div>
+  <!-- <div class='dative-page-header-widgets'></div> -->
+</div>
+
+<div id='dative-page-body'>
+  <form action="form/add_ajax" method="post" class="formAdd">
+    <ul class="fieldset">
+      <li>
+        <label for="transcription">Transcription</label>
+        <select name="grammaticality" id="grammaticality" class="grammaticality">
+        </select>
+        <textarea rows="1" name="transcription" class="transcription
+        form-add-input" id="transcription"
+        maxlength="255"><%= @transcription %></textarea>
+      </li>
+      <li>
+        <label for="morpheme_break">Morpheme Break</label>
+        <textarea name="morpheme_break" id="morpheme_break"
+        maxlength="255"><%= @morpheme_break %></textarea>
+      </li>
+      <li>
+        <label for="morpheme_gloss">Morpheme Gloss</label>
+        <textarea name="morpheme_gloss" id="morpheme_gloss"
+        maxlength="255"><%= @morpheme_gloss %></textarea>
+      </li>
+      <li>
+        <label for="translations-0.transcription">Translation</label>
+        <select name="translations-0.grammaticality"
+          id="translations0grammaticality" class="grammaticality">
+        </select>
+        <textarea name="translations-0.transcription"
+          id="translations0transcription" maxlength="255"
+          class="translation"
+          <% if @translations[0]: %>
+            ><%= @translations[0].transcription %></textarea>
+          <% else: %>
+            ></textarea>
+          <% end %>
+        <button class="insertTranslationFieldButton"
+          title="Add another translation.">Add Translation</button>
+      </li>
+    </ul>
+
+    <ul class="fieldset">
+      <li>
+        <label for="comments">General Comments</label>
+        <textarea name="comments" id="comments"><%= @comments %></textarea>
+      </li>
+      <li>
+        <label for="speaker_comments">Speaker Comments</label>
+        <textarea name="speaker_comments" id="speaker_comments"
+        ><%= @speaker_comments %></textarea>
+      </li>
+      <li>
+        <label for="elicitation_method">Elicitation Method</label>
+        <select name="elicitation_method" id="elicitation_method"></select>
+      </li>
+      <li>
+        <div class="tags-multiselect">
+          <label for="tags">Tags</label>
+          <select name="tags" id="tags" multiple="multiple"></select>
+        </div>
+      </li>
+      <li>
+        <label for="syntactic_category">Category</label>
+        <select name="syntactic_category" id="syntactic_category"></select>
+      </li>
+    </ul>
+
+    <ul class="fieldset">
+      <li>
+        <label for="speaker">Speaker</label>
+        <select name="speaker" id="speaker"></select>
+      </li>
+      <li>
+        <label for="elicitor">Elicitor</label>
+        <select name="elicitor" id="elicitor"></select>
+      </li>
+      <li>
+        <label for="verifier">Verifier</label>
+        <select name="verifier" id="verifier"></select>
+      </li>
+      <li>
+        <label for="source">Source</label>
+        <select name="source" id="source"></select>
+      </li>
+      <li>
+        <label for="date_elicited">Date Elicited</label>
+        <input type="text" name="date_elicited" id="date_elicited"
+          class="dateElicited" value="<%= @date_elicited %>"/>
+      </li>
+    </ul>
+
+    <ul class="fieldset">
+      <li class="center">
+        <input id="submit-button" type="submit" value="Add Form" />
+      </li>
+    </ul>
+  </form>
+</div>
+
+

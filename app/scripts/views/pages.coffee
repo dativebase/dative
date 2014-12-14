@@ -1,19 +1,20 @@
 define [
-  'jquery',
-  'lodash',
   'backbone',
-  './../collections/pages',
-  './basepage',
+  './base',
   './page'
-], ($, _, Backbone, pagesCollection, BasePageView, PageView) ->
+  './../collections/pages',
+  './../templates/basepage'
+], (Backbone, BaseView, PageView, PagesCollection, basepageTemplate) ->
 
   # Pages View
   # --------------
 
   # The DOM element for summarizing the pages of a Dative app
-  class PagesView extends BasePageView
+  class PagesView extends BaseView
 
-    pagesCollection: pagesCollection
+    template: basepageTemplate
+
+    pagesCollection: PagesCollection
 
     initialize: ->
       @initialized = true
@@ -28,7 +29,7 @@ define [
     # Append a single page item to the #dative-page-body div of the pages view.
     addOne: (pageModel) ->
       pageView = new PageView(model: pageModel)
-      $('#dative-page-body').append pageView.render().el
+      @$('#dative-page-body').append pageView.render().el
 
     # Add all items in **pagesCollection** at once.
     addAll: ->

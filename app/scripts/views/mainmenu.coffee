@@ -1,11 +1,12 @@
 define [
+  'jquery'
   'backbone'
-  './../templates'
   './base'
+  './../templates/mainmenu'
   'superfish'
   'supersubs'
   'sfjquimatch'
-], (Backbone, JST, BaseView) ->
+], ($, Backbone, BaseView, mainmenuTemplate) ->
 
   # Main Menu View
   # --------------
@@ -16,7 +17,7 @@ define [
 
     tagName: 'div'
     className: 'mainmenu'
-    template: JST['app/scripts/templates/mainmenu.ejs']
+    template: mainmenuTemplate
 
     initialize: ->
       @listenTo @model, 'change:loggedIn', @_refreshLoginButton

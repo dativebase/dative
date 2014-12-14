@@ -51,9 +51,9 @@ define (require) ->
           translations: ['dog', 'hound']
         )
         form.save()
-        expect(FormModel::.sync).to.have.been.calledOnce
-        expect(FormModel::.sync).to.have.been.calledWith 'create', form
-        FormModel::.sync.restore()
+        expect(FormModel::sync).to.have.been.calledOnce
+        expect(FormModel::sync).to.have.been.calledWith 'create', form
+        FormModel::sync.restore()
 
       it 'makes appropriate AJAX requests (stub of Backbone.sync)', ->
         sinon.stub Backbone, 'sync'
@@ -101,7 +101,7 @@ define (require) ->
         request = requests[0]
         expect(requests.length).to.equal 1
         expect(request.method).to.equal 'POST'
-        expect(request.url).to.equal FormModel::.url
+        expect(request.url).to.equal FormModel::url
 
         requestBody = JSON.parse request.requestBody
         expect(requestBody.transcription).to.equal 'chien'
