@@ -39,9 +39,9 @@ script: grunt deploy
 
 env:
   global:
-    - secure: "idG10uJCHMoQLlySdGjCq+F/UUvCPs6f/gqR8srtIAb7oxdZ25P/jU7yESi+rDwZh9GcB7hNwM2MlonoGZKXlkTGxnSt8e9OMQ2PJuchUspZp5Dt62Ubc+CXo/cwiV4kUP9AqPWqQX45sZu5AxbiP2awdKPSmY+cC8409ml/ozI="
-    - secure: "ULfKxRZxlujo9Dvsj7RLkMrymO2Cw7bm5FpWBqcDGewYOkSyiitqxSc3kolU8kAzgOhjJaplPmGLCi79WRc1aDDLUGyWCMaSzGQYenlj7pYJTsCh7Ql3ByjpZ3R7UYS3whs954+1VhNd40UObnQ3V/dB1SbgCjUVspll4VLUfJU="
-    - secure: "mKbgZojla1lpQWj9/rWGC3ffOmxDMnwrIsZQMf0Si7rgv2m93I7lSeoBxEHzR8fZ6ew2oyMxWwzq7s1S8fUx3yNlk8n1eAC6iv19pkwACDoSpRxUlyKcR28my4kLB4nLYukJO3sHNFHd+ih3vITCrwa5iBp0pBe39YxpapQT9is="
+   - secure: MFLi2VIIEDtmYXUwHYTdMelUVTiILNi2d66dqp7amyLIjSfsgypnmmtbH6NBnNEmZ9srpgrvJVym9tR+0JDvtmC1F/qhZyrLTF2K8schfe3M6+dHlMJDpiFgt4vmWkxnYTinRUXh5nb/Tvhtx8RydDW4JDeTZNyurfE6e7FqZ70=
+   - secure: FQG2Ix+HjfFe2s7KT8RDkb8vhXugWSVOBw/fcbkfSLRLMd9+13mQ/mQooo0HC+L9u9ZtfqVeqkEn0dJExej7heSkWFkUg2vKfyR3Mceyou5JdzXWUX3BUrbLAfAvkN4S6IGtO8Nxnbu88ghqw20uUHGeiKUDfjc9tuSPFxtqQBQ=
+   - secure: hE2iibDhUs1CwWVPkfvNz1l9chaZLF4dRJy4xJ+wejdvVCTgWgg2qTSllwYjRXZ8zwSEi9v5MVHng9z2+AGikuMl8i7yYzxFrBbzM5qIRqRonXlfNrJXx9ruMGKKBhffNtIwZAp1b7IxQaapQ3BXsoXbOp/z8wp3u0aX7DJa1Ck=
 
 after_success:
   # on:
