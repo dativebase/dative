@@ -14,9 +14,11 @@ div#mainmenu {
     white-space: nowrap;
     font-size: 15px;
 }
+
 #dative-client-app
 {
 }
+
 #appview
 {
     margin: 10px auto;
@@ -177,6 +179,7 @@ div.dative-page-header-title
     display: inline-block;
     cursor: pointer;
 }
+
 .dative-explanation {
     max-width: 200px;
     overflow-y: auto;
@@ -517,9 +520,26 @@ div.server-config-widget {
   margin-top: 20px;
   margin-bottom: 20px;
 }
-div.servers-config-widget {
+div.servers-config-widget,
+div.corpus-widget {
   width: 600px;
 }
+
+div.corpus-widget {
+  margin-top: 10px;
+  margin-bottom: 10px;
+}
+
+div.users-widget {
+  width: 500px;
+  margin-top: 10px;
+  margin-bottom: 10px;
+}
+
+div.users-widget div.dative-widget-body {
+  padding: 10px;
+}
+
 div.server-config-widget {
   width: 560px;
   /*width: 400px;*/
@@ -553,3 +573,23 @@ div.dative-register-dialog div.dative-register-info {
   max-height: 20px;
   display: inline-table;
 }
+
+div.dative-user-widget {
+  display: inline-block;
+  margin: 10px;
+  /* width: 200px; */
+}
+
+div.dative-user-widget div.dative-widget-body img {
+  display: block;
+  margin: auto;
+}
+
+div.dative-user-widget div.dative-widget-header div.dative-widget-header-title {
+  display: inline-block;
+  position: relative;
+  padding-left: 20px;
+  padding-right: 10px;
+  top: 10px;
+}
+

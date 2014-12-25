@@ -10,6 +10,7 @@ define [
   './pages'
   './form-add'
   './forms'
+  './corpora'
   './../models/application-settings'
   './../models/form'
   './../collections/forms'
@@ -17,8 +18,8 @@ define [
   './../templates/app'
 ], (Backbone, BaseView, MainMenuView, ProgressWidgetView,
   NotifierView, LoginDialogView, RegisterDialogView, ApplicationSettingsView,
-  PagesView, FormAddView, FormsView, ApplicationSettingsModel, FormModel,
-  FormsCollection, ApplicationSettingsCollection, appTemplate) ->
+  PagesView, FormAddView, FormsView, CorporaView, ApplicationSettingsModel,
+  FormModel, FormsCollection, ApplicationSettingsCollection, appTemplate) ->
 
   # App View
   # --------
@@ -53,8 +54,15 @@ define [
       @listenTo @mainMenuView, 'request:applicationSettings',
         @showApplicationSettingsView
       @listenTo Backbone, 'loginSuggest', @openLoginDialogWithDefaults
+      @listenTo Backbone, 'authenticate:success', @authenticateSuccess
 
       @render()
+
+    authenticateSuccess: ->
+      if @applicationSettings.get('activeServer').get('type') is 'FieldDB'
+        @showCorporaView()
+      else
+        @showFormsView()
 
     openLoginDialogWithDefaults: (username, password) ->
       @loginDialog.dialogOpenWithDefaults username: username, password: password
@@ -150,6 +158,17 @@ define [
       if not @_pagesView
         @_pagesView = new PagesView()
       @_visibleView = @_pagesView
+      @_renderVisibleView()
+
+    # These are FieldDB corpora; not sure yet how we'll distinguish OLD-style
+    # corpora from FieldDB-style ones in terms of how they are labelled and
+    # otherwise... 
+    showCorporaView: ->
+      @_closeVisibleView()
+      if not @_corporaView
+        @_corporaView = new CorporaView
+          applicationSettings: @applicationSettings
+      @_visibleView = @_corporaView
       @_renderVisibleView()
 
     _renderVisibleView: ->

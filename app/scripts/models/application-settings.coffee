@@ -37,11 +37,14 @@ define [
     activeServerURLChanged: ->
       #console.log 'active server URL has changed says the app settings model'
 
-    _getURL: ->
+    getURL: ->
       url = @get('activeServer')?.get('url')
       if url.slice(-1) is '/' then url.slice(0, -1) else url
 
-    _authenticateAttemptDone: (taskId) ->
+    getServerCode: ->
+      @get('activeServer')?.get 'serverCode'
+
+    authenticateAttemptDone: (taskId) ->
       Backbone.trigger 'longTask:deregister', taskId
       Backbone.trigger 'authenticate:end'
 
@@ -52,20 +55,21 @@ define [
     # Attempt to authenticate with the passed-in credentials
     authenticate: (username, password) ->
       if @get('activeServer')?.get('type') is 'FieldDB'
-        @_authenticateFieldDB username: username, password: password
+        # @authenticateFieldDB username: username, password: password
+        @authenticateFieldDBAuthService username: username, password: password
       else
-        @_authenticateOLD username: username, password: password
+        @authenticateOLD username: username, password: password
 
-    _authenticateOLD: (credentials) ->
+    authenticateOLD: (credentials) ->
       taskId = @guid()
       Backbone.trigger 'longTask:register', 'authenticating', taskId
       BaseRelationalModel.cors.request(
         method: 'POST'
         timeout: 3000
-        url: "#{@_getURL()}/login/authenticate"
+        url: "#{@getURL()}/login/authenticate"
         payload: credentials
         onload: (responseJSON) =>
-          @_authenticateAttemptDone taskId
+          @authenticateAttemptDone taskId
           if responseJSON.authenticated is true
             @save username: credentials.username, loggedIn: true
             Backbone.trigger 'authenticate:success'
@@ -73,36 +77,119 @@ define [
             Backbone.trigger 'authenticate:fail', responseJSON
         onerror: (responseJSON) =>
           Backbone.trigger 'authenticate:fail', responseJSON
-          @_authenticateAttemptDone taskId
+          @authenticateAttemptDone taskId
         ontimeout: =>
           Backbone.trigger 'authenticate:fail', error: 'Request timed out'
-          @_authenticateAttemptDone taskId
+          @authenticateAttemptDone taskId
       )
 
+    getFieldDBBaseDBURL: (user) ->
+      if user.corpuses?.length
+        meta = user.corpuses[0]
+        protocol = meta.protocol
+        domain = meta.domain
+        port = if meta.port then ":#{meta.port}" else ''
+        "#{protocol}#{domain}#{port}"
+
+    authenticateFieldDBAuthService: (credentials) ->
+      taskId = @guid()
+      Backbone.trigger 'longTask:register', 'authenticating', taskId
+      BaseRelationalModel.cors.request(
+        method: 'POST'
+        timeout: 3000
+        url: "#{@getURL()}/login"
+        payload: credentials
+        onload: (responseJSON) =>
+          @save
+            baseDBURL: @getFieldDBBaseDBURL(responseJSON.user)
+            username: credentials.username,
+            loggedInUser: responseJSON.user
+          credentials.name = credentials.username
+          @authenticateFieldDBCorpusService credentials, taskId
+        onerror: (responseJSON) =>
+          Backbone.trigger 'authenticate:fail', responseJSON
+          @authenticateAttemptDone taskId
+        ontimeout: =>
+          Backbone.trigger 'authenticate:fail', error: 'Request timed out'
+          @authenticateAttemptDone taskId
+      )
+
+    authenticateFieldDBCorpusService: (credentials, taskId) ->
+      BaseRelationalModel.cors.request(
+        method: 'POST'
+        timeout: 3000
+        url: "#{@get('baseDBURL')}/_session"
+        payload: credentials
+        onload: (responseJSON) =>
+          # TODO @jrwdunham: this responseJSON has a roles Array attribute which
+          # references more corpora than I'm seeing from the `corpusteam`
+          # request. Why the discrepancy?
+          @authenticateAttemptDone taskId
+          if responseJSON.ok
+            @save 'loggedIn', true
+            Backbone.trigger 'authenticate:success'
+          else
+            Backbone.trigger 'authenticate:fail', responseJSON
+        onerror: (responseJSON) =>
+          Backbone.trigger 'authenticate:fail', responseJSON
+          @authenticateAttemptDone taskId
+        ontimeout: =>
+          Backbone.trigger 'authenticate:fail', error: 'Request timed out'
+          @authenticateAttemptDone taskId
+      )
+
+    # WARN: deprecated until I can figure out the issue detailed in the comment
+    # below.
     # This is based on the FieldDB AngularJS ("Spreadsheet") source, i.e.,
     # https://github.com/OpenSourceFieldlinguistics/FieldDB/blob/master/\
     #   angular_client/modules/core/app/scripts/directives/\
     #   fielddb-authentication.js
-    _authenticateFieldDB: (credentials) ->
+    authenticateFieldDB: (credentials) ->
+      credentials.serverCode = 'production' # debuggin
       taskId = @guid()
       Backbone.trigger 'longTask:register', 'authenticating', taskId
-      FieldDB.Database::BASE_AUTH_URL = @_getURL()
+
+      FieldDB.Database::BASE_AUTH_URL = @getURL()
+
+      # ISSUE @cesine @jrwdunham: Dative can't know the DB_URL without first
+      # receiving the response from calling `FieldDB.Database::login`. (Call
+      # `@getFieldDBBaseDBURL user` on the returned user to get it.) However,
+      # `FieldDB/api/corpus/Database.js` (lines 294-345) logs in to its default
+      # DB_URL (https://localhost:6984) immediately after Auth Service
+      # authentication succeeds. The request to get the metadata of a corpus,
+      # however, uses http://localhost:5984, wich is from the `user.corpuses`
+      # array. I am using the following hack to get around this, but either I'm
+      # missing something about how to use FieldDB correctly or
+      # `FieldDB.Database::login` needs to inspect the response from the Auth
+      # Service when constructing BASE_DB.
+      # if @getServerCode() is 'localhost'
+      #   FieldDB.Database::BASE_DB_URL = 'http://localhost:5984'
+
       FieldDB.Database::login(credentials).then(
         (user) =>
-          # TODO @jrwdunham: insert a test on the `user` object here.
-          @save username: credentials.username, loggedIn: true
-          Backbone.trigger 'authenticate:success'
-          user = new FieldDB.User(user)
-          # TODO @jrwdunham: store the returned user somewhere
+          try
+            x = @getFieldDBBaseDBURL(user)
+            console.log x
+            FieldDB.Database::BASE_DB_URL = x
+            @save
+              username: credentials.username,
+              loggedIn: true
+              loggedInUser: user
+            Backbone.trigger 'authenticate:success'
+          catch
+            Backbone.trigger 'authenticate:fail',
+              ['Authentication with the FieldDB server worked, but something',
+                'went wrong with Dative.'].join(' ')
         ,
         (reason) ->
           Backbone.trigger 'authenticate:fail', reason
       ).catch(
         ->
-          Backbone.trigger 'authenticate:fail', {reason: 'An error occurred'}
+          Backbone.trigger 'authenticate:fail',
+            'FieldDB.Database::login triggered an error'
       ).done(
         =>
-          @_authenticateAttemptDone taskId
+          @authenticateAttemptDone taskId
       )
 
 
@@ -111,36 +198,36 @@ define [
 
     logout: ->
       if @get('activeServer')?.get('type') is 'FieldDB'
-        @_logoutFieldDB()
+        @logoutFieldDB()
       else
-        @_logoutOLD()
+        @logoutOLD()
 
-    _logoutOLD: ->
+    logoutOLD: ->
       taskId = @guid()
       Backbone.trigger 'longTask:register', 'logout', taskId
       BaseRelationalModel.cors.request(
-        url: "#{@_getURL()}/login/logout"
+        url: "#{@getURL()}/login/logout"
         method: 'GET'
         timeout: 3000
         onload: (responseJSON) =>
-          @_authenticateAttemptDone taskId
+          @authenticateAttemptDone taskId
           if responseJSON.authenticated is false
             @save 'loggedIn', false
             Backbone.trigger 'logout:success'
           else
             Backbone.trigger 'logout:fail'
         onerror: (responseJSON) =>
-          @_authenticateAttemptDone taskId
+          @authenticateAttemptDone taskId
           Backbone.trigger 'logout:fail'
         ontimeout: =>
-          @_authenticateAttemptDone taskId
+          @authenticateAttemptDone taskId
           Backbone.trigger 'logout:fail', error: 'Request timed out'
       )
 
-    _logoutFieldDB: ->
+    logoutFieldDB: ->
       taskId = @guid()
       Backbone.trigger 'longTask:register', 'logout', taskId
-      FieldDB.Database::BASE_AUTH_URL = @_getURL()
+      FieldDB.Database::BASE_AUTH_URL = @getURL()
       FieldDB.Database::logout().then(
         (responseJSON) =>
           if responseJSON.ok is true
@@ -148,11 +235,11 @@ define [
             Backbone.trigger 'logout:success'
           else
             Backbone.trigger 'logout:fail',
-              "server #{@_getURL()} did not accept logout request."
+              "server #{@getURL()} did not accept logout request."
         ,
         (reason) ->
           Backbone.trigger 'logout:fail', reason
-      ).done(=> @_authenticateAttemptDone taskId)
+      ).done(=> @authenticateAttemptDone taskId)
 
 
     # Check if logged in
@@ -161,19 +248,19 @@ define [
     # Check if we are already logged in.
     checkIfLoggedIn: ->
       if @get('activeServer')?.get('type') is 'FieldDB'
-        @_checkIfLoggedInFieldDB()
+        @checkIfLoggedInFieldDB()
       else
-        @_checkIfLoggedInOLD()
+        @checkIfLoggedInOLD()
 
-    _checkIfLoggedInOLD: ->
+    checkIfLoggedInOLD: ->
       taskId = @guid()
       Backbone.trigger('longTask:register', 'checking if already logged in',
         taskId)
       BaseRelationalModel.cors.request(
-        url: "#{@_getURL()}/speakers"
+        url: "#{@getURL()}/speakers"
         timeout: 3000
         onload: (responseJSON) =>
-          @_authenticateAttemptDone(taskId)
+          @authenticateAttemptDone(taskId)
           if utils.type(responseJSON) is 'array'
             @save 'loggedIn', true
             Backbone.trigger 'authenticate:success'
@@ -183,14 +270,14 @@ define [
         onerror: (responseJSON) =>
           @save 'loggedIn', false
           Backbone.trigger 'authenticate:fail', responseJSON
-          @_authenticateAttemptDone(taskId)
+          @authenticateAttemptDone(taskId)
         ontimeout: =>
           @save 'loggedIn', false
           Backbone.trigger 'authenticate:fail', error: 'Request timed out'
-          @_authenticateAttemptDone(taskId)
+          @authenticateAttemptDone(taskId)
       )
 
-    _checkIfLoggedInFieldDB: ->
+    checkIfLoggedInFieldDB: ->
       taskId = @guid()
       Backbone.trigger('longTask:register', 'checking if already logged in',
         taskId)
@@ -206,7 +293,7 @@ define [
         (reason) =>
           @save 'loggedIn', false
           Backbone.trigger 'authenticate:fail', reason
-      ).done(=> @_authenticateAttemptDone taskId)
+      ).done(=> @authenticateAttemptDone taskId)
 
 
     # Register a new user
@@ -215,34 +302,41 @@ define [
     # `RegisterDialogView` should never allow an OLD registration attempt.
     register: (params) ->
       if @get('activeServer')?.get('type') is 'FieldDB'
-        @_registerFieldDB params
+        @registerFieldDB params
 
-    _registerFieldDB: (params) ->
+    registerFieldDB: (params) ->
       taskId = @guid()
       Backbone.trigger 'longTask:register', 'registering a new user', taskId
 
-      params.authUrl = @_getURL()
-      # TODO @cesine: `appVersionWhenCreated`: should it be Dative current version?
-      params.appVersionWhenCreated = 'placeholder'
+      params.authUrl = @getURL()
+      # TODO @cesine: `appVersionWhenCreated`: should it be Dative current
+      # version?
+      # TODO deploy shell script should search-and-replace "dative-app-verson"
+      # with the value from `bower.json`.
+      params.appVersionWhenCreated = 'dative-app-version'
 
       BaseRelationalModel.cors.request(
-        url: "#{@_getURL()}/register"
+        url: "#{@getURL()}/register"
         payload: params
         method: 'POST'
         timeout: 10000 # FieldDB auth can take some time to register a new user ...
         onload: (responseJSON) =>
-          @_authenticateAttemptDone taskId
+          @authenticateAttemptDone taskId
           # TODO @cesine: what other kinds of responses to registration requests
           # can the auth service make?
           if responseJSON.user?
+            user = responseJSON.user
+            console.log _.keys(user)
+            console.log '\n'
+            console.log JSON.stringify(user, undefined, 2)
             Backbone.trigger 'register:success', responseJSON
           else
             Backbone.trigger 'register:fail', responseJSON.userFriendlyErrors
         onerror: (responseJSON) =>
-          @_authenticateAttemptDone taskId
+          @authenticateAttemptDone taskId
           Backbone.trigger 'register:fail', 'server responded with error'
         ontimeout: =>
-          @_authenticateAttemptDone taskId
+          @authenticateAttemptDone taskId
           Backbone.trigger 'register:fail', 'Request timed out'
       )
 
@@ -263,7 +357,7 @@ define [
         key: 'servers'
         relatedModel: ServerModel
         collectionType: ServersCollection
-        includeInJSON: ['id', 'name', 'type', 'url']
+        includeInJSON: ['id', 'name', 'type', 'url', 'serverCode']
         reverseRelation:
           key: 'applicationSettings'
       ,
@@ -291,6 +385,7 @@ define [
         name: 'OLD Development'
         type: 'OLD'
         url: 'http://127.0.0.1:5000'
+        serverCode: null
 
       server3 =
         id: @guid()
@@ -304,10 +399,12 @@ define [
         name: 'OLD'
         type: 'OLD'
         url: 'http://www.onlinelinguisticdatabase.org'
+        serverCode: null
 
       id: @guid()
       activeServer: server1.id
       loggedIn: false
+      loggedInUser: null
       username: ''
       servers: [server1, server2, server3, server4]
       serverTypes: ['FieldDB', 'OLD']

@@ -1,0 +1,48 @@
+
+  <div class="dative-widget-header ui-widget-header ui-corner-top">
+
+    <div class='dative-widget-header-title'><%= @title %></div>
+
+    <button class="float-left toggle-appear"
+      title="toggle corpus window"></button>
+
+  </div>
+
+  <% if @isActive: %>
+    <div class="dative-widget-body ui-state-highlight">
+  <% else: %>
+    <div class="dative-widget-body">
+  <% end %>
+
+    <div class="users-widget admins-widget ui-widget ui-widget-content
+      dative-widget-center ui-corner-all">
+      <div class="dative-widget-header ui-widget-header ui-corner-top">
+        <div class='dative-widget-header-title'>Admins</div>
+      </div>
+      <div class="dative-widget-body admins-widget-body">
+        There are no admins for this corpus.
+      </div>
+    </div>
+
+    <div class="users-widget writers-widget ui-widget ui-widget-content
+      dative-widget-center ui-corner-all">
+      <div class="dative-widget-header ui-widget-header ui-corner-top">
+        <div class='dative-widget-header-title'>Writers</div>
+      </div>
+      <div class="dative-widget-body writers-widget-body">
+        There are no writers for this corpus.
+      </div>
+    </div>
+
+    <div class="users-widget readers-widget ui-widget ui-widget-content
+      dative-widget-center ui-corner-all">
+      <div class="dative-widget-header ui-widget-header ui-corner-top">
+        <div class='dative-widget-header-title'>Readers</div>
+      </div>
+      <div class="dative-widget-body readers-widget-body">
+        There are no readers for this corpus.
+      </div>
+    </div>
+
+  </div>
+

@@ -1,0 +1,16 @@
+  <div class="dative-widget-header ui-widget-header ui-corner-top">
+
+    <div class='dative-widget-header-title'><%= @username %></div>
+
+    <button class="float-left revoke-privileges"
+      title="revoke this user's <%= @role %> privileges"></button>
+    <button class="float-left change-role"
+      title="change this user's role"></button>
+
+  </div>
+
+  <div class="dative-widget-body">
+    <img src="https://secure.gravatar.com/avatar/<%= @gravatar %>?d=identicon"
+      alt="gravatar image" />
+  </div>
+
