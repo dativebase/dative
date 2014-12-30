@@ -349,6 +349,7 @@ module.exports = (grunt) ->
           src: [
             '*.{ico,txt}'
             '.htaccess'
+            './../package.json'
             'images/{,*/}*.{webp,gif}'
             'styles/fonts/{,*/}*.*'
             'bower_components/sass-bootstrap/fonts/*.*'

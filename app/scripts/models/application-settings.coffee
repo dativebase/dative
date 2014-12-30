@@ -31,6 +31,18 @@ define [
       if not Modernizr.localstorage
         throw new Error 'localStorage unavailable in this browser, please upgrade.'
 
+      self = @
+      if @version == 'da'
+        $.ajax 'package.json',
+        type: 'GET'
+        dataType: 'json'
+        error: (jqXHR, textStatus, errorThrown) ->
+            self.version = 'da'
+            self.set('version', self.version)
+        success: (packageDetails, textStatus, jqXHR) ->
+            self.version = 'v' + packageDetails.version + 'da'
+            self.set('version', self.version)
+
     activeServerChanged: ->
       #console.log 'active server has changed says the app settings model'
 
@@ -222,8 +234,8 @@ define [
       Backbone.trigger 'longTask:register', 'registering a new user', taskId
 
       params.authUrl = @_getURL()
-      # TODO @cesine: `appVersionWhenCreated`: should it be Dative current version?
-      params.appVersionWhenCreated = 'placeholder'
+      # @jrwdunham: `appVersionWhenCreated`: yes should be Dative current version
+      params.appVersionWhenCreated = @version
 
       BaseRelationalModel.cors.request(
         url: "#{@_getURL()}/register"
@@ -273,6 +285,7 @@ define [
         includeInJSON: 'id'
     ]
 
+    version: 'da'
 
     # Defaults
     #=========================================================================

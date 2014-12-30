@@ -26,7 +26,7 @@ define [
       'click a.dative-authenticated': 'toggleLoginDialog'
 
     render: ->
-      @$el.css(MainMenuView.jQueryUIColors.def).html @template() # match jQueryUI colors
+      @$el.css(MainMenuView.jQueryUIColors.def).html @template({version: 'placeholder' }) # match jQueryUI colors TODO @jrwdunham connect this to the app settings version?
       @superfishify() # Superfish transmogrifies menu
       @_refreshLoginButton()
       @bindClickToEventTrigger() # Vivify menu buttons
