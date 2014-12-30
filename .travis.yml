@@ -42,6 +42,6 @@ after_success:
   #   branch: master
   #   condition: $TRAVIS_REPO_SLUG = OpenSourceFieldlinguistics/dative
     - touch "dist/deployed at `date`"
-    - NOW=`date` && sed "s/\"\(version\": \"[^,]*\)\"/\1 $NOW\"/" dist/package.json  > output && echo $NOW
+    - NOW=`date` && sed "s/\"\(version\"\: \"[^,]*\)\"/\1 $NOW\"/" dist/package.json  > output && echo $NOW
     - mv output dist/package.json
     - '[ "${TRAVIS_PULL_REQUEST}" = "false" ] && [ "${TRAVIS_REPO_SLUG}" = "OpenSourceFieldlinguistics/dative" ]  && ncftpput -R -v -u $USERNAME -p $PASSWORD $SERVER /beta dist/*'
