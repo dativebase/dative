@@ -426,6 +426,11 @@ module.exports = (grunt) ->
         dest: '.tmp/scripts/templates'
         ext: '.js'
 
+    exec:
+      setContinuousDeploymentVersion:
+        cmd: ->
+          return 'bash scripts/set_ci_version.sh'
+
     rev:
       dist:
         files:
@@ -522,6 +527,9 @@ module.exports = (grunt) ->
     # .tmp/scripts/templates/
     'eco'
 
+    # permits execution of shell scripts
+    'exec'
+
     #'compass:dist' # commented out because not currently using compass
 
     # useminPrepare: read the `build` comments in index.html and dynamically
@@ -583,5 +591,5 @@ module.exports = (grunt) ->
 
   grunt.registerTask 'docs', ['clean:docs', 'clean:doctmp', 'copy:docco', 'docco', 'clean:doctmp']
 
-  grunt.registerTask 'deploy', ['jshint', 'build']
+  grunt.registerTask 'deploy', ['jshint', 'build', 'exec:setContinuousDeploymentVersion']
 
