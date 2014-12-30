@@ -9,9 +9,9 @@ node_js:
 #   - sh -e /etc/init.d/xvfb start
 
 # whitelist
-branches:
- only:
-   - master
+# branches:
+#  only:
+#    - master
 
 notifications:
   email:
@@ -19,10 +19,6 @@ notifications:
       - lingsync-support@googlegroups.com
     on_success: change
     on_failure: always
-
-env:
-  matrix:
-    # see set_up_new_machine.sh
 
 before_install:
   # Download and configure deps
@@ -32,8 +28,6 @@ before_install:
   - npm install -g jasmine-node
   - npm install
   - bower install
-before_script:
-  # Make sure the emulator has started before running tests
 
 script: grunt deploy
 
@@ -44,11 +38,10 @@ env:
    - secure: hE2iibDhUs1CwWVPkfvNz1l9chaZLF4dRJy4xJ+wejdvVCTgWgg2qTSllwYjRXZ8zwSEi9v5MVHng9z2+AGikuMl8i7yYzxFrBbzM5qIRqRonXlfNrJXx9ruMGKKBhffNtIwZAp1b7IxQaapQ3BXsoXbOp/z8wp3u0aX7DJa1Ck=
 
 after_success:
-on:
-    branch: master
-    condition: $TRAVIS_REPO_SLUG = "OpenSourceFieldlinguistics/dative"
-    - echo $TRAVIS_BRANCH
+  # on:
+  #   branch: master
+  #   condition: $TRAVIS_REPO_SLUG = OpenSourceFieldlinguistics/dative
     - touch "dist/deployed at `date`"
     - NOW=`date` && sed "s/\"\(version\": \"[^,]*\)\"/\1 $NOW\"/" dist/package.json  > output && echo $NOW
     - mv output dist/package.json
-    - '[ "${TRAVIS_PULL_REQUEST}" = "false" ]  && ncftpput -R -v -u $USERNAME -p $PASSWORD $SERVER /beta dist/*'
+    - '[ "${TRAVIS_PULL_REQUEST}" = "false" ] && [ "${TRAVIS_REPO_SLUG}" = "OpenSourceFieldlinguistics/dative" ]  && ncftpput -R -v -u $USERNAME -p $PASSWORD $SERVER /beta dist/*'
