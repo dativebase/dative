@@ -1,4 +1,4 @@
-[![Build Status](https://travis-ci.org/jrwdunham/dative.svg?branch=master)](https://travis-ci.org/jrwdunham/dative)
+[![Build Status](https://travis-ci.org/OpenSourceFieldlinguistics/dative.svg?branch=master)](https://travis-ci.org/OpenSourceFieldlinguistics/dative)
 # Dative: a GUI for LingSync
 
 
