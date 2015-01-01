@@ -24,7 +24,11 @@ define [
     listenToEvents: ->
       @listenTo @applicationSettingsModel, 'change:activeServer',
         @activeServerChanged
+      @listenTo @model, 'change:name', @changeHeaderName
       @delegateEvents()
+
+    changeHeaderName: ->
+      @$('.dative-widget-header-title span.header-title-name').text @model.get('name')
 
     toggleServerCodeSelect: ->
       if @$('select[name=type]').first().val() is 'FieldDB'
@@ -34,10 +38,10 @@ define [
 
     activeServerChanged: ->
       if @active()
-        @$('.dative-widget-header-title').text 'Active Server'
+        @$('.dative-widget-header-title span.activeIndicator').text '(active)'
         @$('.dative-widget-body').addClass 'ui-state-highlight'
       else
-        @$('.dative-widget-header-title').text 'Server'
+        @$('.dative-widget-header-title span.activeIndicator').text ''
         @$('.dative-widget-body').removeClass 'ui-state-highlight'
 
     active: ->
@@ -99,7 +103,10 @@ define [
 
       @_selectmenuify()
       if @model.get('type') is 'OLD' then @$('li.serverCode').hide()
+
       @_tabindicesNaught() # active elements have tabindex=0
+
+      @$('.activeIndicator').css("color", @constructor.jQueryUIColors.defCo)
 
       #@_hoverStateFieldDisplay() # make data display react to focus & hover
 

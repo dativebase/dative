@@ -2,9 +2,9 @@
 
     <div class='dative-widget-header-title'><%= @username %></div>
 
-    <button class="float-left revoke-privileges"
+    <button class="revoke-privileges"
       title="revoke this user's <%= @role %> privileges"></button>
-    <button class="float-left change-role"
+    <button class="change-role"
       title="change this user's role"></button>
 
   </div>

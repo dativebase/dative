@@ -55,8 +55,13 @@ define (require) ->
     regex = /[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?/
     return regex.test(email)
 
+  startsWith = (s, prefix) -> s[...prefix.length] is prefix
+  endsWith = (s, prefix) -> prefix is '' or s[-prefix.length..] is prefix
+
   clone: clone
   type: type
   guid: guid
   emailIsValid: emailIsValid
+  startsWith: startsWith
+  endsWith: endsWith
 

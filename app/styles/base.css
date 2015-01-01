@@ -41,6 +41,7 @@ div#mainmenu {
     margin: 40px auto 15px auto;
     width: 900px;
 }
+
 #dative-page-header,
 .dative-widget-header {
     font-weight: normal;
@@ -51,6 +52,17 @@ div#mainmenu {
     height: 31px;
     /* TEST */
     position: relative;
+}
+
+.header-no-body {
+    border-bottom: none;
+    border-bottom-left-radius: 6px;
+    border-bottom-right-radius: 6px;
+}
+
+.ui-state-highlight {
+    border-bottom-left-radius: 6px;
+    border-bottom-right-radius: 6px;
 }
 
 .dative-widget-header button,
@@ -139,7 +151,7 @@ div.dative-page-header-title
 {
     display: inline-block;
     position: absolute;
-    top: 15px;
+    /*top: 15px;*/
     /*width: 100px;*/
 }
 .dative-pagin-ipp {
@@ -195,7 +207,12 @@ div.dative-page-header-title
 .dative-register-dialog-widget,
 #appview,
 .progress-widget,
-.notifier
+.notifier,
+.corpus-widget,
+.users-widget,
+.dative-user-widget,
+.servers-config-widget,
+.server-config-widget
 {
     box-shadow: 5px 5px 10px rgba(0, 0, 0, 0.5);
     -webkit-box-shadow: 5px 5px 10px rgba(0, 0, 0, 0.5);
@@ -408,8 +425,9 @@ button.ui-multiselect {
     top: 1px;
 }
 
-.dative-form-transcription ,
-.form-primary-data .transcription {
+.dative-form-transcription,
+.form-primary-data .transcription,
+.italic {
     font-style: italic;
 }
 
@@ -527,7 +545,7 @@ div.corpus-widget {
 
 div.corpus-widget {
   margin-top: 10px;
-  margin-bottom: 10px;
+  margin-bottom: 20px;
 }
 
 div.users-widget {
@@ -565,19 +583,9 @@ div.dative-register-dialog li.register-info span {
   min-width: 240px;
 }
 
-div.dative-register-dialog div.dative-register-info {
-  position: absolute;
-  /*max-height: 40px;*/
-  overflow: none;
-  width: auto;
-  max-height: 20px;
-  display: inline-table;
-}
-
 div.dative-user-widget {
   display: inline-block;
   margin: 10px;
-  /* width: 200px; */
 }
 
 div.dative-user-widget div.dative-widget-body img {
@@ -585,11 +593,36 @@ div.dative-user-widget div.dative-widget-body img {
   margin: auto;
 }
 
-div.dative-user-widget div.dative-widget-header div.dative-widget-header-title {
-  display: inline-block;
+div.dative-user-widget div.dative-widget-header div.dative-widget-header-title,
+div.users-widget > div.dative-widget-header > div.dative-widget-header-title {
+  position: static;
+  margin: auto;
+}
+
+div.corpus-widget > div.dative-widget-header,
+div.users-widget > div.dative-widget-header,
+div.servers-config-widget > div.dative-widget-header,
+div.server-config-widget > div.dative-widget-header {
   position: relative;
-  padding-left: 20px;
-  padding-right: 10px;
-  top: 10px;
+}
+
+div.corpus-widget > div.dative-widget-header > div.dative-widget-header-title,
+div.users-widget > div.dative-widget-header > div.dative-widget-header-title,
+div.servers-config-widget > div.dative-widget-header > div.dative-widget-header-title,
+div.server-config-widget > div.dative-widget-header > div.dative-widget-header-title,
+div#dative-page-header > div.dative-page-header-title {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+
+div.button-container-left {
+  /* See http://jsfiddle.net/khrfwjL0/2/ */
+  position: absolute;
+  left: 0%;
+  top: 50%;
+  transform: translateY(-50%);
+  padding-left: 5px;
 }
 

@@ -1,8 +1,10 @@
 <div id='dative-page-header' class='ui-widget-header ui-corner-top'>
 
   <div class='dative-page-header-title'>Corpora</div>
-  <button class="float-left add-corpus" title="create a new corpus"></span>
-  <button class="float-left save-corpora" title="save corpora"></span>
+  <div class='button-container'>
+    <button class="float-left add-corpus" title="create a new corpus"></span>
+    <button class="float-left save-corpora" title="save corpora"></span>
+  </div>
 
 </div>
 

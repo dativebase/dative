@@ -3,10 +3,21 @@
 
   <div class="dative-widget-header ui-widget-header ui-corner-top">
 
-    <div class='dative-widget-header-title'><%= @headerTitle %></div>
+    <% if @isActive: %>
+      <% activeIndicatorValue = '(active)' %>
+    <% else: %>
+      <% activeIndicatorValue = '' %>
+    <% end %>
 
-    <button class="float-left delete-server"
-      title="delete server configuration"></button>
+    <div class='dative-widget-header-title'
+      ><span class='italic header-title-name'><%= @name %></span
+      > server <span class='activeIndicator'><%= activeIndicatorValue %></span
+      ></div>
+
+    <div class='button-container-left'>
+      <button class="delete-server"
+        title="delete this server configuration"></button>
+    </div>
 
   </div>
 

@@ -100,12 +100,16 @@ define [
         url: "#{@getURL()}/login"
         payload: credentials
         onload: (responseJSON) =>
-          @save
-            baseDBURL: @getFieldDBBaseDBURL(responseJSON.user)
-            username: credentials.username,
-            loggedInUser: responseJSON.user
-          credentials.name = credentials.username
-          @authenticateFieldDBCorpusService credentials, taskId
+          if responseJSON.user
+            @save
+              baseDBURL: @getFieldDBBaseDBURL(responseJSON.user)
+              username: credentials.username,
+              loggedInUser: responseJSON.user
+            credentials.name = credentials.username
+            @authenticateFieldDBCorpusService credentials, taskId
+          else
+            Backbone.trigger 'authenticate:fail', responseJSON.userFriendlyErrors
+            @authenticateAttemptDone taskId
         onerror: (responseJSON) =>
           Backbone.trigger 'authenticate:fail', responseJSON
           @authenticateAttemptDone taskId

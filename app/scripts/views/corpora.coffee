@@ -25,7 +25,9 @@ define [
       @addCorpusModelsToCollection()
       @corpusViews = []
       @collection.each (corpus) =>
-        newCorpusView = new CorpusView model: corpus
+        newCorpusView = new CorpusView
+          model: corpus
+          applicationSettings: @applicationSettings.toJSON()
         corpus.fetch()
         @corpusViews.push newCorpusView
 

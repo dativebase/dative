@@ -136,12 +136,6 @@ define [
 
       @$('button').button().attr('tabindex', 0)
 
-      @$('.dative-page-header-title').first()
-        .position
-          my: 'center'
-          at: 'center'
-          of: @$('.dative-page-header-title').first().parent()
-
       # Main Page GUIfication
 
       @$('button.edit').button({icons: {primary: 'ui-icon-pencil'}, text:

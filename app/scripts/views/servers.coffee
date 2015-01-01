@@ -105,6 +105,7 @@ define [
       @$('.dative-widget-body').first()
         .slideToggle
           complete: =>
+            @$('.dative-widget-header').first().toggleClass 'header-no-body'
             $firstInput = @$('input[name=name]').first()
             if $firstInput.is(':visible')
               $firstInput.focus()

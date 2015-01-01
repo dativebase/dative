@@ -11,6 +11,9 @@ define [
 
   class UserView extends BaseView
 
+    initialize: (options) ->
+      @loggedInUserRole = options.loggedInUserRole
+
     tagName: 'div'
     className: 'dative-user-widget ui-widget ui-widget-content ui-corner-all'
     template: userTemplate
@@ -34,13 +37,23 @@ define [
 
     guify: ->
 
+      disabled = false
+      if @loggedInUserRole isnt 'admin'
+        disabled = true
+
       @$('button.revoke-privileges')
         .button
           icons: {primary: 'ui-icon-close'},
           text: false
+          disabled: disabled
 
       @$('button.change-role')
         .button
           icons: {primary: 'ui-icon-triangle-2-n-s'},
           text: false
+          disabled: disabled
+
+      if disabled
+        @$('button.revoke-privileges, button.change-role').hide()
+        @$('div.dative-widget-header').height 'auto'
 

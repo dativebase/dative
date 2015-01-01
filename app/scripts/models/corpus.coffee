@@ -40,6 +40,7 @@ define [
 
     # GET `<CorpusServiceURL>/<corpusname>/_design/pages/_view/corpuses`
     fetch: ->
+      @trigger 'fetchStart'
       CorpusModel.cors.request(
         method: 'GET'
         timeout: 10000
@@ -77,12 +78,15 @@ define [
         onload: (responseJSON) =>
           if responseJSON.users
             @set 'users', responseJSON.users
-            @trigger 'usersFetched'
+            @trigger 'fetchEnd'
           else
+            @trigger 'fetchEnd'
             console.log 'Failed request to /corpusteam: no users attribute.'
         onerror: (responseJSON) =>
+          @trigger 'fetchEnd'
           console.log 'Failed request to /corpusteam: error.'
         ontimeout: =>
+          @trigger 'fetchEnd'
           console.log 'Failed request to /corpusteam: timed out.'
       )
 
