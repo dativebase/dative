@@ -21,7 +21,8 @@
     "spin.js": "*",
     "perfect-scrollbar": "*",
     "fielddb": "*",
-    "backbone.localStorage": "~1.1.14"
+    "backbone.localStorage": "~1.1.14",
+    "superclick": "~1.1.0"
   },
   "devDependencies": {
     "mocha": "*",

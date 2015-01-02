@@ -58,6 +58,13 @@ define [
 
       @render()
 
+    events:
+      'click': 'bodyClicked'
+
+    bodyClicked: ->
+      console.log 'body clicked'
+      Backbone.trigger 'bodyClicked'
+
     authenticateSuccess: ->
       if @applicationSettings.get('activeServer').get('type') is 'FieldDB'
         @showCorporaView()

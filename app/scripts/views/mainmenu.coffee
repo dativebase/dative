@@ -4,6 +4,7 @@ define [
   './base'
   './../templates/mainmenu'
   'superfish'
+  'superclick'
   'supersubs'
   'sfjquimatch'
 ], ($, Backbone, BaseView, mainmenuTemplate) ->
@@ -21,13 +22,15 @@ define [
 
     initialize: ->
       @listenTo @model, 'change:loggedIn', @_refreshLoginButton
+      @listenTo Backbone, 'bodyClicked', @closeSuperclick
 
     events:
       'click a.dative-authenticated': 'toggleLoginDialog'
 
     render: ->
       @$el.css(MainMenuView.jQueryUIColors.def).html @template() # match jQueryUI colors
-      @superfishify() # Superfish transmogrifies menu
+      #@superfishify() # Superfish transmogrifies menu
+      @superclickify() # Superclick transmogrifies menu
       @_refreshLoginButton()
       @bindClickToEventTrigger() # Vivify menu buttons
       @shortcutConfig() # Keyboard shortcuts
@@ -38,6 +41,16 @@ define [
         .superfish(autoArrows: false)
         .superfishJQueryUIMatch(MainMenuView.jQueryUIColors)
 
+    # Superclick jQuery plugin turns mainmenu <ul> into a menubar
+    superclickify: ->
+      @$('.sf-menu').supersubs(minWidth: 12, maxWidth: 27, extraWidth: 2)
+        .superclick(autoArrows: false)
+        .superfishJQueryUIMatch(MainMenuView.jQueryUIColors)
+
+    closeSuperclick: ->
+      console.log 'closeSuperclick called'
+      @$('.sf-menu').superclick 'reset'
+
     # Menu item clicks and keyboard shortcut behaviours are all defined in the
     # data-event and data-shortcut attributes of the <li>s specified in the
     # template. The following functionality creates the appropriate bindings.
@@ -47,6 +60,7 @@ define [
       self = @
       @$('[data-event]').each ->
         $(@).click (event) ->
+          self.$('.sf-menu').superclick('reset')
           event.stopPropagation()
           self.trigger $(@).attr('data-event')
 

@@ -20,6 +20,7 @@ require.config
     jqueryelastic: ['jquery']
     perfectscrollbar: ['jquery']
     superfish: ['jquery']
+    superclick: ['jquery']
     supersubs: ['jquery']
     backbonerelational: ['backbone']
     backbonelocalstorage: ['backbone']
@@ -35,6 +36,7 @@ require.config
     text: '../bower_components/requirejs-text/text'
     jqueryui: '../bower_components/jqueryui/jquery-ui'
     superfish: 'jquery-extensions/superfish'
+    superclick: 'jquery-extensions/superclick'
     #superfish: '../bower_components/superfish/dist/js/superfish'
     #superfish: 'jquery-extensions/superfish/dist/js/superfish'
     igt: 'jquery-extensions/igt'
