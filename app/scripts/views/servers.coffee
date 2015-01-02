@@ -28,29 +28,39 @@ define [
       @bodyVisible = false
 
     listenToEvents: ->
-      @listenTo Backbone, 'removeServerView', @_removeServerView
+      @listenTo Backbone, 'removeServerView', @removeServerView
       @delegateEvents()
 
-    _removeServerView: (serverView) ->
+    removeServerView: (serverView) ->
       @serverViews = _.without @serverViews, serverView
       serverView.close()
       @closed serverView
+      console.log 'removedServerView called'
+      @emptyMessage()
+
+    emptyMessage: ->
+      console.log 'emptyMessage called'
+      if @serverViews.length is 0
+        @$('div.no-servers-msg').show()
+      else
+        @$('div.no-servers-msg').hide()
 
     events:
-      'keydown button.toggle-appear': 'toggleAppearKeys'
+      'keydown button.toggle-appear': 'toggleServerConfigKeys'
       'keydown button.add-server': 'addServerKeys'
-      'click button.toggle-appear': '_toggleServerConfig'
-      'click button.add-server': '_addServer'
+      'click button.toggle-appear': 'toggleServerConfig'
+      'click button.add-server': 'addServer'
 
     render: ->
       @$el.html @template()
-      @_guify()
+      @guify()
       @$widgetBody = @$('div.dative-widget-body').first()
       container = document.createDocumentFragment()
       for serverView in @serverViews
         container.appendChild serverView.render().el
         @rendered serverView
       @$widgetBody.append container
+      @emptyMessage()
       @listenToEvents()
       @
 
@@ -61,11 +71,11 @@ define [
         updatedServerModels.push serverView.model
       @collection.add updatedServerModels
 
-    _addServer: (event) ->
+    addServer: (event) ->
       if event
         event.preventDefault()
         event.stopPropagation()
-      @_openServerConfig()
+      @openServerConfig()
       serverModel = new ServerModel()
       @collection.unshift serverModel
       serverView = new ServerView
@@ -74,8 +84,9 @@ define [
       @serverViews.unshift serverView
       serverView.render().$el.prependTo(@$widgetBody).hide().slideDown('slow')
       @rendered serverView
+      @emptyMessage()
 
-    _guify: ->
+    guify: ->
 
       @$('button').button().attr('tabindex', 0)
 
@@ -88,13 +99,15 @@ define [
         .button
           icons: {primary: triangleIcon}
           text: false
+        .tooltip()
 
       @$('button.add-server')
         .button
           icons: {primary: 'ui-icon-plusthick'}
           text: false
+        .tooltip()
 
-    _toggleServerConfig: (event) ->
+    toggleServerConfig: (event) ->
       if event
         event.preventDefault()
         event.stopPropagation()
@@ -111,15 +124,15 @@ define [
               $firstInput.focus()
             @bodyVisible = @$('.dative-widget-body').is(':visible')
 
-    _openServerConfig: ->
+    openServerConfig: ->
       if not @$('.dative-widget-body').is(':visible')
-        @_toggleServerConfig()
+        @toggleServerConfig()
 
-    _closeServerConfig: ->
+    closeServerConfig: ->
       if @$('.dative-widget-body').is(':visible')
-        @_toggleServerConfig()
+        @toggleServerConfig()
 
-    _rememberTarget: (event) ->
+    rememberTarget: (event) ->
       try
         @$('.dative-input-display').each (index, el) =>
           if el is event.target
@@ -129,20 +142,20 @@ define [
       event.preventDefault()
       event.stopPropagation()
 
-    toggleAppearKeys: (event) ->
-      @_rememberTarget event
+    toggleServerConfigKeys: (event) ->
+      @rememberTarget event
       if event.which in [13, 37, 38, 39, 40] then @stopEvent event
       switch event.which
         when 13 # Enter
-          @_toggleServerConfig()
+          @toggleServerConfig()
         when 37, 38 # left and up arrows
-          @_closeServerConfig()
+          @closeServerConfig()
         when 39, 40 # right and down arrows
-          @_openServerConfig()
+          @openServerConfig()
 
     addServerKeys: (event) ->
-      @_rememberTarget event
+      @rememberTarget event
       if event.which is 13 # Enter
         @stopEvent event
-        @_addServer()
+        @addServer()
 

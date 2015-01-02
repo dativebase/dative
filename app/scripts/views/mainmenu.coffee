@@ -48,7 +48,6 @@ define [
         .superfishJQueryUIMatch(MainMenuView.jQueryUIColors)
 
     closeSuperclick: ->
-      console.log 'closeSuperclick called'
       @$('.sf-menu').superclick 'reset'
 
     # Menu item clicks and keyboard shortcut behaviours are all defined in the

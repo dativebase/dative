@@ -1,9 +1,6 @@
 <div id='dative-page-header' class='ui-widget-header ui-corner-top'>
 
   <div class='dative-page-header-title'><%= @headerTitle %></div>
-  <div class='button-container-left'>
-    <button class="save" title="save"></span>
-  </div>
 
 </div>
 

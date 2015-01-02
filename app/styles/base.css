@@ -554,6 +554,7 @@ div.users-widget {
   margin-bottom: 10px;
 }
 
+div.servers-config-widget > div.dative-widget-body,
 div.users-widget div.dative-widget-body {
   padding: 10px;
 }

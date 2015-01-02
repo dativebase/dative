@@ -57,12 +57,13 @@ define [
       @listenTo Backbone, 'authenticate:success', @authenticateSuccess
 
       @render()
+      # @$el.on('mouseover', ->
+      #   @$('[title]').tooltip())
 
     events:
       'click': 'bodyClicked'
 
     bodyClicked: ->
-      console.log 'body clicked'
       Backbone.trigger 'bodyClicked'
 
     authenticateSuccess: ->

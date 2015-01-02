@@ -14,7 +14,9 @@
 
   </div>
 
-  <div class="dative-widget-body"></div>
+  <div class="dative-widget-body">
+    <div class="no-servers-msg">There are no server configurations.</div>
+  </div>
 
 </div>
 

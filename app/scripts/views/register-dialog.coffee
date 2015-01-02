@@ -21,7 +21,9 @@ define [
     initialize: ->
       @listenTo Backbone, 'registerDialog:toggle', @toggle
       @listenTo @model, 'change:activeServer', @serverDependentRegistration
-      @listenTo @model.get('activeServer'), 'change:type', @serverDependentRegistration
+      if @model.get('activeServer')
+        @listenTo @model.get('activeServer'), 'change:type',
+          @serverDependentRegistration
       @listenTo Backbone, 'authenticate:end', @registerEnd
       @listenTo Backbone, 'register:success', @registerSuccess
 

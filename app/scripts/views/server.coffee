@@ -17,8 +17,10 @@ define [
       @serverCodes = @applicationSettingsModel.get 'fieldDBServerCodes'
 
     events:
-      'keydown button.delete-server': '_keyboardControl'
-      'click button.delete-server': '_deleteServer'
+      'keydown button.delete-server': 'deleteServerKeys'
+      'click button.delete-server': 'deleteServer'
+      'keydown button.activate-server': 'activateServerKeys'
+      'click button.activate-server': 'activateServer'
       'selectmenuchange': 'toggleServerCodeSelect'
 
     listenToEvents: ->
@@ -66,7 +68,7 @@ define [
       @listenToEvents()
       @
 
-    _deleteServer: (event) ->
+    deleteServer: (event) ->
       if event
         event.preventDefault()
         event.stopPropagation()
@@ -75,12 +77,23 @@ define [
         Backbone.trigger 'removeServerView', @
         @remove()
 
-    _keyboardControl: (event) ->
+    deleteServerKeys: (event) ->
       @_rememberTarget event
       if event.which is 13
         event.preventDefault()
         event.stopPropagation()
-        @_deleteServer()
+        @deleteServer()
+
+    activateServerKeys: ->
+      @_rememberTarget event
+      if event.which is 13
+        event.preventDefault()
+        event.stopPropagation()
+        @activateServer()
+
+    activateServer: ->
+      # The ApplicationSettingsView changes the active server.
+      Backbone.trigger 'activateServer', @model.get('id')
 
     _populateSelectFields: ->
       for serverType in ['FieldDB', 'OLD']
@@ -95,11 +108,13 @@ define [
         .button
           icons: {primary: 'ui-icon-trash'}
           text: false
+        .tooltip()
 
-      @$('button.save-server')
+      @$('button.activate-server')
         .button
-          icons: {primary: 'ui-icon-disk'},
+          icons: {primary: 'ui-icon-star'},
           text: false
+        .tooltip()
 
       @_selectmenuify()
       if @model.get('type') is 'OLD' then @$('li.serverCode').hide()
