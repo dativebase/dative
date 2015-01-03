@@ -105,6 +105,9 @@ define [
               baseDBURL: @getFieldDBBaseDBURL(responseJSON.user)
               username: credentials.username,
               loggedInUser: responseJSON.user
+            # I'm still using FieldDB to logout, so it needs these:
+            FieldDB.Database::BASE_AUTH_URL = @getURL()
+            FieldDB.Database::BASE_DB_URL = @getFieldDBBaseDBURL responseJSON.user
             credentials.name = credentials.username
             @authenticateFieldDBCorpusService credentials, taskId
           else
@@ -172,9 +175,6 @@ define [
       FieldDB.Database::login(credentials).then(
         (user) =>
           try
-            x = @getFieldDBBaseDBURL(user)
-            console.log x
-            FieldDB.Database::BASE_DB_URL = x
             @save
               username: credentials.username,
               loggedIn: true
