@@ -103,6 +103,7 @@ define [
           when 'lArrow' then 37
           when 'uArrow' then 38
           when 'dArrow' then 40
+          when ',' then 188
           else shortcutAsString.toUpperCase().charCodeAt 0
 
       ctrlKey: 'ctrl' in shortcutArray

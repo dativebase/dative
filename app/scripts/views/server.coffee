@@ -132,7 +132,6 @@ define [
             my: "left+330 top", at: "left top", collision: "flipfit"
 
       @$('.ui-selectmenu-button').filter('.server-code').each ->
-        console.log $(@).html()
         $(@).tooltip
           items: 'span'
           content: "Choose a server code (for FieldDB servers only)"

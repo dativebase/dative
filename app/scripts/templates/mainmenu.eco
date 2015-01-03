@@ -2,13 +2,14 @@
     <li><a>Dative</a>
         <ul>
             <li><a data-event="request:applicationSettings"
-                 data-shortcut="ctrl+x">Application Settings</a>
+                 data-shortcut="ctrl+,">Application Settings</a>
             </li>
             <li><a data-event="request:home" data-shortcut="ctrl+h">Home</a>
             </li>
             <li><a data-event="request:pages" data-shortcut="ctrl+p">Pages</a>
             </li>
-            <li><a data-event="request:openRegisterDialogBox">Register</a>
+            <li><a data-event="request:openRegisterDialogBox" data-shortcut="ctrl+r"
+              >Register</a>
             </li>
         </ul>
     </li>
@@ -20,9 +21,11 @@
                    data-shortcut="ctrl+s">Search</a></li>
             <li><a data-event="request:formsBrowse"
                    data-shortcut="ctrl+b">Browse</a></li>
-            <li><a data-event="request:quickSearch">Quicksearch</a></li>
+            <!-- <li><a data-event="request:quickSearch">Quicksearch</a></li> -->
         </ul>
     </li>
+
+    <!--
     <li><a>Files</a>
         <ul>
             <li><a data-event="request:fileAdd">Add</a></li>
@@ -30,6 +33,7 @@
             <li><a data-event="request:filesBrowse">Browse</a></li>
         </ul>
     </li>
+
     <li><a>Collections</a>
         <ul>
             <li><a data-event="request:collectionAdd">Add</a></li>
@@ -37,6 +41,7 @@
             <li><a data-event="request:collectionsBrowse">Browse</a></li>
         </ul>
     </li>
+
     <li><a>Analysis</a>
         <ul>
             <li><a data-event="request:phonology">Phonology</a></li>
@@ -51,6 +56,7 @@
                 Morphological Parser</a></li>
         </ul>
     </li>
+
     <li><a>Dictionary</a>
         <ul>
             <li><a data-event="request:dictionarySetup">Setup</a></li>
@@ -58,12 +64,14 @@
             <li><a data-event="request:dictionaryBrowse">Browse</a></li>
         </ul>
     </li>
+
     <li><a>People</a>
         <ul>
             <li><a data-event="request:viewSpeakers">Speakers</a></li>
             <li><a data-event="request:viewUsers">Users</a></li>
         </ul>
     </li>
+
     <li><a>Tags</a>
         <ul>
             <li><a>Tags</a></li>
@@ -71,23 +79,29 @@
             <li><a>Elicitation Methods</a></li>
         </ul>
     </li>
+
     <li><a>Sources</a>
         <ul>
             <li><a>Add</a></li>
             <li><a>Browse</a></li>
         </ul>
     </li>
+
     <li><a>Help</a>
         <ul>
             <li><a >Help Page</a></li>
             <li><a >Dative Documentation</a></li>
         </ul>
     </li>
+    -->
+
     <li><a>Account</a>
         <ul>
+            <!--
             <li><a>My Page</a></li>
             <li><a>My Settings</a></li>
             <li><a>My Memory</a></li>
+            -->
             <li><a data-event="request:openLoginDialogBox"
                    data-shortcut="ctrl+l">Login</a></li>
         </ul>
