@@ -25,7 +25,7 @@ define [
       @listenTo @model, 'change:loggedIn', @_disableButtons
 
       @activeServerView = new ActiveServerView
-        model: @model, width: 139, label: 'Server *'
+        model: @model, width: '12.75em', label: 'Server *'
 
     events:
       'keyup .dative-login-dialog-widget .username': 'validate'

@@ -48,16 +48,19 @@ define [
         onload: (responseJSON) =>
           fieldDBCorpusObject = responseJSON.rows?[0].value or {}
           @set fieldDBCorpusObject
-          @fetchUsers()
+          @trigger 'fetchEnd'
         onerror: (responseJSON) =>
           console.log "Failed to fetch a corpus at #{@url()}."
+          @trigger 'fetchEnd'
         ontimeout: =>
           console.log "Failed to fetch a corpus at #{@url()}. Request timed out."
+          @trigger 'fetchEnd'
       )
 
     # POST `<AuthServiceURL>/corpusteam` with a payload containing `authUrl`,
     # `username`, `pouchname`, and `serverCode`.
     fetchUsers: ->
+      @trigger 'fetchUsersStart'
       # QUESTION @cesine: Is there a good reason that the Spreadsheet app
       # passes the password in the payload to /corpusteam? It doesn't look like
       # `fetchCorpusPermissions` needs it in
@@ -78,15 +81,15 @@ define [
         onload: (responseJSON) =>
           if responseJSON.users
             @set 'users', responseJSON.users
-            @trigger 'fetchEnd'
+            @trigger 'fetchUsersEnd'
           else
-            @trigger 'fetchEnd'
+            @trigger 'fetchUsersEnd'
             console.log 'Failed request to /corpusteam: no users attribute.'
         onerror: (responseJSON) =>
-          @trigger 'fetchEnd'
+          @trigger 'fetchUsersEnd'
           console.log 'Failed request to /corpusteam: error.'
         ontimeout: =>
-          @trigger 'fetchEnd'
+          @trigger 'fetchUsersEnd'
           console.log 'Failed request to /corpusteam: timed out.'
       )
 

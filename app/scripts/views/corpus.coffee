@@ -20,7 +20,10 @@ define [
     template: corpusTemplate
 
     initialize: (options) ->
+      @haveFetchedUsers = false
       @listenTo @model, 'fetchStart', @fetchStart
+      @listenTo @model, 'fetchUsersStart', @fetchUsersStart
+      @listenTo @model, 'fetchUsersEnd', @fetchUsersEnd
       @applicationSettings = options?.applicationSettings or {}
       @admins = []
       @writers = []
@@ -37,8 +40,16 @@ define [
     fetchStart: ->
       @fetching = true
 
+    fetchUsersStart: ->
+      @spin()
+
     fetchEnd: ->
       @fetching = false
+      @stopSpin()
+      @render()
+
+    fetchUsersEnd: ->
+      @haveFetchedUsers = true
       @stopSpin()
       users = @model.get('users')
       if users
@@ -48,6 +59,7 @@ define [
         @creator = @getIsCreator()
         @getUserViews()
       @render()
+      @open()
 
     getUsernames: ->
       @adminNames = (user.username for user in @usersWithoutDuplicates.admins)
@@ -96,7 +108,6 @@ define [
             container.appendChild userView.render().el
             @rendered userView
           @$("div.#{roleClass}-widget-body").html container
-
       @listenToEvents()
       @$('.dative-widget-body').first().hide()
       @
@@ -155,25 +166,49 @@ define [
       event.preventDefault()
       event.stopPropagation()
 
+    fetchUsers: ->
+      @model.fetchUsers()
+
     toggle: (event) ->
       if event then @stopEvent event
 
-      @$('.toggle-appear .ui-button-icon-primary')
-        .toggleClass 'ui-icon-triangle-1-e ui-icon-triangle-1-s'
-
-      @$('.dative-widget-body').first()
-        .slideToggle
-          complete: =>
-            @bodyVisible = @$('.dative-widget-body').is(':visible')
-            @$('.dative-widget-header').first().toggleClass 'header-no-body'
-
-    open: ->
-      if not @$('.dative-widget-body').is(':visible')
-        @toggle()
+      $body = @$('.dative-widget-body').first()
+      if $body.is ':visible'
+        @close()
+      else
+        @open()
 
     close: ->
-      if @$('.dative-widget-body').is(':visible')
-        @toggle()
+      $body = @$('.dative-widget-body').first()
+      if $body.is ':visible'
+        @$('button.toggle-appear')
+          .button
+            icons: {primary: 'ui-icon-triangle-1-e'}
+            text: false
+          .tooltip content: 'show corpus details'
+        $body.slideUp
+          complete: =>
+            @$('.dative-widget-header').first().addClass 'header-no-body'
+            @bodyVisible = false
+
+    open: ->
+      if @haveFetchedUsers
+        @_open()
+      else
+        @fetchUsers()
+
+    _open: ->
+      $body = @$('.dative-widget-body').first()
+      if not $body.is ':visible'
+        @$('button.toggle-appear')
+          .button
+            icons: {primary: 'ui-icon-triangle-1-s'}
+            text: false
+          .tooltip content: 'hide corpus details'
+        @$('.dative-widget-header').first().removeClass 'header-no-body'
+        $body.slideDown
+          complete: =>
+            @bodyVisible = true
 
     guify: ->
       @$('button').button().attr('tabindex', 0)
@@ -186,17 +221,20 @@ define [
         .button
           icons: {primary: 'ui-icon-triangle-1-e'}
           text: false
+        .tooltip()
 
       @$('button.choose-corpus')
         .button
           icons: {primary: 'ui-icon-star'}
           text: false
+        .tooltip()
 
       @$('button.new-admin, button.new-writer, button.new-reader')
         .button
           icons: {primary: 'ui-icon-plusthick'}
           text: false
           disabled: disabled
+        .tooltip()
 
       if disabled
         @$('button.new-admin, button.new-writer, button.new-reader').hide()
@@ -214,7 +252,6 @@ define [
         .css("border-color", @constructor.jQueryUIColors.defBo)
         .attr('tabindex', 0)
 
-
     # Options for spin.js, cf. http://fgnass.github.io/spin.js/
     spinnerOptions:
       lines: 13 # The number of lines to draw
@@ -224,7 +261,6 @@ define [
       corners: 1 # Corner roundness (0..1)
       rotate: 0 # The rotation offset
       direction: 1 # 1: clockwise -1: counterclockwise
-      #color: 'white' #'#000' # #rgb or #rrggbb or array of colors
       color: CorpusView.jQueryUIColors.defCo
       speed: 2.2 # Rounds per second
       trail: 60 # Afterglow percentage
@@ -233,10 +269,17 @@ define [
       className: 'spinner' # The CSS class to assign to the spinner
       zIndex: 2e9 # The z-index (defaults to 2000000000)
       top: '50%' # Top position relative to parent
-      left: '50%' # Left position relative to parent
+      left: '97%' # Left position relative to parent
 
     spin: ->
-      @$('.dative-widget-header').first().spin @spinnerOptions
+      @$('.dative-widget-header').first()
+        .spin @spinnerOptions
+        .tooltip
+          items: 'div'
+          content: 'fetching the users of this corpus'
+          position:
+            my: "left+610 top+8", at: "left top", collision: "flipfit"
+        .tooltip 'open'
 
     stopSpin: ->
       @$('.dative-widget-header').first().spin false

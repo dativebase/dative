@@ -39,6 +39,9 @@ define [
         servers: @model.get('servers').toJSON()
       @$el.html @template(context)
       @$('select.activeServer').selectmenu width: @width
+      @$('.ui-selectmenu-button').tooltip
+        items: 'span'
+        content: 'select the active server'
       @listenToEvents()
       @
 

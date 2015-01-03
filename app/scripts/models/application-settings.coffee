@@ -41,7 +41,7 @@ define [
       url = @get('activeServer')?.get('url')
       if url.slice(-1) is '/' then url.slice(0, -1) else url
 
-    getCorpusServiceURL: ->
+    getCorpusServerURL: ->
       @get('activeServer')?.get 'corpusServerURL'
 
     getServerCode: ->
@@ -104,13 +104,14 @@ define [
         payload: credentials
         onload: (responseJSON) =>
           if responseJSON.user
-            @save
-              baseDBURL: @getFieldDBBaseDBURL(responseJSON.user)
-              username: credentials.username,
-              loggedInUser: responseJSON.user
             # Remember the corpusServiceURL so we can logout.
             @get('activeServer')?.set(
               'corpusServerURL', @getFieldDBBaseDBURL(responseJSON.user))
+            @set
+              baseDBURL: @getFieldDBBaseDBURL(responseJSON.user)
+              username: credentials.username,
+              loggedInUser: responseJSON.user
+            @save()
             credentials.name = credentials.username
             @authenticateFieldDBCorpusService credentials, taskId
           else
@@ -235,7 +236,7 @@ define [
       taskId = @guid()
       Backbone.trigger 'longTask:register', 'logout', taskId
       FieldDB.Database::BASE_AUTH_URL = @getURL()
-      FieldDB.Database::BASE_DB_URL = @getCorpusServiceURL()
+      FieldDB.Database::BASE_DB_URL = @getCorpusServerURL()
       FieldDB.Database::logout().then(
         (responseJSON) =>
           if responseJSON.ok is true
@@ -362,7 +363,7 @@ define [
         key: 'servers'
         relatedModel: ServerModel
         collectionType: ServersCollection
-        includeInJSON: ['id', 'name', 'type', 'url', 'serverCode']
+        includeInJSON: ['id', 'name', 'type', 'url', 'serverCode', 'corpusServerURL']
         reverseRelation:
           key: 'applicationSettings'
       ,
@@ -384,6 +385,7 @@ define [
         type: 'FieldDB'
         url: 'https://localhost:3183'
         serverCode: 'localhost'
+        corpusServerURL: null
 
       server2 =
         id: @guid()
@@ -391,6 +393,7 @@ define [
         type: 'OLD'
         url: 'http://127.0.0.1:5000'
         serverCode: null
+        corpusServerURL: null
 
       server3 =
         id: @guid()
@@ -398,6 +401,7 @@ define [
         type: 'FieldDB'
         url: 'https://auth.lingsync.org'
         serverCode: 'production'
+        corpusServerURL: null
 
       server4 =
         id: @guid()
@@ -405,6 +409,7 @@ define [
         type: 'OLD'
         url: 'http://www.onlinelinguisticdatabase.org'
         serverCode: null
+        corpusServerURL: null
 
       id: @guid()
       activeServer: server1.id

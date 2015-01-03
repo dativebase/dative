@@ -16,9 +16,9 @@
 
     <div class='button-container-left'>
       <button class="delete-server"
-        title="delete this server configuration"></button>
+        title="delete this server"></button>
       <button class="activate-server"
-        title="make this server configuration the active one"></button>
+        title="make this server the active one"></button>
     </div>
 
   </div>

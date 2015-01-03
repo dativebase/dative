@@ -119,7 +119,10 @@ define [
             @$('.dative-widget-header').first().toggleClass 'header-no-body'
             $firstInput = @$('input[name=name]').first()
             if $firstInput.is(':visible')
+              @$('button.toggle-appear').tooltip content: 'hide servers'
               $firstInput.focus()
+            else
+              @$('button.toggle-appear').tooltip content: 'show servers'
             @bodyVisible = @$('.dative-widget-body').is(':visible')
 
     openServerConfig: ->

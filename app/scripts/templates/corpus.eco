@@ -4,7 +4,7 @@
     <div class='dative-widget-header-title'><%= @title %></div>
 
     <div class='button-container-left'>
-      <button class="toggle-appear" title="toggle corpus window"></button>
+      <button class="toggle-appear" title="show corpus details"></button>
       <button class="choose-corpus" title="begin using this corpus"></button>
     </div>
 

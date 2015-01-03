@@ -18,8 +18,7 @@ define [
       type: 'FieldDB' # 'OLD' or 'FieldDB'
       url: '' # must be unique
       serverCode: 'production' # FieldDB-specific; see `model/application-settings` for the list.
-      corpora: [] # array of objects
-      corpus: '' # object
+      corpusServerURL: null
 
   # Backbone-relational + CoffeeScript requirement:
   ServerModel.setup()
