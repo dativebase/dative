@@ -21,19 +21,41 @@ define [
     template: mainmenuTemplate
 
     initialize: ->
-      @listenTo @model, 'change:loggedIn', @_refreshLoginButton
+      @listenTo @model, 'change:loggedIn', @loggedInChanged
       @listenTo Backbone, 'bodyClicked', @closeSuperclick
+
+    loggedInChanged: ->
+      @render()
+
+    setActivityAndVisibility: ->
+      if @model.get('loggedIn')
+        @$('li.requires-authentication').not('.fielddb')
+          .show()
+          .find('a').removeClass 'disabled'
+        if @model.get('activeServer').get('type') is 'FieldDB'
+          @$('li.fielddb').show()
+            .children('a').removeClass 'disabled'
+      else
+        @$('li.requires-authentication').hide()
+          .children('a').addClass 'disabled'
 
     events:
       'click a.dative-authenticated': 'toggleLoginDialog'
 
     render: ->
       @$el.css(MainMenuView.jQueryUIColors.def).html @template() # match jQueryUI colors
+      @setActivityAndVisibility()
+
+      # NOTE @jrwdunham @cesine: I moved to superclick because touchscreen devices
+      # don't support hover events, but apparently superfish does support touchscreen
+      # devices (see http://users.tpg.com.au/j_birch/plugins/superfish/) so maybe we
+      # should switch back.
       #@superfishify() # Superfish transmogrifies menu
       @superclickify() # Superclick transmogrifies menu
-      @_refreshLoginButton()
+
+      @refreshLoginButton()
       @bindClickToEventTrigger() # Vivify menu buttons
-      @shortcutConfig() # Keyboard shortcuts
+      @keyboardShortcuts()
 
     # Superfish jQuery plugin turns mainmenu <ul> into a menubar
     superfishify: ->
@@ -56,40 +78,39 @@ define [
 
     # Bind main menu item clicks to the triggering of the appropriate events.
     bindClickToEventTrigger: ->
-      self = @
-      @$('[data-event]').each ->
-        $(@).click (event) ->
-          self.$('.sf-menu').superclick('reset')
+      @$('[data-event]').each (index, element) =>
+        $(element).click (event) =>
+          @$('.sf-menu').superclick('reset')
           event.stopPropagation()
-          self.trigger $(@).attr('data-event')
+          @trigger $(element).attr('data-event')
 
     # Configure keyboard shortcuts
     # 1. Bind shortcut keystrokes to the appropriate events.
     # 2. Modify the menu items so that shortcut abbreviations are displayed.
-    shortcutConfig: ->
-      self = @
-      $('[data-shortcut][data-event]').each ->
-        event = $(@).attr 'data-event'
-        shortcut = $(@).attr 'data-shortcut'
-        self.bindShortcutToEventTrigger shortcut, event
-        $(@).append $('<span>').addClass('float-right').text(
-          self.getShortcutAbbreviation(shortcut))
+    keyboardShortcuts: ->
+      $(document).off 'keydown'
+      $('[data-shortcut][data-event]').each (index, element) =>
+        if not $(element).hasClass 'disabled'
+          event = $(element).attr 'data-event'
+          shortcut = $(element).attr 'data-shortcut'
+          @bindShortcutToEventTrigger shortcut, event
+          $(element).append $('<span>').addClass('float-right').text(
+            @getShortcutAbbreviation(shortcut))
 
     # Bind keyboard shortcut to triggering of event
     bindShortcutToEventTrigger: (shortcutString, eventName) ->
       # Map for 'ctrl+A' would be {ctrlKey: true, shortcutKey: 65}
       map = @getShortcutMap shortcutString
-      self = @
 
       # Bind the keydown event to the function
-      $(document).keydown (event) ->
+      $(document).keydown (event) =>
         if event.ctrlKey is map.ctrlKey and
         event.altKey is map.altKey and
         event.shiftKey is map.shiftKey and
         event.which is map.shortcutKey
           event.preventDefault()
           event.stopPropagation()
-          self.trigger eventName
+          @trigger eventName
 
     # Return a shortcut object from a shortcut string.
     # Shortcut Map for a shortcut string like 'ctrl+A' would be
@@ -134,7 +155,7 @@ define [
       ].join ''
 
     # Initialize login/logout icon/button
-    _refreshLoginButton: ->
+    refreshLoginButton: ->
       text = 'Login'
       icon = 'ui-icon-locked'
       title = 'login'
@@ -144,9 +165,11 @@ define [
         icon = 'ui-icon-unlocked'
         title = 'logout'
         username = @model.get 'username'
-      @$('a.dative-authenticated').text(text).attr('title', title)
-        .button({icons: {primary: icon}, text: false})
-        .css('border-color', MainMenuView.jQueryUIColors.defBa)
+      @$('a.dative-authenticated')
+        .text(text).attr 'title', title
+        .button {icons: {primary: icon}, text: false}
+        .css 'border-color', MainMenuView.jQueryUIColors.defBa
+        .tooltip()
       @$('.loggedInUsername').text username
 
     # Tell the login dialog box to toggle itself.

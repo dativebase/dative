@@ -136,7 +136,11 @@ define [
 
     isOpen: -> @$source.dialog 'isOpen'
 
-    toggle: -> if @isOpen() then @dialogClose() else @dialogOpen()
+    toggle: ->
+      if @isOpen()
+        @dialogClose()
+      else
+        @dialogOpen()
 
     dialogOpenWithDefaults: (defaults) ->
       @dialogOpen()

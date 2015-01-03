@@ -41,7 +41,7 @@ define [
       @fetching = true
 
     fetchUsersStart: ->
-      @spin()
+      @spin 'fetching the users of this corpus'
 
     fetchEnd: ->
       @fetching = false
@@ -100,7 +100,7 @@ define [
       context = _.extend @model.attributes, isActive: @active()
       @$el.html @template(context)
       @guify()
-      if @fetching then @spin()
+      if @fetching then @spin 'fetching corpus information'
       for roleClass in ['admins', 'writers', 'readers']
         if @[roleClass].length
           container = document.createDocumentFragment()
@@ -271,12 +271,12 @@ define [
       top: '50%' # Top position relative to parent
       left: '97%' # Left position relative to parent
 
-    spin: ->
+    spin: (tooltipMessage) ->
       @$('.dative-widget-header').first()
         .spin @spinnerOptions
         .tooltip
           items: 'div'
-          content: 'fetching the users of this corpus'
+          content: tooltipMessage
           position:
             my: "left+610 top+8", at: "left top", collision: "flipfit"
         .tooltip 'open'

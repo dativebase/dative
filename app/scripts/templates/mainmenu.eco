@@ -1,26 +1,38 @@
 <ul class="sf-menu">
+
     <li><a>Dative</a>
         <ul>
-            <li><a data-event="request:applicationSettings"
+            <li>
+              <a data-event="request:applicationSettings"
                  data-shortcut="ctrl+,">Application Settings</a>
             </li>
-            <li><a data-event="request:home" data-shortcut="ctrl+h">Home</a>
+            <li>
+              <a data-event="request:home" data-shortcut="ctrl+h">Home</a>
             </li>
-            <li><a data-event="request:pages" data-shortcut="ctrl+p">Pages</a>
+            <li class="requires-authentication">
+              <a data-event="request:pages" data-shortcut="ctrl+p">Pages</a>
             </li>
-            <li><a data-event="request:openRegisterDialogBox" data-shortcut="ctrl+r"
+            <li class='requires-authentication fielddb'>
+              <a data-event="request:corporaBrowse" data-shortcut="ctrl+c">Corpora</a>
+            </li>
+            <li>
+              <a data-event="request:openRegisterDialogBox" data-shortcut="ctrl+r"
               >Register</a>
             </li>
         </ul>
     </li>
-    <li><a>Forms</a>
+
+    <li class='requires-authentication'><a>Forms</a>
         <ul>
-            <li><a data-event="request:formAdd"
-                   data-shortcut="ctrl+a">Add</a></li>
-            <li><a data-event="request:formsSearch"
-                   data-shortcut="ctrl+s">Search</a></li>
-            <li><a data-event="request:formsBrowse"
-                   data-shortcut="ctrl+b">Browse</a></li>
+            <li class='requires-authentication'>
+              <a data-event="request:formAdd" data-shortcut="ctrl+a">Add</a>
+            </li>
+            <li class='requires-authentication'>
+              <a data-event="request:formsSearch" data-shortcut="ctrl+s">Search</a>
+            </li>
+            <li class='requires-authentication'>
+              <a data-event="request:formsBrowse" data-shortcut="ctrl+b">Browse</a>
+            </li>
             <!-- <li><a data-event="request:quickSearch">Quicksearch</a></li> -->
         </ul>
     </li>
@@ -107,7 +119,10 @@
         </ul>
     </li>
 </ul>
-<a  class="dative-authenticated"></a>
-<span class="loggedInUsername"></span>
+
+<div class='container-right'>
+  <a class="dative-authenticated" title="login"></a>
+  <span class="loggedInUsername" title="you are not logged in"></span>
+</div>
 
 

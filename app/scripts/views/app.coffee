@@ -51,6 +51,7 @@ define [
       @listenTo @mainMenuView, 'request:formAdd', @showFormAddView
       @listenTo @mainMenuView, 'request:formsBrowse', @showFormsView
       @listenTo @mainMenuView, 'request:formsSearch', @showFormsSearchView
+      @listenTo @mainMenuView, 'request:corporaBrowse', @showCorporaView
       @listenTo @mainMenuView, 'request:openLoginDialogBox', @toggleLoginDialog
       @listenTo @mainMenuView, 'request:openRegisterDialogBox',
         @toggleRegisterDialog
@@ -60,6 +61,7 @@ define [
         @showApplicationSettingsView
       @listenTo Backbone, 'loginSuggest', @openLoginDialogWithDefaults
       @listenTo Backbone, 'authenticate:success', @authenticateSuccess
+      @listenTo Backbone, 'logout:success', @logoutSuccess
 
       @render()
       @showHomePageView()
@@ -69,6 +71,9 @@ define [
 
     bodyClicked: ->
       Backbone.trigger 'bodyClicked'
+
+    logoutSuccess: ->
+      @showHomePageView()
 
     authenticateSuccess: ->
       if @applicationSettings.get('activeServer').get('type') is 'FieldDB'
