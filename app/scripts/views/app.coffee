@@ -8,7 +8,9 @@ define [
   './register-dialog'
   './application-settings'
   './pages'
+  './home'
   './form-add'
+  './forms-search'
   './forms'
   './corpora'
   './../models/application-settings'
@@ -18,8 +20,9 @@ define [
   './../templates/app'
 ], (Backbone, BaseView, MainMenuView, ProgressWidgetView,
   NotifierView, LoginDialogView, RegisterDialogView, ApplicationSettingsView,
-  PagesView, FormAddView, FormsView, CorporaView, ApplicationSettingsModel,
-  FormModel, FormsCollection, ApplicationSettingsCollection, appTemplate) ->
+  PagesView, HomePageView, FormAddView, FormsSearchView, FormsView, CorporaView,
+  ApplicationSettingsModel, FormModel, FormsCollection,
+  ApplicationSettingsCollection, appTemplate) ->
 
   # App View
   # --------
@@ -44,8 +47,10 @@ define [
       @notifier = new NotifierView(@applicationSettings)
 
       @listenTo @mainMenuView, 'request:pages', @showPagesView
+      @listenTo @mainMenuView, 'request:home', @showHomePageView
       @listenTo @mainMenuView, 'request:formAdd', @showFormAddView
       @listenTo @mainMenuView, 'request:formsBrowse', @showFormsView
+      @listenTo @mainMenuView, 'request:formsSearch', @showFormsSearchView
       @listenTo @mainMenuView, 'request:openLoginDialogBox', @toggleLoginDialog
       @listenTo @mainMenuView, 'request:openRegisterDialogBox',
         @toggleRegisterDialog
@@ -57,8 +62,7 @@ define [
       @listenTo Backbone, 'authenticate:success', @authenticateSuccess
 
       @render()
-      # @$el.on('mouseover', ->
-      #   @$('[title]').tooltip())
+      @showHomePageView()
 
     events:
       'click': 'bodyClicked'
@@ -161,11 +165,25 @@ define [
       @_visibleView = @_formsView
       @_renderVisibleView()
 
+    showFormsSearchView: ->
+      @_closeVisibleView()
+      if not @_formsSearchView
+        @_formsSearchView = new FormsSearchView()
+      @_visibleView = @_formsSearchView
+      @_renderVisibleView()
+
     showPagesView: ->
       @_closeVisibleView()
       if not @_pagesView
         @_pagesView = new PagesView()
       @_visibleView = @_pagesView
+      @_renderVisibleView()
+
+    showHomePageView: ->
+      @_closeVisibleView()
+      if not @_homePageView
+        @_homePageView = new HomePageView()
+      @_visibleView = @_homePageView
       @_renderVisibleView()
 
     # These are FieldDB corpora; not sure yet how we'll distinguish OLD-style

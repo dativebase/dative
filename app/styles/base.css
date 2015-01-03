@@ -627,3 +627,11 @@ div.button-container-left {
   padding-left: 5px;
 }
 
+p.paragraph-widget {
+  margin: auto;
+  width: 500px;
+  /* border: 1px solid; */
+  padding: 10px;
+  border-radius: 6px;
+}
+

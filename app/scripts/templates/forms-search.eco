@@ -1,0 +1,10 @@
+<div id='dative-page-header' class='ui-widget-header ui-corner-top'>
+
+  <div class='dative-page-header-title'>Search Forms</div>
+
+</div>
+
+<div id='dative-page-body'>
+  <p class='paragraph-widget'>The GUI for searching forms should go here</p>
+</div>
+
