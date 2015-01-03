@@ -187,6 +187,11 @@ define [
           icons: {primary: 'ui-icon-triangle-1-e'}
           text: false
 
+      @$('button.choose-corpus')
+        .button
+          icons: {primary: 'ui-icon-star'}
+          text: false
+
       @$('button.new-admin, button.new-writer, button.new-reader')
         .button
           icons: {primary: 'ui-icon-plusthick'}

@@ -41,6 +41,9 @@ define [
       url = @get('activeServer')?.get('url')
       if url.slice(-1) is '/' then url.slice(0, -1) else url
 
+    getCorpusServiceURL: ->
+      @get('activeServer')?.get 'corpusServerURL'
+
     getServerCode: ->
       @get('activeServer')?.get 'serverCode'
 
@@ -105,9 +108,9 @@ define [
               baseDBURL: @getFieldDBBaseDBURL(responseJSON.user)
               username: credentials.username,
               loggedInUser: responseJSON.user
-            # I'm still using FieldDB to logout, so it needs these:
-            FieldDB.Database::BASE_AUTH_URL = @getURL()
-            FieldDB.Database::BASE_DB_URL = @getFieldDBBaseDBURL responseJSON.user
+            # Remember the corpusServiceURL so we can logout.
+            @get('activeServer')?.set(
+              'corpusServerURL', @getFieldDBBaseDBURL(responseJSON.user))
             credentials.name = credentials.username
             @authenticateFieldDBCorpusService credentials, taskId
           else
@@ -145,7 +148,7 @@ define [
           @authenticateAttemptDone taskId
       )
 
-    # WARN: deprecated until I can figure out the issue detailed in the comment
+    # WARN: DEPRECATED until I can figure out the issue detailed in the comment
     # below.
     # This is based on the FieldDB AngularJS ("Spreadsheet") source, i.e.,
     # https://github.com/OpenSourceFieldlinguistics/FieldDB/blob/master/\
@@ -232,6 +235,7 @@ define [
       taskId = @guid()
       Backbone.trigger 'longTask:register', 'logout', taskId
       FieldDB.Database::BASE_AUTH_URL = @getURL()
+      FieldDB.Database::BASE_DB_URL = @getCorpusServiceURL()
       FieldDB.Database::logout().then(
         (responseJSON) =>
           if responseJSON.ok is true
@@ -330,9 +334,6 @@ define [
           # can the auth service make?
           if responseJSON.user?
             user = responseJSON.user
-            console.log _.keys(user)
-            console.log '\n'
-            console.log JSON.stringify(user, undefined, 2)
             Backbone.trigger 'register:success', responseJSON
           else
             Backbone.trigger 'register:fail', responseJSON.userFriendlyErrors
