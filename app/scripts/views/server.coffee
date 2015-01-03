@@ -64,7 +64,7 @@ define [
         }
       )
       @$el.html @template(context)
-      @_guify()
+      @guify()
       @listenToEvents()
       @
 
@@ -100,7 +100,7 @@ define [
         @$('select[name="serverType"]', @pageBody)
           .append($('<option>').attr('value', serverType).text(serverType))
 
-    _guify: ->
+    guify: ->
 
       @$('button').button().attr('tabindex', 0)
 
@@ -116,7 +116,28 @@ define [
           text: false
         .tooltip()
 
-      @_selectmenuify()
+      @$('input, select').tooltip
+        position:
+          my: "left+330 top", at: "left top", collision: "flipfit"
+
+      @selectmenuify()
+
+      position = my: "left+330 top", at: "left top", collision: "flipfit"
+
+      @$('.ui-selectmenu-button').filter('.server-type')
+        .tooltip
+          items: 'span'
+          content: "is it a FieldDB server or an OLD one?"
+          position:
+            my: "left+330 top", at: "left top", collision: "flipfit"
+
+      @$('.ui-selectmenu-button').filter('.server-code').each ->
+        console.log $(@).html()
+        $(@).tooltip
+          items: 'span'
+          content: "Choose a server code (for FieldDB servers only)"
+          position: position
+
       if @model.get('type') is 'OLD' then @$('li.serverCode').hide()
 
       @_tabindicesNaught() # active elements have tabindex=0
@@ -125,8 +146,12 @@ define [
 
       #@_hoverStateFieldDisplay() # make data display react to focus & hover
 
-    _selectmenuify: ->
-      @$('select').selectmenu width: 320
+    selectmenuify: ->
+      #@$('select').selectmenu width: 320
+      @$('select[name=type]').selectmenu(width: 320)
+        .next('.ui-selectmenu-button').addClass('server-type')
+      @$('select[name=serverCode]').selectmenu(width: 320)
+        .next('.ui-selectmenu-button').addClass('server-code')
       @$('.ui-selectmenu-button').addClass 'dative-input dative-input-display'
 
     # Tabindices=0 and jQueryUI colors

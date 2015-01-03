@@ -7,9 +7,9 @@
 
     <div class='button-container-left'>
       <button class="float-left toggle-appear"
-        title="toggle server configuration window"></button>
+        title="show servers"></button>
       <button class="float-left add-server"
-        title="create a new server configuration"></button>
+        title="create a new server"></button>
     </div>
 
   </div>

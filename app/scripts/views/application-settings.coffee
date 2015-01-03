@@ -34,6 +34,7 @@ define [
 
     listenToEvents: ->
       @listenTo Backbone, 'activateServer', @activateServer
+      @listenTo Backbone, 'removeServerView', @setModelFromGUI
       if @model.get('activeServer')
         @listenTo @model.get('activeServer'), 'change:url', @activeServerURLChanged
       @delegateEvents()

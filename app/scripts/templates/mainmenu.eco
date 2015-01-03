@@ -1,5 +1,5 @@
 <ul class="sf-menu">
-    <li><a >Dative</a>
+    <li><a>Dative</a>
         <ul>
             <li><a data-event="request:applicationSettings"
                  data-shortcut="ctrl+x">Application Settings</a>

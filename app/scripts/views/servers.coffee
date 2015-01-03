@@ -35,11 +35,9 @@ define [
       @serverViews = _.without @serverViews, serverView
       serverView.close()
       @closed serverView
-      console.log 'removedServerView called'
       @emptyMessage()
 
     emptyMessage: ->
-      console.log 'emptyMessage called'
       if @serverViews.length is 0
         @$('div.no-servers-msg').show()
       else
