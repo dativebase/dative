@@ -25,7 +25,12 @@ define [
       @listenTo @model, 'change:loggedIn', @_disableButtons
 
       @activeServerView = new ActiveServerView
-        model: @model, width: '12.75em', label: 'Server *'
+        model: @model
+        width: '12.75em'
+        label: 'Server *'
+        tooltipContent: 'select a server to login to'
+        tooltipPosition:
+          my: "left+140 top", at: "left top", collision: "flipfit"
 
     events:
       'keyup .dative-login-dialog-widget .username': 'validate'
@@ -38,7 +43,8 @@ define [
       @renderActiveServerView()
       @$source = @$ '.dative-login-dialog' # outer DIV from template
       @$target = @$ '.dative-login-dialog-target' # outer DIV to which jQueryUI dialog appends
-      @_dialogify()
+      @dialogify()
+      @tooltipify()
       @_disableButtons()
       @
 
@@ -48,7 +54,7 @@ define [
       @rendered @activeServerView
 
     # Transform the login dialog HTML to a jQueryUI dialog box.
-    _dialogify: ->
+    dialogify: ->
       @$source.find('input').css('border-color',
         LoginDialogView.jQueryUIColors.defBo)
       @$source.dialog
@@ -58,10 +64,10 @@ define [
             text: 'Register'
             click: => @registerAccount()
             class: 'register'
-          ,
-            text: 'Forgot password'
-            click: => @forgotPassword()
-            class: 'forgot-password'
+          # ,
+          #   text: 'Forgot password'
+          #   click: => @forgotPassword()
+          #   class: 'forgot-password'
           ,
             text: 'Logout'
             click: => @logout()
@@ -82,6 +88,23 @@ define [
         open: =>
           @_initializeDialog()
           @_disableButtons()
+
+    tooltipify: ->
+      @$('button.register')
+        .tooltip
+          content: 'create a new account'
+          items: 'button'
+      @$('button.logout')
+        .tooltip
+          content: 'send a logout request to the server'
+          items: 'button'
+      @$('button.login')
+        .tooltip
+          content: 'attempt to login to the server'
+          items: 'button'
+      @$('input').tooltip
+        position:
+          my: "left+140 top", at: "left top", collision: "flipfit"
 
     _initializeDialog: ->
       @_submitAttempted = false

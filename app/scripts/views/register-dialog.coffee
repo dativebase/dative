@@ -28,7 +28,12 @@ define [
       @listenTo Backbone, 'register:success', @registerSuccess
 
       @activeServerView = new ActiveServerView
-        model: @model, width: 252, label: 'Server *'
+        model: @model
+        width: 252
+        label: 'Server *'
+        tooltipContent: 'select a server to register with'
+        tooltipPosition:
+          my: "left+260 top", at: "left top", collision: "flipfit"
 
     registerEnd: ->
       @enableRegisterButton()
@@ -58,6 +63,7 @@ define [
       @$source = @$ '.dative-register-dialog' # outer DIV from template
       @$target = @$ '.dative-register-dialog-target' # outer DIV to which jQueryUI dialog appends
       @dialogify()
+      @tooltipify()
       @
 
     renderActiveServerView: ->
@@ -119,6 +125,15 @@ define [
           @selectmenuify()
           @tabindicesNaught()
           @disableRegisterButton()
+
+    tooltipify: ->
+      @$('button.register')
+        .tooltip
+          content: 'send a registration request to the server'
+          items: 'button'
+      @$('input').tooltip
+        position:
+          my: "left+260 top", at: "left top", collision: "flipfit"
 
     initializeDialog: ->
       @_submitAttempted = false

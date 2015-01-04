@@ -21,6 +21,9 @@ define [
     initialize: (options) ->
       @width = options.width or 540
       @label = options.label or 'Active Server'
+      @tooltipPosition = options.tooltipPosition or {
+        my: "left top+15", at: "left bottom", collision: "flipfit"}
+      @tooltipContent = options.tooltipContent or 'select the active server'
 
     events:
       'selectmenuchange': 'setModelFromGUI'
@@ -41,7 +44,8 @@ define [
       @$('select.activeServer').selectmenu width: @width
       @$('.ui-selectmenu-button').tooltip
         items: 'span'
-        content: 'select the active server'
+        content: @tooltipContent
+        position: @tooltipPosition
       @listenToEvents()
       @
 
