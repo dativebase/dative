@@ -54,6 +54,7 @@ define [
       @superclickify() # Superclick transmogrifies menu
 
       @refreshLoginButton()
+      @refreshLoggedInUser()
       @bindClickToEventTrigger() # Vivify menu buttons
       @keyboardShortcuts()
 
@@ -170,7 +171,18 @@ define [
         .button {icons: {primary: icon}, text: false}
         .css 'border-color', MainMenuView.jQueryUIColors.defBa
         .tooltip()
-      @$('.loggedInUsername').text username
+
+    refreshLoggedInUser: ->
+      if @model.get 'loggedIn'
+        username = @model.get 'username'
+        activeServerName = @model.get('activeServer').get 'name'
+        activeServerURL = @model.get('activeServer').get 'url'
+        title = ["You are logged in to the server “#{activeServerName}” ",
+          "(#{activeServerURL}) as “#{username}”."].join ''
+        @$('.logged-in-username')
+          .text username
+          .attr 'title', title
+          .tooltip()
 
     # Tell the login dialog box to toggle itself.
     toggleLoginDialog: ->

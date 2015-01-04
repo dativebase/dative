@@ -13,6 +13,7 @@ div#mainmenu {
     z-index: 100;
     white-space: nowrap;
     font-size: 15px;
+    position: relative;
 }
 
 #dative-client-app
@@ -36,6 +37,7 @@ div#mainmenu {
     width: 16px;
     height: 16px;
     margin-top: 3px;
+    bottom: 0.25em;
 }
 #dative-page {
     margin: 40px auto 15px auto;
@@ -516,10 +518,11 @@ h1 {
     margin-bottom: 10px;
 }
 
-.loggedInUsername
+.logged-in-username:hover
 {
-    vertical-align: bottom;
+    cursor: default;
 }
+
 .ui-buttonset .ui-button {
     margin-right: -4px;
 }
@@ -616,6 +619,7 @@ div#dative-page-header > div.dative-page-header-title {
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
+  -webkit-transform: translate(-50%, -50%);
 }
 
 div.button-container-left {
@@ -624,13 +628,20 @@ div.button-container-left {
   left: 0%;
   top: 50%;
   transform: translateY(-50%);
+  -webkit-transform: translateY(-50%);
   padding-left: 5px;
+}
+
+div.container-right {
+  position: absolute;
+  right: 0;
+  top: 20%;
+  padding-right: 1em;
 }
 
 p.paragraph-widget {
   margin: auto;
   width: 500px;
-  /* border: 1px solid; */
   padding: 10px;
   border-radius: 6px;
 }
