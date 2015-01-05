@@ -2,10 +2,8 @@
 
     <div class='dative-widget-header-title'><%= @username %></div>
 
-    <button class="revoke-privileges"
-      title="revoke this user's <%= @role %> privileges"></button>
-    <button class="change-role"
-      title="change this user's role"></button>
+    <button class="revoke-access"
+      title="revoke this user's access to this corpus"></button>
 
   </div>
 

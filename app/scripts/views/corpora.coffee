@@ -45,8 +45,6 @@ define [
     events:
       'keydown button.add-corpus': 'addCorpusKeys'
       'click button.add-corpus': 'addCorpus'
-      'keydown button.save-corpora': 'saveCorporaKeys'
-      'click button.save-corpora': 'saveCorpora'
 
     render: ->
       @$el.html @template()
@@ -90,12 +88,6 @@ define [
           text: false
         .tooltip()
 
-      @$('button.save-corpora')
-        .button
-          icons: {primary: 'ui-icon-disk'}
-          text: false
-        .tooltip()
-
     _rememberTarget: (event) ->
       try
         @$('.dative-input-display').each (index, el) =>
@@ -107,13 +99,4 @@ define [
       if event.which is 13 # Enter
         @stopEvent event
         @addCorpus()
-
-    saveCorporaKeys: (event) ->
-      @_rememberTarget event
-      if event.which is 13 # Enter
-        @stopEvent event
-        @saveCorpora()
-
-    saveCorpora: ->
-      console.log 'you want to save these corpora to the server'
 

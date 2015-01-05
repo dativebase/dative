@@ -19,8 +19,8 @@ define [
     template: userTemplate
 
     events:
-      'keydown button.remove': 'removeKeys'
-      'click button.remove': 'remove'
+      'keydown button.revoke-access': 'revokeAccessKeys'
+      'click button.revoke-access': 'revokeAccess'
 
     listenToEvents: ->
       @listenTo @model, 'change', @modelChanged
@@ -37,23 +37,44 @@ define [
 
     guify: ->
 
-      disabled = false
-      if @loggedInUserRole isnt 'admin'
-        disabled = true
+      disabled = not @userAccessCanBeRevoked()
 
-      @$('button.revoke-privileges')
+      @$('button.revoke-access')
         .button
           icons: {primary: 'ui-icon-close'},
           text: false
           disabled: disabled
-
-      @$('button.change-role')
-        .button
-          icons: {primary: 'ui-icon-triangle-2-n-s'},
-          text: false
-          disabled: disabled
+        .tooltip()
 
       if disabled
-        @$('button.revoke-privileges, button.change-role').hide()
+        @$('button.revoke-access').hide()
         @$('div.dative-widget-header').height 'auto'
+
+      if @userIsLoggedInUser() then @$el.addClass 'ui-state-highlight'
+
+    userAccessCanBeRevoked: ->
+      if @loggedInUserRole is 'admin'
+        if @userIsLoggedInUser() then false else true
+      else
+        false
+
+    userIsLoggedInUser: ->
+      if @model.get('loggedInUsername') is @model.get('username')
+        true
+      else
+        false
+
+    revokeAccessKeys: (event) ->
+      if event.which in [13, 32]
+        @stopEvent event
+        @revokeAccess event
+
+    revokeAccess: (event) ->
+      @stopEvent event
+      username = @model.get 'username'
+      @disableRevokeButton()
+      @trigger 'request:revokeAccess', username
+
+    disableRevokeButton: ->
+      @$('button.revoke-access').button disabled: true
 

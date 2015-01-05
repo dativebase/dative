@@ -3,7 +3,6 @@
   <div class='dative-page-header-title'>Corpora</div>
   <div class='button-container-left'>
     <button class="float-left add-corpus" title="create a new corpus"></span>
-    <button class="float-left save-corpora" title="save corpora"></span>
   </div>
 
 </div>

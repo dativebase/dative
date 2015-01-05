@@ -42,14 +42,22 @@ define [
       @undelegateEvents()
       @delegateEvents()
       @listenTo @addUserView, 'request:grantRoleToUser', @grantRoleToUser
+      @listenToUserViewRevokeAccessRequests()
       @listenTo @model, 'fetchStart', @fetchStart
       @listenTo @model, 'fetchEnd', @fetchEnd
       @listenTo @model, 'fetchUsersStart', @fetchUsersStart
       @listenTo @model, 'fetchUsersEnd', @fetchUsersEnd
       @listenTo @model, 'grantRoleToUserEnd', @stopSpin
-      @listenTo @model, 'grantRoleToUserSuccess', @grantRoleToUserSuccess
+      @listenTo @model, 'grantRoleToUserSuccess', @fetchUsersAfterDelay
       @listenTo @model, 'removeUserFromCorpusEnd', @stopSpin
       @listenTo @model, 'removeUserFromCorpusSuccess', @removeUserFromCorpusSuccess
+
+    listenToUserViewRevokeAccessRequests: ->
+      for userView in @admins.concat @writers, @readers
+        @listenTo userView, 'request:revokeAccess', @removeUserFromCorpusThenFetch
+
+    revokeAccess: (username) ->
+      console.log "Corpus view recieved a revokeAccess request from #{username}"
 
     events:
       'keydown button.toggle-appear': 'toggleAppearKeys'
@@ -64,6 +72,9 @@ define [
         args = @grantRoleToUserRepeat
         @grantRoleToUserRepeat = false
         @grantRoleToUser.apply @, args
+      if @fetchUsersAfterRemoveUserFromCorpus
+        @fetchUsersAfterRemoveUserFromCorpus = false
+        @fetchUsersAfterDelay()
 
     # Remove user(name) from `@adminNames`, `@writerNames` or `@readerNames`
     removeUserFromRoleNames: (username) ->
@@ -81,9 +92,9 @@ define [
             userView.close()
             @closed userView
 
-    grantRoleToUserSuccess: (role, username) ->
+    fetchUsersAfterDelay: ->
       # If you don't wait to call /corpusteam, the FieldDB Auth Service won't
-      # have the updated info...
+      # have the updated info... WARN: I don't like this hack ...
       setTimeout =>
           @fetchUsers()
         ,
@@ -92,8 +103,8 @@ define [
     grantRoleToUser: (newRole, username) ->
       # If the user already has a role in this corpus, we have to first make
       # a request to remove the user completely from the corpus and then later
-      # make a request to add the new role. Thus we store the new role (and
-      # username) in `@grantRoleToUserRepeat`.
+      # make a request to add the new role. For this reason, we must store the
+      # new role (and username) in `@grantRoleToUserRepeat`.
       @grantRoleToUserRepeat = false
       currentRole = @getRole username
       if currentRole
@@ -103,6 +114,10 @@ define [
       else
         @spin "Granting the #{newRole} role to user “#{username}”"
         @model.grantRoleToUser newRole, username
+
+    removeUserFromCorpusThenFetch: (username) ->
+      @fetchUsersAfterRemoveUserFromCorpus = true
+      @removeUserFromCorpus username
 
     removeUserFromCorpus: (username) ->
       @model.removeUserFromCorpus username

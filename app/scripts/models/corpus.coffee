@@ -12,13 +12,17 @@ define [
   # the corpus (metadata) objects in the `corpuses` array of the `user` object
   # that is returned when a user logs in.
   #
-  # A corpus model's data must be retrieved by two requests. The first retrieves
-  # the bulk of the corpus data while the second returns the users with access
-  # to the corpus.
+  # A corpus model's data must be retrieved by two requests. (1) retrieves the
+  # bulk of the corpus data while (2) returns the users with access to the
+  # corpus:
   #
-  # 1. GET `<CorpusServiceURL>/<corpusname>/_design/pages/_view/private_corpuses`
-  # 2. POST `<AuthServiceURL>/corpusteam` with a payload object with the
-  #    attributes `authUrl`, `pouchname`, `serverCode`, and `username`.
+  # 1. @fetch
+  # 2. @fetchUsers
+  #
+  # Two other server-request methods are defined here:
+  #
+  # 3. @removeUserFromCorpus
+  # 4. @grantRoleToUser
 
   class CorpusModel extends BaseModel
 
@@ -26,21 +30,21 @@ define [
       @metadata = options.metadata
       @applicationSettings = options.applicationSettings
 
-    getURL:  ->
+    getCorpusServerURL:  ->
       protocol = @metadata.protocol
       domain = @metadata.domain
       port = if @metadata.port then ":#{@metadata.port}" else ''
       pouchname = @metadata.pouchname
-      ["#{protocol}#{domain}#{port}/#{pouchname}",
-       "/_design/pages/_view/private_corpuses"].join('')
+      "#{protocol}#{domain}#{port}/#{pouchname}"
 
-    # GET `<CorpusServiceURL>/<corpusname>/_design/pages/_view/corpuses`
+    # Fetch the corpus data.
+    # GET `<CorpusServiceURL>/<corpusname>/_design/pages/_view/private_corpuses`
     fetch: ->
       @trigger 'fetchStart'
       CorpusModel.cors.request(
         method: 'GET'
         timeout: 10000
-        url: @getURL()
+        url: "#{@getCorpusServerURL()}/_design/pages/_view/private_corpuses"
         onload: (responseJSON) =>
           fieldDBCorpusObject = responseJSON.rows?[0].value or {}
           @set fieldDBCorpusObject
@@ -53,22 +57,18 @@ define [
           @trigger 'fetchEnd'
       )
 
-    # POST `<AuthServiceURL>/corpusteam` with a payload containing `authUrl`,
-    # `username`, `pouchname`, and `serverCode`.
+    getDefaultPayload: ->
+      authUrl: @applicationSettings.get?('activeServer')?.get?('url')
+      username: @applicationSettings.get?('username')
+      password: @applicationSettings.get?('password')
+      serverCode: @applicationSettings.get?('activeServer')?.get?('serverCode')
+      pouchname: @get 'pouchname'
+
+    # Fetch the users with access to a corpus.
+    # POST `<AuthServiceURL>/corpusteam`
     fetchUsers: ->
       @trigger 'fetchUsersStart'
-      # QUESTION @cesine: Is there a good reason that the Spreadsheet app
-      # passes the password in the payload to /corpusteam? It doesn't look like
-      # `fetchCorpusPermissions` needs it in
-      # `AuthenticationWebService/lib/userauthentication.js`. Also, the request
-      # works without `password` in the payload.
-      authURL = @applicationSettings.get?('activeServer')?.get?('url')
-      payload =
-        authUrl: authURL
-        username: @applicationSettings.get?('username')
-        password: @applicationSettings.get?('password')
-        pouchname: @get 'pouchname'
-        serverCode: @applicationSettings.get?('activeServer')?.get?('serverCode')
+      payload = @getDefaultPayload()
       CorpusModel.cors.request(
         method: 'POST'
         timeout: 10000
@@ -95,26 +95,18 @@ define [
         when 'writer' then 'read_write'
         when 'reader' then 'read_only'
 
-    # POST `<AuthServiceURL>/updateroles` with a payload containing `authUrl`,
-    # `username`, `pouchname`, and `serverCode`.
+    # Grant a role on a corpus to a user.
+    # POST `<AuthServiceURL>/updateroles`
     grantRoleToUser: (role, username) ->
       @trigger 'grantRoleToUserStart'
-      authURL = @applicationSettings.get?('activeServer')?.get?('url')
-      payload =
-        authUrl: authURL
-        username: @applicationSettings.get?('username')
-        password: @applicationSettings.get?('password')
-        serverCode: @applicationSettings.get?('activeServer')?.get?('serverCode')
-        userRoleInfo:
-          # admin: if role is 'admin' then true else false
-          # writer: if role is 'writer' then true else false
-          # reader: if role is 'reader' then true else false
-          admin: if role is 'admin' then true else false
-          writer: if role is 'reader' then false else true
-          reader: true
-          pouchname: @get 'pouchname'
-          role: @getFieldDBRole role
-          usernameToModify: username
+      payload = @getDefaultPayload()
+      payload.userRoleInfo =
+        admin: if role is 'admin' then true else false
+        writer: if role is 'reader' then false else true
+        reader: true
+        pouchname: payload.pouchname
+        role: @getFieldDBRole role
+        usernameToModify: username
       CorpusModel.cors.request(
         method: 'POST'
         timeout: 10000
@@ -134,100 +126,15 @@ define [
           console.log 'Failed request to /updateroles: timed out.'
       )
 
-      # 2. POST AUTH_SERVICE/corpusteam with JSON:
-      # {
-      #   authUrl: "https://auth.lingsync.org"
-      #   password: "..."
-      #   pouchname: "jrwdunham-blackfoot"
-      #   serverCode: "production"
-      #   username: "jrwdunham"
-      # }
-      # Expect: JSON object of users (and roles)
-      #
-      # 3. GET CORPUS_SERVICE/_users/org.couchdb.user:jrwdunham QUESTION: necessary?
-      #
-      # Expect: JSON:
-      #
-      # "{
-        # "_id": "org.couchdb.user:jrwdunham",
-        # "_rev": "2-dd59dbae9fc8f2c6455c5a98cd288c43",
-        # "password_scheme": "pbkdf2",
-        # "iterations": 10,
-        # "name": "jrwdunham",
-        # "roles": [
-          # "fielddbuser",
-          # "jrwdunham-firstcorpus_admin",
-          # "jrwdunham-firstcorpus_commenter",
-          # "jrwdunham-firstcorpus_reader",
-          # "jrwdunham-firstcorpus_writer",
-          # "gina-inuktitut_commenter",
-          # "gina-inuktitut_reader",
-          # "gina-inuktitut_writer",
-          # "lingllama-communitycorpus_commenter",
-          # "lingllama-communitycorpus_reader",
-          # "lingllama-communitycorpus_writer",
-          # "testingharvardimport-firstcorpus_admin",
-          # "testingharvardimport-firstcorpus_reader",
-          # "testingharvardimport-firstcorpus_writer",
-          # "testingharvardimport-hjcopypaste_admin",
-          # "testingharvardimport-hjcopypaste_reader",
-          # "testingharvardimport-hjcopypaste_writer",
-          # "jrwdunham-blackfoot_admin",
-          # "jrwdunham-blackfoot_writer",
-          # "jrwdunham-blackfoot_reader",
-          # "jrwdunham-blackfoot_commenter",
-          # "elisekm-eti3_data_tutorial_admin",
-          # "elisekm-eti3_data_tutorial_reader",
-          # "elisekm-eti3_data_tutorial_writer",
-          # "jrwdunham-gitksan_practice_admin",
-          # "jrwdunham-gitksan_practice_writer",
-          # "jrwdunham-gitksan_practice_reader",
-          # "jrwdunham-gitksan_practice_commenter",
-          # "jrwdunham-blackfoot_ucalgary_workshop_admin",
-          # "jrwdunham-blackfoot_ucalgary_workshop_writer",
-          # "jrwdunham-blackfoot_ucalgary_workshop_reader",
-          # "jrwdunham-blackfoot_ucalgary_workshop_commenter"
-        # ],
-        # "previous_rev": "1-38b76b7604734524807868cf18ec5eba",
-        # "type": "user",
-        # "derived_key": "563df7e28ced77f2a44fe6ff657451bd17205602",
-        # "salt": "afff49dddf1a013bcbbaeb009e441657"
-      # }"
-
-
-    # POST `<AuthServiceURL>/updateroles` with a payload containing `authUrl`,
-    # `username`, `pouchname`, and `serverCode`.
-    # POST AUTH_SERVICE/updateroles with JSON:
-    #   authUrl: "https://auth.lingsync.org"
-    #   (password: "...")
-    #   serverCode: "production"
-    #   username: "jrwdunham"
-    #   userRoleInfo: {
-    #     pouchname: "jrwdunham-blackfoot"
-    #     removeUser: true
-    #     usernameToModify: "jrwdunhamreadonly"
-    #   }
-    # }
-    #
-    # Expect:
-    # {
-    #   "corpusadded": true,
-    #   "info": [
-    #   "User roles updated successfully for jrwdunhamreadonly"
-    #   ]
-    # }
+    # Remove a user from a corpus.
+    # POST `<AuthServiceURL>/updateroles`
     removeUserFromCorpus: (username) ->
       @trigger 'removeUserFromCorpusStart'
-      authURL = @applicationSettings.get?('activeServer')?.get?('url')
-      payload =
-        authUrl: authURL
-        username: @applicationSettings.get?('username')
-        password: @applicationSettings.get?('password')
-        serverCode: @applicationSettings.get?('activeServer')?.get?('serverCode')
-        userRoleInfo:
-          pouchname: @get 'pouchname'
-          removeUser: true
-          usernameToModify: username
+      payload = @getDefaultPayload()
+      payload.userRoleInfo =
+        pouchname: payload.pouchname
+        removeUser: true
+        usernameToModify: username
       CorpusModel.cors.request(
         method: 'POST'
         timeout: 10000
@@ -246,3 +153,4 @@ define [
           @trigger 'removeUserFromCorpusEnd'
           console.log 'Failed request to /updateroles: timed out.'
       )
+
