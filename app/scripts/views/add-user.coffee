@@ -16,6 +16,7 @@ define [
       'dative-widget-center'].join ' '
 
     initialize: (options) ->
+      @autoCompleteIsOpen = false
       @submitAttempted = false
       @inputsValid = false
       @allUsers = options?.allUsers or []
@@ -32,8 +33,7 @@ define [
     events:
       'keyup input[name=username]': 'validate'
       'click button.request-add-user': 'requestAddUser'
-      # <Enter>-as-submit conflicts with autocomplete <Enter>-as-select
-      # 'keydown input[name=username]': 'submitWithEnter'
+      'keydown input[name=username]': 'submitWithEnter'
 
     requestAddUser: ->
       @submitAttempted = true
@@ -86,12 +86,25 @@ define [
       if input[0] in ['a', 'e', 'i', 'o', 'u'] then 'an' else 'a'
 
     submitWithEnter: (event) ->
-      if event.which is 13
+      enterUsedForAutoCompleteSelect = @enterUsedForAutoCompleteSelect event
+      if event.which is 13 and not enterUsedForAutoCompleteSelect
         @stopEvent event
         event.stopPropagation()
         $addUserButton = @$('button.request-add-user')
         disabled = $addUserButton.button 'option', 'disabled'
         if not disabled then $addUserButton.click()
+
+    # Tells us if the user has just selected an autocomplete option using <Enter>
+    enterUsedForAutoCompleteSelect: (event) ->
+      autoCompleteIsOpenOld = @autoCompleteIsOpen
+      @autoCompleteIsOpen = @getAutoCompleteIsOpen()
+      if event.which is 13 and autoCompleteIsOpenOld and not @autoCompleteIsOpen
+        true
+      else
+        false
+
+    getAutoCompleteIsOpen: ->
+      @$('input[name=username]').first().autocomplete('widget').is ':visible'
 
     autoComplete: ->
       @$('input[name=username]').first()

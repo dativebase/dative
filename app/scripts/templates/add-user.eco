@@ -12,9 +12,9 @@
       <li>
         <label for='role'>Role</label>
         <select name='role'>
-          <option value='admin'>Admin</option>
-          <option value='writer'>Writer</option>
           <option value='reader'>Reader</option>
+          <option value='writer'>Writer</option>
+          <option value='admin'>Admin</option>
         </select>
         <div class='dative-add-user-failed-container'>
           <span class='ui-state-error ui-corner-all dative-add-user-failed

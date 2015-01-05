@@ -283,16 +283,18 @@ define [
 
     toggleAddUser: (event) ->
       @stopEvent event
+      contentSuffix = 'form for granting a user access to this corpus'
       if @addUserView.$el.is(':visible')
         @addUserView.$el.slideUp()
         @$('button.add-user').tooltip
-          content: 'show form for granting a user access to this corpus'
+          content: "show #{contentSuffix}"
       else
+        @open()
         @addUserView.$el.slideDown
           complete: =>
             @addUserView.autoComplete()
         @$('button.add-user').tooltip
-          content: 'hide form for granting a user access to this corpus'
+          content: "hide #{contentSuffix}"
 
     toggleAppearKeys: (event) ->
       if event.which in [13, 37, 38, 39, 40] then @stopEvent event
