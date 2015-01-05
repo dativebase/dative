@@ -73,6 +73,8 @@ define [
       Backbone.trigger 'bodyClicked'
 
     logoutSuccess: ->
+      @_closeVisibleView()
+      @_corporaView = null
       @showHomePageView()
 
     authenticateSuccess: ->
@@ -193,7 +195,7 @@ define [
 
     # These are FieldDB corpora; not sure yet how we'll distinguish OLD-style
     # corpora from FieldDB-style ones in terms of how they are labelled and
-    # otherwise... 
+    # otherwise...
     showCorporaView: ->
       @_closeVisibleView()
       if not @_corporaView

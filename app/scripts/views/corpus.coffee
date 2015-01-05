@@ -56,9 +56,6 @@ define [
       for userView in @admins.concat @writers, @readers
         @listenTo userView, 'request:revokeAccess', @removeUserFromCorpusThenFetch
 
-    revokeAccess: (username) ->
-      console.log "Corpus view recieved a revokeAccess request from #{username}"
-
     events:
       'keydown button.toggle-appear': 'toggleAppearKeys'
       'click button.toggle-appear': 'toggle'
@@ -138,7 +135,7 @@ define [
       @stopSpin()
       users = @model.get('users')
       if users
-        @allUsers = (user.username for user in users.allusers)
+        @allUsers = (user.username for user in @getAllUsersArray(users))
         @usersWithoutDuplicates = @getUsersWithoutDuplicates users
         @getUsernames()
         @giveUsernamesToAddUserView()
@@ -247,21 +244,26 @@ define [
 
     # I don't think admins should be redundantly listed as writers and readers.
     getUsersWithoutDuplicates: (users) ->
-      adminNames = (user.username for user in users.admins)
-      writerNames = (user.username for user in users.writers)
-      readerNames = (user.username for user in users.readers)
+      adminNames = (user.username for user in @getAdminsArray(users))
+      writerNames = (user.username for user in @getWritersArray(users))
+      readerNames = (user.username for user in @getReadersArray(users))
       usersWithoutDuplicates =
-        admins: users.admins
+        admins: users.admins or []
         writers: []
         readers: []
-      for writer in users.writers
+      for writer in @getWritersArray(users)
         if writer.username not in adminNames
           usersWithoutDuplicates.writers.push writer
-      for reader in users.readers
+      for reader in @getReadersArray(users)
         if reader.username not in adminNames and
         reader.username not in writerNames
           usersWithoutDuplicates.readers.push reader
       usersWithoutDuplicates
+
+    getAllUsersArray: (users) -> if users.allusers? then users.allusers else []
+    getAdminsArray: (users) -> if users.admins? then users.admins else []
+    getWritersArray: (users) -> if users.writers? then users.writers else []
+    getReadersArray: (users) -> if users.readers? then users.readers else []
 
     toggleAddUserKeys: (event) ->
       if event.which in [13, 32]
