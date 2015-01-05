@@ -16,12 +16,13 @@ define [
       'dative-widget-center'].join ' '
 
     initialize: (options) ->
+      @visible = false
       @autoCompleteIsOpen = false
       @submitAttempted = false
       @inputsValid = false
       @allUsers = options?.allUsers or []
-      @listenTo Backbone, 'addUserToCorpusEnd', @stopSpin
-      @trigger Backbone, 'addUserToCorpusSuccess'
+      @listenTo Backbone, 'grantRoleToUserEnd', @stopSpin
+      @trigger Backbone, 'grantRoleToUserSuccess'
 
     template: addUserTemplate
 
@@ -40,7 +41,7 @@ define [
       {username, role} = @validate()
       if @inputsValid
         @disableAddUserButton()
-        @trigger 'request:addUserToCorpus', username, role
+        @trigger 'request:grantRoleToUser', role, username
 
     disableAddUserButton: ->
       @$('input[name=username]').first().focus()
@@ -104,7 +105,10 @@ define [
         false
 
     getAutoCompleteIsOpen: ->
-      @$('input[name=username]').first().autocomplete('widget').is ':visible'
+      try
+        @$('input[name=username]').first().autocomplete('widget').is ':visible'
+      catch
+        false
 
     autoComplete: ->
       @$('input[name=username]').first()
@@ -139,4 +143,14 @@ define [
             collision: 'flipfit'
 
       @$('.dative-add-user-failed').hide()
+
+    closeGUI: ->
+      @visible = false
+      @$el.slideUp()
+
+    openGUI: ->
+      @visible = true
+      @$el.slideDown
+        complete: =>
+          @autoComplete()
 

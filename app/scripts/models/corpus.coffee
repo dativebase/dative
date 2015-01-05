@@ -97,8 +97,8 @@ define [
 
     # POST `<AuthServiceURL>/updateroles` with a payload containing `authUrl`,
     # `username`, `pouchname`, and `serverCode`.
-    addUserToCorpus: (username, role) ->
-      @trigger 'addUserToCorpusStart'
+    grantRoleToUser: (role, username) ->
+      @trigger 'grantRoleToUserStart'
       authURL = @applicationSettings.get?('activeServer')?.get?('url')
       payload =
         authUrl: authURL
@@ -106,9 +106,12 @@ define [
         password: 'a'
         serverCode: @applicationSettings.get?('activeServer')?.get?('serverCode')
         userRoleInfo:
+          # admin: if role is 'admin' then true else false
+          # writer: if role is 'writer' then true else false
+          # reader: if role is 'reader' then true else false
           admin: if role is 'admin' then true else false
-          writer: if role is 'writer' then true else false
-          reader: if role is 'reader' then true else false
+          writer: if role is 'reader' then false else true
+          reader: true
           pouchname: @get 'pouchname'
           role: @getFieldDBRole role
           usernameToModify: username
@@ -118,18 +121,16 @@ define [
         url: "#{payload.authUrl}/updateroles"
         payload: payload
         onload: (responseJSON) =>
+          @trigger 'grantRoleToUserEnd'
           if responseJSON.corpusadded
-            console.log responseJSON.info[0]
-            @trigger 'addUserToCorpusEnd'
-            @trigger 'addUserToCorpusSuccess'
+            @trigger 'grantRoleToUserSuccess', role, username
           else
-            @trigger 'addUserToCorpusEnd'
             console.log 'Failed request to /updateroles: no `corpusadded` attribute.'
         onerror: (responseJSON) =>
-          @trigger 'addUserToCorpusEnd'
+          @trigger 'grantRoleToUserEnd'
           console.log 'Failed request to /updateroles: error.'
         ontimeout: =>
-          @trigger 'addUserToCorpusEnd'
+          @trigger 'grantRoleToUserEnd'
           console.log 'Failed request to /updateroles: timed out.'
       )
 
@@ -193,3 +194,55 @@ define [
         # "salt": "afff49dddf1a013bcbbaeb009e441657"
       # }"
 
+
+    # POST `<AuthServiceURL>/updateroles` with a payload containing `authUrl`,
+    # `username`, `pouchname`, and `serverCode`.
+    # POST AUTH_SERVICE/updateroles with JSON:
+    #   authUrl: "https://auth.lingsync.org"
+    #   (password: "...")
+    #   serverCode: "production"
+    #   username: "jrwdunham"
+    #   userRoleInfo: {
+    #     pouchname: "jrwdunham-blackfoot"
+    #     removeUser: true
+    #     usernameToModify: "jrwdunhamreadonly"
+    #   }
+    # }
+    #
+    # Expect:
+    # {
+    #   "corpusadded": true,
+    #   "info": [
+    #   "User roles updated successfully for jrwdunhamreadonly"
+    #   ]
+    # }
+    removeUserFromCorpus: (username) ->
+      @trigger 'removeUserFromCorpusStart'
+      authURL = @applicationSettings.get?('activeServer')?.get?('url')
+      payload =
+        authUrl: authURL
+        username: @applicationSettings.get?('username')
+        password: 'a'
+        serverCode: @applicationSettings.get?('activeServer')?.get?('serverCode')
+        userRoleInfo:
+          pouchname: @get 'pouchname'
+          removeUser: true
+          usernameToModify: username
+      CorpusModel.cors.request(
+        method: 'POST'
+        timeout: 10000
+        url: "#{payload.authUrl}/updateroles"
+        payload: payload
+        onload: (responseJSON) =>
+          @trigger 'removeUserFromCorpusEnd'
+          if responseJSON.corpusadded
+            @trigger 'removeUserFromCorpusSuccess', username
+          else
+            console.log 'Failed request to /updateroles: no `corpusadded` attribute.'
+        onerror: (responseJSON) =>
+          @trigger 'removeUserFromCorpusEnd'
+          console.log 'Failed request to /updateroles: error.'
+        ontimeout: =>
+          @trigger 'removeUserFromCorpusEnd'
+          console.log 'Failed request to /updateroles: timed out.'
+      )

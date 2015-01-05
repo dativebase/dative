@@ -11,18 +11,26 @@ define [
   # Corpus View
   # ------------
   #
+  # View for FieldDB corpora.
+  #
+  # WARNING: this view does not (currently) make use of the write-only role
+  # that FieldDB makes available. That is, its logic assumes that a given user
+  # can have one and only one role on a given corpus---admin, writer, or
+  # reader---and that admins are implicitly also writers and readers and writers
+  # are implicitly readers.
 
   class CorpusView extends BaseView
 
     tagName: 'div'
     className: ["corpus-widget dative-widget-center ui-widget ui-widget-content",
-      "ui-corner-all"].join(' ')
+      "ui-corner-all"].join ' '
 
     template: corpusTemplate
 
     initialize: (options) ->
       @addUserView = new AddUserView()
       @haveFetchedUsers = false
+      @bodyVisible = false
       @applicationSettings = options?.applicationSettings or {}
       @admins = []
       @writers = []
@@ -33,11 +41,15 @@ define [
       @stopListening()
       @undelegateEvents()
       @delegateEvents()
+      @listenTo @addUserView, 'request:grantRoleToUser', @grantRoleToUser
       @listenTo @model, 'fetchStart', @fetchStart
+      @listenTo @model, 'fetchEnd', @fetchEnd
       @listenTo @model, 'fetchUsersStart', @fetchUsersStart
       @listenTo @model, 'fetchUsersEnd', @fetchUsersEnd
-      @listenTo @model, 'fetchEnd', @fetchEnd
-      @listenTo @addUserView, 'request:addUserToCorpus', @addUserToCorpus
+      @listenTo @model, 'grantRoleToUserEnd', @stopSpin
+      @listenTo @model, 'grantRoleToUserSuccess', @grantRoleToUserSuccess
+      @listenTo @model, 'removeUserFromCorpusEnd', @stopSpin
+      @listenTo @model, 'removeUserFromCorpusSuccess', @removeUserFromCorpusSuccess
 
     events:
       'keydown button.toggle-appear': 'toggleAppearKeys'
@@ -45,108 +57,55 @@ define [
       'keydown button.add-user': 'toggleAddUserKeys'
       'click button.add-user': 'toggleAddUser'
 
-    addUserToCorpus: (username, role) ->
-      @model.addUserToCorpus username, role
+    removeUserFromCorpusSuccess: (username) ->
+      @removeUserView username
+      @removeUserFromRoleNames username
+      if @grantRoleToUserRepeat
+        args = @grantRoleToUserRepeat
+        @grantRoleToUserRepeat = false
+        @grantRoleToUser.apply @, args
 
-      # 1. POST AUTH_SERVICE/updateroles with JSON:
-      # {
-      #   authUrl: "https://auth.lingsync.org"
-      #   (password: "...")
-      #   serverCode: "production"
-      #   username: "jrwdunham"
-      #   userRoleInfo: {
-      #     admin: false
-      #     pouchname: "jrwdunham-blackfoot"
-      #     reader: true
-      #     role: "read_only"
-      #     usernameToModify: "jrwdunhamreadonly"
-      #     writer: false
-      # }
-      # Expect: {
-      #   corpusadded: true,
-      #   info: ["User roles updated successfully for jrwdunhamreadonly"]
-      # }
-      #
-      # 2. POST AUTH_SERVICE/corpusteam with JSON:
-      # {
-      #   authUrl: "https://auth.lingsync.org"
-      #   password: "..."
-      #   pouchname: "jrwdunham-blackfoot"
-      #   serverCode: "production"
-      #   username: "jrwdunham"
-      # }
-      # Expect: JSON object of users (and roles)
-      #
-      # 3. GET CORPUS_SERVICE/_users/org.couchdb.user:jrwdunham QUESTION: necessary?
-      #
-      # Expect: JSON:
-      #
-      # "{
-        # "_id": "org.couchdb.user:jrwdunham",
-        # "_rev": "2-dd59dbae9fc8f2c6455c5a98cd288c43",
-        # "password_scheme": "pbkdf2",
-        # "iterations": 10,
-        # "name": "jrwdunham",
-        # "roles": [
-          # "fielddbuser",
-          # "jrwdunham-firstcorpus_admin",
-          # "jrwdunham-firstcorpus_commenter",
-          # "jrwdunham-firstcorpus_reader",
-          # "jrwdunham-firstcorpus_writer",
-          # "gina-inuktitut_commenter",
-          # "gina-inuktitut_reader",
-          # "gina-inuktitut_writer",
-          # "lingllama-communitycorpus_commenter",
-          # "lingllama-communitycorpus_reader",
-          # "lingllama-communitycorpus_writer",
-          # "testingharvardimport-firstcorpus_admin",
-          # "testingharvardimport-firstcorpus_reader",
-          # "testingharvardimport-firstcorpus_writer",
-          # "testingharvardimport-hjcopypaste_admin",
-          # "testingharvardimport-hjcopypaste_reader",
-          # "testingharvardimport-hjcopypaste_writer",
-          # "jrwdunham-blackfoot_admin",
-          # "jrwdunham-blackfoot_writer",
-          # "jrwdunham-blackfoot_reader",
-          # "jrwdunham-blackfoot_commenter",
-          # "elisekm-eti3_data_tutorial_admin",
-          # "elisekm-eti3_data_tutorial_reader",
-          # "elisekm-eti3_data_tutorial_writer",
-          # "jrwdunham-gitksan_practice_admin",
-          # "jrwdunham-gitksan_practice_writer",
-          # "jrwdunham-gitksan_practice_reader",
-          # "jrwdunham-gitksan_practice_commenter",
-          # "jrwdunham-blackfoot_ucalgary_workshop_admin",
-          # "jrwdunham-blackfoot_ucalgary_workshop_writer",
-          # "jrwdunham-blackfoot_ucalgary_workshop_reader",
-          # "jrwdunham-blackfoot_ucalgary_workshop_commenter"
-        # ],
-        # "previous_rev": "1-38b76b7604734524807868cf18ec5eba",
-        # "type": "user",
-        # "derived_key": "563df7e28ced77f2a44fe6ff657451bd17205602",
-        # "salt": "afff49dddf1a013bcbbaeb009e441657"
-      # }"
+    # Remove user(name) from `@adminNames`, `@writerNames` or `@readerNames`
+    removeUserFromRoleNames: (username) ->
+      oldRole = @getRole username
+      @["#{oldRole}Names"] = _.without @["#{oldRole}Names"], username
 
-    removeUserFromCorpus: ->
-      # POST AUTH_SERVICE/updateroles with JSON:
-      #   authUrl: "https://auth.lingsync.org"
-      #   (password: "...")
-      #   serverCode: "production"
-      #   username: "jrwdunham"
-      #   userRoleInfo: {
-      #     pouchname: "jrwdunham-blackfoot"
-      #     removeUser: true
-      #     usernameToModify: "jrwdunhamreadonly"
-      #   }
-      # }
-      #
-      # Expect:
-      # {
-      #   "corpusadded": true,
-      #   "info": [
-      #   "User roles updated successfully for jrwdunhamreadonly"
-      #   ]
-      # }
+    removeUserView: (username) ->
+      oldRole = @getRole username
+      userView = (uv for uv in @["#{oldRole}s"] when uv.model.get('username')\
+        is username)[0]
+      if userView
+        @["#{oldRole}s"] = _.without @["#{oldRole}s"], userView
+        userView.$el.fadeOut
+          complete: =>
+            userView.close()
+            @closed userView
+
+    grantRoleToUserSuccess: (role, username) ->
+      # If you don't wait to call /corpusteam, the FieldDB Auth Service won't
+      # have the updated info...
+      setTimeout =>
+          @fetchUsers()
+        ,
+          500
+
+    grantRoleToUser: (newRole, username) ->
+      # If the user already has a role in this corpus, we have to first make
+      # a request to remove the user completely from the corpus and then later
+      # make a request to add the new role. Thus we store the new role (and
+      # username) in `@grantRoleToUserRepeat`.
+      @grantRoleToUserRepeat = false
+      currentRole = @getRole username
+      if currentRole
+        @grantRoleToUserRepeat = [newRole, username]
+        @spin "Revoking the #{currentRole} role for user “#{username}”"
+        @model.removeUserFromCorpus username
+      else
+        @spin "Granting the #{newRole} role to user “#{username}”"
+        @model.grantRoleToUser newRole, username
+
+    removeUserFromCorpus: (username) ->
+      @model.removeUserFromCorpus username
 
     fetchStart: ->
       @fetching = true
@@ -172,7 +131,7 @@ define [
         @creator = @getIsCreator()
         @getUserViews()
       @render()
-      @open()
+      @fetchThenOpen()
 
     giveUsernamesToAddUserView: ->
       @addUserView.allUsers = @allUsers
@@ -194,14 +153,16 @@ define [
       else
         false
 
-    getRole: ->
-      username = @model.get('applicationSettings').get 'username'
+    getRole: (username) ->
+      username = username or @model.get('applicationSettings').get 'username'
       if username in @adminNames
         'admin'
       else if username in @writerNames
         'writer'
-      else
+      else if username in @readerNames
         'reader'
+      else
+        null
 
     activeCorpusChanged: ->
       if @active()
@@ -217,15 +178,12 @@ define [
       @$('input, select').each (index, element) =>
         @model.set $(element).attr('name'), $(element).val()
 
-    render: ->
-      @listenToEvents()
-      context = _.extend @model.attributes, isActive: @active()
-      @$el.html @template(context)
+    renderAddUserView: ->
       @addUserView.setElement @$('div.add-user-widget')
-      @addUserView.render().$el.hide()
+      @addUserView.render()
       @rendered @addUserView
-      @guify()
-      if @fetching then @spin 'fetching corpus information'
+
+    renderUserViews: ->
       for roleClass in ['admins', 'writers', 'readers']
         if @[roleClass].length
           container = document.createDocumentFragment()
@@ -233,7 +191,20 @@ define [
             container.appendChild userView.render().el
             @rendered userView
           @$("div.#{roleClass}-widget-body").html container
-      @$('.dative-widget-body').first().hide()
+
+    render: ->
+      @listenToEvents()
+      context = _.extend @model.attributes, isActive: @active()
+      @$el.html @template(context)
+      @renderAddUserView()
+      @guify()
+      if @fetching then @spin 'fetching corpus information'
+      @renderUserViews()
+      if @bodyVisible then @showBody() else @hideBody()
+      if @addUserView.visible
+        @addUserView.openGUI()
+      else
+        @addUserView.closeGUI()
       @
 
     # Add user subviews to the appropriate array of this corpus view.
@@ -247,16 +218,17 @@ define [
       if users and authUrl and username and serverCode and pouchname
         for roleClass in ['admins', 'writers', 'readers']
           for userObject in @usersWithoutDuplicates[roleClass]
-            userObject.authUrl = authUrl
-            userObject.loggedInUsername = username
-            userObject.serverCode = serverCode
-            userObject.pouchname = pouchname
-            userObject.role = roleClass.substr(0, roleClass.length - 1)
-            userModel = new UserModel userObject
-            userView = new UserView
-              model: userModel
-              loggedInUserRole: @role
-            @[roleClass].push userView
+            if userObject.username not in (uv.model.get('username') for uv in @[roleClass])
+              userObject.authUrl = authUrl
+              userObject.loggedInUsername = username
+              userObject.serverCode = serverCode
+              userObject.pouchname = pouchname
+              userObject.role = roleClass[0..-2]
+              userModel = new UserModel userObject
+              userView = new UserView
+                model: userModel
+                loggedInUserRole: @role
+              @[roleClass].push userView
 
     # I don't think admins should be redundantly listed as writers and readers.
     getUsersWithoutDuplicates: (users) ->
@@ -281,20 +253,23 @@ define [
         @stopEvent event
         @toggleAddUser event
 
-    toggleAddUser: (event) ->
-      @stopEvent event
+    setAddUserButtonState: ->
       contentSuffix = 'form for granting a user access to this corpus'
-      if @addUserView.$el.is(':visible')
-        @addUserView.$el.slideUp()
+      if @addUserView.visible
         @$('button.add-user').tooltip
           content: "show #{contentSuffix}"
       else
-        @open()
-        @addUserView.$el.slideDown
-          complete: =>
-            @addUserView.autoComplete()
         @$('button.add-user').tooltip
           content: "hide #{contentSuffix}"
+
+    toggleAddUser: (event) ->
+      @stopEvent event
+      @setAddUserButtonState()
+      if @addUserView.visible
+        @addUserView.closeGUI()
+      else
+        @fetchThenOpen()
+        @addUserView.openGUI()
 
     toggleAppearKeys: (event) ->
       if event.which in [13, 37, 38, 39, 40] then @stopEvent event
@@ -302,9 +277,9 @@ define [
         when 13 # Enter
           @toggle()
         when 37, 38 # left and up arrows
-          @close()
+          @closeBody()
         when 39, 40 # right and down arrows
-          @open()
+          @fetchThenOpen()
 
     fetchUsers: ->
       @model.fetchUsers()
@@ -313,42 +288,69 @@ define [
       if event then @stopEvent event
       $body = @$('.dative-widget-body').first()
       if $body.is ':visible'
-        @close()
+        @closeBody()
       else
-        @open()
+        @fetchThenOpen()
 
-    close: ->
+    closeBody: ->
+      @setBodyStateClosed()
       $body = @$('.dative-widget-body').first()
-      if $body.is ':visible'
-        @$('button.toggle-appear')
-          .button
-            icons: {primary: 'ui-icon-triangle-1-e'}
-            text: false
-          .tooltip content: 'show corpus details'
-        $body.slideUp
-          complete: =>
-            @$('.dative-widget-header').first().addClass 'header-no-body'
-            @bodyVisible = false
+      if $body.is ':visible' then $body.slideUp()
 
-    open: ->
+    hideBody: ->
+      @setBodyStateClosed()
+      @$('.dative-widget-body').first().hide()
+
+    setBodyStateClosed: ->
+      @bodyVisible = false
+      @setHeaderStateClosed()
+      @setToggleButtonStateClosed()
+
+    setHeaderStateClosed: ->
+      @$('.dative-widget-header').first().addClass 'header-no-body'
+
+    setToggleButtonStateClosed: ->
+      @$('button.toggle-appear')
+        .button
+          icons: {primary: 'ui-icon-triangle-1-e'}
+          text: false
+        .tooltip content: 'show corpus details'
+
+    fetchThenOpen: ->
       if @haveFetchedUsers
-        @_open()
+        @openBody()
       else
         @fetchUsers()
 
-    _open: ->
+    openBody: ->
+      @setBodyStateOpen()
       $body = @$('.dative-widget-body').first()
       if not $body.is ':visible'
-        @$('button.toggle-appear')
-          .button
-            icons: {primary: 'ui-icon-triangle-1-s'}
-            text: false
-          .tooltip content: 'hide corpus details'
-        @$('.dative-widget-header').first().removeClass 'header-no-body'
         $body.slideDown
           complete: =>
-            @bodyVisible = true
-            @$('button.toggle-appear').first().focus()
+            @focusToggleButton()
+
+    showBody: ->
+      @setBodyStateOpen()
+      @$('.dative-widget-body').first().show()
+
+    focusToggleButton: ->
+      @$('button.toggle-appear').first().focus()
+
+    setBodyStateOpen: ->
+      @bodyVisible = true
+      @setHeaderStateOpen()
+      @setToggleButtonStateOpen()
+
+    setHeaderStateOpen: ->
+      @$('.dative-widget-header').first().removeClass 'header-no-body'
+
+    setToggleButtonStateOpen: ->
+      @$('button.toggle-appear')
+        .button
+          icons: {primary: 'ui-icon-triangle-1-s'}
+          text: false
+        .tooltip content: 'hide corpus details'
 
     guify: ->
       @$('button').button().attr('tabindex', 0)

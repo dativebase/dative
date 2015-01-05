@@ -20,7 +20,6 @@ define [
     template: corporaTemplate
 
     initialize: (options) ->
-      console.log 'INITIALIZING A CORPORA VIEW'
       @collection = new CorporaCollection()
       @applicationSettings = options.applicationSettings
       @addCorpusModelsToCollection()
