@@ -25,6 +25,14 @@ define [
       # dropdown will be left hanging in the place where you originally
       # clicked it. So I've disabled "scroll-to-focus" for selectmenus for now.
       #'focus .ui-selectmenu-button': 'scrollToFocusedInput'
+      'selectmenuchange select[name=css-theme]': 'changeThemeCSS'
+
+    # WARN: THIS DOES NOT WORK!
+    # The CSS *does* change dynamically, however for some unknown reason the
+    # selectmenus are all screwed up after the change.
+    changeThemeCSS: (event) ->
+      newJQueryUICSS = @$(event.target).find(':selected').val()
+      $('#jquery-ui-css').attr href: newJQueryUICSS
 
     initialize: ->
       @serversView = new ServersView

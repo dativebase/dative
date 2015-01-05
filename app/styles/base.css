@@ -582,8 +582,7 @@ div.users-widget {
 }
 
 div.servers-config-widget > div.dative-widget-body,
-div.users-widget div.dative-widget-body,
-div.add-user-widget div.dative-widget-body {
+div.users-widget div.dative-widget-body {
   padding: 10px;
 }
 
