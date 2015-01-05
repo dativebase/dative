@@ -139,10 +139,6 @@ define [
           if el is event.target
             @focusedElementIndex = index
 
-    stopEvent: (event) ->
-      event.preventDefault()
-      event.stopPropagation()
-
     toggleServerConfigKeys: (event) ->
       @rememberTarget event
       if event.which in [13, 37, 38, 39, 40] then @stopEvent event

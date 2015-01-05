@@ -2,10 +2,11 @@ define [
   'backbone'
   './base'
   './user'
+  './add-user'
   './../models/user'
   './../templates/corpus'
   'jqueryspin'
-], (Backbone, BaseView, UserView, UserModel, corpusTemplate) ->
+], (Backbone, BaseView, UserView, AddUserView, UserModel, corpusTemplate) ->
 
   # Corpus View
   # ------------
@@ -20,22 +21,132 @@ define [
     template: corpusTemplate
 
     initialize: (options) ->
+      @addUserView = new AddUserView()
       @haveFetchedUsers = false
-      @listenTo @model, 'fetchStart', @fetchStart
-      @listenTo @model, 'fetchUsersStart', @fetchUsersStart
-      @listenTo @model, 'fetchUsersEnd', @fetchUsersEnd
       @applicationSettings = options?.applicationSettings or {}
       @admins = []
       @writers = []
       @readers = []
+      @listenToEvents()
+
+    listenToEvents: ->
+      @stopListening()
+      @undelegateEvents()
+      @delegateEvents()
+      @listenTo @model, 'fetchStart', @fetchStart
+      @listenTo @model, 'fetchUsersStart', @fetchUsersStart
+      @listenTo @model, 'fetchUsersEnd', @fetchUsersEnd
+      @listenTo @model, 'fetchEnd', @fetchEnd
+      @listenTo @addUserView, 'request:addUserToCorpus', @addUserToCorpus
 
     events:
       'keydown button.toggle-appear': 'toggleAppearKeys'
       'click button.toggle-appear': 'toggle'
+      'keydown button.add-user': 'toggleAddUserKeys'
+      'click button.add-user': 'toggleAddUser'
 
-    listenToEvents: ->
-      @listenTo @model, 'fetchEnd', @fetchEnd
-      @delegateEvents()
+    addUserToCorpus: (username, role) ->
+      @model.addUserToCorpus username, role
+
+      # 1. POST AUTH_SERVICE/updateroles with JSON:
+      # {
+      #   authUrl: "https://auth.lingsync.org"
+      #   (password: "...")
+      #   serverCode: "production"
+      #   username: "jrwdunham"
+      #   userRoleInfo: {
+      #     admin: false
+      #     pouchname: "jrwdunham-blackfoot"
+      #     reader: true
+      #     role: "read_only"
+      #     usernameToModify: "jrwdunhamreadonly"
+      #     writer: false
+      # }
+      # Expect: {
+      #   corpusadded: true,
+      #   info: ["User roles updated successfully for jrwdunhamreadonly"]
+      # }
+      #
+      # 2. POST AUTH_SERVICE/corpusteam with JSON:
+      # {
+      #   authUrl: "https://auth.lingsync.org"
+      #   password: "..."
+      #   pouchname: "jrwdunham-blackfoot"
+      #   serverCode: "production"
+      #   username: "jrwdunham"
+      # }
+      # Expect: JSON object of users (and roles)
+      #
+      # 3. GET CORPUS_SERVICE/_users/org.couchdb.user:jrwdunham QUESTION: necessary?
+      #
+      # Expect: JSON:
+      #
+      # "{
+        # "_id": "org.couchdb.user:jrwdunham",
+        # "_rev": "2-dd59dbae9fc8f2c6455c5a98cd288c43",
+        # "password_scheme": "pbkdf2",
+        # "iterations": 10,
+        # "name": "jrwdunham",
+        # "roles": [
+          # "fielddbuser",
+          # "jrwdunham-firstcorpus_admin",
+          # "jrwdunham-firstcorpus_commenter",
+          # "jrwdunham-firstcorpus_reader",
+          # "jrwdunham-firstcorpus_writer",
+          # "gina-inuktitut_commenter",
+          # "gina-inuktitut_reader",
+          # "gina-inuktitut_writer",
+          # "lingllama-communitycorpus_commenter",
+          # "lingllama-communitycorpus_reader",
+          # "lingllama-communitycorpus_writer",
+          # "testingharvardimport-firstcorpus_admin",
+          # "testingharvardimport-firstcorpus_reader",
+          # "testingharvardimport-firstcorpus_writer",
+          # "testingharvardimport-hjcopypaste_admin",
+          # "testingharvardimport-hjcopypaste_reader",
+          # "testingharvardimport-hjcopypaste_writer",
+          # "jrwdunham-blackfoot_admin",
+          # "jrwdunham-blackfoot_writer",
+          # "jrwdunham-blackfoot_reader",
+          # "jrwdunham-blackfoot_commenter",
+          # "elisekm-eti3_data_tutorial_admin",
+          # "elisekm-eti3_data_tutorial_reader",
+          # "elisekm-eti3_data_tutorial_writer",
+          # "jrwdunham-gitksan_practice_admin",
+          # "jrwdunham-gitksan_practice_writer",
+          # "jrwdunham-gitksan_practice_reader",
+          # "jrwdunham-gitksan_practice_commenter",
+          # "jrwdunham-blackfoot_ucalgary_workshop_admin",
+          # "jrwdunham-blackfoot_ucalgary_workshop_writer",
+          # "jrwdunham-blackfoot_ucalgary_workshop_reader",
+          # "jrwdunham-blackfoot_ucalgary_workshop_commenter"
+        # ],
+        # "previous_rev": "1-38b76b7604734524807868cf18ec5eba",
+        # "type": "user",
+        # "derived_key": "563df7e28ced77f2a44fe6ff657451bd17205602",
+        # "salt": "afff49dddf1a013bcbbaeb009e441657"
+      # }"
+
+    removeUserFromCorpus: ->
+      # POST AUTH_SERVICE/updateroles with JSON:
+      #   authUrl: "https://auth.lingsync.org"
+      #   (password: "...")
+      #   serverCode: "production"
+      #   username: "jrwdunham"
+      #   userRoleInfo: {
+      #     pouchname: "jrwdunham-blackfoot"
+      #     removeUser: true
+      #     usernameToModify: "jrwdunhamreadonly"
+      #   }
+      # }
+      #
+      # Expect:
+      # {
+      #   "corpusadded": true,
+      #   "info": [
+      #   "User roles updated successfully for jrwdunhamreadonly"
+      #   ]
+      # }
 
     fetchStart: ->
       @fetching = true
@@ -53,13 +164,23 @@ define [
       @stopSpin()
       users = @model.get('users')
       if users
+        @allUsers = (user.username for user in users.allusers)
         @usersWithoutDuplicates = @getUsersWithoutDuplicates users
         @getUsernames()
+        @giveUsernamesToAddUserView()
         @role = @getRole()
         @creator = @getIsCreator()
         @getUserViews()
       @render()
       @open()
+
+    giveUsernamesToAddUserView: ->
+      @addUserView.allUsers = @allUsers
+      @addUserView.adminNames = @adminNames
+      @addUserView.writerNames = @writerNames
+      @addUserView.readerNames = @readerNames
+      @addUserView.loggedInUsername =
+        @model.get('applicationSettings').get 'username'
 
     getUsernames: ->
       @adminNames = (user.username for user in @usersWithoutDuplicates.admins)
@@ -97,8 +218,12 @@ define [
         @model.set $(element).attr('name'), $(element).val()
 
     render: ->
+      @listenToEvents()
       context = _.extend @model.attributes, isActive: @active()
       @$el.html @template(context)
+      @addUserView.setElement @$('div.add-user-widget')
+      @addUserView.render().$el.hide()
+      @rendered @addUserView
       @guify()
       if @fetching then @spin 'fetching corpus information'
       for roleClass in ['admins', 'writers', 'readers']
@@ -108,7 +233,6 @@ define [
             container.appendChild userView.render().el
             @rendered userView
           @$("div.#{roleClass}-widget-body").html container
-      @listenToEvents()
       @$('.dative-widget-body').first().hide()
       @
 
@@ -152,6 +276,24 @@ define [
           usersWithoutDuplicates.readers.push reader
       usersWithoutDuplicates
 
+    toggleAddUserKeys: (event) ->
+      if event.which in [13, 32]
+        @stopEvent event
+        @toggleAddUser event
+
+    toggleAddUser: (event) ->
+      @stopEvent event
+      if @addUserView.$el.is(':visible')
+        @addUserView.$el.slideUp()
+        @$('button.add-user').tooltip
+          content: 'show form for granting a user access to this corpus'
+      else
+        @addUserView.$el.slideDown
+          complete: =>
+            @addUserView.autoComplete()
+        @$('button.add-user').tooltip
+          content: 'hide form for granting a user access to this corpus'
+
     toggleAppearKeys: (event) ->
       if event.which in [13, 37, 38, 39, 40] then @stopEvent event
       switch event.which
@@ -162,16 +304,11 @@ define [
         when 39, 40 # right and down arrows
           @open()
 
-    stopEvent: (event) ->
-      event.preventDefault()
-      event.stopPropagation()
-
     fetchUsers: ->
       @model.fetchUsers()
 
     toggle: (event) ->
       if event then @stopEvent event
-
       $body = @$('.dative-widget-body').first()
       if $body.is ':visible'
         @close()
@@ -209,6 +346,7 @@ define [
         $body.slideDown
           complete: =>
             @bodyVisible = true
+            @$('button.toggle-appear').first().focus()
 
     guify: ->
       @$('button').button().attr('tabindex', 0)
@@ -229,22 +367,19 @@ define [
           text: false
         .tooltip()
 
-      @$('button.new-admin, button.new-writer, button.new-reader')
+      @$('button.add-user')
         .button
-          icons: {primary: 'ui-icon-plusthick'}
+          icons: {primary: 'ui-icon-person'}
           text: false
           disabled: disabled
         .tooltip()
 
-      if disabled
-        @$('button.new-admin, button.new-writer, button.new-reader').hide()
-        @$('div.users-widget > div.dative-widget-header').height '12px'
+      if disabled then @$('button.add-user').hide()
 
       @selectmenuify()
       @tabindicesNaught() # active elements have tabindex=0
 
     selectmenuify: ->
-      @$('select').selectmenu width: 320
 
     # Tabindices=0 and jQueryUI colors
     tabindicesNaught: ->

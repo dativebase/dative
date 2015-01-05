@@ -65,6 +65,10 @@ define [
     closed: (subView) ->
       @_renderedSubViews = _.without @_renderedSubViews, subView
 
+    stopEvent: (event) ->
+      event.preventDefault()
+      event.stopPropagation()
+
     guid: utils.guid
 
     utils: utils

@@ -20,6 +20,7 @@ define [
     template: corporaTemplate
 
     initialize: (options) ->
+      console.log 'INITIALIZING A CORPORA VIEW'
       @collection = new CorporaCollection()
       @applicationSettings = options.applicationSettings
       @addCorpusModelsToCollection()
@@ -52,7 +53,7 @@ define [
       @$el.html @template()
       @matchHeights()
       @$pageBody = @$('div#dative-page-body').first()
-      @_guify()
+      @guify()
       container = document.createDocumentFragment()
       for corpusView in @corpusViews
         container.appendChild corpusView.render().el
@@ -80,7 +81,7 @@ define [
       corpusView.render().$el.prependTo(@$pageBody).hide().slideDown('slow')
       @rendered corpusView
 
-    _guify: ->
+    guify: ->
 
       @$('button').button().attr('tabindex', 0)
 
@@ -88,21 +89,19 @@ define [
         .button
           icons: {primary: 'ui-icon-plusthick'}
           text: false
+        .tooltip()
 
       @$('button.save-corpora')
         .button
           icons: {primary: 'ui-icon-disk'}
           text: false
+        .tooltip()
 
     _rememberTarget: (event) ->
       try
         @$('.dative-input-display').each (index, el) =>
           if el is event.target
             @focusedElementIndex = index
-
-    stopEvent: (event) ->
-      event.preventDefault()
-      event.stopPropagation()
 
     addCorpusKeys: (event) ->
       @_rememberTarget event

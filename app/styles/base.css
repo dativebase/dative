@@ -200,11 +200,27 @@ div.dative-page-header-title
     padding: 5px;
     z-index: 2000;
 }
+
+.dative-add-user-failed-container {
+    position: absolute;
+}
+
+.dative-add-user-failed {
+    position: relative;
+    top: -26px;
+    left: 411px;
+    z-index: 100;
+    display: inline-block;
+    max-width: 200px;
+}
+
+.dative-add-user-failed,
 .dative-login-dialog-widget .dative-login-failed,
 .dative-register-dialog-widget .dative-register-validation,
 .dative-register-validation {
     padding: 5px;
 }
+
 .dative-login-dialog-widget,
 .dative-register-dialog-widget,
 #appview,
@@ -213,8 +229,10 @@ div.dative-page-header-title
 .corpus-widget,
 .users-widget,
 .dative-user-widget,
+.dative-add-user-widget,
 .servers-config-widget,
-.server-config-widget
+.server-config-widget,
+.add-user-widget
 {
     box-shadow: 5px 5px 10px rgba(0, 0, 0, 0.5);
     -webkit-box-shadow: 5px 5px 10px rgba(0, 0, 0, 0.5);
@@ -273,11 +291,15 @@ ul.fieldset label {
     width: 75px;
 }
 
+.add-user-widget ul.fieldset label {
+    width: 80px;
+}
+
 .loginLogin ul.fieldset label,
 .registerForm ul.fieldset label {
-    /*width: 61px;*/
     width: 120px;
 }
+
 .fieldset label,
 .fieldset input[type="text"],
 .fieldset input[type="password"],
@@ -287,6 +309,7 @@ ul.fieldset label {
 .fieldset textarea {
     display: inline-block;
 }
+
 .ui-selectmenu-button:focus,
 .ui-button:focus,
 .ms-list:focus,
@@ -551,6 +574,7 @@ div.corpus-widget {
   margin-bottom: 20px;
 }
 
+div.add-user-widget,
 div.users-widget {
   width: 500px;
   margin-top: 10px;
@@ -558,7 +582,8 @@ div.users-widget {
 }
 
 div.servers-config-widget > div.dative-widget-body,
-div.users-widget div.dative-widget-body {
+div.users-widget div.dative-widget-body,
+div.add-user-widget div.dative-widget-body {
   padding: 10px;
 }
 
@@ -569,7 +594,8 @@ div.server-config-widget {
   margin-bottom: 20px;
 }
 
-div.server-config-widget input {
+div.server-config-widget input,
+div.add-user-widget input {
   max-width: 300px;
   min-width: 300px;
   width: 300px;
@@ -598,6 +624,7 @@ div.dative-user-widget div.dative-widget-body img {
 }
 
 div.dative-user-widget div.dative-widget-header div.dative-widget-header-title,
+div.dative-add-user-widget div.dative-widget-header div.dative-widget-header-title,
 div.users-widget > div.dative-widget-header > div.dative-widget-header-title {
   position: static;
   margin: auto;
@@ -610,8 +637,14 @@ div.server-config-widget > div.dative-widget-header {
   position: relative;
 }
 
+div.add-user-widget > div.dative-widget-header,
+div.users-widget > div.dative-widget-header {
+  height: 12px;
+}
+
 div.corpus-widget > div.dative-widget-header > div.dative-widget-header-title,
 div.users-widget > div.dative-widget-header > div.dative-widget-header-title,
+div.add-user-widget > div.dative-widget-header > div.dative-widget-header-title,
 div.servers-config-widget > div.dative-widget-header > div.dative-widget-header-title,
 div.server-config-widget > div.dative-widget-header > div.dative-widget-header-title,
 div#dative-page-header > div.dative-page-header-title {

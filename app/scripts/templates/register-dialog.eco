@@ -32,7 +32,7 @@
       <li class='fielddb'>
         <label for='email'>E-mail *</label>
         <input type='text' name='email' class='email'
-          title='enter your email' tabindex=0 />
+          title='enter your email address' tabindex=0 />
         <span class='ui-state-error ui-corner-all dative-register-validation
           email-validation'></span>
       </li>
