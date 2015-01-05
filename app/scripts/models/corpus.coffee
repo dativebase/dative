@@ -66,7 +66,7 @@ define [
       payload =
         authUrl: authURL
         username: @applicationSettings.get?('username')
-        password: 'a'
+        password: @applicationSettings.get?('password')
         pouchname: @get 'pouchname'
         serverCode: @applicationSettings.get?('activeServer')?.get?('serverCode')
       CorpusModel.cors.request(
@@ -103,7 +103,7 @@ define [
       payload =
         authUrl: authURL
         username: @applicationSettings.get?('username')
-        password: 'a'
+        password: @applicationSettings.get?('password')
         serverCode: @applicationSettings.get?('activeServer')?.get?('serverCode')
         userRoleInfo:
           # admin: if role is 'admin' then true else false
@@ -222,7 +222,7 @@ define [
       payload =
         authUrl: authURL
         username: @applicationSettings.get?('username')
-        password: 'a'
+        password: @applicationSettings.get?('password')
         serverCode: @applicationSettings.get?('activeServer')?.get?('serverCode')
         userRoleInfo:
           pouchname: @get 'pouchname'

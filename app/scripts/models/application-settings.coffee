@@ -74,7 +74,10 @@ define [
         onload: (responseJSON) =>
           @authenticateAttemptDone taskId
           if responseJSON.authenticated is true
-            @save username: credentials.username, loggedIn: true
+            @save
+              username: credentials.username
+              password: credentials.password
+              loggedIn: true
             Backbone.trigger 'authenticate:success'
           else
             Backbone.trigger 'authenticate:fail', responseJSON
@@ -110,6 +113,7 @@ define [
             @set
               baseDBURL: @getFieldDBBaseDBURL(responseJSON.user)
               username: credentials.username,
+              password: credentials.password,
               loggedInUser: responseJSON.user
             @save()
             credentials.name = credentials.username
@@ -181,6 +185,7 @@ define [
           try
             @save
               username: credentials.username,
+              password: credentials.password,
               loggedIn: true
               loggedInUser: user
             Backbone.trigger 'authenticate:success'
@@ -416,6 +421,7 @@ define [
       loggedIn: false
       loggedInUser: null
       username: ''
+      password: '' # WARN: I don't like storing the password in localStorage, but FieldDB needs to send it on subsequent requests, so I'm persisting it for now ...
       servers: [server1, server2, server3, server4]
       serverTypes: ['FieldDB', 'OLD']
       fieldDBServerCodes: [
