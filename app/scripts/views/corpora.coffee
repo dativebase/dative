@@ -86,6 +86,7 @@ define [
         .button
           icons: {primary: 'ui-icon-plusthick'}
           text: false
+          disabled: true # TODO: implement the addCorpus action!
         .tooltip()
 
     _rememberTarget: (event) ->

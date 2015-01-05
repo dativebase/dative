@@ -5,7 +5,7 @@
 
     <div class='button-container-left'>
       <button class="toggle-appear" title="show corpus details"></button>
-      <button class="choose-corpus" title="use this corpus"></button>
+      <button class="use-corpus" title="use this corpus"></button>
       <button class="add-user"
         title="show form for granting a user access to this corpus"></button>
     </div>

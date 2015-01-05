@@ -62,6 +62,7 @@ define [
       @listenTo Backbone, 'loginSuggest', @openLoginDialogWithDefaults
       @listenTo Backbone, 'authenticate:success', @authenticateSuccess
       @listenTo Backbone, 'logout:success', @logoutSuccess
+      @listenTo Backbone, 'request:browseFieldDBCorpus', @browseFieldDBCorpus
 
       @render()
       @showHomePageView()
@@ -70,7 +71,10 @@ define [
       'click': 'bodyClicked'
 
     bodyClicked: ->
-      Backbone.trigger 'bodyClicked'
+      Backbone.trigger 'bodyClicked' # Mainmenu superclick listens for this
+
+    browseFieldDBCorpus: (corpusId) ->
+      console.log "AppView knows that you want to browse #{corpusId}"
 
     logoutSuccess: ->
       @_closeVisibleView()

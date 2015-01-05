@@ -61,6 +61,8 @@ define [
       'click button.toggle-appear': 'toggle'
       'keydown button.add-user': 'toggleAddUserKeys'
       'click button.add-user': 'toggleAddUser'
+      'keydown button.use-corpus': 'useCorpusKeys'
+      'click button.use-corpus': 'useCorpus'
 
     removeUserFromCorpusSuccess: (username) ->
       @removeUserView username
@@ -265,6 +267,15 @@ define [
     getWritersArray: (users) -> if users.writers? then users.writers else []
     getReadersArray: (users) -> if users.readers? then users.readers else []
 
+    useCorpusKeys: (event) ->
+      if event.which in [13, 32]
+        @stopEvent event
+        @useCorpus event
+
+    useCorpus: (event) ->
+      if event then @stopEvent event
+      Backbone.trigger 'request:browseFieldDBCorpus', @model.get('pouchname')
+
     toggleAddUserKeys: (event) ->
       if event.which in [13, 32]
         @stopEvent event
@@ -382,7 +393,7 @@ define [
           text: false
         .tooltip()
 
-      @$('button.choose-corpus')
+      @$('button.use-corpus')
         .button
           icons: {primary: 'ui-icon-star'}
           text: false
