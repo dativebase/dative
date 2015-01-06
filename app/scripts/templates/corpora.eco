@@ -2,7 +2,12 @@
 
   <div class='dative-page-header-title'>Corpora</div>
   <div class='button-container-left'>
-    <button class="float-left add-corpus" title="create a new corpus"></span>
+    <button class="add-corpus"
+      title="create a new corpus"></button>
+    <button class="expand-all-corpora"
+      title="expand all corpus views"></button>
+    <button class="collapse-all-corpora"
+      title="collapse all corpus views"></button>
   </div>
 
 </div>

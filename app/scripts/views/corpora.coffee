@@ -40,11 +40,20 @@ define [
         @collection.add corpusModel
 
     listenToEvents: ->
+      @stopListening()
+      @undelegateEvents()
       @delegateEvents()
+
 
     events:
       'keydown button.add-corpus': 'addCorpusKeys'
       'click button.add-corpus': 'addCorpus'
+
+      'keydown button.expand-all-corpora': 'expandAllCorporaKeys'
+      'click button.expand-all-corpora': 'expandAllCorpora'
+
+      'keydown button.collapse-all-corpora': 'collapseAllCorporaKeys'
+      'click button.collapse-all-corpora': 'collapseAllCorpora'
 
     render: ->
       @$el.html @template()
@@ -89,6 +98,18 @@ define [
           disabled: true # TODO: implement the addCorpus action!
         .tooltip()
 
+      @$('button.expand-all-corpora')
+        .button
+          icons: {primary: 'ui-icon-arrowthickstop-1-s'}
+          text: false
+        .tooltip()
+
+      @$('button.collapse-all-corpora')
+        .button
+          icons: {primary: 'ui-icon-arrowthickstop-1-n'}
+          text: false
+        .tooltip()
+
     _rememberTarget: (event) ->
       try
         @$('.dative-input-display').each (index, el) =>
@@ -100,4 +121,24 @@ define [
       if event.which is 13 # Enter
         @stopEvent event
         @addCorpus()
+
+    expandAllCorporaKeys: (event) ->
+      @_rememberTarget event
+      if event.which in [13, 32]
+        @stopEvent event
+        @expandAllCorpora()
+
+    expandAllCorpora: (event) ->
+      for corpusView in @corpusViews
+        corpusView.fetchThenOpen()
+
+    collapseAllCorporaKeys: (event) ->
+      @_rememberTarget event
+      if event.which in [13, 32]
+        @stopEvent event
+        @collapseAllCorpora()
+
+    collapseAllCorpora: (event) ->
+      for corpusView in @corpusViews
+        corpusView.closeBody()
 
