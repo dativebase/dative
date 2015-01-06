@@ -27,8 +27,8 @@ define [
   class CorpusModel extends BaseModel
 
     initialize: (options) ->
-      @metadata = options.metadata
       @applicationSettings = options.applicationSettings
+      @metadata = options.metadata
 
     getCorpusServerURL:  ->
       protocol = @metadata.protocol

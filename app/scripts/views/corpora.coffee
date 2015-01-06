@@ -2,11 +2,12 @@ define [
   'backbone'
   './base'
   './corpus'
+  './create-corpus'
   './../models/corpus'
   './../collections/corpora'
   './../templates/corpora'
   'perfectscrollbar'
-], (Backbone, BaseView, CorpusView, CorpusModel, CorporaCollection,
+], (Backbone, BaseView, CorpusView, CreateCorpusView, CorpusModel, CorporaCollection,
   corporaTemplate) ->
 
   # Corpora View
@@ -20,16 +21,13 @@ define [
     template: corporaTemplate
 
     initialize: (options) ->
-      @collection = new CorporaCollection()
       @applicationSettings = options.applicationSettings
+      @collection = new CorporaCollection()
+      @collection.applicationSettings = @applicationSettings
       @addCorpusModelsToCollection()
       @corpusViews = []
-      @collection.each (corpus) =>
-        newCorpusView = new CorpusView
-          model: corpus
-          applicationSettings: @applicationSettings.toJSON()
-        corpus.fetch()
-        @corpusViews.push newCorpusView
+      @createCorpusView = new CreateCorpusView()
+      @getAndFetchCorpusViews()
 
     addCorpusModelsToCollection: () ->
       corpusMetadataArray = @applicationSettings.get('loggedInUser').corpuses
@@ -39,15 +37,26 @@ define [
           metadata: corpusMetadata
         @collection.add corpusModel
 
+    getAndFetchCorpusViews: ->
+      @collection.each (corpus) =>
+        newCorpusView = new CorpusView
+          model: corpus
+          applicationSettings: @applicationSettings.toJSON()
+        corpus.fetch()
+        @corpusViews.push newCorpusView
+
     listenToEvents: ->
       @stopListening()
       @undelegateEvents()
       @delegateEvents()
+      @listenTo @createCorpusView, 'request:createCorpus', @createCorpus
 
+    createCorpus: (corpusName) ->
+      console.log "You want the corpora view to request creation of the corpus #{corpusName}"
 
     events:
-      'keydown button.add-corpus': 'addCorpusKeys'
-      'click button.add-corpus': 'addCorpus'
+      'keydown button.create-corpus': 'toggleCreateCorpusKeys'
+      'click button.create-corpus': 'toggleCreateCorpus'
 
       'keydown button.expand-all-corpora': 'expandAllCorporaKeys'
       'click button.expand-all-corpora': 'expandAllCorpora'
@@ -58,16 +67,53 @@ define [
     render: ->
       @$el.html @template()
       @matchHeights()
-      @$pageBody = @$('div#dative-page-body').first()
       @guify()
+      @renderCorpusViews()
+      @renderCreateCorpusView()
+      @listenToEvents()
+      if @createCorpusView.visible
+        @createCorpusView.show()
+      else
+        @createCorpusView.hide()
+      @perfectScrollbar()
+      @
+
+    setCreateCorpusButtonState: ->
+      contentSuffix = 'form for creating a new corpus'
+      if @createCorpusView.visible
+        @$('button.create-corpus').tooltip
+          content: "show #{contentSuffix}"
+      else
+        @$('button.create-corpus').tooltip
+          content: "hide #{contentSuffix}"
+
+    toggleCreateCorpus: (event) ->
+      console.log 'in toggleCreateCorpus'
+      if event then @stopEvent event
+      @setCreateCorpusButtonState()
+      if @createCorpusView.visible
+        @createCorpusView.closeGUI()
+      else
+        @createCorpusView.openGUI()
+
+    toggleCreateCorpusKeys: (event) ->
+      @_rememberTarget event
+      if event.which in [13, 32]
+        @stopEvent event
+        @toggleCreateCorpus event
+
+    renderCreateCorpusView: ->
+      @$('div.create-corpus-widget-container').html @createCorpusView.render().$el
+      @rendered @createCorpusView
+
+    renderCorpusViews: ->
       container = document.createDocumentFragment()
       for corpusView in @corpusViews
         container.appendChild corpusView.render().el
         @rendered corpusView
-      @$pageBody.append container
-      @listenToEvents()
-      @$pageBody.perfectScrollbar()
-      @
+      @$('div.corpora-list').append container
+
+    perfectScrollbar: -> @$('div#dative-page-body').first().perfectScrollbar()
 
     setCollectionFromGUI: ->
       updatedCorpusModels = []
@@ -76,26 +122,14 @@ define [
         updatedCorpusModels.push corpusView.model
       @collection.add updatedCorpusModels
 
-    addCorpus: (event) ->
-      if event
-        event.preventDefault()
-        event.stopPropagation()
-      corpusModel = new CorpusModel()
-      @collection.unshift corpusModel
-      corpusView = new CorpusView model: corpusModel
-      @corpusViews.unshift corpusView
-      corpusView.render().$el.prependTo(@$pageBody).hide().slideDown('slow')
-      @rendered corpusView
-
     guify: ->
 
       @$('button').button().attr('tabindex', 0)
 
-      @$('button.add-corpus')
+      @$('button.create-corpus')
         .button
           icons: {primary: 'ui-icon-plusthick'}
           text: false
-          disabled: true # TODO: implement the addCorpus action!
         .tooltip()
 
       @$('button.expand-all-corpora')
@@ -116,12 +150,6 @@ define [
           if el is event.target
             @focusedElementIndex = index
 
-    addCorpusKeys: (event) ->
-      @_rememberTarget event
-      if event.which is 13 # Enter
-        @stopEvent event
-        @addCorpus()
-
     expandAllCorporaKeys: (event) ->
       @_rememberTarget event
       if event.which in [13, 32]
@@ -129,6 +157,7 @@ define [
         @expandAllCorpora()
 
     expandAllCorpora: (event) ->
+      if event then @stopEvent event
       for corpusView in @corpusViews
         corpusView.fetchThenOpen()
 
@@ -139,6 +168,7 @@ define [
         @collapseAllCorpora()
 
     collapseAllCorpora: (event) ->
+      if event then @stopEvent event
       for corpusView in @corpusViews
         corpusView.closeBody()
 

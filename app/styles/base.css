@@ -201,11 +201,13 @@ div.dative-page-header-title
     z-index: 2000;
 }
 
-.dative-add-user-failed-container {
+.dative-add-user-failed-container,
+.dative-create-corpus-failed-container {
     position: absolute;
 }
 
-.dative-add-user-failed {
+.dative-add-user-failed,
+.dative-create-corpus-failed {
     position: relative;
     top: -26px;
     left: 411px;
@@ -215,6 +217,7 @@ div.dative-page-header-title
 }
 
 .dative-add-user-failed,
+.dative-create-corpus-failed,
 .dative-login-dialog-widget .dative-login-failed,
 .dative-register-dialog-widget .dative-register-validation,
 .dative-register-validation {
@@ -227,6 +230,7 @@ div.dative-page-header-title
 .progress-widget,
 .notifier,
 .corpus-widget,
+.create-corpus-widget,
 .users-widget,
 .dative-user-widget,
 .dative-add-user-widget,
@@ -238,6 +242,7 @@ div.dative-page-header-title
     -webkit-box-shadow: 5px 5px 10px rgba(0, 0, 0, 0.5);
     -moz-box-shadow: 5px 5px 10px rgba(0, 0, 0, 0.5);
 }
+
 ul.sf-menu li ul
 {
     box-shadow: 5px 5px 10px rgba(0, 0, 0, 0.5);
@@ -291,6 +296,7 @@ ul.fieldset label {
     width: 75px;
 }
 
+.create-corpus-widget ul.fieldset label,
 .add-user-widget ul.fieldset label {
     width: 80px;
 }
@@ -565,11 +571,13 @@ div.server-config-widget {
   margin-bottom: 20px;
 }
 div.servers-config-widget,
-div.corpus-widget {
+div.corpus-widget,
+div.create-corpus-widget {
   width: 600px;
 }
 
-div.corpus-widget {
+div.corpus-widget,
+div.create-corpus-widget {
   margin-top: 10px;
   margin-bottom: 20px;
 }
@@ -594,7 +602,8 @@ div.server-config-widget {
 }
 
 div.server-config-widget input,
-div.add-user-widget input {
+div.add-user-widget input,
+div.create-corpus-widget input {
   max-width: 300px;
   min-width: 300px;
   width: 300px;
@@ -630,6 +639,7 @@ div.users-widget > div.dative-widget-header > div.dative-widget-header-title {
 }
 
 div.corpus-widget > div.dative-widget-header,
+div.create-corpus-widget > div.dative-widget-header,
 div.users-widget > div.dative-widget-header,
 div.servers-config-widget > div.dative-widget-header,
 div.server-config-widget > div.dative-widget-header {
@@ -642,6 +652,7 @@ div.users-widget > div.dative-widget-header {
 }
 
 div.corpus-widget > div.dative-widget-header > div.dative-widget-header-title,
+div.create-corpus-widget > div.dative-widget-header > div.dative-widget-header-title,
 div.users-widget > div.dative-widget-header > div.dative-widget-header-title,
 div.add-user-widget > div.dative-widget-header > div.dative-widget-header-title,
 div.servers-config-widget > div.dative-widget-header > div.dative-widget-header-title,
