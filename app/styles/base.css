@@ -556,6 +556,11 @@ h1 {
     margin-right: -4px;
 }
 
+.ui-button-text-only .ui-button-text,
+.ui-button-text {
+  padding: 0.5em;
+}
+
 .ui-dialog .ui-dialog-titlebar {
   line-height: normal;
 }

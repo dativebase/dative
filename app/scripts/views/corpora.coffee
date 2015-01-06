@@ -127,21 +127,15 @@ define [
       @$('button').button().attr('tabindex', 0)
 
       @$('button.create-corpus')
-        .button
-          icons: {primary: 'ui-icon-plusthick'}
-          text: false
+        .button()
         .tooltip()
 
       @$('button.expand-all-corpora')
-        .button
-          icons: {primary: 'ui-icon-arrowthickstop-1-s'}
-          text: false
+        .button()
         .tooltip()
 
       @$('button.collapse-all-corpora')
-        .button
-          icons: {primary: 'ui-icon-arrowthickstop-1-n'}
-          text: false
+        .button()
         .tooltip()
 
     _rememberTarget: (event) ->

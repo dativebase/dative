@@ -282,7 +282,7 @@ define [
         @toggleAddUser event
 
     setAddUserButtonState: ->
-      contentSuffix = 'form for granting a user access to this corpus'
+      contentSuffix = 'interface for managing corpus users'
       if @addUserView.visible
         @$('button.add-user').tooltip
           content: "show #{contentSuffix}"
@@ -394,15 +394,11 @@ define [
         .tooltip()
 
       @$('button.use-corpus')
-        .button
-          icons: {primary: 'ui-icon-star'}
-          text: false
+        .button()
         .tooltip()
 
       @$('button.add-user')
         .button
-          icons: {primary: 'ui-icon-person'}
-          text: false
           disabled: disabled
         .tooltip()
 

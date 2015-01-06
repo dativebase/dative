@@ -4,10 +4,17 @@
     <div class='dative-widget-header-title'><%= @title %></div>
 
     <div class='button-container-left'>
+
       <button class="toggle-appear" title="show corpus details"></button>
-      <button class="use-corpus" title="use this corpus"></button>
-      <button class="add-user"
-        title="show form for granting a user access to this corpus"></button>
+
+      <button class="use-corpus" title="use this corpus">
+        <i class="fa fa-star fa-fw"></i>
+      </button>
+
+      <button class="add-user" title="show interface for managing corpus users">
+        <i class="fa fa-users fa-fw"></i>
+      </button>
+
     </div>
 
   </div>
