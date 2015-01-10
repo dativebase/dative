@@ -29,13 +29,21 @@ define [
       @createCorpusView = new CreateCorpusView()
       @getAndFetchCorpusViews()
 
-    addCorpusModelsToCollection: () ->
-      corpusMetadataArray = @applicationSettings.get('loggedInUser').corpuses
-      for corpusMetadata in corpusMetadataArray
+    addCorpusModelsToCollection: ->
+      for pouchname in @getCorpusPouchnames()
         corpusModel = new CorpusModel
           applicationSettings: @applicationSettings
-          metadata: corpusMetadata
+          pouchname: pouchname
         @collection.add corpusModel
+
+    getCorpusPouchnames: ->
+      _.uniq(@getPouchnameFromRole(role) for role in \
+        @applicationSettings.get('loggedInUserRoles') \
+        when role isnt 'fielddbuser')
+
+    getPouchnameFromRole: (role) ->
+      roleArray = (role.split /[-_]/)[0..-2]
+      "#{roleArray[0]}-#{roleArray[1..].join('_')}"
 
     getAndFetchCorpusViews: ->
       @collection.each (corpus) =>

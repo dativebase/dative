@@ -141,7 +141,9 @@ define [
           # request. Why the discrepancy?
           @authenticateAttemptDone taskId
           if responseJSON.ok
-            @save 'loggedIn', true
+            @save
+              loggedIn: true
+              loggedInUserRoles: responseJSON.roles
             Backbone.trigger 'authenticate:success'
           else
             Backbone.trigger 'authenticate:fail', responseJSON

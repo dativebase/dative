@@ -223,7 +223,7 @@ define [
 
     # Add user subviews to the appropriate array of this corpus view.
     getUserViews: ->
-      authUrl = @model.get('metadata').authUrl
+      authUrl = @model.get('applicationSettings').get('activeServer').get('url')
       pouchname = @model.get('pouchname')
       username = @model.get('applicationSettings').get('username')
       serverCode = @model.get('applicationSettings').get('activeServer')

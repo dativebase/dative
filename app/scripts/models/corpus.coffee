@@ -8,9 +8,9 @@ define [
   # Corpus Model
   # ------------
   #
-  # A model for FieldDB corpora. A `CorpusModel` is instantiated with one of
-  # the corpus (metadata) objects in the `corpuses` array of the `user` object
-  # that is returned when a user logs in.
+  # A model for FieldDB corpora. A `CorpusModel` is instantiated with a pouchname
+  # for the corpus. This is a unique, spaceless, lowercase name that begins with
+  # its creator's username.
   #
   # A corpus model's data must be retrieved by two requests. (1) retrieves the
   # bulk of the corpus data while (2) returns the users with access to the
@@ -28,14 +28,10 @@ define [
 
     initialize: (options) ->
       @applicationSettings = options.applicationSettings
-      @metadata = options.metadata
+      @pouchname = options.pouchname
 
     getCorpusServerURL:  ->
-      protocol = @metadata.protocol
-      domain = @metadata.domain
-      port = if @metadata.port then ":#{@metadata.port}" else ''
-      pouchname = @metadata.pouchname
-      "#{protocol}#{domain}#{port}/#{pouchname}"
+      "#{@applicationSettings.get('baseDBURL')}/#{@pouchname}"
 
     # Fetch the corpus data.
     # GET `<CorpusServiceURL>/<corpusname>/_design/pages/_view/private_corpuses`
