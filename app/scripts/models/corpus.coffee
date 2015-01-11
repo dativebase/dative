@@ -42,7 +42,9 @@ define [
         timeout: 10000
         url: "#{@getCorpusServerURL()}/_design/pages/_view/private_corpuses"
         onload: (responseJSON) =>
-          fieldDBCorpusObject = responseJSON.rows?[0].value or {}
+          #fieldDBCorpusObject = responseJSON.rows?[-1].value or {}
+          fieldDBCorpusObject = @getFieldDBCorpusObject responseJSON
+          console.log fieldDBCorpusObject
           @set fieldDBCorpusObject
           @trigger 'fetchEnd'
         onerror: (responseJSON) =>
@@ -52,6 +54,12 @@ define [
           console.log "Failed to fetch a corpus at #{@url()}. Request timed out."
           @trigger 'fetchEnd'
       )
+
+    getFieldDBCorpusObject: (responseJSON) ->
+      result = {}
+      if responseJSON.rows?
+        [..., tmp] = responseJSON.rows # Last element in array, a la CoffeeScript
+        result = tmp.value
 
     getDefaultPayload: ->
       authUrl: @applicationSettings.get?('activeServer')?.get?('url')

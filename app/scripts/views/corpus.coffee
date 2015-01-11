@@ -208,8 +208,7 @@ define [
 
     render: ->
       @listenToEvents()
-      context = _.extend @model.attributes, isActive: @active()
-      @$el.html @template(context)
+      @$el.html @template(@getContext())
       @renderAddUserView()
       @guify()
       if @fetching then @spin 'fetching corpus information'
@@ -220,6 +219,13 @@ define [
       else
         @addUserView.closeGUI()
       @
+
+    getContext: ->
+      context = _.extend @model.attributes, isActive: @active()
+      # Hacky, but ...
+      if context.pouchname is 'lingllama-communitycorpus'
+        context.title = "LingLlama's Community Corpus"
+      context
 
     # Add user subviews to the appropriate array of this corpus view.
     getUserViews: ->
