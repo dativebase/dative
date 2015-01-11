@@ -15,9 +15,9 @@
       ></div>
 
     <div class='button-container-left'>
-      <button class="delete-server"
+      <button class="delete-server dative-tooltip"
         title="delete this server"></button>
-      <button class="activate-server"
+      <button class="activate-server dative-tooltip"
         title="make this server the active one"></button>
     </div>
 
@@ -33,13 +33,13 @@
 
       <li>
         <label for="name">Name</label>
-        <input type="text" name="name" class="dative-input
+        <input type="text" name="name" class="dative-input dative-tooltip
           dative-input-display" title="enter a name for the server"
           value="<%= @name %>" /> </li>
 
       <li>
         <label for="url">URL</label>
-        <input type="text" name="url" class="dative-input
+        <input type="text" name="url" class="dative-input dative-tooltip
           dative-input-display" title="enter a URL for the server
           (including protocol and port, if needed)"
           value="<%= @url %>" />

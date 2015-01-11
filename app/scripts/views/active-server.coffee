@@ -42,10 +42,12 @@ define [
         servers: @model.get('servers').toJSON()
       @$el.html @template(context)
       @$('select.activeServer').selectmenu width: @width
-      @$('.ui-selectmenu-button').tooltip
-        items: 'span'
-        content: @tooltipContent
-        position: @tooltipPosition
+      @$('.ui-selectmenu-button')
+        .addClass 'dative-tooltip dative-select-active-server'
+        .tooltip
+          items: 'span'
+          content: @tooltipContent
+          position: @tooltipPosition
       @listenToEvents()
       @
 

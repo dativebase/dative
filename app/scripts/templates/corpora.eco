@@ -3,15 +3,18 @@
   <div class='dative-page-header-title'>Corpora</div>
   <div class='button-container-left'>
 
-    <button class="create-corpus" title="show form for creating a new corpus">
+    <button class="create-corpus dative-tooltip"
+      title="show form for creating a new corpus">
       <i class="fa fa-plus fa-fw"></i>
     </button>
 
-    <button class="expand-all-corpora" title="expand all corpus views">
+    <button class="expand-all-corpora dative-tooltip"
+      title="expand all corpus views">
       <i class="fa fa-angle-double-down fa-fw"></i>
     </button>
 
-    <button class="collapse-all-corpora" title="collapse all corpus views">
+    <button class="collapse-all-corpora dative-tooltip"
+      title="collapse all corpus views">
       <i class="fa fa-angle-double-up fa-fw"></i>
     </button>
 

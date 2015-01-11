@@ -108,28 +108,40 @@ define [
         .button
           icons: {primary: 'ui-icon-trash'}
           text: false
-        .tooltip()
+        .tooltip
+          position:
+            my: "right-40 center"
+            at: "left center"
+            collision: "flipfit"
 
       @$('button.activate-server')
         .button
           icons: {primary: 'ui-icon-star'},
           text: false
-        .tooltip()
+        .tooltip
+          position:
+            my: "right-70 center"
+            at: "left center"
+            collision: "flipfit"
 
       @$('input, select').tooltip
         position:
-          my: "left+330 top", at: "left top", collision: "flipfit"
+          my: "right-90 center"
+          at: "left center"
+          collision: "flipfit"
 
       @selectmenuify()
 
-      position = my: "left+330 top", at: "left top", collision: "flipfit"
+      position =
+        my: "right-90 center"
+        at: "left center"
+        collision: "flipfit"
 
       @$('.ui-selectmenu-button').filter('.server-type')
         .tooltip
           items: 'span'
           content: "is it a FieldDB server or an OLD one?"
-          position:
-            my: "left+330 top", at: "left top", collision: "flipfit"
+          position: position
 
       @$('.ui-selectmenu-button').filter('.server-code').each ->
         $(@).tooltip

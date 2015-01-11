@@ -6,10 +6,8 @@
     <div class='dative-widget-header-title'>Servers</div>
 
     <div class='button-container-left'>
-      <button class="float-left toggle-appear"
-        title="show servers"></button>
-      <button class="float-left add-server"
-        title="create a new server"></button>
+      <button class="toggle-appear dative-tooltip" title="show servers"></button>
+      <button class="add-server dative-tooltip" title="create a new server"></button>
     </div>
 
   </div>

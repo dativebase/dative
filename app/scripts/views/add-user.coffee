@@ -121,16 +121,17 @@ define [
       @$('input[name=username]')
         .tooltip
           position:
-            my: "right-65 center"
+            my: "right-85 center"
             at: "left center"
             collision: "flipfit"
 
       @$('.ui-selectmenu-button').filter('.role')
+        .addClass 'dative-tooltip'
         .tooltip
           items: 'span'
           content: 'which role should the new user have?'
           position:
-            my: "right-35 center"
+            my: "right-85 center"
             at: "left center"
             collision: "flipfit"
 
@@ -138,8 +139,8 @@ define [
         .button()
         .tooltip
           position:
-            my: 'left+80 top'
-            at: 'left top'
+            my: 'right-85 center'
+            at: 'left center'
             collision: 'flipfit'
 
       @$('.dative-add-user-failed').hide()

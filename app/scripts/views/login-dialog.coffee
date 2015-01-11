@@ -22,21 +22,26 @@ define [
       @listenTo Backbone, 'authenticate:success', @_authenticateSuccess
       @listenTo Backbone, 'loginDialog:toggle', @toggle
       @listenTo Backbone, 'logout:success', @logoutSuccess
+      @listenTo Backbone, 'register-dialog:open', @dialogClose
       @listenTo @model, 'change:loggedIn', @_disableButtons
 
       @activeServerView = new ActiveServerView
         model: @model
-        width: '12.75em'
+        width: '18.75em'
         label: 'Server *'
         tooltipContent: 'select a server to login to'
         tooltipPosition:
-          my: "left+140 top", at: "left top", collision: "flipfit"
+          my: "right-80 center"
+          at: "left center"
+          collision: "flipfit"
 
     events:
       'keyup .dative-login-dialog-widget .username': 'validate'
       'keydown .dative-login-dialog-widget .username': '_submitWithEnter'
       'keyup .dative-login-dialog-widget .password': 'validate'
       'keydown .dative-login-dialog-widget .password': '_submitWithEnter'
+      'keydown .dative-login-dialog-widget .dative-select-active-server': '_submitWithEnter'
+      'dialogdragstart': 'closeAllTooltips'
 
     render: ->
       @$el.append @template()
@@ -58,12 +63,14 @@ define [
       @$source.find('input').css('border-color',
         LoginDialogView.jQueryUIColors.defBo)
       @$source.dialog
+        hide: {effect: 'fade'}
+        show: {effect: 'fade'}
         autoOpen: false
         appendTo: @$target
         buttons: [
             text: 'Register'
             click: => @registerAccount()
-            class: 'register'
+            class: 'register dative-tooltip'
           # ,
           #   text: 'Forgot password'
           #   click: => @forgotPassword()
@@ -71,11 +78,11 @@ define [
           ,
             text: 'Logout'
             click: => @logout()
-            class: 'logout'
+            class: 'logout dative-tooltip'
           ,
             text: 'Login'
             click: => @login()
-            class: 'login'
+            class: 'login dative-tooltip'
         ]
         dialogClass: 'dative-login-dialog-widget'
         title: 'Login'
@@ -94,17 +101,32 @@ define [
         .tooltip
           content: 'create a new account'
           items: 'button'
+          position:
+            my: 'right-5 center'
+            at: 'left center'
+            collision: 'flipfit'
       @$('button.logout')
         .tooltip
           content: 'send a logout request to the server'
           items: 'button'
+          position:
+            my: 'right-75 center'
+            at: 'left center'
+            collision: 'flipfit'
       @$('button.login')
         .tooltip
           content: 'attempt to login to the server'
           items: 'button'
-      @$('input').tooltip
-        position:
-          my: "left+140 top", at: "left top", collision: "flipfit"
+          position:
+            my: 'right-137 center'
+            at: 'left center'
+            collision: 'flipfit'
+      @$('input')
+        .tooltip
+          position:
+            my: "right-80 center"
+            at: "left center"
+            collision: "flipfit"
 
     _initializeDialog: ->
       @_submitAttempted = false
@@ -153,7 +175,9 @@ define [
         disabled = loginButton.button 'option', 'disabled'
         if not disabled then loginButton.click()
 
-    dialogOpen: -> @$source.dialog 'open'
+    dialogOpen: ->
+      Backbone.trigger 'login-dialog:open'
+      @$source.dialog 'open'
 
     dialogClose: -> @$source.dialog 'close'
 

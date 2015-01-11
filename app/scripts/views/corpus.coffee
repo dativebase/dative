@@ -348,7 +348,8 @@ define [
         .button
           icons: {primary: 'ui-icon-triangle-1-e'}
           text: false
-        .tooltip content: 'show corpus details'
+        .tooltip
+          content: 'show corpus details'
 
     fetchThenOpen: ->
       if @haveFetchedUsers
@@ -397,16 +398,28 @@ define [
         .button
           icons: {primary: 'ui-icon-triangle-1-e'}
           text: false
-        .tooltip()
+        .tooltip
+          position:
+            my: "right-10 center"
+            at: "left center"
+            collision: "flipfit"
 
       @$('button.use-corpus')
         .button()
-        .tooltip()
+        .tooltip
+          position:
+            my: "right-45 center"
+            at: "left center"
+            collision: "flipfit"
 
       @$('button.add-user')
         .button
           disabled: disabled
-        .tooltip()
+        .tooltip
+          position:
+            my: "right-80 center"
+            at: "left center"
+            collision: "flipfit"
 
       if disabled then @$('button.add-user').hide()
 

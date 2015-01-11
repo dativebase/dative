@@ -97,13 +97,21 @@ define [
         .button
           icons: {primary: triangleIcon}
           text: false
-        .tooltip()
+        .tooltip
+          position:
+            my: "right-20 center"
+            at: "left center"
+            collision: "flipfit"
 
       @$('button.add-server')
         .button
           icons: {primary: 'ui-icon-plusthick'}
           text: false
-        .tooltip()
+        .tooltip
+          position:
+            my: "right-50 center"
+            at: "left center"
+            collision: "flipfit"
 
     toggleServerConfig: (event) ->
       if event

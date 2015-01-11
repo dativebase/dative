@@ -26,6 +26,7 @@ define [
           @serverDependentRegistration
       @listenTo Backbone, 'authenticate:end', @registerEnd
       @listenTo Backbone, 'register:success', @registerSuccess
+      @listenTo Backbone, 'login-dialog:open', @dialogClose
 
       @activeServerView = new ActiveServerView
         model: @model
@@ -33,7 +34,9 @@ define [
         label: 'Server *'
         tooltipContent: 'select a server to register with'
         tooltipPosition:
-          my: "left+260 top", at: "left top", collision: "flipfit"
+          my: "right-80 center"
+          at: "left center"
+          collision: "flipfit"
 
     registerEnd: ->
       @enableRegisterButton()
@@ -55,6 +58,7 @@ define [
       'keydown .dative-register-dialog-widget .passwordConfirm': 'submitWithEnter'
       'input .dative-register-dialog-widget .email': 'validate'
       'keydown .dative-register-dialog-widget .email': 'submitWithEnter'
+      'dialogdragstart': 'closeAllTooltips'
 
     render: ->
       @$el.append @template(@model.attributes)
@@ -105,13 +109,14 @@ define [
       @$source.find('input').css('border-color',
         RegisterDialogView.jQueryUIColors.defBo)
       @$source.dialog
-        position: my: "center+30", at: "center+30", of: window
+        hide: {effect: 'fade'}
+        show: {effect: 'fade'}
         autoOpen: false
         appendTo: @$target
         buttons: [
             text: 'Register'
             click: => @register()
-            class: 'register'
+            class: 'register dative-tooltip'
         ]
         dialogClass: 'dative-register-dialog-widget'
         title: 'Register'
@@ -131,9 +136,15 @@ define [
         .tooltip
           content: 'send a registration request to the server'
           items: 'button'
+          position:
+            my: "right-10 center"
+            at: "left center"
+            collision: "flipfit"
       @$('input').tooltip
         position:
-          my: "left+260 top", at: "left top", collision: "flipfit"
+          my: "right-80 center"
+          at: "left center"
+          collision: "flipfit"
 
     initializeDialog: ->
       @_submitAttempted = false
@@ -141,7 +152,9 @@ define [
         .find('span.dative-register-validation').text('').hide()
       @$target.find('.ui-selectmenu-button').focus()
 
-    dialogOpen: -> @$source.dialog 'open'
+    dialogOpen: ->
+      Backbone.trigger 'register-dialog:open'
+      @$source.dialog 'open'
 
     dialogClose: -> @$source.dialog 'close'
 

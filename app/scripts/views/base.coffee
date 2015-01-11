@@ -24,6 +24,8 @@ define [
 
     @debugMode: false
 
+    tooltipsDisabled: true
+
     # Class attribute that holds the jQueryUI colors of the jQueryUI theme
     # currently in use.
     @jQueryUIColors: $.getJQueryUIColors()
@@ -94,4 +96,7 @@ define [
     # Return true if element has a vertical scrollbar
     _hasVerticalScrollBar: (el) ->
       if el.clientHeight < el.scrollHeight then true else false
+
+    closeAllTooltips: ->
+      @$('.dative-tooltip').tooltip 'close'
 

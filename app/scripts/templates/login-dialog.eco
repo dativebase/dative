@@ -1,27 +1,27 @@
 <div class='dative-login-dialog'>
-  <form action='login/authenticate' method='post' class='loginLogin'>
-    <ul class='fieldset'>
 
-      <li class="active-server"></li>
+  <ul class='fieldset'>
 
-      <li>
-        <label for='username'>Username</label>
-        <input type='text' name='username' class='username'
-          title="enter your username" tabindex=0 id="big" />
-        <span class='ui-state-error ui-corner-all dative-login-failed
-          username-error'></span>
-      </li>
+    <li class="active-server"></li>
 
-      <li>
-        <label for='password'>Password</label>
-        <input type='password' name='password' class='password'
-          title="enter your password" tabindex=0 />
-        <span class='ui-state-error ui-corner-all dative-login-failed
-          password-error'></span>
-      </li>
+    <li>
+      <label for='username'>Username</label>
+      <input type='text' name='username' class='username dative-tooltip'
+        title="enter your username" tabindex=0 id="big" />
+      <span class='ui-state-error ui-corner-all dative-login-failed
+        username-error'></span>
+    </li>
 
-    </ul>
-  </form>
+    <li>
+      <label for='password'>Password</label>
+      <input type='password' name='password' class='password dative-tooltip'
+        title="enter your password" tabindex=0 />
+      <span class='ui-state-error ui-corner-all dative-login-failed
+        password-error'></span>
+    </li>
+
+  </ul>
+
 </div>
 
 <div class='dative-login-dialog-target'><div>

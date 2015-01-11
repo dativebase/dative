@@ -96,7 +96,6 @@ define [
           content: "hide #{contentSuffix}"
 
     toggleCreateCorpus: (event) ->
-      console.log 'in toggleCreateCorpus'
       if event then @stopEvent event
       @setCreateCorpusButtonState()
       if @createCorpusView.visible
@@ -121,7 +120,14 @@ define [
         @rendered corpusView
       @$('div.corpora-list').append container
 
-    perfectScrollbar: -> @$('div#dative-page-body').first().perfectScrollbar()
+    perfectScrollbar: ->
+      @$('div#dative-page-body').first()
+        .perfectScrollbar()
+        .scroll => @closeAllTooltips()
+
+    # The special `onClose` event is called by `close` in base.coffee upon close
+    onClose: ->
+      @$('div#dative-page-body').first().unbind 'scroll'
 
     setCollectionFromGUI: ->
       updatedCorpusModels = []
@@ -136,15 +142,27 @@ define [
 
       @$('button.create-corpus')
         .button()
-        .tooltip()
+        .tooltip
+          position:
+            my: "right-10 center"
+            at: "left center"
+            collision: "flipfit"
 
       @$('button.expand-all-corpora')
         .button()
-        .tooltip()
+        .tooltip
+          position:
+            my: "right-45 center"
+            at: "left center"
+            collision: "flipfit"
 
       @$('button.collapse-all-corpora')
         .button()
-        .tooltip()
+        .tooltip
+          position:
+            my: "right-80 center"
+            at: "left center"
+            collision: "flipfit"
 
     _rememberTarget: (event) ->
       try

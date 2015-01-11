@@ -301,9 +301,15 @@ ul.fieldset label {
     width: 80px;
 }
 
-.loginLogin ul.fieldset label,
-.registerForm ul.fieldset label {
-    width: 120px;
+.dative-login-dialog ul.fieldset label,
+.registerForm ul.fieldset label
+{
+    width: 6em;
+}
+
+.dative-login-dialog ul.fieldset input
+{
+    width: 15em;
 }
 
 .fieldset label,

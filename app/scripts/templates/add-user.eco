@@ -24,7 +24,7 @@
 
       <li>
         <label for='username'>Username</label>
-        <input type='text' name='username'
+        <input type='text' name='username' class='dative-tooltip'
           title='enter the username of an existing user; the form will autocomplete
           with the usernames of existing users' />
         <div class='dative-add-user-failed-container'>
@@ -35,7 +35,7 @@
 
       <li>
         <label for='username'></label>
-        <button class='request-add-user'
+        <button class='request-add-user dative-tooltip'
           title='request that this user be added to this corpus with the specified role'
           >Add User</button>
       </li>

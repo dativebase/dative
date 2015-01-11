@@ -38,7 +38,12 @@ define [
       @serversView = new ServersView
         collection: @model.get('servers')
         serverTypes: @model.get('serverTypes')
-      @activeServerView = new ActiveServerView model: @model
+      @activeServerView = new ActiveServerView
+        model: @model
+        tooltipPosition:
+          my: "right-100 center"
+          at: "left center"
+          collision: "flipfit"
 
     listenToEvents: ->
       @listenTo Backbone, 'activateServer', @activateServer
@@ -93,13 +98,22 @@ define [
         false})
       @$('button.save').button({icons: {primary: 'ui-icon-disk'}, text: false})
 
-      @pageBody.perfectScrollbar()
+      @perfectScrollbar()
 
       @selectmenuify()
       @hoverStateFieldDisplay() # make data display react to focus & hover
       @tabindicesNaught() # active elements have tabindex=0
 
       @$('div.server-config-widget-body').hide()
+
+    perfectScrollbar: ->
+      @$('div#dative-page-body').first()
+        .perfectScrollbar()
+        .scroll => @closeAllTooltips()
+
+    # The special `onClose` event is called by `close` in base.coffee upon close
+    onClose: ->
+      @$('div#dative-page-body').first().unbind 'scroll'
 
     selectmenuify: ->
       @$('select', @pageBody).selectmenu()
@@ -155,5 +169,16 @@ define [
       windowHeight = $(window).height()
       desiredOffset = windowHeight / 2
       scrollTop = trueOffset - desiredOffset
-      @pageBody.animate {scrollTop: scrollTop}, 250
+      @pageBody.animate
+        scrollTop: scrollTop
+        250
+        'swing'
+        =>
+          # Since Dative tooltips close upon scroll events, we have to re-open
+          # the tooltip of the focused element after we programmatically scroll
+          # here. BUG @jrwdunham: this doesn't work as consistently as I'd like
+          # it to. I don't know why yet...
+          if $element.hasClass 'dative-tooltip'
+            console.log 'hey'
+            $element.tooltip 'open'
 
