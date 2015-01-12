@@ -160,20 +160,20 @@ define [
 
     # Initialize login/logout icon/button
     refreshLoginButton: ->
-      text = 'Login'
-      icon = 'ui-icon-locked'
-      title = 'login'
-      username = ''
       if @model.get 'loggedIn'
-        text = 'Logout'
-        icon = 'ui-icon-unlocked'
-        title = 'logout'
-        username = @model.get 'username'
-      @$('a.dative-authenticated')
-        .text(text).attr 'title', title
-        .button {icons: {primary: icon}, text: false}
-        .css 'border-color', MainMenuView.jQueryUIColors.defBa
-        .tooltip()
+        @$('a.dative-authenticated')
+          .attr 'title', 'logout'
+          .find('i').removeClass('fa-lock').addClass('fa-unlock-alt').end()
+          .button()
+          .css 'border-color', MainMenuView.jQueryUIColors.defBa
+          .tooltip()
+      else
+        @$('a.dative-authenticated')
+          .attr 'title', 'login'
+          .find('i').removeClass('fa-unlock-alt').addClass('fa-lock').end()
+          .button()
+          .css 'border-color', MainMenuView.jQueryUIColors.defBa
+          .tooltip()
 
     refreshLoggedInUser: ->
       if @model.get 'loggedIn'

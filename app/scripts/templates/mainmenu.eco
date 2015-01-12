@@ -121,7 +121,9 @@
 </ul>
 
 <div class='container-right'>
-  <a class="dative-authenticated" title="login"></a>
+  <a class="dative-authenticated" title="login">
+    <i class='fa fa-lock fa-fw'></i>
+  </a>
   <a class="logged-in-username" title="you are not logged in"></a>
 </div>
 

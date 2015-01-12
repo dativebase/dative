@@ -579,6 +579,18 @@ h1 {
   padding: 0.5em;
 }
 
+.dative-authenticated span.ui-button-text
+{
+    padding: 0;
+}
+
+.dative-authenticated span.ui-button-text i
+{
+  right: 0.1em;
+  bottom: 0.05em;
+  position: relative;
+}
+
 .ui-dialog .ui-dialog-titlebar {
   line-height: normal;
 }
