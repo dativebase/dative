@@ -41,8 +41,6 @@ define [
 
       @$('button.revoke-access')
         .button
-          icons: {primary: 'ui-icon-close'},
-          text: false
           disabled: disabled
         .tooltip
           position:
