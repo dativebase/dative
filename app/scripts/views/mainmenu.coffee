@@ -34,7 +34,6 @@ define [
         @$('li.requires-authentication').not('.fielddb')
           .show()
           .find('a').removeClass 'disabled'
-        console.log @model.get('activeServer')?.get
         if @model.get('activeServer')?.get('type') is 'FieldDB'
           @$('li.fielddb').show()
             .children('a').removeClass 'disabled'
@@ -98,8 +97,13 @@ define [
           event = $(element).attr 'data-event'
           shortcut = $(element).attr 'data-shortcut'
           @bindShortcutToEventTrigger shortcut, event
-          $(element).append $('<span>').addClass('float-right').text(
-            @getShortcutAbbreviation(shortcut))
+          shortcutAbbreviation = @getShortcutAbbreviation(shortcut)
+          $(element).append $('<span>').addClass('float-right').html(
+            @getShortcutInFixedWithSpans(shortcutAbbreviation))
+
+    getShortcutInFixedWithSpans: (shortcut) ->
+      [initial..., last] = shortcut
+      "#{initial.join('')}<span class='fixed-width'>#{last}</span>"
 
     # Bind keyboard shortcut to triggering of event
     bindShortcutToEventTrigger: (shortcutString, eventName) ->

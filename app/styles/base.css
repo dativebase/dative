@@ -724,3 +724,8 @@ p.paragraph-widget {
   border-radius: 6px;
 }
 
+span.fixed-width
+{
+    display: inline-block;
+    width: 1em;
+}
