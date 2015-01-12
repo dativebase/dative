@@ -2,7 +2,7 @@
 
     <div class='dative-widget-header-title'><%= @username %></div>
 
-    <button class="revoke-access"
+    <button class="revoke-access dative-tooltip"
       title="revoke this user's access to this corpus"></button>
 
   </div>

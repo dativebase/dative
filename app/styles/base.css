@@ -202,18 +202,26 @@ div.dative-page-header-title
 }
 
 .dative-add-user-failed-container,
-.dative-create-corpus-failed-container {
+.dative-create-corpus-failed-container,
+.dative-validation-container
+{
     position: absolute;
 }
 
 .dative-add-user-failed,
-.dative-create-corpus-failed {
+.dative-create-corpus-failed
+{
     position: relative;
-    top: -26px;
-    left: 411px;
     z-index: 100;
     display: inline-block;
     max-width: 200px;
+}
+
+.dative-add-user-failed,
+.dative-create-corpus-failed
+{
+    top: -26px;
+    left: 411px;
 }
 
 .dative-add-user-failed,
@@ -301,8 +309,7 @@ ul.fieldset label {
     width: 80px;
 }
 
-.dative-login-dialog ul.fieldset label,
-.registerForm ul.fieldset label
+.dative-login-dialog ul.fieldset label
 {
     width: 6em;
 }
@@ -310,6 +317,11 @@ ul.fieldset label {
 .dative-login-dialog ul.fieldset input
 {
     width: 15em;
+}
+
+.registerForm ul.fieldset label
+{
+    width: 10em;
 }
 
 .fieldset label,

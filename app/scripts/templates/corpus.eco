@@ -6,7 +6,9 @@
     <div class='button-container-left'>
 
       <button class="toggle-appear dative-tooltip"
-        title="show corpus details"></button>
+        title="show corpus details">
+        <i class="fa fa-caret-right fa-fw"></i>
+      </button>
 
       <button class="use-corpus dative-tooltip"
         title="use this corpus">

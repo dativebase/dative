@@ -34,7 +34,7 @@ define [
         label: 'Server *'
         tooltipContent: 'select a server to register with'
         tooltipPosition:
-          my: "right-80 center"
+          my: "right-130 center"
           at: "left center"
           collision: "flipfit"
 
@@ -142,7 +142,7 @@ define [
             collision: "flipfit"
       @$('input').tooltip
         position:
-          my: "right-80 center"
+          my: "right-130 center"
           at: "left center"
           collision: "flipfit"
 
@@ -313,6 +313,7 @@ define [
 
     # `attr` must have a value; indicate that and return `null` if no `val`.
     required: (attr, val) ->
+      console.log "in required with #{attr} and value: #{val}"
       if val
         @$(".#{attr}-validation").first().hide()
         val

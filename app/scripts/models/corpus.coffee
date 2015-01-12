@@ -31,7 +31,8 @@ define [
       @pouchname = options.pouchname
 
     getCorpusServerURL:  ->
-      "#{@applicationSettings.get('baseDBURL')}/#{@pouchname}"
+      url = @applicationSettings.get 'baseDBURL'
+      "#{url}/#{@pouchname}"
 
     # Fetch the corpus data.
     # GET `<CorpusServiceURL>/<corpusname>/_design/pages/_view/private_corpuses`
@@ -42,10 +43,9 @@ define [
         timeout: 10000
         url: "#{@getCorpusServerURL()}/_design/pages/_view/private_corpuses"
         onload: (responseJSON) =>
-          #fieldDBCorpusObject = responseJSON.rows?[-1].value or {}
           fieldDBCorpusObject = @getFieldDBCorpusObject responseJSON
-          console.log fieldDBCorpusObject
-          @set fieldDBCorpusObject
+          if fieldDBCorpusObject
+            @set fieldDBCorpusObject
           @trigger 'fetchEnd'
         onerror: (responseJSON) =>
           console.log "Failed to fetch a corpus at #{@url()}."

@@ -178,7 +178,6 @@ define [
           # the tooltip of the focused element after we programmatically scroll
           # here. BUG @jrwdunham: this doesn't work as consistently as I'd like
           # it to. I don't know why yet...
-          if $element.hasClass 'dative-tooltip'
-            console.log 'hey'
+          if $element.hasClass('dative-tooltip') and $element.tooltip('instance')
             $element.tooltip 'open'
 

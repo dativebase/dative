@@ -31,6 +31,7 @@ define [
       @addUserView = new AddUserView()
       @haveFetchedUsers = false
       @bodyVisible = false
+      @shouldFocusToggleButtonUponOpen = true
       @applicationSettings = options?.applicationSettings or {}
       @admins = []
       @writers = []
@@ -222,9 +223,20 @@ define [
 
     getContext: ->
       context = _.extend @model.attributes, isActive: @active()
-      # Hacky, but ...
       if context.pouchname is 'lingllama-communitycorpus'
         context.title = "LingLlama's Community Corpus"
+      # The following works with local FieldDB but not with production, as of Jan 11, 2015
+      ###
+      [ownerName, corpusName] = context.pouchname.split('-')
+      myUsername = @model.get('applicationSettings').get 'username'
+      if corpusName is 'firstcorpus'
+        if myUsername is ownerName
+          context.modifiedTitle = "my #{context.title}"
+        else
+          context.modifiedTitle = "#{ownerName}'s #{context.title}"
+      else
+        context.modifiedTitle = context.title
+      ###
       context
 
     # Add user subviews to the appropriate array of this corpus view.
@@ -345,9 +357,8 @@ define [
 
     setToggleButtonStateClosed: ->
       @$('button.toggle-appear')
-        .button
-          icons: {primary: 'ui-icon-triangle-1-e'}
-          text: false
+        .find('i').removeClass('fa-caret-down').addClass('fa-caret-right').end()
+        .button()
         .tooltip
           content: 'show corpus details'
 
@@ -363,7 +374,10 @@ define [
       if not $body.is ':visible'
         $body.slideDown
           complete: =>
-            @focusToggleButton()
+            if @shouldFocusToggleButtonUponOpen
+              @focusToggleButton()
+            else
+              @shouldFocusToggleButtonUponOpen = true
 
     showBody: ->
       @setBodyStateOpen()
@@ -382,9 +396,8 @@ define [
 
     setToggleButtonStateOpen: ->
       @$('button.toggle-appear')
-        .button
-          icons: {primary: 'ui-icon-triangle-1-s'}
-          text: false
+        .find('i').addClass('fa-caret-down').removeClass('fa-caret-right').end()
+        .button()
         .tooltip content: 'hide corpus details'
 
     guify: ->
@@ -395,9 +408,7 @@ define [
         disabled = false
 
       @$('button.toggle-appear')
-        .button
-          icons: {primary: 'ui-icon-triangle-1-e'}
-          text: false
+        .button()
         .tooltip
           position:
             my: "right-10 center"

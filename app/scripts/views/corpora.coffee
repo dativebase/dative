@@ -30,7 +30,8 @@ define [
       @getAndFetchCorpusViews()
 
     addCorpusModelsToCollection: ->
-      for pouchname in @getCorpusPouchnames()
+      # WARN: I'm ignoring `public-firstcorpus` and `llinglama-communitycorpus' for now
+      for pouchname in _.without @getCorpusPouchnames(), 'public-firstcorpus', 'lingllama-communitycorpus'
         corpusModel = new CorpusModel
           applicationSettings: @applicationSettings
           pouchname: pouchname
@@ -179,6 +180,7 @@ define [
     expandAllCorpora: (event) ->
       if event then @stopEvent event
       for corpusView in @corpusViews
+        corpusView.shouldFocusToggleButtonUponOpen = false
         corpusView.fetchThenOpen()
 
     collapseAllCorporaKeys: (event) ->

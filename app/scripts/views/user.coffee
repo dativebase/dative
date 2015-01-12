@@ -44,7 +44,11 @@ define [
           icons: {primary: 'ui-icon-close'},
           text: false
           disabled: disabled
-        .tooltip()
+        .tooltip
+          position:
+            my: 'left+10 center'
+            at: 'right center'
+            collision: 'flipfit'
 
       if disabled
         @$('button.revoke-access').hide()
