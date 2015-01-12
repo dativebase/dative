@@ -105,9 +105,7 @@ define [
       @$('button').button().attr('tabindex', 0)
 
       @$('button.delete-server')
-        .button
-          icons: {primary: 'ui-icon-trash'}
-          text: false
+        .button()
         .tooltip
           position:
             my: "right-40 center"
@@ -115,9 +113,7 @@ define [
             collision: "flipfit"
 
       @$('button.activate-server')
-        .button
-          icons: {primary: 'ui-icon-star'},
-          text: false
+        .button()
         .tooltip
           position:
             my: "right-70 center"

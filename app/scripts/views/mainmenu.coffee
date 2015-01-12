@@ -27,12 +27,15 @@ define [
     loggedInChanged: ->
       @render()
 
+    # Make certain menu items (in)active and (in)visible depending on
+    # authentication status and server type.
     setActivityAndVisibility: ->
       if @model.get('loggedIn')
         @$('li.requires-authentication').not('.fielddb')
           .show()
           .find('a').removeClass 'disabled'
-        if @model.get('activeServer').get('type') is 'FieldDB'
+        console.log @model.get('activeServer')?.get
+        if @model.get('activeServer')?.get('type') is 'FieldDB'
           @$('li.fielddb').show()
             .children('a').removeClass 'disabled'
       else
@@ -175,8 +178,8 @@ define [
     refreshLoggedInUser: ->
       if @model.get 'loggedIn'
         username = @model.get 'username'
-        activeServerName = @model.get('activeServer').get 'name'
-        activeServerURL = @model.get('activeServer').get 'url'
+        activeServerName = @model.get('activeServer')?.get 'name'
+        activeServerURL = @model.get('activeServer')?.get 'url'
         title = ["You are logged in to the server “#{activeServerName}” ",
           "(#{activeServerURL}) as “#{username}”."].join ''
         @$('.logged-in-username')

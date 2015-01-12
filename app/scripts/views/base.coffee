@@ -98,5 +98,7 @@ define [
       if el.clientHeight < el.scrollHeight then true else false
 
     closeAllTooltips: ->
-      @$('.dative-tooltip').tooltip 'close'
+      @$('.dative-tooltip').each (index, element) ->
+        if $(element).tooltip 'instance'
+          $(element).tooltip 'close'
 

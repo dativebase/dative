@@ -16,9 +16,13 @@
 
     <div class='button-container-left'>
       <button class="delete-server dative-tooltip"
-        title="delete this server"></button>
+        title="delete this server">
+        <i class='fa fa-trash fa-fw'></i>
+      </button>
       <button class="activate-server dative-tooltip"
-        title="make this server the active one"></button>
+        title="make this server the active one">
+        <i class='fa fa-star fa-fw'></i>
+      </button>
     </div>
 
   </div>

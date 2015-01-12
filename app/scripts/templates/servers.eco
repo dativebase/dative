@@ -7,8 +7,12 @@
     <div class='dative-widget-header-title'>Servers</div>
 
     <div class='button-container-left'>
-      <button class="toggle-appear dative-tooltip" title="show servers"></button>
-      <button class="add-server dative-tooltip" title="create a new server"></button>
+      <button class="toggle-appear dative-tooltip" title="show servers">
+        <i class='fa fa-caret-right fa-fw'></i>
+      </button>
+      <button class="add-server dative-tooltip" title="create a new server">
+        <i class='fa fa-plus fa-fw'></i>
+      </button>
     </div>
 
   </div>

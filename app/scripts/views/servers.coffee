@@ -36,6 +36,7 @@ define [
       serverView.close()
       @closed serverView
       @emptyMessage()
+      @$('button.toggle-appear').first().focus()
 
     emptyMessage: ->
       if @serverViews.length is 0
@@ -58,6 +59,7 @@ define [
         container.appendChild serverView.render().el
         @rendered serverView
       @$widgetBody.append container
+      if @bodyVisible then @showServerConfig() else @hideServerConfig()
       @emptyMessage()
       @listenToEvents()
       @
@@ -88,15 +90,8 @@ define [
 
       @$('button').button().attr('tabindex', 0)
 
-      triangleIcon = 'ui-icon-triangle-1-s'
-      if not @bodyVisible
-        @$('.dative-widget-body').first().hide()
-        triangleIcon = 'ui-icon-triangle-1-e'
-
       @$('button.toggle-appear')
-        .button
-          icons: {primary: triangleIcon}
-          text: false
+        .button()
         .tooltip
           position:
             my: "right-20 center"
@@ -104,9 +99,7 @@ define [
             collision: "flipfit"
 
       @$('button.add-server')
-        .button
-          icons: {primary: 'ui-icon-plusthick'}
-          text: false
+        .button()
         .tooltip
           position:
             my: "right-50 center"
@@ -114,32 +107,60 @@ define [
             collision: "flipfit"
 
     toggleServerConfig: (event) ->
-      if event
-        event.preventDefault()
-        event.stopPropagation()
-
-      @$('.toggle-appear .ui-button-icon-primary')
-        .toggleClass 'ui-icon-triangle-1-e ui-icon-triangle-1-s'
-
-      @$('.dative-widget-body').first()
-        .slideToggle
-          complete: =>
-            @$('.dative-widget-header').first().toggleClass 'header-no-body'
-            $firstInput = @$('input[name=name]').first()
-            if $firstInput.is(':visible')
-              @$('button.toggle-appear').tooltip content: 'hide servers'
-              $firstInput.focus()
-            else
-              @$('button.toggle-appear').tooltip content: 'show servers'
-            @bodyVisible = @$('.dative-widget-body').is(':visible')
-
-    openServerConfig: ->
-      if not @$('.dative-widget-body').is(':visible')
-        @toggleServerConfig()
+      if event then @stopEvent event
+      $body = @$('.dative-widget-body').first()
+      if $body.is ':visible'
+        @closeServerConfig()
+      else
+        @openServerConfig()
 
     closeServerConfig: ->
-      if @$('.dative-widget-body').is(':visible')
-        @toggleServerConfig()
+      @setBodyStateClosed()
+      $body = @$('.dative-widget-body').first()
+      if $body.is ':visible' then $body.slideUp()
+
+    hideServerConfig: ->
+      @setBodyStateClosed()
+      @$('.dative-widget-body').first().hide()
+
+    showServerConfig: ->
+      @setBodyStateOpen()
+      @$('.dative-widget-body').first().show()
+
+    openServerConfig: ->
+      @setBodyStateOpen()
+      $body = @$('.dative-widget-body').first()
+      if not $body.is ':visible' then $body.slideDown()
+      # $firstInput = @$('input[name=name]').first()
+      # $firstInput.focus()
+
+    setBodyStateClosed: ->
+      @bodyVisible = false
+      @setHeaderStateClosed()
+      @setToggleButtonStateClosed()
+
+    setBodyStateOpen: ->
+      @bodyVisible = true
+      @setHeaderStateOpen()
+      @setToggleButtonStateOpen()
+
+    setHeaderStateClosed: ->
+      @$('.dative-widget-header').first().addClass 'header-no-body'
+
+    setHeaderStateOpen: ->
+      @$('.dative-widget-header').first().removeClass 'header-no-body'
+
+    setToggleButtonStateClosed: ->
+      @$('button.toggle-appear')
+        .find('i').removeClass('fa-caret-down').addClass('fa-caret-right').end()
+        .button()
+        .tooltip content: 'show servers'
+
+    setToggleButtonStateOpen: ->
+      @$('button.toggle-appear')
+        .find('i').addClass('fa-caret-down').removeClass('fa-caret-right').end()
+        .button()
+        .tooltip content: 'hide servers'
 
     rememberTarget: (event) ->
       try
