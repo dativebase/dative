@@ -44,8 +44,8 @@ define [
         url: "#{@getCorpusServerURL()}/_design/pages/_view/private_corpuses"
         onload: (responseJSON) =>
           fieldDBCorpusObject = @getFieldDBCorpusObject responseJSON
-          if fieldDBCorpusObject
-            @set fieldDBCorpusObject
+          # TODO @jrwdunham: should this `set` be a `save`?
+          if fieldDBCorpusObject then @set fieldDBCorpusObject
           @trigger 'fetchEnd'
         onerror: (responseJSON) =>
           console.log "Failed to fetch a corpus at #{@url()}."

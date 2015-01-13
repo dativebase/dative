@@ -18,14 +18,24 @@ define [
     initialize: (options) ->
       @visible = false
       @submitAttempted = false
+      @requestPending = false
       @inputsValid = false
-      @listenTo Backbone, 'createCorpusEnd', @stopSpin
+
+    listenToEvents: ->
+      @stopListening()
+      @undelegateEvents()
+      @delegateEvents()
+      @listenTo Backbone, 'newCorpusStart', @newCorpusStart
+      @listenTo Backbone, 'newCorpusEnd', @newCorpusEnd
+      @listenTo Backbone, 'newCorpusSuccess', @newCorpusSuccess
+      @listenTo Backbone, 'newCorpusFail', @newCorpusFail
 
     template: createCorpusTemplate
 
     render: ->
       @$el.html @template()
       @guify()
+      @listenToEvents()
       @
 
     events:
@@ -34,12 +44,108 @@ define [
       'keydown button.request-create-corpus': 'requestCreateCorpusKeys'
       'keydown input[name=corpus-name]': 'requestCreateCorpusKeys'
 
+    newCorpusStart: (newCorpusName) ->
+      @disableCreateCorpusButton()
+      @spin "Requesting creation of a new corpus named “#{newCorpusName}”"
+
+    newCorpusEnd: ->
+      @requestPending = false
+      @hideTooltip()
+      @enableCreateCorpusButton()
+      @stopSpin()
+
+    newCorpusSuccess: (newCorpusName) ->
+      @showCorpusCreateSuccessMessage "Successfully created a corpus named “#{newCorpusName}”"
+
+    newCorpusFail: (reason) ->
+      @showCorpusCreateErrorMessage reason
+
+    corpusCreateMessagePosition:
+      my: 'left top'
+      at: 'right+195 top'
+      collision: 'flipfit'
+
+    showCorpusCreateSuccessMessage: (message) ->
+      @closeCorpusCreateErrorMessage()
+      $target = @$('.request-create-corpus-success-tooltip').first()
+      $target
+        .tooltip
+          items: 'span'
+          tooltipClass: 'ui-state-highlight'
+          content: message
+          position: @corpusCreateMessagePosition
+      $target.tooltip 'open'
+
+    closeCorpusCreateErrorMessage: ->
+      $target = @$('.request-create-corpus-error-tooltip').first()
+      if $target.tooltip 'instance' then $target.tooltip 'close'
+
+    closeCorpusCreateSuccessMessage: ->
+      $target = @$('.request-create-corpus-success-tooltip').first()
+      if $target.tooltip 'instance' then $target.tooltip 'close'
+
+    showCorpusCreateErrorMessage: (message) ->
+      @closeCorpusCreateSuccessMessage()
+      $target = @$('.request-create-corpus-error-tooltip').first()
+      $target
+        .tooltip
+          items: 'span'
+          tooltipClass: 'ui-state-error'
+          content: message
+          position: @corpusCreateMessagePosition
+      $target.tooltip 'open'
+
+    # Options for spin.js, cf. http://fgnass.github.io/spin.js/
+    spinnerOptions:
+      lines: 13 # The number of lines to draw
+      length: 5 # The length of each line
+      width: 2 # The line thickness
+      radius: 3 # The radius of the inner circle
+      corners: 1 # Corner roundness (0..1)
+      rotate: 0 # The rotation offset
+      direction: 1 # 1: clockwise -1: counterclockwise
+      color: CreateCorpusView.jQueryUIColors.defCo
+      speed: 2.2 # Rounds per second
+      trail: 60 # Afterglow percentage
+      shadow: false # Whether to render a shadow
+      hwaccel: false # Whether to use hardware acceleration
+      className: 'spinner' # The CSS class to assign to the spinner
+      zIndex: 2e9 # The z-index (defaults to 2000000000)
+      top: '50%' # Top position relative to parent
+      left: '97%' # Left position relative to parent
+
+    spin: (tooltipMessage=null) ->
+      @$('.dative-widget-header').first().spin @spinnerOptions
+      if tooltipMessage then @showTooltip tooltipMessage, 'success'
+
+    tooltipPosition:
+      my: "left+610 top+8"
+      at: "left top"
+      collision: "flipfit"
+
+    showTooltip: (tooltipMessage) ->
+      @$('.dative-widget-header').first()
+        .tooltip
+          items: 'div'
+          content: tooltipMessage
+          position: @tooltipPosition
+        .tooltip 'open'
+
+    hideTooltip: ->
+      $header = @$('.dative-widget-header').first()
+      if $header.tooltip 'instance'
+        $header.tooltip 'close'
+
+    stopSpin: ->
+      @$('.dative-widget-header').first().spin false
+
     requestCreateCorpus: ->
       @submitAttempted = true
       corpusName = @validate()
       if @inputsValid
         @disableCreateCorpusButton()
         @trigger 'request:createCorpus', corpusName
+        @requestPending = true
 
     requestCreateCorpusKeys: (event) ->
       if event.which is 13
@@ -49,11 +155,14 @@ define [
         if not disabled then $createCorpusButton.click()
 
     disableCreateCorpusButton: ->
-      @$('input[name=corpus-name]').first().focus()
+      @focusNameInput()
       @$('button.request-create-corpus').button 'disable'
 
     enableCreateCorpusButton: ->
       @$('button.request-create-corpus').button 'enable'
+
+    focusNameInput: ->
+      @$('input[name=corpus-name]').first().focus()
 
     validate: ->
       corpusName = @$('input[name=corpus-name]').val() or false
@@ -65,7 +174,7 @@ define [
       if @submitAttempted
         if @inputsValid
           @hideErrorMsg()
-          @enableCreateCorpusButton()
+          if not @requestPending then @enableCreateCorpusButton()
         else
           @showErrorMsg errorMsg
           @disableCreateCorpusButton()
@@ -85,16 +194,17 @@ define [
 
     guify: ->
 
+      position =
+        my: "right-95px center"
+        at: "left center"
+        collision: "flipfit"
+
       @$('input[name=corpus-name]')
-        .tooltip
-          position:
-            my: "right-95px center"
-            at: "left center"
-            collision: "flipfit"
+        .tooltip position: position
 
       @$('button.request-create-corpus')
         .button()
-        .tooltip()
+        .tooltip position: position
 
       @$('.dative-create-corpus-failed').hide()
       @tabindicesNaught()
@@ -102,6 +212,7 @@ define [
     closeGUI: ->
       @visible = false
       @$el.slideUp()
+      @closeAllTooltips()
 
     openGUI: ->
       @visible = true

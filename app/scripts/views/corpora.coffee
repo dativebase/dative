@@ -31,7 +31,8 @@ define [
 
     addCorpusModelsToCollection: ->
       # WARN: I'm ignoring `public-firstcorpus` and `llinglama-communitycorpus' for now
-      for pouchname in _.without @getCorpusPouchnames(), 'public-firstcorpus', 'lingllama-communitycorpus'
+      for pouchname in _.without @getCorpusPouchnames(), 'public-firstcorpus', \
+      'lingllama-communitycorpus'
         corpusModel = new CorpusModel
           applicationSettings: @applicationSettings
           pouchname: pouchname
@@ -58,18 +59,33 @@ define [
       @stopListening()
       @undelegateEvents()
       @delegateEvents()
-      @listenTo @createCorpusView, 'request:createCorpus', @createCorpus
+      @listenTo @createCorpusView, 'request:createCorpus', @issueCreateCorpusRequest
+      @listenTo Backbone, 'newCorpusSuccess', @newCorpusAddedToCollection
 
-    createCorpus: (corpusName) ->
-      console.log "You want the corpora view to request creation of the corpus #{corpusName}"
+    newCorpusAddedToCollection: (newCorpusName) ->
+      @prependNewCorpusViewToCorpusViews()
+      @prependNewCorpusViewToDOM()
+
+    prependNewCorpusViewToCorpusViews: ->
+      newCorpusModel = @collection.at 0
+      newCorpusView = new CorpusView
+        model: newCorpusModel
+        applicationSettings: @applicationSettings.toJSON()
+      @corpusViews.unshift newCorpusView
+
+    prependNewCorpusViewToDOM: ->
+      @corpusViews[0].render().$el.prependTo(@$('div.corpora-list'))
+        .hide().slideDown('slow')
+      @rendered @corpusViews[0]
+
+    issueCreateCorpusRequest: (corpusName) ->
+      @collection.newCorpus corpusName
 
     events:
       'keydown button.create-corpus': 'toggleCreateCorpusKeys'
       'click button.create-corpus': 'toggleCreateCorpus'
-
       'keydown button.expand-all-corpora': 'expandAllCorporaKeys'
       'click button.expand-all-corpora': 'expandAllCorpora'
-
       'keydown button.collapse-all-corpora': 'collapseAllCorporaKeys'
       'click button.collapse-all-corpora': 'collapseAllCorpora'
 
@@ -85,7 +101,11 @@ define [
       else
         @createCorpusView.hide()
       @perfectScrollbar()
+      @focusFirstButton()
       @
+
+    focusFirstButton: ->
+      @$('button.ui-button').first().focus()
 
     setCreateCorpusButtonState: ->
       contentSuffix = 'form for creating a new corpus'
@@ -103,6 +123,7 @@ define [
         @createCorpusView.closeGUI()
       else
         @createCorpusView.openGUI()
+        @createCorpusView.focusNameInput()
 
     toggleCreateCorpusKeys: (event) ->
       @_rememberTarget event

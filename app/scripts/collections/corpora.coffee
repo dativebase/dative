@@ -15,7 +15,7 @@ define [
     # Create a new corpus.
     # POST `<AuthServiceURL>/newcorpus`
     newCorpus: (newCorpusName) ->
-      @trigger 'newCorpusStart'
+      Backbone.trigger 'newCorpusStart', newCorpusName
       payload =
         authUrl: @applicationSettings.get?('activeServer')?.get?('url')
         username: @applicationSettings.get?('username')
@@ -28,17 +28,29 @@ define [
         url: "#{payload.authUrl}/newcorpus"
         payload: payload
         onload: (responseJSON) =>
-          @trigger 'newCorpusEnd'
+          Backbone.trigger 'newCorpusEnd'
           if responseJSON.corpusadded
-            # TODO @jrwdunham: initialize a new corpus model and add it to the collection.
-            @trigger 'newCorpusSuccess', username
+            if responseJSON.corpus
+              corpusObject = responseJSON.corpus
+              corpusObject.applicationSettings = @applicationSettings
+              @unshift corpusObject
+              Backbone.trigger 'newCorpusSuccess', newCorpusName
+            else
+              Backbone.trigger 'newCorpusFail',
+                ["There was an error creating corpus “#{newCorpusName}”.",
+                 "This name is probably already taken.",
+                 "Try a different one."].join ' '
+              console.log responseJSON.userFriendlyErrors[0]
           else
+            Backbone.trigger 'newCorpusFail', "Request to create corpus failed: `corpusadded` not truthy."
             console.log 'Failed request to /newcorpus: `corpusadded` not truthy.'
         onerror: (responseJSON) =>
-          @trigger 'newCorpusEnd'
+          Backbone.trigger 'newCorpusEnd'
+          Backbone.trigger 'newCorpusFail', "Request to create corpus failed with an error."
           console.log 'Failed request to /newcorpus: error.'
         ontimeout: =>
-          @trigger 'newCorpusEnd'
+          Backbone.trigger 'newCorpusEnd'
+          Backbone.trigger 'newCorpusFail', "Request to create corpus failed: request timed out."
           console.log 'Failed request to /newcorpus: timed out.'
       )
 
