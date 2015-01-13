@@ -89,15 +89,9 @@ define [
       'click button.expand-all-corpora': 'expandAllCorpora'
       'keydown button.collapse-all-corpora': 'collapseAllCorporaKeys'
       'click button.collapse-all-corpora': 'collapseAllCorpora'
-      "focus button, input, .ui-selectmenu-button": 'rememberFocusedElement'
-
-    focusableSelector: 'button, input, .ui-selectmenu-button'
-
-    rememberFocusedElement: (event) ->
-      try
-        @$(@focusableSelector).each (index, el) =>
-          if el is event.target
-            @focusedElementIndex = index
+      'focus button, input, .ui-selectmenu-button': 'rememberFocusedElement'
+      'focus input': 'scrollToFocusedInput'
+      'focus button': 'scrollToFocusedInput'
 
     render: (taskId) ->
       @$el.html @template()
@@ -123,9 +117,6 @@ define [
 
     focusFirstButton: ->
       @$('button.ui-button').first().focus()
-
-    focusLastFocusedElement: ->
-      @$(@focusableSelector).eq(@focusedElementIndex).focus()
 
     setCreateCorpusButtonState: ->
       contentSuffix = 'form for creating a new corpus'

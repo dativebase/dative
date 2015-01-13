@@ -26,6 +26,7 @@ define [
       # clicked it. So I've disabled "scroll-to-focus" for selectmenus for now.
       #'focus .ui-selectmenu-button': 'scrollToFocusedInput'
       'selectmenuchange select[name=css-theme]': 'changeThemeCSS'
+      'focus button, input, .ui-selectmenu-button': 'rememberFocusedElement'
 
     # WARN: THIS DOES NOT WORK!
     # The CSS *does* change dynamically, however for some unknown reason the
@@ -35,6 +36,7 @@ define [
       $('#jquery-ui-css').attr href: newJQueryUICSS
 
     initialize: ->
+      @focusedElementIndex = null
       @serversView = new ServersView
         collection: @model.get('servers')
         serverTypes: @model.get('serverTypes')
@@ -63,7 +65,7 @@ define [
       #console.log 'active server url has changed'
       return
 
-    render: ->
+    render: (taskId) ->
       params = _.extend {headerTitle: 'Application Settings'}, @model.attributes
       @$el.html @template(params)
 
@@ -81,6 +83,7 @@ define [
       @guify()
       @setFocus()
       @listenToEvents()
+      Backbone.trigger 'longTask:deregister', taskId
       @
 
     setModelFromGUI: ->
@@ -137,47 +140,9 @@ define [
         .css("border-color", ApplicationSettingsView.jQueryUIColors.defBo)
         .attr('tabindex', 0)
 
-    _rememberTarget: (event) ->
-      try
-        @$('button, .ui-selectmenu-button, input').each (index, el) =>
-          if el is event.target
-            @focusedElementIndex = index
-            return false # break out of jQuery each loop
-
-    setFocus: (viewType) ->
-      if @focusedElementIndex?
-        @$('button, .ui-selectmenu-button, input').eq(@focusedElementIndex)
-          .focus().select()
+    setFocus: ->
+      if @focusedElementIndex
+        @focusLastFocusedElement()
       else
-        @$('.ui-selectmenu-button').first().focus()
-
-    # Alter the scroll position so that the focused UI element is centered.
-    scrollToFocusedInput: (event) ->
-      # Small bug: if you tab really fast through the inputs, the scroll
-      # animations will be queued and all jumpy. Calling `.stop` as below
-      # does nof fix the issue.
-      # @$('input, button, .ui-selectmenu-button').stop('fx', true, false)
-
-      $element = $ event.currentTarget
-
-      # Get the true offset of the element
-      initialScrollTop = @pageBody.scrollTop()
-      @pageBody.scrollTop 0
-      trueOffset = $element.offset().top
-      @pageBody.scrollTop initialScrollTop
-
-      windowHeight = $(window).height()
-      desiredOffset = windowHeight / 2
-      scrollTop = trueOffset - desiredOffset
-      @pageBody.animate
-        scrollTop: scrollTop
-        250
-        'swing'
-        =>
-          # Since Dative tooltips close upon scroll events, we have to re-open
-          # the tooltip of the focused element after we programmatically scroll
-          # here. BUG @jrwdunham: this doesn't work as consistently as I'd like
-          # it to. I don't know why yet...
-          if $element.hasClass('dative-tooltip') and $element.tooltip('instance')
-            $element.tooltip 'open'
+        @focusFirstElement()
 

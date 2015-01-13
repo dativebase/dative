@@ -121,3 +121,54 @@ define [
       top: '0%' # Top position relative to parent
       left: '0%' # Left position relative to parent
 
+    # Logic for remembering and re-focusing the last focused element.
+
+    focusedElementIndex: 0
+
+    rememberFocusedElement: (event) ->
+      try
+        @$(@focusableSelector).each (index, el) =>
+          if el is event.target
+            @focusedElementIndex = index
+
+    focusLastFocusedElement: ->
+      @$(@focusableSelector).eq(@focusedElementIndex).focus()
+
+    focusFirstElement: ->
+      @$(@focusableSelector).eq(0).focus()
+
+    focusableSelector: 'button, input, .ui-selectmenu-button'
+
+    # Alter the scroll position so that the focused UI element is centered.
+    scrollToFocusedInput: (event) ->
+      # Small bug: if you tab really fast through the inputs, the scroll
+      # animations will be queued and all jumpy. Calling `.stop` as below
+      # does nof fix the issue.
+      # @$('input, button, .ui-selectmenu-button').stop('fx', true, false)
+
+      pageBodySelector = @pageBodySelector or '#dative-page-body'
+      $pageBody = @$ pageBodySelector
+
+      $element = $ event.currentTarget
+
+      # Get the true offset of the element
+      initialScrollTop = $pageBody.scrollTop()
+      $pageBody.scrollTop 0
+      trueOffset = $element.offset().top
+      $pageBody.scrollTop initialScrollTop
+
+      windowHeight = $(window).height()
+      desiredOffset = windowHeight / 2
+      scrollTop = trueOffset - desiredOffset
+      $pageBody.animate
+        scrollTop: scrollTop
+        250
+        'swing'
+        =>
+          # Since Dative tooltips close upon scroll events, we have to re-open
+          # the tooltip of the focused element after we programmatically scroll
+          # here. BUG @jrwdunham: this doesn't work as consistently as I'd like
+          # it to. I don't know why yet...
+          if $element.hasClass('dative-tooltip') and $element.tooltip('instance')
+            $element.tooltip 'open'
+

@@ -160,12 +160,17 @@ define [
       @_renderVisibleView()
 
     showApplicationSettingsView: ->
+      if @_applicationSettingsView and
+      @_visibleView is @_applicationSettingsView
+        return
+      taskId = @guid()
+      Backbone.trigger 'longTask:register', 'Opening application settings', taskId
       @_closeVisibleView()
       if not @_applicationSettingsView
         @_applicationSettingsView = new ApplicationSettingsView(
           model: @applicationSettings)
       @_visibleView = @_applicationSettingsView
-      @_renderVisibleView()
+      @_renderVisibleView taskId
 
     showFormsView: ->
       @_closeVisibleView()
