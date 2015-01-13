@@ -150,7 +150,10 @@ define [
       @_submitAttempted = false
       @$target.find('.password.passwordConfirm').val('').end()
         .find('span.dative-register-validation').text('').hide()
-      @$target.find('.ui-selectmenu-button').focus()
+      @focusFirstInput()
+
+    focusFirstInput: ->
+      @$target.find('input').first().focus()
 
     dialogOpen: ->
       Backbone.trigger 'register-dialog:open'
@@ -221,7 +224,7 @@ define [
 
     selectmenuify: ->
       @$target.find('select').selectmenu width: 252
-      @$target.find('.ui-selectmenu-button').focus()
+      @focusFirstInput()
 
     # Tabindices=0 and jQueryUI colors
     tabindicesNaught: ->

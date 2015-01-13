@@ -89,7 +89,7 @@ define [
       'keydown button.collapse-all-corpora': 'collapseAllCorporaKeys'
       'click button.collapse-all-corpora': 'collapseAllCorpora'
 
-    render: ->
+    render: (taskId) ->
       @$el.html @template()
       @matchHeights()
       @guify()
@@ -102,6 +102,7 @@ define [
         @createCorpusView.hide()
       @perfectScrollbar()
       @focusFirstButton()
+      Backbone.trigger 'longTask:deregister', taskId
       @
 
     focusFirstButton: ->

@@ -523,6 +523,7 @@ h1 {
 {
     position: relative;
 }
+
 .progress-widget,
 .notifier
 {
@@ -531,16 +532,24 @@ h1 {
     min-height: 40px;
     width: 100px;
     margin: 20px;
-    padding: 20px;
+    z-index: 100;
 }
+
 .progress-widget
 {
     left: 0;
+    padding: 10px 10px 0px 10px;
+}
+
+.progress-widget-spinner
+{
+    height: 20px;
 }
 
 .notifier
 {
     right: 0;
+    padding: 20px;
 }
 
 .pulse1
@@ -557,7 +566,7 @@ h1 {
 
 .progress-widget-tasks
 {
-    margin-top: 80px;
+    margin-top: 10px;
 }
 .progress-widget-tasks ul li,
 .notifier ul li

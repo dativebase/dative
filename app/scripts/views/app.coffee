@@ -201,16 +201,19 @@ define [
     # corpora from FieldDB-style ones in terms of how they are labelled and
     # otherwise...
     showCorporaView: ->
+      if @_corporaView and @_visibleView is @_corporaView then return
+      taskId = @guid()
+      Backbone.trigger 'longTask:register', 'Opening corpora view', taskId
       @_closeVisibleView()
       if not @_corporaView
         @_corporaView = new CorporaView
           applicationSettings: @applicationSettings
       @_visibleView = @_corporaView
-      @_renderVisibleView()
+      @_renderVisibleView taskId
 
-    _renderVisibleView: ->
+    _renderVisibleView: (taskId=null) ->
       @_visibleView.setElement @$('#appview')
-      @_visibleView.render()
+      @_visibleView.render taskId
       @rendered @_visibleView
 
     # Open/close the login dialog box
