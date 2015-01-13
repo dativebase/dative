@@ -105,7 +105,7 @@ define [
     # Options for spin.js, cf. http://fgnass.github.io/spin.js/
     spinnerOptions:
       lines: 13 # The number of lines to draw
-      length: 50 # The length of each line
+      length: 5 # The length of each line
       width: 2 # The line thickness
       radius: 3 # The radius of the inner circle
       corners: 1 # Corner roundness (0..1)
