@@ -21,6 +21,7 @@ define [
     template: corporaTemplate
 
     initialize: (options) ->
+      @focusedElementIndex = null
       @applicationSettings = options.applicationSettings
       @collection = new CorporaCollection()
       @collection.applicationSettings = @applicationSettings
@@ -88,6 +89,15 @@ define [
       'click button.expand-all-corpora': 'expandAllCorpora'
       'keydown button.collapse-all-corpora': 'collapseAllCorporaKeys'
       'click button.collapse-all-corpora': 'collapseAllCorpora'
+      "focus button, input, .ui-selectmenu-button": 'rememberFocusedElement'
+
+    focusableSelector: 'button, input, .ui-selectmenu-button'
+
+    rememberFocusedElement: (event) ->
+      try
+        @$(@focusableSelector).each (index, el) =>
+          if el is event.target
+            @focusedElementIndex = index
 
     render: (taskId) ->
       @$el.html @template()
@@ -101,12 +111,21 @@ define [
       else
         @createCorpusView.hide()
       @perfectScrollbar()
-      @focusFirstButton()
+      @setFocus()
       Backbone.trigger 'longTask:deregister', taskId
       @
 
+    setFocus: ->
+      if @focusedElementIndex
+        @focusLastFocusedElement()
+      else
+        @focusFirstButton()
+
     focusFirstButton: ->
       @$('button.ui-button').first().focus()
+
+    focusLastFocusedElement: ->
+      @$(@focusableSelector).eq(@focusedElementIndex).focus()
 
     setCreateCorpusButtonState: ->
       contentSuffix = 'form for creating a new corpus'
@@ -127,7 +146,6 @@ define [
         @createCorpusView.focusNameInput()
 
     toggleCreateCorpusKeys: (event) ->
-      @_rememberTarget event
       if event.which in [13, 32]
         @stopEvent event
         @toggleCreateCorpus event
@@ -187,14 +205,7 @@ define [
             at: "left center"
             collision: "flipfit"
 
-    _rememberTarget: (event) ->
-      try
-        @$('.dative-input-display').each (index, el) =>
-          if el is event.target
-            @focusedElementIndex = index
-
     expandAllCorporaKeys: (event) ->
-      @_rememberTarget event
       if event.which in [13, 32]
         @stopEvent event
         @expandAllCorpora()
@@ -206,7 +217,6 @@ define [
         corpusView.fetchThenOpen()
 
     collapseAllCorporaKeys: (event) ->
-      @_rememberTarget event
       if event.which in [13, 32]
         @stopEvent event
         @collapseAllCorpora()
