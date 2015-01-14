@@ -76,7 +76,7 @@ define [
 
       modelObject
 
-    render: ->
+    render: (taskId) ->
       params = headerTitle: 'Add a Form'
       _.extend params, @model.toJSON()
       @$el.html @template(params)
@@ -86,6 +86,8 @@ define [
       @_guify body
       @_addModel body
       @_setFocus()
+      Backbone.trigger 'longTask:deregister', taskId
+      @
 
     _setFocus: ->
       if @focusedElementId?

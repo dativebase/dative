@@ -11,7 +11,9 @@ define [
 
     template: formsSearchTemplate
 
-    render: ->
+    render: (taskId) ->
       @$el.html @template()
       @matchHeights()
+      Backbone.trigger 'longTask:deregister', taskId
+      @
 

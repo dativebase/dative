@@ -151,9 +151,9 @@ define [
 
     editHeaderInfo: ->
       @pagination.items = @collection.length
-      @pagination.pages = @pagination.items / @pagination.itemsPerPage
-      @$('.form-count').text @pagination.items
-      @$('.page-count').text @pagination.pages
+      @pagination.pages = Math.ceil(@pagination.items / @pagination.itemsPerPage)
+      @$('.form-count').text @utils.integerWithCommas(@pagination.items)
+      @$('.page-count').text @utils.integerWithCommas(@pagination.pages)
 
     # Deprecated?
     appendView: (model, index) ->

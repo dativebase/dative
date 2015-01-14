@@ -1,9 +1,9 @@
 <div id='dative-page-header' class='ui-widget-header ui-corner-top'>
 
   <div class='dative-page-header-title'>
-    Browse
-    (<span class='form-count'><%= @pagination.items %></span> forms,
-     <span class='page-count'><%= @pagination.pages %></span> pages)
+    Browsing
+    <span class='form-count'><%= @pagination.items %></span> forms across
+    <span class='page-count'><%= @pagination.pages %></span> pages
   </div>
 
   <div class='button-container-left'>

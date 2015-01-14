@@ -1,5 +1,6 @@
 define [
   'backbone'
+  './../routes/router'
   './base'
   './mainmenu'
   './progress-widget'
@@ -17,7 +18,7 @@ define [
   './../models/form'
   './../collections/application-settings'
   './../templates/app'
-], (Backbone, BaseView, MainMenuView, ProgressWidgetView,
+], (Backbone, Workspace, BaseView, MainMenuView, ProgressWidgetView,
   NotifierView, LoginDialogView, RegisterDialogView, ApplicationSettingsView,
   PagesView, HomePageView, FormAddView, FormsSearchView, FormsView, CorporaView,
   ApplicationSettingsModel, FormModel, ApplicationSettingsCollection,
@@ -25,7 +26,6 @@ define [
 
   # App View
   # --------
-  #
   #
   # This is the spine of the application. Only one AppView object is created
   # and it controls the creation and rendering of all of the subviews that
@@ -38,69 +38,57 @@ define [
 
     initialize: (options) ->
 
+      @router = new Workspace()
       @getApplicationSettings options
+
       @mainMenuView = new MainMenuView model: @applicationSettings
       @loginDialog = new LoginDialogView model: @applicationSettings
       @registerDialog = new RegisterDialogView model: @applicationSettings
       @progressWidget = new ProgressWidgetView()
       @notifier = new NotifierView(@applicationSettings)
 
-      @listenTo @mainMenuView, 'request:pages', @showPagesView
       @listenTo @mainMenuView, 'request:home', @showHomePageView
+      @listenTo @mainMenuView, 'request:applicationSettings', @showApplicationSettingsView
+      @listenTo @mainMenuView, 'request:openLoginDialogBox', @toggleLoginDialog
+      @listenTo @mainMenuView, 'request:openRegisterDialogBox', @toggleRegisterDialog
+      @listenTo @mainMenuView, 'request:corporaBrowse', @showCorporaView
       @listenTo @mainMenuView, 'request:formAdd', @showFormAddView
       @listenTo @mainMenuView, 'request:formsBrowse', @showFormsView
       @listenTo @mainMenuView, 'request:formsSearch', @showFormsSearchView
-      @listenTo @mainMenuView, 'request:corporaBrowse', @showCorporaView
-      @listenTo @mainMenuView, 'request:openLoginDialogBox', @toggleLoginDialog
-      @listenTo @mainMenuView, 'request:openRegisterDialogBox',
-        @toggleRegisterDialog
-      @listenTo @loginDialog, 'request:openRegisterDialogBox',
-        @toggleRegisterDialog
-      @listenTo @mainMenuView, 'request:applicationSettings',
-        @showApplicationSettingsView
+      @listenTo @mainMenuView, 'request:pages', @showPagesView
+
+      @listenTo @router, 'route:home', @showHomePageView
+      @listenTo @router, 'route:applicationSettings', @showApplicationSettingsView
+      @listenTo @router, 'route:openLoginDialogBox', @toggleLoginDialog
+      @listenTo @router, 'route:openRegisterDialogBox', @toggleRegisterDialog
+      @listenTo @router, 'route:corporaBrowse', @showCorporaView
+      @listenTo @router, 'route:formAdd', @showFormAddView
+      @listenTo @router, 'route:formsBrowse', @showFormsView
+      @listenTo @router, 'route:formsSearch', @showFormsSearchView
+      @listenTo @router, 'route:pages', @showPagesView
+
+      @listenTo @loginDialog, 'request:openRegisterDialogBox', @toggleRegisterDialog
       @listenTo Backbone, 'loginSuggest', @openLoginDialogWithDefaults
       @listenTo Backbone, 'authenticate:success', @authenticateSuccess
       @listenTo Backbone, 'logout:success', @logoutSuccess
       @listenTo Backbone, 'useCorpus', @browseFieldDBCorpus
 
       @render()
+      Backbone.history.start()
       @showHomePageView()
 
     events:
       'click': 'bodyClicked'
 
-    bodyClicked: ->
-      Backbone.trigger 'bodyClicked' # Mainmenu superclick listens for this
-
-    browseFieldDBCorpus: (corpusId) ->
-      fieldDBCorporaCollection = @applicationSettings.get(
-        'fieldDBCorporaCollection')
-      activeFieldDBCorpus = fieldDBCorporaCollection.findWhere
-        pouchname: corpusId
-      @applicationSettings.set 'activeFieldDBCorpus', activeFieldDBCorpus
-      @showFormsView()
-
-    logoutSuccess: ->
-      @_closeVisibleView()
-      @_corporaView = null
-      @showHomePageView()
-
-    authenticateSuccess: ->
-      if @applicationSettings.get('activeServer').get('type') is 'FieldDB'
-        @showCorporaView()
-      else
-        @showFormsView()
-
-    openLoginDialogWithDefaults: (username, password) ->
-      @loginDialog.dialogOpenWithDefaults username: username, password: password
-
     render: ->
       @$el.html @template()
+
       @mainMenuView.setElement(@$('#mainmenu')).render()
       @loginDialog.setElement(@$('#login-dialog-container')).render()
       @registerDialog.setElement(@$('#register-dialog-container')).render()
       @progressWidget.setElement(@$('#progress-widget-container')).render()
       @notifier.setElement @$('#notifier-container')
+
       @rendered @mainMenuView
       @rendered @loginDialog
       @rendered @registerDialog
@@ -114,6 +102,35 @@ define [
       # FieldDB.FieldDBObject.application.currentFieldDB.url = FieldDB.FieldDBObject.application.currentFieldDB.BASE_DB_URL
 
       @matchWindowDimensions()
+
+    bodyClicked: ->
+      Backbone.trigger 'bodyClicked' # Mainmenu superclick listens for this
+
+    browseFieldDBCorpus: (corpusId) ->
+      fieldDBCorporaCollection = @applicationSettings.get(
+        'fieldDBCorporaCollection')
+      activeFieldDBCorpus = fieldDBCorporaCollection.findWhere
+        pouchname: corpusId
+      @applicationSettings.set 'activeFieldDBCorpus', activeFieldDBCorpus
+      @showFormsView()
+
+    logoutSuccess: ->
+      @closeVisibleView()
+      @corporaView = null
+      @showHomePageView()
+
+    activeServerType: ->
+      try
+        @applicationSettings.get('activeServer').get 'type'
+      catch
+        null
+
+    authenticateSuccess: ->
+      activeServerType = @activeServerType()
+      switch activeServerType
+        when 'FieldDB' then @showCorporaView()
+        when 'OLD' then @showFormsView()
+        else console.log 'Error'
 
     # Set `@applicationSettings` and `@applicationSettingsCollection`
     getApplicationSettings: (options) ->
@@ -136,96 +153,109 @@ define [
       $(window).resize =>
         @$('#appview').css height: $(window).height() - 50
 
-    # When a view closes, it's good to be able to keep track of
-    # its focused element so that it can be returned to a past state.
-    _rememberFocusedElement: ->
-      focusedElement = $(document.activeElement)
-      #focusedElement = @$ ':focus'
-      if focusedElement
-        focusedElementId = focusedElement.attr 'id'
-        if focusedElementId
-          @_visibleView?.focusedElementId = focusedElementId
-        else if /ms-list/.test focusedElement.attr('class')
-          @_visibleView?.focusedElementId = 'ms-tags .ms-list'
-        else
-          console.log 'focused element has no id' if AppView.debugMode
+    renderVisibleView: (taskId=null) ->
+      @visibleView.setElement @$('#appview')
+      @visibleView.render taskId
+      @rendered @visibleView
 
-    _closeVisibleView: ->
-      @_rememberFocusedElement()
-      if @_visibleView
-        @_visibleView.close()
-        @closed @_visibleView
+    closeVisibleView: ->
+      if @visibleView
+        @visibleView.close()
+        @closed @visibleView
+
+    loggedIn: -> @applicationSettings.get 'loggedIn'
+
+    ############################################################################
+    # Methods for showing the main "pages" of Dative                           #
+    ############################################################################
 
     showFormAddView: ->
-      @_closeVisibleView()
-      if not @_formAddView
-        @_formAddView = new FormAddView(model: new FormModel())
-      @_visibleView = @_formAddView
-      @_renderVisibleView()
+      if not @loggedIn() then return
+      if @formAddView and @visibleView is @formAddView then return
+      @router.navigate 'form-add'
+      taskId = @guid()
+      Backbone.trigger 'longTask:register', 'Opening form add view', taskId
+      @closeVisibleView()
+      if not @formAddView
+        @formAddView = new FormAddView(model: new FormModel())
+      @visibleView = @formAddView
+      @renderVisibleView taskId
 
     showApplicationSettingsView: ->
-      if @_applicationSettingsView and
-      @_visibleView is @_applicationSettingsView
-        return
+      if @applicationSettingsView and
+      @visibleView is @applicationSettingsView then return
+      @router.navigate 'application-settings'
       taskId = @guid()
       Backbone.trigger 'longTask:register', 'Opening application settings', taskId
-      @_closeVisibleView()
-      if not @_applicationSettingsView
-        @_applicationSettingsView = new ApplicationSettingsView(
+      @closeVisibleView()
+      if not @applicationSettingsView
+        @applicationSettingsView = new ApplicationSettingsView(
           model: @applicationSettings)
-      @_visibleView = @_applicationSettingsView
-      @_renderVisibleView taskId
+      @visibleView = @applicationSettingsView
+      @renderVisibleView taskId
 
     showFormsView: ->
-      @_closeVisibleView()
-      if not @_formsView
-        @_formsView = new FormsView applicationSettings: @applicationSettings
-      @_visibleView = @_formsView
-      @_renderVisibleView()
+      if not @loggedIn() then return
+      if @formsView and @visibleView is @formsView then return
+      @router.navigate 'forms-browse'
+      taskId = @guid()
+      Backbone.trigger 'longTask:register', 'Opening form browse view', taskId
+      @closeVisibleView()
+      if not @formsView
+        @formsView = new FormsView applicationSettings: @applicationSettings
+      @visibleView = @formsView
+      @renderVisibleView taskId
 
     showFormsSearchView: ->
-      @_closeVisibleView()
-      if not @_formsSearchView
-        @_formsSearchView = new FormsSearchView()
-      @_visibleView = @_formsSearchView
-      @_renderVisibleView()
+      if not @loggedIn() then return
+      if @formsSearchView and @visibleView is @formsSearchView then return
+      @router.navigate 'forms-search'
+      taskId = @guid()
+      Backbone.trigger 'longTask:register', 'Opening form search view', taskId
+      @closeVisibleView()
+      if not @formsSearchView then @formsSearchView = new FormsSearchView()
+      @visibleView = @formsSearchView
+      @renderVisibleView taskId
 
     showPagesView: ->
-      @_closeVisibleView()
-      if not @_pagesView
-        @_pagesView = new PagesView()
-      @_visibleView = @_pagesView
-      @_renderVisibleView()
+      if not @loggedIn() then return
+      if @pagesView and @visibleView is @pagesView then return
+      @router.navigate 'pages'
+      taskId = @guid()
+      Backbone.trigger 'longTask:register', 'Opening pages view', taskId
+      @closeVisibleView()
+      if not @pagesView then @pagesView = new PagesView()
+      @visibleView = @pagesView
+      @renderVisibleView taskId
 
     showHomePageView: ->
-      @_closeVisibleView()
-      if not @_homePageView
-        @_homePageView = new HomePageView()
-      @_visibleView = @_homePageView
-      @_renderVisibleView()
+      if @homePageView and @visibleView is @homePageView then return
+      @router.navigate 'home'
+      @closeVisibleView()
+      if not @homePageView then @homePageView = new HomePageView()
+      @visibleView = @homePageView
+      @renderVisibleView()
 
-    # These are FieldDB corpora; not sure yet how we'll distinguish OLD-style
-    # corpora from FieldDB-style ones in terms of how they are labelled and
-    # otherwise...
     showCorporaView: ->
-      if @_corporaView and @_visibleView is @_corporaView then return
+      if not @loggedIn() then return
+      if @corporaView and @visibleView is @corporaView then return
+      @router.navigate 'corpora'
       taskId = @guid()
       Backbone.trigger 'longTask:register', 'Opening corpora view', taskId
-      @_closeVisibleView()
-      if not @_corporaView
-        @_corporaView = new CorporaView
-          applicationSettings: @applicationSettings
-      @_visibleView = @_corporaView
-      @_renderVisibleView taskId
-
-    _renderVisibleView: (taskId=null) ->
-      @_visibleView.setElement @$('#appview')
-      @_visibleView.render taskId
-      @rendered @_visibleView
+      @closeVisibleView()
+      if not @corporaView
+        @corporaView = new CorporaView applicationSettings: @applicationSettings
+      @visibleView = @corporaView
+      @renderVisibleView taskId
 
     # Open/close the login dialog box
     toggleLoginDialog: ->
       Backbone.trigger 'loginDialog:toggle'
+
+    openLoginDialogWithDefaults: (username, password) ->
+      @loginDialog.dialogOpenWithDefaults
+        username: username
+        password: password
 
     # Open/close the register dialog box
     toggleRegisterDialog: ->

@@ -58,10 +58,14 @@ define (require) ->
   startsWith = (s, prefix) -> s[...prefix.length] is prefix
   endsWith = (s, prefix) -> prefix is '' or s[-prefix.length..] is prefix
 
+  integerWithCommas = (integer) ->
+    integer.toString().replace /\B(?=(\d{3})+(?!\d))/g, ','
+
   clone: clone
   type: type
   guid: guid
   emailIsValid: emailIsValid
   startsWith: startsWith
   endsWith: endsWith
+  integerWithCommas: integerWithCommas
 

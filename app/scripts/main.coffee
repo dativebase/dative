@@ -68,8 +68,7 @@ require [
     'sfjquimatch'
     'jqueryspin'
   ], (AppView, Workspace) ->
-    new Workspace()
-    Backbone.history.start()
+    # workspace = new Workspace()
     window.debugMode = false
 
     # Overriding FieldDB's `bug` which creates a JS `alert()`.
@@ -78,5 +77,6 @@ require [
       console.log message
 
     $ ->
+      # Backbone.history.start()
       new AppView()
 
