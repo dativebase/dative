@@ -2,8 +2,12 @@ define [
   'backbone'
   './base'
   './form'
+  './pagination-item-table'
+  './../collections/forms'
   './../templates/forms'
-], (Backbone, BaseView, FormView, formsTemplate) ->
+  'perfectscrollbar'
+], (Backbone, BaseView, FormView, PaginationItemTableView, FormsCollection,
+  formsTemplate) ->
 
   # Forms View
   # -----------
@@ -15,52 +19,159 @@ define [
     template: formsTemplate
 
     initialize: (options) ->
-      @applicationSettings = options.applicationSettings or {}
-      #@listenTo @collection, 'change', @_renderCollection
-      #@listenTo @collection, 'add', @_renderCollection
-      @_renderedFormViews = []
+      @focusedElementIndex = null
+      @applicationSettings = options.applicationSettings
+      @getActiveServerType()
+      @collection = new FormsCollection()
+      @collection.applicationSettings = @applicationSettings
+      @formViews = []
+      @listenToEvents()
 
-    render: ->
-      console.log 'IN RENDER OF FORMS VIEW'
-      params =
-        paginator:
-          itemCount: 2
-          pageCount: 1
-      @$el.html @template(params)
+    events: {}
+
+    listenToEvents: ->
+      @stopListening()
+      @undelegateEvents()
+      @delegateEvents()
+      @listenTo Backbone, 'fetchAllFieldDBFormsStart', @fetchAllFormsStart
+      @listenTo Backbone, 'fetchAllFieldDBFormsEnd', @fetchAllFormsEnd
+      @listenTo Backbone, 'fetchAllFieldDBFormsSuccess', @fetchAllFormsSuccess
+
+    fetchAllFormsStart: ->
+      @spin 'fetching all forms'
+
+    fetchAllFormsEnd: ->
+      @stopSpin()
+
+    fetchAllFormsSuccess: ->
+      @editHeaderInfo()
+      @getFormViews()
+      @renderPage()
+
+    getFormViews: ->
+      @collection.each (formModel) =>
+        newFormView = new FormView
+          model: formModel
+          applicationSettings: @applicationSettings
+        @formViews.push newFormView
+
+    spinnerOptions: ->
+      _.extend BaseView::spinnerOptions, {top: '50%', left: '97%'}
+
+    spin: (tooltipMessage) ->
+      @$('#dative-page-header')
+        .spin @spinnerOptions()
+        .tooltip
+          items: 'div'
+          content: tooltipMessage
+          position:
+            my: "left+10 center"
+            at: "right center"
+            collision: "flipfit"
+        .tooltip 'open'
+
+    stopSpin: ->
+      $header = @$('#dative-page-header')
+      $header.spin false
+      if $header.tooltip 'instance' then $header.tooltip 'destroy'
+
+    getActiveServerType: ->
+      if @applicationSettings.get('activeServer').get('type') is 'FieldDB'
+        @activeServerType = 'FieldDB'
+        @activeFieldDBCorpus = @applicationSettings.get 'activeFieldDBCorpus'
+      else
+        @activeServerType = 'OLD'
+
+    pagination:
+      items: 0
+      itemsPerPage: 10
+      page: 1
+      pages: 0
+
+    render: (taskId) ->
+      @$el.html @template(pagination: @pagination)
       @matchHeights()
-      @collection.fetch
-        itemsPerPage: @applicationSettings.get 'itemsPerPage'
-      @_renderCollection()
+      @guify()
+      @collection.fetchAllFieldDBForms()
+      @listenToEvents()
+      @perfectScrollbar()
+      @setFocus()
+      Backbone.trigger 'longTask:deregister', taskId
+      @
 
-      # TODO: bind the collection's 'change' event to the construction and
-      # rendering of all of the models (in the page of paginator)
+    setFocus: ->
+      if @focusedElementIndex
+        @focusLastFocusedElement()
+      else
+        @focusFirstButton()
 
-      # Asynchronous GET request
-      #$.get('form/browse_ajax', options, OLD.forms.handlePaginatorResponse, 'json');
+    focusFirstButton: ->
+      @$('button.ui-button').first().focus()
 
-    # See this `curl` command for what the OLD API returns:
-    # curl --cookie-jar my-cookies.txt --header "Content-Type: application/json" --data '{"username": "admin", "password": "adminA_1"}' http://127.0.0.1:5000/login/authenticate
-    _renderCollection: ->
-      console.log '_renderCollection called'
-      @$('.dative-pagin-items').html ''
-      @_closeRenderedForms()
-      @collection.each (model, index) => @_appendView(model, index)
+    guify: ->
 
-    _closeRenderedForms: ->
-      while @_renderedFormViews.length
-        formView = @_renderedFormViews.pop()
+      @$('button').button().attr('tabindex', 0)
+
+      @$('button.expand-all')
+        .button()
+        .tooltip
+          position:
+            my: "right-10 center"
+            at: "left center"
+            collision: "flipfit"
+
+      @$('button.collapse-all')
+        .button()
+        .tooltip
+          position:
+            my: "right-45 center"
+            at: "left center"
+            collision: "flipfit"
+
+    perfectScrollbar: ->
+      @$('#dative-page-body')
+        .perfectScrollbar()
+        .scroll => @closeAllTooltips()
+
+    # Render a page (pagination) of form views.
+    renderPage: ->
+      start = (@pagination.page - 1) * @pagination.itemsPerPage
+      end = start + @pagination.itemsPerPage - 1
+      $formList = @$('.dative-pagin-items')
+      for formView, index in @formViews[start..end]
+        formId = formView.model.get('id')
+        paginationItemTableView = new PaginationItemTableView
+          formId: formId
+          index: index + 1
+        $formList.append paginationItemTableView.render().el
+        formView.setElement @$("##{formId}")
+        formView.render()
+        @rendered formView
+        @rendered paginationItemTableView
+
+    editHeaderInfo: ->
+      @pagination.items = @collection.length
+      @pagination.pages = @pagination.items / @pagination.itemsPerPage
+      @$('.form-count').text @pagination.items
+      @$('.page-count').text @pagination.pages
+
+    # Deprecated?
+    appendView: (model, index) ->
+      formView = new FormView model: model
+      formView.render()
+      @formViews.push formView
+      @rendered formView
+      @$('.dative-pagin-items').append @paginItemTable(formView.$el, index)
+
+    # Deprecated?
+    closeRenderedForms: ->
+      while @formViews.length
+        formView = @formViews.pop()
         formView.close()
         @closed formView
 
-    _appendView: (model, index) ->
-      formView = new FormView model: model
-      formView.render()
-      @_renderedFormViews.push formView
-      @rendered formView
-      @$('.dative-pagin-items').append @_paginItemTable(formView.$el, index)
-
     # Return the form view wrapped in a pagination item <table>
-    _paginItemTable: (formView$el, index) ->
+    paginItemTable: (formView$el, index) ->
       $('<table>')
         .addClass('dative-pagin-item')
         .append($('<tbody>')

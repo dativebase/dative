@@ -25,6 +25,7 @@ define [
       @applicationSettings = options.applicationSettings
       @collection = new CorporaCollection()
       @collection.applicationSettings = @applicationSettings
+      @applicationSettings.set 'fieldDBCorporaCollection', @collection
       @addCorpusModelsToCollection()
       @corpusViews = []
       @createCorpusView = new CreateCorpusView()

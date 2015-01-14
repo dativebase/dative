@@ -27,7 +27,7 @@ define [
       #idbSync: Backbone.sync
       #sync: Backbone.ajaxSync
 
-      initialize: ->
+      initialize: (options) ->
 
       url: 'fakeurl' # Backbone throws 'A "url" property or function must be specified' if this is not present.
       #url: 'http://www.onlinelinguisticdatabase.org/'

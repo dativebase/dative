@@ -10,10 +10,9 @@ define [
   # For displaying individual forms with an IGT interface.
   #
   # TODOS
-  # 1. change all of the 'old-' stuff to 'dative-' or '' (in base.css and in templates)
-  # 2. change all of the snake_case to camelCase, as needed
-  # 3. make dates human-readable (see `getHumanReadable` in OLD.js)
-  # 4. render the file view into the form view ... (cf. `filesDiv.append(filesContent);` of OLD.js)
+  #
+  # 1. make dates human-readable (see `getHumanReadable` in OLD.js)
+  # 2. render the file view into the form view ... (cf. `filesDiv.append(filesContent);` of OLD.js)
 
   class FormView extends BaseView
 
@@ -23,7 +22,7 @@ define [
     #tagName: 'table'
     #className: 'dative-pagin-item'
 
-    initialize: () ->
+    initialize: ->
       @listenTo @model, 'change', @render
       @listenTo Backbone, 'formViews:dehighlight', @_dehighlight
 
@@ -32,10 +31,9 @@ define [
       'click .form-hide-button': '_clickHideButton'
 
     render: ->
-      console.log @model.toJSON()
       @$el.attr('id', @model.cid).html @template(@model.toJSON())
       @_guify()
-      this
+      @
 
     _guify: ->
       @$('.form-hide-button').button(
@@ -45,7 +43,6 @@ define [
       @$('.form-secondary-data').hide()
 
     _highlightAndShow: ->
-      console.log 'in _highlightAndShow'
       @_highlight()
       @_showAdditionalData()
 

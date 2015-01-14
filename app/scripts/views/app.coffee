@@ -15,14 +15,13 @@ define [
   './corpora'
   './../models/application-settings'
   './../models/form'
-  './../collections/forms'
   './../collections/application-settings'
   './../templates/app'
 ], (Backbone, BaseView, MainMenuView, ProgressWidgetView,
   NotifierView, LoginDialogView, RegisterDialogView, ApplicationSettingsView,
   PagesView, HomePageView, FormAddView, FormsSearchView, FormsView, CorporaView,
-  ApplicationSettingsModel, FormModel, FormsCollection,
-  ApplicationSettingsCollection, appTemplate) ->
+  ApplicationSettingsModel, FormModel, ApplicationSettingsCollection,
+  appTemplate) ->
 
   # App View
   # --------
@@ -62,7 +61,7 @@ define [
       @listenTo Backbone, 'loginSuggest', @openLoginDialogWithDefaults
       @listenTo Backbone, 'authenticate:success', @authenticateSuccess
       @listenTo Backbone, 'logout:success', @logoutSuccess
-      @listenTo Backbone, 'request:browseFieldDBCorpus', @browseFieldDBCorpus
+      @listenTo Backbone, 'useCorpus', @browseFieldDBCorpus
 
       @render()
       @showHomePageView()
@@ -74,7 +73,12 @@ define [
       Backbone.trigger 'bodyClicked' # Mainmenu superclick listens for this
 
     browseFieldDBCorpus: (corpusId) ->
-      console.log "AppView knows that you want to browse #{corpusId}"
+      fieldDBCorporaCollection = @applicationSettings.get(
+        'fieldDBCorporaCollection')
+      activeFieldDBCorpus = fieldDBCorporaCollection.findWhere
+        pouchname: corpusId
+      @applicationSettings.set 'activeFieldDBCorpus', activeFieldDBCorpus
+      @showFormsView()
 
     logoutSuccess: ->
       @_closeVisibleView()
@@ -175,9 +179,7 @@ define [
     showFormsView: ->
       @_closeVisibleView()
       if not @_formsView
-        @_formsView = new FormsView
-          collection: new FormsCollection()
-          applicationSettings: @applicationSettings
+        @_formsView = new FormsView applicationSettings: @applicationSettings
       @_visibleView = @_formsView
       @_renderVisibleView()
 

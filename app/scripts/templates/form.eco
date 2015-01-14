@@ -12,17 +12,30 @@
 </div>
 
 <div class='form-primary-data old-form-primary-data'>
+
   <div class='form-igt-data old-form-igt'>
+
     <div class='phonetic-transcription
         old-form-phoneticTranscription'></div>
+
     <div class='transcription old-form-transcription'>
       <%= @transcription %>
     </div>
-    <div class='morpheme-break old-form-morphemeBreak'></div>
-    <div class='morpheme-gloss old-form-morphemeGloss'></div>
+
+    <div class='morpheme-break old-form-morphemeBreak'>
+      <%= @morphemeBreak %>
+    </div>
+
+    <div class='morpheme-gloss old-form-morphemeGloss'>
+      <%= @morphemeGloss %>
+    </div>
+
   </div>
+
   <div class='form-translations-data old-form-glosses'>
+
     <% for translation in @translations: %>
+
       <div class='translation old-form-gloss'>
         <span class='translation-grammaticality old-form-gloss-gram'>
           <%= translation.grammaticality %>
@@ -31,7 +44,9 @@
           <%= translation.transcription %>
         </span>
       </div>
+
     <% end %>
+
   </div>
 </div>
 
@@ -155,5 +170,4 @@
   </div>
 
 </div>
-
 

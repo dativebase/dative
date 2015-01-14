@@ -292,7 +292,8 @@ define [
 
     useCorpus: (event) ->
       if event then @stopEvent event
-      Backbone.trigger 'request:browseFieldDBCorpus', @model.get('pouchname')
+      # Backbone.trigger 'request:browseFieldDBCorpus', @model.get('pouchname')
+      Backbone.trigger 'useCorpus', @model.get('pouchname')
 
     toggleAddUserKeys: (event) ->
       if event.which in [13, 32]
