@@ -18,7 +18,7 @@ define [
 
     template: formTemplate
     tagName: 'div'
-    className: 'igt-form old-form-object ui-corner-all'
+    className: 'igt-form dative-form-object ui-corner-all'
     #tagName: 'table'
     #className: 'dative-pagin-item'
 
@@ -65,6 +65,6 @@ define [
 
     _hideAdditionalData: (event) ->
       @$el.css 'border-color': 'transparent'
-      @$('.old-form-buttons, .old-form-secondary-data, .old-form-hide-button')
+      @$('.dative-form-buttons, .dative-form-secondary-data, .dative-form-hide-button')
         .slideUp 'slow'
 

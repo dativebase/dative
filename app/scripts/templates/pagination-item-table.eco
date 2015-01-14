@@ -3,7 +3,7 @@
     <td class='dative-pagin-item-index'>(<%= @index %>)</td>
     <td class='dative-pagin-item-content'>
       <div id='<%= @formId %>'
-        class='igt-form old-form-object ui-corner-all'></div>
+        class='igt-form dative-form-object ui-corner-all'></div>
     </td>
   </tr>
 </tbody>

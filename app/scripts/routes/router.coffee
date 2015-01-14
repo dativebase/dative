@@ -12,6 +12,6 @@ define [
       true
 
     help: ->
-      #console.log "help!"
+      console.log "help!"
       true
 
