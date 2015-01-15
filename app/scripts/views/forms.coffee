@@ -5,10 +5,11 @@ define [
   './pagination-menu-top'
   './pagination-item-table'
   './../collections/forms'
+  './../utils/paginator'
   './../templates/forms'
   'perfectscrollbar'
 ], (Backbone, BaseView, FormView, PaginationMenuTopView,
-  PaginationItemTableView, FormsCollection, formsTemplate) ->
+  PaginationItemTableView, FormsCollection, Paginator, formsTemplate) ->
 
   # Forms View
   # -----------
@@ -21,14 +22,15 @@ define [
 
     initialize: (options) ->
       @focusedElementIndex = null
+      @formViews = []
       @renderedFormViews = []
       @renderedPaginationItemTableViews = []
-      @paginationMenuTopView = new PaginationMenuTopView pagination: @pagination
+      @paginator = new Paginator()
+      @paginationMenuTopView = new PaginationMenuTopView pagination: @paginator
       @applicationSettings = options.applicationSettings
       @getActiveServerType()
       @collection = new FormsCollection()
       @collection.applicationSettings = @applicationSettings
-      @formViews = []
       @listenToEvents()
 
     events:
@@ -54,11 +56,10 @@ define [
       @listenTo @paginationMenuTopView, 'paginator:showTwoPagesForward', @showTwoPagesForward
       @listenTo @paginationMenuTopView, 'paginator:showThreePagesForward', @showThreePagesForward
 
-
     render: (taskId) ->
       context =
         pluralizeByNum: @utils.pluralizeByNum
-        pagination: @pagination
+        pagination: @paginator
       @$el.html @template(context)
       @matchHeights()
       @guify()
@@ -72,7 +73,7 @@ define [
 
     renderPaginationMenuTopView: ->
       @paginationMenuTopView.setElement @$('div.dative-pagination-menu-top').first()
-      @paginationMenuTopView.render pagination: @pagination
+      @paginationMenuTopView.render pagination: @paginator
       @rendered @paginationMenuTopView
 
     fetchAllFormsStart: ->
@@ -104,7 +105,7 @@ define [
       @$('.dative-pagin-items')[hideMethod] hideOptions
 
     getAnimationDuration: ->
-      400 + (25 * @getItemsDisplayed())
+      100 + (10 * @paginator.itemsDisplayed)
 
     closeRenderedFormViews: ->
       while @renderedFormViews.length
@@ -119,7 +120,7 @@ define [
         @closed paginationItemTableView
 
     refreshPaginationMenuTop: ->
-      @paginationMenuTopView.render pagination: @pagination
+      @paginationMenuTopView.render pagination: @paginator
 
     getFormViews: ->
       @collection.each (formModel) =>
@@ -154,19 +155,6 @@ define [
         @activeFieldDBCorpus = @applicationSettings.get 'activeFieldDBCorpus'
       else
         @activeServerType = 'OLD'
-
-    pagination:
-      items: 0
-      itemsPerPage: 10
-      page: 1
-      pages: 0
-      start: 0
-      end: 0
-
-    refreshPagination: ->
-      @pagination.start = (@pagination.page - 1) * @pagination.itemsPerPage
-      @pagination.end = @pagination.start + @pagination.itemsPerPage - 1
-      @pagination.pages = Math.ceil(@pagination.items / @pagination.itemsPerPage)
 
     setFocus: ->
       if @focusedElementIndex
@@ -204,9 +192,9 @@ define [
 
     # Render a page (pagination) of form views.
     renderPage: (options) ->
-      @refreshPagination()
+      @paginator._refresh() # TODO: NECESSARY?
       $formList = @$('.dative-pagin-items')
-      for formView, index in @formViews[@pagination.start..@pagination.end]
+      for formView, index in @formViews[@paginator.start..@paginator.end]
         formId = formView.model.get('id')
         paginationItemTableView = new PaginationItemTableView
           formId: formId
@@ -228,26 +216,18 @@ define [
         $formList.show()
         @setFocus()
 
-    getItemsDisplayed: ->
-      if @pagination.itemsPerPage > @pagination.items
-        @pagination.items
-      else
-        @pagination.itemsPerPage
-
     refreshHeader: ->
-      @pagination.items = @collection.length
-      @refreshPagination()
-      @$('.items-displayed').text @utils.integerWithCommas(@getItemsDisplayed())
-      @$('.form-count').text @utils.integerWithCommas(@pagination.items)
-      @$('.form-count-noun').text @utils.pluralizeByNum('form', @pagination.items)
-      @$('.page-count').text @utils.integerWithCommas(@pagination.pages)
-      @$('.page-count-noun').text @utils.pluralizeByNum('page', @pagination.pages)
+      @paginator.setItems @collection.length
+      @$('.items-displayed').text @utils.integerWithCommas(@paginator.itemsDisplayed)
+      @$('.form-count').text @utils.integerWithCommas(@paginator.items)
+      @$('.form-count-noun').text @utils.pluralizeByNum('form', @paginator.items)
+      @$('.page-count').text @utils.integerWithCommas(@paginator.pages)
+      @$('.page-count-noun').text @utils.pluralizeByNum('page', @paginator.pages)
 
     changeItemsPerPage: (newItemsPerPage) ->
-      itemsDisplayedBefore = @getItemsDisplayed()
-      @pagination.itemsPerPage = newItemsPerPage
-      @refreshPagination()
-      itemsDisplayedAfter = @getItemsDisplayed()
+      itemsDisplayedBefore = @paginator.itemsDisplayed
+      @paginator.setItemsPerPage newItemsPerPage
+      itemsDisplayedAfter = @paginator.itemsDisplayed
       if itemsDisplayedBefore isnt itemsDisplayedAfter
         @refreshPage
           hideEffect: 'fadeOut'
