@@ -19,8 +19,6 @@ define [
     template: formTemplate
     tagName: 'div'
     className: 'igt-form dative-form-object ui-corner-all'
-    #tagName: 'table'
-    #className: 'dative-pagin-item'
 
     initialize: ->
       @listenTo @model, 'change', @render
@@ -32,10 +30,10 @@ define [
 
     render: ->
       @$el.attr('id', @model.cid).html @template(@model.toJSON())
-      @_guify()
+      @guify()
       @
 
-    _guify: ->
+    guify: ->
       @$('.form-hide-button').button(
         icons: primary: 'ui-icon-close'
         text: false).hide()

@@ -45,6 +45,7 @@ div#mainmenu {
 }
 
 #dative-page-header,
+#dative-page-header.dative-two-part-header > div.dative-forms-view-header,
 .dative-widget-header {
     font-weight: normal;
     text-align: center;
@@ -54,6 +55,28 @@ div#mainmenu {
     height: 31px;
     /* TEST */
     position: relative;
+}
+
+#dative-page-header.dative-two-part-header > div.dative-forms-view-header
+{
+    border-bottom: none;
+}
+
+#dative-page-header.dative-two-part-header
+{
+    height: 75px;
+    padding: 0;
+}
+
+.dative-pagination-menu-top
+{
+  width: 900px;
+  position: absolute;
+  left: 0%;
+  bottom: 25%;
+  transform: translateY(-50%);
+  -webkit-transform: translateY(-50%);
+  padding-left: 0px 5px;
 }
 
 .header-no-body {
@@ -701,12 +724,23 @@ div.users-widget > div.dative-widget-header > div.dative-widget-header-title,
 div.add-user-widget > div.dative-widget-header > div.dative-widget-header-title,
 div.servers-config-widget > div.dative-widget-header > div.dative-widget-header-title,
 div.server-config-widget > div.dative-widget-header > div.dative-widget-header-title,
-div#dative-page-header > div.dative-page-header-title {
+div#dative-page-header > div.dative-page-header-title,
+div#dative-page-header > div.dative-forms-view-header > div.dative-page-header-title,
+div.button-container-center {
   position: absolute;
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
   -webkit-transform: translate(-50%, -50%);
+}
+
+div.buttonz-container-center {
+  /* See http://jsfiddle.net/khrfwjL0/2/ */
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translateY(-50%);
+  -webkit-transform: translateY(-50%);
 }
 
 div.button-container-left {
@@ -717,6 +751,16 @@ div.button-container-left {
   transform: translateY(-50%);
   -webkit-transform: translateY(-50%);
   padding-left: 5px;
+}
+
+div.button-container-right {
+  /* See http://jsfiddle.net/khrfwjL0/2/ */
+  position: absolute;
+  right: 0%;
+  top: 50%;
+  transform: translateY(-50%);
+  -webkit-transform: translateY(-50%);
+  padding-right: 5px;
 }
 
 div.container-right {

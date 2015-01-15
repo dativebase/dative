@@ -435,10 +435,7 @@ define [
 
       if disabled then @$('button.add-user').hide()
 
-      @selectmenuify()
       @tabindicesNaught() # active elements have tabindex=0
-
-    selectmenuify: ->
 
     # Tabindices=0 and jQueryUI colors
     tabindicesNaught: ->

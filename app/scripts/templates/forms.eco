@@ -1,19 +1,30 @@
-<div id='dative-page-header' class='ui-widget-header ui-corner-top'>
+<div id='dative-page-header'
+  class='ui-widget-header ui-corner-top dative-two-part-header'>
 
-  <div class='dative-page-header-title'>
-    Browsing
-    <span class='form-count'><%= @pagination.items %></span> forms across
-    <span class='page-count'><%= @pagination.pages %></span> pages
+  <div class='dative-forms-view-header'>
+
+    <div class='dative-page-header-title'>
+      Browsing
+      <span class='items-per-page'><%= @pagination.itemsPerPage %></span> of
+      <span class='form-count'><%= @pagination.items %></span> forms across
+      <span class='page-count'><%= @pagination.pages %></span> pages
+    </div>
+
+    <div class='button-container-left'>
+
+      <button class='expand-all dative-tooltip' title='expand all forms'>
+        <i class='fa fa-fw fa-angle-double-down'></i>
+      </button>
+
+      <button class='collapse-all dative-tooltip' title='collapse all forms'>
+        <i class='fa fa-fw fa-angle-double-up'></i>
+      </button>
+
+    </div>
+
   </div>
 
-  <div class='button-container-left'>
-    <button class='expand-all dative-tooltip' title='expand all forms'>
-      <i class='fa fa-fw fa-angle-double-down'></i>
-    </button>
-    <button class='collapse-all dative-tooltip' title='collapse all forms'>
-      <i class='fa fa-fw fa-angle-double-up'></i>
-    </button>
-  </div>
+  <div class='dative-pagination-menu-top'></div>
 
 </div>
 

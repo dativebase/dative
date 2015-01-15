@@ -2,12 +2,13 @@ define [
   'backbone'
   './base'
   './form'
+  './pagination-menu-top'
   './pagination-item-table'
   './../collections/forms'
   './../templates/forms'
   'perfectscrollbar'
-], (Backbone, BaseView, FormView, PaginationItemTableView, FormsCollection,
-  formsTemplate) ->
+], (Backbone, BaseView, FormView, PaginationMenuTopView,
+  PaginationItemTableView, FormsCollection, formsTemplate) ->
 
   # Forms View
   # -----------
@@ -20,6 +21,7 @@ define [
 
     initialize: (options) ->
       @focusedElementIndex = null
+      @paginationMenuTopView = new PaginationMenuTopView pagination: @pagination
       @applicationSettings = options.applicationSettings
       @getActiveServerType()
       @collection = new FormsCollection()
@@ -37,6 +39,23 @@ define [
       @listenTo Backbone, 'fetchAllFieldDBFormsEnd', @fetchAllFormsEnd
       @listenTo Backbone, 'fetchAllFieldDBFormsSuccess', @fetchAllFormsSuccess
 
+    render: (taskId) ->
+      @$el.html @template(pagination: @pagination)
+      @matchHeights()
+      @guify()
+      @renderPaginationMenuTopView()
+      @collection.fetchAllFieldDBForms()
+      @listenToEvents()
+      @perfectScrollbar()
+      @setFocus()
+      Backbone.trigger 'longTask:deregister', taskId
+      @
+
+    renderPaginationMenuTopView: ->
+      @paginationMenuTopView.setElement @$('div.dative-pagination-menu-top').first()
+      @paginationMenuTopView.render pagination: @pagination
+      @rendered @paginationMenuTopView
+
     fetchAllFormsStart: ->
       @spin 'fetching all forms'
 
@@ -45,6 +64,7 @@ define [
 
     fetchAllFormsSuccess: ->
       @editHeaderInfo()
+      @paginationMenuTopView.render pagination: @pagination
       @getFormViews()
       @renderPage()
 
@@ -56,7 +76,7 @@ define [
         @formViews.push newFormView
 
     spinnerOptions: ->
-      _.extend BaseView::spinnerOptions, {top: '50%', left: '97%'}
+      _.extend BaseView::spinnerOptions, {top: '25%', left: '98%'}
 
     spin: (tooltipMessage) ->
       @$('#dative-page-header')
@@ -66,7 +86,7 @@ define [
           content: tooltipMessage
           position:
             my: "left+10 center"
-            at: "right center"
+            at: "right top+20"
             collision: "flipfit"
         .tooltip 'open'
 
@@ -87,17 +107,6 @@ define [
       itemsPerPage: 10
       page: 1
       pages: 0
-
-    render: (taskId) ->
-      @$el.html @template(pagination: @pagination)
-      @matchHeights()
-      @guify()
-      @collection.fetchAllFieldDBForms()
-      @listenToEvents()
-      @perfectScrollbar()
-      @setFocus()
-      Backbone.trigger 'longTask:deregister', taskId
-      @
 
     setFocus: ->
       if @focusedElementIndex
@@ -152,6 +161,7 @@ define [
     editHeaderInfo: ->
       @pagination.items = @collection.length
       @pagination.pages = Math.ceil(@pagination.items / @pagination.itemsPerPage)
+      @$('.items-per-page').text @utils.integerWithCommas(@pagination.itemsPerPage)
       @$('.form-count').text @utils.integerWithCommas(@pagination.items)
       @$('.page-count').text @utils.integerWithCommas(@pagination.pages)
 
