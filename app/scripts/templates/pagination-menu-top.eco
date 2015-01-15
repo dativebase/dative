@@ -12,15 +12,13 @@
 
 </div>
 
-<% console.log @ %>
-
 <div class='button-container-center'>
 
   <select name='items-per-page'>
     <% for integer in @possibleItemsPerPage: %>
       <% selected = if integer is @itemsPerPage then 'selected' else '' %>
       <option value='<%= integer %>' <%= selected %>
-        ><%= integer %> item<%= @pluralize integer %> per page
+        ><%= integer %> <%= @pluralizeByNum 'item', integer %> per page
       </option>
     <% end %>
   </select>

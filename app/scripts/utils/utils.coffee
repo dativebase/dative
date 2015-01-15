@@ -61,6 +61,13 @@ define (require) ->
   integerWithCommas = (integer) ->
     integer.toString().replace /\B(?=(\d{3})+(?!\d))/g, ','
 
+  pluralize = (noun) -> "#{noun}s"
+
+  pluralizeByNum = (noun, numeral) ->
+    switch numeral
+      when 1 then noun
+      else pluralize noun
+
   clone: clone
   type: type
   guid: guid
@@ -68,4 +75,6 @@ define (require) ->
   startsWith: startsWith
   endsWith: endsWith
   integerWithCommas: integerWithCommas
+  pluralize: pluralize
+  pluralizeByNum: pluralizeByNum
 

@@ -21,6 +21,8 @@ define [
 
     initialize: (options) ->
       @focusedElementIndex = null
+      @renderedFormViews = []
+      @renderedPaginationItemTableViews = []
       @paginationMenuTopView = new PaginationMenuTopView pagination: @pagination
       @applicationSettings = options.applicationSettings
       @getActiveServerType()
@@ -29,7 +31,8 @@ define [
       @formViews = []
       @listenToEvents()
 
-    events: {}
+    events:
+      'focus button, input, .ui-selectmenu-button': 'rememberFocusedElement'
 
     listenToEvents: ->
       @stopListening()
@@ -39,8 +42,24 @@ define [
       @listenTo Backbone, 'fetchAllFieldDBFormsEnd', @fetchAllFormsEnd
       @listenTo Backbone, 'fetchAllFieldDBFormsSuccess', @fetchAllFormsSuccess
 
+      @listenTo @paginationMenuTopView, 'paginator:changeItemsPerPage', @changeItemsPerPage
+      @listenTo @paginationMenuTopView, 'paginator:showFirstPage', @showFirstPage
+      @listenTo @paginationMenuTopView, 'paginator:showLastPage', @showLastPage
+      @listenTo @paginationMenuTopView, 'paginator:showPreviousPage', @showPreviousPage
+      @listenTo @paginationMenuTopView, 'paginator:showNextPage', @showNextPage
+      @listenTo @paginationMenuTopView, 'paginator:showThreePagesBack', @showThreePagesBack
+      @listenTo @paginationMenuTopView, 'paginator:showTwoPagesBack', @showTwoPagesBack
+      @listenTo @paginationMenuTopView, 'paginator:showOnePageBack', @showOnePageBack
+      @listenTo @paginationMenuTopView, 'paginator:showOnePageForward', @showOnePageForward
+      @listenTo @paginationMenuTopView, 'paginator:showTwoPagesForward', @showTwoPagesForward
+      @listenTo @paginationMenuTopView, 'paginator:showThreePagesForward', @showThreePagesForward
+
+
     render: (taskId) ->
-      @$el.html @template(pagination: @pagination)
+      context =
+        pluralizeByNum: @utils.pluralizeByNum
+        pagination: @pagination
+      @$el.html @template(context)
       @matchHeights()
       @guify()
       @renderPaginationMenuTopView()
@@ -63,10 +82,44 @@ define [
       @stopSpin()
 
     fetchAllFormsSuccess: ->
-      @editHeaderInfo()
-      @paginationMenuTopView.render pagination: @pagination
       @getFormViews()
-      @renderPage()
+      @refreshPage()
+
+    refreshPage: (options) ->
+      @refreshHeader()
+      @refreshPaginationMenuTop()
+      @closeThenOpenCurrentPage options
+
+    closeThenOpenCurrentPage: (options) ->
+      hideMethod = 'hide'
+      hideOptions =
+        complete: =>
+          @$('.dative-pagin-items').html ''
+          @closeRenderedFormViews()
+          @closeRenderedPaginationItemTableViews()
+          @renderPage options
+      if options?.hideEffect
+        hideOptions.duration = @getAnimationDuration()
+        hideMethod = options.hideEffect
+      @$('.dative-pagin-items')[hideMethod] hideOptions
+
+    getAnimationDuration: ->
+      400 + (25 * @getItemsDisplayed())
+
+    closeRenderedFormViews: ->
+      while @renderedFormViews.length
+        formView = @renderedFormViews.pop()
+        formView.close()
+        @closed formView
+
+    closeRenderedPaginationItemTableViews: ->
+      while @renderedPaginationItemTableViews.length
+        paginationItemTableView = @renderedPaginationItemTableViews.pop()
+        paginationItemTableView.close()
+        @closed paginationItemTableView
+
+    refreshPaginationMenuTop: ->
+      @paginationMenuTopView.render pagination: @pagination
 
     getFormViews: ->
       @collection.each (formModel) =>
@@ -107,6 +160,13 @@ define [
       itemsPerPage: 10
       page: 1
       pages: 0
+      start: 0
+      end: 0
+
+    refreshPagination: ->
+      @pagination.start = (@pagination.page - 1) * @pagination.itemsPerPage
+      @pagination.end = @pagination.start + @pagination.itemsPerPage - 1
+      @pagination.pages = Math.ceil(@pagination.items / @pagination.itemsPerPage)
 
     setFocus: ->
       if @focusedElementIndex
@@ -143,11 +203,10 @@ define [
         .scroll => @closeAllTooltips()
 
     # Render a page (pagination) of form views.
-    renderPage: ->
-      start = (@pagination.page - 1) * @pagination.itemsPerPage
-      end = start + @pagination.itemsPerPage - 1
+    renderPage: (options) ->
+      @refreshPagination()
       $formList = @$('.dative-pagin-items')
-      for formView, index in @formViews[start..end]
+      for formView, index in @formViews[@pagination.start..@pagination.end]
         formId = formView.model.get('id')
         paginationItemTableView = new PaginationItemTableView
           formId: formId
@@ -155,41 +214,72 @@ define [
         $formList.append paginationItemTableView.render().el
         formView.setElement @$("##{formId}")
         formView.render()
+        @renderedFormViews.push formView
         @rendered formView
+        @renderedPaginationItemTableViews.push paginationItemTableView
         @rendered paginationItemTableView
 
-    editHeaderInfo: ->
+      if options?.showEffect
+        $formList[options.showEffect]
+          duration: @getAnimationDuration()
+          complete: =>
+            @setFocus()
+      else
+        $formList.show()
+        @setFocus()
+
+    getItemsDisplayed: ->
+      if @pagination.itemsPerPage > @pagination.items
+        @pagination.items
+      else
+        @pagination.itemsPerPage
+
+    refreshHeader: ->
       @pagination.items = @collection.length
-      @pagination.pages = Math.ceil(@pagination.items / @pagination.itemsPerPage)
-      @$('.items-per-page').text @utils.integerWithCommas(@pagination.itemsPerPage)
+      @refreshPagination()
+      @$('.items-displayed').text @utils.integerWithCommas(@getItemsDisplayed())
       @$('.form-count').text @utils.integerWithCommas(@pagination.items)
+      @$('.form-count-noun').text @utils.pluralizeByNum('form', @pagination.items)
       @$('.page-count').text @utils.integerWithCommas(@pagination.pages)
+      @$('.page-count-noun').text @utils.pluralizeByNum('page', @pagination.pages)
 
-    # Deprecated?
-    appendView: (model, index) ->
-      formView = new FormView model: model
-      formView.render()
-      @formViews.push formView
-      @rendered formView
-      @$('.dative-pagin-items').append @paginItemTable(formView.$el, index)
+    changeItemsPerPage: (newItemsPerPage) ->
+      itemsDisplayedBefore = @getItemsDisplayed()
+      @pagination.itemsPerPage = newItemsPerPage
+      @refreshPagination()
+      itemsDisplayedAfter = @getItemsDisplayed()
+      if itemsDisplayedBefore isnt itemsDisplayedAfter
+        @refreshPage
+          hideEffect: 'fadeOut'
+          showEffect: 'fadeIn'
 
-    # Deprecated?
-    closeRenderedForms: ->
-      while @formViews.length
-        formView = @formViews.pop()
-        formView.close()
-        @closed formView
+    showFirstPage: ->
+      console.log "forms view knows that you want to showFirstPage"
 
-    # Return the form view wrapped in a pagination item <table>
-    paginItemTable: (formView$el, index) ->
-      $('<table>')
-        .addClass('dative-pagin-item')
-        .append($('<tbody>')
-          .append($('<tr>')
-            .append($('<td>')
-              .addClass('dative-pagin-item-index')
-              .text("(#{index + 1})"))
-            .append($('<td>')
-              .addClass('dative-pagin-item-content')
-              .html(formView$el))))
+    showLastPage: ->
+      console.log "forms view knows that you want to showLastPage"
+
+    showPreviousPage: ->
+      console.log "forms view knows that you want to showPreviousPage"
+
+    showNextPage: ->
+      console.log "forms view knows that you want to showNextPage"
+
+    showThreePagesBack: ->
+      console.log "forms view knows that you want to showThreePagesBack"
+
+    showTwoPagesBack: ->
+      console.log "forms view knows that you want to showTwoPagesBack"
+
+    showOnePageBack: ->
+      console.log "forms view knows that you want to showOnePageBack"
+
+    showOnePageForward: ->
+      console.log "forms view knows that you want to showOnePageForward"
+
+    showTwoPagesForward: ->
+      console.log "forms view knows that you want to showTwoPagesForward"
+
+    showThreePagesForward: ->
+      console.log "forms view knows that you want to showThreePagesForward"
 

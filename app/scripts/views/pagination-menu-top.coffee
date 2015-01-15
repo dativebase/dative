@@ -20,7 +20,21 @@ define [
       @pagination = @defaultPagination
       @pagination = @getPagination options
 
-    events: {}
+    events:
+      'selectmenuchange': 'changeItemsPerPage'
+
+      'click .first-page': 'showFirstPage'
+      'click .last-page': 'showLastPage'
+      'click .previous-page': 'showPreviousPage'
+      'click .next-page': 'showNextPage'
+
+      'click .current-minus-3': 'showThreePagesBack'
+      'click .current-minus-2': 'showTwoPagesBack'
+      'click .current-minus-1': 'showOnePageBack'
+
+      'click .current-plus-1': 'showOnePageForward'
+      'click .current-plus-2': 'showTwoPagesForward'
+      'click .current-plus-3': 'showThreePagesForward'
 
     defaultPagination:
       items: 0
@@ -36,19 +50,11 @@ define [
       catch
         @pagination
 
-    pluralize: (numeral) ->
-      switch numeral
-        when 1 then ''
-        else 's'
-
     getContext: ->
-      _.extend {pluralize: @pluralize}, @pagination
+      _.extend {pluralizeByNum: @utils.pluralizeByNum}, @pagination
 
     render: (options) ->
       @pagination = @getPagination options
-      console.log 'in render of pagination menu'
-      console.log @pagination
-      #@$el.html @template(@pagination)
       @$el.html @template(@getContext())
       @guify()
       @buttonVisibility()
@@ -144,9 +150,18 @@ define [
             at: "right center"
             collision: "flipfit"
 
+      # specify selected option of itemsPerPage select
+      @$('select[name=items-per-page] option').each (index, element) =>
+        $option = $(element)
+        if Number($option.val()) is @pagination.itemsPerPage
+          $option.prop 'selected', true
+        else
+          $option.prop 'selected', false
+
       @$('select').selectmenu width: 200
         .next('.ui-selectmenu-button').addClass('items-per-page')
 
+      # SMALL BUG: tooltip seems to be generated on two elements by the following:
       @$('.ui-selectmenu-button').filter('.items-per-page')
         .addClass 'dative-tooltip'
         .tooltip
@@ -173,9 +188,7 @@ define [
           @$(selector)
             .button 'disable'
             .hide()
-          console.log "#{selector} should be hidden"
         else
-          console.log "#{selector} should have value #{pageNumber}"
           @$(selector)
             .button 'option', 'label', pageNumber
             .button 'enable'
@@ -186,4 +199,44 @@ define [
                 at: 'left bottom+10'
                 collision: 'flipfit'
             .show()
+
+    ############################################################################
+    # Methods that trigger events requesting for specific pages to be shown.
+    ############################################################################
+
+    changeItemsPerPage: ->
+      newItemsPerPage = Number @$('select[name=items-per-page]').val()
+      if isNaN newItemsPerPage
+        newItemsPerPage = 10
+      @trigger 'paginator:changeItemsPerPage', newItemsPerPage
+
+    showFirstPage: ->
+      @trigger 'paginator:showFirstPage'
+
+    showLastPage: ->
+      @trigger 'paginator:showLastPage'
+
+    showPreviousPage: ->
+      @trigger 'paginator:showPreviousPage'
+
+    showNextPage: ->
+      @trigger 'paginator:showNextPage'
+
+    showThreePagesBack: ->
+      @trigger 'paginator:showThreePagesBack'
+
+    showTwoPagesBack: ->
+      @trigger 'paginator:showTwoPagesBack'
+
+    showOnePageBack: ->
+      @trigger 'paginator:showOnePageBack'
+
+    showOnePageForward: ->
+      @trigger 'paginator:showOnePageForward'
+
+    showTwoPagesForward: ->
+      @trigger 'paginator:showTwoPagesForward'
+
+    showThreePagesForward: ->
+      @trigger 'paginator:showThreePagesForward'
 
