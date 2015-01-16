@@ -20,6 +20,10 @@
 
     <div class='button-container-left'>
 
+      <button class='new-form dative-tooltip' title='create a new form'>
+        <i class='fa fa-fw fa-plus'></i>
+      </button>
+
       <button class='expand-all dative-tooltip' title='expand all forms'>
         <i class='fa fa-fw fa-angle-double-down'></i>
       </button>

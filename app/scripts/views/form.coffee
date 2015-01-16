@@ -20,17 +20,23 @@ define [
     tagName: 'div'
     className: 'igt-form dative-form-object ui-corner-all'
 
-    initialize: ->
+    listenToEvents: ->
+      @stopListening()
+      @undelegateEvents()
+      @delegateEvents()
       @listenTo @model, 'change', @render
-      @listenTo Backbone, 'formViews:dehighlight', @_dehighlight
+      @listenTo Backbone, 'form:dehighlightAllFormViews', @dehighlight
+      @listenTo Backbone, 'formsView:expandAllForms', @expand
+      @listenTo Backbone, 'formsView:collapseAllForms', @collapse
 
     events:
-      'click': '_highlightAndShow'
-      'click .form-hide-button': '_clickHideButton'
+      'click': 'highlightAndShow'
+      'click .form-hide-button': 'clickHideButton'
 
     render: ->
       @$el.attr('id', @model.cid).html @template(@model.toJSON())
       @guify()
+      @listenToEvents()
       @
 
     guify: ->
@@ -40,28 +46,34 @@ define [
       @$('.form-buttons').buttonset().hide()
       @$('.form-secondary-data').hide()
 
-    _highlightAndShow: ->
-      @_highlight()
-      @_showAdditionalData()
+    expand: ->
+      console.log 'A form view hears that you want to expand it.'
 
-    _highlight: ->
-      Backbone.trigger 'formViews:dehighlight'
+    collapse: ->
+      console.log 'A form view hears that you want to collapse it.'
+
+    highlightAndShow: ->
+      @highlight()
+      @showAdditionalData()
+
+    highlight: ->
+      Backbone.trigger 'form:dehighlightAllFormViews'
       @$el.addClass 'ui-state-highlight'
 
-    _dehighlight: ->
+    dehighlight: ->
       @$el.removeClass 'ui-state-highlight'
 
-    _clickHideButton: (event) ->
-      event.stopPropagation()
-      @_hideAdditionalData()
+    clickHideButton: (event) ->
+      @stopEvent event
+      @hideAdditionalData()
 
     # Show and hide the additional data div, class is 'secondary-data' I think
-    _showAdditionalData: ->
-      @$el.animate('border-color': FormView.jQueryUIColors.defBo, 'slow')
+    showAdditionalData: ->
+      @$el.animate 'border-color': FormView.jQueryUIColors.defBo, 'slow'
       @$('.form-buttons, .form-secondary-data, .form-hide-button')
         .slideDown 'slow'
 
-    _hideAdditionalData: (event) ->
+    hideAdditionalData: (event) ->
       @$el.css 'border-color': 'transparent'
       @$('.dative-form-buttons, .dative-form-secondary-data, .dative-form-hide-button')
         .slideUp 'slow'

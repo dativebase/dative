@@ -35,6 +35,20 @@ define [
 
     events:
       'focus button, input, .ui-selectmenu-button': 'rememberFocusedElement'
+      'click .expand-all': 'expandAllForms'
+      'click .collapse-all': 'collapseAllForms'
+      'click .new-form': 'showNewFormView'
+
+    expandAllForms: ->
+      console.log 'in expand all forms'
+      Backbone.trigger 'formsView:expandAllForms'
+
+    collapseAllForms: ->
+      console.log 'in collapse all forms'
+      Backbone.trigger 'formsView:collapseAllForms'
+
+    showNewFormView: ->
+      console.log 'You want to display the new form view'
 
     listenToEvents: ->
       @stopListening()
@@ -169,7 +183,7 @@ define [
 
       @$('button').button().attr('tabindex', 0)
 
-      @$('button.expand-all')
+      @$('button.new-form')
         .button()
         .tooltip
           position:
@@ -177,11 +191,19 @@ define [
             at: "left center"
             collision: "flipfit"
 
-      @$('button.collapse-all')
+      @$('button.expand-all')
         .button()
         .tooltip
           position:
             my: "right-45 center"
+            at: "left center"
+            collision: "flipfit"
+
+      @$('button.collapse-all')
+        .button()
+        .tooltip
+          position:
+            my: "right-80 center"
             at: "left center"
             collision: "flipfit"
 
