@@ -30,9 +30,9 @@ define [
       @applicationSettings = options.applicationSettings
       @pouchname = options.pouchname
 
-    getCorpusServerURL:  ->
-      url = @applicationSettings.get 'baseDBURL'
-      "#{url}/#{@pouchname}"
+    ############################################################################
+    # CORS methods
+    ############################################################################
 
     # Fetch the corpus data.
     # GET `<CorpusServiceURL>/<corpusname>/_design/pages/_view/private_corpuses`
@@ -54,19 +54,6 @@ define [
           console.log "Failed to fetch a corpus at #{@url()}. Request timed out."
           @trigger 'fetchEnd'
       )
-
-    getFieldDBCorpusObject: (responseJSON) ->
-      result = {}
-      if responseJSON.rows?
-        [..., tmp] = responseJSON.rows # Last element in array, a la CoffeeScript
-        result = tmp.value
-
-    getDefaultPayload: ->
-      authUrl: @applicationSettings.get?('activeServer')?.get?('url')
-      username: @applicationSettings.get?('username')
-      password: @applicationSettings.get?('password')
-      serverCode: @applicationSettings.get?('activeServer')?.get?('serverCode')
-      pouchname: @get 'pouchname'
 
     # Fetch the users with access to a corpus.
     # POST `<AuthServiceURL>/corpusteam`
@@ -92,12 +79,6 @@ define [
           @trigger 'fetchUsersEnd'
           console.log 'Failed request to /corpusteam: timed out.'
       )
-
-    getFieldDBRole: (role) ->
-      switch role
-        when 'admin' then 'admin'
-        when 'writer' then 'read_write'
-        when 'reader' then 'read_only'
 
     # Grant a role on a corpus to a user.
     # POST `<AuthServiceURL>/updateroles`
@@ -157,4 +138,31 @@ define [
           @trigger 'removeUserFromCorpusEnd'
           console.log 'Failed request to /updateroles: timed out.'
       )
+
+    ############################################################################
+    # utility methods
+    ############################################################################
+
+    getCorpusServerURL:  ->
+      url = @applicationSettings.get 'baseDBURL'
+      "#{url}/#{@pouchname}"
+
+    getFieldDBCorpusObject: (responseJSON) ->
+      result = {}
+      if responseJSON.rows?
+        [..., tmp] = responseJSON.rows # Last element in array, a la CoffeeScript
+        result = tmp.value
+
+    getDefaultPayload: ->
+      authUrl: @applicationSettings.get?('activeServer')?.get?('url')
+      username: @applicationSettings.get?('username')
+      password: @applicationSettings.get?('password')
+      serverCode: @applicationSettings.get?('activeServer')?.get?('serverCode')
+      pouchname: @get 'pouchname'
+
+    getFieldDBRole: (role) ->
+      switch role
+        when 'admin' then 'admin'
+        when 'writer' then 'read_write'
+        when 'reader' then 'read_only'
 

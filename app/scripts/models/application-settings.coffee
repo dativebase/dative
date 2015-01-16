@@ -378,6 +378,10 @@ define [
         key: 'activeServer'
         relatedModel: ServerModel
         includeInJSON: 'id'
+      #,
+      #  type: Backbone.HasMany
+      #  key: 'fieldDBCorpora'
+      #  relatedModel: CorpusModel
     ]
 
 

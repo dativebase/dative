@@ -38,7 +38,7 @@ define [
     render: ->
       context =
         label: @label
-        activeServerId: @model.get('activeServer')?.get('id')
+        activeServerId: @model.get('activeServer')?.get?('id')
         servers: @model.get('servers').toJSON()
       @$el.html @template(context)
       @$('select.activeServer').selectmenu width: @width

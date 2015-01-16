@@ -18,7 +18,8 @@ define [
 
     template: formTemplate
     tagName: 'div'
-    className: 'igt-form dative-form-object ui-corner-all'
+    className: ['dative-form-widget dative-widget-center ui-widget',
+      'ui-widget-content ui-corner-all'].join ' '
 
     listenToEvents: ->
       @stopListening()
@@ -30,8 +31,8 @@ define [
       @listenTo Backbone, 'formsView:collapseAllForms', @collapse
 
     events:
-      'click': 'highlightAndShow'
-      'click .form-hide-button': 'clickHideButton'
+      'click': 'highlightAndShowOnlyMe'
+      'click .toggle-form-details': 'clickHideButton'
 
     render: ->
       @$el.attr('id', @model.cid).html @template(@model.toJSON())
@@ -40,41 +41,184 @@ define [
       @
 
     guify: ->
-      @$('.form-hide-button').button(
-        icons: primary: 'ui-icon-close'
-        text: false).hide()
-      @$('.form-buttons').buttonset().hide()
-      @$('.form-secondary-data').hide()
+      @guifyButtons()
+      @hideHeader()
+      @hideSecondaryData()
+
+    guifyButtons: ->
+
+      @$('button.toggle-form-details')
+        .button()
+        .tooltip
+          position:
+            my: "right-40 center"
+            at: "left center"
+            collision: "flipfit"
+
+      @$('button.update-form')
+        .button()
+        .tooltip
+          position:
+            my: "right-40 center"
+            at: "left center"
+            collision: "flipfit"
+
+      @$('button.associate-form')
+        .button()
+        .tooltip
+          position:
+            my: "right-40 center"
+            at: "left center"
+            collision: "flipfit"
+
+      @$('button.export-form')
+        .button()
+        .tooltip
+          position:
+            my: "right-40 center"
+            at: "left center"
+            collision: "flipfit"
+
+      @$('button.remember-form')
+        .button()
+        .tooltip
+          position:
+            my: "right-40 center"
+            at: "left center"
+            collision: "flipfit"
+
+      @$('button.delete-form')
+        .button()
+        .tooltip
+          position:
+            my: "right-40 center"
+            at: "left center"
+            collision: "flipfit"
+
+      @$('button.duplicate-form')
+        .button()
+        .tooltip
+          position:
+            my: "right-40 center"
+            at: "left center"
+            collision: "flipfit"
+
+      @$('button.form-history')
+        .button()
+        .tooltip
+          position:
+            my: "right-40 center"
+            at: "left center"
+            collision: "flipfit"
 
     expand: ->
-      console.log 'A form view hears that you want to expand it.'
+      @showFullAnimate()
 
     collapse: ->
-      console.log 'A form view hears that you want to collapse it.'
+      @hideFullAnimate()
 
     highlightAndShow: ->
       @highlight()
-      @showAdditionalData()
+      @showSecondaryData()
+
+    highlightAndShowOnlyMe: ->
+      @showFullAnimate()
+      @highlightOnlyMe()
 
     highlight: ->
-      Backbone.trigger 'form:dehighlightAllFormViews'
       @$el.addClass 'ui-state-highlight'
+
+    highlightOnlyMe: ->
+      @dehighlightAll()
+      @highlight()
+
+    dehighlightAll: ->
+      Backbone.trigger 'form:dehighlightAllFormViews'
 
     dehighlight: ->
       @$el.removeClass 'ui-state-highlight'
 
+    dehighlightAndHide: ->
+      @dehighlight()
+      @hideSecondaryData()
+
     clickHideButton: (event) ->
       @stopEvent event
-      @hideAdditionalData()
+      @hideSecondaryData()
 
-    # Show and hide the additional data div, class is 'secondary-data' I think
-    showAdditionalData: ->
-      @$el.animate 'border-color': FormView.jQueryUIColors.defBo, 'slow'
-      @$('.form-buttons, .form-secondary-data, .form-hide-button')
-        .slideDown 'slow'
+    ############################################################################
+    # Hide & Show stuff
+    ############################################################################
 
-    hideAdditionalData: (event) ->
+    # Full = border, header & secondary data
+    ############################################################################
+
+    showFull: ->
+      @addBorder()
+      @showHeader()
+      @showSecondaryData()
+
+    hideFull: ->
+      @removeBorder()
+      @hideHeader()
+      @hideSecondaryData()
+
+    showFullAnimate: ->
+      @addBorderAnimate()
+      @showHeaderAnimate()
+      @showSecondaryDataAnimate()
+
+    hideFullAnimate: ->
+      @removeBorderAnimate()
+      @hideHeaderAnimate()
+      @hideSecondaryDataAnimate()
+
+    # Header
+    ############################################################################
+
+    showHeader: ->
+      @$('.dative-widget-header').first().show()
+
+    hideHeader: ->
+      @$('.dative-widget-header').first().hide()
+
+    showHeaderAnimate: ->
+      @$('.dative-widget-header').first().slideDown 'slow'
+
+    hideHeaderAnimate: ->
+      @$('.dative-widget-header').first().slideUp 'slow'
+
+    # Secondary Data
+    ############################################################################
+
+    showSecondaryData: ->
+      @addBorder()
+      @$('.form-secondary-data').show()
+
+    hideSecondaryData: ->
+      @removeBorder()
+      @$('.form-secondary-data').hide()
+
+    showSecondaryDataAnimate: ->
+      @addBorderAnimate()
+      @$('.form-secondary-data').slideDown 'slow'
+
+    hideSecondaryDataAnimate: (event) ->
+      @removeBorderAnimate()
+      @$('.form-secondary-data').slideUp 'slow'
+
+    # Border
+    ############################################################################
+
+    addBorder: ->
+      @$el.css 'border-color': FormView.jQueryUIColors.defBo
+
+    removeBorder: ->
       @$el.css 'border-color': 'transparent'
-      @$('.dative-form-buttons, .dative-form-secondary-data, .dative-form-hide-button')
-        .slideUp 'slow'
+
+    addBorderAnimate: ->
+      @$el.animate 'border-color': FormView.jQueryUIColors.defBo, 'slow'
+
+    removeBorderAnimate: ->
+      @$el.animate 'border-color': 'transparent', 'slow'
 

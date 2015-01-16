@@ -103,8 +103,9 @@ div#mainmenu {
     text-align: left;
     margin-top: 5px;
 }
-.dative-form-object,
-.igt-form {
+
+.dative-form-widget
+{
     font-size: inherit;
     padding: 10px;
     border-style: solid;
@@ -114,10 +115,12 @@ div#mainmenu {
     top: -11px;
     display: block;
 }
-.dative-form-object:hover,
-.igt-form:hover {
+
+.dative-form-widget:hover
+{
     cursor: pointer;
 }
+
 ul.sf-menu li a
 {
     cursor: default;
@@ -128,10 +131,7 @@ ul.sf-menu li a
     font-size: 11px;
     padding: 10px 0;
 }
-.dative-form-buttons ,
-.form-buttons {
-    margin-bottom: 10px;
-}
+
 .dative-forms-view-one-interface .dative-widget-body,
 .dative-forms-browse-interface .dative-widget-body {
     position: relative;

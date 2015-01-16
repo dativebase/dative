@@ -1,14 +1,53 @@
-<button class='form-hide-button dative-form-hide-button
-    float-right'>hide</button>
+<div class="dative-widget-header ui-widget-header ui-corner-top">
 
-<div class='form-buttons dative-form-buttons'>
-  <button>Update</button>
-  <button>Associate</button>
-  <button>Export</button>
-  <button>Remember</button>
-  <button>Delete</button>
-  <button>Duplicate</button>
-  <button>History</button>
+  <div class='button-container-left'>
+
+    <button class="toggle-form-details dative-tooltip"
+      title="show the buttons and extra data of this form">
+      <i class='fa fa-caret-right fa-fw'></i>
+    </button>
+
+  </div>
+
+  <div class='button-container-right'>
+
+    <button class="update-form dative-tooltip"
+      title="update this form">
+      <i class='fa fa-pencil-square-o fa-fw'></i>
+    </button>
+
+    <button class="associate-form dative-tooltip"
+      title="associate this form to a file">
+      <i class='fa fa-link fa-fw'></i>
+    </button>
+
+    <button class="export-form dative-tooltip"
+      title="export this form to various file formats">
+      <i class='fa fa-download fa-fw'></i>
+    </button>
+
+    <button class="remember-form dative-tooltip"
+      title="save this form to your personal clipboard">
+      <i class='fa fa-clipboard fa-fw'></i>
+    </button>
+
+    <button class="delete-form dative-tooltip"
+      title="delete this form">
+      <i class='fa fa-trash fa-fw'></i>
+    </button>
+
+    <button class="duplicate-form dative-tooltip"
+      title="duplicate this form">
+      <i class='fa fa-copy fa-fw'></i>
+    </button>
+
+    <button class="form-history dative-tooltip"
+      title="view the history of this form">
+      <i class='fa fa-history fa-fw'></i>
+    </button>
+
+  </div>
+
 </div>
 
 <div class='form-primary-data dative-form-primary-data'>
@@ -48,6 +87,7 @@
     <% end %>
 
   </div>
+
 </div>
 
 <div class='form-secondary-data dative-form-secondary-data'>

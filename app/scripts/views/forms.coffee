@@ -40,11 +40,9 @@ define [
       'click .new-form': 'showNewFormView'
 
     expandAllForms: ->
-      console.log 'in expand all forms'
       Backbone.trigger 'formsView:expandAllForms'
 
     collapseAllForms: ->
-      console.log 'in collapse all forms'
       Backbone.trigger 'formsView:collapseAllForms'
 
     showNewFormView: ->
