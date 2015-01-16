@@ -22,6 +22,7 @@ define [
 
     initialize: ->
       @listenTo @model, 'change:loggedIn', @loggedInChanged
+      @listenTo @model, 'change:activeFieldDBCorpus', @refreshLoggedInUser
       @listenTo Backbone, 'bodyClicked', @closeSuperclick
 
     loggedInChanged: ->
@@ -179,13 +180,18 @@ define [
           .css 'border-color', MainMenuView.jQueryUIColors.defBa
           .tooltip()
 
+    # Reset the tooltip title of the logged-in user's name in the top right.
     refreshLoggedInUser: ->
       if @model.get 'loggedIn'
         username = @model.get 'username'
         activeServerName = @model.get('activeServer')?.get 'name'
-        activeServerURL = @model.get('activeServer')?.get 'url'
-        title = ["You are logged in to the server “#{activeServerName}” ",
-          "(#{activeServerURL}) as “#{username}”."].join ''
+        activeServerType = @model.get('activeServer')?.get 'type'
+        activeFieldDBCorpus = @model.get 'activeFieldDBCorpus'
+        title = ["You are logged in to the server “#{activeServerName}”",
+          "as “#{username}”"].join ' '
+        if activeServerType is 'FieldDB' and activeFieldDBCorpus
+          title = ["#{title} and are using the corpus",
+            "“#{activeFieldDBCorpus.get 'title'}”"].join ' '
         @$('.logged-in-username')
           .text username
           .attr 'title', title
