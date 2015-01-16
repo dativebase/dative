@@ -1,8 +1,9 @@
 define [
   'backbone'
   './base'
+  './../utils/paginator'
   './../templates/pagination-menu-top'
-], (Backbone, BaseView, template) ->
+], (Backbone, BaseView, Paginator, template) ->
 
   # Pagination Menu Top View
   # ------------------------
@@ -17,8 +18,8 @@ define [
     className: 'dative-pagination-menu-top'
 
     initialize: (options) ->
-      @pagination = @defaultPagination
-      @pagination = @getPagination options
+      @paginator = @defaultPaginator
+      @paginator = @getPaginator options
 
     events:
       'selectmenuchange': 'changeItemsPerPage'
@@ -36,28 +37,24 @@ define [
       'click .current-plus-2': 'showTwoPagesForward'
       'click .current-plus-3': 'showThreePagesForward'
 
-    defaultPagination:
-      items: 0
-      itemsPerPage: 10
-      possibleItemsPerPage: [1, 5, 10, 25, 50, 100]
-      page: 1
-      pages: 0
+    defaultPaginator: ->
+      new Paginator()
 
-    getPagination: (options) ->
+    getPaginator: (options) ->
       try
-        pagination = options.pagination
-        _.extend @defaultPagination, pagination
+        paginator = options.paginator
       catch
-        @pagination
+        paginator = @paginator
+      paginator
 
     getContext: ->
-      _.extend {pluralizeByNum: @utils.pluralizeByNum}, @pagination
+      _.extend {pluralizeByNum: @utils.pluralizeByNum}, @paginator
 
     render: (options) ->
-      @pagination = @getPagination options
+      @paginator = @getPaginator options
       @$el.html @template(@getContext())
       @guify()
-      @buttonVisibility()
+      @setButtonState()
       @
 
     guify: ->
@@ -153,12 +150,12 @@ define [
       # specify selected option of itemsPerPage select
       @$('select[name=items-per-page] option').each (index, element) =>
         $option = $(element)
-        if Number($option.val()) is @pagination.itemsPerPage
+        if Number($option.val()) is @paginator.itemsPerPage
           $option.prop 'selected', true
         else
           $option.prop 'selected', false
 
-      @$('select').selectmenu width: 200
+      @$('select').selectmenu width: 160
         .next('.ui-selectmenu-button').addClass('items-per-page')
 
       # SMALL BUG: tooltip seems to be generated on two elements by the following:
@@ -172,19 +169,32 @@ define [
             at: "left center"
             collision: "flipfit"
 
-    buttonVisibility: ->
+    # Enable/disable pagination buttons (and potentially set their values, e.g.,
+    # to page numbers, and potentially hide them too).
+    setButtonState: ->
+      @setCurrentPageButtonState()
+      @setNumberedPageButtonsState()
+      @setPreviousFirstPageButtonsState()
+      @setNextLastPageButtonsState()
+
+    # The current page button is unique: always disabled.
+    setCurrentPageButtonState: ->
       @$('.current-page')
-        .button 'option', 'label', @pagination.page
+        .button 'option', 'label', @paginator.page
         .button 'disable'
+
+    # Set the state of the 6 page-numbered buttons that surround the current
+    # page button.
+    setNumberedPageButtonsState: ->
       pageNumbers =
-        '.current-minus-3': @pagination.page - 3
-        '.current-minus-2': @pagination.page - 2
-        '.current-minus-1': @pagination.page - 1
-        '.current-plus-1': @pagination.page + 1
-        '.current-plus-2': @pagination.page + 2
-        '.current-plus-3': @pagination.page + 3
+        '.current-minus-3': @paginator.page - 3
+        '.current-minus-2': @paginator.page - 2
+        '.current-minus-1': @paginator.page - 1
+        '.current-plus-1': @paginator.page + 1
+        '.current-plus-2': @paginator.page + 2
+        '.current-plus-3': @paginator.page + 3
       for selector, pageNumber of pageNumbers
-        if pageNumber > @pagination.pages or pageNumber < 1
+        if pageNumber > @paginator.pages or pageNumber < 1
           @$(selector)
             .button 'disable'
             .hide()
@@ -199,6 +209,18 @@ define [
                 at: 'left bottom+10'
                 collision: 'flipfit'
             .show()
+
+    setPreviousFirstPageButtonsState: ->
+      if @paginator.page is 1
+        @$('.previous-page, .first-page').button 'disable'
+      else
+        @$('.previous-page, .first-page').button 'enable'
+
+    setNextLastPageButtonsState: ->
+      if @paginator.page is @paginator.pages
+        @$('.next-page, .last-page').button 'disable'
+      else
+        @$('.next-page, .last-page').button 'enable'
 
     ############################################################################
     # Methods that trigger events requesting for specific pages to be shown.

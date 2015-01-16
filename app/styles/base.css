@@ -734,13 +734,8 @@ div.button-container-center {
   -webkit-transform: translate(-50%, -50%);
 }
 
-div.buttonz-container-center {
-  /* See http://jsfiddle.net/khrfwjL0/2/ */
-  position: absolute;
-  left: 50%;
-  top: 50%;
-  transform: translateY(-50%);
-  -webkit-transform: translateY(-50%);
+div.button-container-center {
+  width: 700px;
 }
 
 div.button-container-left {

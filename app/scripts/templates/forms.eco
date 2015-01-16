@@ -4,14 +4,20 @@
   <div class='dative-forms-view-header'>
 
     <div class='dative-page-header-title'>
+      <% console.log @paginator.itemsDisplayed %>
       Browsing
-      <span class='items-displayed'><%= @pagination.itemsPerPage %></span>
+      <!--<span class='form-count-noun'><%= @pluralizeByNum 'form', @paginator.itemsDisplayed %></span>
+      <span class='items-start'><%= @paginator.start + 1 %></span> to <span
+            class='items-end'><%= @paginator.end + 1 %></span>-->
+      <% if @paginator.start is @paginator.end - 1: %>
+        <span class='form-range'>form <%= @paginator.start + 1 %></span>
+      <% else: %>
+        <span class='form-range'>forms <%= @paginator.start + 1 %> to <%= @paginator.end + 1 %></span>
+      <% end %>
       of
-      <span class='form-count'><%= @pagination.items %></span>
-      <span class='form-count-noun'><%= @pluralizeByNum 'form', @pagination.items %></span>
-      across
-      <span class='page-count'><%= @pagination.pages %></span>
-      <span class='page-count-noun'><%= @pluralizeByNum 'page', @pagination.pages %></span>
+      <span class='form-count'><%= @paginator.items %></span>
+      (<span class='page-count'><%= @paginator.pages %></span>
+      <span class='page-count-noun'><%= @pluralizeByNum 'page', @paginator.pages %></span>)
     </div>
 
     <div class='button-container-left'>

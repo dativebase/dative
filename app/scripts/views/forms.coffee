@@ -26,7 +26,7 @@ define [
       @renderedFormViews = []
       @renderedPaginationItemTableViews = []
       @paginator = new Paginator()
-      @paginationMenuTopView = new PaginationMenuTopView pagination: @paginator
+      @paginationMenuTopView = new PaginationMenuTopView paginator: @paginator
       @applicationSettings = options.applicationSettings
       @getActiveServerType()
       @collection = new FormsCollection()
@@ -59,7 +59,7 @@ define [
     render: (taskId) ->
       context =
         pluralizeByNum: @utils.pluralizeByNum
-        pagination: @paginator
+        paginator: @paginator
       @$el.html @template(context)
       @matchHeights()
       @guify()
@@ -73,7 +73,7 @@ define [
 
     renderPaginationMenuTopView: ->
       @paginationMenuTopView.setElement @$('div.dative-pagination-menu-top').first()
-      @paginationMenuTopView.render pagination: @paginator
+      @paginationMenuTopView.render paginator: @paginator
       @rendered @paginationMenuTopView
 
     fetchAllFormsStart: ->
@@ -120,7 +120,7 @@ define [
         @closed paginationItemTableView
 
     refreshPaginationMenuTop: ->
-      @paginationMenuTopView.render pagination: @paginator
+      @paginationMenuTopView.render paginator: @paginator
 
     getFormViews: ->
       @collection.each (formModel) =>
@@ -194,18 +194,20 @@ define [
     renderPage: (options) ->
       @paginator._refresh() # TODO: NECESSARY?
       $formList = @$('.dative-pagin-items')
-      for formView, index in @formViews[@paginator.start..@paginator.end]
-        formId = formView.model.get('id')
-        paginationItemTableView = new PaginationItemTableView
-          formId: formId
-          index: index + 1
-        $formList.append paginationItemTableView.render().el
-        formView.setElement @$("##{formId}")
-        formView.render()
-        @renderedFormViews.push formView
-        @rendered formView
-        @renderedPaginationItemTableViews.push paginationItemTableView
-        @rendered paginationItemTableView
+      for index in [@paginator.start..@paginator.end]
+        formView = @formViews[index]
+        if formView # formView may be undefined.
+          formId = formView.model.get 'id'
+          paginationItemTableView = new PaginationItemTableView
+            formId: formId
+            index: index + 1
+          $formList.append paginationItemTableView.render().el
+          formView.setElement @$("##{formId}")
+          formView.render()
+          @renderedFormViews.push formView
+          @rendered formView
+          @renderedPaginationItemTableViews.push paginationItemTableView
+          @rendered paginationItemTableView
 
       if options?.showEffect
         $formList[options.showEffect]
@@ -218,7 +220,14 @@ define [
 
     refreshHeader: ->
       @paginator.setItems @collection.length
-      @$('.items-displayed').text @utils.integerWithCommas(@paginator.itemsDisplayed)
+      if @paginator.start is @paginator.end
+        @$('.form-range')
+          .text "form #{@utils.integerWithCommas(@paginator.start + 1)}"
+      else
+        @$('.form-range').text ["forms",
+          "#{@utils.integerWithCommas(@paginator.start + 1)}",
+          "to",
+          "#{@utils.integerWithCommas(@paginator.end + 1)}"].join ' '
       @$('.form-count').text @utils.integerWithCommas(@paginator.items)
       @$('.form-count-noun').text @utils.pluralizeByNum('form', @paginator.items)
       @$('.page-count').text @utils.integerWithCommas(@paginator.pages)
@@ -234,32 +243,68 @@ define [
           showEffect: 'fadeIn'
 
     showFirstPage: ->
-      console.log "forms view knows that you want to showFirstPage"
-
-    showLastPage: ->
-      console.log "forms view knows that you want to showLastPage"
+      pageBefore = @paginator.page
+      @paginator.setPageToFirst()
+      pageAfter = @paginator.page
+      if pageBefore isnt pageAfter
+        @refreshPage
+          hideEffect: 'fadeOut'
+          showEffect: 'fadeIn'
 
     showPreviousPage: ->
-      console.log "forms view knows that you want to showPreviousPage"
+      pageBefore = @paginator.page
+      @paginator.setPageToPrevious()
+      pageAfter = @paginator.page
+      if pageBefore isnt pageAfter
+        @refreshPage
+          hideEffect: 'fadeOut'
+          showEffect: 'fadeIn'
 
     showNextPage: ->
-      console.log "forms view knows that you want to showNextPage"
+      pageBefore = @paginator.page
+      @paginator.setPageToNext()
+      pageAfter = @paginator.page
+      if pageBefore isnt pageAfter
+        @refreshPage
+          hideEffect: 'fadeOut'
+          showEffect: 'fadeIn'
+
+    showLastPage: ->
+      pageBefore = @paginator.page
+      @paginator.setPageToLast()
+      pageAfter = @paginator.page
+      if pageBefore isnt pageAfter
+        @refreshPage
+          hideEffect: 'fadeOut'
+          showEffect: 'fadeIn'
+
+    # Show a new page where `method` determines whether the new page is
+    # behind or ahead of the current one and where `n` is the number of
+    # pages behind or ahead.
+    showPage: (n, method) ->
+      pageBefore = @paginator.page
+      @paginator[method] n
+      pageAfter = @paginator.page
+      if pageBefore isnt pageAfter
+        @refreshPage
+          hideEffect: 'fadeOut'
+          showEffect: 'fadeIn'
 
     showThreePagesBack: ->
-      console.log "forms view knows that you want to showThreePagesBack"
+      @showPage 3, 'decrementPage'
 
     showTwoPagesBack: ->
-      console.log "forms view knows that you want to showTwoPagesBack"
+      @showPage 2, 'decrementPage'
 
     showOnePageBack: ->
-      console.log "forms view knows that you want to showOnePageBack"
+      @showPage 1, 'decrementPage'
 
     showOnePageForward: ->
-      console.log "forms view knows that you want to showOnePageForward"
+      @showPage 1, 'incrementPage'
 
     showTwoPagesForward: ->
-      console.log "forms view knows that you want to showTwoPagesForward"
+      @showPage 2, 'incrementPage'
 
     showThreePagesForward: ->
-      console.log "forms view knows that you want to showThreePagesForward"
+      @showPage 3, 'incrementPage'
 
