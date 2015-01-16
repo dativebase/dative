@@ -37,6 +37,17 @@ define [
       'click .current-plus-2': 'showTwoPagesForward'
       'click .current-plus-3': 'showThreePagesForward'
 
+      'keydown': 'keyboardShorcuts'
+
+    # First stab at keyboard shortcuts.
+    # Of course, these only work when a control on the paginator is in focus.
+    keyboardShorcuts: (event) ->
+      switch event.which
+        when 70 then @$('.first-page').click() # f
+        when 80 then @$('.previous-page').click() # p
+        when 78 then @$('.next-page').click() # n
+        when 76 then @$('.last-page').click() # l
+
     defaultPaginator: ->
       new Paginator()
 
