@@ -71,7 +71,7 @@ define [
       @listenTo Backbone, 'loginSuggest', @openLoginDialogWithDefaults
       @listenTo Backbone, 'authenticate:success', @authenticateSuccess
       @listenTo Backbone, 'logout:success', @logoutSuccess
-      @listenTo Backbone, 'useCorpus', @browseFieldDBCorpus
+      @listenTo Backbone, 'useFieldDBCorpus', @useFieldDBCorpus
 
       @render()
       Backbone.history.start()
@@ -106,13 +106,20 @@ define [
     bodyClicked: ->
       Backbone.trigger 'bodyClicked' # Mainmenu superclick listens for this
 
-    browseFieldDBCorpus: (corpusId) ->
+    useFieldDBCorpus: (corpusId) ->
+      # TODO @jrwdunham: backbone-relational-ify this!:
+      currentlyActiveFieldDBCorpus = @applicationSettings
+        .get 'activeFieldDBCorpus'
       fieldDBCorporaCollection = @applicationSettings.get(
         'fieldDBCorporaCollection')
-      activeFieldDBCorpus = fieldDBCorporaCollection.findWhere
+      newActiveFieldDBCorpus = fieldDBCorporaCollection.findWhere
         pouchname: corpusId
-      @applicationSettings.set 'activeFieldDBCorpus', activeFieldDBCorpus
-      @showFormsView()
+      @applicationSettings.set 'activeFieldDBCorpus', newActiveFieldDBCorpus
+
+      if currentlyActiveFieldDBCorpus is newActiveFieldDBCorpus
+        @showFormsView fieldDBCorpusHasChanged: false
+      else
+        @showFormsView fieldDBCorpusHasChanged: true
 
     logoutSuccess: ->
       @closeVisibleView()
@@ -130,7 +137,7 @@ define [
       switch activeServerType
         when 'FieldDB' then @showCorporaView()
         when 'OLD' then @showFormsView()
-        else console.log 'Error'
+        else console.log 'Error: you logged in to a non-FieldDB/non-OLD server (?).'
 
     # Set `@applicationSettings` and `@applicationSettingsCollection`
     getApplicationSettings: (options) ->
@@ -194,14 +201,19 @@ define [
       @visibleView = @applicationSettingsView
       @renderVisibleView taskId
 
-    showFormsView: ->
+    showFormsView: (options) ->
       if not @loggedIn() then return
       if @formsView and @visibleView is @formsView then return
       @router.navigate 'forms-browse'
       taskId = @guid()
       Backbone.trigger 'longTask:register', 'Opening form browse view', taskId
       @closeVisibleView()
-      if not @formsView
+      if @formsView
+        if @activeServerType() is 'FieldDB' and options?.fieldDBCorpusHasChanged
+          @formsView.close()
+          @closed @formsView
+          @formsView = new FormsView applicationSettings: @applicationSettings
+      else
         @formsView = new FormsView applicationSettings: @applicationSettings
       @visibleView = @formsView
       @renderVisibleView taskId

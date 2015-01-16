@@ -1,7 +1,11 @@
 
   <div class="dative-widget-header ui-widget-header ui-corner-top header-no-body">
 
-    <div class='dative-widget-header-title'><%= @title %></div>
+    <% activeIndicator = if @isActive then '(active)' else '' %>
+    <div class='dative-widget-header-title'>
+      <%= @title %>
+      <span class="active-indicator"><%= activeIndicator %></span>
+    </div>
 
     <div class='button-container-left'>
 

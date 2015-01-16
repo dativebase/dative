@@ -40,10 +40,10 @@ define [
 
     activeServerChanged: ->
       if @active()
-        @$('.dative-widget-header-title span.activeIndicator').text '(active)'
+        @$('.dative-widget-header-title span.active-indicator').text '(active)'
         @$('.dative-widget-body').addClass 'ui-state-highlight'
       else
-        @$('.dative-widget-header-title span.activeIndicator').text ''
+        @$('.dative-widget-header-title span.active-indicator').text ''
         @$('.dative-widget-body').removeClass 'ui-state-highlight'
 
     active: ->
@@ -149,7 +149,7 @@ define [
 
       @_tabindicesNaught() # active elements have tabindex=0
 
-      @$('.activeIndicator').css("color", @constructor.jQueryUIColors.defCo)
+      @$('.active-indicator').css("color", @constructor.jQueryUIColors.defCo)
 
       #@_hoverStateFieldDisplay() # make data display react to focus & hover
 

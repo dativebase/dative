@@ -41,6 +41,9 @@ define [
 
     # First stab at keyboard shortcuts.
     # Of course, these only work when a control on the paginator is in focus.
+    # A better approach might be to have a keyboard shortcut component
+    # in AppView which triggers events on certain key presses and then
+    # certain views listen for those events.
     keyboardShorcuts: (event) ->
       switch event.which
         when 70 then @$('.first-page').click() # f

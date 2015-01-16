@@ -180,14 +180,16 @@ define [
         null
 
     activeCorpusChanged: ->
-      if @active()
+      if @isActive()
         @$('.dative-widget-body').addClass 'ui-state-highlight'
       else
         @$('.dative-widget-body').removeClass 'ui-state-highlight'
 
-    active: ->
-      # TODO @jrwdunham: where is the active corpus info to be stored?
-      false
+    isActive: ->
+      activeFieldDBCorpusPouchname = @model
+        .get('applicationSettings').get('activeFieldDBCorpus')?.get 'pouchname'
+      pouchname = @model.get 'pouchname'
+      if activeFieldDBCorpusPouchname is pouchname then true else false
 
     setModelFromGUI: ->
       @$('input, select').each (index, element) =>
@@ -222,7 +224,7 @@ define [
       @
 
     getContext: ->
-      context = _.extend @model.attributes, isActive: @active()
+      context = _.extend @model.attributes, isActive: @isActive()
       if context.pouchname is 'lingllama-communitycorpus'
         context.title = "LingLlama's Community Corpus"
       # The following works with local FieldDB but not with production, as of Jan 11, 2015
@@ -292,8 +294,7 @@ define [
 
     useCorpus: (event) ->
       if event then @stopEvent event
-      # Backbone.trigger 'request:browseFieldDBCorpus', @model.get('pouchname')
-      Backbone.trigger 'useCorpus', @model.get('pouchname')
+      Backbone.trigger 'useFieldDBCorpus', @model.get('pouchname')
 
     toggleAddUserKeys: (event) ->
       if event.which in [13, 32]
@@ -436,6 +437,8 @@ define [
       if disabled then @$('button.add-user').hide()
 
       @tabindicesNaught() # active elements have tabindex=0
+
+      @$('.active-indicator').css "color", @constructor.jQueryUIColors.defCo
 
     # Tabindices=0 and jQueryUI colors
     tabindicesNaught: ->

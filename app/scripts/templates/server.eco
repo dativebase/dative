@@ -1,7 +1,6 @@
 <div class="server-config-widget dative-widget-center ui-widget
   ui-widget-content ui-corner-all">
 
-  <div class="dative-widget-header ui-widget-header ui-corner-top">
 
     <% if @isActive: %>
       <% activeIndicatorValue = '(active)' %>
@@ -9,9 +8,11 @@
       <% activeIndicatorValue = '' %>
     <% end %>
 
+  <div class="dative-widget-header ui-widget-header ui-corner-top">
+
     <div class='dative-widget-header-title'
       ><span class='italic header-title-name'><%= @name %></span
-      > server <span class='activeIndicator'><%= activeIndicatorValue %></span
+      > server <span class='active-indicator'><%= activeIndicatorValue %></span
       ></div>
 
     <div class='button-container-left'>
