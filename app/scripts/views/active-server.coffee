@@ -32,8 +32,22 @@ define [
       @listenTo @model.get('servers'), 'add', @newServerAdded
       @listenTo @model.get('servers'), 'remove', @serverRemoved
       @listenTo @model.get('servers'), 'change', @serverChanged
+      @listenTo @model, 'change:loggedIn', @loggedInChanged
       @listenTo @model, 'change:activeServer', @activeServerChanged
       @delegateEvents()
+
+    loggedInChanged: ->
+      @selectmenuify()
+
+    loggedIn: ->
+      @model.get 'loggedIn'
+
+    selectmenuify: ->
+      disabled = if @loggedIn() then true else false
+      @$('select.activeServer')
+        .selectmenu
+          width: @width
+          disabled: disabled
 
     render: ->
       context =
@@ -41,7 +55,7 @@ define [
         activeServerId: @model.get('activeServer')?.get?('id')
         servers: @model.get('servers').toJSON()
       @$el.html @template(context)
-      @$('select.activeServer').selectmenu width: @width
+      @selectmenuify()
       @$('.ui-selectmenu-button')
         .addClass 'dative-tooltip dative-select-active-server'
         .tooltip

@@ -134,15 +134,16 @@ define [
 
     rememberFocusedElement: (event) ->
       try
-        @$(@focusableSelector).each (index, el) =>
+        @$(@focusableSelector).not('.ui-state-disabled').each (index, el) =>
           if el is event.target
             @focusedElementIndex = index
 
     focusLastFocusedElement: ->
-      @$(@focusableSelector).eq(@focusedElementIndex).focus()
+      @$(@focusableSelector)
+        .not('.ui-state-disabled').eq(@focusedElementIndex).focus()
 
     focusFirstElement: ->
-      @$(@focusableSelector).eq(0).focus()
+      @$(@focusableSelector).not('.ui-state-disabled').eq(0).focus()
 
     focusableSelector: 'button, input, .ui-selectmenu-button'
 

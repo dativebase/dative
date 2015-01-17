@@ -29,6 +29,9 @@ define [
       @listenTo @model, 'change:name', @changeHeaderName
       @delegateEvents()
 
+    loggedIn: ->
+      @applicationSettingsModel.get 'loggedIn'
+
     changeHeaderName: ->
       @$('.dative-widget-header-title span.header-title-name').text @model.get('name')
 
@@ -112,8 +115,10 @@ define [
             at: "left center"
             collision: "flipfit"
 
+      activateDisabled = if @loggedIn() then true else false
       @$('button.activate-server')
-        .button()
+        .button
+          disabled: activateDisabled
         .tooltip
           position:
             my: "right-70 center"
