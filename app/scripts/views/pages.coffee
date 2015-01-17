@@ -25,6 +25,7 @@ define [
       @$el.html @template(headerTitle: 'Pages')
       @matchHeights()
       @addAll()
+      @fixRoundedBorders()
       Backbone.trigger 'longTask:deregister', taskId
       @
 

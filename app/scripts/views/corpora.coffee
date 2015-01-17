@@ -107,6 +107,7 @@ define [
         @createCorpusView.hide()
       @perfectScrollbar()
       @setFocus()
+      @fixRoundedBorders()
       Backbone.trigger 'longTask:deregister', taskId
       @
 

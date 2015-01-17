@@ -14,4 +14,6 @@ define [
     render: ->
       @$el.html @template()
       @matchHeights()
+      @fixRoundedBorders()
+      @
 

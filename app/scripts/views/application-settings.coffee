@@ -80,6 +80,7 @@ define [
       @setFocus()
       @listenToEvents()
       Backbone.trigger 'longTask:deregister', taskId
+      @fixRoundedBorders()
       @
 
     setModelFromGUI: ->
@@ -170,7 +171,7 @@ define [
       linkHTML = $jQueryUILinkElement.get(0).outerHTML
       $('#font-awesome-css').after linkHTML
       outerCallback = =>
-        innerCallback = ->
+        innerCallback = =>
           Backbone.trigger 'application-settings:jQueryUIThemeChanged'
         @constructor.refreshJQueryUIColors innerCallback
       @listenForLinkOnload outerCallback

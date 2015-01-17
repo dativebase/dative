@@ -179,3 +179,37 @@ define [
           if $element.hasClass('dative-tooltip') and $element.tooltip('instance')
             $element.tooltip 'open'
 
+    # Fix rounded borders so that adjacently nested rounded borders <divs> don't
+    # have a gap between them. This must be done in the JS and not the CSS
+    # because Dative can dynamically change the CSS to different jQueryUI
+    # themese, which would mess up a static CSS file. (HACK WARN.)
+    fixRoundedBorders: ->
+      @$('#dative-page-header, .ui-widget > .ui-widget-header').each (index, element) =>
+        $el = $ element
+        cssProperties = [
+          'border-top-left-radius'
+          'border-top-right-radius'
+          'border-bottom-right-radius'
+          'border-bottom-left-radius'
+        ]
+        $el.css(
+          'border-radius',
+          _.map(
+            _.values($el.css(cssProperties)),
+            @decrementPxVal,
+            @
+          ).join(' ')
+        )
+
+    # '6px' becomes '5px', '0px' doesn't change, '1.2em' shouldn't change, etc.
+    decrementPxVal: (pxVal) ->
+      try
+        if @utils.endsWith pxVal, 'px'
+          pxInt = Number(pxVal.replace 'px', '')
+          if pxInt > 0 then "#{pxInt - 1}px" else pxVal
+        else
+          pxVal
+      catch e
+        console.log "exception with #{pxVal}"
+        console.log e
+        pxVal

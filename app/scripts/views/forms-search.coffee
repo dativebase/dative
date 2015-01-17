@@ -14,6 +14,7 @@ define [
     render: (taskId) ->
       @$el.html @template()
       @matchHeights()
+      @fixRoundedBorders()
       Backbone.trigger 'longTask:deregister', taskId
       @
 

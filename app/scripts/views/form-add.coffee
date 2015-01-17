@@ -86,6 +86,7 @@ define [
       @_guify body
       @_addModel body
       @_setFocus()
+      @fixRoundedBorders()
       Backbone.trigger 'longTask:deregister', taskId
       @
 
