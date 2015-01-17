@@ -10,18 +10,18 @@
         <label for="transcription">Transcription</label>
         <select name="grammaticality" id="grammaticality" class="grammaticality">
         </select>
-        <textarea rows="1" name="transcription" class="transcription
+        <textarea rows="1" name="transcription" class="transcription ui-corner-all
         form-add-input" id="transcription"
         maxlength="255"><%= @transcription %></textarea>
       </li>
       <li>
         <label for="morpheme_break">Morpheme Break</label>
-        <textarea name="morpheme_break" id="morpheme_break"
+        <textarea name="morpheme_break" id="morpheme_break" class="ui-corner-all"
         maxlength="255"><%= @morpheme_break %></textarea>
       </li>
       <li>
         <label for="morpheme_gloss">Morpheme Gloss</label>
-        <textarea name="morpheme_gloss" id="morpheme_gloss"
+        <textarea name="morpheme_gloss" id="morpheme_gloss" class="ui-corner-all"
         maxlength="255"><%= @morpheme_gloss %></textarea>
       </li>
       <li>
@@ -31,7 +31,7 @@
         </select>
         <textarea name="translations-0.transcription"
           id="translations0transcription" maxlength="255"
-          class="translation"
+          class="translation ui-corner-all"
           <% if @translations[0]: %>
             ><%= @translations[0].transcription %></textarea>
           <% else: %>
@@ -45,11 +45,12 @@
     <ul class="fieldset">
       <li>
         <label for="comments">General Comments</label>
-        <textarea name="comments" id="comments"><%= @comments %></textarea>
+        <textarea name="comments" id="comments" class="ui-corner-all"
+          ><%= @comments %></textarea>
       </li>
       <li>
         <label for="speaker_comments">Speaker Comments</label>
-        <textarea name="speaker_comments" id="speaker_comments"
+        <textarea name="speaker_comments" id="speaker_comments" class="ui-corner-all"
         ><%= @speaker_comments %></textarea>
       </li>
       <li>
@@ -88,7 +89,7 @@
       <li>
         <label for="date_elicited">Date Elicited</label>
         <input type="text" name="date_elicited" id="date_elicited"
-          class="dateElicited" value="<%= @date_elicited %>"/>
+          class="dateElicited ui-corner-all" value="<%= @date_elicited %>"/>
       </li>
     </ul>
 

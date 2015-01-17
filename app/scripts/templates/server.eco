@@ -32,7 +32,7 @@
   </div>
 
   <% if @isActive: %>
-    <div class="dative-widget-body ui-state-highlight">
+    <div class="dative-widget-body ui-state-highlight ui-corner-bottom">
   <% else: %>
     <div class="dative-widget-body">
   <% end %>
@@ -41,13 +41,13 @@
 
       <li>
         <label for="name">Name</label>
-        <input type="text" name="name" class="dative-input dative-tooltip
+        <input type="text" name="name" class="dative-input dative-tooltip ui-corner-all
           dative-input-display" title="enter a name for the server"
           value="<%= @name %>" /> </li>
 
       <li>
         <label for="url">URL</label>
-        <input type="text" name="url" class="dative-input dative-tooltip
+        <input type="text" name="url" class="dative-input dative-tooltip ui-corner-all
           dative-input-display" title="enter a URL for the server
           (including protocol and port, if needed)"
           value="<%= @url %>" />

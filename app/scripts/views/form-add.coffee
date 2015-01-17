@@ -259,8 +259,8 @@ define [
                 name: "#{name}.transcription"
                 maxlength: '255'
                 id: transcriptionId)
-              .addClass('translation')
-              .css("border-color", @constructor.jQueryUIColors().defBo))
+              .addClass('translation ui-corner-all')
+              .css("border-color", BaseView.jQueryUIColors().defBo))
             .append($('<button>').addClass('removeMe')
               .attr(title: 'Remove this translation field.')
               .text('Remove Me')

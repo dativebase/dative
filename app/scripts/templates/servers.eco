@@ -1,7 +1,7 @@
 <div class="servers-config-widget dative-widget-center ui-widget
   ui-widget-content ui-corner-all">
 
-  <div class="dative-widget-header header-no-body ui-widget-header
+  <div class="dative-widget-header header-no-body ui-corner-bottom ui-widget-header
     ui-corner-top dative-tooltip">
 
     <div class='dative-widget-header-title'>Servers</div>

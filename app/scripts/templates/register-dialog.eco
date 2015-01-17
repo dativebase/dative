@@ -6,7 +6,7 @@
 
       <li class='fielddb'>
         <label for='username'>Username *</label>
-        <input type='text' name='username' class='username dative-tooltip'
+        <input type='text' name='username' class='username dative-tooltip ui-corner-all'
           title='enter the username for your new account'
           tabindex=0 id="big" />
         <span class='dative-register-validation ui-state-error ui-corner-all
@@ -15,7 +15,7 @@
 
       <li class='fielddb'>
         <label for='password'>Password *</label>
-        <input type='password' name='password' class='password dative-tooltip'
+        <input type='password' name='password' class='password dative-tooltip ui-corner-all'
           title='enter a password for your new account' tabindex=0 />
         <span class='ui-state-error ui-corner-all dative-register-validation
           password-validation'></span>
@@ -23,7 +23,7 @@
 
       <li class='fielddb'>
         <label for='passwordConfirm'>Confirm password *</label>
-        <input type='password' name='passwordConfirm' class='passwordConfirm dative-tooltip'
+        <input type='password' name='passwordConfirm' class='passwordConfirm dative-tooltip ui-corner-all'
           title='repeat your new password (to make sure it is right)' tabindex=0 />
         <span class='ui-state-error ui-corner-all dative-register-validation
           passwordConfirm-validation'></span>
@@ -31,7 +31,7 @@
 
       <li class='fielddb'>
         <label for='email'>E-mail *</label>
-        <input type='text' name='email' class='email dative-tooltip'
+        <input type='text' name='email' class='email dative-tooltip ui-corner-all'
           title='enter your email address' tabindex=0 />
         <span class='ui-state-error ui-corner-all dative-register-validation
           email-validation'></span>

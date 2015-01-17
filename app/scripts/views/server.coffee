@@ -41,10 +41,10 @@ define [
     activeServerChanged: ->
       if @active()
         @$('.dative-widget-header-title span.active-indicator').text '(active)'
-        @$('.dative-widget-body').addClass 'ui-state-highlight'
+        @$('.dative-widget-body').addClass 'ui-state-highlight ui-corner-bottom'
       else
         @$('.dative-widget-header-title span.active-indicator').text ''
-        @$('.dative-widget-body').removeClass 'ui-state-highlight'
+        @$('.dative-widget-body').removeClass 'ui-state-highlight ui-corner-bottom'
 
     active: ->
       @model is @model.collection.applicationSettings.get 'activeServer'

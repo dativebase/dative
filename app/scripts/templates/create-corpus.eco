@@ -10,7 +10,7 @@
 
       <li>
         <label for='corpus-name'>Corpus name</label>
-        <input type='text' name='corpus-name' class='dative-tooltip'
+        <input type='text' name='corpus-name' class='dative-tooltip ui-corner-all'
           title='enter the name of the corpus you would like to create' />
         <div class='dative-create-corpus-failed-container'>
           <span class='ui-state-error ui-corner-all dative-create-corpus-failed

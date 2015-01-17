@@ -181,9 +181,9 @@ define [
 
     activeCorpusChanged: ->
       if @isActive()
-        @$('.dative-widget-body').addClass 'ui-state-highlight'
+        @$('.dative-widget-body').addClass 'ui-state-highlight ui-corner-bottom'
       else
-        @$('.dative-widget-body').removeClass 'ui-state-highlight'
+        @$('.dative-widget-body').removeClass 'ui-state-highlight ui-corner-bottom'
 
     isActive: ->
       activeFieldDBCorpusPouchname = @model
@@ -355,7 +355,7 @@ define [
       @setToggleButtonStateClosed()
 
     setHeaderStateClosed: ->
-      @$('.dative-widget-header').first().addClass 'header-no-body'
+      @$('.dative-widget-header').first().addClass 'header-no-body ui-corner-bottom'
 
     setToggleButtonStateClosed: ->
       @$('button.toggle-appear')
@@ -394,7 +394,7 @@ define [
       @setToggleButtonStateOpen()
 
     setHeaderStateOpen: ->
-      @$('.dative-widget-header').first().removeClass 'header-no-body'
+      @$('.dative-widget-header').first().removeClass 'header-no-body ui-corner-bottom'
 
     setToggleButtonStateOpen: ->
       @$('button.toggle-appear')

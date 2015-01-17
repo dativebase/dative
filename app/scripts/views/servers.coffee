@@ -145,10 +145,10 @@ define [
       @setToggleButtonStateOpen()
 
     setHeaderStateClosed: ->
-      @$('.dative-widget-header').first().addClass 'header-no-body'
+      @$('.dative-widget-header').first().addClass 'header-no-body ui-corner-bottom'
 
     setHeaderStateOpen: ->
-      @$('.dative-widget-header').first().removeClass 'header-no-body'
+      @$('.dative-widget-header').first().removeClass 'header-no-body ui-corner-bottom'
 
     setToggleButtonStateClosed: ->
       @$('button.toggle-appear')

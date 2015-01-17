@@ -24,7 +24,7 @@
 
       <li>
         <label for='username'>Username</label>
-        <input type='text' name='username' class='dative-tooltip'
+        <input type='text' name='username' class='dative-tooltip ui-corner-all'
           title='enter the username of an existing user; the form will autocomplete
           with the usernames of existing users' />
         <div class='dative-add-user-failed-container'>

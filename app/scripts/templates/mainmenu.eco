@@ -1,7 +1,7 @@
 <ul class="sf-menu">
 
     <li><a>Dative</a>
-        <ul>
+        <ul class='ui-corner-bottom'>
             <li>
               <a data-event="request:applicationSettings"
                  data-shortcut="ctrl+,">Application Settings</a>
@@ -23,7 +23,7 @@
     </li>
 
     <li class='requires-authentication'><a>Forms</a>
-        <ul>
+        <ul class='ui-corner-bottom'>
             <li class='requires-authentication'>
               <a data-event="request:formAdd" data-shortcut="ctrl+a">Add</a>
             </li>
@@ -39,7 +39,7 @@
 
     <!--
     <li><a>Files</a>
-        <ul>
+        <ul class='ui-corner-bottom'>
             <li><a data-event="request:fileAdd">Add</a></li>
             <li><a data-event="request:filesSearch">Search</a></li>
             <li><a data-event="request:filesBrowse">Browse</a></li>
@@ -47,7 +47,7 @@
     </li>
 
     <li><a>Collections</a>
-        <ul>
+        <ul class='ui-corner-bottom'>
             <li><a data-event="request:collectionAdd">Add</a></li>
             <li><a data-event="request:collectionsSearch">Search</a></li>
             <li><a data-event="request:collectionsBrowse">Browse</a></li>
@@ -55,7 +55,7 @@
     </li>
 
     <li><a>Analysis</a>
-        <ul>
+        <ul class='ui-corner-bottom'>
             <li><a data-event="request:phonology">Phonology</a></li>
             <li><a data-event="request:analyzedWordsCorpus">
                 Analyzed Words Corpus</a></li>
@@ -70,7 +70,7 @@
     </li>
 
     <li><a>Dictionary</a>
-        <ul>
+        <ul class='ui-corner-bottom'>
             <li><a data-event="request:dictionarySetup">Setup</a></li>
             <li><a data-event="request:dictionarySearch">Search</a></li>
             <li><a data-event="request:dictionaryBrowse">Browse</a></li>
@@ -78,14 +78,14 @@
     </li>
 
     <li><a>People</a>
-        <ul>
+        <ul class='ui-corner-bottom'>
             <li><a data-event="request:viewSpeakers">Speakers</a></li>
             <li><a data-event="request:viewUsers">Users</a></li>
         </ul>
     </li>
 
     <li><a>Tags</a>
-        <ul>
+        <ul class='ui-corner-bottom'>
             <li><a>Tags</a></li>
             <li><a>Syntactic Categories</a></li>
             <li><a>Elicitation Methods</a></li>
@@ -93,14 +93,14 @@
     </li>
 
     <li><a>Sources</a>
-        <ul>
+        <ul class='ui-corner-bottom'>
             <li><a>Add</a></li>
             <li><a>Browse</a></li>
         </ul>
     </li>
 
     <li><a>Help</a>
-        <ul>
+        <ul class='ui-corner-bottom'>
             <li><a >Help Page</a></li>
             <li><a >Dative Documentation</a></li>
         </ul>
@@ -108,7 +108,7 @@
     -->
 
     <li><a>Account</a>
-        <ul>
+        <ul class='ui-corner-bottom'>
             <!--
             <li><a>My Page</a></li>
             <li><a>My Settings</a></li>

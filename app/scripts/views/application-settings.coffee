@@ -176,11 +176,13 @@ define [
       @listenForLinkOnload outerCallback
 
       # Still TODO:
-      # 1. spinner and focus highlight don't seem to be changing ...
-      # 1. theme-specific CSS for border radii, etc. (smarter CSS should do this ...)
-      # 2. persist theme settings to localhost
-      # 3. create a default in application settings model
-      # 4. disable this feature when there is no Internet connection
+      # 1. persist theme settings to localhost
+      # 2. create a default in application settings model
+      # 3. disable this feature when there is no Internet connection
+      # 4. focus highlight doesn't match on login dialog (probably because it
+      #    should be re-rendered after theme change)
+      # 5. Gap between rounded borders and container fill. See
+      #    http://w3facility.org/question/jquery-ui-how-to-remove-gap-at-each-rounded-corner-of-accordions/
 
     jQueryUIThemes: [
       ['ui-lightness', 'UI lightness']

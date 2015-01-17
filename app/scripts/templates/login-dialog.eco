@@ -6,7 +6,7 @@
 
     <li>
       <label for='username'>Username</label>
-      <input type='text' name='username' class='username dative-tooltip'
+      <input type='text' name='username' class='username dative-tooltip ui-corner-all'
         title="enter your username" tabindex=0 id="big" />
       <span class='ui-state-error ui-corner-all dative-login-failed
         username-error'></span>
@@ -14,7 +14,7 @@
 
     <li>
       <label for='password'>Password</label>
-      <input type='password' name='password' class='password dative-tooltip'
+      <input type='password' name='password' class='password dative-tooltip ui-corner-all'
         title="enter your password" tabindex=0 />
       <span class='ui-state-error ui-corner-all dative-login-failed
         password-error'></span>

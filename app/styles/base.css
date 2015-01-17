@@ -79,17 +79,6 @@ div#mainmenu {
   padding-left: 0px 5px;
 }
 
-.header-no-body {
-    border-bottom: none;
-    border-bottom-left-radius: 6px;
-    border-bottom-right-radius: 6px;
-}
-
-.ui-state-highlight {
-    border-bottom-left-radius: 6px;
-    border-bottom-right-radius: 6px;
-}
-
 .dative-widget-header button,
 .dative-widget-header select+div,
 #dative-page-header button,
@@ -274,14 +263,6 @@ div.dative-page-header-title
     -moz-box-shadow: 5px 5px 10px rgba(0, 0, 0, 0.5);
 }
 
-ul.sf-menu li ul
-{
-    box-shadow: 5px 5px 10px rgba(0, 0, 0, 0.5);
-    -webkit-box-shadow: 5px 5px 10px rgba(0, 0, 0, 0.5);
-    -moz-box-shadow: 5px 5px 10px rgba(0, 0, 0, 0.5);
-    border-bottom-right-radius: 6px;
-    border-bottom-left-radius: 6px;
-}
 div.heading {
 }
 
@@ -366,28 +347,6 @@ textarea:focus {
     box-shadow: 0 0 10px orange !important;
 }
 
-ul.fieldset textarea,
-ul.fieldset input[type="text"],
-ul.fieldset input[type="password"],
-ul.fieldset select[name="elicitation_method"],
-ul.fieldset select[name="syntactic_category"],
-ul.fieldset select[name="speaker"],
-ul.fieldset select[name="elicitor"],
-ul.fieldset select[name="verifier"],
-ul.fieldset select[name="source"],
-div.dative-display {
-    border-style: solid;
-    border-width: 1px;
-    padding: 7px 10px 5px 10px;
-    margin-top: 0px;
-    margin-bottom: 0px;
-    height: 16px;
-    min-height: 16px;
-    -moz-border-radius: 6px;
-    -webkit-border-radius: 6px;
-    -khtml-border-radius: 6px;
-    border-radius: 6px;
-}
 div.dative-display {
   display: inline-block;
 }
@@ -527,14 +486,6 @@ h1 {
 .ms-container .ms-selectable,
 .ms-container .ms-selection {
     background: transparent;
-}
-
-.ms-container .ms-list{
-  -webkit-border-radius: 6px;
-  -moz-border-radius: 6px;
-  border-radius: 6px;
-  height: 100px;
-  background: white;
 }
 
 .sf-menu a.sf-with-ul {
@@ -765,15 +716,65 @@ div.container-right {
   padding-right: 1em;
 }
 
-p.paragraph-widget {
-  margin: auto;
-  width: 500px;
-  padding: 10px;
-  border-radius: 6px;
-}
-
 span.fixed-width
 {
     display: inline-block;
     width: 1em;
+}
+
+ul.fieldset textarea,
+ul.fieldset input[type="text"],
+ul.fieldset input[type="password"],
+ul.fieldset select[name="elicitation_method"],
+ul.fieldset select[name="syntactic_category"],
+ul.fieldset select[name="speaker"],
+ul.fieldset select[name="elicitor"],
+ul.fieldset select[name="verifier"],
+ul.fieldset select[name="source"],
+div.dative-display {
+    border-style: solid;
+    border-width: 1px;
+    padding: 7px 10px 5px 10px;
+    margin-top: 0px;
+    margin-bottom: 0px;
+    height: 16px;
+    min-height: 16px;
+    /*
+    -moz-border-radius: 6px;
+    -webkit-border-radius: 6px;
+    -khtml-border-radius: 6px;
+    border-radius: 6px;
+    */
+}
+
+.header-no-body {
+    border-bottom: none;
+}
+
+ul.sf-menu li ul
+{
+    box-shadow: 5px 5px 10px rgba(0, 0, 0, 0.5);
+    -webkit-box-shadow: 5px 5px 10px rgba(0, 0, 0, 0.5);
+    -moz-box-shadow: 5px 5px 10px rgba(0, 0, 0, 0.5);
+}
+
+/* Multi-select stuff; TODO: remove border-radius stuff? */
+.ms-container .ms-list{
+  -webkit-border-radius: 6px;
+  -moz-border-radius: 6px;
+  border-radius: 6px;
+  height: 100px;
+  background: white;
+}
+
+p.paragraph-widget {
+  margin: auto;
+  width: 500px;
+  padding: 10px;
+}
+
+/* See http://stackoverflow.com/questions/13126917/can-i-style-the-resize-grabber-of-textarea */
+::-webkit-resizer
+{
+  display: none;
 }
