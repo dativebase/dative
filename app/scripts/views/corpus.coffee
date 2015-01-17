@@ -447,7 +447,7 @@ define [
         .attr('tabindex', 0)
 
     spinnerOptions: ->
-      _.extend BaseView::spinnerOptions, {top: '50%', left: '97%'}
+      _.extend BaseView::spinnerOptions(), {top: '50%', left: '97%'}
 
     spin: (tooltipMessage) ->
       @$('.dative-widget-header').first()

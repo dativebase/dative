@@ -110,7 +110,7 @@ define [
           $(element).tooltip 'close'
 
     # Options for spin.js, cf. http://fgnass.github.io/spin.js/
-    spinnerOptions:
+    spinnerOptions: ->
       lines: 13 # The number of lines to draw
       length: 5 # The length of each line
       width: 2 # The line thickness
@@ -118,7 +118,7 @@ define [
       corners: 1 # Corner roundness (0..1)
       rotate: 0 # The rotation offset
       direction: 1 # 1: clockwise -1: counterclockwise
-      color: BaseView.jQueryUIColors().defCo
+      color: @constructor.jQueryUIColors().defCo
       speed: 2.2 # Rounds per second
       trail: 60 # Afterglow percentage
       shadow: false # Whether to render a shadow

@@ -96,7 +96,7 @@ define [
       $target.tooltip 'open'
 
     spinnerOptions: ->
-      _.extend BaseView::spinnerOptions, {top: '50%', left: '97%'}
+      _.extend BaseView::spinnerOptions(), {top: '50%', left: '97%'}
 
     spin: (tooltipMessage=null) ->
       @$('.dative-widget-header').first().spin @spinnerOptions()

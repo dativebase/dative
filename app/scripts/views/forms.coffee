@@ -142,7 +142,7 @@ define [
         @formViews.push newFormView
 
     spinnerOptions: ->
-      _.extend BaseView::spinnerOptions, {top: '25%', left: '98%'}
+      _.extend BaseView::spinnerOptions(), {top: '25%', left: '98%'}
 
     spin: (tooltipMessage) ->
       @$('#dative-page-header')

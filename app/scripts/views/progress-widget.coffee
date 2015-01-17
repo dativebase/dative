@@ -49,7 +49,7 @@ define [
       setInterval f, 500
 
     spinnerOptions: ->
-      _.extend BaseView::spinnerOptions, {top: '20px', left: '20px'}
+      _.extend BaseView::spinnerOptions(), {top: '20px', left: '20px'}
 
     spin: ->
       @$(@spinnerId).spin @spinnerOptions()
