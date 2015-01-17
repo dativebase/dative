@@ -137,7 +137,7 @@ define [
         autoSize: true
       )
       $('select, input, textarea', context)
-        .css "border-color", FormAddView.jQueryUIColors.defBo
+        .css "border-color", @constructor.jQueryUIColors().defBo
 
       $('textarea.transcription', context)
         .focus(->
@@ -260,7 +260,7 @@ define [
                 maxlength: '255'
                 id: transcriptionId)
               .addClass('translation')
-              .css("border-color", FormAddView.jQueryUIColors.defBo))
+              .css("border-color", @constructor.jQueryUIColors().defBo))
             .append($('<button>').addClass('removeMe')
               .attr(title: 'Remove this translation field.')
               .text('Remove Me')

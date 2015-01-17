@@ -24,8 +24,12 @@ define [
       @listenTo @model, 'change:loggedIn', @loggedInChanged
       @listenTo @model, 'change:activeFieldDBCorpus', @refreshLoggedInUser
       @listenTo Backbone, 'bodyClicked', @closeSuperclick
+      @listenTo Backbone, 'application-settings:jQueryUIThemeChanged', @jQueryUIThemeChanged
 
     loggedInChanged: ->
+      @render()
+
+    jQueryUIThemeChanged: ->
       @render()
 
     # Make certain menu items (in)active and (in)visible depending on
@@ -46,7 +50,7 @@ define [
       'click a.dative-authenticated': 'toggleLoginDialog'
 
     render: ->
-      @$el.css(MainMenuView.jQueryUIColors.def).html @template() # match jQueryUI colors
+      @$el.css(@constructor.jQueryUIColors().def).html @template() # match jQueryUI colors
       @setActivityAndVisibility()
 
       # NOTE @jrwdunham @cesine: I moved to superclick because touchscreen devices
@@ -65,13 +69,13 @@ define [
     superfishify: ->
       @$('.sf-menu').supersubs(minWidth: 12, maxWidth: 27, extraWidth: 2)
         .superfish(autoArrows: false)
-        .superfishJQueryUIMatch(MainMenuView.jQueryUIColors)
+        .superfishJQueryUIMatch(@constructor.jQueryUIColors())
 
     # Superclick jQuery plugin turns mainmenu <ul> into a menubar
     superclickify: ->
       @$('.sf-menu').supersubs(minWidth: 12, maxWidth: 27, extraWidth: 2)
         .superclick(autoArrows: false)
-        .superfishJQueryUIMatch(MainMenuView.jQueryUIColors)
+        .superfishJQueryUIMatch(@constructor.jQueryUIColors())
 
     closeSuperclick: ->
       @$('.sf-menu').superclick 'reset'
@@ -170,14 +174,14 @@ define [
           .attr 'title', 'logout'
           .find('i').removeClass('fa-lock').addClass('fa-unlock-alt').end()
           .button()
-          .css 'border-color', MainMenuView.jQueryUIColors.defBa
+          .css 'border-color', @constructor.jQueryUIColors().defBa
           .tooltip()
       else
         @$('a.dative-authenticated')
           .attr 'title', 'login'
           .find('i').removeClass('fa-unlock-alt').addClass('fa-lock').end()
           .button()
-          .css 'border-color', MainMenuView.jQueryUIColors.defBa
+          .css 'border-color', @constructor.jQueryUIColors().defBa
           .tooltip()
 
     # Reset the tooltip title of the logged-in user's name in the top right.

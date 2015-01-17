@@ -173,7 +173,7 @@ define [
     # TODO @jrwdunham: this could be a method defined once in BaseView, I think.
     tabindicesNaught: ->
       @$('select, input')
-        .css("border-color", @constructor.jQueryUIColors.defBo)
+        .css("border-color", @constructor.jQueryUIColors().defBo)
         .attr('tabindex', 0)
 
     guify: ->

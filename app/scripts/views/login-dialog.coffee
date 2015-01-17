@@ -61,7 +61,7 @@ define [
     # Transform the login dialog HTML to a jQueryUI dialog box.
     dialogify: ->
       @$source.find('input').css('border-color',
-        LoginDialogView.jQueryUIColors.defBo)
+        @constructor.jQueryUIColors().defBo)
       @$source.dialog
         hide: {effect: 'fade'}
         show: {effect: 'fade'}
@@ -91,7 +91,7 @@ define [
           @$target.find('button, .ui-selectmenu-button').attr('tabindex', 0)
             .end()
             .find('input')
-              .css('border-color', LoginDialogView.jQueryUIColors.defBo)
+              .css('border-color', @constructor.jQueryUIColors().defBo)
         open: =>
           @_initializeDialog()
           @_disableButtons()

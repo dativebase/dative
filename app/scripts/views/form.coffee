@@ -211,13 +211,13 @@ define [
     ############################################################################
 
     addBorder: ->
-      @$el.css 'border-color': FormView.jQueryUIColors.defBo
+      @$el.css 'border-color': @constructor.jQueryUIColors().defBo
 
     removeBorder: ->
       @$el.css 'border-color': 'transparent'
 
     addBorderAnimate: ->
-      @$el.animate 'border-color': FormView.jQueryUIColors.defBo, 'slow'
+      @$el.animate 'border-color': @constructor.jQueryUIColors().defBo, 'slow'
 
     removeBorderAnimate: ->
       @$el.animate 'border-color': 'transparent', 'slow'

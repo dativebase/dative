@@ -11,23 +11,16 @@
       <li class="active-server"></li>
       <li class="server-config-container"></li>
 
-      <!--
       <li class="theme-selector">
         <label for='css-theme'>Theme</label>
         <select name='css-theme'>
-          <option value="http://code.jquery.com/ui/1.11.2/themes/le-frog/jquery-ui.css"
-            >Le Frog</option>
-          <option value="http://code.jquery.com/ui/1.11.2/themes/start/jquery-ui.css"
-            >Start</option>
-          <option value="http://code.jquery.com/ui/1.11.2/themes/smoothness/jquery-ui.css"
-            >Smoothness</option>
-          <option value="http://code.jquery.com/ui/1.11.2/themes/redmond/jquery-ui.css"
-            >Redmond</option>
-          <option value="http://code.jquery.com/ui/1.11.2/themes/sunny/jquery-ui.css"
-            >Sunny</option>
+          <% for [themeName, themeNameHumanReadable] in @themes: %>
+            <option
+              value="http://code.jquery.com/ui/1.11.2/themes/<%= themeName %>/jquery-ui.min.css"
+            ><%= themeNameHumanReadable %></option>
+          <% end %>
         </select>
       </li>
-      -->
 
     </ul>
   </div>

@@ -28,7 +28,14 @@ define [
 
     # Class attribute that holds the jQueryUI colors of the jQueryUI theme
     # currently in use.
-    @jQueryUIColors: $.getJQueryUIColors()
+    @jQueryUIColors: ->
+      if not @constructor._jQueryUIColors
+        @constructor._jQueryUIColors = $.getJQueryUIColors()
+      @constructor._jQueryUIColors
+
+    @refreshJQueryUIColors: (callback) ->
+      @constructor._jQueryUIColors = $.getJQueryUIColors()
+      if callback then callback()
 
     # TODO: figure out where/how to store/persist user settings
     @userSettings:
@@ -111,7 +118,7 @@ define [
       corners: 1 # Corner roundness (0..1)
       rotate: 0 # The rotation offset
       direction: 1 # 1: clockwise -1: counterclockwise
-      color: BaseView.jQueryUIColors.defCo
+      color: BaseView.jQueryUIColors().defCo
       speed: 2.2 # Rounds per second
       trail: 60 # Afterglow percentage
       shadow: false # Whether to render a shadow

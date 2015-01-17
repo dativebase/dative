@@ -438,12 +438,12 @@ define [
 
       @tabindicesNaught() # active elements have tabindex=0
 
-      @$('.active-indicator').css "color", @constructor.jQueryUIColors.defCo
+      @$('.active-indicator').css "color", @constructor.jQueryUIColors().defCo
 
     # Tabindices=0 and jQueryUI colors
     tabindicesNaught: ->
       @$('select, input')
-        .css("border-color", @constructor.jQueryUIColors.defBo)
+        .css("border-color", @constructor.jQueryUIColors().defBo)
         .attr('tabindex', 0)
 
     spinnerOptions: ->

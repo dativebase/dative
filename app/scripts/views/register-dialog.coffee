@@ -107,7 +107,7 @@ define [
     # Transform the register dialog HTML to a jQueryUI dialog box.
     dialogify: ->
       @$source.find('input').css('border-color',
-        RegisterDialogView.jQueryUIColors.defBo)
+        @constructor.jQueryUIColors().defBo)
       @$source.dialog
         hide: {effect: 'fade'}
         show: {effect: 'fade'}
@@ -124,7 +124,7 @@ define [
         create: =>
           @$target.find('button').attr('tabindex', 0).end()
             .find('input').css('border-color',
-              RegisterDialogView.jQueryUIColors.defBo)
+              @constructor.jQueryUIColors().defBo)
         open: =>
           @initializeDialog()
           @selectmenuify()
@@ -230,7 +230,7 @@ define [
     tabindicesNaught: ->
       @$('button, select, input, textarea, div.dative-input-display,
         span.ui-selectmenu-button')
-        .css("border-color", RegisterDialogView.jQueryUIColors.defBo)
+        .css("border-color", @constructor.jQueryUIColors().defBo)
         .attr('tabindex', 0)
 
 
