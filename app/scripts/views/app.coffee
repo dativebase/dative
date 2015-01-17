@@ -7,6 +7,7 @@ define [
   './notifier'
   './login-dialog'
   './register-dialog'
+  './alert-dialog'
   './application-settings'
   './pages'
   './home'
@@ -19,10 +20,10 @@ define [
   './../collections/application-settings'
   './../templates/app'
 ], (Backbone, Workspace, BaseView, MainMenuView, ProgressWidgetView,
-  NotifierView, LoginDialogView, RegisterDialogView, ApplicationSettingsView,
-  PagesView, HomePageView, FormAddView, FormsSearchView, FormsView, CorporaView,
-  ApplicationSettingsModel, FormModel, ApplicationSettingsCollection,
-  appTemplate) ->
+  NotifierView, LoginDialogView, RegisterDialogView, AlertDialogView,
+  ApplicationSettingsView, PagesView, HomePageView, FormAddView,
+  FormsSearchView, FormsView, CorporaView, ApplicationSettingsModel, FormModel,
+  ApplicationSettingsCollection, appTemplate) ->
 
   # App View
   # --------
@@ -44,6 +45,7 @@ define [
       @mainMenuView = new MainMenuView model: @applicationSettings
       @loginDialog = new LoginDialogView model: @applicationSettings
       @registerDialog = new RegisterDialogView model: @applicationSettings
+      @alertDialog = new AlertDialogView model: @applicationSettings
       @progressWidget = new ProgressWidgetView()
       @notifier = new NotifierView(@applicationSettings)
 
@@ -86,12 +88,14 @@ define [
       @mainMenuView.setElement(@$('#mainmenu')).render()
       @loginDialog.setElement(@$('#login-dialog-container')).render()
       @registerDialog.setElement(@$('#register-dialog-container')).render()
+      @alertDialog.setElement(@$('#alert-dialog-container')).render()
       @progressWidget.setElement(@$('#progress-widget-container')).render()
       @notifier.setElement @$('#notifier-container')
 
       @rendered @mainMenuView
       @rendered @loginDialog
       @rendered @registerDialog
+      @rendered @alertDialog
       @rendered @progressWidget
       @rendered @notifier # Notifier self-renders but we register it as rendered anyways so that we can clean up after it if `.close` is ever called
 
@@ -272,4 +276,8 @@ define [
     # Open/close the register dialog box
     toggleRegisterDialog: ->
       Backbone.trigger 'registerDialog:toggle'
+
+    # Open/close the alert dialog box
+    toggleAlertDialog: ->
+      Backbone.trigger 'alertDialog:toggle'
 
