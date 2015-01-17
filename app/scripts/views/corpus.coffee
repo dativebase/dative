@@ -354,9 +354,6 @@ define [
       @setHeaderStateClosed()
       @setToggleButtonStateClosed()
 
-    setHeaderStateClosed: ->
-      @$('.dative-widget-header').first().addClass 'header-no-body ui-corner-bottom'
-
     setToggleButtonStateClosed: ->
       @$('button.toggle-appear')
         .find('i').removeClass('fa-caret-down').addClass('fa-caret-right').end()
@@ -392,9 +389,6 @@ define [
       @bodyVisible = true
       @setHeaderStateOpen()
       @setToggleButtonStateOpen()
-
-    setHeaderStateOpen: ->
-      @$('.dative-widget-header').first().removeClass 'header-no-body ui-corner-bottom'
 
     setToggleButtonStateOpen: ->
       @$('button.toggle-appear')

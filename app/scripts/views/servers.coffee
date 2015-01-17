@@ -144,12 +144,6 @@ define [
       @setHeaderStateOpen()
       @setToggleButtonStateOpen()
 
-    setHeaderStateClosed: ->
-      @$('.dative-widget-header').first().addClass 'header-no-body ui-corner-bottom'
-
-    setHeaderStateOpen: ->
-      @$('.dative-widget-header').first().removeClass 'header-no-body ui-corner-bottom'
-
     setToggleButtonStateClosed: ->
       @$('button.toggle-appear')
         .find('i').removeClass('fa-caret-down').addClass('fa-caret-right').end()

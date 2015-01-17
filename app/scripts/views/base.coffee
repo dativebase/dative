@@ -185,8 +185,15 @@ define [
     # because Dative can dynamically change the CSS to different jQueryUI
     # themese, which would mess up a static CSS file. (HACK WARN.)
     fixRoundedBorders: ->
-      @$('#dative-page-header, .ui-widget > .ui-widget-header').each (index, element) =>
-        $el = $ element
+      selector = '#dative-page-header, .ui-widget > .ui-widget-header'
+      @$(selector).each (index, element) =>
+        @fixRoundedBorder element
+
+    fixRoundedBorder: (element) ->
+        if element instanceof $
+          $el = element
+        else
+          $el = $ element
         cssProperties = [
           'border-top-left-radius'
           'border-top-right-radius'
@@ -214,3 +221,22 @@ define [
         console.log "exception with #{pxVal}"
         console.log e
         pxVal
+
+    # When a widget's body is CLOSED, its header SHOULD have rounded bottom
+    # corners.
+    setHeaderStateClosed: ->
+      $header = @$('.dative-widget-header').first()
+      $header.addClass 'header-no-body ui-corner-bottom'
+      $header.css
+        'border-bottom-left-radius': $header.css('border-top-left-radius')
+        'border-bottom-right-radius': $header.css('border-top-right-radius')
+
+    # When a widget's body is OPEN, its header should NOT have rounded bottom
+    # corners.
+    setHeaderStateOpen: ->
+      $header = @$('.dative-widget-header').first()
+      $header.removeClass 'header-no-body ui-corner-bottom'
+      $header.css
+        'border-bottom-left-radius': 0
+        'border-bottom-right-radius': 0
+
