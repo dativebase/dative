@@ -41,10 +41,11 @@ define [
           collision: "flipfit"
 
     listenToEvents: ->
+      @stopListening()
+      @undelegateEvents()
+      @delegateEvents()
       @listenTo Backbone, 'activateServer', @activateServer
       @listenTo Backbone, 'removeServerView', @setModelFromGUI
-      if @model.get('activeServer')
-        @listenTo @model.get('activeServer'), 'change:url', @activeServerURLChanged
       @delegateEvents()
 
     activateServer: (id) ->
@@ -53,29 +54,11 @@ define [
         .selectmenu('refresh')
       @setModelFromGUI()
 
-    activeServerURLChanged: ->
-      # TODO @jrwdunham: what is the point of this method? Delete or use...
-      #console.log 'active server url has changed'
-      return
-
     render: (taskId) ->
-      params = _.extend(
-        {headerTitle: 'Application Settings', themes: @jQueryUIThemes},
-        @model.attributes
-      )
-      @$el.html @template(params)
-
-      @serversView.setElement @$('li.server-config-container').first()
-      @activeServerView.setElement @$('li.active-server').first()
-
-      @serversView.render()
-      @activeServerView.render()
-
-      @rendered @serversView
-      @rendered @activeServerView
-
+      @html()
+      @renderServersView()
+      @renderActiveServerView()
       @matchHeights()
-      @pageBody = @$ '#dative-page-body'
       @guify()
       @setFocus()
       @listenToEvents()
@@ -83,8 +66,29 @@ define [
       @fixRoundedBorders()
       @
 
+    html: ->
+      params = _.extend(
+        {headerTitle: 'Application Settings', themes: @jQueryUIThemes},
+        @model.attributes
+      )
+      @$el.html @template(params)
+
+    renderServersView: ->
+      @serversView.setElement @$('li.server-config-container').first()
+      @serversView.render()
+      @rendered @serversView
+
+    renderActiveServerView: ->
+      @activeServerView.setElement @$('li.active-server').first()
+      @activeServerView.render()
+      @rendered @activeServerView
+
+    loggedIn: -> @model.get 'loggedIn'
+
     setModelFromGUI: ->
-      @model.set 'activeServer', @$('select[name=activeServer]').val()
+      # We don't want to change the active server if we are logged in with it.
+      if not @loggedIn()
+        @model.set 'activeServer', @$('select[name=activeServer]').val()
       @serversView.setCollectionFromGUI()
       @model.save()
 
