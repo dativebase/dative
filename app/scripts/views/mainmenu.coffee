@@ -3,10 +3,8 @@ define [
   'backbone'
   './base'
   './../templates/mainmenu'
-  'superfish'
   'superclick'
   'supersubs'
-  'sfjquimatch'
 ], ($, Backbone, BaseView, mainmenuTemplate) ->
 
   # Main Menu View
@@ -75,7 +73,8 @@ define [
     superclickify: ->
       @$('.sf-menu').supersubs(minWidth: 12, maxWidth: 27, extraWidth: 2)
         .superclick(autoArrows: false)
-        .superfishJQueryUIMatch(@constructor.jQueryUIColors())
+      @matchMenuToJQueryUITheme()
+        # .superclickJQueryUIMatch(@constructor.jQueryUIColors())
 
     closeSuperclick: ->
       @$('.sf-menu').superclick 'reset'
@@ -204,4 +203,51 @@ define [
     # Tell the login dialog box to toggle itself.
     toggleLoginDialog: ->
       Backbone.trigger 'loginDialog:toggle'
+
+    # This replaces the functionality that used to be housed in the jQuery
+    # extension `superclick-jqueryui-match` (and `superfish-jqueryui-match`).
+    matchMenuToJQueryUITheme: ->
+      colors = @constructor.jQueryUIColors()
+
+      hoverCSS = -> $(@).css(colors.hov)
+      defaultCSS = -> $(@).css(colors.def)
+      activeCSS = -> $(@).css(colors.act)
+
+      selector = [
+        'ul.sf-menu'
+        'ul.sf-menu > li'
+        'ul.sf-menu > li > a'
+        'ul.sf-menu > li > ul'
+        'ul.sf-menu > li > ul > li'
+        'ul.sf-menu > li > ul > li a'
+      ].join ', '
+      @$(selector).css colors.def
+
+      selector = [
+        'ul.sf-menu > li > ul > li:last-child',
+        'ul.sf-menu > li > ul > li:last-child a'
+      ].join ', '
+      @$(selector).addClass 'ui-corner-bottom sf-option-bottom'
+
+      selector = [
+        'ul.sf-menu > li > ul > li'
+        'ul.sf-menu > li > ul > li > a'
+      ].join ', '
+      @$(selector).hover hoverCSS, defaultCSS
+
+      selector = [
+        'ul.sf-menu > li'
+        'ul.sf-menu > li > a'
+        'ul.sf-menu > li > ul > li'
+        'ul.sf-menu > li > ul > li > a'
+      ].join ', '
+      @$(selector).mousedown activeCSS
+
+      selector = [
+        'ul.sf-menu > li'
+        'ul.sf-menu > li > a'
+        'ul.sf-menu > li > ul > li'
+        'ul.sf-menu > li > ul > li > a'
+      ].join ', '
+      @$(selector).mouseup defaultCSS
 

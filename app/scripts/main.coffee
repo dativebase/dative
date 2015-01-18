@@ -60,12 +60,9 @@ require.config
 require [
     'views/app',
     'routes/router'
-    # 'FieldDB'
-    #'backboneindexeddb'
     'multiselect'
     'jqueryelastic'
     'jqueryuicolors'
-    'sfjquimatch'
     'jqueryspin'
   ], (AppView, Workspace) ->
     # workspace = new Workspace()
