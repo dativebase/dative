@@ -24,6 +24,25 @@ define [
       @listenTo Backbone, 'bodyClicked', @closeSuperclick
       @listenTo Backbone, 'application-settings:jQueryUIThemeChanged', @jQueryUIThemeChanged
 
+    events:
+      'click a.dative-authenticated': 'toggleLoginDialog'
+
+      'mouseenter ul.sf-menu > li > ul > li': 'mouseEnteredMenuItem'
+      'mouseenter ul.sf-menu > li > ul > li > a': 'mouseEnteredMenuItem'
+
+      'mouseleave ul.sf-menu > li > ul > li': 'mouseLeftMenuItem'
+      'mouseleave ul.sf-menu > li > ul > li > a': 'mouseLeftMenuItem'
+
+      'mousedown ul.sf-menu > li': 'mouseDownMenuItem'
+      'mousedown ul.sf-menu > li > a': 'mouseDownMenuItem'
+      'mousedown ul.sf-menu > li > ul > li': 'mouseDownMenuItem'
+      'mousedown ul.sf-menu > li > ul > li > a': 'mouseDownMenuItem'
+
+      'mouseup ul.sf-menu > li': 'mouseUpMenuItem'
+      'mouseup ul.sf-menu > li > a': 'mouseUpMenuItem'
+      'mouseup ul.sf-menu > li > ul > li': 'mouseUpMenuItem'
+      'mouseup ul.sf-menu > li > ul > li > a': 'mouseUpMenuItem'
+
     loggedInChanged: ->
       @render()
 
@@ -44,11 +63,10 @@ define [
         @$('li.requires-authentication').hide()
           .children('a').addClass 'disabled'
 
-    events:
-      'click a.dative-authenticated': 'toggleLoginDialog'
-
     render: ->
-      @$el.css(@constructor.jQueryUIColors().def).html @template() # match jQueryUI colors
+      @$el
+        .css(@constructor.jQueryUIColors().def) # match jQueryUI colors
+        .html @template()
       @setActivityAndVisibility()
 
       # NOTE @jrwdunham @cesine: I moved to superclick because touchscreen devices
@@ -71,10 +89,13 @@ define [
 
     # Superclick jQuery plugin turns mainmenu <ul> into a menubar
     superclickify: ->
-      @$('.sf-menu').supersubs(minWidth: 12, maxWidth: 27, extraWidth: 2)
-        .superclick(autoArrows: false)
+      @$('.sf-menu')
+        .supersubs
+          minWidth: 12
+          maxWidth: 27
+          extraWidth: 2
+        .superclick autoArrows: false
       @matchMenuToJQueryUITheme()
-        # .superclickJQueryUIMatch(@constructor.jQueryUIColors())
 
     closeSuperclick: ->
       @$('.sf-menu').superclick 'reset'
@@ -84,6 +105,8 @@ define [
     # template. The following functionality creates the appropriate bindings.
 
     # Bind main menu item clicks to the triggering of the appropriate events.
+    # TODO @jrwdunham: it should be possible to do this in `@events`. It would
+    # be nice to have all DOM event binding in one place.
     bindClickToEventTrigger: ->
       @$('[data-event]').each (index, element) =>
         $(element).click (event) =>
@@ -206,12 +229,8 @@ define [
 
     # This replaces the functionality that used to be housed in the jQuery
     # extension `superclick-jqueryui-match` (and `superfish-jqueryui-match`).
+    # Also see the mouse enter/leave/down/up event binddings in `@events`
     matchMenuToJQueryUITheme: ->
-      colors = @constructor.jQueryUIColors()
-
-      hoverCSS = -> $(@).css(colors.hov)
-      defaultCSS = -> $(@).css(colors.def)
-      activeCSS = -> $(@).css(colors.act)
 
       selector = [
         'ul.sf-menu'
@@ -221,7 +240,7 @@ define [
         'ul.sf-menu > li > ul > li'
         'ul.sf-menu > li > ul > li a'
       ].join ', '
-      @$(selector).css colors.def
+      @$(selector).css @constructor.jQueryUIColors().def
 
       selector = [
         'ul.sf-menu > li > ul > li:last-child',
@@ -229,25 +248,15 @@ define [
       ].join ', '
       @$(selector).addClass 'ui-corner-bottom sf-option-bottom'
 
-      selector = [
-        'ul.sf-menu > li > ul > li'
-        'ul.sf-menu > li > ul > li > a'
-      ].join ', '
-      @$(selector).hover hoverCSS, defaultCSS
+    mouseEnteredMenuItem: (event) ->
+      $(event.currentTarget).css @constructor.jQueryUIColors().hov
 
-      selector = [
-        'ul.sf-menu > li'
-        'ul.sf-menu > li > a'
-        'ul.sf-menu > li > ul > li'
-        'ul.sf-menu > li > ul > li > a'
-      ].join ', '
-      @$(selector).mousedown activeCSS
+    mouseLeftMenuItem: (event) ->
+      $(event.currentTarget).css @constructor.jQueryUIColors().def
 
-      selector = [
-        'ul.sf-menu > li'
-        'ul.sf-menu > li > a'
-        'ul.sf-menu > li > ul > li'
-        'ul.sf-menu > li > ul > li > a'
-      ].join ', '
-      @$(selector).mouseup defaultCSS
+    mouseDownMenuItem: (event) ->
+      $(event.currentTarget).css @constructor.jQueryUIColors().act
+
+    mouseUpMenuItem: (event) ->
+      $(event.currentTarget).css @constructor.jQueryUIColors().def
 
