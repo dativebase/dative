@@ -125,6 +125,7 @@ define [
           @$target.find('button').attr('tabindex', 0).end()
             .find('input').css('border-color',
               @constructor.jQueryUIColors().defBo)
+          @fontAwesomateCloseIcon()
         open: =>
           @initializeDialog()
           @selectmenuify()

@@ -240,3 +240,17 @@ define [
         'border-bottom-left-radius': 0
         'border-bottom-right-radius': 0
 
+    # Hack for changing the close "X" of a jQueryUI dialog to a font-awesome
+    # fa-close "X".
+    fontAwesomateCloseIcon: ->
+      newIconHTML = [
+        '<span class="ui-button-text">',
+        '<i class="fa fa-fw fa-close" ',
+        'style="position: relative; right: 0.48em; bottom: 0.45em;"></i></span>'
+      ].join ''
+      @$target.find('button.ui-dialog-titlebar-close')
+        .find('span.ui-button-icon-primary').remove().end()
+        .removeClass 'ui-button-icon-only'
+        .addClass 'ui-button-text-only'
+        .html newIconHTML
+

@@ -92,6 +92,7 @@ define [
             .end()
             .find('input')
               .css('border-color', @constructor.jQueryUIColors().defBo)
+          @fontAwesomateCloseIcon()
         open: =>
           @_initializeDialog()
           @_disableButtons()
