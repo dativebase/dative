@@ -1,5 +1,9 @@
 <div class='dative-alert-dialog'>
-  Hello from the alert dialog!
+
+  <div class='dative-alert-text'>
+    Hello from the alert dialog!
+  </div>
+
 </div>
 
 <div class='dative-alert-dialog-target'><div>

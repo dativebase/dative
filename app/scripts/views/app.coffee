@@ -74,7 +74,6 @@ define [
       @listenTo Backbone, 'authenticate:success', @authenticateSuccess
       @listenTo Backbone, 'logout:success', @logoutSuccess
       @listenTo Backbone, 'useFieldDBCorpus', @useFieldDBCorpus
-      @listenTo Backbone, 'createAlert', @createAlert
 
       @render()
       Backbone.history.start()
@@ -281,8 +280,4 @@ define [
     # Open/close the alert dialog box
     toggleAlertDialog: ->
       Backbone.trigger 'alertDialog:toggle'
-
-    createAlert: (alertMessage) ->
-      console.log "alertMessage is #{alertMessage}"
-      # open the alert with the given message
 

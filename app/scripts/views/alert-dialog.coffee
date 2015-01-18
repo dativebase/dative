@@ -16,6 +16,7 @@ define [
 
     initialize: ->
       @listenTo Backbone, 'alertDialog:toggle', @toggle
+      @listenTo Backbone, 'openAlertDialog', @dialogOpen
 
     events:
       'dialogdragstart': 'closeAllTooltips'
@@ -27,6 +28,8 @@ define [
     render: ->
       @$el.append @template()
       @dialogify()
+      @setupButtons()
+      @focusOkButton()
       # @tooltipify()
       @
 
@@ -39,10 +42,17 @@ define [
         autoOpen: false
         appendTo: @$('.dative-alert-dialog-target').first()
         buttons: [
+            text: 'Cancel'
+            class: 'cancel dative-tooltip'
+            click: =>
+              @dialogClose()
+              @triggerCancelEvent()
+          ,
             text: 'Ok'
             class: 'ok dative-tooltip'
             click: =>
               @dialogClose()
+              @triggerConfirmEvent()
         ]
         dialogClass: 'dative-alert-dialog-widget'
         title: 'Alert'
@@ -62,12 +72,43 @@ define [
             at: 'left center'
             collision: 'flipfit'
 
-    focusAppropriateInput: ->
-      @$('.ok').first().focus()
+    focusOkButton: ->
+      @$('.dative-alert-dialog-target button.ok').first().focus()
 
-    dialogOpen: ->
+    focusCancelButton: ->
+      @$('.dative-alert-dialog-target button.cancel').first().focus()
+
+    triggerConfirmEvent: ->
+      if @confirmEvent
+        if @confirmArgument
+          Backbone.trigger @confirmEvent, @confirmArgument
+          @confirmArgument = null
+        else
+          Backbone.trigger @confirmEvent
+        @confirmEvent = null
+
+    triggerCancelEvent: ->
+
+    dialogOpen: (options) ->
+      if options.text then @setText options.text
+      if options.confirm then @showCancelButton()
+      if options.confirmEvent then @confirmEvent = options.confirmEvent
+      if options.confirmArgument then @confirmArgument = options.confirmArgument
       Backbone.trigger 'alert-dialog:open'
+      @$('.dative-alert-dialog').on("dialogopen", => @focusCancelButton)
       @$('.dative-alert-dialog').first().dialog 'open'
+
+    setupButtons: ->
+      @hideCancelButton()
+
+    showCancelButton: ->
+      @$('.dative-alert-dialog-target button.cancel').show()
+
+    hideCancelButton: ->
+      @$('.dative-alert-dialog-target button.cancel').hide()
+
+    setText: (text) ->
+      @$('.dative-alert-dialog-target .dative-alert-text').text text
 
     dialogClose: (event) ->
       @$('.dative-alert-dialog').first().dialog 'close'

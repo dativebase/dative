@@ -18,7 +18,7 @@ define [
 
     events:
       'keydown button.delete-server': 'deleteServerKeys'
-      'click button.delete-server': 'deleteServer'
+      'click button.delete-server': 'deleteServerConfirm'
       'keydown button.activate-server': 'activateServerKeys'
       'click button.activate-server': 'activateServer'
       'selectmenuchange': 'toggleServerCodeSelect'
@@ -29,6 +29,7 @@ define [
       @listenTo @applicationSettingsModel, 'change:loggedIn',
         @loggedInChanged
       @listenTo @model, 'change:name', @changeHeaderName
+      @listenTo Backbone, 'deleteServer', @deleteServer
       @delegateEvents()
 
     loggedIn: ->
@@ -75,20 +76,29 @@ define [
       )
       @$el.html @template(context)
 
-    deleteServer: (event) ->
-      if event
-        event.preventDefault()
-        event.stopPropagation()
-      @$el.slideUp 'medium', =>
-        @model.trigger 'removeme', @model
-        Backbone.trigger 'removeServerView', @
-        @remove()
+    # Trigger opening of a confirm dialog: if user clicks "Ok", then this
+    # server will be deleted.
+    deleteServerConfirm: (event) ->
+      if event then @stopEvent event
+      options =
+        text: "Do you really want to delete the server called “#{@model.get('name')}”?"
+        confirm: true
+        confirmEvent: 'deleteServer'
+        confirmArgument: @model.get('id')
+      Backbone.trigger 'openAlertDialog', options
+
+    # Really delete this server
+    deleteServer: (serverId) ->
+      if serverId is @model.get('id')
+        @$el.slideUp 'medium', =>
+          @model.trigger 'removeme', @model
+          Backbone.trigger 'removeServerView', @
+          @remove()
 
     deleteServerKeys: (event) ->
       if event.which is 13
-        event.preventDefault()
-        event.stopPropagation()
-        @deleteServer()
+        @stopEvent event
+        @deleteServerConfirm()
 
     activateServerKeys: ->
       if event.which is 13

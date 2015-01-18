@@ -75,8 +75,9 @@ define [
       @_renderedSubViews = _.without @_renderedSubViews, subView
 
     stopEvent: (event) ->
-      event.preventDefault()
-      event.stopPropagation()
+      try
+        event.preventDefault()
+        event.stopPropagation()
 
     guid: utils.guid
 
