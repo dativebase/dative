@@ -1,6 +1,8 @@
 <tbody>
   <tr>
-    <td class='dative-pagin-item-index'>(<%= @index %>)</td>
+    <td class='dative-pagin-item-index-cell'>
+      <span class='dative-pagin-item-index'>(<%= @index %>)
+    </td>
     <td class='dative-pagin-item-content'>
       <div id='<%= @formId %>'
         class='igt-form dative-form-object ui-corner-all'></div>

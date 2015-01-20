@@ -68,6 +68,61 @@ define (require) ->
       when 1 then noun
       else pluralize noun
 
+  # Parses a date(time) string to a Date instance
+  dateString2object = (dateString) ->
+    date = new Date(Date.parse(dateString))
+    if date.toString() is 'Invalid Date' then null else date
+
+  # Returns a `Date` instance as "January 1, 2015 at 5:45 p.m.", etc.
+  humanDatetime = (dateObject) ->
+    humanDateString = humanDate dateObject
+    if not humanDateString then return null
+    "#{humanDateString} at #{humanTime dateObject}"
+
+  # Returns a `Date` instance as "January 1, 2015", etc.
+  humanDate = (dateObject) ->
+    try
+      monthNames = ["January", "February", "March", "April", "May", "June",
+        "July", "August", "September", "October", "November", "December"]
+      ["#{monthNames[dateObject.getMonth()]}",
+      "#{dateObject.getDate()},",
+      "#{dateObject.getFullYear()}"].join ' '
+    catch
+      null
+
+  # Returns the time portion of a `Date` instance as "5:45 p.m.", etc.
+  humanTime = (dateObject) ->
+    try
+      hours = dateObject.getHours()
+      minutes = dateObject.getMinutes()
+      ampm = if hours >= 12 then 'p.m.' else 'a.m.'
+      hours = hours % 12
+      hours = if hours then hours else 12 # the hour '0' should be '12'
+      minutes = if minutes < 10 then "0#{minutes}" else minutes
+      "#{hours}:#{minutes} #{ampm}"
+    catch
+      return null
+
+  # Takes a Date instance and returns a string indicating how long ago it was from now.
+  timeSince = (dateObject) ->
+    try
+      date = dateObject.getTime()
+    catch
+      return null
+    if isNaN date then return ''
+    seconds = Math.floor((new Date() - date) / 1000)
+    interval = Math.floor(seconds / 31536000)
+    if interval > 1 then return "#{interval} years ago"
+    interval = Math.floor(seconds / 2592000)
+    if interval > 1 then return "#{interval} months ago"
+    interval = Math.floor(seconds / 86400)
+    if interval > 1 then return "#{interval} days ago"
+    interval = Math.floor(seconds / 3600)
+    if interval > 1 then return "#{interval} hours ago"
+    interval = Math.floor(seconds / 60)
+    if interval > 1 then return "#{interval} minutes ago"
+    return "#{Math.floor(seconds)} seconds ago"
+
   clone: clone
   type: type
   guid: guid
@@ -77,4 +132,9 @@ define (require) ->
   integerWithCommas: integerWithCommas
   pluralize: pluralize
   pluralizeByNum: pluralizeByNum
+  timeSince: timeSince
+  humanDatetime: humanDatetime
+  humanDate: humanDate
+  humanTime: humanTime
+  dateString2object: dateString2object
 

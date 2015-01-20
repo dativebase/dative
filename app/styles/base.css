@@ -105,7 +105,7 @@ div#mainmenu {
     display: block;
 }
 
-.dative-form-widget:hover
+.form-secondary-data div.dative-tooltip
 {
     cursor: pointer;
 }
@@ -119,6 +119,17 @@ ul.sf-menu li a
 .form-secondary-data {
     font-size: 11px;
     padding: 10px 0;
+}
+
+.dative-form-object > .dative-widget-body
+{
+    padding: 10px;
+}
+
+.dative-form-object
+{
+    border-width: 1px;
+    border-style: solid;
 }
 
 .dative-forms-view-one-interface .dative-widget-body,
@@ -759,22 +770,30 @@ ul.sf-menu li ul
 }
 
 /* Multi-select stuff; TODO: remove border-radius stuff? */
-.ms-container .ms-list{
-  -webkit-border-radius: 6px;
-  -moz-border-radius: 6px;
-  border-radius: 6px;
-  height: 100px;
-  background: white;
+  .ms-container .ms-list{
+    -webkit-border-radius: 6px;
+    -moz-border-radius: 6px;
+    border-radius: 6px;
+    height: 100px;
+    background: white;
 }
 
 p.paragraph-widget {
-  margin: auto;
-  width: 500px;
-  padding: 10px;
+    margin: auto;
+    width: 500px;
+    padding: 10px;
 }
 
-/* See http://stackoverflow.com/questions/13126917/can-i-style-the-resize-grabber-of-textarea */
+/* Remove the ugly resizer in textareas (works only on Safari/Chrome)
+ * See http://stackoverflow.com/questions/13126917/can-i-style-the-resize-grabber-of-textarea */
 ::-webkit-resizer
 {
-  display: none;
+    display: none;
 }
+
+.form-igt-data,
+.form-translations-data
+{
+    line-height: 130%;
+}
+

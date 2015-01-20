@@ -3,8 +3,13 @@
   <div class='button-container-left'>
 
     <button class="toggle-form-details dative-tooltip"
-      title="show the buttons and extra data of this form">
-      <i class='fa fa-caret-right fa-fw'></i>
+      title="hide the buttons and extra data of this form">
+      <i class='fa fa-angle-double-up fa-fw'></i>
+    </button>
+
+    <button class="toggle-secondary-data dative-tooltip"
+      title="hide the secondary data of this form">
+      <i class='fa fa-angle-up fa-fw'></i>
     </button>
 
   </div>
@@ -50,163 +55,158 @@
 
 </div>
 
-<div class='form-primary-data dative-form-primary-data'>
+<div class='dative-widget-body'>
 
-  <div class='form-igt-data dative-form-igt'>
+  <div class='form-primary-data dative-form-primary-data'>
 
-    <div class='phonetic-transcription
-        dative-form-phoneticTranscription'></div>
+    <div class='form-igt-data dative-form-igt'>
 
-    <div class='transcription dative-form-transcription'>
-      <%= @transcription %>
-    </div>
+      <div class='phonetic-transcription
+          dative-form-phoneticTranscription'></div>
 
-    <div class='morpheme-break dative-form-morphemeBreak'>
-      <%= @morphemeBreak %>
-    </div>
-
-    <div class='morpheme-gloss dative-form-morphemeGloss'>
-      <%= @morphemeGloss %>
-    </div>
-
-  </div>
-
-  <div class='form-translations-data dative-form-glosses'>
-
-    <% for translation in @translations: %>
-
-      <div class='translation dative-form-gloss'>
-        <span class='translation-grammaticality dative-form-gloss-gram'>
-          <%= translation.grammaticality %>
-        </span>
-        <span class='translation-transcription dative-form-gloss-gloss'>
-          <%= translation.transcription %>
-        </span>
+      <div class='transcription dative-form-transcription'>
+        <%= @transcription %>
       </div>
 
-    <% end %>
+      <div class='morpheme-break dative-form-morphemeBreak'>
+        <%= @morphemeBreak %>
+      </div>
 
-  </div>
+      <div class='morpheme-gloss dative-form-morphemeGloss'>
+        <%= @morphemeGloss %>
+      </div>
 
-</div>
+    </div>
 
-<div class='form-secondary-data dative-form-secondary-data'>
+    <div class='form-translations-data'>
 
-  <div class='form-id dative-form-id'>
-    <div class='form-secondary-data-label
-      dative-form-secondary-data-label'>id</div>
-    <div class='form-secondary-data-content
-      dative-form-secondary-data-content'><%= @id %></div>
-  </div>
+      <% for translation in @translations: %>
 
-  <div class='form-comments dative-form-comments'>
-    <div class='form-secondary-data-label
-      dative-form-secondary-data-label'>comments</div>
-    <div class='form-secondary-data-content
-      dative-form-secondary-data-content'><%= @comments %></div>
-  </div>
+        <div class='translation'>
+          <span class='translation-grammaticality'>
+            <%= translation.grammaticality %>
+          </span>
+          <span class='translation-transcription'>
+            <%= translation.transcription %>
+          </span>
+        </div>
 
-  <div class='form-speaker-comments dative-form-speakerComments'>
-    <div class='form-secondary-data-label
-      dative-form-secondary-data-label'>speaker comments</div>
-    <div class='form-secondary-data-content
-      dative-form-secondary-data-content'><%= @speaker_comments %></div>
-  </div>
-
-  <div class='form-elicitation-method dative-form-elicitationMethod'>
-    <div class='form-secondary-data-label
-      dative-form-secondary-data-label'>elicitation method</div>
-    <div class='form-secondary-data-content
-      dative-form-secondary-data-content'><%= @elicitation_method %></div>
-  </div>
-
-  <div class='form-tags dative-form-keywords'>
-    <div class='form-secondary-data-label
-      dative-form-secondary-data-label'>tags</div>
-    <div class='form-secondary-data-content
-      dative-form-secondary-data-content'>
-      <% for tag in @tags: %>
-        <div class='form-tag dative-form-keyword'><%= tag.name %></div>
       <% end %>
+
     </div>
+
   </div>
 
-  <div class='form-syntactic-category-string
-    dative-form-syntacticCategoryString'>
-    <div class='form-secondary-data-label
-      dative-form-secondary-data-label'>syntactic category string</div>
-    <div class='form-secondary-data-content
-      dative-form-secondary-data-content'><%= @syntactic_category_string %></div>
-  </div>
+  <div class='form-secondary-data'>
 
-  <div class='form-syntactic-category dative-form-syntacticCategory'>
-    <div class='form-secondary-data-label
-      dative-form-secondary-data-label'>syntactic category</div>
-    <div class='form-secondary-data-content
-      dative-form-secondary-data-content'><%= @syntactic_category.name %></div>
-  </div>
-
-  <div class='form-speaker dative-form-speaker'>
-    <div class='form-secondary-data-label
-      dative-form-secondary-data-label'>speaker</div>
-    <div class='form-secondary-data-content dative-form-secondary-data-content'>
-      <%= "#{@speaker.first_name} #{@speaker.last_name}" %>
+    <div class='form-comments'<%- @displayNoneStyle 'comments', @ %>>
+      <div class='form-secondary-data-label'>comments</div>
+      <div class='form-secondary-data-content'><%= @comments %></div>
     </div>
-  </div>
 
-  <div class='form-elicitor dative-form-elicitor'>
-    <div class='form-secondary-data-label
-      dative-form-secondary-data-label'>elicitor</div>
-    <div class='form-secondary-data-content dative-form-secondary-data-content'>
-      <%= "#{@elicitor.first_name} #{@elicitor.last_name}" %>
+    <div class='form-speaker-comments'<%- @displayNoneStyle 'speakerComments', @ %>>
+      <div class='form-secondary-data-label'>speaker comments</div>
+      <div class='form-secondary-data-content'><%= @speakerComments %></div>
     </div>
-  </div>
 
-  <div class='form-verifier dative-form-verifier'>
-    <div class='form-secondary-data-label
-      dative-form-secondary-data-label'>verifier</div>
-    <div class='form-secondary-data-content dative-form-secondary-data-content'>
-      <%= "#{@verifier.first_name} #{@verifier.last_name}" %>
+    <div class='form-elicitation-method'<%- @displayNoneStyle 'elicitationMethod', @ %>>
+      <div class='form-secondary-data-label'>elicitation method</div>
+      <div class='form-secondary-data-content'><%= @elicitationMethod.name %></div>
     </div>
-  </div>
 
-  <div class='form-source dative-form-source'>
-    <div class='form-secondary-data-label
-      dative-form-secondary-data-label'>source</div>
-    <div class='form-secondary-data-content dative-form-secondary-data-content'>
-      <%= "#{@source.author} (#{@source.year})" %>
+    <div class='form-tags'<%- @displayNoneStyle 'tags', @ %>>
+      <div class='form-secondary-data-label'>tags</div>
+      <div class='form-secondary-data-content'>
+        <% for tag in @tags: %>
+          <div class='form-tag'><%= tag.name %></div>
+        <% end %>
+      </div>
     </div>
-  </div>
 
-  <div class='form-date-elicited dative-form-dateElicited'>
-    <div class='form-secondary-data-label
-      dative-form-secondary-data-label'>elicited</div>
-    <div class='form-secondary-data-content
-      dative-form-secondary-data-content'><%= @date_elicited %></div>
-  </div>
-
-  <div class='form-datetime-entered dative-form-datetimeEntered'>
-    <div class='form-secondary-data-label
-      dative-form-secondary-data-label'>entered</div>
-    <div class='form-secondary-data-content
-      dative-form-secondary-data-content'><%= @datetime_entered %></div>
-  </div>
-
-  <div class='form-datetime-modified dative-form-datetimeModified'>
-    <div class='form-secondary-data-label
-      dative-form-secondary-data-label'>last modified</div>
-    <div class='form-secondary-data-content
-      dative-form-secondary-data-content'><%= @datetime_modified %></div>
-  </div>
-
-  <div class='form-files dative-form-files'>
-    <div class='form-secondary-data-label
-      dative-form-secondary-data-label'>files</div>
-    <div class='form-secondary-data-content dative-form-secondary-data-content'>
-      <% for file in @files: %>
-        <div class='form-file dative-form-file'><%= files.name %></div>
-      <% end %>
+    <div class='form-syntactic-categories'<%- @displayNoneStyle 'syntacticCategories', @ %>>
+      <div class='form-secondary-data-label'>syntactic categories</div>
+      <div class='form-secondary-data-content'><%= @syntacticCategories %></div>
     </div>
+
+    <div class='form-syntactic-category'<%- @displayNoneStyle 'syntacticCategory', @ %>>
+      <div class='form-secondary-data-label'>syntactic category</div>
+      <div class='form-secondary-data-content'><%= @syntacticCategory.name %></div>
+    </div>
+
+    <div class='form-speaker'<%- @displayNoneStyle 'speaker', @ %>>
+      <div class='form-secondary-data-label'>speaker</div>
+      <div class='form-secondary-data-content'>
+        <%= "#{@speaker.firstName} #{@speaker.lastName}" %>
+      </div>
+    </div>
+
+    <div class='form-elicitor'<%- @displayNoneStyle 'elicitor', @ %>>
+      <div class='form-secondary-data-label'>elicitor</div>
+      <div class='form-secondary-data-content'>
+        <%= "#{@elicitor.firstName} #{@elicitor.lastName}" %>
+      </div>
+    </div>
+
+    <div class='form-enterer'>
+      <div class='form-secondary-data-label'>enterer</div>
+      <div class='form-secondary-data-content'>
+        <% if @enterer.firstName and @enterer.lastName: %>
+          <%= "#{@enterer.firstName} #{@enterer.lastName}" %>
+        <% else if @enterer.username: %>
+          <%= @enterer.username %>
+        <% end %>
+      </div>
+    </div>
+
+    <div class='form-verifier'<%- @displayNoneStyle 'verifier', @ %>>
+      <div class='form-secondary-data-label'>verifier</div>
+      <div class='form-secondary-data-content'>
+        <%= "#{@verifier.firstName} #{@verifier.lastName}" %>
+      </div>
+    </div>
+
+    <div class='form-source'<%- @displayNoneStyle 'source', @ %>>
+      <div class='form-secondary-data-label'>source</div>
+      <div class='form-secondary-data-content'>
+        <%= "#{@source.author} (#{@source.year})" %>
+      </div>
+    </div>
+
+    <div class='form-date-elicited'<%- @displayNoneStyle 'dateElicited', @ %>>
+      <div class='form-secondary-data-label'>elicited</div>
+      <div class='form-secondary-data-content dative-tooltip'
+        title='This form was elicited on <%= @humanDate @dateElicited %>'
+      ><%= @timeSince @dateElicited %></div>
+    </div>
+
+    <div class='form-datetime-entered'<%- @displayNoneStyle 'datetimeEntered', @ %>>
+      <div class='form-secondary-data-label'>entered</div>
+      <div class='form-secondary-data-content dative-tooltip'
+        title='This form was entered on <%= @humanDatetime @datetimeEntered %>'
+      ><%= @timeSince @datetimeEntered %></div>
+    </div>
+
+    <div class='form-datetime-modified'<%- @displayNoneStyle 'datetimeModified', @ %>>
+      <div class='form-secondary-data-label'>last modified</div>
+      <div class='form-secondary-data-content dative-tooltip'
+        title='This form was last modified on <%= @humanDatetime @datetimeModified %>'
+        ><%= @timeSince @datetimeModified %></div>
+    </div>
+
+    <div class='form-files'<%- @displayNoneStyle 'files', @ %>>
+      <div class='form-secondary-data-label'>files</div>
+      <div class='form-secondary-data-content'>
+        <% for file in @files: %>
+          <div class='form-file'><%= files.name %></div>
+        <% end %>
+      </div>
+    </div>
+
+    <div class='form-id'>
+      <div class='form-secondary-data-label'>id</div>
+      <div class='form-secondary-data-content'><%= @id %></div>
+    </div>
+
   </div>
 
 </div>
