@@ -38,8 +38,11 @@ define [
       'click .form-primary-data': 'showAndHighlightOnlyMe'
       'mouseenter .form-primary-data': 'mouseenterPrimaryData'
       'mouseleave .form-primary-data': 'mouseleavePrimaryData'
-      'click .toggle-form-details': 'hideFullAnimate'
+      'click .hide-form-details': 'hideFormDetails'
       'click .toggle-secondary-data': 'toggleSecondaryDataAnimate'
+      'focus': 'focus'
+      'focusout': 'focusout'
+      'keydown': 'keydown'
 
     render: ->
       @html()
@@ -50,7 +53,9 @@ define [
     html: ->
       context = @getContext()
       @$el
-        .attr 'id', @model.cid
+        .attr
+          'id': @model.cid
+          'tabindex': 0
         .html @template(context)
 
     # Context object for the template.
@@ -80,7 +85,7 @@ define [
     isValueless: (thing) ->
       _.isObject(thing) and
       (not _.isArray(thing)) and
-      _.isEmpty(_.filter(_.values(thing), (x) -> x isnt null))
+      _.isEmpty(_.filter(_.values(thing), (x) -> x isnt null and x isnt ''))
 
     guify: ->
       @guifyButtons()
@@ -100,7 +105,7 @@ define [
 
     guifyButtons: ->
 
-      @$('button.toggle-form-details')
+      @$('button.hide-form-details')
         .button()
         .tooltip
           items: 'button'
@@ -174,9 +179,11 @@ define [
             collision: "flipfit"
 
     expand: ->
+      @showSecondaryDataEvent = 'form:formExpanded' # FormsView listens for this once in order to scroll to the correct place
       @showFullAnimate()
 
     collapse: ->
+      @hideSecondaryDataEvent = 'form:formCollapsed' # FormsView listens for this once in order to scroll to the correct place
       @hideFullAnimate()
 
     highlightAndShow: ->
@@ -205,9 +212,27 @@ define [
       @dehighlight()
       @hideSecondaryData()
 
+    focus: ->
+      @highlightOnlyMe()
+
+    focusout: ->
+      @dehighlight()
+
+    # <Enter> on a closed and form opens it, <Esc> on an open form closes it.
+    keydown: (event) ->
+      if @headerVisible
+        if event.which is 27 then @hideFullAnimate()
+      else
+        if event.which is 13 then @showFullAnimate()
+
     ############################################################################
     # Hide & Show stuff
     ############################################################################
+
+    # Clicking on the double-angle-up (hide-form-details) button calls this.
+    hideFormDetails: ->
+      @hideFullAnimate()
+      @$el.focus()
 
     # Full = border, header & secondary data
     ############################################################################
@@ -280,13 +305,23 @@ define [
       @secondaryDataVisible = true
       @setSecondaryDataButtonStateOpen()
       @addBorderAnimate()
-      @$('.form-secondary-data').slideDown()
+      @$('.form-secondary-data').slideDown
+        complete: =>
+          # FormsView listens once for this and fixes scroll position and focus in response
+          if @showSecondaryDataEvent
+            Backbone.trigger @showSecondaryDataEvent
+            @showSecondaryDataEvent = null
 
     hideSecondaryDataAnimate: (event) ->
       @secondaryDataVisible = false
       @setSecondaryDataButtonStateClosed()
       @removeBorderAnimate()
-      @$('.form-secondary-data').slideUp()
+      @$('.form-secondary-data').slideUp
+        complete: =>
+          # FormsView listens once for this and fixes scroll position and focus in response
+          if @hideSecondaryDataEvent
+            Backbone.trigger @hideSecondaryDataEvent
+            @hideSecondaryDataEvent = null
 
     toggleSecondaryDataAnimate: ->
       if @secondaryDataVisible

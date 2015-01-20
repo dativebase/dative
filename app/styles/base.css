@@ -193,6 +193,11 @@ div.dative-page-header-title
     vertical-align: top;
     padding-right: 10px;
 }
+
+.dative-pagin-item-index-cell {
+    min-width: 5em;
+}
+
 .dative-pagin-item-content {
     width: 700px;
 }
@@ -349,6 +354,7 @@ ul.fieldset label {
     display: inline-block;
 }
 
+.dative-form-object:focus,
 .ui-selectmenu-button:focus,
 .ui-button:focus,
 .ms-list:focus,

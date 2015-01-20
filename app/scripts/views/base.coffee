@@ -140,8 +140,11 @@ define [
             @focusedElementIndex = index
 
     focusLastFocusedElement: ->
+      @focusElement @focusedElementIndex
+
+    focusElement: (index) ->
       @$(@focusableSelector)
-        .not('.ui-state-disabled').eq(@focusedElementIndex).focus()
+        .not('.ui-state-disabled').eq(index).focus()
 
     focusFirstElement: ->
       @$(@focusableSelector).not('.ui-state-disabled').eq(0).focus()
@@ -158,7 +161,10 @@ define [
       pageBodySelector = @pageBodySelector or '#dative-page-body'
       $pageBody = @$ pageBodySelector
 
-      $element = $ event.currentTarget
+      try
+        $element = $ event.currentTarget
+      catch
+        $element = @$ ':focus'
 
       # Get the true offset of the element
       initialScrollTop = $pageBody.scrollTop()

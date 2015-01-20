@@ -34,15 +34,26 @@ define [
       @listenToEvents()
 
     events:
-      'focus button, input, .ui-selectmenu-button': 'rememberFocusedElement'
+      'focus button, input, .ui-selectmenu-button, .dative-form-object': 'rememberFocusedElement'
+      'focus .dative-form-object': 'scrollToFocusedInput'
       'click .expand-all': 'expandAllForms'
       'click .collapse-all': 'collapseAllForms'
       'click .new-form': 'showNewFormView'
+      'keydown': 'keyboardShortcuts'
+
+    # These are the focusable elements in the forms browse interface.
+    focusableSelector: 'button, input, .ui-selectmenu-button, .dative-form-object'
 
     expandAllForms: ->
+      @listenToOnce Backbone, 'form:formExpanded', @restoreFocusAndScrollPosition
       Backbone.trigger 'formsView:expandAllForms'
 
+    restoreFocusAndScrollPosition: ->
+      @focusLastFocusedElement()
+      @scrollToFocusedInput()
+
     collapseAllForms: ->
+      @listenToOnce Backbone, 'form:formCollapsed', @restoreFocusAndScrollPosition
       Backbone.trigger 'formsView:collapseAllForms'
 
     showNewFormView: ->
@@ -67,6 +78,25 @@ define [
       @listenTo @paginationMenuTopView, 'paginator:showOnePageForward', @showOnePageForward
       @listenTo @paginationMenuTopView, 'paginator:showTwoPagesForward', @showTwoPagesForward
       @listenTo @paginationMenuTopView, 'paginator:showThreePagesForward', @showThreePagesForward
+
+    # The FormsView is here directly manipulating the GUI domain of the Pagination
+    # Top Menu in order to implement some of these keyboard shortcuts. This seems
+    # better than an overload of message passing, but we may want to change this
+    # later.
+    # WARN: TODO: @jrwdunham: some of these keyboard shortcuts should only work if
+    # user-editable fields are *not* open. That is, we do not want "n" to bring us
+    # to the next page if we are editing a form and type the character "n"
+    # TODO: @jrwdunham @cesine: consider changing the shortcut keys: vim-style
+    # conventions or arrow keys might be better. Alternatively (or in
+    # addition), we could have these be user-customizable. 
+    keyboardShortcuts: (event) ->
+      switch event.which
+        when 70 then @$('.first-page').click() # f
+        when 80 then @$('.previous-page').click() # p
+        when 78 then @$('.next-page').click() # n
+        when 76 then @$('.last-page').click() # l
+        when 40 then @$('.expand-all').click() # down arrow
+        when 38 then @$('.collapse-all').click() # up arrow
 
     render: (taskId) ->
       context =
@@ -172,10 +202,13 @@ define [
       if @focusedElementIndex
         @focusLastFocusedElement()
       else
-        @focusFirstButton()
+        @focusFirstForm()
 
     focusFirstButton: ->
       @$('button.ui-button').first().focus()
+
+    focusFirstForm: ->
+      @$('div.dative-form-object').first().focus()
 
     guify: ->
 

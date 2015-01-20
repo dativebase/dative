@@ -2,7 +2,7 @@
 
   <div class='button-container-left'>
 
-    <button class="toggle-form-details dative-tooltip"
+    <button class="hide-form-details dative-tooltip"
       title="hide the buttons and extra data of this form">
       <i class='fa fa-angle-double-up fa-fw'></i>
     </button>
@@ -32,7 +32,7 @@
     </button>
 
     <button class="remember-form dative-tooltip"
-      title="save this form to your personal clipboard">
+      title="copy this form to your personal clipboard">
       <i class='fa fa-clipboard fa-fw'></i>
     </button>
 
@@ -147,7 +147,7 @@
       </div>
     </div>
 
-    <div class='form-enterer'>
+    <div class='form-enterer'<%- @displayNoneStyle 'elicitor', @ %>>
       <div class='form-secondary-data-label'>enterer</div>
       <div class='form-secondary-data-content'>
         <% if @enterer.firstName and @enterer.lastName: %>
