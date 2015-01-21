@@ -68,7 +68,7 @@ define [
 
     html: ->
       params = _.extend(
-        {headerTitle: 'Application Settings', themes: @jQueryUIThemes},
+        {headerTitle: 'Application Settings'},
         @model.attributes
       )
       @$el.html @template(params)
@@ -90,6 +90,7 @@ define [
       if not @loggedIn()
         @model.set 'activeServer', @$('select[name=activeServer]').val()
       @serversView.setCollectionFromGUI()
+      @model.set 'activeJQueryUITheme', @$('select[name=css-theme]').val()
       @model.save()
 
     guify: ->
@@ -168,7 +169,14 @@ define [
       # cross-platform/browser support. May want to do feature detection and
       # employ a mixture of strategies 1-4.
 
-      newJQueryUICSSURL = @$(event.target).find(':selected').val()
+      @setModelFromGUI()
+      Backbone.trigger 'applicationSettings:changeTheme'
+
+      ###
+      #themeName = @$(event.target).find(':selected').val()
+      themeName = @model.get 'activeJQueryUITheme'
+      # TODO: this URL stuff should be in model
+      newJQueryUICSSURL = "http://code.jquery.com/ui/1.11.2/themes/#{themeName}/jquery-ui.min.css"
       $jQueryUILinkElement = $('#jquery-ui-css')
       $jQueryUILinkElement.remove()
       $jQueryUILinkElement.attr href: newJQueryUICSSURL
@@ -179,8 +187,9 @@ define [
           Backbone.trigger 'application-settings:jQueryUIThemeChanged'
         @constructor.refreshJQueryUIColors innerCallback
       @listenForLinkOnload outerCallback
+      ###
 
-      # Still TODO:
+      # Remaining TODOs:
       # 1. persist theme settings to localhost
       # 2. create a default in application settings model
       # 3. disable this feature when there is no Internet connection
@@ -188,33 +197,6 @@ define [
       #    should be re-rendered after theme change)
       # 5. Gap between rounded borders and container fill. See
       #    http://w3facility.org/question/jquery-ui-how-to-remove-gap-at-each-rounded-corner-of-accordions/
-
-    jQueryUIThemes: [
-      ['ui-lightness', 'UI lightness']
-      ['ui-darkness', 'UI darkness']
-      ['smoothness', 'Smoothness']
-      ['start', 'Start']
-      ['redmond', 'Redmond']
-      ['sunny', 'Sunny']
-      ['overcast', 'Overcast']
-      ['le-frog', 'Le Frog']
-      ['flick', 'Flick']
-      ['pepper-grinder', 'Pepper Grinder']
-      ['eggplant', 'Eggplant']
-      ['dark-hive', 'Dark Hive']
-      ['cupertino', 'Cupertino']
-      ['south-street', 'South Street']
-      ['blitzer', 'Blitzer']
-      ['humanity', 'Humanity']
-      ['hot-sneaks', 'Hot Sneaks']
-      ['excite-bike', 'Excite Bike']
-      ['vader', 'Vader']
-      ['dot-luv', 'Dot Luv']
-      ['mint-choc', 'Mint Choc']
-      ['black-tie', 'Black Tie']
-      ['trontastic', 'Trontastic']
-      ['swanky-purse', 'Swanky Purse']
-    ]
 
     ############################################################################
     # Four strategies for detecting that a new CSS <link> has loaded.

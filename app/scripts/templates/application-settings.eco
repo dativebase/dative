@@ -9,15 +9,20 @@
     <ul class="fieldset">
 
       <li class="active-server"></li>
+
       <li class="server-config-container"></li>
 
       <li class="theme-selector">
         <label for='css-theme'>Theme</label>
         <select name='css-theme'>
-          <% for [themeName, themeNameHumanReadable] in @themes: %>
-            <option
-              value="http://code.jquery.com/ui/1.11.2/themes/<%= themeName %>/jquery-ui.min.css"
-            ><%= themeNameHumanReadable %></option>
+          <% for [themeName, themeNameHumanReadable] in @jQueryUIThemes: %>
+            <% if themeName is @activeJQueryUITheme: %>
+              <option value="<%= themeName %>" selected
+              ><%= themeNameHumanReadable %></option>
+            <% else: %>
+              <option value="<%= themeName %>"
+              ><%= themeNameHumanReadable %></option>
+            <% end %>
           <% end %>
         </select>
       </li>

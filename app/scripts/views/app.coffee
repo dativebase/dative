@@ -74,8 +74,14 @@ define [
       @listenTo Backbone, 'authenticate:success', @authenticateSuccess
       @listenTo Backbone, 'logout:success', @logoutSuccess
       @listenTo Backbone, 'useFieldDBCorpus', @useFieldDBCorpus
+      @listenTo Backbone, 'useFieldDBCorpus', @useFieldDBCorpus
+      @listenTo Backbone, 'applicationSettings:changeTheme', @changeTheme
 
       @render()
+
+      if @applicationSettings.get('activeJQueryUITheme') isnt 'cupertino'
+        @changeTheme()
+
       Backbone.history.start()
       @showHomePageView()
 
@@ -280,4 +286,82 @@ define [
     # Open/close the alert dialog box
     toggleAlertDialog: ->
       Backbone.trigger 'alertDialog:toggle'
+
+    ############################################################################
+    # Change the jQuery UI CSS Theme
+    ############################################################################
+
+    changeTheme: (event) ->
+
+      # This is harder than it might at first seem.
+      # Method:
+      # 1. get new CSS URL from selectmenu
+      # 2. remove the current jQueryUI CSS <link>
+      # 3. add a new jQueryUI CSS <link> with the new URL in its `href`
+      # 4. ***CRUCIAL:*** when <link> `load` event fires, we ...
+      # 5. get `BaseView.constructor` to refresh its `_jQueryUIColors`, which ...
+      # 6. triggers a Backbone event indicating that the jQueryUI theme has changed, which ...
+      # 7. causes `MainMenuView` to re-render.
+      #
+      # WARN: works for me on Mac with FF, Ch & Sa. Unsure of
+      # cross-platform/browser support. May want to do feature detection and
+      # employ a mixture of strategies 1-4.
+
+      themeName = @applicationSettings.get 'activeJQueryUITheme'
+      # TODO: this URL stuff should be in model
+      newJQueryUICSSURL = "http://code.jquery.com/ui/1.11.2/themes/#{themeName}/jquery-ui.min.css"
+      $jQueryUILinkElement = $('#jquery-ui-css')
+      $jQueryUILinkElement.remove()
+      $jQueryUILinkElement.attr href: newJQueryUICSSURL
+      linkHTML = $jQueryUILinkElement.get(0).outerHTML
+      $('#font-awesome-css').after linkHTML
+      outerCallback = =>
+        innerCallback = =>
+          Backbone.trigger 'application-settings:jQueryUIThemeChanged'
+        @constructor.refreshJQueryUIColors innerCallback
+      @listenForLinkOnload outerCallback
+
+      # Remaining TODOs:
+      # 1. persist theme settings to localhost
+      # 2. create a default in application settings model
+      # 3. disable this feature when there is no Internet connection
+      # 4. focus highlight doesn't match on login dialog (probably because it
+      #    should be re-rendered after theme change)
+      # 5. Gap between rounded borders and container fill. See
+      #    http://w3facility.org/question/jquery-ui-how-to-remove-gap-at-each-rounded-corner-of-accordions/
+
+    # Four strategies for detecting that a new CSS <link> has loaded.
+    ############################################################################
+    #
+    # See http://www.phpied.com/when-is-a-stylesheet-really-loaded/
+
+    # strategy #1
+    listenForLinkOnload: (callback) ->
+      link = document.getElementById 'jquery-ui-css'
+      link.onload = -> callback()
+
+    # strategy #2
+    addEventListenerToLink: (callback) ->
+      link = document.getElementById 'jquery-ui-css'
+      eventListener = -> callback()
+      if link.addEventListener
+        link.addEventListener 'load', eventListener, false
+
+    # strategy #3
+    listenForReadyStateChange: (callback) ->
+      link = document.getElementById 'jquery-ui-css'
+      link.onreadystatechange = ->
+        state = link.readyState
+        if state is 'loaded' or state is 'complete'
+          link.onreadystatechange = null
+          callback()
+
+    # strategy #4
+    checkForChangeInDocumentStyleSheets: (callback) ->
+      cssnum = document.styleSheets.length
+      func = ->
+        if document.styleSheets.length > cssnum
+          callback()
+          clearInterval ti
+      ti = setInterval func, 10
 

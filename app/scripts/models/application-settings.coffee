@@ -439,7 +439,36 @@ define [
         'concordia'
         'dyslexdisorth'
       ]
+
       itemsPerPage: 10
+
+      activeJQueryUITheme: 'cupertino'
+      jQueryUIThemes: [
+        ['ui-lightness', 'UI lightness']
+        ['ui-darkness', 'UI darkness']
+        ['smoothness', 'Smoothness']
+        ['start', 'Start']
+        ['redmond', 'Redmond']
+        ['sunny', 'Sunny']
+        ['overcast', 'Overcast']
+        ['le-frog', 'Le Frog']
+        ['flick', 'Flick']
+        ['pepper-grinder', 'Pepper Grinder']
+        ['eggplant', 'Eggplant']
+        ['dark-hive', 'Dark Hive']
+        ['cupertino', 'Cupertino']
+        ['south-street', 'South Street']
+        ['blitzer', 'Blitzer']
+        ['humanity', 'Humanity']
+        ['hot-sneaks', 'Hot Sneaks']
+        ['excite-bike', 'Excite Bike']
+        ['vader', 'Vader']
+        ['dot-luv', 'Dot Luv']
+        ['mint-choc', 'Mint Choc']
+        ['black-tie', 'Black Tie']
+        ['trontastic', 'Trontastic']
+        ['swanky-purse', 'Swanky Purse']
+      ]
 
   # Backbone-relational requires this when using CoffeeScript
   ApplicationSettingsModel.setup()
