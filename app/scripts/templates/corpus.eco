@@ -16,8 +16,8 @@
       </button>
 
       <button class="use-corpus dative-tooltip"
-        title="use this corpus">
-        <i class="fa fa-star fa-fw"></i>
+        title="activate this corpus and view its data">
+        <i class="fa fa-toggle-off fa-fw"></i>
       </button>
 
       <button class="add-user dative-tooltip"

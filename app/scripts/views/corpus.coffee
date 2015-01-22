@@ -294,6 +294,7 @@ define [
 
     useCorpus: (event) ->
       if event then @stopEvent event
+      @setUseCorpusButtonStateActive()
       Backbone.trigger 'useFieldDBCorpus', @model.get('pouchname')
 
     toggleAddUserKeys: (event) ->
@@ -361,6 +362,12 @@ define [
         .tooltip
           content: 'show corpus details'
 
+    setUseCorpusButtonStateInactive: ->
+      @$('button.use-corpus')
+        .find('i').addClass('fa-toggle-off').removeClass('fa-toggle-on').end()
+        .button()
+        .tooltip content: 'activate this corpus and view its data'
+
     fetchThenOpen: ->
       if @haveFetchedUsers
         @openBody()
@@ -395,6 +402,12 @@ define [
         .find('i').addClass('fa-caret-down').removeClass('fa-caret-right').end()
         .button()
         .tooltip content: 'hide corpus details'
+
+    setUseCorpusButtonStateActive: ->
+      @$('button.use-corpus')
+        .find('i').addClass('fa-toggle-on').removeClass('fa-toggle-off').end()
+        .button()
+        .tooltip content: 'this is the active corpus; click here to browse its data'
 
     guify: ->
       @$('button').button().attr('tabindex', 0)
@@ -431,6 +444,11 @@ define [
       if disabled then @$('button.add-user').hide()
 
       @tabindicesNaught() # active elements have tabindex=0
+
+      if @isActive()
+        @setUseCorpusButtonStateActive()
+      else
+        @setUseCorpusButtonStateInactive()
 
       @$('.active-indicator').css "color", @constructor.jQueryUIColors().defCo
 

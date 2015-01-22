@@ -24,7 +24,7 @@
 
       <button class="activate-server dative-tooltip"
         title="make this server the active one">
-        <i class='fa fa-star fa-fw'></i>
+        <i class='fa fa-toggle-off fa-fw'></i>
       </button>
 
     </div>

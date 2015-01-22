@@ -106,6 +106,18 @@ define [
         event.stopPropagation()
         @activateServer()
 
+    setActivateServerButtonStateActive: ->
+      @$('button.activate-server')
+        .find('i').addClass('fa-toggle-on').removeClass('fa-toggle-off').end()
+        .button()
+        .tooltip content: 'this is the active server'
+
+    setActivateServerButtonStateInactive: ->
+      @$('button.activate-server')
+        .find('i').addClass('fa-toggle-off').removeClass('fa-toggle-on').end()
+        .button()
+        .tooltip content: 'make this server the active one'
+
     activateServer: ->
       # The ApplicationSettingsView changes the active server.
       Backbone.trigger 'activateServer', @model.get('id')
@@ -116,8 +128,8 @@ define [
     controlsShouldBeDisabled: -> if @isActive() then true else false
 
     guify: ->
-      @displayActivity()
       @buttonSetup()
+      @displayActivity()
       @inputSetup()
       @selectmenuSetup()
       @tabindicesNaught() # active elements have tabindex=0
@@ -129,9 +141,11 @@ define [
           .text '(active)'
           .css("color", @constructor.jQueryUIColors().defCo)
         @$('.dative-widget-body').addClass 'ui-state-highlight ui-corner-bottom'
+        @setActivateServerButtonStateActive()
       else
         @$('.dative-widget-header-title span.active-indicator').text ''
         @$('.dative-widget-body').removeClass 'ui-state-highlight ui-corner-bottom'
+        @setActivateServerButtonStateInactive()
 
     buttonSetup: ->
 
