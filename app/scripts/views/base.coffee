@@ -135,7 +135,7 @@ define [
 
     rememberFocusedElement: (event) ->
       try
-        @$(@focusableSelector).not('.ui-state-disabled').each (index, el) =>
+        @$(@focusableSelector).each (index, el) =>
           if el is event.target
             @focusedElementIndex = index
 
@@ -143,8 +143,12 @@ define [
       @focusElement @focusedElementIndex
 
     focusElement: (index) ->
-      @$(@focusableSelector)
-        .not('.ui-state-disabled').eq(index).focus()
+      $focusables = @$ @focusableSelector
+      $elementToSelect = $focusables.eq index
+      if $elementToSelect.hasClass '.ui-state-disabled'
+        @focusFirstElement()
+      else
+        $elementToSelect.focus()
 
     focusFirstElement: ->
       @$(@focusableSelector).not('.ui-state-disabled').eq(0).focus()

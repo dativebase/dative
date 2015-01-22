@@ -41,6 +41,8 @@ define [
       'click .new-form': 'showNewFormView'
       'keydown': 'keyboardShortcuts'
 
+    rememberFocusedElement: ->
+
     # These are the focusable elements in the forms browse interface.
     focusableSelector: 'button, input, .ui-selectmenu-button, .dative-form-object'
 
@@ -198,6 +200,9 @@ define [
       else
         @activeServerType = 'OLD'
 
+    # ISSUE: @jrwdunham: because the paginator buttons can become dis/enabled
+    # based on the paginator state, the setFocus can behave erratically, since
+    # it sets focus based on the remembered index of a jQuery matched set.
     setFocus: ->
       if @focusedElementIndex
         @focusLastFocusedElement()
