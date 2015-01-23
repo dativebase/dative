@@ -123,6 +123,16 @@ define (require) ->
     if interval > 1 then return "#{interval} minutes ago"
     return "#{Math.floor(seconds)} seconds ago"
 
+  # snake_case to camelCase
+  snake2camel = (string) ->
+    string.replace(/(_[a-z])/g, ($1) ->
+      $1.toUpperCase().replace('_',''))
+
+  # camelCase to snake_case
+  camel2snake = (string) ->
+    string.replace(/([A-Z])/g, ($1) ->
+      "_#{$1.toLowerCase()}")
+
   clone: clone
   type: type
   guid: guid
@@ -137,4 +147,6 @@ define (require) ->
   humanDate: humanDate
   humanTime: humanTime
   dateString2object: dateString2object
+  snake2camel: snake2camel
+  camel2snake: camel2snake
 

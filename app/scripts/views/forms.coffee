@@ -65,9 +65,14 @@ define [
       @stopListening()
       @undelegateEvents()
       @delegateEvents()
+
       @listenTo Backbone, 'fetchAllFieldDBFormsStart', @fetchAllFormsStart
       @listenTo Backbone, 'fetchAllFieldDBFormsEnd', @fetchAllFormsEnd
       @listenTo Backbone, 'fetchAllFieldDBFormsSuccess', @fetchAllFormsSuccess
+
+      @listenTo Backbone, 'fetchOLDFormsStart', @fetchAllFormsStart
+      @listenTo Backbone, 'fetchOLDFormsEnd', @fetchAllFormsEnd
+      @listenTo Backbone, 'fetchOLDFormsSuccess', @fetchAllFormsSuccess
 
       @listenTo @paginationMenuTopView, 'paginator:changeItemsPerPage', @changeItemsPerPage
       @listenTo @paginationMenuTopView, 'paginator:showFirstPage', @showFirstPage
@@ -108,12 +113,18 @@ define [
       @matchHeights()
       @guify()
       @renderPaginationMenuTopView()
-      @collection.fetchAllFieldDBForms()
+      @fetchFormsToCollection()
       @listenToEvents()
       @perfectScrollbar()
       @setFocus()
       Backbone.trigger 'longTask:deregister', taskId
       @
+
+    fetchFormsToCollection: ->
+      if @activeServerType is 'FieldDB'
+        @collection.fetchAllFieldDBForms()
+      else
+        @collection.fetchOLDForms()
 
     renderPaginationMenuTopView: ->
       @paginationMenuTopView.setElement @$('div.dative-pagination-menu-top').first()

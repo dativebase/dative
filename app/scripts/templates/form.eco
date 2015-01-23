@@ -111,7 +111,7 @@
 
     <div class='form-elicitation-method'<%- @displayNoneStyle 'elicitationMethod', @ %>>
       <div class='form-secondary-data-label'>elicitation method</div>
-      <div class='form-secondary-data-content'><%= @elicitationMethod.name %></div>
+      <div class='form-secondary-data-content'><%= @elicitationMethod?.name %></div>
     </div>
 
     <div class='form-tags'<%- @displayNoneStyle 'tags', @ %>>
@@ -130,46 +130,42 @@
 
     <div class='form-syntactic-category'<%- @displayNoneStyle 'syntacticCategory', @ %>>
       <div class='form-secondary-data-label'>syntactic category</div>
-      <div class='form-secondary-data-content'><%= @syntacticCategory.name %></div>
+      <div class='form-secondary-data-content'><%= @syntacticCategory?.name %></div>
     </div>
 
     <div class='form-speaker'<%- @displayNoneStyle 'speaker', @ %>>
       <div class='form-secondary-data-label'>speaker</div>
-      <div class='form-secondary-data-content'>
-        <%= "#{@speaker.firstName} #{@speaker.lastName}" %>
-      </div>
+      <% speaker = if @speaker then "#{@speaker.firstName} #{@speaker.lastName}" else '' %>
+      <div class='form-secondary-data-content'><%= speaker %></div>
     </div>
 
     <div class='form-elicitor'<%- @displayNoneStyle 'elicitor', @ %>>
       <div class='form-secondary-data-label'>elicitor</div>
-      <div class='form-secondary-data-content'>
-        <%= "#{@elicitor.firstName} #{@elicitor.lastName}" %>
-      </div>
+      <% elicitor = if @elicitor then "#{@elicitor.firstName} #{@elicitor.lastName}" else '' %>
+      <div class='form-secondary-data-content'><%= elicitor %></div>
     </div>
 
     <div class='form-enterer'<%- @displayNoneStyle 'elicitor', @ %>>
       <div class='form-secondary-data-label'>enterer</div>
       <div class='form-secondary-data-content'>
-        <% if @enterer.firstName and @enterer.lastName: %>
+        <% if @enterer?.firstName and @enterer?.lastName: %>
           <%= "#{@enterer.firstName} #{@enterer.lastName}" %>
         <% else if @enterer.username: %>
-          <%= @enterer.username %>
+          <%= @enterer?.username %>
         <% end %>
       </div>
     </div>
 
     <div class='form-verifier'<%- @displayNoneStyle 'verifier', @ %>>
       <div class='form-secondary-data-label'>verifier</div>
-      <div class='form-secondary-data-content'>
-        <%= "#{@verifier.firstName} #{@verifier.lastName}" %>
-      </div>
+      <% verifier = if @verifier then "#{@verifier.firstName} #{@verifier.lastName}" else '' %>
+      <div class='form-secondary-data-content'><%= verifier %></div>
     </div>
 
     <div class='form-source'<%- @displayNoneStyle 'source', @ %>>
       <div class='form-secondary-data-label'>source</div>
-      <div class='form-secondary-data-content'>
-        <%= "#{@source.author} (#{@source.year})" %>
-      </div>
+      <% source = if @source then "#{@source.author} (#{@source.year})" else '' %>
+      <div class='form-secondary-data-content'><%= source %></div>
     </div>
 
     <div class='form-date-elicited'<%- @displayNoneStyle 'dateElicited', @ %>>

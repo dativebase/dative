@@ -13,7 +13,7 @@ define [
     url: 'fakeurl' # Backbone throws 'A "url" property or function must be specified' if this is not present.
 
     ############################################################################
-    # Dative Schema stuff
+    # Dative Schema
     ############################################################################
 
     # Note: the comments in this method definition reflect the OLD's relational schema
@@ -53,7 +53,7 @@ define [
       modifier: @defaultUser() # relation('User', primaryjoin='Form.modifier_id==User.id') modifier_id: null # Column(Integer, ForeignKey('user.id', ondelete='SET NULL'))
       verifier: @defaultUser() # relation('User', primaryjoin='Form.verifier_id==User.id') verifier_id: null # Column(Integer, ForeignKey('user.id', ondelete='SET NULL'))
       speaker: @defaultSpeaker # relation('Speaker') speaker_id: null # Column(Integer, ForeignKey('speaker.id', ondelete='SET NULL'))
-      elicitationMethod: @defaultElicitationMethod# relation('ElicitationMethod') elicitationmethod_id: null # Column(Integer, ForeignKey('elicitationmethod.id', ondelete='SET NULL'))
+      elicitationMethod: @defaultElicitationMethod # relation('ElicitationMethod') elicitationmethod_id: null # Column(Integer, ForeignKey('elicitationmethod.id', ondelete='SET NULL'))
       syntacticCategory: @defaultSyntacticCategory() # relation('SyntacticCategory', backref='forms') syntacticcategory_id: null # Column(Integer, ForeignKey('syntacticcategory.id', ondelete='SET NULL'))
       source: @defaultSource# relation('Source') source_id: null # Column(Integer, ForeignKey('source.id', ondelete='SET NULL'))
 
@@ -275,6 +275,28 @@ define [
       catch
         datetimeString
 
+
+    ############################################################################
+    # OLD-to-Dative Schema stuff
+    ############################################################################
+
+    old2dative: (oldForm) ->
+      # An OLD form is received as a JSON object. See
+      # http://online-linguistic-database.readthedocs.org/en/latest/datastructure.html#form
+      # for an exact specification of its attributes and their validation
+      # requirements.
+
+      dativeForm = {}
+      for attribute, value of oldForm
+        attribute = @oldAttribute2datumAttribute attribute
+        dativeForm[attribute] = value
+      dativeForm
+
+    oldAttribute2datumAttribute: (attribute) ->
+      switch attribute
+        when 'syntactic_category_string' then 'syntacticCategories'
+        when 'syntax' then 'syntacticTreePTB'
+        else @utils.snake2camel attribute
 
     # The OLD serves a form as a JSON object. The `Form.get_dict()` method is responsible
     # for transforming a form-as-python-object to a JSON object of the following form:

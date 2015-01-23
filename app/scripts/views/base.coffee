@@ -44,14 +44,6 @@ define [
     trim: (string) ->
       string.replace /^\s+|\s+$/g, ''
 
-    snake2camel: (string) ->
-      string.replace(/(_[a-z])/g, ($1) ->
-        $1.toUpperCase().replace('_',''))
-
-    camel2snake: (string) ->
-      string.replace(/([A-Z])/g, ($1) ->
-        "_#{$1.toLowerCase()}")
-
     # Cleanly closes this view and all of it's rendered subviews
     close: ->
       @$el.empty()
