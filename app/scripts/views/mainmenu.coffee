@@ -59,6 +59,9 @@ define [
         if @model.get('activeServer')?.get('type') is 'FieldDB'
           @$('li.fielddb').show()
             .children('a').removeClass 'disabled'
+        else
+          @$('li.fielddb').hide()
+            .children('a').addClass 'disabled'
       else
         @$('li.requires-authentication').hide()
           .children('a').addClass 'disabled'
