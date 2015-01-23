@@ -20,8 +20,13 @@
         <i class="fa fa-toggle-off fa-fw"></i>
       </button>
 
+      <button class="edit-corpus dative-tooltip"
+        title="show interface for editing the details of this corpus">
+        <i class="fa fa-edit fa-fw"></i>
+      </button>
+
       <button class="add-user dative-tooltip"
-        title="show interface for managing corpus users">
+        title="show interface for managing the users of this corpus">
         <i class="fa fa-users fa-fw"></i>
       </button>
 
@@ -34,6 +39,9 @@
   <% else: %>
     <div class="dative-widget-body">
   <% end %>
+
+    <div class="edit-corpus-widget ui-widget ui-widget-content
+      dative-widget-center ui-corner-all"></div>
 
     <div class="add-user-widget ui-widget ui-widget-content
       dative-widget-center ui-corner-all"></div>

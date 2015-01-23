@@ -272,7 +272,8 @@ div.dative-page-header-title
 .dative-add-user-widget,
 .servers-config-widget,
 .server-config-widget,
-.add-user-widget
+.add-user-widget,
+.edit-corpus-widget
 {
     box-shadow: 5px 5px 10px rgba(0, 0, 0, 0.5);
     -webkit-box-shadow: 5px 5px 10px rgba(0, 0, 0, 0.5);
@@ -325,7 +326,9 @@ ul.fieldset label {
 }
 
 .create-corpus-widget ul.fieldset label,
-.add-user-widget ul.fieldset label {
+.add-user-widget ul.fieldset label,
+.edit-corpus-widget ul.fieldset label
+{
     width: 80px;
 }
 
@@ -618,6 +621,7 @@ div.create-corpus-widget {
 }
 
 div.add-user-widget,
+div.edit-corpus-widget,
 div.users-widget {
   width: 500px;
   margin-top: 10px;
@@ -638,6 +642,7 @@ div.server-config-widget {
 
 div.server-config-widget input,
 div.add-user-widget input,
+div.edit-corpus-widget textarea,
 div.create-corpus-widget input {
   max-width: 300px;
   min-width: 300px;
@@ -682,6 +687,7 @@ div.server-config-widget > div.dative-widget-header {
 }
 
 div.add-user-widget > div.dative-widget-header,
+div.edit-corpus-widget > div.dative-widget-header,
 div.users-widget > div.dative-widget-header {
   height: 12px;
 }
@@ -690,6 +696,7 @@ div.corpus-widget > div.dative-widget-header > div.dative-widget-header-title,
 div.create-corpus-widget > div.dative-widget-header > div.dative-widget-header-title,
 div.users-widget > div.dative-widget-header > div.dative-widget-header-title,
 div.add-user-widget > div.dative-widget-header > div.dative-widget-header-title,
+div.edit-corpus-widget > div.dative-widget-header > div.dative-widget-header-title,
 div.servers-config-widget > div.dative-widget-header > div.dative-widget-header-title,
 div.server-config-widget > div.dative-widget-header > div.dative-widget-header-title,
 div#dative-page-header > div.dative-page-header-title,

@@ -2,11 +2,12 @@ define [
   'backbone'
   './base'
   './user'
+  './edit-corpus'
   './add-user'
   './../models/user'
   './../templates/corpus'
   'jqueryspin'
-], (Backbone, BaseView, UserView, AddUserView, UserModel, corpusTemplate) ->
+], (Backbone, BaseView, UserView, EditCorpusView, AddUserView, UserModel, corpusTemplate) ->
 
   # Corpus View
   # ------------
@@ -29,6 +30,7 @@ define [
 
     initialize: (options) ->
       @addUserView = new AddUserView()
+      @editCorpusView = new EditCorpusView model: @model
       @haveFetchedUsers = false
       @bodyVisible = false
       @shouldFocusToggleButtonUponOpen = true
@@ -43,6 +45,7 @@ define [
       @undelegateEvents()
       @delegateEvents()
       @listenTo @addUserView, 'request:grantRoleToUser', @grantRoleToUser
+      @listenTo @editCorpusView, 'request:editCorpus', @editCorpus
       @listenToUserViewRevokeAccessRequests()
       @listenTo @model, 'fetchStart', @fetchStart
       @listenTo @model, 'fetchEnd', @fetchEnd
@@ -52,6 +55,8 @@ define [
       @listenTo @model, 'grantRoleToUserSuccess', @fetchUsersAfterDelay
       @listenTo @model, 'removeUserFromCorpusEnd', @stopSpin
       @listenTo @model, 'removeUserFromCorpusSuccess', @removeUserFromCorpusSuccess
+      @listenTo @model, 'updateCorpusSuccess', @updateCorpusSuccess
+      @listenTo @model, 'updateCorpusEnd', @stopSpin
 
     listenToUserViewRevokeAccessRequests: ->
       for userView in @admins.concat @writers, @readers
@@ -62,6 +67,8 @@ define [
       'click button.toggle-appear': 'toggle'
       'keydown button.add-user': 'toggleAddUserKeys'
       'click button.add-user': 'toggleAddUser'
+      'keydown button.edit-corpus': 'toggleEditCorpusKeys'
+      'click button.edit-corpus': 'toggleEditCorpus'
       'keydown button.use-corpus': 'useCorpusKeys'
       'click button.use-corpus': 'useCorpus'
 
@@ -75,6 +82,9 @@ define [
       if @fetchUsersAfterRemoveUserFromCorpus
         @fetchUsersAfterRemoveUserFromCorpus = false
         @fetchUsersAfterDelay()
+
+    updateCorpusSuccess: (username) ->
+      console.log 'we successfully updated the title and description of this corpus'
 
     # Remove user(name) from `@adminNames`, `@writerNames` or `@readerNames`
     removeUserFromRoleNames: (username) ->
@@ -114,6 +124,11 @@ define [
       else
         @spin "Granting the #{newRole} role to user “#{username}”"
         @model.grantRoleToUser newRole, username
+
+    # Tell the model to edit the corpus details on the server.
+    editCorpus: (newTitle, newDescription) ->
+      @spin "Updating the title and description of this corpus"
+      @model.updateCorpus newTitle, newDescription
 
     removeUserFromCorpusThenFetch: (username) ->
       @fetchUsersAfterRemoveUserFromCorpus = true
@@ -200,6 +215,11 @@ define [
       @addUserView.render()
       @rendered @addUserView
 
+    renderEditCorpusView: ->
+      @editCorpusView.setElement @$('div.edit-corpus-widget')
+      @editCorpusView.render()
+      @rendered @editCorpusView
+
     renderUserViews: ->
       for roleClass in ['admins', 'writers', 'readers']
         if @[roleClass].length
@@ -212,16 +232,29 @@ define [
     render: ->
       @listenToEvents()
       @$el.html @template(@getContext())
+      @renderEditCorpusView()
       @renderAddUserView()
       @guify()
       if @fetching then @spin 'fetching corpus information'
       @renderUserViews()
       if @bodyVisible then @showBody() else @hideBody()
+      @openAddUserView()
+      @openEditCorpusView()
+      @
+
+    openAddUserView: ->
+      @setAddUserButtonState()
       if @addUserView.visible
         @addUserView.openGUI()
       else
         @addUserView.closeGUI()
-      @
+
+    openEditCorpusView: ->
+      @setEditCorpusButtonState()
+      if @editCorpusView.visible
+        @editCorpusView.openGUI()
+      else
+        @editCorpusView.closeGUI()
 
     getContext: ->
       context = _.extend @model.attributes, isActive: @isActive()
@@ -302,23 +335,46 @@ define [
         @stopEvent event
         @toggleAddUser event
 
+    toggleEditCorpusKeys: (event) ->
+      if event.which in [13, 32]
+        @stopEvent event
+        @toggleEditCorpus event
+
     setAddUserButtonState: ->
-      contentSuffix = 'interface for managing corpus users'
+      contentSuffix = 'interface for managing the users of this corpus'
       if @addUserView.visible
         @$('button.add-user').tooltip
-          content: "show #{contentSuffix}"
+          content: "hide #{contentSuffix}"
       else
         @$('button.add-user').tooltip
+          content: "show #{contentSuffix}"
+
+    setEditCorpusButtonState: ->
+      contentSuffix = 'interface for editing the details of this corpus'
+      if @editCorpusView.visible
+        @$('button.edit-corpus').tooltip
           content: "hide #{contentSuffix}"
+      else
+        @$('button.edit-corpus').tooltip
+          content: "show #{contentSuffix}"
 
     toggleAddUser: (event) ->
       @stopEvent event
-      @setAddUserButtonState()
       if @addUserView.visible
         @addUserView.closeGUI()
       else
         @fetchThenOpen()
         @addUserView.openGUI()
+      @setAddUserButtonState()
+
+    toggleEditCorpus: (event) ->
+      @stopEvent event
+      if @editCorpusView.visible
+        @editCorpusView.closeGUI()
+      else
+        @fetchThenOpen()
+        @editCorpusView.openGUI()
+      @setEditCorpusButtonState()
 
     toggleAppearKeys: (event) ->
       if event.which in [13, 37, 38, 39, 40] then @stopEvent event
@@ -412,9 +468,7 @@ define [
     guify: ->
       @$('button').button().attr('tabindex', 0)
 
-      disabled = true
-      if @role is 'admin'
-        disabled = false
+      disabled = if @role is 'admin' then false else true
 
       @$('button.toggle-appear')
         .button()
@@ -432,12 +486,20 @@ define [
             at: "left center"
             collision: "flipfit"
 
+      @$('button.edit-corpus')
+        .button()
+        .tooltip
+          position:
+            my: "right-80 center"
+            at: "left center"
+            collision: "flipfit"
+
       @$('button.add-user')
         .button
           disabled: disabled
         .tooltip
           position:
-            my: "right-80 center"
+            my: "right-115 center"
             at: "left center"
             collision: "flipfit"
 
@@ -454,7 +516,7 @@ define [
 
     # Tabindices=0 and jQueryUI colors
     tabindicesNaught: ->
-      @$('select, input')
+      @$('select, input, textarea')
         .css("border-color", @constructor.jQueryUIColors().defBo)
         .attr('tabindex', 0)
 

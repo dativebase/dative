@@ -74,7 +74,6 @@ define [
       @listenTo Backbone, 'authenticate:success', @authenticateSuccess
       @listenTo Backbone, 'logout:success', @logoutSuccess
       @listenTo Backbone, 'useFieldDBCorpus', @useFieldDBCorpus
-      @listenTo Backbone, 'useFieldDBCorpus', @useFieldDBCorpus
       @listenTo Backbone, 'applicationSettings:changeTheme', @changeTheme
 
       @render()

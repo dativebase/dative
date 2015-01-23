@@ -19,10 +19,11 @@ define [
   # 1. @fetch
   # 2. @fetchUsers
   #
-  # Two other server-request methods are defined here:
+  # Three other server-request methods are defined here:
   #
   # 3. @removeUserFromCorpus
   # 4. @grantRoleToUser
+  # 5. @updateCorpus
 
   class CorpusModel extends BaseModel
 
@@ -138,6 +139,87 @@ define [
           @trigger 'removeUserFromCorpusEnd'
           console.log 'Failed request to /updateroles: timed out.'
       )
+
+    # Update the details of a corpus
+    # PUT `<CorpusServiceURL>/<pouchname>/<corpusUUID>
+    # QUESTIONS:
+    # 1. do I need to manually change `titleAsURL`? What about the other fields?
+
+    # TODO:
+    # set title to new title
+    # set description to new description
+    # update dateModified timestamp: new Date().getTime()
+    # allow user to modify gravatar
+    # show gravatar in corpus list
+    #
+    updateCorpus: (title, description) ->
+      console.log 'in updateCorpus of corpus model'
+      for attr in _.keys(@attributes).sort()
+        if attr not in ['applicationSettings', 'isActive']
+          console.log '\n'
+          console.log attr
+          console.log JSON.stringify(@attributes[attr])
+          console.log '\n'
+
+    updateCorpus_: (title, description) ->
+      @trigger 'updateCorpusStart'
+      payload = @getDefaultPayload()
+      payload.userRoleInfo =
+        pouchname: payload.pouchname
+        removeUser: true
+        usernameToModify: username
+      CorpusModel.cors.request(
+        method: 'PUT'
+        timeout: 10000
+        url: "#{payload.authUrl}/updateroles"
+        payload: payload
+        onload: (responseJSON) =>
+          @trigger 'updateCorpusEnd'
+          if responseJSON.corpusadded
+            @trigger 'updateCorpusSuccess', username
+          else
+            console.log 'Failed request to /updateroles: no `corpusadded` attribute.'
+        onerror: (responseJSON) =>
+          @trigger 'updateCorpusEnd'
+          console.log 'Failed request to /updateroles: error.'
+        ontimeout: =>
+          @trigger 'updateCorpusEnd'
+          console.log 'Failed request to /updateroles: timed out.'
+      )
+
+    ###
+    # This is the object that is sent to PUT `<CorpusServiceURL>/<pouchname>/<corpusUUID>
+    # on an update request. It is 
+    _id: "63ff8fd7b5be6becbd9e5413b3060dd5"
+    _rev: "12-d1e6a51f42377dc3803207bbf6a13baa"
+    api: "private_corpuses"
+    authUrl: "https://auth.lingsync.org"
+    collection: "private_corpuses"
+    comments: []
+    confidential: {fieldDBtype: "Confidential", secretkey: "e14714cb-ddfb-5e4e-bad9-2a75d573dbe0",…}
+    conversationFields: [,…]
+    copyright: "Default: Add names of the copyright holders of the corpus."
+    *** dateModified: 1421953770590 # timestamp of last modification (I think)
+    datumFields: [{fieldDBtype: "DatumField", labelFieldLinguists: "Judgement", mask: "grammatical",…},…]
+    datumStates: [{color: "success", showInSearchResults: "checked", selected: "selected", state: "Checked"},…]
+    dbname: "jrwdunham-firstcorpus"
+    description: "Best corpus ever"
+    fieldDBtype: "Corpus"
+    *** gravatar: "33b8cbbfd6c49148ad31ed95e67b4390"
+    license: {title: "Default: Creative Commons Attribution-ShareAlike (CC BY-SA).",…}
+    modifiedByUser: {value: "jrwdunham, jrwdunham, jrwdunham, jrwdunham, jrwdunham",…}
+    participantFields: [,…]
+    pouchname: "jrwdunham-firstcorpus"
+    publicCorpus: "Private"
+    searchKeywords: "Froggo"
+    sessionFields: [{fieldDBtype: "DatumField", labelFieldLinguists: "Goal", value: "", mask: "", encryptedValue: "",…},…]
+    termsOfUse: {,…}
+    *** timestamp: 1399303339523 # timestamp of corpus creation (I think)
+    title: "Big Bear Corpus"
+    titleAsUrl: "big_bear_corpus"
+    url: "https://corpus.lingsync.org/jrwdunham-firstcorpus"
+    version: "v2.38.16"
+    ###
 
     ############################################################################
     # utility methods

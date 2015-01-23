@@ -4,8 +4,11 @@
 </div>
 
 <div id='dative-page-body'>
+
   <form action="form/add_ajax" method="post" class="formAdd">
+
     <ul class="fieldset">
+
       <li>
         <label for="transcription">Transcription</label>
         <select name="grammaticality" id="grammaticality" class="grammaticality">
@@ -14,16 +17,19 @@
         form-add-input" id="transcription"
         maxlength="255"><%= @transcription %></textarea>
       </li>
+
       <li>
         <label for="morpheme_break">Morpheme Break</label>
         <textarea name="morpheme_break" id="morpheme_break" class="ui-corner-all"
         maxlength="255"><%= @morpheme_break %></textarea>
       </li>
+
       <li>
         <label for="morpheme_gloss">Morpheme Gloss</label>
         <textarea name="morpheme_gloss" id="morpheme_gloss" class="ui-corner-all"
         maxlength="255"><%= @morpheme_gloss %></textarea>
       </li>
+
       <li>
         <label for="translations-0.transcription">Translation</label>
         <select name="translations-0.grammaticality"
@@ -40,6 +46,7 @@
         <button class="insertTranslationFieldButton"
           title="Add another translation.">Add Translation</button>
       </li>
+
     </ul>
 
     <ul class="fieldset">
