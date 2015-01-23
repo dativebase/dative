@@ -97,13 +97,14 @@ define [
     # conventions or arrow keys might be better. Alternatively (or in
     # addition), we could have these be user-customizable. 
     keyboardShortcuts: (event) ->
-      switch event.which
-        when 70 then @$('.first-page').click() # f
-        when 80 then @$('.previous-page').click() # p
-        when 78 then @$('.next-page').click() # n
-        when 76 then @$('.last-page').click() # l
-        when 40 then @$('.expand-all').click() # down arrow
-        when 38 then @$('.collapse-all').click() # up arrow
+      if not event.ctrlKey
+        switch event.which
+          when 70 then @$('.first-page').click() # f
+          when 80 then @$('.previous-page').click() # p
+          when 78 then @$('.next-page').click() # n
+          when 76 then @$('.last-page').click() # l
+          when 40 then @$('.expand-all').click() # down arrow
+          when 38 then @$('.collapse-all').click() # up arrow
 
     render: (taskId) ->
       context =
