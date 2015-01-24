@@ -23,9 +23,9 @@ define [
     initialize: (options) ->
       @focusedElementIndex = null
       @applicationSettings = options.applicationSettings
+      @activeFieldDBCorpus = options.activeFieldDBCorpus
       @collection = new CorporaCollection()
       @collection.applicationSettings = @applicationSettings
-      @applicationSettings.set 'fieldDBCorporaCollection', @collection
       @addCorpusModelsToCollection()
       @corpusViews = []
       @createCorpusView = new CreateCorpusView()
@@ -54,6 +54,7 @@ define [
         newCorpusView = new CorpusView
           model: corpus
           applicationSettings: @applicationSettings.toJSON()
+          activeFieldDBCorpus: @activeFieldDBCorpus
         corpus.fetch()
         @corpusViews.push newCorpusView
 
@@ -73,6 +74,7 @@ define [
       newCorpusView = new CorpusView
         model: newCorpusModel
         applicationSettings: @applicationSettings.toJSON()
+        activeFieldDBCorpus: @activeFieldDBCorpus
       @corpusViews.unshift newCorpusView
 
     prependNewCorpusViewToDOM: ->

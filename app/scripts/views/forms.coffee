@@ -28,9 +28,11 @@ define [
       @paginator = new Paginator()
       @paginationMenuTopView = new PaginationMenuTopView paginator: @paginator
       @applicationSettings = options.applicationSettings
+      @activeFieldDBCorpus = options.activeFieldDBCorpus
       @getActiveServerType()
       @collection = new FormsCollection()
       @collection.applicationSettings = @applicationSettings
+      @collection.activeFieldDBCorpus = @activeFieldDBCorpus
       @listenToEvents()
 
     events:
@@ -208,7 +210,6 @@ define [
     getActiveServerType: ->
       if @applicationSettings.get('activeServer').get('type') is 'FieldDB'
         @activeServerType = 'FieldDB'
-        @activeFieldDBCorpus = @applicationSettings.get 'activeFieldDBCorpus'
       else
         @activeServerType = 'OLD'
 

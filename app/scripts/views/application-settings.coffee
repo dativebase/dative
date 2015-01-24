@@ -43,7 +43,6 @@ define [
     listenToEvents: ->
       @stopListening()
       @undelegateEvents()
-      @delegateEvents()
       @listenTo Backbone, 'activateServer', @activateServer
       @listenTo Backbone, 'removeServerView', @setModelFromGUI
       @delegateEvents()

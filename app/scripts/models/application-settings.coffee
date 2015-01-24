@@ -426,6 +426,8 @@ define [
       activeServer: server1.id
       loggedIn: false
       loggedInUser: null
+      loggedInUserRoles: []
+      baseDBURL: null
       username: ''
       password: '' # WARN: I don't like storing the password in localStorage, but FieldDB needs to send it on subsequent requests, so I'm persisting it for now ...
       servers: [server1, server2, server3, server4]

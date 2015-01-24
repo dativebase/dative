@@ -20,9 +20,12 @@ define [
 
     initialize: ->
       @listenTo @model, 'change:loggedIn', @loggedInChanged
-      @listenTo @model, 'change:activeFieldDBCorpus', @refreshLoggedInUser
       @listenTo Backbone, 'bodyClicked', @closeSuperclick
       @listenTo Backbone, 'application-settings:jQueryUIThemeChanged', @jQueryUIThemeChanged
+
+    activeFieldDBCorpusChanged: (activeFieldDBCorpusTitle) ->
+      @activeFieldDBCorpusTitle = activeFieldDBCorpusTitle
+      @refreshLoggedInUser()
 
     events:
       'click a.dative-authenticated': 'toggleLoginDialog'
@@ -218,9 +221,9 @@ define [
         activeFieldDBCorpus = @model.get 'activeFieldDBCorpus'
         title = ["You are logged in to the server “#{activeServerName}”",
           "as “#{username}”"].join ' '
-        if activeServerType is 'FieldDB' and activeFieldDBCorpus
+        if activeServerType is 'FieldDB' and @activeFieldDBCorpusTitle
           title = ["#{title} and are using the corpus",
-            "“#{activeFieldDBCorpus.get 'title'}”"].join ' '
+            "“#{@activeFieldDBCorpusTitle}”"].join ' '
         @$('.logged-in-username')
           .text username
           .attr 'title', title

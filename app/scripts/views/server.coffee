@@ -24,6 +24,8 @@ define [
       'selectmenuchange': 'toggleServerCodeSelect'
 
     listenToEvents: ->
+      @stopListening()
+      @undelegateEvents()
       @listenTo @applicationSettingsModel, 'change:activeServer',
         @activeServerChanged
       @listenTo @applicationSettingsModel, 'change:loggedIn',
@@ -55,7 +57,6 @@ define [
 
     setModelFromGUI: ->
       @$('input, select').each (index, element) =>
-        # console.log "setting #{$(element).attr('name')} to #{$(element).val()}"
         @model.set $(element).attr('name'), $(element).val()
 
     render: ->

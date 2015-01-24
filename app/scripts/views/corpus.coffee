@@ -35,6 +35,7 @@ define [
       @bodyVisible = false
       @shouldFocusToggleButtonUponOpen = true
       @applicationSettings = options?.applicationSettings or {}
+      @activeFieldDBCorpus = options?.activeFieldDBCorpus
       @admins = []
       @writers = []
       @readers = []
@@ -201,8 +202,7 @@ define [
         @$('.dative-widget-body').removeClass 'ui-state-highlight ui-corner-bottom'
 
     isActive: ->
-      activeFieldDBCorpusPouchname = @model
-        .get('applicationSettings').get('activeFieldDBCorpus')?.get 'pouchname'
+      activeFieldDBCorpusPouchname = @activeFieldDBCorpus?.get 'pouchname'
       pouchname = @model.get 'pouchname'
       if activeFieldDBCorpusPouchname is pouchname then true else false
 

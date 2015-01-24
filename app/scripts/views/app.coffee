@@ -116,18 +116,14 @@ define [
       Backbone.trigger 'bodyClicked' # Mainmenu superclick listens for this
 
     useFieldDBCorpus: (corpusId) ->
-      # TODO @jrwdunham: backbone-relational-ify this!:
-      currentlyActiveFieldDBCorpus = @applicationSettings
-        .get 'activeFieldDBCorpus'
-      fieldDBCorporaCollection = @applicationSettings.get(
-        'fieldDBCorporaCollection')
-      newActiveFieldDBCorpus = fieldDBCorporaCollection.findWhere
+      currentlyActiveFieldDBCorpus = @activeFieldDBCorpus
+      fieldDBCorporaCollection = @corporaView?.collection
+      @activeFieldDBCorpus = fieldDBCorporaCollection?.findWhere
         pouchname: corpusId
-      @applicationSettings.set 'activeFieldDBCorpus', newActiveFieldDBCorpus
-
-      if currentlyActiveFieldDBCorpus is newActiveFieldDBCorpus
+      if currentlyActiveFieldDBCorpus is @activeFieldDBCorpus
         @showFormsView fieldDBCorpusHasChanged: false
       else
+        @mainMenuView.activeFieldDBCorpusChanged @activeFieldDBCorpus.get('title')
         @showFormsView fieldDBCorpusHasChanged: true
 
     logoutSuccess: ->
@@ -221,9 +217,13 @@ define [
         if @activeServerType() is 'FieldDB' and options?.fieldDBCorpusHasChanged
           @formsView.close()
           @closed @formsView
-          @formsView = new FormsView applicationSettings: @applicationSettings
+          @formsView = new FormsView
+            applicationSettings: @applicationSettings
+            activeFieldDBCorpus: @activeFieldDBCorpus
       else
-        @formsView = new FormsView applicationSettings: @applicationSettings
+        @formsView = new FormsView
+          applicationSettings: @applicationSettings
+          activeFieldDBCorpus: @activeFieldDBCorpus
       @visibleView = @formsView
       @renderVisibleView taskId
 
@@ -265,7 +265,9 @@ define [
       Backbone.trigger 'longTask:register', 'Opening corpora view', taskId
       @closeVisibleView()
       if not @corporaView
-        @corporaView = new CorporaView applicationSettings: @applicationSettings
+        @corporaView = new CorporaView
+          applicationSettings: @applicationSettings
+          activeFieldDBCorpus: @activeFieldDBCorpus
       @visibleView = @corporaView
       @renderVisibleView taskId
 

@@ -69,7 +69,7 @@ define [
 
     getFetchAllFieldDBFormsURL: ->
       url = @applicationSettings.get 'baseDBURL'
-      pouchname = @applicationSettings.get('activeFieldDBCorpus').get('pouchname')
+      pouchname = @activeFieldDBCorpus.get 'pouchname'
       "#{url}/#{pouchname}/_design/pages/_view/datums_chronological"
 
     getOLDURL: -> @applicationSettings.get('activeServer').get 'url'
