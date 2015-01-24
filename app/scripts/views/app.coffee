@@ -38,17 +38,27 @@ define [
     el: '#dative-client-app'
 
     initialize: (options) ->
-
       @router = new Workspace()
       @getApplicationSettings options
+      @overrideFieldDBNotificationHooks()
+      @initializePersistentSubviews()
+      @listenToEvents()
+      @render()
+      @setTheme()
+      Backbone.history.start()
+      @showHomePageView()
 
-      @mainMenuView = new MainMenuView model: @applicationSettings
-      @loginDialog = new LoginDialogView model: @applicationSettings
-      @registerDialog = new RegisterDialogView model: @applicationSettings
-      @alertDialog = new AlertDialogView model: @applicationSettings
-      @progressWidget = new ProgressWidgetView()
-      @notifier = new NotifierView(@applicationSettings)
+    events:
+      'click': 'bodyClicked'
 
+    render: ->
+      @$el.html @template()
+      @renderPersistentSubviews()
+      # @configureFieldDB() # FieldDB stuff commented out until it can be better incorporated
+
+      @matchWindowDimensions()
+
+    listenToEvents: ->
       @listenTo @mainMenuView, 'request:home', @showHomePageView
       @listenTo @mainMenuView, 'request:applicationSettings', @showApplicationSettingsView
       @listenTo @mainMenuView, 'request:openLoginDialogBox', @toggleLoginDialog
@@ -76,20 +86,15 @@ define [
       @listenTo Backbone, 'useFieldDBCorpus', @useFieldDBCorpus
       @listenTo Backbone, 'applicationSettings:changeTheme', @changeTheme
 
-      @render()
+    initializePersistentSubviews: ->
+      @mainMenuView = new MainMenuView model: @applicationSettings
+      @loginDialog = new LoginDialogView model: @applicationSettings
+      @registerDialog = new RegisterDialogView model: @applicationSettings
+      @alertDialog = new AlertDialogView model: @applicationSettings
+      @progressWidget = new ProgressWidgetView()
+      @notifier = new NotifierView(@applicationSettings)
 
-      if @applicationSettings.get('activeJQueryUITheme') isnt 'cupertino'
-        @changeTheme()
-
-      Backbone.history.start()
-      @showHomePageView()
-
-    events:
-      'click': 'bodyClicked'
-
-    render: ->
-      @$el.html @template()
-
+    renderPersistentSubviews: ->
       @mainMenuView.setElement(@$('#mainmenu')).render()
       @loginDialog.setElement(@$('#login-dialog-container')).render()
       @registerDialog.setElement(@$('#register-dialog-container')).render()
@@ -103,14 +108,6 @@ define [
       @rendered @alertDialog
       @rendered @progressWidget
       @rendered @notifier # Notifier self-renders but we register it as rendered anyways so that we can clean up after it if `.close` is ever called
-
-      # FieldDB stuff commented out until it can be better incorporated
-      # FieldDB.FieldDBObject.application = @applicationSettings
-      # FieldDB.FieldDBObject.application.currentFieldDB = new FieldDB.Corpus()
-      # FieldDB.FieldDBObject.application.currentFieldDB.loadOrCreateCorpusByPouchName("jrwdunham-firstcorpus")
-      # FieldDB.FieldDBObject.application.currentFieldDB.url = FieldDB.FieldDBObject.application.currentFieldDB.BASE_DB_URL
-
-      @matchWindowDimensions()
 
     bodyClicked: ->
       Backbone.trigger 'bodyClicked' # Mainmenu superclick listens for this
@@ -292,10 +289,17 @@ define [
     # Change the jQuery UI CSS Theme
     ############################################################################
 
+    # Change the theme if we're using the non-default one on startup.
+    setTheme: ->
+      activeTheme = @applicationSettings.get 'activeJQueryUITheme'
+      defaultTheme = @applicationSettings.get 'defaultJQueryUITheme'
+      if activeTheme isnt defaultTheme
+        @changeTheme()
+
     changeTheme: (event) ->
 
       # This is harder than it might at first seem.
-      # Method:
+      # Algorithm:
       # 1. get new CSS URL from selectmenu
       # 2. remove the current jQueryUI CSS <link>
       # 3. add a new jQueryUI CSS <link> with the new URL in its `href`
@@ -323,13 +327,9 @@ define [
       @listenForLinkOnload outerCallback
 
       # Remaining TODOs:
-      # 1. persist theme settings to localhost
-      # 2. create a default in application settings model
-      # 3. disable this feature when there is no Internet connection
-      # 4. focus highlight doesn't match on login dialog (probably because it
+      # 1. disable this feature when there is no Internet connection
+      # 2. focus highlight doesn't match on login dialog (probably because it
       #    should be re-rendered after theme change)
-      # 5. Gap between rounded borders and container fill. See
-      #    http://w3facility.org/question/jquery-ui-how-to-remove-gap-at-each-rounded-corner-of-accordions/
 
     # Four strategies for detecting that a new CSS <link> has loaded.
     ############################################################################
@@ -365,4 +365,84 @@ define [
           callback()
           clearInterval ti
       ti = setInterval func, 10
+
+    configureFieldDB: ->
+      # FieldDB stuff commented out until it can be better incorporated
+      # FieldDB.FieldDBObject.application = @applicationSettings
+      # FieldDB.FieldDBObject.application.currentFieldDB = new FieldDB.Corpus()
+      # FieldDB.FieldDBObject.application.currentFieldDB.loadOrCreateCorpusByPouchName("jrwdunham-firstcorpus")
+      # FieldDB.FieldDBObject.application.currentFieldDB.url = FieldDB.FieldDBObject.application.currentFieldDB.BASE_DB_URL
+
+    ############################################################################
+    # FieldDB .bug, .warn and .confirm hooks
+    ############################################################################
+
+    # Overriding FieldDB's logging hooks to do nothing
+    # FieldDB.FieldDBObject.verbose = () -> {}
+    # FieldDB.FieldDBObject.debug = () -> {}
+    # FieldDB.FieldDBObject.todo = () -> {}
+
+    overrideFieldDBNotificationHooks: ->
+      FieldDB.FieldDBObject.bug = @displayBugReportDialog
+      FieldDB.FieldDBObject.warn = @displayWarningMessagesDialog
+      FieldDB.FieldDBObject.confirm = @displayConfirmDialog
+
+    displayBugReportDialog: (message) ->
+      # TODO @jrwdunham: display a Dative-styled dialog explaining the bug and
+      # also displaying a bug report form.
+      console.log ["TODO show some visual contact us or open a bug report in",
+        "a seperate window using probably http://jqueryui.com/dialog/#default",
+        message].join ' '
+      run = ->
+        window.open(
+          "https://docs.google.com/forms/d/18KcT_SO8YxG8QNlHValEztGmFpEc4-ZrjWO76lm0mUQ/viewform")
+      setTimeout run, 1000
+
+    displayWarningMessagesDialog: (message, message2, message3, message4) ->
+      # TODO @jrwdunham: display a Dative-styled dialog with "warning-style
+      # visuals" showing the warning messages. This does look like a good
+      # possibility: http://www.erichynds.com/examples/jquery-notify/index.htm
+      console.log ["TODO show some visual thing here using the app view using",
+        "something like http://www.erichynds.com/examples/jquery-notify/",
+        message].join ' '
+
+    displayConfirmDialog: (message, optionalLocale) ->
+      # TODO @jrwdunham: use the already-in-place @alertDialog for this
+      # TODO @jrwdunham @cesine: figure out how i18n/localization works in
+      # FieldDB and begin implementing something similar in Dative.
+      console.log ["TODO show some visual thing here using the app view using",
+        "something like http://jqueryui.com/dialog/#modal-confirmation" ,
+        message].join ' '
+
+      # NOTE @jrwdunham: this is cesine's first stab at a jQuery-style dialog
+      # for this:
+
+      # deferred = FieldDB.Q.defer(),
+      # self = this;
+
+      # $(function() {
+      #   $( "#dialog-confirm" ).dialog({
+      #     resizable: false,
+      #     height:140,
+      #     modal: true,
+      #     buttons: {
+      #       message: function() {
+      #         $( this ).dialog( "close" );
+      #         deferred.resolve({
+      #           message: message,
+      #           optionalLocale: optionalLocale,
+      #           response: true
+      #           });
+      #         },
+      #         Cancel: function() {
+      #           $( this ).dialog( "close" );
+      #           deferred.reject({
+      #             message: message,
+      #             optionalLocale: optionalLocale,
+      #             response: false
+      #             });
+      #         }
+      #       }
+      #       });
+      #   });
 

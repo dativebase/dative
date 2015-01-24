@@ -445,6 +445,7 @@ define [
       itemsPerPage: 10
 
       activeJQueryUITheme: 'cupertino'
+      defaultJQueryUITheme: 'cupertino'
       jQueryUIThemes: [
         ['ui-lightness', 'UI lightness']
         ['ui-darkness', 'UI darkness']
