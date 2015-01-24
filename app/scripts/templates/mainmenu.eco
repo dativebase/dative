@@ -99,13 +99,15 @@
         </ul>
     </li>
 
+    -->
+
     <li><a>Help</a>
         <ul class='ui-corner-bottom'>
             <li><a >Help Page</a></li>
             <li><a >Dative Documentation</a></li>
+            <li><a >Version <%= @version %></a></li>
         </ul>
     </li>
-    -->
 
     <li><a>Account</a>
         <ul class='ui-corner-bottom'>

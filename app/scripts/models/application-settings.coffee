@@ -31,6 +31,20 @@ define [
       if not Modernizr.localstorage
         throw new Error 'localStorage unavailable in this browser, please upgrade.'
 
+      @setVersion()
+
+    # set app version from package.json
+    setVersion: ->
+      if @get('version') is 'da'
+        $.ajax
+          url: 'package.json',
+          type: 'GET'
+          dataType: 'json'
+          error: (jqXHR, textStatus, errorThrown) =>
+            console.log "Ajax request for package.json threw an error: #{errorThrown}"
+          success: (packageDetails, textStatus, jqXHR) =>
+            @set 'version', packageDetails.version
+
     activeServerChanged: ->
       #console.log 'active server has changed says the app settings model'
 
@@ -323,14 +337,8 @@ define [
     registerFieldDB: (params) ->
       taskId = @guid()
       Backbone.trigger 'longTask:register', 'registering a new user', taskId
-
       params.authUrl = @getURL()
-      # TODO @cesine: `appVersionWhenCreated`: should it be Dative current
-      # version?
-      # TODO deploy shell script should search-and-replace "dative-app-verson"
-      # with the value from `bower.json`.
-      params.appVersionWhenCreated = 'dative-app-version'
-
+      params.appVersionWhenCreated = "v#{@get('version')}da"
       BaseRelationalModel.cors.request(
         url: "#{@getURL()}/register"
         payload: params
@@ -383,7 +391,6 @@ define [
       #  key: 'fieldDBCorpora'
       #  relatedModel: CorpusModel
     ]
-
 
     # Defaults
     #=========================================================================
@@ -472,6 +479,9 @@ define [
         ['trontastic', 'Trontastic']
         ['swanky-purse', 'Swanky Purse']
       ]
+
+      version: 'da'
+
 
   # Backbone-relational requires this when using CoffeeScript
   ApplicationSettingsModel.setup()

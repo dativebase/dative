@@ -72,7 +72,7 @@ define [
     render: ->
       @$el
         .css(@constructor.jQueryUIColors().def) # match jQueryUI colors
-        .html @template()
+        .html @template(@model.attributes)
       @setActivityAndVisibility()
 
       # NOTE @jrwdunham @cesine: I moved to superclick because touchscreen devices

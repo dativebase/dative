@@ -342,6 +342,9 @@ module.exports = (grunt) ->
           dest: '.tmp/scripts'
           src: '**/*.coffee'
         ]
+      packagejson:
+        src: 'package.json'
+        dest: '.tmp/'
       dist:
         files: [
           expand: true
@@ -351,6 +354,7 @@ module.exports = (grunt) ->
           src: [
             '*.{ico,txt}'
             '.htaccess'
+            './../package.json'
             'images/{,*/}*.{webp,gif}'
             'styles/fonts/{,*/}*.*'
             'bower_components/sass-bootstrap/fonts/*.*'
@@ -481,6 +485,7 @@ module.exports = (grunt) ->
       return grunt.task.run [
         'clean:server'
         'copy:coffee'
+        'copy:packagejson'
         'coffee:serve'
         'coffee:test'
         #'createDefaultTemplate'
@@ -495,6 +500,7 @@ module.exports = (grunt) ->
     grunt.task.run [
       'clean:server'
       'copy:coffee'
+      'copy:packagejson'
       'coffee:serve'
       #'createDefaultTemplate'
       #'jst'
@@ -529,6 +535,7 @@ module.exports = (grunt) ->
   grunt.registerTask 'build', [
     'clean:dist' # remove everything in dist/ and .tmp/
     'copy:coffee' # copy all .coffee files in app/scripts/ to .tmp/scripts/
+    'copy:packagejson'
     'coffee:dist' # convert all .coffee files in .tmp/scripts to .js in situ
 
     # eco: convert all .eco files in app/scripts/templates/ to .js files in
