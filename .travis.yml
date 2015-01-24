@@ -9,9 +9,9 @@ node_js:
 #   - sh -e /etc/init.d/xvfb start
 
 # whitelist
-#branches:
+# branches:
 #  only:
-#    - tests
+#    - master
 
 notifications:
   email:
@@ -20,29 +20,27 @@ notifications:
     on_success: change
     on_failure: always
 
-env:
-  matrix:
-    # see set_up_new_machine.sh
-
 before_install:
   # Download and configure deps
-  - echo Y | sudo apt-get install ncftpput
+  - export TZ=Canada/Eastern # http://stackoverflow.com/questions/23371542/how-do-i-configure-travis-ci-to-use-the-correct-time-zone-for-a-rails-app
+  - sudo apt-get install ncftp
   - npm install -g grunt-cli
   - npm install -g bower
   - npm install -g jasmine-node
   - npm install
   - bower install
-before_script:
-  # Make sure the emulator has started before running tests
 
 script: grunt deploy
 
 env:
   global:
-    - secure: "idG10uJCHMoQLlySdGjCq+F/UUvCPs6f/gqR8srtIAb7oxdZ25P/jU7yESi+rDwZh9GcB7hNwM2MlonoGZKXlkTGxnSt8e9OMQ2PJuchUspZp5Dt62Ubc+CXo/cwiV4kUP9AqPWqQX45sZu5AxbiP2awdKPSmY+cC8409ml/ozI="
-    - secure: "ULfKxRZxlujo9Dvsj7RLkMrymO2Cw7bm5FpWBqcDGewYOkSyiitqxSc3kolU8kAzgOhjJaplPmGLCi79WRc1aDDLUGyWCMaSzGQYenlj7pYJTsCh7Ql3ByjpZ3R7UYS3whs954+1VhNd40UObnQ3V/dB1SbgCjUVspll4VLUfJU="
-    - secure: "PQZA5cLfK1kVAC/rg6AKysw6PqtDImQ28xWdKMU1ZAQAI2jy9LtUUCwU+fvAIT4VK0ceI1TQLX9ERRndSfsHe4iA4TUfKRo1Gt1YehHs89c5dWrogFNL1IMqMdNbjaHenddzBxgY3mhT+CjlhaSzSA79hcPEivtlt/n+/SMOgfU="
+   - secure: MFLi2VIIEDtmYXUwHYTdMelUVTiILNi2d66dqp7amyLIjSfsgypnmmtbH6NBnNEmZ9srpgrvJVym9tR+0JDvtmC1F/qhZyrLTF2K8schfe3M6+dHlMJDpiFgt4vmWkxnYTinRUXh5nb/Tvhtx8RydDW4JDeTZNyurfE6e7FqZ70=
+   - secure: FQG2Ix+HjfFe2s7KT8RDkb8vhXugWSVOBw/fcbkfSLRLMd9+13mQ/mQooo0HC+L9u9ZtfqVeqkEn0dJExej7heSkWFkUg2vKfyR3Mceyou5JdzXWUX3BUrbLAfAvkN4S6IGtO8Nxnbu88ghqw20uUHGeiKUDfjc9tuSPFxtqQBQ=
+   - secure: hE2iibDhUs1CwWVPkfvNz1l9chaZLF4dRJy4xJ+wejdvVCTgWgg2qTSllwYjRXZ8zwSEi9v5MVHng9z2+AGikuMl8i7yYzxFrBbzM5qIRqRonXlfNrJXx9ruMGKKBhffNtIwZAp1b7IxQaapQ3BXsoXbOp/z8wp3u0aX7DJa1Ck=
 
 after_success:
-    - echo $TRAVIS_BRANCH
-    - "ncftpput -R -v -u $USERNAME -p $PASSWORD $SERVER_PATH dist /beta" || echo " ncftpput failed" &&  exit 4
+  # on:
+  #   branch: master
+  #   condition: $TRAVIS_REPO_SLUG = OpenSourceFieldlinguistics/dative
+    - touch "dist/deployed at `date`"
+    - '[ "${TRAVIS_PULL_REQUEST}" = "false" ] && [ "${TRAVIS_REPO_SLUG}" = "OpenSourceFieldlinguistics/dative" ]  && ncftpput -R -v -u $USERNAME -p $PASSWORD $SERVER /beta dist/*'
