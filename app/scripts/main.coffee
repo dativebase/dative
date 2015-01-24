@@ -68,10 +68,52 @@ require [
     # workspace = new Workspace()
     window.debugMode = false
 
-    # Overriding FieldDB's `bug` which creates a JS `alert()`.
-    # TODO @cesine: is there a better way to override this FieldDB behaviour?
+    # Overriding FieldDB's logging hooks to do nothing
+    # FieldDB.FieldDBObject.verbose = () -> {}
+    # FieldDB.FieldDBObject.debug = () -> {}
+    # FieldDB.FieldDBObject.todo = () -> {}
+
+    # Overriding FieldDB's notification hooks
     FieldDB.FieldDBObject.bug = (message) ->
-      console.log message
+      console.log "TODO show some visual contact us or open a bug report in a seperate window using probably http://jqueryui.com/dialog/#default " , message
+      # $("#dialog").dialog(message);
+      run = () ->
+        window.open("https://docs.google.com/forms/d/18KcT_SO8YxG8QNlHValEztGmFpEc4-ZrjWO76lm0mUQ/viewform")
+      setTimeout(run, 1000)
+
+    FieldDB.FieldDBObject.warn = (message, message2, message3, message4) ->
+      console.log "TODO show some visual thing here using the app view using something like http://www.erichynds.com/examples/jquery-notify/" , message
+
+    FieldDB.FieldDBObject.confirm = (message, optionalLocale) ->
+      console.log "TODO show some visual thing here using the app view using something like http://jqueryui.com/dialog/#modal-confirmation" , message
+      # deferred = FieldDB.Q.defer(),
+      # self = this;
+
+      # $(function() {
+      #   $( "#dialog-confirm" ).dialog({
+      #     resizable: false,
+      #     height:140,
+      #     modal: true,
+      #     buttons: {
+      #       message: function() {
+      #         $( this ).dialog( "close" );
+      #         deferred.resolve({
+      #           message: message,
+      #           optionalLocale: optionalLocale,
+      #           response: true
+      #           });
+      #         },
+      #         Cancel: function() {
+      #           $( this ).dialog( "close" );
+      #           deferred.reject({
+      #             message: message,
+      #             optionalLocale: optionalLocale,
+      #             response: false
+      #             });
+      #         }
+      #       }
+      #       });
+      #   });
 
     $ ->
       # Backbone.history.start()
