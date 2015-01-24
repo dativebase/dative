@@ -21,6 +21,9 @@ define [
     initialize: (options) ->
       @width = options.width or 540
       @label = options.label or 'Active Server'
+      @tooltipPosition = options.tooltipPosition or {
+        my: "left top+15", at: "left bottom", collision: "flipfit"}
+      @tooltipContent = options.tooltipContent or 'select the active server'
 
     events:
       'selectmenuchange': 'setModelFromGUI'
@@ -29,16 +32,36 @@ define [
       @listenTo @model.get('servers'), 'add', @newServerAdded
       @listenTo @model.get('servers'), 'remove', @serverRemoved
       @listenTo @model.get('servers'), 'change', @serverChanged
+      @listenTo @model, 'change:loggedIn', @loggedInChanged
       @listenTo @model, 'change:activeServer', @activeServerChanged
       @delegateEvents()
+
+    loggedInChanged: ->
+      @selectmenuify()
+
+    loggedIn: ->
+      @model.get 'loggedIn'
+
+    selectmenuify: ->
+      disabled = if @loggedIn() then true else false
+      @$('select.activeServer')
+        .selectmenu
+          width: @width
+          disabled: disabled
 
     render: ->
       context =
         label: @label
-        activeServerId: @model.get('activeServer')?.get('id')
+        activeServerId: @model.get('activeServer')?.get?('id')
         servers: @model.get('servers').toJSON()
       @$el.html @template(context)
-      @$('select.activeServer').selectmenu width: @width
+      @selectmenuify()
+      @$('.ui-selectmenu-button')
+        .addClass 'dative-tooltip dative-select-active-server'
+        .tooltip
+          items: 'span'
+          content: @tooltipContent
+          position: @tooltipPosition
       @listenToEvents()
       @
 

@@ -1,17 +1,38 @@
 <div class="server-config-widget dative-widget-center ui-widget
   ui-widget-content ui-corner-all">
 
+
+    <% if @isActive: %>
+      <% activeIndicatorValue = '(active)' %>
+    <% else: %>
+      <% activeIndicatorValue = '' %>
+    <% end %>
+
   <div class="dative-widget-header ui-widget-header ui-corner-top">
 
-    <div class='dative-widget-header-title'><%= @headerTitle %></div>
+    <div class='dative-widget-header-title'
+      ><span class='italic header-title-name'><%= @name %></span
+      > server <span class='active-indicator'><%= activeIndicatorValue %></span
+      ></div>
 
-    <button class="float-left delete-server"
-      title="delete server configuration"></button>
+    <div class='button-container-left'>
+
+      <button class="delete-server dative-tooltip"
+        title="delete this server">
+        <i class='fa fa-trash fa-fw'></i>
+      </button>
+
+      <button class="activate-server dative-tooltip"
+        title="make this server the active one">
+        <i class='fa fa-toggle-off fa-fw'></i>
+      </button>
+
+    </div>
 
   </div>
 
   <% if @isActive: %>
-    <div class="dative-widget-body ui-state-highlight">
+    <div class="dative-widget-body ui-state-highlight ui-corner-bottom">
   <% else: %>
     <div class="dative-widget-body">
   <% end %>
@@ -20,14 +41,16 @@
 
       <li>
         <label for="name">Name</label>
-        <input type="text" name="name" class="dative-input
-          dative-input-display" value="<%= @name %>" />
-      </li>
+        <input type="text" name="name" class="dative-input dative-tooltip ui-corner-all
+          dative-input-display" title="enter a name for the server"
+          value="<%= @name %>" /> </li>
 
       <li>
         <label for="url">URL</label>
-        <input type="text" name="url" class="dative-input
-          dative-input-display" value="<%= @url %>" />
+        <input type="text" name="url" class="dative-input dative-tooltip ui-corner-all
+          dative-input-display" title="enter a URL for the server
+          (including protocol and port, if needed)"
+          value="<%= @url %>" />
       </li>
 
       <li>

@@ -16,131 +16,85 @@ define [
     template: applicationSettingsTemplate
 
     events:
-      'click button.save': 'clickSave'
-      'keydown .dative-input-display': '_keyboardControl'
-      'keydown button': '_keyboardControl'
       'keyup input': 'setModelFromGUI'
-      'selectmenuchange': 'setModelFromGUI'
+      'selectmenuchange select[name=activeServer]': 'setModelFromGUI'
       'click': 'setModelFromGUI'
-
       'focus input': 'scrollToFocusedInput'
       'focus button': 'scrollToFocusedInput'
+      'selectmenuchange select[name=css-theme]': 'changeTheme'
+      'focus button, input, .ui-selectmenu-button': 'rememberFocusedElement'
       # BUG: if you scroll to a selectmenu you've just clicked on, the select
       # dropdown will be left hanging in the place where you originally
       # clicked it. So I've disabled "scroll-to-focus" for selectmenus for now.
       #'focus .ui-selectmenu-button': 'scrollToFocusedInput'
 
     initialize: ->
+      @focusedElementIndex = null
       @serversView = new ServersView
         collection: @model.get('servers')
         serverTypes: @model.get('serverTypes')
-      @activeServerView = new ActiveServerView model: @model
+      @activeServerView = new ActiveServerView
+        model: @model
+        tooltipPosition:
+          my: "right-100 center"
+          at: "left center"
+          collision: "flipfit"
 
     listenToEvents: ->
-      @listenTo Backbone, 'applicationSettings:edit', @edit
-      @listenTo Backbone, 'applicationSettings:view', @view
-      @listenTo Backbone, 'applicationSettings:save', @save
-      if @model.get('activeServer')
-        @listenTo @model.get('activeServer'), 'change:url', @activeServerURLChanged
+      @stopListening()
+      @undelegateEvents()
+      @listenTo Backbone, 'activateServer', @activateServer
+      @listenTo Backbone, 'removeServerView', @setModelFromGUI
       @delegateEvents()
 
-    activeServerURLChanged: ->
-      #console.log 'active server url has changed'
-      return
+    activateServer: (id) ->
+      @$('select[name=activeServer]')
+        .val(id)
+        .selectmenu('refresh')
+      @setModelFromGUI()
 
-    render: ->
-      params = _.extend {headerTitle: 'Application Settings'}, @model.attributes
-      @$el.html @template(params)
-
-      @serversView.setElement @$('li.server-config-container').first()
-      @activeServerView.setElement @$('li.active-server').first()
-
-      @serversView.render()
-      @activeServerView.render()
-
-      @rendered @serversView
-      @rendered @activeServerView
-
+    render: (taskId) ->
+      @html()
+      @renderServersView()
+      @renderActiveServerView()
       @matchHeights()
-      @pageBody = @$ '#dative-page-body'
-      @_guify()
-      @_setFocus()
+      @guify()
+      @setFocus()
       @listenToEvents()
+      Backbone.trigger 'longTask:deregister', taskId
+      @fixRoundedBorders()
       @
 
-    clickSave: (event) ->
-      event.preventDefault()
-      event.stopPropagation()
-      @save()
+    html: ->
+      params = _.extend(
+        {headerTitle: 'Application Settings'},
+        @model.attributes
+      )
+      @$el.html @template(params)
 
-    save: ->
-      @setModelFromGUI()
-      @model.save()
+    renderServersView: ->
+      @serversView.setElement @$('li.server-config-container').first()
+      @serversView.render()
+      @rendered @serversView
+
+    renderActiveServerView: ->
+      @activeServerView.setElement @$('li.active-server').first()
+      @activeServerView.render()
+      @rendered @activeServerView
+
+    loggedIn: -> @model.get 'loggedIn'
 
     setModelFromGUI: ->
-      @model.set 'activeServer', @$('select[name=activeServer]').val()
+      # We don't want to change the active server if we are logged in with it.
+      if not @loggedIn()
+        @model.set 'activeServer', @$('select[name=activeServer]').val()
       @serversView.setCollectionFromGUI()
+      @model.set 'activeJQueryUITheme', @$('select[name=css-theme]').val()
+      @model.save()
 
-    _getFormData: ->
-      #activeServer: @$('select[name=activeServer]').val()
-
-      activeServer: @model.get('servers').findWhere(
-        id: @$('select[name=activeServer]').val())
-      servers: @serversView._getFormData()
-
-    _editButtons: ->
-      @$('button.edit').button 'disable'
-      @$('button.save').button 'enable'
-      #@$('button.view').show()
-
-    _viewButtons: ->
-      @$('button.edit').button 'enable'
-      @$('button.save').button 'disable'
-      #@$('button.view').hide()
-
-    _keyboardControl: (event) ->
-      @_rememberTarget event
-      # <Esc> on input field calls `view`
-      if event.which is 27
-        try
-          classes = $(event.target).attr('class').split /\s+/
-          if 'dative-input' in classes
-            event.stopPropagation()
-            @view()
-        catch error
-      # <Enter> on input calls `save`, on data display calls `edit`
-      else if event.which is 13
-        event.preventDefault()
-        event.stopPropagation()
-        try
-          classes = $(event.target).attr('class').split /\s+/
-          if 'dative-display' in classes
-            @edit()
-          else if 'dative-input' in classes
-            @save()
-          else if 'view' in classes
-            @view()
-          else if 'edit' in classes
-            @edit()
-          else if 'save' in classes
-            @save()
-          else if 'add-server' in classes
-            @_addServer()
-
-    _populateSelectFields: ->
-      for serverType in ['FieldDB', 'OLD']
-        @$('select[name="serverType"]', @pageBody)
-          .append($('<option>').attr('value', serverType).text(serverType))
-
-    _guify: ->
+    guify: ->
 
       @$('button').button().attr('tabindex', 0)
-
-      @$('.dative-page-header-title').first()
-        .position
-          my: 'center'
-          at: 'center'
-          of: @$('.dative-page-header-title').first().parent()
 
       # Main Page GUIfication
 
@@ -148,20 +102,29 @@ define [
         false})
       @$('button.save').button({icons: {primary: 'ui-icon-disk'}, text: false})
 
-      @pageBody.perfectScrollbar()
+      @perfectScrollbar()
 
-      @_selectmenuify()
-      @_hoverStateFieldDisplay() # make data display react to focus & hover
-      @_tabindicesNaught() # active elements have tabindex=0
+      @selectmenuify()
+      @hoverStateFieldDisplay() # make data display react to focus & hover
+      @tabindicesNaught() # active elements have tabindex=0
 
       @$('div.server-config-widget-body').hide()
 
-    _selectmenuify: ->
-      @$('select', @pageBody).selectmenu()
-      @$('.ui-selectmenu-button').addClass 'dative-input dative-input-display'
+    perfectScrollbar: ->
+      @$('div#dative-page-body').first()
+        .perfectScrollbar()
+        .scroll => @closeAllTooltips()
+
+    # The special `onClose` event is called by `close` in base.coffee upon close
+    onClose: ->
+      @$('div#dative-page-body').first().unbind 'scroll'
+
+    selectmenuify: ->
+      @$('select[name=css-theme]').selectmenu
+        width: 540
 
     # Make active elements have tabindex=0
-    _hoverStateFieldDisplay: ->
+    hoverStateFieldDisplay: ->
       @$('div.dative-input-display')
         .mouseover(->
           $(@).addClass('ui-state-hover').addClass('ui-state-active'))
@@ -172,49 +135,100 @@ define [
           $(@).removeClass('ui-state-hover').removeClass('ui-state-active'))
 
     # Tabindices=0 and jQueryUI colors
-    _tabindicesNaught: ->
+    tabindicesNaught: ->
       @$('button, select, input, textarea, div.dative-input-display,
         span.ui-selectmenu-button')
-        .css("border-color", ApplicationSettingsView.jQueryUIColors.defBo)
+        .css("border-color", @constructor.jQueryUIColors().defBo)
         .attr('tabindex', 0)
 
-    _addModel: ->
-      @$('select[name="serverType"]', @pageBody)
-        .val(@model.get('serverType'))
-        .selectmenu 'refresh', true
-
-    _rememberTarget: (event) ->
-      try
-        @$('button, .ui-selectmenu-button, input').each (index, el) =>
-          if el is event.target
-            @focusedElementIndex = index
-            return false # break out of jQuery each loop
-
-    _setFocus: (viewType) ->
-      if @focusedElementIndex?
-        #@$('.dative-input-display').eq(@focusedElementIndex)
-        @$('button, .ui-selectmenu-button, input').eq(@focusedElementIndex)
-          .focus().select()
+    setFocus: ->
+      if @focusedElementIndex
+        @focusLastFocusedElement()
       else
-        @$('.ui-selectmenu-button').first().focus()
+        @focusFirstElement()
 
-    # Alter the scroll position so that the focused UI element is centered.
-    scrollToFocusedInput: (event) ->
-      # Small bug: if you tab really fast through the inputs, the scroll
-      # animations will be queued and all jumpy. Calling `.stop` as below
-      # does nof fix the issue.
-      # @$('input, button, .ui-selectmenu-button').stop('fx', true, false)
+    ############################################################################
+    # Change jQueryUI CSS Theme stuff
+    ############################################################################
 
-      $element = $ event.currentTarget
+    # Change the jQuery UI CSS Theme
+    changeTheme: (event) ->
 
-      # Get the true offset of the element
-      initialScrollTop = @pageBody.scrollTop()
-      @pageBody.scrollTop 0
-      trueOffset = $element.offset().top
-      @pageBody.scrollTop initialScrollTop
+      # This is harder than it might at first seem.
+      # Method:
+      # 1. get new CSS URL from selectmenu
+      # 2. remove the current jQueryUI CSS <link>
+      # 3. add a new jQueryUI CSS <link> with the new URL in its `href`
+      # 4. ***CRUCIAL:*** when <link> `load` event fires, we ...
+      # 5. get `BaseView.constructor` to refresh its `_jQueryUIColors`, which ...
+      # 6. triggers a Backbone event indicating that the jQueryUI theme has changed, which ...
+      # 7. causes `MainMenuView` to re-render.
+      #
+      # WARN: works for me on Mac with FF, Ch & Sa. Unsure of
+      # cross-platform/browser support. May want to do feature detection and
+      # employ a mixture of strategies 1-4.
 
-      windowHeight = $(window).height()
-      desiredOffset = windowHeight / 2
-      scrollTop = trueOffset - desiredOffset
-      @pageBody.animate {scrollTop: scrollTop}, 250
+      @setModelFromGUI()
+      Backbone.trigger 'applicationSettings:changeTheme'
+
+      ###
+      #themeName = @$(event.target).find(':selected').val()
+      themeName = @model.get 'activeJQueryUITheme'
+      # TODO: this URL stuff should be in model
+      newJQueryUICSSURL = "http://code.jquery.com/ui/1.11.2/themes/#{themeName}/jquery-ui.min.css"
+      $jQueryUILinkElement = $('#jquery-ui-css')
+      $jQueryUILinkElement.remove()
+      $jQueryUILinkElement.attr href: newJQueryUICSSURL
+      linkHTML = $jQueryUILinkElement.get(0).outerHTML
+      $('#font-awesome-css').after linkHTML
+      outerCallback = =>
+        innerCallback = =>
+          Backbone.trigger 'application-settings:jQueryUIThemeChanged'
+        @constructor.refreshJQueryUIColors innerCallback
+      @listenForLinkOnload outerCallback
+      ###
+
+      # Remaining TODOs:
+      # 1. persist theme settings to localhost
+      # 2. create a default in application settings model
+      # 3. disable this feature when there is no Internet connection
+      # 4. focus highlight doesn't match on login dialog (probably because it
+      #    should be re-rendered after theme change)
+      # 5. Gap between rounded borders and container fill. See
+      #    http://w3facility.org/question/jquery-ui-how-to-remove-gap-at-each-rounded-corner-of-accordions/
+
+    ############################################################################
+    # Four strategies for detecting that a new CSS <link> has loaded.
+    # See http://www.phpied.com/when-is-a-stylesheet-really-loaded/
+    ############################################################################
+
+    # strategy #1
+    listenForLinkOnload: (callback) ->
+      link = document.getElementById 'jquery-ui-css'
+      link.onload = -> callback()
+
+    # strategy #2
+    addEventListenerToLink: (callback) ->
+      link = document.getElementById 'jquery-ui-css'
+      eventListener = -> callback()
+      if link.addEventListener
+        link.addEventListener 'load', eventListener, false
+
+    # strategy #3
+    listenForReadyStateChange: (callback) ->
+      link = document.getElementById 'jquery-ui-css'
+      link.onreadystatechange = ->
+        state = link.readyState
+        if state is 'loaded' or state is 'complete'
+          link.onreadystatechange = null
+          callback()
+
+    # strategy #4
+    checkForChangeInDocumentStyleSheets: (callback) ->
+      cssnum = document.styleSheets.length
+      func = ->
+        if document.styleSheets.length > cssnum
+          callback()
+          clearInterval ti
+      ti = setInterval func, 10
 

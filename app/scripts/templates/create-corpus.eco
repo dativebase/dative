@@ -1,0 +1,33 @@
+  <div class="dative-widget-header ui-widget-header ui-corner-top dative-tooltip">
+
+    <div class='dative-widget-header-title'>Create a new corpus</div>
+
+  </div>
+
+  <div class="dative-widget-body">
+
+    <ul class="fieldset">
+
+      <li>
+        <label for='corpus-name'>Corpus name</label>
+        <input type='text' name='corpus-name' class='dative-tooltip ui-corner-all'
+          title='enter the name of the corpus you would like to create' />
+        <div class='dative-create-corpus-failed-container'>
+          <span class='ui-state-error ui-corner-all dative-create-corpus-failed
+            corpus-name-error'></span>
+        </div>
+      </li>
+
+      <li>
+        <label for='request-create-corpus'></label>
+        <button class='request-create-corpus dative-tooltip'
+          title='request that a corpus with the specified name be created'
+          >Create Corpus</button>
+        <span class='request-create-corpus-error-tooltip dative-tooltip'></span>
+        <span class='request-create-corpus-success-tooltip dative-tooltip'></span>
+      </li>
+
+    </ul>
+
+  </div>
+

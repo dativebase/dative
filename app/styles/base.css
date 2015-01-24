@@ -6,17 +6,20 @@ body {
 div.mainmenu,
 div#mainmenu {
     width: 100%;
-    height: 26px;
+    height: 24px;
     border-bottom-style: solid;
     border-bottom-width: 1px;
     top: 0;
     z-index: 100;
     white-space: nowrap;
     font-size: 15px;
+    position: relative;
 }
+
 #dative-client-app
 {
 }
+
 #appview
 {
     margin: 10px auto;
@@ -34,12 +37,15 @@ div#mainmenu {
     width: 16px;
     height: 16px;
     margin-top: 3px;
+    bottom: 0.25em;
 }
 #dative-page {
     margin: 40px auto 15px auto;
     width: 900px;
 }
+
 #dative-page-header,
+#dative-page-header.dative-two-part-header > div.dative-forms-view-header,
 .dative-widget-header {
     font-weight: normal;
     text-align: center;
@@ -49,6 +55,28 @@ div#mainmenu {
     height: 31px;
     /* TEST */
     position: relative;
+}
+
+#dative-page-header.dative-two-part-header > div.dative-forms-view-header
+{
+    border-bottom: none;
+}
+
+#dative-page-header.dative-two-part-header
+{
+    height: 75px;
+    padding: 0;
+}
+
+.dative-pagination-menu-top
+{
+  width: 900px;
+  position: absolute;
+  left: 0%;
+  bottom: 25%;
+  transform: translateY(-50%);
+  -webkit-transform: translateY(-50%);
+  padding-left: 0px 5px;
 }
 
 .dative-widget-header button,
@@ -64,8 +92,9 @@ div#mainmenu {
     text-align: left;
     margin-top: 5px;
 }
-.dative-form-object,
-.igt-form {
+
+.dative-form-widget
+{
     font-size: inherit;
     padding: 10px;
     border-style: solid;
@@ -75,10 +104,12 @@ div#mainmenu {
     top: -11px;
     display: block;
 }
-.dative-form-object:hover,
-.igt-form:hover {
+
+.form-secondary-data div.dative-tooltip
+{
     cursor: pointer;
 }
+
 ul.sf-menu li a
 {
     cursor: default;
@@ -89,10 +120,18 @@ ul.sf-menu li a
     font-size: 11px;
     padding: 10px 0;
 }
-.dative-form-buttons ,
-.form-buttons {
-    margin-bottom: 10px;
+
+.dative-form-object > .dative-widget-body
+{
+    padding: 10px;
 }
+
+.dative-form-object
+{
+    border-width: 1px;
+    border-style: solid;
+}
+
 .dative-forms-view-one-interface .dative-widget-body,
 .dative-forms-browse-interface .dative-widget-body {
     position: relative;
@@ -137,7 +176,7 @@ div.dative-page-header-title
 {
     display: inline-block;
     position: absolute;
-    top: 15px;
+    /*top: 15px;*/
     /*width: 100px;*/
 }
 .dative-pagin-ipp {
@@ -154,6 +193,11 @@ div.dative-page-header-title
     vertical-align: top;
     padding-right: 10px;
 }
+
+.dative-pagin-item-index-cell {
+    min-width: 5em;
+}
+
 .dative-pagin-item-content {
     width: 700px;
 }
@@ -177,35 +221,65 @@ div.dative-page-header-title
     display: inline-block;
     cursor: pointer;
 }
+
 .dative-explanation {
     max-width: 200px;
     overflow-y: auto;
     padding: 5px;
     z-index: 2000;
 }
+
+.dative-add-user-failed-container,
+.dative-create-corpus-failed-container,
+.dative-validation-container
+{
+    position: absolute;
+}
+
+.dative-add-user-failed,
+.dative-create-corpus-failed
+{
+    position: relative;
+    z-index: 100;
+    display: inline-block;
+    max-width: 200px;
+}
+
+.dative-add-user-failed,
+.dative-create-corpus-failed
+{
+    top: -26px;
+    left: 411px;
+}
+
+.dative-add-user-failed,
+.dative-create-corpus-failed,
 .dative-login-dialog-widget .dative-login-failed,
 .dative-register-dialog-widget .dative-register-validation,
 .dative-register-validation {
     padding: 5px;
 }
+
 .dative-login-dialog-widget,
 .dative-register-dialog-widget,
 #appview,
 .progress-widget,
-.notifier
+.notifier,
+.corpus-widget,
+.create-corpus-widget,
+.users-widget,
+.dative-user-widget,
+.dative-add-user-widget,
+.servers-config-widget,
+.server-config-widget,
+.add-user-widget,
+.edit-corpus-widget
 {
     box-shadow: 5px 5px 10px rgba(0, 0, 0, 0.5);
     -webkit-box-shadow: 5px 5px 10px rgba(0, 0, 0, 0.5);
     -moz-box-shadow: 5px 5px 10px rgba(0, 0, 0, 0.5);
 }
-ul.sf-menu li ul
-{
-    box-shadow: 5px 5px 10px rgba(0, 0, 0, 0.5);
-    -webkit-box-shadow: 5px 5px 10px rgba(0, 0, 0, 0.5);
-    -moz-box-shadow: 5px 5px 10px rgba(0, 0, 0, 0.5);
-    border-bottom-right-radius: 6px;
-    border-bottom-left-radius: 6px;
-}
+
 div.heading {
 }
 
@@ -251,11 +325,28 @@ ul.fieldset label {
     width: 75px;
 }
 
-.loginLogin ul.fieldset label,
-.registerForm ul.fieldset label {
-    /*width: 61px;*/
-    width: 120px;
+.create-corpus-widget ul.fieldset label,
+.add-user-widget ul.fieldset label,
+.edit-corpus-widget ul.fieldset label
+{
+    width: 80px;
 }
+
+.dative-login-dialog ul.fieldset label
+{
+    width: 6em;
+}
+
+.dative-login-dialog ul.fieldset input
+{
+    width: 15em;
+}
+
+.registerForm ul.fieldset label
+{
+    width: 10em;
+}
+
 .fieldset label,
 .fieldset input[type="text"],
 .fieldset input[type="password"],
@@ -265,6 +356,8 @@ ul.fieldset label {
 .fieldset textarea {
     display: inline-block;
 }
+
+.dative-form-object:focus,
 .ui-selectmenu-button:focus,
 .ui-button:focus,
 .ms-list:focus,
@@ -274,28 +367,6 @@ textarea:focus {
     box-shadow: 0 0 10px orange !important;
 }
 
-ul.fieldset textarea,
-ul.fieldset input[type="text"],
-ul.fieldset input[type="password"],
-ul.fieldset select[name="elicitation_method"],
-ul.fieldset select[name="syntactic_category"],
-ul.fieldset select[name="speaker"],
-ul.fieldset select[name="elicitor"],
-ul.fieldset select[name="verifier"],
-ul.fieldset select[name="source"],
-div.dative-display {
-    border-style: solid;
-    border-width: 1px;
-    padding: 7px 10px 5px 10px;
-    margin-top: 0px;
-    margin-bottom: 0px;
-    height: 16px;
-    min-height: 16px;
-    -moz-border-radius: 6px;
-    -webkit-border-radius: 6px;
-    -khtml-border-radius: 6px;
-    border-radius: 6px;
-}
 div.dative-display {
   display: inline-block;
 }
@@ -405,8 +476,9 @@ button.ui-multiselect {
     top: 1px;
 }
 
-.dative-form-transcription ,
-.form-primary-data .transcription {
+.dative-form-transcription,
+.form-primary-data .transcription,
+.italic {
     font-style: italic;
 }
 
@@ -436,14 +508,6 @@ h1 {
     background: transparent;
 }
 
-.ms-container .ms-list{
-  -webkit-border-radius: 6px;
-  -moz-border-radius: 6px;
-  border-radius: 6px;
-  height: 100px;
-  background: white;
-}
-
 .sf-menu a.sf-with-ul {
     padding-right: 12px;
 }
@@ -453,6 +517,7 @@ h1 {
 {
     position: relative;
 }
+
 .progress-widget,
 .notifier
 {
@@ -461,16 +526,24 @@ h1 {
     min-height: 40px;
     width: 100px;
     margin: 20px;
-    padding: 20px;
+    z-index: 100;
 }
+
 .progress-widget
 {
     left: 0;
+    padding: 10px 10px 0px 10px;
+}
+
+.progress-widget-spinner
+{
+    height: 20px;
 }
 
 .notifier
 {
     right: 0;
+    padding: 20px;
 }
 
 .pulse1
@@ -487,7 +560,7 @@ h1 {
 
 .progress-widget-tasks
 {
-    margin-top: 80px;
+    margin-top: 10px;
 }
 .progress-widget-tasks ul li,
 .notifier ul li
@@ -495,12 +568,30 @@ h1 {
     margin-bottom: 10px;
 }
 
-.loggedInUsername
+.logged-in-username:hover
 {
-    vertical-align: bottom;
+    cursor: default;
 }
+
 .ui-buttonset .ui-button {
     margin-right: -4px;
+}
+
+.ui-button-text-only .ui-button-text,
+.ui-button-text {
+  padding: 0.5em;
+}
+
+.dative-authenticated span.ui-button-text
+{
+    padding: 0;
+}
+
+.dative-authenticated span.ui-button-text i
+{
+  right: 0.1em;
+  bottom: 0.05em;
+  position: relative;
 }
 
 .ui-dialog .ui-dialog-titlebar {
@@ -517,9 +608,31 @@ div.server-config-widget {
   margin-top: 20px;
   margin-bottom: 20px;
 }
-div.servers-config-widget {
+div.servers-config-widget,
+div.corpus-widget,
+div.create-corpus-widget {
   width: 600px;
 }
+
+div.corpus-widget,
+div.create-corpus-widget {
+  margin-top: 10px;
+  margin-bottom: 20px;
+}
+
+div.add-user-widget,
+div.edit-corpus-widget,
+div.users-widget {
+  width: 500px;
+  margin-top: 10px;
+  margin-bottom: 10px;
+}
+
+div.servers-config-widget > div.dative-widget-body,
+div.users-widget div.dative-widget-body {
+  padding: 10px;
+}
+
 div.server-config-widget {
   width: 560px;
   /*width: 400px;*/
@@ -527,7 +640,10 @@ div.server-config-widget {
   margin-bottom: 20px;
 }
 
-div.server-config-widget input {
+div.server-config-widget input,
+div.add-user-widget input,
+div.edit-corpus-widget textarea,
+div.create-corpus-widget input {
   max-width: 300px;
   min-width: 300px;
   width: 300px;
@@ -545,11 +661,152 @@ div.dative-register-dialog li.register-info span {
   min-width: 240px;
 }
 
-div.dative-register-dialog div.dative-register-info {
-  position: absolute;
-  /*max-height: 40px;*/
-  overflow: none;
-  width: auto;
-  max-height: 20px;
-  display: inline-table;
+div.dative-user-widget {
+  display: inline-block;
+  margin: 10px;
 }
+
+div.dative-user-widget div.dative-widget-body img {
+  display: block;
+  margin: auto;
+}
+
+div.dative-user-widget div.dative-widget-header div.dative-widget-header-title,
+div.dative-add-user-widget div.dative-widget-header div.dative-widget-header-title,
+div.users-widget > div.dative-widget-header > div.dative-widget-header-title {
+  position: static;
+  margin: auto;
+}
+
+div.corpus-widget > div.dative-widget-header,
+div.create-corpus-widget > div.dative-widget-header,
+div.users-widget > div.dative-widget-header,
+div.servers-config-widget > div.dative-widget-header,
+div.server-config-widget > div.dative-widget-header {
+  position: relative;
+}
+
+div.add-user-widget > div.dative-widget-header,
+div.edit-corpus-widget > div.dative-widget-header,
+div.users-widget > div.dative-widget-header {
+  height: 12px;
+}
+
+div.corpus-widget > div.dative-widget-header > div.dative-widget-header-title,
+div.create-corpus-widget > div.dative-widget-header > div.dative-widget-header-title,
+div.users-widget > div.dative-widget-header > div.dative-widget-header-title,
+div.add-user-widget > div.dative-widget-header > div.dative-widget-header-title,
+div.edit-corpus-widget > div.dative-widget-header > div.dative-widget-header-title,
+div.servers-config-widget > div.dative-widget-header > div.dative-widget-header-title,
+div.server-config-widget > div.dative-widget-header > div.dative-widget-header-title,
+div#dative-page-header > div.dative-page-header-title,
+div#dative-page-header > div.dative-forms-view-header > div.dative-page-header-title,
+div.button-container-center {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  -webkit-transform: translate(-50%, -50%);
+}
+
+div.button-container-center {
+  width: 700px;
+}
+
+div.button-container-left {
+  /* See http://jsfiddle.net/khrfwjL0/2/ */
+  position: absolute;
+  left: 0%;
+  top: 50%;
+  transform: translateY(-50%);
+  -webkit-transform: translateY(-50%);
+  padding-left: 5px;
+}
+
+div.button-container-right {
+  /* See http://jsfiddle.net/khrfwjL0/2/ */
+  position: absolute;
+  right: 0%;
+  top: 50%;
+  transform: translateY(-50%);
+  -webkit-transform: translateY(-50%);
+  padding-right: 5px;
+}
+
+div.container-right {
+  position: absolute;
+  right: 0;
+  top: 20%;
+  padding-right: 1em;
+}
+
+span.fixed-width
+{
+    display: inline-block;
+    width: 1em;
+}
+
+ul.fieldset textarea,
+ul.fieldset input[type="text"],
+ul.fieldset input[type="password"],
+ul.fieldset select[name="elicitation_method"],
+ul.fieldset select[name="syntactic_category"],
+ul.fieldset select[name="speaker"],
+ul.fieldset select[name="elicitor"],
+ul.fieldset select[name="verifier"],
+ul.fieldset select[name="source"],
+div.dative-display {
+    border-style: solid;
+    border-width: 1px;
+    padding: 7px 10px 5px 10px;
+    margin-top: 0px;
+    margin-bottom: 0px;
+    height: 16px;
+    min-height: 16px;
+    /*
+    -moz-border-radius: 6px;
+    -webkit-border-radius: 6px;
+    -khtml-border-radius: 6px;
+    border-radius: 6px;
+    */
+}
+
+.header-no-body {
+    border-bottom: none;
+}
+
+ul.sf-menu li ul
+{
+    box-shadow: 5px 5px 10px rgba(0, 0, 0, 0.5);
+    -webkit-box-shadow: 5px 5px 10px rgba(0, 0, 0, 0.5);
+    -moz-box-shadow: 5px 5px 10px rgba(0, 0, 0, 0.5);
+}
+
+/* Multi-select stuff; TODO: remove border-radius stuff? */
+  .ms-container .ms-list{
+    -webkit-border-radius: 6px;
+    -moz-border-radius: 6px;
+    border-radius: 6px;
+    height: 100px;
+    background: white;
+}
+
+p.paragraph-widget {
+    margin: auto;
+    width: 500px;
+    padding: 10px;
+}
+
+/* Remove the ugly resizer in textareas (works only on Safari/Chrome)
+ * See http://stackoverflow.com/questions/13126917/can-i-style-the-resize-grabber-of-textarea */
+::-webkit-resizer
+{
+    display: none;
+}
+
+.form-igt-data,
+.form-translations-data
+{
+    line-height: 130%;
+}
+

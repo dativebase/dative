@@ -20,6 +20,7 @@ require.config
     jqueryelastic: ['jquery']
     perfectscrollbar: ['jquery']
     superfish: ['jquery']
+    superclick: ['jquery']
     supersubs: ['jquery']
     backbonerelational: ['backbone']
     backbonelocalstorage: ['backbone']
@@ -35,6 +36,7 @@ require.config
     text: '../bower_components/requirejs-text/text'
     jqueryui: '../bower_components/jqueryui/jquery-ui'
     superfish: 'jquery-extensions/superfish'
+    superclick: 'jquery-extensions/superclick'
     #superfish: '../bower_components/superfish/dist/js/superfish'
     #superfish: 'jquery-extensions/superfish/dist/js/superfish'
     igt: 'jquery-extensions/igt'
@@ -58,16 +60,12 @@ require.config
 require [
     'views/app',
     'routes/router'
-    # 'FieldDB'
-    #'backboneindexeddb'
     'multiselect'
     'jqueryelastic'
     'jqueryuicolors'
-    'sfjquimatch'
     'jqueryspin'
   ], (AppView, Workspace) ->
-    new Workspace()
-    Backbone.history.start()
+    # workspace = new Workspace()
     window.debugMode = false
 
     # Overriding FieldDB's `bug` which creates a JS `alert()`.
@@ -76,5 +74,6 @@ require [
       console.log message
 
     $ ->
+      # Backbone.history.start()
       new AppView()
 

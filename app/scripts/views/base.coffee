@@ -24,9 +24,18 @@ define [
 
     @debugMode: false
 
+    tooltipsDisabled: true
+
     # Class attribute that holds the jQueryUI colors of the jQueryUI theme
     # currently in use.
-    @jQueryUIColors: $.getJQueryUIColors()
+    @jQueryUIColors: ->
+      if not @constructor._jQueryUIColors
+        @constructor._jQueryUIColors = $.getJQueryUIColors()
+      @constructor._jQueryUIColors
+
+    @refreshJQueryUIColors: (callback) ->
+      @constructor._jQueryUIColors = $.getJQueryUIColors()
+      if callback then callback()
 
     # TODO: figure out where/how to store/persist user settings
     @userSettings:
@@ -34,14 +43,6 @@ define [
 
     trim: (string) ->
       string.replace /^\s+|\s+$/g, ''
-
-    snake2camel: (string) ->
-      string.replace(/(_[a-z])/g, ($1) ->
-        $1.toUpperCase().replace('_',''))
-
-    camel2snake: (string) ->
-      string.replace(/([A-Z])/g, ($1) ->
-        "_#{$1.toLowerCase()}")
 
     # Cleanly closes this view and all of it's rendered subviews
     close: ->
@@ -64,6 +65,11 @@ define [
     # Deregisters a subview that has been manually closed by this view
     closed: (subView) ->
       @_renderedSubViews = _.without @_renderedSubViews, subView
+
+    stopEvent: (event) ->
+      try
+        event.preventDefault()
+        event.stopPropagation()
 
     guid: utils.guid
 
@@ -90,4 +96,164 @@ define [
     # Return true if element has a vertical scrollbar
     _hasVerticalScrollBar: (el) ->
       if el.clientHeight < el.scrollHeight then true else false
+
+    closeAllTooltips: ->
+      @$('.dative-tooltip').each (index, element) ->
+        if $(element).tooltip 'instance'
+          $(element).tooltip 'close'
+
+    # Options for spin.js, cf. http://fgnass.github.io/spin.js/
+    spinnerOptions: ->
+      lines: 13 # The number of lines to draw
+      length: 5 # The length of each line
+      width: 2 # The line thickness
+      radius: 3 # The radius of the inner circle
+      corners: 1 # Corner roundness (0..1)
+      rotate: 0 # The rotation offset
+      direction: 1 # 1: clockwise -1: counterclockwise
+      color: @constructor.jQueryUIColors().defCo
+      speed: 2.2 # Rounds per second
+      trail: 60 # Afterglow percentage
+      shadow: false # Whether to render a shadow
+      hwaccel: false # Whether to use hardware acceleration
+      className: 'spinner' # The CSS class to assign to the spinner
+      zIndex: 2e9 # The z-index (defaults to 2000000000)
+      top: '0%' # Top position relative to parent
+      left: '0%' # Left position relative to parent
+
+    # Logic for remembering and re-focusing the last focused element.
+
+    focusedElementIndex: 0
+
+    rememberFocusedElement: (event) ->
+      try
+        @$(@focusableSelector).each (index, el) =>
+          if el is event.target
+            @focusedElementIndex = index
+
+    focusLastFocusedElement: ->
+      @focusElement @focusedElementIndex
+
+    focusElement: (index) ->
+      $focusables = @$ @focusableSelector
+      $elementToSelect = $focusables.eq index
+      if $elementToSelect.hasClass '.ui-state-disabled'
+        @focusFirstElement()
+      else
+        $elementToSelect.focus()
+
+    focusFirstElement: ->
+      @$(@focusableSelector).not('.ui-state-disabled').eq(0).focus()
+
+    focusableSelector: 'button, input, .ui-selectmenu-button'
+
+    # Alter the scroll position so that the focused UI element is centered.
+    scrollToFocusedInput: (event) ->
+      # Small bug: if you tab really fast through the inputs, the scroll
+      # animations will be queued and all jumpy. Calling `.stop` as below
+      # does nof fix the issue.
+      # @$('input, button, .ui-selectmenu-button').stop('fx', true, false)
+
+      pageBodySelector = @pageBodySelector or '#dative-page-body'
+      $pageBody = @$ pageBodySelector
+
+      try
+        $element = $ event.currentTarget
+      catch
+        $element = @$ ':focus'
+
+      # Get the true offset of the element
+      initialScrollTop = $pageBody.scrollTop()
+      $pageBody.scrollTop 0
+      trueOffset = $element.offset().top
+      $pageBody.scrollTop initialScrollTop
+
+      windowHeight = $(window).height()
+      desiredOffset = windowHeight / 2
+      scrollTop = trueOffset - desiredOffset
+      $pageBody.animate
+        scrollTop: scrollTop
+        250
+        'swing'
+        =>
+          # Since Dative tooltips close upon scroll events, we have to re-open
+          # the tooltip of the focused element after we programmatically scroll
+          # here. BUG @jrwdunham: this doesn't work as consistently as I'd like
+          # it to. I don't know why yet...
+          if $element.hasClass('dative-tooltip') and $element.tooltip('instance')
+            $element.tooltip 'open'
+
+    # Fix rounded borders so that adjacently nested rounded borders <divs> don't
+    # have a gap between them. This must be done in the JS and not the CSS
+    # because Dative can dynamically change the CSS to different jQueryUI
+    # themese, which would mess up a static CSS file. (HACK WARN.)
+    fixRoundedBorders: ->
+      selector = '#dative-page-header, .ui-widget > .ui-widget-header'
+      @$(selector).each (index, element) =>
+        @fixRoundedBorder element
+
+    fixRoundedBorder: (element) ->
+        if element instanceof $
+          $el = element
+        else
+          $el = $ element
+        cssProperties = [
+          'border-top-left-radius'
+          'border-top-right-radius'
+          'border-bottom-right-radius'
+          'border-bottom-left-radius'
+        ]
+        $el.css(
+          'border-radius',
+          _.map(
+            _.values($el.css(cssProperties)),
+            @decrementPxVal,
+            @
+          ).join(' ')
+        )
+
+    # '6px' becomes '5px', '0px' doesn't change, '1.2em' shouldn't change, etc.
+    decrementPxVal: (pxVal) ->
+      try
+        if @utils.endsWith pxVal, 'px'
+          pxInt = Number(pxVal.replace 'px', '')
+          if pxInt > 0 then "#{pxInt - 1}px" else pxVal
+        else
+          pxVal
+      catch e
+        console.log "exception with #{pxVal}"
+        console.log e
+        pxVal
+
+    # When a widget's body is CLOSED, its header SHOULD have rounded bottom
+    # corners.
+    setHeaderStateClosed: ->
+      $header = @$('.dative-widget-header').first()
+      $header.addClass 'header-no-body ui-corner-bottom'
+      $header.css
+        'border-bottom-left-radius': $header.css('border-top-left-radius')
+        'border-bottom-right-radius': $header.css('border-top-right-radius')
+
+    # When a widget's body is OPEN, its header should NOT have rounded bottom
+    # corners.
+    setHeaderStateOpen: ->
+      $header = @$('.dative-widget-header').first()
+      $header.removeClass 'header-no-body ui-corner-bottom'
+      $header.css
+        'border-bottom-left-radius': 0
+        'border-bottom-right-radius': 0
+
+    # Hack for changing the close "X" of a jQueryUI dialog to a font-awesome
+    # fa-close "X".
+    fontAwesomateCloseIcon: ->
+      newIconHTML = [
+        '<span class="ui-button-text">',
+        '<i class="fa fa-fw fa-close" ',
+        'style="position: relative; right: 0.48em; bottom: 0.45em;"></i></span>'
+      ].join ''
+      @$target.find('button.ui-dialog-titlebar-close')
+        .find('span.ui-button-icon-primary').remove().end()
+        .removeClass 'ui-button-icon-only'
+        .addClass 'ui-button-text-only'
+        .html newIconHTML
 

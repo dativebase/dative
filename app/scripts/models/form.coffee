@@ -3,202 +3,417 @@ define [
     'backbone'
     './database'
     './base'
-    #'backboneindexeddb'
   ], (_, Backbone, database, BaseModel) ->
 
-    # Form Model
-    # ----------
+  # Form Model
+  # ----------
+
+  class FormModel extends BaseModel
+
+    url: 'fakeurl' # Backbone throws 'A "url" property or function must be specified' if this is not present.
+
+    ############################################################################
+    # Dative Schema
+    ############################################################################
+
+    # Note: the comments in this method definition reflect the OLD's relational schema
+    # and will be removed later.
+    defaults: ->
+      id: null # integer in OLD, UUID in FieldDB
+      UUID: null # OLD only
+      transcription: "" # Column(Unicode(255), nullable=False)
+      phoneticTranscription: "" # Column(Unicode(255))
+      narrowPhoneticTranscription: "" # Column(Unicode(255))
+      morphemeBreak: "" # Column(Unicode(255))
+      morphemeGloss: "" # Column(Unicode(255))
+      comments: "" # Column(UnicodeText)
+      speakerComments: "" # OLD only; Column(UnicodeText)
+      grammaticality: "" # FieldDB `judgement`; OLD Column(Unicode(255))
+      dateElicited: null # Column(Date)
+      datetimeEntered: null # FieldDB `dateEntered`; OLD Column(DateTime)
+      datetimeModified: null # FieldDB `dateModified`; OLD  Column(DateTime, default=now)
+      syntacticCategories: "" # FieldDB `syntacticCategory`, OLD `syntacticCategoryString` Column(Unicode(255))
+      morphemeBreakIds: [] # OLD only; Column(UnicodeText)
+      morphemeGlossIds: [] # OLD only; Column(UnicodeText)
+      breakGlossCategory: "" # OLD only; Column(Unicode(1023))
+      syntacticTreePTB: "" # OLD `syntax`: Column(Unicode(1023))
+      semantics: "" # OLD only: Column(Unicode(1023))
+      status: "" # `status` in the OLD, `validationStatus` in FieldDB: see the comments in `fieldDB2dative` below. Column(Unicode(40), default=u'tested')  # u'tested' vs. u'requires testing'
+
+      # FieldDB-only attributes
+      syntacticTreeLaTeX: ""
+      fieldDBTags: "" # just a string. This is FieldDB `tags`.
+      fieldDBDatumTags: [] # Is this an array? This is meant to hold FieldDB `datumTags`. TODO: figure this out.
+      modifiers: [] # array of users who have modified the form; TODO: figure out if these objects are ordered and which attributes they have.
+      fieldDBComments:[] # array of comment objects: {text: '...', username: '...', timestamp: '...'}
+
+      # Many-to-one relations
+      elicitor: @defaultUser() # relation('User', primaryjoin='Form.elicitor_id==User.id') elicitor_id: null # Column(Integer, ForeignKey('user.id', ondelete='SET NULL'))
+      enterer: @defaultUser() # @defaultUser() # relation('User', primaryjoin='Form.enterer_id==User.id') enterer_id: null # Column(Integer, ForeignKey('user.id', ondelete='SET NULL'))
+      modifier: @defaultUser() # relation('User', primaryjoin='Form.modifier_id==User.id') modifier_id: null # Column(Integer, ForeignKey('user.id', ondelete='SET NULL'))
+      verifier: @defaultUser() # relation('User', primaryjoin='Form.verifier_id==User.id') verifier_id: null # Column(Integer, ForeignKey('user.id', ondelete='SET NULL'))
+      speaker: @defaultSpeaker # relation('Speaker') speaker_id: null # Column(Integer, ForeignKey('speaker.id', ondelete='SET NULL'))
+      elicitationMethod: @defaultElicitationMethod # relation('ElicitationMethod') elicitationmethod_id: null # Column(Integer, ForeignKey('elicitationmethod.id', ondelete='SET NULL'))
+      syntacticCategory: @defaultSyntacticCategory() # relation('SyntacticCategory', backref='forms') syntacticcategory_id: null # Column(Integer, ForeignKey('syntacticcategory.id', ondelete='SET NULL'))
+      source: @defaultSource# relation('Source') source_id: null # Column(Integer, ForeignKey('source.id', ondelete='SET NULL'))
+
+      # One-to-many relations
+      translations: [] # relation('Translation', backref='form', cascade='all, delete, delete-orphan')
+
+      # Many-to-many relations
+      files: [] # relation('File', secondary=FormFile.__table__, backref='forms')
+      collections: [] # relation('Collection', secondary=CollectionForm.__table__, backref='forms')
+      tags: [] # relation('Tag', secondary=FormTag.__table__, backref='forms')
+
+    defaultUser: ->
+      id: null
+      firstName: null
+      lastName: null
+      role: null
+      username: null
+
+    defaultSpeaker: ->
+      id: null
+      firstName: null
+      lastName: null
+      dialect: null
+
+    defaultElicitationMethod: ->
+      id: null
+      name: null
+
+    defaultSyntacticCategory: ->
+      id: null
+      name: null
+
+    defaultSource: ->
+      id: null
+      type: null
+      key: null
+      journal: null
+      editor: null
+      chapter: null
+      pages: null
+      publisher: null
+      booktitle: null
+      school: null
+      institution: null
+      year: null
+      author: null
+      title: null
+      node: null
+
+    ############################################################################
+    # FieldDB-to-Dative Schema stuff
+    ############################################################################
+
+    # fieldDb2dative: input: a FieldDB datum object, output: a Dative form model
+    # --------------------------------------------------------------------------
     #
-    # First stab at a form model.
-    # This is a model that attempts to be compatible with an OLD 1.0 RESTful
-    # web service
+    # Converts attribute names and values, as appropriate. Also stores the
+    # FieldDB datum object unmodified in an attribute.
     #
-    # Models are for conversions, validations, computed properties, and access
-    # control.
+    # TODO:
     #
-    # Future development:
+    # - dative2fieldDB
+    # - old2dative
+    # - dative2old
     #
-    # - relationality via backbone-relational
-    # - FieldDB compatibility
-    # - client-side storage via indexeddb
+    # TODO: answer these questions (w/ help from @cesine):
 
-    class FormModel extends BaseModel
+    # 1. datumField.tags is simply a string. Do the current FieldDB
+    # applications make any assumptions about how tags are identified within
+    # that string? I am assuming that it's just a string and the exectation
+    # is that users will use whatever tag-delimiting conventions they like.
+    # In the OLD, a tag can have a name that has whitespace in it. An OLD tag
+    # is an object with `name`, `id`, and `description` attributes. Do we want
+    # to modify the FieldDB data structure to allow for these types of tags?
+    # For now I am renaming FieldDB tags as `fieldDBTags` on Dative and I will
+    # treat FieldDB and OLD tags differently.
 
-      #idbSync: Backbone.sync
-      #sync: Backbone.ajaxSync
+    # 2. What to do with `datumField.validationStatus`? Is it the equivalent of
+    # the OLD's `status`? Since both are strings, I am (for now) treating them
+    # both as `status` fields in Dative.
 
-      initialize: ->
+    # 3. What to do with `datumStates`? It is an array of objects with 4
+    # attributes: `color`, `showInSearchResults`, `selected`, and `state`. I am
+    # currently not using this attribute in Dative.
 
-      url: 'fakeurl' # Backbone throws 'A "url" property or function must be specified' if this is not present.
-      #url: 'http://www.onlinelinguisticdatabase.org/'
-      #url: 'http://www.fake-old-url.org/'
+    # 4. `datumField.syntacticCategory` is actually a segmented list of
+    # categories corresponding to each morpheme in the morphemeBreak, at
+    # least that is what I glean it should be from the `help` value for this
+    # field. In my opinion, this field is misnamed, as is "gloss". Both
+    # should be plural: "syntacticCategories" and "glosses" since they are
+    # really sequences of categories and glosses. Consequently,
+    # "syntacticCategory" should be given to the category of the entire
+    # datum/form, as in the OLD. I am renaming both
+    # `FieldDB.Datum.syntacticCategory` and
+    # `OLD.Form.syntacticCategoryString` to `Dative.Form.syntacticCategories`.
+    # `OLD.Form.syntacticCategory` is `Dative.Form.syntacticCategory` and
+    # there is, as of yet, no equivalent in FieldDB.
 
-      # Backbone-IndexedDB requires `database` and `storeName`
-      database: database
-      storeName: 'forms'
+    # 5. `datumField.syntacticTreeLaTeX`. I'm just leaving this as is for now.
+    # The OLD assumes (implicitly) that the values of its `syntax` attributes
+    # will be PTB-style bracket notation trees. Dative should be able to do
+    # stuff with both. My current approach is for Dative to rename
+    # `OLD.Form.syntax` to `Dative.Form.syntacticTreePTB` and to adopt
+    # `FieldDB.datumField.syntacticTreeLaTeX` as
+    # `Dative.Form.syntacticTreeLaTeX`. That is, the two syntax bracket
+    # notation fields will co-exist, for now. (Even though you can easily get
+    # from PTB trees to QTree/LaTeX ones as I do in the OLD web app ...)
 
-      defaults: =>
-        @oldFormSchema()
+    # 6. `datumField.`modifiedByUsers` is an array of all users who have modified
+    # the form. This is odd because it's useful to know the order of who modified
+    # it. The OLD stores all of this information: who made what modification when.
+    # (In the OLD, `modifier` is an object representing the user to make the last
+    # modification. Previous modifiers can be retrieved by retrieving the history
+    # of a form.) Is the `modifiedByUsers` array ordered? Is there a way to
+    # recover the modification history from the corpus service so that we can
+    # provide a "get history" feature? For now I am having Dative use both
+    # FieldDB's `modifiedByUsers` and the OLD's `modifier` and Dative will treat
+    # them differently.
 
-      # OLD 1.0a1 Form schema
-      # The comments after each line are the Python/SQLAlchemy column constraints and definitions
-      #__tablename__ = "form"
-      oldFormSchema: ->
-        id: null # integer, primary key
-        UUID: null # an implicit primary key (used for versioning)
-        transcription: "" # Column(Unicode(255), nullable=False)
-        phonetic_transcription: "" # Column(Unicode(255))
-        narrow_phonetic_transcription: "" # Column(Unicode(255))
-        morpheme_break: "" # Column(Unicode(255))
-        morpheme_gloss: "" # Column(Unicode(255))
-        comments: "" # Column(UnicodeText)
-        speaker_comments: "" # Column(UnicodeText)
-        grammaticality: "" # Column(Unicode(255))
-        date_elicited: null # Column(Date)
-        datetime_entered: null # Column(DateTime)
-        datetime_modified: null # Column(DateTime, default=now)
-        syntactic_category_string: "" # Column(Unicode(255))
-        morpheme_break_ids: [] # Column(UnicodeText)
-        morpheme_gloss_ids: [] # Column(UnicodeText)
-        break_gloss_category: "" # Column(Unicode(1023))
-        syntax: "" # Column(Unicode(1023))
-        semantics: "" # Column(Unicode(1023))
-        status: "" # Column(Unicode(40), default=u'tested')  # u'tested' vs. u'requires testing'
+    # 7. What is the difference between `datumTags` and `datumFields.tags`?
+    # Looks to me like the latter isn't being used by the Spreadsheet app: it
+    # uses the former. I am taking FieldDB `tags` as `fieldDBTags` and
+    # FieldDB `datumTags` as `fieldDBDatumTags`. OLD `tags` will be `tags`,
+    # for now...
 
-        # Many-to-one relations
-        elicitor: @defaultOLDJSONUser # relation('User', primaryjoin='Form.elicitor_id==User.id') elicitor_id: null # Column(Integer, ForeignKey('user.id', ondelete='SET NULL'))
-        enterer: @defaultOLDJSONUser # relation('User', primaryjoin='Form.enterer_id==User.id') enterer_id: null # Column(Integer, ForeignKey('user.id', ondelete='SET NULL'))
-        modifier: @defaultOLDJSONUser # relation('User', primaryjoin='Form.modifier_id==User.id') modifier_id: null # Column(Integer, ForeignKey('user.id', ondelete='SET NULL'))
-        verifier: @defaultOLDJSONUser # relation('User', primaryjoin='Form.verifier_id==User.id') verifier_id: null # Column(Integer, ForeignKey('user.id', ondelete='SET NULL'))
-        speaker: @defaultOLDJSONSpeaker # relation('Speaker') speaker_id: null # Column(Integer, ForeignKey('speaker.id', ondelete='SET NULL'))
-        elicitation_method: @defaultOLDJSONElicitationMethod# relation('ElicitationMethod') elicitationmethod_id: null # Column(Integer, ForeignKey('elicitationmethod.id', ondelete='SET NULL'))
-        syntactic_category: @defaultOLDJSONSyntacticCategory() # relation('SyntacticCategory', backref='forms') syntacticcategory_id: null # Column(Integer, ForeignKey('syntacticcategory.id', ondelete='SET NULL'))
-        source: @defaultOLDJSONSource# relation('Source') source_id: null # Column(Integer, ForeignKey('source.id', ondelete='SET NULL'))
+    # 8. `comments` is an array. I think that the OLD and FieldDB are using the
+    # word "comments" in two different ways. In the OLD, "comments" is just a
+    # string of comments by the creator/editor of the form about the form. In
+    # FieldDB, "comments" is an array of comments made by various users about
+    # the form. Thus a user might only have the "Commenter" role on a corpus
+    # and may be allowed to add comments but not do much else. For now I am
+    # renaming `FieldDB.Datum.comments` to `Dative.Form.fieldDBComments`.
 
-        # One-to-many relations
-        translations: [] # relation('Translation', backref='form', cascade='all, delete, delete-orphan')
+    # 9. I am renaming FieldDB `utterance` to Dative `transcription`. In the
+    # OLD, `transcription` is by default and implicitly an orthographic
+    # transcription. However, `Orthography` is another field option in some
+    # FieldDB GUIs. The OLD has specific `phoneticTranscription` and
+    # `narrowPhoneticTranscription` fields. Not clear to me just yet how we
+    # should deal with these various similar fields. The logic around all of
+    # these fields should be the same/ similar, i.e., in terms of IGT
+    # formatting.
 
-        # Many-to-many relations
-        files: [] # relation('File', secondary=FormFile.__table__, backref='forms')
-        collections: [] # relation('Collection', secondary=CollectionForm.__table__, backref='forms')
-        tags: [] # relation('Tag', secondary=FormTag.__table__, backref='forms')
+    fieldDB2dative: (fieldDBDatum) ->
+      # console.log 'in fieldDB2dative'
+      # console.log JSON.stringify(fieldDBDatum, undefined, 2)
+      # A FieldDB Datum is, at its core, an array of objects, each of which has
+      # a `label` and a `value` attribute. This method essentially creates a new
+      # object from that label/value information. Certain labels are changed.
+      # The entire fieldDBDatum is stored in the newly created Dative model under
+      # the attribute `fieldDBDatum` so that other # attributes (i.e., `mask`,
+      # `encrypted`, `shouldBeEncrypted`, `help`, `size`, and
+      # `userchooseable` can be recovered).
 
-      # The OLD serves a form as a JSON object. The `Form.get_dict()` method is responsible
-      # for transforming a form-as-python-object to a JSON object of the following form:
-      # Relational data are truncated, e.g., form_dict['elicitor'] is a dict with keys for
-      # 'id', 'first_name' and 'last_name' (cf. get_mini_user_dict above) and lacks
-      # keys for other attributes such as 'username', 'personal_page_content', etc.
-      oldJSON:
-        id: null
-        UUID: null
-        transcription: null
-        phonetic_transcription: null
-        narrow_phonetic_transcription: null
-        morpheme_break: null
-        morpheme_gloss: null
-        comments: null
-        speaker_comments: null
-        grammaticality: null
-        date_elicited: null # ISO date string, e.g., "2014-07-25"
-        datetime_entered: null # ISO datetime string, e.g., "2014-07-25T00:21:02.066819"
-        datetime_modified: null # ISO datetime string, e.g., "2014-07-25T00:21:02.066819"
-        syntactic_category_string: null # E.g., "N-Num"
+      dativeForm =
+        id: fieldDBDatum.id
+        fieldDBDatum: fieldDBDatum
+        fieldDBComments: fieldDBDatum.value.comments # (an array)
+        datetimeModified: @fixFieldDBDatetimeString(
+          fieldDBDatum.value.dateModified) # a string datetime (with timezone)
+        datetimeEntered: @fixFieldDBDatetimeString(
+          fieldDBDatum.value.dateEntered) # a string datetime (with timezone)
 
-        # morpheme_break_ids and morpheme_gloss_ids are nested arrays with depth of 4
-        # a possible morpheme_break_ids value for a form like 'chiens' could be
-        # [[[[33, u'dog', u'N']], [[111, u'PL', u'Num'], [103, u'PL', u'Agr']]]]
-        # The outermost array represents the form; the arrays within the form array are
-        # word arrays; each word array contains one or more morpheme arrays; finally, each
-        # morpheme may be ambiguous so it may contain multiple triplet arrays representing
-        # references to matching lexical forms. Morpheme triplets are [id, gloss, category]
-        # for `morpheme_break_ids` and [id, shape, category] for `morpheme_gloss_ids`.
-        morpheme_break_ids: []
-        morpheme_gloss_ids: []
+      datumFields = fieldDBDatum.value.datumFields
+      sessionFields = fieldDBDatum.value.session.sessionFields
+      for fieldDBObject in datumFields.concat sessionFields
 
-        break_gloss_category: null # E.g., "chien|dog|N-s|PL|Num"
+        # Here is where the label renaming and value conversion occurs
+        attribute = @fieldDBAttribute2datumAttribute fieldDBObject.label
+        value = @fieldDBValue2datumValue(fieldDBObject.value, fieldDBObject.label)
 
-        syntax: null
-        semantics: null
-        status: null
+        # An array value in a fieldDB datumField might (?) be encoded as
+        # multiple objects with the same `label` value.
+        # TODO @cesine: does this ever happen? I.e., can `datumFields` contain
+        # two objects with the same `label` value?
+        if dativeForm[attribute] and
+        @utils.type(dativeForm[attribute]) is 'array'
+          dativeForm[attribute].push value
+        else
+          dativeForm[attribute] = value
 
-        elicitor: @defaultOLDJSONUser
-        enterer: @defaultOLDJSONUser
-        modifier: @defaultOLDJSONUser
-        verifier: @defaultOLDJSONUser
-        speaker: @defaultOLDJSONSpeaker
-        elicitation_method: @defaultOLDJSONElicitationMethod
-        syntactic_category: @defaultOLDJSONSyntacticCategory
-        source: @defaultOLDJSONSource
+      @set dativeForm
 
-        translations: [] # List of objects with the following attributes: "id", "transcription", "grammaticality"
-        tags: [] # List of objects with the following attributes: "id", "name"
-        files: [] # List of objects with the following attributes: "id", "name", "filename", "MIME_type", "size", "url", "lossy_filename"
+    # Transform FieldDB values to Dative-style ones.
+    # NOTE: label is the *unmodified* FieldDB datum label.
+    fieldDBValue2datumValue: (value, label) ->
+      switch label
+        when 'translation' then @fieldDBTranscription2dativeTranscriptions value
+        when 'user' then @fieldDBEnterer2dativeUser value
+        else value
 
-      defaultOLDJSONUser:
-        id: null
-        first_name: null
-        last_name: null
-        role: null
+    fieldDBTranscription2dativeTranscriptions: (value) ->
+      [{appropriateness: '', transcription: value}]
 
-      defaultOLDJSONSpeaker:
-        id: null
-        first_name: null
-        last_name: null
-        dialect: null
+    fieldDBEnterer2dativeUser: (value) ->
+      enterer = @defaultUser()
+      enterer.username = value
+      enterer
 
-      defaultOLDJSONElicitationMethod:
-        id: null
-        name: null
+    fieldDBAttribute2datumAttribute: (label) ->
+      switch label
+        when 'utterance' then 'transcription'
+        when 'gloss' then 'morphemeGloss'
+        when 'morphemes' then 'morphemeBreak'
+        when 'judgement' then 'grammaticality'
+        when 'translation' then 'translations'
+        when 'syntacticCategory' then 'syntacticCategories' # see question #4 above.
+        when 'validationStatus' then 'status' # @cesine: which statuses are relevant to the logic of the various FieldDB GUIs?
+        when 'user' then 'enterer'
+        when 'modifiedByUsers' then 'modifiers'
+        when 'tags' then 'fieldDBTags'
+        when 'datumTags' then 'fieldDBDatumTags'
+        else label
 
-      defaultOLDJSONSyntacticCategory: ->
-        id: null
-        name: null
+    # For some reason *some* FieldDB datetimes are enclosed in double quotation
+    # marks. This fixes that.
+    fixFieldDBDatetimeString: (datetimeString) ->
+      try
+        datetimeString.replace /(^"|"$)/g, ''
+      catch
+        datetimeString
 
-      defaultOLDJSONSource:
-        id: null
-        type: null
-        key: null
-        journal: null
-        editor: null
-        chapter: null
-        pages: null
-        publisher: null
-        booktitle: null
-        school: null
-        institution: null
-        year: null
-        author: null
-        title: null
-        node: null
 
-      # TODO: if OLD AJAX persistence, validate in accordance with oldFormSchema below.
-      validate: (attrs, options) ->
+    ############################################################################
+    # OLD-to-Dative Schema stuff
+    ############################################################################
 
-      # oldFormSchema reflects how server-side OLD validation occurs.
-      # Modify this to provide client-side OLD-compatible validation.
-      _oldFormSchema:
-        transcription: null # ValidOrthographicTranscription(not_empty=True, max=255)
-        phonetic_transcription: null # = ValidBroadPhoneticTranscription(max=255)
-        narrow_phonetic_transcription: null # = ValidNarrowPhoneticTranscription(max=255)
-        morpheme_break: null # = ValidMorphemeBreakTranscription(max=255)
-        grammaticality: null # = ValidGrammaticality()
-        morpheme_gloss: null # = UnicodeString(max=255)
-        translations: null # = ValidTranslations(not_empty=True)
-        comments: null # = UnicodeString()
-        speaker_comments: null # = UnicodeString()
-        syntax: null # = UnicodeString(max=1023)
-        semantics: null # = UnicodeString(max=1023)
-        status: null # = OneOf(h.form_statuses)
-        elicitation_method: @defaultOLDJSONElicitationMethod # = ValidOLDModelObject(model_name='ElicitationMethod')
-        syntactic_category: null # = ValidOLDModelObject(model_name='SyntacticCategory')
-        speaker: null # = ValidOLDModelObject(model_name='Speaker')
-        elicitor: null # = ValidOLDModelObject(model_name='User')
-        verifier: null # = ValidOLDModelObject(model_name='User')
-        source: null # = ValidOLDModelObject(model_name='Source')
-        tags: null # = ForEach(ValidOLDModelObject(model_name='Tag'))
-        files: null # = ForEach(ValidOLDModelObject(model_name='File'))
-        date_elicited: null # = DateConverter(month_style='mm/dd/yyyy')
+    old2dative: (oldForm) ->
+      # An OLD form is received as a JSON object. See
+      # http://online-linguistic-database.readthedocs.org/en/latest/datastructure.html#form
+      # for an exact specification of its attributes and their validation
+      # requirements.
 
-      parse: (response, options) ->
-        response
+      dativeForm = {}
+      for attribute, value of oldForm
+        attribute = @oldAttribute2datumAttribute attribute
+        dativeForm[attribute] = value
+      dativeForm
+
+    oldAttribute2datumAttribute: (attribute) ->
+      switch attribute
+        when 'syntactic_category_string' then 'syntacticCategories'
+        when 'syntax' then 'syntacticTreePTB'
+        else @utils.snake2camel attribute
+
+    # The OLD serves a form as a JSON object. The `Form.get_dict()` method is responsible
+    # for transforming a form-as-python-object to a JSON object of the following form:
+    # Relational data are truncated, e.g., form_dict['elicitor'] is a dict with keys for
+    # 'id', 'first_name' and 'last_name' (cf. get_mini_user_dict above) and lacks
+    # keys for other attributes such as 'username', 'personal_page_content', etc.
+    oldJSON:
+      id: null
+      UUID: null
+      transcription: null
+      phonetic_transcription: null
+      narrow_phonetic_transcription: null
+      morpheme_break: null
+      morpheme_gloss: null
+      comments: null
+      speaker_comments: null
+      grammaticality: null
+      date_elicited: null # ISO date string, e.g., "2014-07-25"
+      datetime_entered: null # ISO datetime string, e.g., "2014-07-25T00:21:02.066819"
+      datetime_modified: null # ISO datetime string, e.g., "2014-07-25T00:21:02.066819"
+      syntactic_category_string: null # E.g., "N-Num"
+
+      # morpheme_break_ids and morpheme_gloss_ids are nested arrays with depth of 4
+      # a possible morpheme_break_ids value for a form like 'chiens' could be
+      # [[[[33, u'dog', u'N']], [[111, u'PL', u'Num'], [103, u'PL', u'Agr']]]]
+      # The outermost array represents the form; the arrays within the form array are
+      # word arrays; each word array contains one or more morpheme arrays; finally, each
+      # morpheme may be ambiguous so it may contain multiple triplet arrays representing
+      # references to matching lexical forms. Morpheme triplets are [id, gloss, category]
+      # for `morpheme_break_ids` and [id, shape, category] for `morpheme_gloss_ids`.
+      morpheme_break_ids: []
+      morpheme_gloss_ids: []
+
+      break_gloss_category: null # E.g., "chien|dog|N-s|PL|Num"
+
+      syntax: null
+      semantics: null
+      status: null
+
+      elicitor: @defaultOLDJSONUser
+      enterer: @defaultOLDJSONUser
+      modifier: @defaultOLDJSONUser
+      verifier: @defaultOLDJSONUser
+      speaker: @defaultOLDJSONSpeaker
+      elicitation_method: @defaultOLDJSONElicitationMethod
+      syntactic_category: @defaultOLDJSONSyntacticCategory
+      source: @defaultOLDJSONSource
+
+      translations: [] # List of objects with the following attributes: "id", "transcription", "grammaticality"
+      tags: [] # List of objects with the following attributes: "id", "name"
+      files: [] # List of objects with the following attributes: "id", "name", "filename", "MIME_type", "size", "url", "lossy_filename"
+
+    defaultOLDJSONUser:
+      id: null
+      first_name: null
+      last_name: null
+      role: null
+
+    defaultOLDJSONSpeaker:
+      id: null
+      first_name: null
+      last_name: null
+      dialect: null
+
+    defaultOLDJSONElicitationMethod:
+      id: null
+      name: null
+
+    defaultOLDJSONSyntacticCategory: ->
+      id: null
+      name: null
+
+    defaultOLDJSONSource:
+      id: null
+      type: null
+      key: null
+      journal: null
+      editor: null
+      chapter: null
+      pages: null
+      publisher: null
+      booktitle: null
+      school: null
+      institution: null
+      year: null
+      author: null
+      title: null
+      node: null
+
+    # TODO: if OLD AJAX persistence, validate in accordance with oldFormSchema below.
+    validate: (attrs, options) ->
+
+    # oldFormSchema reflects how server-side OLD validation occurs.
+    # Modify this to provide client-side OLD-compatible validation.
+    _oldFormSchema:
+      transcription: null # ValidOrthographicTranscription(not_empty=True, max=255)
+      phonetic_transcription: null # = ValidBroadPhoneticTranscription(max=255)
+      narrow_phonetic_transcription: null # = ValidNarrowPhoneticTranscription(max=255)
+      morpheme_break: null # = ValidMorphemeBreakTranscription(max=255)
+      grammaticality: null # = ValidGrammaticality()
+      morpheme_gloss: null # = UnicodeString(max=255)
+      translations: null # = ValidTranslations(not_empty=True)
+      comments: null # = UnicodeString()
+      speaker_comments: null # = UnicodeString()
+      syntax: null # = UnicodeString(max=1023)
+      semantics: null # = UnicodeString(max=1023)
+      status: null # = OneOf(h.form_statuses)
+      elicitation_method: @defaultOLDJSONElicitationMethod # = ValidOLDModelObject(model_name='ElicitationMethod')
+      syntactic_category: null # = ValidOLDModelObject(model_name='SyntacticCategory')
+      speaker: null # = ValidOLDModelObject(model_name='Speaker')
+      elicitor: null # = ValidOLDModelObject(model_name='User')
+      verifier: null # = ValidOLDModelObject(model_name='User')
+      source: null # = ValidOLDModelObject(model_name='Source')
+      tags: null # = ForEach(ValidOLDModelObject(model_name='Tag'))
+      files: null # = ForEach(ValidOLDModelObject(model_name='File'))
+      date_elicited: null # = DateConverter(month_style='mm/dd/yyyy')
+
+    parse: (response, options) ->
+      response
 

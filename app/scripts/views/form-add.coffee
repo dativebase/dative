@@ -76,7 +76,7 @@ define [
 
       modelObject
 
-    render: ->
+    render: (taskId) ->
       params = headerTitle: 'Add a Form'
       _.extend params, @model.toJSON()
       @$el.html @template(params)
@@ -86,6 +86,9 @@ define [
       @_guify body
       @_addModel body
       @_setFocus()
+      @fixRoundedBorders()
+      Backbone.trigger 'longTask:deregister', taskId
+      @
 
     _setFocus: ->
       if @focusedElementId?
@@ -135,7 +138,7 @@ define [
         autoSize: true
       )
       $('select, input, textarea', context)
-        .css "border-color", FormAddView.jQueryUIColors.defBo
+        .css "border-color", @constructor.jQueryUIColors().defBo
 
       $('textarea.transcription', context)
         .focus(->
@@ -257,8 +260,8 @@ define [
                 name: "#{name}.transcription"
                 maxlength: '255'
                 id: transcriptionId)
-              .addClass('translation')
-              .css("border-color", FormAddView.jQueryUIColors.defBo))
+              .addClass('translation ui-corner-all')
+              .css("border-color", BaseView.jQueryUIColors().defBo))
             .append($('<button>').addClass('removeMe')
               .attr(title: 'Remove this translation field.')
               .text('Remove Me')

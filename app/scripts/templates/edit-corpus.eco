@@ -1,0 +1,47 @@
+  <div class="dative-widget-header ui-widget-header ui-corner-top">
+
+    <div class='dative-widget-header-title'>Edit the details of this
+    corpus</div>
+
+  </div>
+
+  <div class="dative-widget-body">
+
+    <ul class="fieldset">
+
+      <li>
+        <label for='title'>Title</label>
+        <textarea rows="1" name="title" maxlength="255"
+          class="title ui-corner-all corpus-edit-input dative-tooltip"
+          title="Modify the title of this corpus"
+        ><%= @title %></textarea>
+        <div class='dative-edit-corpus-failed-container'>
+          <span class='ui-state-error ui-corner-all dative-edit-corpus-failed
+            title-error edit-corpus-error'></span>
+        </div>
+      </li>
+
+      <li>
+        <label for='description'>description</label>
+        <textarea rows="1" name="description"
+          class="description ui-corner-all corpus-edit-input dative-tooltip"
+          title="Modify the description of this corpus"
+        ><%= @description %></textarea>
+        <div class='dative-edit-corpus-failed-container'>
+          <span class='ui-state-error ui-corner-all dative-edit-corpus-failed
+            description-error edit-corpus-error'></span>
+        </div>
+      </li>
+
+      <li>
+        <label for=''></label>
+        <button class='request-edit-corpus dative-tooltip'
+          title='save corpus changes'
+          >Save</button>
+      </li>
+
+    </ul>
+
+  </div>
+
+

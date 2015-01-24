@@ -1,0 +1,82 @@
+
+  <div class="dative-widget-header ui-widget-header ui-corner-top
+    ui-corner-bottom header-no-body">
+
+    <% activeIndicator = if @isActive then '(active)' else '' %>
+    <div class='dative-widget-header-title'>
+      <%= @title %>
+      <span class="active-indicator"><%= activeIndicator %></span>
+    </div>
+
+    <div class='button-container-left'>
+
+      <button class="toggle-appear dative-tooltip"
+        title="show corpus details">
+        <i class="fa fa-caret-right fa-fw"></i>
+      </button>
+
+      <button class="use-corpus dative-tooltip"
+        title="activate this corpus and view its data">
+        <i class="fa fa-toggle-off fa-fw"></i>
+      </button>
+
+      <button class="edit-corpus dative-tooltip"
+        title="show interface for editing the details of this corpus">
+        <i class="fa fa-edit fa-fw"></i>
+      </button>
+
+      <button class="add-user dative-tooltip"
+        title="show interface for managing the users of this corpus">
+        <i class="fa fa-users fa-fw"></i>
+      </button>
+
+    </div>
+
+  </div>
+
+  <% if @isActive: %>
+    <div class="dative-widget-body ui-state-highlight ui-corner-bottom">
+  <% else: %>
+    <div class="dative-widget-body">
+  <% end %>
+
+    <div class="edit-corpus-widget ui-widget ui-widget-content
+      dative-widget-center ui-corner-all"></div>
+
+    <div class="add-user-widget ui-widget ui-widget-content
+      dative-widget-center ui-corner-all"></div>
+
+    <div class="users-widget admins-widget ui-widget ui-widget-content
+      dative-widget-center ui-corner-all">
+
+      <div class="dative-widget-header ui-widget-header ui-corner-top">
+        <div class='dative-widget-header-title'>Admins</div>
+      </div>
+
+      <div class="dative-widget-body admins-widget-body">
+        There are no admins for this corpus.
+      </div>
+    </div>
+
+    <div class="users-widget writers-widget ui-widget ui-widget-content
+      dative-widget-center ui-corner-all">
+      <div class="dative-widget-header ui-widget-header ui-corner-top">
+        <div class='dative-widget-header-title'>Writers</div>
+      </div>
+      <div class="dative-widget-body writers-widget-body">
+        There are no writers for this corpus.
+      </div>
+    </div>
+
+    <div class="users-widget readers-widget ui-widget ui-widget-content
+      dative-widget-center ui-corner-all">
+      <div class="dative-widget-header ui-widget-header ui-corner-top">
+        <div class='dative-widget-header-title'>Readers</div>
+      </div>
+      <div class="dative-widget-body readers-widget-body">
+        There are no readers for this corpus.
+      </div>
+    </div>
+
+  </div>
+

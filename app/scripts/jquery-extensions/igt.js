@@ -71,7 +71,7 @@ define(['jquery'], function($) {
 
             // Line Group Class: class to give to line groups
             var lineGroupClass = (options.lineGroupClass === undefined) ?
-                            'old-form-igt-line-group': options.lineGroupClass;
+                            'dative-form-igt-line-group': options.lineGroupClass;
 
             ////////////////////////////////////////////////////////////////////
             // FUNCTIONS //

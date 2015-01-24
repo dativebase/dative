@@ -235,6 +235,7 @@ module.exports = (grunt) ->
             jqueryelastic: ['jquery']
             perfectscrollbar: ['jquery']
             superfish: ['jquery']
+            superclick: ['jquery']
             supersubs: ['jquery']
             backbonerelational: ['backbone']
             backbonelocalstorage: ['backbone']
@@ -250,6 +251,7 @@ module.exports = (grunt) ->
             text: '../../<%= yeoman.app %>/bower_components/requirejs-text/text'
             jqueryui: '../../<%= yeoman.app %>/bower_components/jqueryui/jquery-ui'
             superfish: '../../<%= yeoman.app%>/scripts/jquery-extensions/superfish'
+            superclick: '../../<%= yeoman.app%>/scripts/jquery-extensions/superclick'
             #superfish: '../../<%= yeoman.app%>/scripts/jquery-extensions/superfish/dist/js/superfish'
             #superfish: '../../<%= yeoman.app %>/bower_components/superfish/dist/js/superfish'
             igt: '../../<%= yeoman.app%>/scripts/jquery-extensions/igt'

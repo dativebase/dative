@@ -1,87 +1,84 @@
 define [
-    'backbone',
-    './../models/form'
-    './../models/database'
-    #'backboneindexeddb' # WARN: conflicts with backbone.localStorage and/or backbone.relational
-  ], (Backbone, FormModel, database) ->
+  'backbone',
+  './../models/form'
+  './../utils/utils'
+], (Backbone, FormModel, utils) ->
 
-    class FormsCollection extends Backbone.Collection
+  # Forms Collection
+  # ----------------
+  #
+  # Holds models for forms.
 
-      # Backbone-IndexedDB stuff
-      database: database
-      storeName: 'forms'
-      model: FormModel
-      url: 'http://127.0.0.1:5002'
+  class FormsCollection extends Backbone.Collection
 
-      # Overriding `fetch` (for now...)
-      fetch: (options) ->
-        @_fakeFetch()
-        #@_corsFetch()
+    model: FormModel
+    url: 'fake-url'
 
-      _fakeFetch: ->
-        fakeFormModel1 = new @model
-          transcription: 'chien'
-          translations: [
-              transcription: 'dog'
-            ,
-              transcription: 'hound'
-            ,
-              transcription: 'wolf'
-              grammaticality: '*'
-          ]
-        fakeFormModel2 = new @model
-          transcription: 'chat'
-          translations: [transcription: 'cat']
-        @set [fakeFormModel1, fakeFormModel2]
+    # Fetch *all* FieldDB forms.
+    # GET `<CorpusServiceURL>/<pouchname>/_design/pages/_view/datums_chronological`
+    fetchAllFieldDBForms: ->
+      Backbone.trigger 'fetchAllFieldDBFormsStart'
+      FormModel.cors.request(
+        method: 'GET'
+        url: @getFetchAllFieldDBFormsURL()
+        onload: (responseJSON) =>
+          Backbone.trigger 'fetchAllFieldDBFormsEnd'
+          if responseJSON.rows
+            @add @getDativeFormModelsFromFieldDBObjects(responseJSON)
+            Backbone.trigger 'fetchAllFieldDBFormsSuccess'
+          else
+            reason = responseJSON.reason or 'unknown'
+            Backbone.trigger 'fetchAllFieldDBFormsFail',
+              "failed to fetch all fielddb forms; reason: #{reason}"
+            console.log ["request to datums_chronological failed;",
+              "reason: #{reason}"].join ' '
+        onerror: (responseJSON) =>
+          Backbone.trigger 'fetchAllFieldDBFormsEnd'
+          Backbone.trigger 'fetchAllFieldDBFormsFail', 'error in fetching all
+            fielddb forms'
+          console.log 'Error in request to datums_chronological'
+      )
 
-      _corsFetch: ->
+    # Fetch OLD Forms
+    # GET `<OLD_URL>/forms
+    fetchOLDForms: ->
+      Backbone.trigger 'fetchOLDFormsStart'
+      FormModel.cors.request(
+        method: 'GET'
+        url: "#{@getOLDURL()}/forms"
+        onload: (responseJSON) =>
+          Backbone.trigger 'fetchOLDFormsEnd'
+          if utils.type(responseJSON) is 'array'
+            @add @getDativeFormModelsFromOLDObjects(responseJSON)
+            Backbone.trigger 'fetchOLDFormsSuccess'
+          else
+            reason = responseJSON.reason or 'unknown'
+            Backbone.trigger 'fetchOLDFormsFail',
+              "failed to fetch all old forms; reason: #{reason}"
+            console.log ["GET request to /forms failed;",
+              "reason: #{reason}"].join ' '
+        onerror: (responseJSON) =>
+          Backbone.trigger 'fetchOLDFormsEnd'
+          Backbone.trigger 'fetchOLDFormsFail', 'error in fetching forms'
+          console.log 'Error in GET request to /forms'
+      )
 
-        # TODO: read this: http://stackoverflow.com/questions/14376295/should-i-simulate-a-cors-options-request-in-sinon-js-or-how-do-i-test-cross-doma
+    ############################################################################
+    # Helpers
+    ############################################################################
 
-        url = "#{@url}/forms"
-        method = 'GET'
-        payload = null
+    getFetchAllFieldDBFormsURL: ->
+      url = @applicationSettings.get 'baseDBURL'
+      pouchname = @activeFieldDBCorpus.get 'pouchname'
+      "#{url}/#{pouchname}/_design/pages/_view/datums_chronological"
 
-        fetchType = 'authenticate'
-        if fetchType is 'authenticate'
-          url = 'http://127.0.0.1:5000/login/authenticate'
-          method = 'POST'
-          payload = JSON.stringify(username: 'dative-rest-username', password: 'password')
-        else if fetchType is 'forms_new'
-          url = 'http://127.0.0.1:5000/forms/new'
-        console.log url
-        xhr = @model::createCORSRequest method, url
-        if not xhr
-          throw new Error 'CORS not supported'
-        xhr.withCredentials = true
-        xhr.send(payload)
+    getOLDURL: -> @applicationSettings.get('activeServer').get 'url'
 
-        console.log 'I made a request'
-        xhr.onload = ->
-          console.log 'onload fired'
-          responseText = xhr.responseText
-          console.log responseText
+    # Return an array of `FormModel` instances built from FieldDB objects.
+    getDativeFormModelsFromFieldDBObjects: (responseJSON) ->
+      (new FormModel()).fieldDB2dative(o) for o in responseJSON.rows
 
-          # TODO: process the response.
-
-        xhr.onerror = ->
-          console.log 'onerror: there was an error!'
-
-        xhr.onloadstart = ->
-          console.log 'onloadstart: the request has started'
-
-        xhr.onabort = ->
-          console.log 'onabort: the request has been aborted. For instance, by
-            invoking the abort() method.'
-
-        xhr.onprogress = ->
-          console.log 'onprogress: while loading and sending data.'
-
-        xhr.ontimeout = ->
-          console.log 'ontimeout: author-specified timeout has passed before the
-            request could complete.'
-
-        xhr.onloadend = ->
-          console.log 'onloadend: the request has completed (either in success
-            or failure).'
+    # Return an array of `FormModel` instances built from OLD objects.
+    getDativeFormModelsFromOLDObjects: (responseJSON) ->
+      (new FormModel()).old2dative(o) for o in responseJSON
 

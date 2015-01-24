@@ -21,12 +21,22 @@ define [
     initialize: ->
       @listenTo Backbone, 'registerDialog:toggle', @toggle
       @listenTo @model, 'change:activeServer', @serverDependentRegistration
-      @listenTo @model.get('activeServer'), 'change:type', @serverDependentRegistration
+      if @model.get('activeServer')
+        @listenTo @model.get('activeServer'), 'change:type',
+          @serverDependentRegistration
       @listenTo Backbone, 'authenticate:end', @registerEnd
       @listenTo Backbone, 'register:success', @registerSuccess
+      @listenTo Backbone, 'login-dialog:open', @dialogClose
 
       @activeServerView = new ActiveServerView
-        model: @model, width: 252, label: 'Server *'
+        model: @model
+        width: 252
+        label: 'Server *'
+        tooltipContent: 'select a server to register with'
+        tooltipPosition:
+          my: "right-130 center"
+          at: "left center"
+          collision: "flipfit"
 
     registerEnd: ->
       @enableRegisterButton()
@@ -48,6 +58,7 @@ define [
       'keydown .dative-register-dialog-widget .passwordConfirm': 'submitWithEnter'
       'input .dative-register-dialog-widget .email': 'validate'
       'keydown .dative-register-dialog-widget .email': 'submitWithEnter'
+      'dialogdragstart': 'closeAllTooltips'
 
     render: ->
       @$el.append @template(@model.attributes)
@@ -56,6 +67,7 @@ define [
       @$source = @$ '.dative-register-dialog' # outer DIV from template
       @$target = @$ '.dative-register-dialog-target' # outer DIV to which jQueryUI dialog appends
       @dialogify()
+      @tooltipify()
       @
 
     renderActiveServerView: ->
@@ -95,15 +107,16 @@ define [
     # Transform the register dialog HTML to a jQueryUI dialog box.
     dialogify: ->
       @$source.find('input').css('border-color',
-        RegisterDialogView.jQueryUIColors.defBo)
+        @constructor.jQueryUIColors().defBo)
       @$source.dialog
-        position: my: "center+30", at: "center+30", of: window
+        hide: {effect: 'fade'}
+        show: {effect: 'fade'}
         autoOpen: false
         appendTo: @$target
         buttons: [
             text: 'Register'
             click: => @register()
-            class: 'register'
+            class: 'register dative-tooltip'
         ]
         dialogClass: 'dative-register-dialog-widget'
         title: 'Register'
@@ -111,20 +124,41 @@ define [
         create: =>
           @$target.find('button').attr('tabindex', 0).end()
             .find('input').css('border-color',
-              RegisterDialogView.jQueryUIColors.defBo)
+              @constructor.jQueryUIColors().defBo)
+          @fontAwesomateCloseIcon()
         open: =>
           @initializeDialog()
           @selectmenuify()
           @tabindicesNaught()
           @disableRegisterButton()
 
+    tooltipify: ->
+      @$('button.register')
+        .tooltip
+          content: 'send a registration request to the server'
+          items: 'button'
+          position:
+            my: "right-10 center"
+            at: "left center"
+            collision: "flipfit"
+      @$('input').tooltip
+        position:
+          my: "right-130 center"
+          at: "left center"
+          collision: "flipfit"
+
     initializeDialog: ->
       @_submitAttempted = false
       @$target.find('.password.passwordConfirm').val('').end()
         .find('span.dative-register-validation').text('').hide()
-      @$target.find('.ui-selectmenu-button').focus()
+      @focusFirstInput()
 
-    dialogOpen: -> @$source.dialog 'open'
+    focusFirstInput: ->
+      @$target.find('input').first().focus()
+
+    dialogOpen: ->
+      Backbone.trigger 'register-dialog:open'
+      @$source.dialog 'open'
 
     dialogClose: -> @$source.dialog 'close'
 
@@ -191,13 +225,13 @@ define [
 
     selectmenuify: ->
       @$target.find('select').selectmenu width: 252
-      @$target.find('.ui-selectmenu-button').focus()
+      @focusFirstInput()
 
     # Tabindices=0 and jQueryUI colors
     tabindicesNaught: ->
       @$('button, select, input, textarea, div.dative-input-display,
         span.ui-selectmenu-button')
-        .css("border-color", RegisterDialogView.jQueryUIColors.defBo)
+        .css("border-color", @constructor.jQueryUIColors().defBo)
         .attr('tabindex', 0)
 
 
@@ -283,6 +317,7 @@ define [
 
     # `attr` must have a value; indicate that and return `null` if no `val`.
     required: (attr, val) ->
+      console.log "in required with #{attr} and value: #{val}"
       if val
         @$(".#{attr}-validation").first().hide()
         val
