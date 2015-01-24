@@ -75,7 +75,7 @@ define [
       # FieldDB stuff commented out until it can be better incorporated
       # FieldDB.FieldDBObject.application = @applicationSettings
       # FieldDB.FieldDBObject.application.currentFieldDB = new FieldDB.Corpus()
-      # FieldDB.FieldDBObject.application.currentFieldDB.loadOrCreateCorpusByPouchName("jrwdunham-firstcorpus")
+      # FieldDB.FieldDBObject.application.currentFieldDB.loadOrCreateCorpusByPouchName("testingdative-firstcorpus")
       # FieldDB.FieldDBObject.application.currentFieldDB.url = FieldDB.FieldDBObject.application.currentFieldDB.BASE_DB_URL
 
       @matchWindowDimensions()
