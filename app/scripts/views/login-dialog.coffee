@@ -96,6 +96,8 @@ define [
         open: =>
           @_initializeDialog()
           @_disableButtons()
+        close: =>
+          @closeAllTooltips()
 
     tooltipify: ->
       @$('button.register')

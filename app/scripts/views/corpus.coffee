@@ -5,9 +5,11 @@ define [
   './edit-corpus'
   './add-user'
   './../models/user'
+  './../utils/globals'
   './../templates/corpus'
   'jqueryspin'
-], (Backbone, BaseView, UserView, EditCorpusView, AddUserView, UserModel, corpusTemplate) ->
+], (Backbone, BaseView, UserView, EditCorpusView, AddUserView, UserModel,
+  globals, corpusTemplate) ->
 
   # Corpus View
   # ------------
@@ -202,7 +204,7 @@ define [
         @$('.dative-widget-body').removeClass 'ui-state-highlight ui-corner-bottom'
 
     isActive: ->
-      activeFieldDBCorpusPouchname = @activeFieldDBCorpus?.get 'pouchname'
+      activeFieldDBCorpusPouchname = globals.applicationSettings.get 'activeFieldDBCorpus'
       pouchname = @model.get 'pouchname'
       if activeFieldDBCorpusPouchname is pouchname then true else false
 
@@ -527,10 +529,9 @@ define [
       @$('.dative-widget-header').first()
         .spin @spinnerOptions()
         .tooltip
-          items: 'div'
           content: tooltipMessage
           position:
-            my: "left+610 top+8", at: "left top", collision: "flipfit"
+            my: "left+1110 top+8", at: "left top", collision: "flipfit"
         .tooltip 'open'
 
     stopSpin: ->

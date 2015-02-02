@@ -18,12 +18,13 @@ define [
   './../models/application-settings'
   './../models/form'
   './../collections/application-settings'
+  './../utils/globals'
   './../templates/app'
 ], (Backbone, Workspace, BaseView, MainMenuView, ProgressWidgetView,
   NotifierView, LoginDialogView, RegisterDialogView, AlertDialogView,
   ApplicationSettingsView, PagesView, HomePageView, FormAddView,
   FormsSearchView, FormsView, CorporaView, ApplicationSettingsModel, FormModel,
-  ApplicationSettingsCollection, appTemplate) ->
+  ApplicationSettingsCollection, globals, appTemplate) ->
 
   # App View
   # --------
@@ -40,6 +41,7 @@ define [
     initialize: (options) ->
       @router = new Workspace()
       @getApplicationSettings options
+      globals.applicationSettings = @applicationSettings
       @overrideFieldDBNotificationHooks()
       @initializePersistentSubviews()
       @listenToEvents()
@@ -117,6 +119,8 @@ define [
       fieldDBCorporaCollection = @corporaView?.collection
       @activeFieldDBCorpus = fieldDBCorporaCollection?.findWhere
         pouchname: corpusId
+      @applicationSettings.save 'activeFieldDBCorpus', corpusId
+      globals.activeFieldDBCorpus = @activeFieldDBCorpus
       if currentlyActiveFieldDBCorpus is @activeFieldDBCorpus
         @showFormsView fieldDBCorpusHasChanged: false
       else
@@ -257,6 +261,7 @@ define [
     showCorporaView: ->
       if not @loggedIn() then return
       if @corporaView and @visibleView is @corporaView then return
+      if @visibleView then @visibleView.spin()
       @router.navigate 'corpora'
       taskId = @guid()
       Backbone.trigger 'longTask:register', 'Opening corpora view', taskId
@@ -265,6 +270,7 @@ define [
         @corporaView = new CorporaView
           applicationSettings: @applicationSettings
           activeFieldDBCorpus: @activeFieldDBCorpus
+      if @visibleView then @visibleView.stopSpin()
       @visibleView = @corporaView
       @renderVisibleView taskId
 

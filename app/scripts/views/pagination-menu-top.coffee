@@ -178,6 +178,7 @@ define [
       @setNumberedPageButtonsState()
       @setPreviousFirstPageButtonsState()
       @setNextLastPageButtonsState()
+      @setItemsPerPageSelectState()
 
     # The current page button is unique: always disabled.
     setCurrentPageButtonState: ->
@@ -213,16 +214,22 @@ define [
             .show()
 
     setPreviousFirstPageButtonsState: ->
-      if @paginator.page is 1
+      if @paginator.page is 1 or @paginator.items is 0
         @$('.previous-page, .first-page').button 'disable'
       else
         @$('.previous-page, .first-page').button 'enable'
 
     setNextLastPageButtonsState: ->
-      if @paginator.page is @paginator.pages
+      if @paginator.page is @paginator.pages or @paginator.items is 0
         @$('.next-page, .last-page').button 'disable'
       else
         @$('.next-page, .last-page').button 'enable'
+
+    setItemsPerPageSelectState: ->
+      if @paginator.items is 0
+        @$('select[name=items-per-page]').selectmenu 'disable'
+      else
+        @$('select[name=items-per-page]').selectmenu 'enable'
 
     ############################################################################
     # Methods that trigger events requesting for specific pages to be shown.

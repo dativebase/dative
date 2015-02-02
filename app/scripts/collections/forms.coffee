@@ -2,7 +2,8 @@ define [
   'backbone',
   './../models/form'
   './../utils/utils'
-], (Backbone, FormModel, utils) ->
+  './../utils/globals'
+], (Backbone, FormModel, utils, globals) ->
 
   # Forms Collection
   # ----------------
@@ -68,8 +69,8 @@ define [
     ############################################################################
 
     getFetchAllFieldDBFormsURL: ->
-      url = @applicationSettings.get 'baseDBURL'
-      pouchname = @activeFieldDBCorpus.get 'pouchname'
+      url = globals.applicationSettings.get 'baseDBURL'
+      pouchname = globals.applicationSettings.get 'activeFieldDBCorpus'
       "#{url}/#{pouchname}/_design/pages/_view/datums_chronological"
 
     getOLDURL: -> @applicationSettings.get('activeServer').get 'url'

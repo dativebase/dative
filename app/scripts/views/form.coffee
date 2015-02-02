@@ -315,7 +315,6 @@ define [
     hideSecondaryDataAnimate: (event) ->
       @secondaryDataVisible = false
       @setSecondaryDataButtonStateClosed()
-      @removeBorderAnimate()
       @$('.form-secondary-data').slideUp
         complete: =>
           # FormsView listens once for this and fixes scroll position and focus in response

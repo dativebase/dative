@@ -2,10 +2,11 @@ define [
   'jquery'
   'backbone'
   './base'
+  './../utils/globals'
   './../templates/mainmenu'
   'superclick'
   'supersubs'
-], ($, Backbone, BaseView, mainmenuTemplate) ->
+], ($, Backbone, BaseView, globals, mainmenuTemplate) ->
 
   # Main Menu View
   # --------------
@@ -26,6 +27,7 @@ define [
     activeFieldDBCorpusChanged: (activeFieldDBCorpusTitle) ->
       @activeFieldDBCorpusTitle = activeFieldDBCorpusTitle
       @refreshLoggedInUser()
+      @displayActiveCorpusName()
 
     events:
       'click a.dative-authenticated': 'toggleLoginDialog'
@@ -83,6 +85,7 @@ define [
       @superclickify() # Superclick transmogrifies menu
 
       @refreshLoginButton()
+      @displayActiveCorpusName()
       @refreshLoggedInUser()
       @bindClickToEventTrigger() # Vivify menu buttons
       @keyboardShortcuts()
@@ -211,6 +214,10 @@ define [
           .button()
           .css 'border-color', @constructor.jQueryUIColors().defBa
           .tooltip()
+
+    displayActiveCorpusName: ->
+      if globals.activeFieldDBCorpus
+        @$('.active-corpus-name').text globals.activeFieldDBCorpus.get('title')
 
     # Reset the tooltip title of the logged-in user's name in the top right.
     refreshLoggedInUser: ->

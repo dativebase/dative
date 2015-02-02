@@ -701,6 +701,7 @@ div.servers-config-widget > div.dative-widget-header > div.dative-widget-header-
 div.server-config-widget > div.dative-widget-header > div.dative-widget-header-title,
 div#dative-page-header > div.dative-page-header-title,
 div#dative-page-header > div.dative-forms-view-header > div.dative-page-header-title,
+div.container-center,
 div.button-container-center {
   position: absolute;
   top: 50%;

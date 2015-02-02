@@ -118,8 +118,15 @@ define [
       hwaccel: false # Whether to use hardware acceleration
       className: 'spinner' # The CSS class to assign to the spinner
       zIndex: 2e9 # The z-index (defaults to 2000000000)
-      top: '0%' # Top position relative to parent
-      left: '0%' # Left position relative to parent
+      # top: '0%' # Top position relative to parent
+      # left: '0%' # Left position relative to parent
+      top: '50%'
+      left: '98%'
+
+    spin: -> @$('#dative-page-header').spin @spinnerOptions()
+
+    stopSpin: -> @$('#dative-page-header').spin false
+
 
     # Logic for remembering and re-focusing the last focused element.
 

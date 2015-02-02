@@ -122,6 +122,9 @@
     </li>
 </ul>
 
+<div class='container-center active-corpus-name'>
+</div>
+
 <div class='container-right'>
   <a class="dative-authenticated" title="login">
     <i class='fa fa-lock fa-fw'></i>

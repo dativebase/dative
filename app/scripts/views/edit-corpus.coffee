@@ -2,6 +2,7 @@ define [
   'backbone'
   './base'
   './../templates/edit-corpus'
+  'jqueryelastic'
 ], (Backbone, BaseView, editCorpusTemplate) ->
 
   # Edit Corpus View
@@ -81,7 +82,7 @@ define [
       if input[0] in ['a', 'e', 'i', 'o', 'u'] then 'an' else 'a'
 
     submitWithEnter: (event) ->
-      if event.which is 13
+      if event.ctrlKey and event.which is 13
         @stopEvent event
         $editCorpusButton = @$('button.request-edit-corpus')
         disabled = $editCorpusButton.button 'option', 'disabled'
@@ -90,6 +91,7 @@ define [
     guify: ->
 
       @$('textarea[name=title]')
+        .elastic compactOnBlur: false
         .tooltip
           position:
             my: "right-85 center"
@@ -97,6 +99,7 @@ define [
             collision: "flipfit"
 
       @$('textarea[name=description]')
+        .elastic compactOnBlur: false
         .tooltip
           position:
             my: "right-85 center"
@@ -112,6 +115,9 @@ define [
             collision: 'flipfit'
 
       @$('.dative-edit-corpus-failed').hide()
+
+      # Do this, otherwise jquery-elastic erratically increases textarea height ...
+      @$('textarea').css height: '16px'
 
     closeGUI: ->
       @visible = false

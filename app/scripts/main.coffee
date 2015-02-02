@@ -69,5 +69,5 @@ require [
 
     $ ->
       # Backbone.history.start()
-      new AppView()
+      app = new AppView()
 

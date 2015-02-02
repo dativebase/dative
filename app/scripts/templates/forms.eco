@@ -4,18 +4,16 @@
   <div class='dative-forms-view-header'>
 
     <div class='dative-page-header-title'>
-      Browsing
-      <% if @paginator.start is @paginator.end - 1: %>
-        <span class='form-range'>form <%= @paginator.start + 1 %></span>
-      <% else: %>
-        <span class='form-range'>forms <%= @paginator.start + 1 %>
-        to <%= @paginator.end + 1 %></span>
-      <% end %>
-      of
-      <span class='form-count'><%= @paginator.items %></span>
-      (<span class='page-count'><%= @paginator.pages %></span>
-      <span class='page-count-noun'
-        ><%= @pluralizeByNum 'page', @paginator.pages %></span>)
+      <div class='no-forms'>
+        There are no forms to display
+      </div>
+      <div class='pagination-info'>
+        Browsing
+        <span class='form-range'></span>
+        of
+        <span class='form-count'></span>
+        (<span class='page-count'></span> <span class='page-count-noun'></span>)
+      </div>
     </div>
 
     <div class='button-container-left'>

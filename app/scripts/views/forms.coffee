@@ -36,14 +36,13 @@ define [
       @listenToEvents()
 
     events:
-      'focus button, input, .ui-selectmenu-button, .dative-form-object': 'rememberFocusedElement'
+      'focus button, input, .ui-selectmenu-button, .dative-form-object':
+        'rememberFocusedElement'
       'focus .dative-form-object': 'scrollToFocusedInput'
       'click .expand-all': 'expandAllForms'
       'click .collapse-all': 'collapseAllForms'
       'click .new-form': 'showNewFormView'
       'keydown': 'keyboardShortcuts'
-
-    rememberFocusedElement: ->
 
     # These are the focusable elements in the forms browse interface.
     focusableSelector: 'button, input, .ui-selectmenu-button, .dative-form-object'
@@ -113,8 +112,10 @@ define [
         pluralizeByNum: @utils.pluralizeByNum
         paginator: @paginator
       @$el.html @template(context)
+      @spin()
       @matchHeights()
       @guify()
+      @refreshHeader()
       @renderPaginationMenuTopView()
       @fetchFormsToCollection()
       @listenToEvents()
@@ -163,7 +164,8 @@ define [
       @$('.dative-pagin-items')[hideMethod] hideOptions
 
     getAnimationDuration: ->
-      100 + (10 * @paginator.itemsDisplayed)
+      100
+      #100 + (10 * @paginator.itemsDisplayed)
 
     closeRenderedFormViews: ->
       while @renderedFormViews.length
@@ -193,14 +195,15 @@ define [
     spin: (tooltipMessage) ->
       @$('#dative-page-header')
         .spin @spinnerOptions()
-        .tooltip
-          items: 'div'
-          content: tooltipMessage
-          position:
-            my: "left+10 center"
-            at: "right top+20"
-            collision: "flipfit"
-        .tooltip 'open'
+      if tooltipMessage
+        @$('#dative-page-header')
+          .tooltip
+            content: tooltipMessage
+            position:
+              my: "left+10 center"
+              at: "right top+20"
+              collision: "flipfit"
+          .tooltip 'open'
 
     stopSpin: ->
       $header = @$('#dative-page-header')
@@ -218,8 +221,10 @@ define [
     # it sets focus based on the remembered index of a jQuery matched set.
     setFocus: ->
       if @focusedElementIndex
+        console.log 'we will focus last focused element'
         @focusLastFocusedElement()
       else
+        console.log 'we will focus the first form'
         @focusFirstForm()
 
     focusFirstButton: ->
@@ -279,6 +284,7 @@ define [
           @rendered formView
           @renderedPaginationItemTableViews.push paginationItemTableView
           @rendered paginationItemTableView
+      @stopSpin()
 
       if options?.showEffect
         $formList[options.showEffect]
@@ -291,18 +297,28 @@ define [
 
     refreshHeader: ->
       @paginator.setItems @collection.length
-      if @paginator.start is @paginator.end
-        @$('.form-range')
-          .text "form #{@utils.integerWithCommas(@paginator.start + 1)}"
+      if @paginator.items is 0
+        @$('.no-forms').show()
+        @$('.pagination-info').hide()
+        @$('button.expand-all').button 'disable'
+        @$('button.collapse-all').button 'disable'
       else
-        @$('.form-range').text ["forms",
-          "#{@utils.integerWithCommas(@paginator.start + 1)}",
-          "to",
-          "#{@utils.integerWithCommas(@paginator.end + 1)}"].join ' '
-      @$('.form-count').text @utils.integerWithCommas(@paginator.items)
-      @$('.form-count-noun').text @utils.pluralizeByNum('form', @paginator.items)
-      @$('.page-count').text @utils.integerWithCommas(@paginator.pages)
-      @$('.page-count-noun').text @utils.pluralizeByNum('page', @paginator.pages)
+        @$('.no-forms').hide()
+        @$('.pagination-info').show()
+        @$('button.expand-all').button 'enable'
+        @$('button.collapse-all').button 'enable'
+        if @paginator.start is @paginator.end
+          @$('.form-range')
+            .text "form #{@utils.integerWithCommas(@paginator.start + 1)}"
+        else
+          @$('.form-range').text ["forms",
+            "#{@utils.integerWithCommas(@paginator.start + 1)}",
+            "to",
+            "#{@utils.integerWithCommas(@paginator.end + 1)}"].join ' '
+        @$('.form-count').text @utils.integerWithCommas(@paginator.items)
+        @$('.form-count-noun').text @utils.pluralizeByNum('form', @paginator.items)
+        @$('.page-count').text @utils.integerWithCommas(@paginator.pages)
+        @$('.page-count-noun').text @utils.pluralizeByNum('page', @paginator.pages)
 
     changeItemsPerPage: (newItemsPerPage) ->
       itemsDisplayedBefore = @paginator.itemsDisplayed

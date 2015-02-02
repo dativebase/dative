@@ -5,10 +5,11 @@ define [
   './create-corpus'
   './../models/corpus'
   './../collections/corpora'
+  './../utils/globals'
   './../templates/corpora'
   'perfectscrollbar'
 ], (Backbone, BaseView, CorpusView, CreateCorpusView, CorpusModel, CorporaCollection,
-  corporaTemplate) ->
+  globals, corporaTemplate) ->
 
   # Corpora View
   # ------------
