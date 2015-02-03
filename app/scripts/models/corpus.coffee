@@ -140,6 +140,9 @@ define [
           console.log 'Failed request to /updateroles: timed out.'
       )
 
+    # NOTE: @jrwdunham, @cesine: NOT IMPLEMENTED
+    # See https://github.com/jrwdunham/dative/issues/78
+
     # Update the details of a corpus
     # PUT `<CorpusServiceURL>/<pouchname>/<corpusUUID>
     # QUESTIONS:
@@ -148,18 +151,19 @@ define [
     # TODO:
     # set title to new title
     # set description to new description
-    # update dateModified timestamp: new Date().getTime()
+    # update dateModified timestamp: (new Date().getTime()
     # allow user to modify gravatar
     # show gravatar in corpus list
     #
     updateCorpus: (title, description) ->
       console.log 'in updateCorpus of corpus model'
-      for attr in _.keys(@attributes).sort()
-        if attr not in ['applicationSettings', 'isActive']
-          console.log '\n'
-          console.log attr
-          console.log JSON.stringify(@attributes[attr])
-          console.log '\n'
+      console.log JSON.stringify(@, undefined, 2)
+      # for attr in _.keys(@attributes).sort()
+      #   if attr not in ['applicationSettings', 'isActive']
+      #     console.log '\n'
+      #     console.log attr
+      #     console.log JSON.stringify(@attributes[attr])
+      #     console.log '\n'
 
     updateCorpus_: (title, description) ->
       @trigger 'updateCorpusStart'

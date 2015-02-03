@@ -643,6 +643,7 @@ div.server-config-widget {
 div.server-config-widget input,
 div.add-user-widget input,
 div.edit-corpus-widget textarea,
+div.edit-corpus-widget input,
 div.create-corpus-widget input {
   max-width: 300px;
   min-width: 300px;

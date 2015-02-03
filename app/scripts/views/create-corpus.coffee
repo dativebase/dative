@@ -39,14 +39,14 @@ define [
       @
 
     events:
-      'keyup input[name=corpus-name]': 'validate'
+      'keyup input[name=corpus-title]': 'validate'
       'click button.request-create-corpus': 'requestCreateCorpus'
       'keydown button.request-create-corpus': 'requestCreateCorpusKeys'
-      'keydown input[name=corpus-name]': 'requestCreateCorpusKeys'
+      'keydown input[name=corpus-title]': 'requestCreateCorpusKeys'
 
-    newCorpusStart: (newCorpusName) ->
+    newCorpusStart: (newCorpusTitle) ->
       @disableCreateCorpusButton()
-      @spin "Requesting creation of a new corpus named “#{newCorpusName}”"
+      @spin "Requesting creation of a new corpus entitled “#{newCorpusTitle}”"
 
     newCorpusEnd: ->
       @requestPending = false
@@ -54,8 +54,8 @@ define [
       @enableCreateCorpusButton()
       @stopSpin()
 
-    newCorpusSuccess: (newCorpusName) ->
-      @showCorpusCreateSuccessMessage "Successfully created a corpus named “#{newCorpusName}”"
+    newCorpusSuccess: (newCorpusTitle) ->
+      @showCorpusCreateSuccessMessage "Successfully created a corpus entitled “#{newCorpusTitle}”"
 
     newCorpusFail: (reason) ->
       @showCorpusCreateErrorMessage reason
@@ -125,10 +125,10 @@ define [
 
     requestCreateCorpus: ->
       @submitAttempted = true
-      corpusName = @validate()
+      corpusTitle = @validate()
       if @inputsValid
         @disableCreateCorpusButton()
-        @trigger 'request:createCorpus', corpusName
+        @trigger 'request:createCorpus', corpusTitle
         @requestPending = true
 
     requestCreateCorpusKeys: (event) ->
@@ -139,20 +139,20 @@ define [
         if not disabled then $createCorpusButton.click()
 
     disableCreateCorpusButton: ->
-      @focusNameInput()
+      @focusTitleInput()
       @$('button.request-create-corpus').button 'disable'
 
     enableCreateCorpusButton: ->
       @$('button.request-create-corpus').button 'enable'
 
-    focusNameInput: ->
-      @$('input[name=corpus-name]').first().focus()
+    focusTitleInput: ->
+      @$('input[name=corpus-title]').first().focus()
 
     validate: ->
-      corpusName = @$('input[name=corpus-name]').val() or false
-      if corpusName then @hideErrorMsg()
+      corpusTitle = @$('input[name=corpus-title]').val() or false
+      if corpusTitle then @hideErrorMsg()
       errorMsg = null
-      if not corpusName
+      if not corpusTitle
         errorMsg = 'required'
       @inputsValid = if errorMsg then false else true
       if @submitAttempted
@@ -162,12 +162,12 @@ define [
         else
           @showErrorMsg errorMsg
           @disableCreateCorpusButton()
-      corpusName
+      corpusTitle
 
     showErrorMsg: (errorMsg) ->
-      @$(".corpus-name-error").first().stop().text(errorMsg).fadeIn()
+      @$(".corpus-title-error").first().stop().text(errorMsg).fadeIn()
 
-    hideErrorMsg: -> @$(".corpus-name-error").first().stop().fadeOut()
+    hideErrorMsg: -> @$(".corpus-title-error").first().stop().fadeOut()
 
     # Tabindices=0 and jQueryUI colors
     # TODO @jrwdunham: this could be a method defined once in BaseView, I think.
@@ -183,7 +183,7 @@ define [
         at: "left center"
         collision: "flipfit"
 
-      @$('input[name=corpus-name]')
+      @$('input[name=corpus-title]')
         .tooltip position: position
 
       @$('button.request-create-corpus')

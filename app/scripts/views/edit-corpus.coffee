@@ -30,10 +30,10 @@ define [
       @
 
     events:
-      'keyup textarea[name=title]': 'validate'
+      'keyup input[name=title]': 'validate'
       'keyup textarea[name=description]': 'validate'
       'click button.request-edit-corpus': 'requestEditCorpus'
-      'keydown textarea[name=title]': 'submitWithEnter'
+      'keydown input[name=title]': 'submitWithEnter'
       'keydown textarea[name=description]': 'submitWithEnter'
 
     requestEditCorpus: ->
@@ -44,14 +44,14 @@ define [
         @trigger 'request:editCorpus', title, description
 
     disableEditCorpusButton: ->
-      @$('textarea[name=title]').first().focus()
+      @$('input[name=title]').first().focus()
       @$('button.request-edit-corpus').button 'disable'
 
     enableEditCorpusButton: ->
       @$('button.request-edit-corpus').button 'enable'
 
     validate: ->
-      title = @$('textarea[name=title]').val() or false
+      title = @$('input[name=title]').val() or false
       description = @$('textarea[name=description]').val() or false
       if title then @hideTitleErrorMsg()
       if description then @hideDescriptionErrorMsg()
@@ -90,8 +90,7 @@ define [
 
     guify: ->
 
-      @$('textarea[name=title]')
-        .elastic compactOnBlur: false
+      @$('input[name=title]')
         .tooltip
           position:
             my: "right-85 center"
@@ -108,6 +107,7 @@ define [
 
       @$('button.request-edit-corpus')
         .button()
+        .button 'disable'
         .tooltip
           position:
             my: 'right-85 center'
@@ -125,5 +125,7 @@ define [
 
     openGUI: ->
       @visible = true
-      @$el.slideDown()
+      @$el.slideDown
+        complete: =>
+          @$('input').first().focus()
 

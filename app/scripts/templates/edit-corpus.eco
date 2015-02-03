@@ -11,10 +11,9 @@
 
       <li>
         <label for='title'>Title</label>
-        <textarea rows="1" name="title" maxlength="255"
+        <input type="text" maxlength="255" name="title"
           class="title ui-corner-all corpus-edit-input dative-tooltip"
-          title="Modify the title of this corpus"
-        ><%= @title %></textarea>
+          title="Modify the title of this corpus" value="<%= @title %>" />
         <div class='dative-edit-corpus-failed-container'>
           <span class='ui-state-error ui-corner-all dative-edit-corpus-failed
             title-error edit-corpus-error'></span>
@@ -37,8 +36,11 @@
         <label for=''></label>
         <button class='request-edit-corpus dative-tooltip'
           title='save corpus changes'
-          >Save</button>
+          ><i class="fa fa-fw fa-floppy-o"></i>Save Corpus Details</button>
       </li>
+
+      <p class='ui-state-error'>WARNing: Corpus metadata update currently
+      deactivated in Dative.</p>
 
     </ul>
 
