@@ -5,4 +5,5 @@
 <div id='login-dialog-container'></div>
 <div id='register-dialog-container'></div>
 <div id='alert-dialog-container'></div>
+<div id='help-dialog-container'></div>
 

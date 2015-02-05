@@ -25,20 +25,33 @@ div#mainmenu {
     margin: 10px auto;
     width: 900px;
 }
-#dative-page-body {
+
+#dative-page-body
+{
     margin: 10px;
     overflow: hidden;
     position: relative;
 }
+
 .ui-widget {
     font-size: 100%;
 }
-.dative-authenticated {
+
+.dative-help,
+.dative-authenticated
+{
     width: 16px;
     height: 16px;
     margin-top: 3px;
     bottom: 0.25em;
 }
+
+button.help-button
+{
+    width: 20px;
+    height: 20px;
+}
+
 #dative-page {
     margin: 40px auto 15px auto;
     width: 900px;
@@ -262,6 +275,7 @@ div.dative-page-header-title
 
 .dative-login-dialog-widget,
 .dative-register-dialog-widget,
+.dative-help-dialog-widget,
 #appview,
 .progress-widget,
 .notifier,
@@ -582,16 +596,27 @@ h1 {
   padding: 0.5em;
 }
 
-.dative-authenticated span.ui-button-text
+.dative-authenticated span.ui-button-text,
+.dative-help span.ui-button-text
 {
     padding: 0;
 }
 
-.dative-authenticated span.ui-button-text i
+.dative-authenticated span.ui-button-text i,
+.dative-help span.ui-button-text i
 {
   right: 0.1em;
-  bottom: 0.05em;
   position: relative;
+}
+
+.dative-help span.ui-button-text i
+{
+  bottom: 0.05em;
+}
+
+.dative-authenticated span.ui-button-text i
+{
+  bottom: 0.02em;
 }
 
 .ui-dialog .ui-dialog-titlebar {
@@ -757,6 +782,7 @@ ul.fieldset select[name="speaker"],
 ul.fieldset select[name="elicitor"],
 ul.fieldset select[name="verifier"],
 ul.fieldset select[name="source"],
+.dative-help-dialog input[type="text"],
 div.dative-display {
     border-style: solid;
     border-width: 1px;
@@ -772,6 +798,120 @@ div.dative-display {
     border-radius: 6px;
     */
 }
+
+.help-search-container
+{
+  position: relative;
+}
+
+.help-search-container label[for=help-search]
+{
+  position: absolute;
+  top: 0.75em;
+  z-index: 99;
+}
+
+.help-search-container input[name=help-search]
+{
+  position: absolute;
+  left: -0.6em;
+  padding-left: 2em;
+}
+
+.help-search-spacer
+{
+  height: 3.5em;
+}
+
+.dative-help-dialog .help-content-container
+{
+  margin-right: -1em;
+  padding-bottom: 5em;
+  overflow: hidden;
+  height: 85%;
+  position: relative;
+}
+
+.dative-help-dialog .help-content
+{
+  margin-right: 1.5em;
+  text-align: justify;
+}
+
+.dative-help-dialog .focused-help-match
+{
+  border-width: 4px;
+}
+
+.dative-help-dialog .help-content
+{
+  line-height: 125%;
+}
+
+.dative-help-dialog .help-content h1,
+.dative-help-dialog .help-content h2,
+.dative-help-dialog .help-content h3,
+.dative-help-dialog .help-content h4,
+.dative-help-dialog .help-content h5,
+.dative-help-dialog .help-content p
+{
+  margin-top: 0.75em;
+}
+
+.dative-help-dialog .help-content h1
+{
+  font-size: 150%;
+}
+
+.dative-help-dialog .help-content h2
+{
+  font-size: 140%;
+}
+
+.dative-help-dialog .help-content h3
+{
+  font-size: 130%;
+}
+
+.dative-help-dialog .help-content h4
+{
+  font-size: 120%;
+}
+
+.dative-help-dialog .help-content h5
+{
+  font-size: 110%;
+}
+
+.dative-help-dialog .help-content ul,
+.dative-help-dialog .help-content ol
+{
+  margin-top: 1em;
+  margin-bottom: 1em;
+}
+
+.dative-help-dialog .help-content ul > li
+{
+  list-style: disc outside none;
+  margin-left: 2em;
+}
+
+.dative-help-dialog .help-content ol > li
+{
+  list-style: decimal outside none;
+  margin-left: 2em;
+}
+
+.dative-help-dialog .help-content strong
+{
+  font-weight: bold;
+}
+
+.watermark
+{
+  color: #999;
+}
+
 
 .header-no-body {
     border-bottom: none;
@@ -812,3 +952,7 @@ p.paragraph-widget {
     line-height: 130%;
 }
 
+.black-fa
+{
+  color: black;
+}

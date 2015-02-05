@@ -23,6 +23,7 @@
     "grunt-docco": "^0.3.3",
     "grunt-eco": "*",
     "grunt-exec": "^0.4.6",
+    "grunt-markdown": "~0.7.0",
     "grunt-mocha": "~0.4.10",
     "grunt-open": "~0.2.3",
     "grunt-regex-replace": "*",

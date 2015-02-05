@@ -25,12 +25,27 @@ module.exports = (grunt) ->
 
   grunt.initConfig
 
+    markdown:
+      all:
+        files: [
+          expand: true,
+          flatten: true,
+          src: '<%= yeoman.app %>/help/src/*.md'
+          dest: '<%= yeoman.app %>/help/html/'
+          ext: '.html'
+        ]
+        options:
+          template: '<%= yeoman.app %>/help/src/template.jst'
+
     yeoman: yeomanConfig
 
     watch:
       options:
         nospawn: true
         livereload: true
+      help:
+        files: ['<%= yeoman.app %>/help/src/*.md']
+        tasks: ['markdown:all']
       coffee:
         files: ['<%= yeoman.app %>/scripts/{,*/}*.coffee']
         tasks: ['copy:coffee', 'coffee:serve']
@@ -483,6 +498,7 @@ module.exports = (grunt) ->
 
     if target is 'test'
       return grunt.task.run [
+        'markdown:all'
         'clean:server'
         'copy:coffee'
         'copy:packagejson'
@@ -498,6 +514,7 @@ module.exports = (grunt) ->
       ]
 
     grunt.task.run [
+      'markdown:all'
       'clean:server'
       'copy:coffee'
       'copy:packagejson'
@@ -533,6 +550,7 @@ module.exports = (grunt) ->
       grunt.task.run testTasks
 
   grunt.registerTask 'build', [
+    'markdown:all'
     'clean:dist' # remove everything in dist/ and .tmp/
     'copy:coffee' # copy all .coffee files in app/scripts/ to .tmp/scripts/
     'copy:packagejson'

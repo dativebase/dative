@@ -31,6 +31,7 @@ define [
 
     events:
       'click a.dative-authenticated': 'toggleLoginDialog'
+      'click a.dative-help': 'toggleHelpDialog'
 
       'mouseenter ul.sf-menu > li > ul > li': 'mouseEnteredMenuItem'
       'mouseenter ul.sf-menu > li > ul > li > a': 'mouseEnteredMenuItem'
@@ -84,6 +85,7 @@ define [
       #@superfishify() # Superfish transmogrifies menu
       @superclickify() # Superclick transmogrifies menu
 
+      @helpButtonState()
       @refreshLoginButton()
       @displayActiveCorpusName()
       @refreshLoggedInUser()
@@ -169,6 +171,7 @@ define [
           when 'uArrow' then 38
           when 'dArrow' then 40
           when ',' then 188
+          when '?' then 191
           else shortcutAsString.toUpperCase().charCodeAt 0
 
       ctrlKey: 'ctrl' in shortcutArray
@@ -197,6 +200,12 @@ define [
         if 'shift' in shortcutArray then '\u21E7' else ''
         getShortcutKeyAbbrev shortcutArray.pop()
       ].join ''
+
+    helpButtonState: ->
+      @$('a.dative-help')
+        .button()
+        .css 'border-color', @constructor.jQueryUIColors().defBa
+        .tooltip()
 
     # Initialize login/logout icon/button
     refreshLoginButton: ->
@@ -239,6 +248,10 @@ define [
     # Tell the login dialog box to toggle itself.
     toggleLoginDialog: ->
       Backbone.trigger 'loginDialog:toggle'
+
+    # Tell the help dialog box to toggle itself.
+    toggleHelpDialog: ->
+      Backbone.trigger 'helpDialog:toggle'
 
     # This replaces the functionality that used to be housed in the jQuery
     # extension `superclick-jqueryui-match` (and `superfish-jqueryui-match`).

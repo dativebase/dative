@@ -103,7 +103,7 @@
 
     <li><a>Help</a>
         <ul class='ui-corner-bottom'>
-            <li><a >Help Page</a></li>
+            <li><a data-event="request:toggleHelpDialogBox" data-shortcut="ctrl+?">Help Page</a></li>
             <li><a >Dative Documentation</a></li>
             <li><a >Version <%= @version %></a></li>
         </ul>
@@ -126,9 +126,15 @@
 </div>
 
 <div class='container-right'>
+
+  <a class="dative-help" title="help with using Dative">
+    <i class='fa fa-question fa-fw'></i>
+  </a>
+
   <a class="dative-authenticated" title="login">
     <i class='fa fa-lock fa-fw'></i>
   </a>
+
   <a class="logged-in-username" title="you are not logged in"></a>
 </div>
 

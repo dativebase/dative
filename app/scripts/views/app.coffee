@@ -8,6 +8,7 @@ define [
   './login-dialog'
   './register-dialog'
   './alert-dialog'
+  './help-dialog'
   './application-settings'
   './pages'
   './home'
@@ -22,7 +23,7 @@ define [
   './../templates/app'
 ], (Backbone, Workspace, BaseView, MainMenuView, ProgressWidgetView,
   NotifierView, LoginDialogView, RegisterDialogView, AlertDialogView,
-  ApplicationSettingsView, PagesView, HomePageView, FormAddView,
+  HelpDialogView, ApplicationSettingsView, PagesView, HomePageView, FormAddView,
   FormsSearchView, FormsView, CorporaView, ApplicationSettingsModel, FormModel,
   ApplicationSettingsCollection, globals, appTemplate) ->
 
@@ -49,6 +50,7 @@ define [
       @setTheme()
       Backbone.history.start()
       @showHomePageView()
+      #@toggleHelpDialog()
 
     events:
       'click': 'bodyClicked'
@@ -64,6 +66,7 @@ define [
       @listenTo @mainMenuView, 'request:home', @showHomePageView
       @listenTo @mainMenuView, 'request:applicationSettings', @showApplicationSettingsView
       @listenTo @mainMenuView, 'request:openLoginDialogBox', @toggleLoginDialog
+      @listenTo @mainMenuView, 'request:toggleHelpDialogBox', @toggleHelpDialog
       @listenTo @mainMenuView, 'request:openRegisterDialogBox', @toggleRegisterDialog
       @listenTo @mainMenuView, 'request:corporaBrowse', @showCorporaView
       @listenTo @mainMenuView, 'request:formAdd', @showFormAddView
@@ -93,6 +96,7 @@ define [
       @loginDialog = new LoginDialogView model: @applicationSettings
       @registerDialog = new RegisterDialogView model: @applicationSettings
       @alertDialog = new AlertDialogView model: @applicationSettings
+      @helpDialog = new HelpDialogView()
       @progressWidget = new ProgressWidgetView()
       @notifier = new NotifierView(@applicationSettings)
 
@@ -101,6 +105,7 @@ define [
       @loginDialog.setElement(@$('#login-dialog-container')).render()
       @registerDialog.setElement(@$('#register-dialog-container')).render()
       @alertDialog.setElement(@$('#alert-dialog-container')).render()
+      @helpDialog.setElement(@$('#help-dialog-container'))
       @progressWidget.setElement(@$('#progress-widget-container')).render()
       @notifier.setElement @$('#notifier-container')
 
@@ -108,8 +113,13 @@ define [
       @rendered @loginDialog
       @rendered @registerDialog
       @rendered @alertDialog
+      # @rendered @helpDialog
       @rendered @progressWidget
       @rendered @notifier # Notifier self-renders but we register it as rendered anyways so that we can clean up after it if `.close` is ever called
+
+    renderHelpDialog: ->
+      @helpDialog.render()
+      @rendered @helpDialog
 
     bodyClicked: ->
       Backbone.trigger 'bodyClicked' # Mainmenu superclick listens for this
@@ -290,6 +300,12 @@ define [
     # Open/close the alert dialog box
     toggleAlertDialog: ->
       Backbone.trigger 'alertDialog:toggle'
+
+    # Open/close the help dialog box
+    toggleHelpDialog: ->
+      if not @helpDialog.rendered
+        @renderHelpDialog()
+      Backbone.trigger 'helpDialog:toggle'
 
     ############################################################################
     # Change the jQuery UI CSS Theme
