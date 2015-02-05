@@ -6,10 +6,12 @@ define [
   './pagination-item-table'
   './../collections/forms'
   './../utils/paginator'
+  './../utils/globals'
   './../templates/forms'
   'perfectscrollbar'
 ], (Backbone, BaseView, FormView, PaginationMenuTopView,
-  PaginationItemTableView, FormsCollection, Paginator, formsTemplate) ->
+  PaginationItemTableView, FormsCollection, Paginator, globals,
+  formsTemplate) ->
 
   # Forms View
   # -----------
@@ -25,6 +27,11 @@ define [
       @formViews = []
       @renderedFormViews = []
       @renderedPaginationItemTableViews = []
+      @fetchCompleted = false
+      @lastFetched =
+        serverType: ''
+        serverName: ''
+        fieldDBCorpusPouchname: ''
       @paginator = new Paginator()
       @paginationMenuTopView = new PaginationMenuTopView paginator: @paginator
       @applicationSettings = options.applicationSettings
@@ -112,12 +119,16 @@ define [
         pluralizeByNum: @utils.pluralizeByNum
         paginator: @paginator
       @$el.html @template(context)
+      @$('.no-forms').hide()
       @spin()
       @matchHeights()
       @guify()
       @refreshHeader()
       @renderPaginationMenuTopView()
-      @fetchFormsToCollection()
+      if @weNeedToFetchFormsAgain()
+        @fetchFormsToCollection()
+      else
+        @refreshPage()
       @listenToEvents()
       @perfectScrollbar()
       @setFocus()
@@ -125,7 +136,7 @@ define [
       @
 
     fetchFormsToCollection: ->
-      if @activeServerType is 'FieldDB'
+      if @getActiveServerType() is 'FieldDB'
         @collection.fetchAllFieldDBForms()
       else
         @collection.fetchOLDForms()
@@ -136,14 +147,45 @@ define [
       @rendered @paginationMenuTopView
 
     fetchAllFormsStart: ->
+      @fetchCompleted = false
       @spin 'fetching all forms'
 
     fetchAllFormsEnd: ->
+      @fetchCompleted = true
       @stopSpin()
 
     fetchAllFormsSuccess: ->
+      @saveFetchedMetadata()
       @getFormViews()
       @refreshPage()
+
+    # Remember the server type (and corpus name) of the last fetch, so we don't needlessly
+    # repeat it on future renderings.
+    saveFetchedMetadata: ->
+      @lastFetched.serverType = @getActiveServerType()
+      @lastFetched.serverName = @getActiveServerName()
+      @lastFetched.fieldDBCorpusPouchname = @getActiveServerFieldDBCorpusPouchname()
+
+    getActiveServerType: ->
+      globals.applicationSettings.get('activeServer').get 'type'
+
+    getActiveServerName: ->
+      globals.applicationSettings.get('activeServer').get 'name'
+
+    getActiveServerFieldDBCorpusPouchname: ->
+      if @getActiveServerType() is 'FieldDB'
+        globals.applicationSettings.get 'activeFieldDBCorpus'
+      else
+        null
+
+    # Returns false if we have already fetched these forms; prevents redundant
+    # requests.
+    weNeedToFetchFormsAgain: ->
+      toFetch =
+        serverType: @getActiveServerType()
+        serverName: @getActiveServerName()
+        fieldDBCorpusPouchname: @getActiveServerFieldDBCorpusPouchname()
+      if _.isEqual(toFetch, @lastFetched) then false else true
 
     refreshPage: (options) ->
       @refreshHeader()
@@ -210,21 +252,13 @@ define [
       $header.spin false
       if $header.tooltip 'instance' then $header.tooltip 'destroy'
 
-    getActiveServerType: ->
-      if @applicationSettings.get('activeServer').get('type') is 'FieldDB'
-        @activeServerType = 'FieldDB'
-      else
-        @activeServerType = 'OLD'
-
     # ISSUE: @jrwdunham: because the paginator buttons can become dis/enabled
     # based on the paginator state, the setFocus can behave erratically, since
     # it sets focus based on the remembered index of a jQuery matched set.
     setFocus: ->
       if @focusedElementIndex
-        console.log 'we will focus last focused element'
         @focusLastFocusedElement()
       else
-        console.log 'we will focus the first form'
         @focusFirstForm()
 
     focusFirstButton: ->
@@ -296,6 +330,13 @@ define [
         @setFocus()
 
     refreshHeader: ->
+      if not @fetchCompleted
+        @$('.no-forms').hide()
+        @$('.pagination-info').hide()
+        @$('button.expand-all').button 'disable'
+        @$('button.collapse-all').button 'disable'
+        @$('button.new-form').button 'disable'
+        return
       @paginator.setItems @collection.length
       if @paginator.items is 0
         @$('.no-forms').show()
