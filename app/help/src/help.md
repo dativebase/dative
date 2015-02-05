@@ -35,10 +35,28 @@ If you have an account with a LingSync or an OLD server, the first step
 is to login by clicking on the lock icon <i class="fa fa-fw fa-lock"></i> in
 the top right or by clicking on Account > Login. In the login dialog that
 appears, select the appropriate server, enter your username and password,
-and click login. If you have a LingSync account, you will most likely want to
-login to the server called “FieldDB”. If you are unable to login, you may
-need to manually create a new server. See the 
+and click the “Login” button. If you have a LingSync account, you will most
+likely want to login to the server called “FieldDB”. If you are unable to
+login, you may need to manually create a new server (see the [application
+settings](#application-settings) section).
 
+If you do not have a LingSync account, you may create one through Dative.
+First, open the registration form by clicking on Dative > Register (or
+by pressing ⌃R). Choose a FieldDB/LingSync-type server to register with,
+enter your desired username and password (and your email), and click the
+“Register” button and an account should be generated for you.
+
+Once you have successfully logged in, you will be brought either to the
+corpora interface (if you have logged into a LingSync server) or to the
+browse forms interface (if you have logged into an OLD server). At the
+corpus interface, you must choose the FieldDB/LingSync corpus that you
+wish to use; you do this by clicking on the “activate corpus” button
+<i class="fa fa-fw fa-toggle-off"></i>. This will take you to the browse
+forms interface where you can view the data in the corpus, modify it,
+and add to it.
+
+WARNING: THE DATA MODIFICATION/ADDITION FEATURE IS CURRENTLY NOT YET
+IMPLEMENTED IN DATIVE.
 
 
 ## Frequently Asked Questions<a data-name="frequently-asked-questions"></a>
@@ -59,7 +77,7 @@ need to manually create a new server. See the
 Dative is an application for linguistic fieldwork. It is a graphical user
 interface that runs in modern web browsers. The data that you enter into
 Dative are saved to the web server that you are logged into at the time.
-This may be a LingSync [LingSync](https://www.lingsync.org/) server or an
+This may be a [LingSync](https://www.lingsync.org/) server or an
 [OLD](http://www.onlinelinguisticdatabase.org/) one. LingSync and the OLD
 are web services that allow linguistic data to be stored and manipulated
 on web servers by multiple users at the same time.
@@ -90,7 +108,7 @@ and scroll to the next match. Press the up arrow key to highlight and scroll to
 the previous match.
 
 This help text is displayed inside of a movable and resizable dialog widget.
-You can change its width and/or heihght by clicking and dragging on its borders
+You can change its width and/or height by clicking and dragging on its borders
 or corners. You can also expand/compress it to its default large and small
 sizes by clicking on the expand/compress button <i class="fa fa-fw
 fa-expand"></i><i class="fa fa-fw fa-compress"></i> at the bottom.
