@@ -49,7 +49,18 @@ define [
       'click .expand-all': 'expandAllForms'
       'click .collapse-all': 'collapseAllForms'
       'click .new-form': 'showNewFormView'
+      'click .forms-browse-help': 'openFormsBrowseHelp'
       'keydown': 'keyboardShortcuts'
+
+    # Tell the Help dialog to open itself and search for "browsing forms" and
+    # scroll to the second match. WARN: this is brittle because if the help
+    # HTML changes, then the second match may not be what we want
+    openFormsBrowseHelp: ->
+      Backbone.trigger(
+        'helpDialog:toggle',
+        searchTerm: 'browsing forms'
+        scrollToIndex: 1
+      )
 
     # These are the focusable elements in the forms browse interface.
     focusableSelector: 'button, input, .ui-selectmenu-button, .dative-form-object'
@@ -238,6 +249,7 @@ define [
       @$('#dative-page-header')
         .spin @spinnerOptions()
       if tooltipMessage
+        console.log "have a message: #{tooltipMessage}"
         @$('#dative-page-header')
           .tooltip
             content: tooltipMessage
@@ -293,6 +305,14 @@ define [
           position:
             my: "right-80 center"
             at: "left center"
+            collision: "flipfit"
+
+      @$('button.forms-browse-help')
+        .button()
+        .tooltip
+          position:
+            my: "left+10 center"
+            at: "right center"
             collision: "flipfit"
 
     perfectScrollbar: ->

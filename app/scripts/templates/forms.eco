@@ -32,6 +32,14 @@
 
     </div>
 
+    <div class='button-container-right'>
+
+      <button class='forms-browse-help dative-tooltip' title='help with browsing forms'>
+        <i class='fa fa-fw fa-question'></i>
+      </button>
+
+    </div>
+
   </div>
 
   <div class='dative-pagination-menu-top'></div>

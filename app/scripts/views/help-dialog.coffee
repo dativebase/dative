@@ -18,12 +18,13 @@ define [
     template: helpDialogTemplate
 
     initialize: ->
-      @rendered = false
+      @hasBeenRendered = false
       @HELP_HTML = ''
       @searchPattern = ''
       @EXPANDED_WIDTH = 500
       @COLLAPSED_WIDTH = 230
       @scrolledToMatchedElementIndex = 0
+      @postHTMLRetrievedAction = null # may be specified as a method to call once the Help HTML has been retrieved.
       @listenTo Backbone, 'helpDialog:toggle', @toggle
 
     collapsedHeight: ->
@@ -35,7 +36,7 @@ define [
     events:
       'dialogdragstart': 'closeAllTooltips'
       'dialogresize': 'resizeSearchInput'
-      'keyup input[name=help-search]': 'searchHelpText'
+      'keyup input[name=help-search]': 'keyupEventInHelpSearchInput'
       'click a[href]': 'scrollToInternalLink'
 
     # We have to handle hash-based internal links manually because of
@@ -46,7 +47,10 @@ define [
         @stopEvent event
         # This is the id value that Markdown generates for headers with named anchors
         headerIdSelector = "##{href[1..]}-a-data-name-#{href[1..]}-a-"
-        @scrollToMatch @$(headerIdSelector)
+        @scrollToElementById headerIdSelector
+
+    scrollToElementById: (idSelector) ->
+      @scrollToMatch @$(idSelector)
 
     # Highlight a specific match.
     highlight: ($matchedElement, $matchedElements) ->
@@ -123,41 +127,51 @@ define [
         | #{@searchPattern}  # match the search pattern
       ///gi
 
-    # Search the help document.
+    # Handle keyup events in the text input for searching the help document.
     # When a user types a pattern into the help search input, the widget highlights
     # any substrings that match the search pattern and scrolls to the first match.
-    # This is regular expression search.
-    # Subsequent <Enter> presses focus and scroll to subsequent matches.
+    # Subsequent <Enter> or <down-arrow> presses focus and scroll to subsequent
+    # matches while <up-arrow> presses focus and scroll to previous matches.
     # TODO: <Tab> and <Shift+Tab> should advance and reverse, respectively, the
     # focused element and the scroll position.
-    searchHelpText: (event) ->
-
+    keyupEventInHelpSearchInput: (event) ->
       if event.which in [13, 40] # <Enter> and <down arrow> mean "scroll to next match"
-        console.log 'here'
         @highlightAndScrollToNextMatch()
         return
       else if event.which is 38 # <up arrow> means "scroll to previous match"
         @highlightAndScrollToPreviousMatch()
         return
 
-      searchPattern = $('input[name=help-search]').val()
+      searchPattern = @$('input[name=help-search]').val()
       if searchPattern is @searchPattern
-        return # Do nothing when there's no pattern.
+        return # Do nothing when there's no new pattern.
 
+      @searchHelpText searchPattern
+
+    # Search the help document.
+    # This is regular expression search.
+    searchHelpText: (searchPattern, scrollToIndex=0) ->
+      console.log "in searchHelpText with #{searchPattern} and #{scrollToIndex}"
       @searchPattern = searchPattern
       if @searchPattern
         try
           searchRegex = @getSearchRegex()
           @highlightText searchRegex
           $matchedElements = @$('.help-content span.help-match')
-          $firstMatchedElement = $matchedElements.first()
-          if $firstMatchedElement
-            @highlight $firstMatchedElement, $matchedElements
-            @scrolledToMatchedElementIndex = 0
-            @scrollToMatch $firstMatchedElement
+          $scrollTo = $matchedElements.eq scrollToIndex
+          #$firstMatchedElement = $matchedElements.first()
+          if scrollToIndex > 0 and not $scrollTo
+            scrollToIndex = 0
+            $scrollTo = $matchedElements.first()
+          if $scrollTo
+            console.log 'we have a scrollTo!'
+            console.log $scrollTo
+            @highlight $scrollTo, $matchedElements
+            console.log 'we highlighted'
+            @scrolledToMatchedElementIndex = scrollToIndex
+            @scrollToMatch $scrollTo
+            console.log 'we scrolled to the match'
         catch SyntaxError # A bad regex
-          console.log 'bad regex syntax error fuck'
-          console.log SyntaxError
           return
       else
         @$('.help-content').html @HELP_HTML
@@ -195,7 +209,7 @@ define [
       @$('input[name=help-search]').first().css('width', ui.size.width - 50)
 
     render: ->
-      @rendered = true
+      @hasBeenRendered = true
       @$el.append @template()
       @$target = @$ '.dative-help-dialog-target'
       @dialogify()
@@ -215,6 +229,10 @@ define [
           @HELP_HTML = helpHTML
           @stopSpin()
           @$('.help-content').html @HELP_HTML
+          if @postHTMLRetrievedAction
+            @postHTMLRetrievedAction()
+            @postHTMLRetrievedAction = null
+
 
     spinnerOptions: ->
       _.extend BaseView::spinnerOptions(), {top: '5%', left: '5%'}
@@ -307,18 +325,47 @@ define [
 
     isOpen: -> @$('.dative-help-dialog').dialog 'isOpen'
 
-    toggle: ->
+    toggle: (options) ->
+      if not @hasBeenRendered
+        # This tells us to call `toggle` again once the help dialog has been
+        # rendered (and its HTML have been retrieved from the Dative server).
+        @postHTMLRetrievedAction = => @toggle options
+        @render()
+        return
       if @isOpen()
         @dialogClose()
       else
         @dialogOpen()
+        @simulateSearchHelpText options
+
+    # Make it seem as though `options.searchTerm` has been searched in
+    # the help text: put the search term in the input, focus the input,
+    # highlight the matches, focus the `scrollToIndex`ed match and scroll
+    # to it.
+    simulateSearchHelpText: (options) ->
+      if options?.searchTerm
+        @$('input[name=help-search]')
+          .focus()
+          .val options.searchTerm
+        if options.scrollToIndex
+          @searchHelpText options.searchTerm, options.scrollToIndex
+        else
+          @searchHelpText options.searchTerm
 
     # Give the input element `$element` a watermark containing `text`.
     watermark: ($element, text) ->
       $element
-        .blur ->
-          if $(@).val().length is 0 then $(@).val(text).addClass 'watermark'
-        .focus ->
-          if $(@).val() is text then $(@).val('').removeClass 'watermark'
+        .blur (e) =>
+          $input = @$ e.target
+          if $input.val().length is 0
+            $input
+              .val text
+              .addClass 'watermark'
+        .focus (e) =>
+          $input = @$ e.target
+          if $input.val() is text
+            $input
+              .val ''
+              .removeClass 'watermark'
         .val(text).addClass 'watermark'
 

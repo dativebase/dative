@@ -113,7 +113,6 @@ define [
       @rendered @loginDialog
       @rendered @registerDialog
       @rendered @alertDialog
-      # @rendered @helpDialog
       @rendered @progressWidget
       @rendered @notifier # Notifier self-renders but we register it as rendered anyways so that we can clean up after it if `.close` is ever called
 
@@ -303,7 +302,7 @@ define [
 
     # Open/close the help dialog box
     toggleHelpDialog: ->
-      if not @helpDialog.rendered
+      if not @helpDialog.hasBeenRendered
         @renderHelpDialog()
       Backbone.trigger 'helpDialog:toggle'
 
