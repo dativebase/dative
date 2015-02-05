@@ -24,8 +24,8 @@ define [
 
     initialize: (options) ->
       @focusedElementIndex = null
-      @formViews = []
-      @renderedFormViews = []
+      @formViews = [] # holds a FormView instance for each FormModel in FormsCollection
+      @renderedFormViews = [] # references to the FormView instances that are rendered
       @renderedPaginationItemTableViews = []
       @fetchCompleted = false
       @lastFetched =
@@ -239,12 +239,19 @@ define [
     refreshPaginationMenuTop: ->
       @paginationMenuTopView.render paginator: @paginator
 
+    # TODO: @cesine @jrwdunham instantiating a FormView for every FormModel
+    # in the collection seems potentially inefficient. Thoughts?
     getFormViews: ->
       @collection.each (formModel) =>
         newFormView = new FormView
           model: formModel
           applicationSettings: @applicationSettings
-        @formViews.push newFormView
+        #@formViews.push newFormView
+        # Do this because we want the most recent forms first.
+        # NOTE: I think we should really be able to do this ordering via the
+        # server request: in the FieldDB case, this would mean defining a new
+        # CouchDB view for datums_chronological_reverse (@cesine?)
+        @formViews.unshift newFormView
 
     spinnerOptions: ->
       _.extend BaseView::spinnerOptions(), {top: '25%', left: '93.5%'}
@@ -350,6 +357,10 @@ define [
         $formList.show()
         @setFocus()
 
+    # Refresh the content of the forms browse header.
+    # This is the top "row" of the header, with the "create a new form"
+    # button, the "expand/collapse all" buttons and the title.
+    # (Note that the pagination controls are handled by a separate view.
     refreshHeader: ->
       if not @fetchCompleted
         @$('.no-forms')
