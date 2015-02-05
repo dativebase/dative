@@ -30,10 +30,11 @@ define [
           else
             reason = responseJSON.reason or 'unknown'
             Backbone.trigger 'fetchAllFieldDBFormsFail',
-              "failed to fetch all fielddb forms; reason: #{reason}"
+              "Failed in fetching the data. #{reason}"
             console.log ["request to datums_chronological failed;",
               "reason: #{reason}"].join ' '
         onerror: (responseJSON) =>
+          console.log 'Error in request to datums_chronological'
           Backbone.trigger 'fetchAllFieldDBFormsEnd'
           Backbone.trigger 'fetchAllFieldDBFormsFail', 'error in fetching all
             fielddb forms'

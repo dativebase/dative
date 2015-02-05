@@ -87,6 +87,7 @@ define [
 
       @listenTo Backbone, 'fetchAllFieldDBFormsStart', @fetchAllFormsStart
       @listenTo Backbone, 'fetchAllFieldDBFormsEnd', @fetchAllFormsEnd
+      @listenTo Backbone, 'fetchAllFieldDBFormsFail', @fetchAllFormsFail
       @listenTo Backbone, 'fetchAllFieldDBFormsSuccess', @fetchAllFormsSuccess
 
       @listenTo Backbone, 'fetchOLDFormsStart', @fetchAllFormsStart
@@ -130,8 +131,6 @@ define [
         pluralizeByNum: @utils.pluralizeByNum
         paginator: @paginator
       @$el.html @template(context)
-      @$('.no-forms').hide()
-      @spin()
       @matchHeights()
       @guify()
       @refreshHeader()
@@ -164,6 +163,11 @@ define [
     fetchAllFormsEnd: ->
       @fetchCompleted = true
       @stopSpin()
+
+    fetchAllFormsFail: (reason) ->
+      @$('.no-forms')
+        .show()
+        .text reason
 
     fetchAllFormsSuccess: ->
       @saveFetchedMetadata()
@@ -243,7 +247,7 @@ define [
         @formViews.push newFormView
 
     spinnerOptions: ->
-      _.extend BaseView::spinnerOptions(), {top: '25%', left: '98%'}
+      _.extend BaseView::spinnerOptions(), {top: '25%', left: '93.5%'}
 
     spin: (tooltipMessage) ->
       @$('#dative-page-header')
@@ -253,11 +257,8 @@ define [
         @$('#dative-page-header')
           .tooltip
             content: tooltipMessage
-            position:
-              my: "left+10 center"
-              at: "right top+20"
-              collision: "flipfit"
-          .tooltip 'open'
+            create: (event, ui) =>
+              @$('#dative-page-header').tooltip 'open'
 
     stopSpin: ->
       $header = @$('#dative-page-header')
@@ -351,7 +352,9 @@ define [
 
     refreshHeader: ->
       if not @fetchCompleted
-        @$('.no-forms').hide()
+        @$('.no-forms')
+          .show()
+          .text 'Fetching data from the server ...'
         @$('.pagination-info').hide()
         @$('button.expand-all').button 'disable'
         @$('button.collapse-all').button 'disable'
@@ -359,15 +362,19 @@ define [
         return
       @paginator.setItems @collection.length
       if @paginator.items is 0
-        @$('.no-forms').show()
+        @$('.no-forms')
+          .show()
+          .text 'There are no forms to display'
         @$('.pagination-info').hide()
         @$('button.expand-all').button 'disable'
         @$('button.collapse-all').button 'disable'
+        @$('button.new-form').button 'enable'
       else
         @$('.no-forms').hide()
         @$('.pagination-info').show()
         @$('button.expand-all').button 'enable'
         @$('button.collapse-all').button 'enable'
+        @$('button.new-form').button 'enable'
         if @paginator.start is @paginator.end
           @$('.form-range')
             .text "form #{@utils.integerWithCommas(@paginator.start + 1)}"

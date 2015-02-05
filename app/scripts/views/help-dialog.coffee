@@ -151,7 +151,6 @@ define [
     # Search the help document.
     # This is regular expression search.
     searchHelpText: (searchPattern, scrollToIndex=0) ->
-      console.log "in searchHelpText with #{searchPattern} and #{scrollToIndex}"
       @searchPattern = searchPattern
       if @searchPattern
         try
@@ -159,18 +158,13 @@ define [
           @highlightText searchRegex
           $matchedElements = @$('.help-content span.help-match')
           $scrollTo = $matchedElements.eq scrollToIndex
-          #$firstMatchedElement = $matchedElements.first()
           if scrollToIndex > 0 and not $scrollTo
             scrollToIndex = 0
             $scrollTo = $matchedElements.first()
           if $scrollTo
-            console.log 'we have a scrollTo!'
-            console.log $scrollTo
             @highlight $scrollTo, $matchedElements
-            console.log 'we highlighted'
             @scrolledToMatchedElementIndex = scrollToIndex
             @scrollToMatch $scrollTo
-            console.log 'we scrolled to the match'
         catch SyntaxError # A bad regex
           return
       else
