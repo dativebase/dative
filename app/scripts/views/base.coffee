@@ -190,6 +190,12 @@ define [
           if $element.hasClass('dative-tooltip') and $element.tooltip('instance')
             $element.tooltip 'open'
 
+    scrollToTop: ->
+      @$('#dative-page-body').animate
+        scrollTop: 0
+        250
+        'swing'
+
     # Fix rounded borders so that adjacently nested rounded borders <divs> don't
     # have a gap between them. This must be done in the JS and not the CSS
     # because Dative can dynamically change the CSS to different jQueryUI

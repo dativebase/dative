@@ -10,6 +10,9 @@ define [
 
   # Form Add View
   # --------------
+  #
+  # Logic for the HTML form for creating new, and updating existing, Dative
+  # (i.e., linguistic) forms.
 
   # The DOM element for adding a new form
   class FormAddView extends BaseView

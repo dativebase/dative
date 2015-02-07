@@ -2,21 +2,23 @@ define [
   'backbone'
   './base'
   './form'
+  './form-add-widget'
   './pagination-menu-top'
   './pagination-item-table'
   './../collections/forms'
+  './../models/form'
   './../utils/paginator'
   './../utils/globals'
   './../templates/forms'
   'perfectscrollbar'
-], (Backbone, BaseView, FormView, PaginationMenuTopView,
-  PaginationItemTableView, FormsCollection, Paginator, globals,
+], (Backbone, BaseView, FormView, FormAddWidgetView, PaginationMenuTopView,
+  PaginationItemTableView, FormsCollection, FormModel, Paginator, globals,
   formsTemplate) ->
 
   # Forms View
   # -----------
   #
-  # Displays a list of forms.
+  # Displays a list of forms (with pagination).
 
   class FormsView extends BaseView
 
@@ -26,14 +28,16 @@ define [
       @focusedElementIndex = null
       @formViews = [] # holds a FormView instance for each FormModel in FormsCollection
       @renderedFormViews = [] # references to the FormView instances that are rendered
-      @renderedPaginationItemTableViews = []
+      @formAddView = new FormAddWidgetView model: new FormModel()
+      @formAddViewVisible = false
+      @renderedPaginationItemTableViews = [] # Each form is in a 1-row/2-cell table where cell 1 is the index+1, e.g., (1), (2), etc.
       @fetchCompleted = false
-      @lastFetched =
+      @lastFetched = # We store this to help us prevent redundant requests to the server for all forms.
         serverType: ''
         serverName: ''
         fieldDBCorpusPouchname: ''
       @paginator = new Paginator()
-      @paginationMenuTopView = new PaginationMenuTopView paginator: @paginator
+      @paginationMenuTopView = new PaginationMenuTopView paginator: @paginator # This handles the UI for the items-per-page select, the first, prevous, next buttons, etc.
       @applicationSettings = options.applicationSettings
       @activeFieldDBCorpus = options.activeFieldDBCorpus
       @getActiveServerType()
@@ -42,13 +46,20 @@ define [
       @collection.activeFieldDBCorpus = @activeFieldDBCorpus
       @listenToEvents()
 
+    controlFocused: (event) ->
+      @rememberFocusedElement event
+      @scrollToFocusedInput event
+
     events:
-      'focus button, input, .ui-selectmenu-button, .dative-form-object':
-        'rememberFocusedElement'
-      'focus .dative-form-object': 'scrollToFocusedInput'
+      # 'focus .dative-form-object, input, textarea, .ui-selectmenu-button, button':
+      #   'rememberFocusedElement'
+      # 'focus .dative-form-object, input, textarea, .ui-selectmenu-button, button':
+      #   'scrollToFocusedInput'
+      'focus .dative-form-object, input, textarea, .ui-selectmenu-button, button':
+        'controlFocused'
       'click .expand-all': 'expandAllForms'
       'click .collapse-all': 'collapseAllForms'
-      'click .new-form': 'showNewFormView'
+      'click .new-form': 'showFormAddViewAnimate'
       'click .forms-browse-help': 'openFormsBrowseHelp'
       'keydown': 'keyboardShortcuts'
 
@@ -63,7 +74,7 @@ define [
       )
 
     # These are the focusable elements in the forms browse interface.
-    focusableSelector: 'button, input, .ui-selectmenu-button, .dative-form-object'
+    focusableSelector: 'textarea, button, input, .ui-selectmenu-button, .dative-form-object'
 
     expandAllForms: ->
       @listenToOnce Backbone, 'form:formExpanded', @restoreFocusAndScrollPosition
@@ -77,8 +88,61 @@ define [
       @listenToOnce Backbone, 'form:formCollapsed', @restoreFocusAndScrollPosition
       Backbone.trigger 'formsView:collapseAllForms'
 
-    showNewFormView: ->
-      console.log 'You want to display the new form view'
+    formAddViewVisibility: ->
+      if @formAddViewVisible
+        @showFormAddView()
+      else
+        @hideFormAddView()
+
+    hideFormAddView: ->
+      @setFormAddViewButtonShow()
+      @formAddViewVisible = false
+      @$('.add-form-widget').hide()
+
+    showFormAddView: ->
+      @setFormAddViewButtonHide()
+      @formAddViewVisible = true
+      @$('.add-form-widget').show()
+      #@focusFirstFormAddViewTextarea()
+
+    hideFormAddViewAnimate: ->
+      @setFormAddViewButtonShow()
+      @formAddViewVisible = false
+      @$('.add-form-widget').slideUp()
+      @formAddView.closeAllTooltips()
+      @focusFirstForm()
+      @scrollToTop()
+
+    showFormAddViewAnimate: ->
+      @setFormAddViewButtonHide()
+      @formAddViewVisible = true
+      @$('.add-form-widget').slideDown()
+      @focusFirstFormAddViewTextarea()
+
+    focusFirstFormAddViewTextarea: ->
+      @$('.add-form-widget textarea').first().focus()
+
+    toggleFormAddViewAnimate: ->
+      if @$('.add-form-widget').is ':visible'
+        @hideFormAddViewAnimate()
+      else
+        @showFormAddViewAnimate()
+
+    setFormAddViewButtonState: ->
+      if @formAddViewVisible
+        @setFormAddViewButtonHide()
+      else
+        @setFormAddViewButtonShow()
+
+    setFormAddViewButtonShow: ->
+      @$('button.new-form')
+        .button 'enable'
+        .tooltip
+          content: 'create a new form'
+
+    setFormAddViewButtonHide: ->
+      @$('button.new-form')
+        .button 'disable'
 
     listenToEvents: ->
       @stopListening()
@@ -106,25 +170,35 @@ define [
       @listenTo @paginationMenuTopView, 'paginator:showTwoPagesForward', @showTwoPagesForward
       @listenTo @paginationMenuTopView, 'paginator:showThreePagesForward', @showThreePagesForward
 
+      @listenTo @formAddView, 'formAddView:hide', @hideFormAddViewAnimate
+
     # The FormsView is here directly manipulating the GUI domain of the Pagination
     # Top Menu in order to implement some of these keyboard shortcuts. This seems
     # better than an overload of message passing, but we may want to change this
     # later.
     # WARN: TODO: @jrwdunham: some of these keyboard shortcuts should only work if
     # user-editable fields are *not* open. That is, we do not want "n" to bring us
-    # to the next page if we are editing a form and type the character "n"
+    # to the next page if we are editing a form and type the character "n". This may
+    # now be handled by the `if not @addFormWidgetHasFocus()` condition.
     # TODO: @jrwdunham @cesine: consider changing the shortcut keys: vim-style
     # conventions or arrow keys might be better. Alternatively (or in
     # addition), we could have these be user-customizable. 
+    # TODO: up and down arrows should not expand/contract all when a
+    # (items-per-page) selectmenu is in focus.
     keyboardShortcuts: (event) ->
-      if not event.ctrlKey
-        switch event.which
-          when 70 then @$('.first-page').click() # f
-          when 80 then @$('.previous-page').click() # p
-          when 78 then @$('.next-page').click() # n
-          when 76 then @$('.last-page').click() # l
-          when 40 then @$('.expand-all').click() # down arrow
-          when 38 then @$('.collapse-all').click() # up arrow
+      if not @addFormWidgetHasFocus()
+        if not event.ctrlKey
+          switch event.which
+            when 70 then @$('.first-page').click() # f
+            when 80 then @$('.previous-page').click() # p
+            when 78 then @$('.next-page').click() # n
+            when 76 then @$('.last-page').click() # l
+            when 40 then @$('.expand-all').click() # down arrow
+            when 38 then @$('.collapse-all').click() # up arrow
+            when 65 then @toggleFormAddViewAnimate() # a
+
+    addFormWidgetHasFocus: ->
+      @$('.add-form-widget').find(':focus').length > 0
 
     render: (taskId) ->
       context =
@@ -135,6 +209,8 @@ define [
       @guify()
       @refreshHeader()
       @renderPaginationMenuTopView()
+      @renderFormAddView()
+      @formAddViewVisibility()
       if @weNeedToFetchFormsAgain()
         @fetchFormsToCollection()
       else
@@ -156,9 +232,14 @@ define [
       @paginationMenuTopView.render paginator: @paginator
       @rendered @paginationMenuTopView
 
+    renderFormAddView: ->
+      @formAddView.setElement @$('.add-form-widget').first()
+      @formAddView.render()
+      @rendered @formAddView
+
     fetchAllFormsStart: ->
       @fetchCompleted = false
-      @spin 'fetching all forms'
+      @spin()
 
     fetchAllFormsEnd: ->
       @fetchCompleted = true
@@ -246,7 +327,7 @@ define [
         newFormView = new FormView
           model: formModel
           applicationSettings: @applicationSettings
-        #@formViews.push newFormView
+        #@formViews.push newFormView # What we used to do.
         # Do this because we want the most recent forms first.
         # NOTE: I think we should really be able to do this ordering via the
         # server request: in the FieldDB case, this would mean defining a new
@@ -256,27 +337,15 @@ define [
     spinnerOptions: ->
       _.extend BaseView::spinnerOptions(), {top: '25%', left: '93.5%'}
 
-    spin: (tooltipMessage) ->
-      @$('#dative-page-header')
-        .spin @spinnerOptions()
-      if tooltipMessage
-        console.log "have a message: #{tooltipMessage}"
-        @$('#dative-page-header')
-          .tooltip
-            content: tooltipMessage
-            create: (event, ui) =>
-              @$('#dative-page-header').tooltip 'open'
+    spin: -> @$('#dative-page-header').spin @spinnerOptions()
 
-    stopSpin: ->
-      $header = @$('#dative-page-header')
-      $header.spin false
-      if $header.tooltip 'instance' then $header.tooltip 'destroy'
+    stopSpin: -> @$('#dative-page-header').spin false
 
     # ISSUE: @jrwdunham: because the paginator buttons can become dis/enabled
     # based on the paginator state, the setFocus can behave erratically, since
     # it sets focus based on the remembered index of a jQuery matched set.
     setFocus: ->
-      if @focusedElementIndex
+      if @focusedElementIndex?
         @focusLastFocusedElement()
       else
         @focusFirstForm()
@@ -379,13 +448,15 @@ define [
         @$('.pagination-info').hide()
         @$('button.expand-all').button 'disable'
         @$('button.collapse-all').button 'disable'
-        @$('button.new-form').button 'enable'
+        # @$('button.new-form').button 'enable'
+        @setFormAddViewButtonState()
       else
         @$('.no-forms').hide()
         @$('.pagination-info').show()
         @$('button.expand-all').button 'enable'
         @$('button.collapse-all').button 'enable'
-        @$('button.new-form').button 'enable'
+        # @$('button.new-form').button 'enable'
+        @setFormAddViewButtonState()
         if @paginator.start is @paginator.end
           @$('.form-range')
             .text "form #{@utils.integerWithCommas(@paginator.start + 1)}"

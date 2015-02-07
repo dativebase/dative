@@ -59,7 +59,6 @@ define [
       @$el.html @template()
       @renderPersistentSubviews()
       # @configureFieldDB() # FieldDB stuff commented out until it can be better incorporated
-
       @matchWindowDimensions()
 
     listenToEvents: ->
@@ -191,18 +190,6 @@ define [
     # Methods for showing the main "pages" of Dative                           #
     ############################################################################
 
-    showFormAddView: ->
-      if not @loggedIn() then return
-      if @formAddView and @visibleView is @formAddView then return
-      @router.navigate 'form-add'
-      taskId = @guid()
-      Backbone.trigger 'longTask:register', 'Opening form add view', taskId
-      @closeVisibleView()
-      if not @formAddView
-        @formAddView = new FormAddView(model: new FormModel())
-      @visibleView = @formAddView
-      @renderVisibleView taskId
-
     showApplicationSettingsView: ->
       if @applicationSettingsView and
       @visibleView is @applicationSettingsView then return
@@ -235,6 +222,31 @@ define [
           applicationSettings: @applicationSettings
           activeFieldDBCorpus: @activeFieldDBCorpus
       @visibleView = @formsView
+      # This is relevant if the user is trying to add a new form.
+      if options?.showFormAddView
+        @formsView.formAddViewVisible = true
+        @formsView.focusedElementIndex = 0
+      @renderVisibleView taskId
+
+    showFormAddView: ->
+      if not @loggedIn() then return
+      if @formsView and @visibleView is @formsView
+        @visibleView.toggleFormAddViewAnimate()
+      else
+        @showFormsView showFormAddView: true
+
+    # Put out of use for now. Now adding a form is done via the browse
+    # interface. See `showFormAddView`.
+    showFormAddView_OLD: ->
+      if not @loggedIn() then return
+      if @formAddView and @visibleView is @formAddView then return
+      @router.navigate 'form-add'
+      taskId = @guid()
+      Backbone.trigger 'longTask:register', 'Opening form add view', taskId
+      @closeVisibleView()
+      if not @formAddView
+        @formAddView = new FormAddView(model: new FormModel())
+      @visibleView = @formAddView
       @renderVisibleView taskId
 
     showFormsSearchView: ->

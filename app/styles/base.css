@@ -287,7 +287,8 @@ div.dative-page-header-title
 .servers-config-widget,
 .server-config-widget,
 .add-user-widget,
-.edit-corpus-widget
+.edit-corpus-widget,
+.add-form-widget
 {
     box-shadow: 5px 5px 10px rgba(0, 0, 0, 0.5);
     -webkit-box-shadow: 5px 5px 10px rgba(0, 0, 0, 0.5);
@@ -425,7 +426,8 @@ ul.fieldset select[name="tags"]+button {
 
 ul.fieldset select+div, /* div siblings of selects are jquery.ui.selectmenu creatures */
 .dative-forms-browse-interface select+div,
-button.insertTranslationFieldButton,
+button.append-translation-field,
+button.remove-translation-field,
 button.removeMe,
 input[type="submit"],
 button {
@@ -725,6 +727,7 @@ div.add-user-widget > div.dative-widget-header > div.dative-widget-header-title,
 div.edit-corpus-widget > div.dative-widget-header > div.dative-widget-header-title,
 div.servers-config-widget > div.dative-widget-header > div.dative-widget-header-title,
 div.server-config-widget > div.dative-widget-header > div.dative-widget-header-title,
+div.add-form-widget > div.dative-widget-header > div.dative-widget-header-title,
 div#dative-page-header > div.dative-page-header-title,
 div#dative-page-header > div.dative-forms-view-header > div.dative-page-header-title,
 div.container-center,
@@ -956,3 +959,9 @@ p.paragraph-widget {
 {
   color: black;
 }
+
+div.add-form-widget
+{
+  width: 800px;
+}
+

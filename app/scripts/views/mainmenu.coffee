@@ -226,7 +226,9 @@ define [
 
     displayActiveCorpusName: ->
       if globals.activeFieldDBCorpus
-        @$('.active-corpus-name').text globals.activeFieldDBCorpus.get('title')
+        @$('.active-corpus-name')
+          .text globals.activeFieldDBCorpus.get('title')
+          .css 'color', 'red'
 
     # Reset the tooltip title of the logged-in user's name in the top right.
     refreshLoggedInUser: ->
