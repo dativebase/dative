@@ -13,6 +13,7 @@ Help</a> section.</p>
 <li><a href="#help-with-the-help">Help with the Help</a></li>
 <li><a href="#application-settings">Application Settings</a></li>
 <li><a href="#browsing-forms">Browsing Forms</a></li>
+<li><a href="#adding-a-form">Adding a Form</a></li>
 <li><a href="#keyboard-shortcuts">Keyboard Shortcuts</a></li>
 </ul>
 <h2 id="quickstart-a-data-name-quickstart-a-">QuickStart<a data-name="quickstart"></a></h2>
@@ -48,7 +49,8 @@ and add to it.</p>
 IMPLEMENTED IN DATIVE.</p>
 <h2 id="frequently-asked-questions-a-data-name-frequently-asked-questions-a-">Frequently Asked Questions<a data-name="frequently-asked-questions"></a></h2>
 <ol>
-<li>What is the difference between the terms “LingSync” and “FieldDB”?<ul>
+<li><p>What is the difference between the terms “LingSync” and “FieldDB”?</p>
+<ul>
 <li>These terms refer, basically, to the same thing. “LingSync” can be thought
 of as the more user-friendly label while “FieldDB” is the more technical
 one. LingSync/FieldDB is a suite of software components designed to
@@ -57,6 +59,16 @@ can be thought of as a component in this suite. The other major component
 that is relevant to Dative is the LingSync/FieldDB web service which
 stores linguistic data on servers so that multiple fieldworkers can
 build corpora collaboratively.</li>
+</ul>
+</li>
+<li><p>What is a “form”?</p>
+<ul>
+<li>A form is a linguistic form. It is a general term meant to encompass
+all of the data points that you might enter into a linguistic fieldwork/
+language documentation database. In practice, may be a morpheme, word,
+phrase, sentence, or even a multi-sentential unit. In LingSync
+applications, the term “datum” is sometimes used. These two terms may
+be considered equivalent here.</li>
 </ul>
 </li>
 </ol>
@@ -119,7 +131,35 @@ LingSync or OLD server administrator.</p>
 <p>Note that you do not need to click “Save” here. Dative saves all of your
 application settings changes automatically to your browser&#39;s local storage.</p>
 <h2 id="browsing-forms-a-data-name-browsing-forms-a-">Browsing Forms<a data-name="browsing-forms"></a></h2>
-<p>This is the help text for the forms-browse view.</p>
+<p>When you click on the Forms &gt; Browse menu button, enter the keyboard shortcut
+⌃B, or click on a FieldDB “activate corpus” button (<i class="fa fa-fw
+fa-toggle-off"></i>), you will be brought to the forms browsing interface.
+This interface displays all of your forms (i.e., data points) in a paginated
+display; that is the forms are split across a number of pages. You may change
+the number of forms displayed per page and can navigate to particular pages
+using the controls provided.</p>
+<p>Each form may be expanded to reveal controls related to it as well as more
+information about it. Click on a form to expand it. You can expand all forms
+on the page by clicking the “expand all” <i class="fa fa-fw
+fa-angle-double-down"></i> button or collapse all forms by clicking on the
+“collapse all” <i class="fa fa-fw fa-angle-double-up"></i> button.</p>
+<h2 id="adding-a-form-a-data-name-adding-a-form-a-">Adding a Form<a data-name="adding-a-form"></a></h2>
+<p>To create a new form, click on the “create a new form” button <i class="fa
+fa-fw fa-plus"></i> from within the “browse forms” interface (or enter the
+keyboard shortcut ⌃A). This will cause the “Add a Form” widget to be displayed
+at the top of the browse forms page. Enter the data for the form (usually
+at minimum a transcription and a translation) and click on the “Add a Form”
+button at the bottom.</p>
+<p>Dative divides the “Add a Form” form into two parts: the primary fields and
+the secondary ones. By default only the primary fields are displayed. You
+may reveal the secondary fields by clicking on the “show secondary fields”
+button <i class="fa fa-fw fa-angle-down"></i> near the top right of the “Add
+a Form” widget.</p>
+<h3 id="modifying-the-form-fields">Modifying the Form Fields</h3>
+<p>WARN: THIS IS NOT IMPLEMENTED YET.</p>
+<p>Dative allows users to control which fields are present on a form. When using
+a FieldDB/LingSync server, the user may define any number of text-based fields,
+i.e., fields whose values are strings of characters.</p>
 <h2 id="keyboard-shortcuts-a-data-name-keyboard-shortcuts-a-">Keyboard Shortcuts<a data-name="keyboard-shortcuts"></a></h2>
 <p>Dative has keyboard shortcuts for most actions. Some keyboard shortcuts are
 global and work throughout the application, no matter which pages or widgets

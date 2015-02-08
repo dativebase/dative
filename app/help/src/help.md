@@ -17,6 +17,7 @@ Help](#help-with-the-help) section.
 - [Help with the Help](#help-with-the-help)
 - [Application Settings](#application-settings)
 - [Browsing Forms](#browsing-forms)
+- [Adding a Form](#adding-a-form)
 - [Keyboard Shortcuts](#keyboard-shortcuts)
 
 
@@ -71,6 +72,13 @@ IMPLEMENTED IN DATIVE.
       stores linguistic data on servers so that multiple fieldworkers can
       build corpora collaboratively.
 
+2. What is a “form”?
+    - A form is a linguistic form. It is a general term meant to encompass
+      all of the data points that you might enter into a linguistic fieldwork/
+      language documentation database. In practice, may be a morpheme, word,
+      phrase, sentence, or even a multi-sentential unit. In LingSync
+      applications, the term “datum” is sometimes used. These two terms may
+      be considered equivalent here.
 
 ## About Dative<a data-name="about-dative"></a>
 
@@ -151,7 +159,46 @@ application settings changes automatically to your browser's local storage.
 
 ## Browsing Forms<a data-name="browsing-forms"></a>
 
-This is the help text for the forms-browse view.
+When you click on the Forms > Browse menu button, enter the keyboard shortcut
+⌃B, or click on a FieldDB “activate corpus” button (<i class="fa fa-fw
+fa-toggle-off"></i>), you will be brought to the forms browsing interface.
+This interface displays all of your forms (i.e., data points) in a paginated
+display; that is the forms are split across a number of pages. You may change
+the number of forms displayed per page and can navigate to particular pages
+using the controls provided.
+
+Each form may be expanded to reveal controls related to it as well as more
+information about it. Click on a form to expand it. You can expand all forms
+on the page by clicking the “expand all” <i class="fa fa-fw
+fa-angle-double-down"></i> button or collapse all forms by clicking on the
+“collapse all” <i class="fa fa-fw fa-angle-double-up"></i> button.
+
+
+
+## Adding a Form<a data-name="adding-a-form"></a>
+
+To create a new form, click on the “create a new form” button <i class="fa
+fa-fw fa-plus"></i> from within the “browse forms” interface (or enter the
+keyboard shortcut ⌃A). This will cause the “Add a Form” widget to be displayed
+at the top of the browse forms page. Enter the data for the form (usually
+at minimum a transcription and a translation) and click on the “Add a Form”
+button at the bottom.
+
+Dative divides the “Add a Form” form into two parts: the primary fields and
+the secondary ones. By default only the primary fields are displayed. You
+may reveal the secondary fields by clicking on the “show secondary fields”
+button <i class="fa fa-fw fa-angle-down"></i> near the top right of the “Add
+a Form” widget.
+
+
+### Modifying the Form Fields
+
+WARN: THIS IS NOT IMPLEMENTED YET.
+
+Dative allows users to control which fields are present on a form. When using
+a FieldDB/LingSync server, the user may define any number of text-based fields,
+i.e., fields whose values are strings of characters.
+
 
 
 ## Keyboard Shortcuts<a data-name="keyboard-shortcuts"></a>

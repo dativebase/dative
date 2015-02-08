@@ -37,6 +37,17 @@ define [
       'click button.remove-translation-field': 'removeTranslationField'
       'click button.hide-form-add-widget': 'hideSelf'
       'click button.toggle-secondary-data': 'toggleSecondaryDataAnimate'
+      'click .form-add-help': 'openFormAddHelp'
+
+    # Tell the Help dialog to open itself and search for "browsing forms" and
+    # scroll to the second match. WARN: this is brittle because if the help
+    # HTML changes, then the second match may not be what we want
+    openFormAddHelp: ->
+      Backbone.trigger(
+        'helpDialog:toggle',
+        searchTerm: 'adding a form'
+        scrollToIndex: 1
+      )
 
     # TODO: AJAX/CORS-fetch the form add metadata (OLD-depending?), if needed
     # and spin() in the meantime ...
@@ -140,8 +151,16 @@ define [
           .tooltip
             position: @tooltipPosition -70
           .end()
+        .filter('.form-add-help')
+          .tooltip
+            position:
+              my: "left+10 center"
+              at: "right center"
+              collision: "flipfit"
+          .end()
         .not('.transcription, .translation, .append-remove-translation-field,
-          .add-form-button, .hide-form-add-widget, .toggle-secondary-data')
+          .add-form-button, .hide-form-add-widget, .toggle-secondary-data,
+          .form-add-help')
           .tooltip
             position: @tooltipPosition()
 
