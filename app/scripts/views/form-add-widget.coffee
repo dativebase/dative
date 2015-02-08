@@ -2,10 +2,11 @@ define [
   'backbone'
   './base'
   './../models/form'
+  './../utils/globals'
   './../templates/form-add-widget'
   'multiselect'
   'jqueryelastic'
-], (Backbone, BaseView, FormModel, formAddTemplate) ->
+], (Backbone, BaseView, FormModel, globals, formAddTemplate) ->
 
   # Form Add Widget View
   # --------------------
@@ -25,6 +26,7 @@ define [
       @secondaryDataVisible = false
       @wideSelectMenuWidth = 548
       @grammaticalitySelectMenuWidth = 50
+      @listenToEvents()
 
     events:
       'change': 'setToModel' # fires when multi-select changes
@@ -39,6 +41,18 @@ define [
       'click button.toggle-secondary-data': 'toggleSecondaryDataAnimate'
       'click .form-add-help': 'openFormAddHelp'
 
+    listenToEvents: ->
+      @stopListening()
+      @undelegateEvents()
+      @delegateEvents()
+
+      # Events specific to an OLD backend and the request for the data needed to create a form.
+      @listenTo Backbone, 'getOLDNewFormDataStart', @getOLDNewFormDataStart
+      @listenTo Backbone, 'getOLDNewFormDataEnd', @getOLDNewFormDataEnd
+      @listenTo Backbone, 'getOLDNewFormDataSuccess', @getOLDNewFormDataSuccess
+      @listenTo Backbone, 'getOLDNewFormDataFail', @getOLDNewFormDataFail
+
+
     # Tell the Help dialog to open itself and search for "browsing forms" and
     # scroll to the second match. WARN: this is brittle because if the help
     # HTML changes, then the second match may not be what we want
@@ -52,11 +66,28 @@ define [
     # TODO: AJAX/CORS-fetch the form add metadata (OLD-depending?), if needed
     # and spin() in the meantime ...
     render: (taskId) ->
+      if @activeServerTypeIsOLD() and not @weHaveOLDNewFormData()
+        @model.getOLDNewFormData()
+        return @
       @html()
       @secondaryDataVisibility()
       @guify()
       @fixRoundedBorders() # defined in BaseView
+      @listenToEvents()
       @
+
+    getActiveServerType: ->
+      try
+        globals.applicationSettings.get('activeServer').get 'type'
+      catch
+        null
+
+    activeServerTypeIsOLD: ->
+      @getActiveServerType() is 'OLD'
+
+    weHaveOLDNewFormData: ->
+      @log _.keys(globals)
+      globals.oldData?
 
     # Write the initial HTML to the page.
     html: ->
@@ -678,4 +709,23 @@ define [
 #
 # 11. syntacticTreeLaTeX and syntacticTreePTB
 #
+
+
+    ############################################################################
+    # Responding to events from request to get data needed to create a new OLD form
+    ############################################################################
+
+    getOLDNewFormDataStart: ->
+      @spin()
+
+    getOLDNewFormDataEnd: ->
+      @stopSpin()
+
+    getOLDNewFormDataSuccess: (data) ->
+      globals.oldData = data
+      @render()
+
+    getOLDNewFormDataFail: ->
+      console.log 'Failed to retrieve the data from the OLD server which is
+        necessary for creating a new form'
 

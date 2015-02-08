@@ -598,7 +598,8 @@ h1 {
     margin-bottom: 10px;
 }
 
-.logged-in-username:hover
+.logged-in-username:hover,
+.active-corpus-name:hover
 {
     cursor: default;
 }

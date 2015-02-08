@@ -134,7 +134,7 @@ define [
       if currentlyActiveFieldDBCorpus is @activeFieldDBCorpus
         @showFormsView fieldDBCorpusHasChanged: false
       else
-        @mainMenuView.activeFieldDBCorpusChanged @activeFieldDBCorpus.get('title')
+        # @mainMenuView.activeFieldDBCorpusChanged @activeFieldDBCorpus.get('title')
         @showFormsView fieldDBCorpusHasChanged: true
 
     logoutSuccess: ->

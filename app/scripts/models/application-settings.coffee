@@ -261,7 +261,10 @@ define [
       FieldDB.Database::logout().then(
         (responseJSON) =>
           if responseJSON.ok is true
-            @save 'loggedIn', false
+            @save
+              loggedIn: false
+              activeFieldDBCorpus: null
+              activeFieldDBCorpusTitle: null
             Backbone.trigger 'logout:success'
           else
             Backbone.trigger 'logout:fail',
@@ -448,6 +451,9 @@ define [
         'concordia'
         'dyslexdisorth'
       ]
+
+      activeFieldDBCorpus: null
+      activeFieldDBCorpusTitle: null
 
       itemsPerPage: 10
 

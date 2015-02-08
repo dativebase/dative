@@ -1,9 +1,10 @@
 define [
     'underscore'
     'backbone'
+    './../utils/globals'
     './database'
     './base'
-  ], (_, Backbone, database, BaseModel) ->
+  ], (_, Backbone, globals, database, BaseModel) ->
 
   # Form Model
   # ----------
@@ -418,4 +419,34 @@ define [
 
     parse: (response, options) ->
       response
+
+
+    getOLDURL: -> globals.applicationSettings.get('activeServer').get 'url'
+
+    # Issue a GET request to /forms/new on the active OLD server.
+    # This returns a JSON object containing the data necessary to
+    # create a new OLD form, an object with keys like `grammaticalities`,
+    # `elicitation_methods`, `users`, `speakers`, etc. See:
+    # https://github.com/jrwdunham/old/blob/master/onlinelinguisticdatabase/controllers/forms.py#L160
+    # https://github.com/jrwdunham/old/blob/master/onlinelinguisticdatabase/controllers/forms.py#L454-L524
+    getOLDNewFormData: ->
+      Backbone.trigger 'getOLDNewFormDataStart'
+      FormModel.cors.request(
+        method: 'GET'
+        url: "#{@getOLDURL()}/forms/new"
+        onload: (responseJSON) =>
+          Backbone.trigger 'getOLDNewFormDataEnd'
+          # console.log JSON.stringify(responseJSON, undefined, 2)
+          Backbone.trigger 'getOLDNewFormDataSuccess', responseJSON
+          # TODO: trigger FAIL event if appropriate (how do we know?)
+          # Backbone.trigger 'getOLDNewFormDataFail',
+          #     "Failed in fetching the data."
+          # console.log "GET request to OLD server for /forms/new failed"
+        onerror: (responseJSON) =>
+          Backbone.trigger 'getOLDNewFormDataEnd'
+          Backbone.trigger 'getOLDNewFormDataFail',
+            'Error in GET request to OLD server for /forms/new'
+          console.log 'Error in GET request to OLD server for /forms/new'
+      )
+
 

@@ -21,11 +21,12 @@ define [
 
     initialize: ->
       @listenTo @model, 'change:loggedIn', @loggedInChanged
+      @listenTo @model, 'change:activeFieldDBCorpusTitle', @activeFieldDBCorpusChanged
+      @listenTo @model, 'change:activeServer', @activeFieldDBCorpusChanged
       @listenTo Backbone, 'bodyClicked', @closeSuperclick
       @listenTo Backbone, 'application-settings:jQueryUIThemeChanged', @jQueryUIThemeChanged
 
-    activeFieldDBCorpusChanged: (activeFieldDBCorpusTitle) ->
-      @activeFieldDBCorpusTitle = activeFieldDBCorpusTitle
+    activeFieldDBCorpusChanged: ->
       @refreshLoggedInUser()
       @displayActiveCorpusName()
 
@@ -224,14 +225,37 @@ define [
           .css 'border-color', @constructor.jQueryUIColors().defBa
           .tooltip()
 
+    # Display the name of the active corpus at the top center of the menu bar.
+    # If there is no active corpus, display the name of the active server.
     displayActiveCorpusName: ->
-      if globals.activeFieldDBCorpus
+      activeFieldDBCorpusTitle = globals
+        .applicationSettings?.get? 'activeFieldDBCorpusTitle'
+      activeServerName = globals
+        .applicationSettings?.get?('activeServer').get? 'name'
+      activeServerType = globals
+        .applicationSettings?.get?('activeServer').get? 'type'
+      loggedIn = globals
+        .applicationSettings?.get? 'loggedIn'
+      text = null
+      if activeFieldDBCorpusTitle
+        text = activeFieldDBCorpusTitle
+        title = "You are logged in to “#{activeServerName}” and are using the
+          corpus “#{activeFieldDBCorpusTitle}”"
+      else if activeServerName
+        text = activeServerName
+        if loggedIn
+          if activeServerType is 'OLD'
+            title = "You are logged in to the OLD server “#{activeServerName}”"
+          else
+            title = "You are logged in to the FieldDB server
+              “#{activeServerName}” but have not yet activated a corpus"
+        else
+          title = "The active server is “#{activeServerName}”"
+      if text
         @$('.active-corpus-name')
-          .text globals.activeFieldDBCorpus.get('title')
-      else if globals.applicationSettings
-        if globals.applicationSettings.get('activeFieldDBCorpusTitle')
-          @$('.active-corpus-name')
-            .text globals.applicationSettings.get('activeFieldDBCorpusTitle')
+          .text text
+          .attr 'title', title
+          .tooltip()
 
     # Reset the tooltip title of the logged-in user's name in the top right.
     refreshLoggedInUser: ->
@@ -239,12 +263,12 @@ define [
         username = @model.get 'username'
         activeServerName = @model.get('activeServer')?.get 'name'
         activeServerType = @model.get('activeServer')?.get 'type'
-        activeFieldDBCorpus = @model.get 'activeFieldDBCorpus'
+        activeFieldDBCorpusTitle = @model.get 'activeFieldDBCorpusTitle'
         title = ["You are logged in to the server “#{activeServerName}”",
           "as “#{username}”"].join ' '
-        if activeServerType is 'FieldDB' and @activeFieldDBCorpusTitle
+        if activeServerType is 'FieldDB' and activeFieldDBCorpusTitle
           title = ["#{title} and are using the corpus",
-            "“#{@activeFieldDBCorpusTitle}”"].join ' '
+            "“#{activeFieldDBCorpusTitle}”"].join ' '
         @$('.logged-in-username')
           .text username
           .attr 'title', title
