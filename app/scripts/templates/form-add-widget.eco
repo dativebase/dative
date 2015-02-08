@@ -22,7 +22,7 @@
 
 <div class="dative-widget-body">
 
-  <form action="form/add_ajax" method="post" class="formAdd">
+  <div class="form-add-form">
 
     <ul class="fieldset igt-data">
 
@@ -256,13 +256,14 @@
 
     </div>
 
-    <ul class="fieldset">
+    <ul class="fieldset button-only-fieldset">
       <li class="center">
-        <input type="submit" value="Add Form" class="dative-tooltip"
-          title="Save this new form" />
+        <button class="add-form-button dative-tooltip"
+          title="Save this new form">Add Form</button>
       </li>
     </ul>
 
-  </form>
+  </div>
+
 </div>
 

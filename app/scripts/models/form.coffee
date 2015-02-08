@@ -7,6 +7,8 @@ define [
 
   # Form Model
   # ----------
+  #
+  # A Backbone model for Dative forms. 
 
   class FormModel extends BaseModel
 

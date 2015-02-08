@@ -30,6 +30,7 @@ define [
       @renderedFormViews = [] # references to the FormView instances that are rendered
       @formAddView = new FormAddWidgetView model: new FormModel()
       @formAddViewVisible = false
+      @weShouldFocusFirstAddViewInput = false
       @renderedPaginationItemTableViews = [] # Each form is in a 1-row/2-cell table where cell 1 is the index+1, e.g., (1), (2), etc.
       @fetchCompleted = false
       @lastFetched = # We store this to help us prevent redundant requests to the server for all forms.
@@ -118,9 +119,6 @@ define [
       @formAddViewVisible = true
       @$('.add-form-widget').slideDown()
       @focusFirstFormAddViewTextarea()
-
-    focusFirstFormAddViewTextarea: ->
-      @$('.add-form-widget textarea').first().focus()
 
     toggleFormAddViewAnimate: ->
       if @$('.add-form-widget').is ':visible'
@@ -346,7 +344,10 @@ define [
     # it sets focus based on the remembered index of a jQuery matched set.
     setFocus: ->
       if @focusedElementIndex?
+        @weShouldFocusFirstAddViewInput = false
         @focusLastFocusedElement()
+      else if @weShouldFocusFirstAddViewInput
+        @focusFirstFormAddViewTextarea()
       else
         @focusFirstForm()
 
@@ -355,6 +356,9 @@ define [
 
     focusFirstForm: ->
       @$('div.dative-form-object').first().focus()
+
+    focusFirstFormAddViewTextarea: ->
+      @$('.add-form-widget textarea').first().focus()
 
     guify: ->
 

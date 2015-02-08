@@ -317,22 +317,36 @@ ul.fieldset {
     position: relative;
     font-size: 12px;
 }
+
+ul.fieldset.button-only-fieldset
+{
+    margin-top: -1em;
+    padding-top: 0;
+    padding-bottom: 5px;
+}
+
 .formAddForm ul.fieldset {
     width: 868px;
 }
+
 ul.fieldset li {
     padding: 0 0 6px;
     position: relative;
 }
+
 ul.fieldset label {
     padding: 8px 3px 1px 0;
     text-align: right;
     vertical-align: top;
     font-size: 12px;
 }
-.formAdd ul.fieldset label {
+
+div.form-add-form ul.fieldset label,
+.formAdd ul.fieldset label
+{
     width: 150px;
 }
+
 .applicationSettingsForm ul.fieldset label {
     width: 144px;
 }

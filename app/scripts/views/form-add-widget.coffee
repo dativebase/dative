@@ -10,12 +10,12 @@ define [
   # Form Add Widget View
   # --------------------
   #
-  # Very similar to the FormAddView of views/form-add.coffee, except that this
-  # one is designed to be a subview of a page view (FormAddView is a top-level
-  # page view.)
+  # View for a widget containing inputs and controls for creating a new
+  # form and updating an existing one. Currently this view is being
+  # used as a sub-view of the "forms browse" page view.
   #
-  # Logic for the HTML form for creating new, and updating existing, Dative
-  # (i.e., linguistic) forms.
+  # (Note: the page-view-level `FormAddView` is currently not being used and
+  # may be removed entirely.)
 
   class FormAddWidgetView extends BaseView
 
@@ -24,99 +24,223 @@ define [
     initialize: ->
       @secondaryDataVisible = false
       @wideSelectMenuWidth = 548
-
-    # Return a default tooltip position.
-    tooltipPosition: (rightOffset=-120) ->
-      my: "right#{rightOffset} top"
-      at: 'left top'
-      collision: 'flipfit'
+      @grammaticalitySelectMenuWidth = 50
 
     events:
       'change': 'setToModel' # fires when multi-select changes
       'input': 'setToModel' # fires when an input, textarea or date-picker changes
       'selectmenuchange': 'setToModel' # fires when a selectmenu changes
       'menuselect': 'setToModel' # fires when the tags multi-select changes (not working?...)
-      'keydown form.formAdd': 'submitFormKeys'
-      'click input[type=submit]': 'submitForm'
+      'keydown form.formAdd': 'keyboardEvents'
+      'click button.add-form-button': 'submitForm'
       'click button.append-translation-field': 'appendTranslationField'
       'click button.remove-translation-field': 'removeTranslationField'
       'click button.hide-form-add-widget': 'hideSelf'
       'click button.toggle-secondary-data': 'toggleSecondaryDataAnimate'
 
-    # The FormsView will handle this hiding.
-    hideSelf: ->
-      @trigger 'formAddView:hide'
-
-    # Set the state of the "add a form" HTML form on the model.
-    setToModel: ->
-      modelObject = @getModelObjectFromAddForm()
-      # FieldDB stuff commented out until it can be better incorporated.
-      # Note: form model should *not* be saved on every minute change.
-      # tobesaved = new FieldDB.Document(modelObject)
-      # tobesaved.dbname = tobesaved.application.currentFieldDB.dbname
-      # tobesaved.url = tobesaved.application.currentFieldDB.url + "/"+ tobesaved.dbname
-      # tobesaved.save()
-      @model?.set modelObject
-
-    # Extract data in the inputs of the HTML "Add a Form" form and
-    # convert them to an object
-    getModelObjectFromAddForm: ->
-      modelObject = {}
-      for fieldObject in $('form.formAdd').serializeArray()
-        # The challenge here is to take form fields with names like
-        # 'translations-1.grammaticality' and use them to produce lists
-        # of objects like
-        # modelObject['translations'] = [..., {grammaticality: ...}]
-
-        # First, make an object with indices as keys:
-        # modelObject['translations'] = {0: ..., 1: {grammaticality: ...}}
-        if fieldObject.name.split('-').length is 2
-          [attr, tmp] = fieldObject.name.split '-'
-          [index, subAttr] = tmp.split '.'
-          if attr of modelObject
-            attrVal = modelObject[attr]
-          else
-            attrVal = modelObject[attr] = {}
-          if index of attrVal
-            tmp = attrVal[index]
-          else
-            tmp = attrVal[index] = {}
-          tmp[subAttr] = fieldObject.value
-        else
-          modelObject[fieldObject.name] = fieldObject.value
-
-      # Second step is to convert the object with index keys into
-      # an array.
-      for attr of modelObject
-        if @utils.type(modelObject[attr]) is 'object'
-          array = []
-          for key of (k for k of modelObject[attr]).sort()
-            array.push modelObject[attr][key]
-          modelObject[attr] = array
-
-      # The tags multi-select value needs to be explicitly extracted
-      modelObject.tags = $('form.formAdd select[name=tags]').val()
-
-      modelObject
-
     # TODO: AJAX/CORS-fetch the form add metadata (OLD-depending?), if needed
     # and spin() in the meantime ...
     render: (taskId) ->
+      @html()
+      @secondaryDataVisibility()
+      @guify()
+      @fixRoundedBorders() # defined in BaseView
+      @
+
+    # Write the initial HTML to the page.
+    html: ->
       params =
         headerTitle: 'Add a Form'
         model: @model.toJSON()
         options: @fakeFormAddOptions # TODO: fetch real data from server (or provide defaults?)
       @$el.html @template(params)
-      @secondaryDataVisibility()
-      $body = $('.dative-widget-body')
-      #@populateSelectFields $body # DEPRECATED: should be done in template
-      @guify()
-      #@addModel $body # DEPRECATED: should be done in template
-      #@setFocus()
-      @fixRoundedBorders()
-      # Backbone.trigger 'longTask:deregister', taskId # Don't think I need this since this is a widget, not a page...
-      @
 
+    ############################################################################
+    # jQuery (UI) GUI stuff.
+    ############################################################################
+
+    # Make the vanilla HTML nice and jQueryUI-ified.
+    guify: ->
+      @selectmenuify()
+      @multiSelectify()
+      @buttonify()
+      @datepickerify()
+      @bordercolorify()
+      @elasticize()
+      @tooltipify()
+
+    # Make the <select>s into nice jQuery selectmenus.
+    selectmenuify: ->
+      @$('select')
+        .filter('.grammaticality')
+          .selectmenu width: @grammaticalitySelectMenuWidth
+          .each (index, element) =>
+            @transferClassAndTitle @$(element)
+          .end()
+        .not('.grammaticality, .tags')
+          .selectmenu width: @wideSelectMenuWidth
+          .each (index, element) =>
+            @transferClassAndTitle @$(element)
+
+    # Make the tags <select> into a jQuery multiSelect
+    multiSelectify: ->
+      @$('select[name=tags]')
+        .multiSelect()
+        .each (index, element) =>
+          @transferClassAndTitle @$(element), '.ms-container'
+
+    # Copy the class and title attributes from a <select> to its corresponding
+    # selectmenu button. This permits later "tooltipification".
+    transferClassAndTitle: ($element, selector='.ui-selectmenu-button') ->
+      class_ = $element.attr 'class'
+      title = $element.attr 'title'
+      $element
+        .next selector
+          .addClass "#{class_} dative-tooltip"
+          .attr 'title', title
+
+    # Make the buttons into nice jQuery buttons.
+    buttonify: ->
+      @$('button').button()
+
+    # Make the date elicited input into a nice jQuery datepickter.
+    datepickerify: ->
+      @$('input[name="dateElicited"]').datepicker
+        appendText: "<span style='margin: 0 10px;'>mm/dd/yyyy</span>"
+        autoSize: true
+
+    # Make the border colors match the jQueryUI theme.
+    bordercolorify: ->
+      @$('select, input, textarea')
+        .css "border-color", @constructor.jQueryUIColors().defBo
+
+    # Use jQuery elastic to make <textarea>s stretch to fit their content.
+    elasticize: ->
+      @$('textarea')
+        .elastic compactOnBlur: false
+        .css height: '16px' # Do this, otherwise jquery-elastic erratically increases textarea height ...
+
+    # Make the `title` attributes of the inputs/controls into tooltips
+    # The jQuery chain is simply to get the tooltip positioning right.
+    tooltipify: ->
+      @$('.dative-tooltip')
+        .filter('.append-remove-translation-field')
+          .tooltip
+            position: @tooltipPosition -630
+          .end()
+        .filter('.transcription, .translation')
+          .tooltip
+            position: @tooltipPosition -170
+          .end()
+        .filter('.add-form-button, .hide-form-add-widget')
+          .tooltip
+            position: @tooltipPosition -20
+          .end()
+        .filter('.toggle-secondary-data')
+          .tooltip
+            position: @tooltipPosition -70
+          .end()
+        .not('.transcription, .translation, .append-remove-translation-field,
+          .add-form-button, .hide-form-add-widget, .toggle-secondary-data')
+          .tooltip
+            position: @tooltipPosition()
+
+    # Return a default tooltip position where the tops are aligned and the right
+    # side of the tooltip is `rightOffset` away from the left side of the target.
+    tooltipPosition: (rightOffset=-120) ->
+      my: "right#{rightOffset} top"
+      at: 'left top'
+      collision: 'flipfit'
+
+
+    ############################################################################
+    # Logic for populating the model.
+    ############################################################################
+
+    # Set the state of the "add a form" HTML form on the Dative form model.
+    setToModel: ->
+      modelObject = @getModelObjectFromAddForm()
+      # @setFieldDBDatum modelObject
+      @log _.keys(modelObject).sort()
+      @log _.keys(@model.toJSON()).sort()
+      @model?.set modelObject
+
+    # Create a FieldDB datum model.
+    # NOTE: this method is currently not being used
+    setFieldDBDatum: (modelObject) ->
+      tobesaved = new FieldDB.Document modelObject
+      tobesaved.dbname = tobesaved.application.currentFieldDB.dbname
+      tobesaved.url = "#{tobesaved.application.currentFieldDB.url}/#{tobesaved.dbname}"
+      tobesaved.save()
+
+    # Extract data in the inputs of the HTML "Add a Form" form and
+    # convert them to an object
+    getModelObjectFromAddForm: ->
+      modelObject = {}
+      for {name, value} in @getFields()
+        modelObject = @createModelObjectFirstPass modelObject, name, value
+      modelObject = @createModelObjectSecondPass modelObject
+      # The tags multi-select value needs to be explicitly extracted
+      modelObject.tags = $('div.form-add-form select[name=tags]').val()
+      modelObject
+
+    # Get an array of objects with `name` and `value` attributes: extracted
+    # from the HTML fields in the widget.
+    getFields: ->
+      @$('div.form-add-form :input').serializeArray()
+
+    # Return the passed-in `modelObject` where it's object-type values
+    # (created by `createModelObjectFirstPass`) are converted to arrays,
+    # that is
+    #     modelObject['translations'] = {1: {grammaticality: '*', transcription: 'dog'}, ...}}
+    # becomes
+    #     modelObject['translations'] = [{grammaticality: '*', transcription: 'dog'}, ...]
+    createModelObjectSecondPass: (modelObject) ->
+      for attr, value of modelObject
+        if @utils.type(value) is 'object'
+          array = []
+          for key of (k for k of value).sort()
+            array.push value[key]
+          modelObject[attr] = array
+      modelObject
+
+    # Return the passed-in `modelObject` with the passed-in `name` and
+    # `value`.
+    # The challenge here is to take form fields with names like
+    # 'translations-1.grammaticality' and 'translations-1.transcription' and
+    # use them to produce attributes of `modelObject` that are lists of objects,
+    # as in:
+    #     modelObject['translations'] = [{grammaticality: '*', transcription: 'dog'}, ...]
+    # This function is the first pass in this task: it returns an object with
+    # indices as keys:
+    #     modelObject['translations'] = {1: {grammaticality: '*', transcription: 'dog'}, ...}}
+    createModelObjectFirstPass: (modelObject, name, value) ->
+      if name.split('-').length is 2
+        [attr, tmp] = name.split '-'
+        [index, subAttr] = tmp.split '.'
+        if attr of modelObject
+          attrVal = modelObject[attr]
+        else
+          attrVal = modelObject[attr] = {}
+        if index of attrVal
+          tmp = attrVal[index]
+        else
+          tmp = attrVal[index] = {}
+        tmp[subAttr] = value
+      else # This is the regular case: just a regular name/value pair
+        modelObject[name] = value
+      modelObject
+
+
+    ############################################################################
+    # Showing, hiding and toggling
+    ############################################################################
+
+    # The FormsView will handle this hiding.
+    hideSelf: ->
+      @trigger 'formAddView:hide'
+
+    # If the secondary data fields should be visible, show them; otherwise no.
     secondaryDataVisibility: ->
       if @secondaryDataVisible
         @showSecondaryData()
@@ -155,6 +279,7 @@ define [
       else
         @showSecondaryDataAnimate()
 
+    # Make the "toggle secondary data" button have the appropriate icon and tooltip.
     setSecondaryDataToggleButtonState: ->
       if @secondaryDataVisible
         @$('button.toggle-secondary-data')
@@ -171,16 +296,7 @@ define [
             .removeClass 'fa-angle-up'
             .addClass 'fa-angle-down'
 
-    setFormAddViewButtonShow: ->
-      @$('button.new-form')
-        .button 'enable'
 
-    # TODO: delete this. (I think it's being handled by the forms browse view
-    setFocus_: ->
-      if @focusedElementId?
-        @$("##{@focusedElementId}").first().focus()
-      else
-        $('#transcription').focus()
 
     # Add the data from the associated model to the <select>s, i.e. preserve
     # state across views. (Note that the values of textareas and text inputs
@@ -210,96 +326,20 @@ define [
         $('select[name="tags"]', context)
           .multiSelect 'select', @model.get('tags')
 
-    guify: ->
-      @selectmenuify()
-      @multiSelectify()
-      @buttonify()
-      @datepickerify()
-      @bordercolorify()
-      @elasticize()
-      @tooltipify()
 
-    # Make the <select>s into nice jQuery selectmenus.
-    selectmenuify: ->
-      @$('select')
-        .filter('.grammaticality')
-          .selectmenu width: 50
-          .each (index, element) =>
-            @transferClassAndTitle @$(element)
-          .end()
-        .not('.grammaticality, .tags')
-          .selectmenu width: @wideSelectMenuWidth
-          .each (index, element) =>
-            @transferClassAndTitle @$(element)
-
-    # Make the tags <select> into a jQuery multiSelect
-    multiSelectify: ->
-      @$('select[name=tags]')
-        .multiSelect()
-        .each (index, element) =>
-          @transferClassAndTitle @$(element), '.ms-container'
-
-    # Copy the class and title attributes from a <select> to its corresponding
-    # selectmenu button. This permits later "tooltipification".
-    transferClassAndTitle: ($element, selector='.ui-selectmenu-button') ->
-      class_ = $element.attr 'class'
-      title = $element.attr 'title'
-      $element
-        .next selector
-          .addClass "#{class_} dative-tooltip"
-          .attr 'title', title
-
-    # Make the buttons into nice jQuery buttons.
-    buttonify: ->
-      @$('button, input[type=submit]').button()
-
-    # Make the date elicited input into a nice jQuery datepickter.
-    datepickerify: ->
-      @$('input[name="dateElicited"]').datepicker
-        appendText: "<span style='margin: 0 10px;'>mm/dd/yyyy</span>"
-        autoSize: true
-
-    # Make the border colors match the jQueryUI theme.
-    bordercolorify: ->
-      @$('select, input, textarea')
-        .css "border-color", @constructor.jQueryUIColors().defBo
-
-    # Use jQuery elastic to make <textarea>s stretch to fit their content.
-    elasticize: ->
-      @$('textarea')
-        .elastic compactOnBlur: false
-        .css height: '16px' # Do this, otherwise jquery-elastic erratically increases textarea height ...
-
-    # Make the `title` attributes of the inputs/controls into tooltips
-    tooltipify: ->
-      @$('.dative-tooltip')
-        .filter('.append-remove-translation-field')
-          .tooltip
-            position: @tooltipPosition -630
-          .end()
-        .filter('.transcription, .translation')
-          .tooltip
-            position: @tooltipPosition -170
-          .end()
-        .filter('input[type=submit]')
-          .tooltip
-            position: @tooltipPosition -20
-          .end()
-        .not('.transcription, .translation, .append-remove-translation-field, input[type=submit]')
-          .tooltip
-            position: @tooltipPosition()
-
-    # CTRL + <Return> in a textarea submits the form;
-    # <Return> in an input does too.
-    submitFormKeys: (event) ->
+    # Handle special keydown events in the HTML form.
+    # - <Ctrl+Return> in a textarea submits the form
+    # - <Return> in an input submits the form
+    # - <Shift+Tab> in the tags multiselect focuses the previous input
+    keyboardEvents: (event) ->
       if event.which is 13
         targetTagName = $(event.target).prop 'tagName'
         if event.ctrlKey and targetTagName is 'TEXTAREA'
           @stopEvent event
-          @$('input[type=submit]').click()
+          @$('.add-form-button').click()
         else if targetTagName is 'INPUT'
           @stopEvent event
-          @$('input[type=submit]').click()
+          @$('.add-form-button').click()
       # TODO: this is supposed to make Shift+Tab focus the elicitationMethod
       # multiselect, but instead it's focusing the speaker comments. I haven't
       # yet been able to figure out why.
@@ -310,6 +350,7 @@ define [
     submitForm: (event) ->
       @stopEvent event
       console.log 'you want to submit this form'
+
 
     # TODO: don't delete this method yet. It may be useful for populating
     # the widget's inputs for form updating.
@@ -333,17 +374,15 @@ define [
           @$('textarea').elastic compactOnBlur: false
 
           # Populate grammaticality
-          console.log formAddOptions.grammaticalities
           $selectGrammaticality = @$('select.grammaticality')
           for grammaticality in formAddOptions.grammaticalities
             $selectGrammaticality
               .append($('<option>')
                 .attr('value', grammaticality)
                 .text(grammaticality))
-          $selectGrammaticality.selectmenu width: 50
+          $selectGrammaticality.selectmenu width: @grammaticalitySelectMenuWidth
 
           # Populate & GUI-ify elicitationMethod
-          console.log formAddOptions.elicitationMethods
           $selectElicitationMethod = @$('select[name=elicitationMethod]')
           for [elicitationMethodId, elicitationMethod] in formAddOptions.elicitationMethods
             $selectElicitationMethod
@@ -403,6 +442,11 @@ define [
 
       updateAddInterface formAddOptions, 'success'
 
+
+    ############################################################################
+    # New translation field(s) logic
+    ############################################################################
+
     # Append a new translation Field <li> at the bottom of the IGT data
     # section.
     appendTranslationField: (event) ->
@@ -429,7 +473,7 @@ define [
     selectmenuifyLastTranslationField: ($li=null) ->
       $li = if $li then $li else @$('li.translation-li').last()
       $li.find('select.translation-grammaticality')
-        .selectmenu(width: 50)
+        .selectmenu(width: @grammaticalitySelectMenuWidth)
         .next('.ui-selectmenu-button')
           .addClass('translation-grammaticality')
 
@@ -518,8 +562,14 @@ define [
       ("<option value=\"#{grammaticality}\">#{grammaticality}</option>" \
         for grammaticality in @fakeFormAddOptions.grammaticalities).join ''
 
+
+    ############################################################################
+    # Fake form add options.
+    ############################################################################
+
+    # TODO: AJAX-query these for the OLD (and FieldDB?)
+
     # Fake formAddOptions object for development purposes.
-    # TODO: make this a fetch from the server.
     fakeFormAddOptions:
       grammaticalities: [
         '',
@@ -567,4 +617,46 @@ define [
         [2, 'Chomsky (1965)']
       ]
 
+# TODO
+#
+# 1. set these here or have the servers do it?:
+#   - datetimeEntered
+#   - datetimeModified
+#   - enterer
+#   - modifier
+#
+# 2. have the form accommodate FieldDB's non-relational data structure:
+#   - no selectmenus for elicitor, category, etc.
+#   - tags is just a text field
+#   - elicitor/verifier are strings
+#   - perhaps have warning-based validation for these
+#
+# 3. fieldDBComments: an array of objects (I think)
+#   - form fields diverge, depending on OLD/FieldDB backend
+#
+# 4. fieldDBDatumTags and fieldDBTags
+#   - I am unsure what the data struture of these fields are, exactly
+#
+# 5. id and UUID:
+#   - differences between OLD and FieldDB in this respect
+#
+# 6. modifiers (fieldDB only)
+#   - an array of some sort.
+#
+# 7. breakGlossCategory, morphemeBreakIds, and morphemeGlossIds
+#   - these are OLD-specific and are generated server-side, but
+#     they are integral to the morpho-lexical consistency stuff.
+#
+# 8. Create Dative fields for narrowPhoneticTranscription, phoneticTranscription
+#    and semantics.
+#   - these are OLD-specific, but FieldDB can easily accommodate them.
+#
+# 9. Create Dative fields for status
+#
+# 10. Create Dative field for syntacticCategories
+#   - user-specifiable
+#   - the OLD creates this server-side using morphemeBreak and morphemeGloss and the 
+#
+# 11. syntacticTreeLaTeX and syntacticTreePTB
+#
 

@@ -225,7 +225,7 @@ define [
       # This is relevant if the user is trying to add a new form.
       if options?.showFormAddView
         @formsView.formAddViewVisible = true
-        @formsView.focusedElementIndex = 0
+        @formsView.weShouldFocusFirstAddViewInput = true
       @renderVisibleView taskId
 
     showFormAddView: ->
