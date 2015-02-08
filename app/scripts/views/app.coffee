@@ -127,7 +127,9 @@ define [
       fieldDBCorporaCollection = @corporaView?.collection
       @activeFieldDBCorpus = fieldDBCorporaCollection?.findWhere
         pouchname: corpusId
-      @applicationSettings.save 'activeFieldDBCorpus', corpusId
+      @applicationSettings.save
+        'activeFieldDBCorpus': corpusId
+        'activeFieldDBCorpusTitle': @activeFieldDBCorpus.get 'title'
       globals.activeFieldDBCorpus = @activeFieldDBCorpus
       if currentlyActiveFieldDBCorpus is @activeFieldDBCorpus
         @showFormsView fieldDBCorpusHasChanged: false
