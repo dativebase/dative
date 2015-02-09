@@ -119,9 +119,9 @@ define [
     # TODO: @jrwdunham @cesine: consider changing the shortcut keys: vim-style
     # conventions or arrow keys might be better. Alternatively (or in
     # addition), we could have these be user-customizable.
-    # TODO: up and down arrows should not expand/contract all when a
-    # (items-per-page) selectmenu is in focus.
     keyboardShortcuts: (event) ->
+      if @itemsPerPageSelectHasFocus()
+        console.log 'items per page select has focus'
       if not @addFormWidgetHasFocus()
         if not event.ctrlKey
           switch event.which
@@ -129,14 +129,25 @@ define [
             when 80 then @$('.previous-page').click() # p
             when 78 then @$('.next-page').click() # n
             when 76 then @$('.last-page').click() # l
-            when 40 then @$('.expand-all').click() # down arrow
-            when 38 then @$('.collapse-all').click() # up arrow
+            when 40 # down arrow
+              if not @itemsPerPageSelectHasFocus()
+                @$('.expand-all').click()
+            when 38 # up arrow
+              if not @itemsPerPageSelectHasFocus()
+                @$('.collapse-all').click()
             when 65 then @toggleFormAddViewAnimate() # a
 
     # Returns true if the Add a Form widget has focus; we don't want the forms
     # browsing shortcuts to be in effect if the user is adding a form.
     addFormWidgetHasFocus: ->
       @$('.add-form-widget').find(':focus').length > 0
+
+    # Returns true if the "items per page" selectmenu in the Pagination Top
+    # Menu view has focus; we don't want the expand/collapse shortcuts to
+    # be triggered when we're using the arrow keys to change the number of
+    # forms being displayed.
+    itemsPerPageSelectHasFocus: ->
+      @$('.ui-selectmenu-button.items-per-page').is ':focus'
 
     # Respond appropriately when a "control" (input, button, etc.) has been focused.
     # Basically, remember the focused element and scroll to it.
