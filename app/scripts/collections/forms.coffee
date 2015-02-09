@@ -52,7 +52,6 @@ define [
         onload: (responseJSON) =>
           Backbone.trigger 'fetchOLDFormsEnd'
           if 'items' of responseJSON
-            # console.log JSON.stringify(responseJSON.items[0], undefined, 2)
             @add @getDativeFormModelsFromOLDObjects(responseJSON.items)
             Backbone.trigger 'fetchOLDFormsSuccess', responseJSON.paginator
           else
@@ -83,6 +82,14 @@ define [
     # Return a URL for requesting a page of forms from an OLD web service.
     # GET parameters control pagination and ordering.
     getOLDFormsPaginationURL: (options) ->
+      "#{@getOLDURL()}/forms?\
+        page=#{options.page}&\
+        items_per_page=#{options.itemsPerPage}"
+
+    # Return a URL for requesting a page of forms from an OLD web service.
+    # GET parameters control pagination and ordering.
+    # ORDERING: DESC BY ID
+    getOLDFormsPaginationURL_: (options) ->
       "#{@getOLDURL()}/forms?\
         page=#{options.page}&\
         items_per_page=#{options.itemsPerPage}&\

@@ -3,16 +3,15 @@ define ['./../utils/utils'], (utils) ->
   # Paginator
   # ---------
   #
-  # Holds a integers and logic for manipulating pagination.
+  # Holds attributes and logic for manipulating pagination.
 
   class Paginator
 
-    constructor: ->
-      # user-settable attributes
+    constructor: (
+      @page = 1
       @items = 0
       @itemsPerPage = 10
-      @page = 1
-      @possibleItemsPerPage = @_defaultPossibleItemsPerPage
+      @possibleItemsPerPage = @_defaultPossibleItemsPerPage) ->
 
       # computed attributes
       @itemsDisplayed = 0

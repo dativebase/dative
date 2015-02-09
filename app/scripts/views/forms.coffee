@@ -42,6 +42,7 @@ define [
       @weShouldFocusFirstAddViewInput = false # AppView sets this to True when you click Forms > Add
       @renderedPaginationItemTableViews = [] # Each form view is in a 1-row/2-cell table where cell 1 is the index+1, e.g., (1), (2), etc.
       @fetchCompleted = false
+      @fetchOLDFormsLastPage = false # This is set to true when we want to fetch the last OLD page immediately after fetching the first one.
       @lastFetched = # We store this to help us prevent redundant requests to the server for all forms.
         serverType: ''
         serverName: ''
@@ -178,19 +179,27 @@ define [
       Backbone.trigger 'formsView:collapseAllForms'
 
     # Tell the collection to fetch forms from the server and add them to itself.
-    # `@render` calls this. Note that with a FieldDB backend we fetch everything but
-    # with an OLD backend we just fetch the forms for the current pagination page,
-    # i.e., we use the OLD's server-side pagination feature.
+    # Only `@render` calls this. Note that with a FieldDB backend we fetch
+    # everything but with an OLD backend we just fetch the forms for the
+    # current pagination page, i.e., we use the OLD's server-side pagination
+    # feature.
+    # Note that setting `fetchOLDFormsLastPage` to `true` will cause
+    # `@fetchOLDFormsSuccess` to immediately make a second request for the last
+    # page of forms. This is the only way to get the last page of forms from
+    # the OLD via its current API; that is, you first have to make a vacuous
+    # request in order to get the form count so that you know what the last
+    # page is.
     fetchFormsToCollection: ->
       if @getActiveServerType() is 'FieldDB'
         @collection.fetchAllFieldDBForms()
       else
+        @fetchOLDFormsLastPage = true
         @fetchOLDFormsPageToCollection()
 
     # Get a page of forms from an OLD web service.
     # Note that when the OLD is the server, the forms collection simply holds
     # one page at a time; that is, the collection is emptied and refilled on
-    # each pagination action.
+    # each pagination action, hence the `.reset()` call here.
     fetchOLDFormsPageToCollection: ->
       @collection.reset()
       @collection.fetchOLDForms @paginator
@@ -227,11 +236,13 @@ define [
         .text reason
 
     # We have succeeded in retrieving all forms from a FieldDB server.
+    # In the FieldDB case we can call `@showLastPage()` because this method
+    # is only called once: after all forms have been fetched.
     fetchAllFormsSuccess: ->
       @saveFetchedMetadata()
       @getFormViews()
       @setPaginatorItems()
-      @refreshPage()
+      @showLastPage()
 
     # We have succeeded in retrieving a page of forms from an OLD server.
     # `paginator` is an object returned from the OLD. Crucially, it has an
@@ -242,7 +253,11 @@ define [
       @saveFetchedMetadata()
       @getFormViews()
       @setPaginatorItems paginator
-      @refreshPageFade()
+      if @fetchOLDFormsLastPage
+        @fetchOLDFormsLastPage = false
+        @showLastPage() # This will fetch the last page and re-call `fetchOLDFormsSuccess`
+      else
+        @refreshPageFade()
 
     # Tell the paginator how many items/forms are in our corpus/database.
     setPaginatorItems: (oldPaginator=null) ->
@@ -250,6 +265,7 @@ define [
         @paginator.setItems oldPaginator.count # the OLD case
       else
         @paginator.setItems @collection.length # the FieldDB case
+      #@paginator.setPageToLast()
 
     # Remember the server type and name (and corpus name) of the last forms
     # fetch, so we don't needlessly repeat it on future renderings of this
@@ -393,6 +409,9 @@ define [
 
     # Create a `FormView` instance for each `FormModel` instance in
     # `@collection` and append it to `@formViews`.
+    # Note that in the OLD case, we reset `formViews` to `[]` because
+    # with server-side pagination we only store one page worth of form
+    # models/views at a time.
     # TODO (@cesine @jrwdunham): instantiating a FormView for every FormModel
     # in the collection seems potentially inefficient. Thoughts?
     getFormViews: ->
@@ -400,7 +419,8 @@ define [
         @formViews = []
       @collection.each (formModel) =>
         newFormView = new FormView model: formModel
-        @formViews.unshift newFormView
+        #@formViews.unshift newFormView
+        @formViews.push newFormView
 
     spinnerOptions: ->
       _.extend BaseView::spinnerOptions(), {top: '25%', left: '93.5%'}
