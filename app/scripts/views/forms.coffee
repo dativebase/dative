@@ -436,13 +436,16 @@ define [
       else if @weShouldFocusFirstAddViewInput
         @focusFirstFormAddViewTextarea()
       else
-        @focusFirstForm()
+        @focusLastForm()
 
     focusFirstButton: ->
       @$('button.ui-button').first().focus()
 
     focusFirstForm: ->
       @$('div.dative-form-object').first().focus()
+
+    focusLastForm: ->
+      @$('div.dative-form-object').last().focus()
 
     focusFirstFormAddViewTextarea: ->
       @$('.add-form-widget textarea').first().focus()
@@ -654,7 +657,7 @@ define [
       @formAddViewVisible = false
       @$('.add-form-widget').slideUp()
       @formAddView.closeAllTooltips()
-      @focusFirstForm()
+      @focusLastForm()
       @scrollToTop()
 
     showFormAddViewAnimate: ->
