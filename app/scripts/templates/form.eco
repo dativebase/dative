@@ -145,13 +145,13 @@
       <div class='form-secondary-data-content'><%= elicitor %></div>
     </div>
 
-    <div class='form-enterer'<%- @displayNoneStyle 'elicitor', @ %>>
+    <div class='form-enterer'<%- @displayNoneStyle 'enterer', @ %>>
       <div class='form-secondary-data-label'>enterer</div>
       <div class='form-secondary-data-content'>
         <% if @enterer?.firstName and @enterer?.lastName: %>
           <%= "#{@enterer.firstName} #{@enterer.lastName}" %>
-        <% else if @enterer.username: %>
-          <%= @enterer?.username %>
+        <% else if @enterer?.username: %>
+          <%= @enterer.username %>
         <% end %>
       </div>
     </div>

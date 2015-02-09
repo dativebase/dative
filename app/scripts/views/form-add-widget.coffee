@@ -85,8 +85,9 @@ define [
     activeServerTypeIsOLD: ->
       @getActiveServerType() is 'OLD'
 
+    # Returns true of `globals` has a key for `oldData`. The value of this key is
+    # an object containing speakers, users, grammaticalities, tags, etc.
     weHaveOLDNewFormData: ->
-      @log _.keys(globals)
       globals.oldData?
 
     # Write the initial HTML to the page.
@@ -211,8 +212,8 @@ define [
     setToModel: ->
       modelObject = @getModelObjectFromAddForm()
       # @setFieldDBDatum modelObject
-      @log _.keys(modelObject).sort()
-      @log _.keys(@model.toJSON()).sort()
+      # @log _.keys(modelObject).sort()
+      # @log _.keys(@model.toJSON()).sort()
       @model?.set modelObject
 
     # Create a FieldDB datum model.

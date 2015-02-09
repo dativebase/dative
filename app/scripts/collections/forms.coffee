@@ -42,18 +42,21 @@ define [
       )
 
     # Fetch OLD Forms
-    # GET `<OLD_URL>/forms
-    fetchOLDForms: ->
+    # GET `<OLD_URL>/forms?page=x&items_per_page=y
+    # See http://online-linguistic-database.readthedocs.org/en/latest/interface.html#get-resources
+    fetchOLDForms: (options) ->
       Backbone.trigger 'fetchOLDFormsStart'
       FormModel.cors.request(
         method: 'GET'
-        url: "#{@getOLDURL()}/forms"
+        url: @getOLDFormsPaginationURL options
         onload: (responseJSON) =>
           Backbone.trigger 'fetchOLDFormsEnd'
-          if utils.type(responseJSON) is 'array'
-            @add @getDativeFormModelsFromOLDObjects(responseJSON)
-            Backbone.trigger 'fetchOLDFormsSuccess'
+          if 'items' of responseJSON
+            # console.log JSON.stringify(responseJSON.items[0], undefined, 2)
+            @add @getDativeFormModelsFromOLDObjects(responseJSON.items)
+            Backbone.trigger 'fetchOLDFormsSuccess', responseJSON.paginator
           else
+            # console.log _.keys(responseJSON)
             reason = responseJSON.reason or 'unknown'
             Backbone.trigger 'fetchOLDFormsFail',
               "failed to fetch all old forms; reason: #{reason}"
@@ -74,7 +77,18 @@ define [
       pouchname = globals.applicationSettings.get 'activeFieldDBCorpus'
       "#{url}/#{pouchname}/_design/pages/_view/datums_chronological"
 
-    getOLDURL: -> @applicationSettings.get('activeServer').get 'url'
+    getOLDURL: ->
+      globals.applicationSettings.get('activeServer').get 'url'
+
+    # Return a URL for requesting a page of forms from an OLD web service.
+    # GET parameters control pagination and ordering.
+    getOLDFormsPaginationURL: (options) ->
+      "#{@getOLDURL()}/forms?\
+        page=#{options.page}&\
+        items_per_page=#{options.itemsPerPage}&\
+        order_by_model=Form&\
+        order_by_attribute=id&\
+        order_by_direction=desc"
 
     # Return an array of `FormModel` instances built from FieldDB objects.
     getDativeFormModelsFromFieldDBObjects: (responseJSON) ->

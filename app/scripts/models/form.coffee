@@ -420,7 +420,6 @@ define [
     parse: (response, options) ->
       response
 
-
     getOLDURL: -> globals.applicationSettings.get('activeServer').get 'url'
 
     # Issue a GET request to /forms/new on the active OLD server.
@@ -448,5 +447,4 @@ define [
             'Error in GET request to OLD server for /forms/new'
           console.log 'Error in GET request to OLD server for /forms/new'
       )
-
 
