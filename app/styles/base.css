@@ -118,9 +118,15 @@ button.help-button
     display: block;
 }
 
-.form-secondary-data div.dative-tooltip
+.form-secondary-data div.dative-tooltip,
+.form-secondary-data span.dative-tooltip
 {
     cursor: pointer;
+}
+
+.form-secondary-data-content .form-fielddb-comment:not(:first-child)
+{
+  margin-top: 0.5em;
 }
 
 ul.sf-menu li a

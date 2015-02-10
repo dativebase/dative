@@ -45,10 +45,19 @@ define [
 
       # FieldDB-only attributes
       syntacticTreeLaTeX: ""
+      consultants: "" # just a string. In `sessionFields`. Values I've seen are: "AB"; I expect "AB CD FG" would be an anticipated value too.
       fieldDBTags: "" # just a string. This is FieldDB `tags`.
       fieldDBDatumTags: [] # Is this an array? This is meant to hold FieldDB `datumTags`. TODO: figure this out.
-      modifiers: [] # array of users who have modified the form; TODO: figure out if these objects are ordered and which attributes they have.
+      modifiers: [] # This is `datumFields.modifiedByUser`: an array of users who have modified the form; TODO: figure out if these objects are ordered and which attributes they have.
       fieldDBComments:[] # array of comment objects: {text: '...', username: '...', timestamp: '...'}
+
+      # Template TODOs:
+      # - fieldDBDatumTags: @cesine: I don't know what to do with this attribute... Is it only used in the Prototype?
+      # - modifiers
+      # - fieldDBComments
+      #   - QUESTION: why do fieldDBComments have timestampModified values when
+      #     they can't be modified? At least, they can't be modified in
+      #     Spreadsheet.
 
       # Many-to-one relations
       elicitor: @defaultUser() # relation('User', primaryjoin='Form.elicitor_id==User.id') elicitor_id: null # Column(Integer, ForeignKey('user.id', ondelete='SET NULL'))
@@ -165,15 +174,15 @@ define [
     # notation fields will co-exist, for now. (Even though you can easily get
     # from PTB trees to QTree/LaTeX ones as I do in the OLD web app ...)
 
-    # 6. `datumField.`modifiedByUsers` is an array of all users who have modified
+    # 6. `datumField.`modifiedByUser` is an array of all users who have modified
     # the form. This is odd because it's useful to know the order of who modified
     # it. The OLD stores all of this information: who made what modification when.
     # (In the OLD, `modifier` is an object representing the user to make the last
     # modification. Previous modifiers can be retrieved by retrieving the history
-    # of a form.) Is the `modifiedByUsers` array ordered? Is there a way to
+    # of a form.) Is the `modifiedByUser` array ordered? Is there a way to
     # recover the modification history from the corpus service so that we can
     # provide a "get history" feature? For now I am having Dative use both
-    # FieldDB's `modifiedByUsers` and the OLD's `modifier` and Dative will treat
+    # FieldDB's `modifiedByUser` and the OLD's `modifier` and Dative will treat
     # them differently.
 
     # 7. What is the difference between `datumTags` and `datumFields.tags`?
@@ -225,7 +234,7 @@ define [
 
         # Here is where the label renaming and value conversion occurs
         attribute = @fieldDBAttribute2datumAttribute fieldDBObject.label
-        value = @fieldDBValue2datumValue(fieldDBObject.value, fieldDBObject.label)
+        value = @fieldDBValue2datumValue(fieldDBObject, fieldDBObject.label)
 
         # An array value in a fieldDB datumField might (?) be encoded as
         # multiple objects with the same `label` value.
@@ -241,16 +250,22 @@ define [
 
     # Transform FieldDB values to Dative-style ones.
     # NOTE: label is the *unmodified* FieldDB datum label.
-    fieldDBValue2datumValue: (value, label) ->
+    fieldDBValue2datumValue: (object, label) ->
+      value = object.value
       switch label
         when 'translation' then @fieldDBTranscription2dativeTranscriptions value
-        when 'user' then @fieldDBEnterer2dativeUser value
+        when 'user' then @fieldDBUsername2dativeUser value
+        when 'enteredByUser' then @fieldDBUsername2dativeUser value
+        when 'modifiedByUser' then object.users
         else value
 
     fieldDBTranscription2dativeTranscriptions: (value) ->
       [{appropriateness: '', transcription: value}]
 
-    fieldDBEnterer2dativeUser: (value) ->
+    # This converts a value which is simply a username (a string) to a
+    # Dative-style user object with a single valuated attribute: `username`.
+    # This applies to `sessionFields.user` and `datumFields.enterer`.
+    fieldDBUsername2dativeUser: (value) ->
       enterer = @defaultUser()
       enterer.username = value
       enterer
@@ -264,8 +279,9 @@ define [
         when 'translation' then 'translations'
         when 'syntacticCategory' then 'syntacticCategories' # see question #4 above.
         when 'validationStatus' then 'status' # @cesine: which statuses are relevant to the logic of the various FieldDB GUIs?
-        when 'user' then 'enterer'
-        when 'modifiedByUsers' then 'modifiers'
+        when 'user' then 'sessionEnterer'
+        when 'enteredByUser' then 'enterer'
+        when 'modifiedByUser' then 'modifiers'
         when 'tags' then 'fieldDBTags'
         when 'datumTags' then 'fieldDBDatumTags'
         else label
@@ -305,7 +321,7 @@ define [
         else @utils.snake2camel attribute
 
     # The values of an OLD form object can themselves be objects. In that case,
-    # to Dative-ize them we change their snake case attributes to camelCase.
+    # to Dative-ize them we change their snake_case attributes to camelCase.
     oldValue2datumValue: (value) ->
       if @utils.type(value) is 'object'
         newValue = {}

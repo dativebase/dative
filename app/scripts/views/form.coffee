@@ -62,6 +62,7 @@ define [
     getContext: ->
       context = _.extend(@model.toJSON(), {
         displayNoneStyle: @displayNoneStyle
+        fieldDBGrammaticalityConverter: @fieldDBGrammaticalityConverter
         timeSince: @utils.timeSince
         humanDatetime: @utils.humanDatetime
         humanDate: @utils.humanDate
@@ -74,6 +75,7 @@ define [
       context
 
     # Return an in-line CSS style to hide the HTML of an empty form attribute
+    # Note the use of `=>` so that the ECO template knows to use this view's context.
     displayNoneStyle: (attribute, context) =>
       value = context[attribute]
       if not _.isDate(value) and (_.isEmpty(value) or @isValueless(value))
@@ -81,7 +83,15 @@ define [
       else
         ''
 
-    # Returns `true` only if thing is an object all of whose values are `null`
+    # FieldDB `judgement` values can be any string. Sometimes that string is
+    # "grammatical". We want this to be "" when displayed.
+    fieldDBGrammaticalityConverter: (grammaticality) ->
+      switch grammaticality
+        when 'grammatical' then ''
+        else grammaticality
+
+    # Returns `true` only if thing is an object all of whose values are either
+    # `null` or empty strings.
     isValueless: (thing) ->
       _.isObject(thing) and
       (not _.isArray(thing)) and
@@ -101,7 +111,7 @@ define [
     tooltipify: ->
       @$('.form-secondary-data .dative-tooltip')
         .tooltip
-          items: 'div'
+          items: 'div, span'
 
     guifyButtons: ->
 
