@@ -60,6 +60,10 @@ define [
       'click .new-form': 'showFormAddViewAnimate'
       'click .forms-browse-help': 'openFormsBrowseHelp'
       'keydown': 'keyboardShortcuts'
+      # @$el is enclosed in top and bottom invisible divs. These allow us to
+      # close-circuit the tab loop and keep focus in the view.
+      'focus .focusable-top':  'focusLastElement'
+      'focus .focusable-bottom':  'focusFirstElement'
 
     render: (taskId) ->
       @html()

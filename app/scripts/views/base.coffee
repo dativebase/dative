@@ -149,10 +149,25 @@ define [
       else
         $elementToSelect.focus()
 
-    focusFirstElement: ->
-      @$(@focusableSelector).not('.ui-state-disabled').eq(0).focus()
-
+    # This is the default selector for the things that Dative considers to be
+    # "focusable". Views may override this to achieve certain behaviour.
     focusableSelector: 'button, input, .ui-selectmenu-button'
+
+    # Focus the first focusable element in the view.
+    focusFirstElement: ->
+      @$(@focusableSelector)
+        .filter(':visible')
+        .not('.ui-state-disabled')
+        .eq(0)
+          .focus()
+
+    # Focus the last focusable element in the view.
+    focusLastElement: ->
+      @$(@focusableSelector)
+        .filter(':visible')
+        .not('.ui-state-disabled')
+        .eq(-1)
+          .focus()
 
     # Alter the scroll position so that the focused UI element is centered.
     scrollToFocusedInput: (event) ->

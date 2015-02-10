@@ -1,3 +1,5 @@
+<div class='focusable-top' tabindex='0'></div>
+
 <div id='dative-page-header'
   class='ui-widget-header ui-corner-top dative-two-part-header'>
 
@@ -56,4 +58,6 @@
   <div class='dative-pagin-nav dative-pagin-nav-bottom'></div>
 
 </div>
+
+<div class='focusable-bottom' tabindex='0'></div>
 

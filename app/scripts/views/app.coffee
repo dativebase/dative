@@ -50,7 +50,6 @@ define [
       @setTheme()
       Backbone.history.start()
       @showHomePageView()
-      #@toggleHelpDialog()
 
     events:
       'click': 'bodyClicked'
