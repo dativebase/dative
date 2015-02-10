@@ -48,9 +48,11 @@
 
 <div id='dative-page-body'>
 
+  <div class='dative-pagin-items'></div>
+
   <div class='add-form-widget dative-widget-center ui-widget
     ui-widget-content ui-corner-all'></div>
-  <div class='dative-pagin-items'></div>
+
   <div class='dative-pagin-nav dative-pagin-nav-bottom'></div>
 
 </div>

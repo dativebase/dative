@@ -669,13 +669,14 @@ define [
       @$('.add-form-widget').slideUp()
       @formAddView.closeAllTooltips()
       @focusLastForm()
-      @scrollToTop()
+      @scrollToBottom()
 
     showFormAddViewAnimate: ->
       @setFormAddViewButtonHide()
       @formAddViewVisible = true
       @$('.add-form-widget').slideDown()
       @focusFirstFormAddViewTextarea()
+      @scrollToBottom()
 
     toggleFormAddViewAnimate: ->
       if @$('.add-form-widget').is ':visible'

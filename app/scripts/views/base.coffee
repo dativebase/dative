@@ -196,6 +196,14 @@ define [
         250
         'swing'
 
+    scrollToBottom: ->
+      $pageBody = @$ '#dative-page-body'
+      pageBodyHeight = $pageBody.height()
+      @$('#dative-page-body').animate
+        scrollTop: pageBodyHeight
+        250
+        'swing'
+
     # Fix rounded borders so that adjacently nested rounded borders <divs> don't
     # have a gap between them. This must be done in the JS and not the CSS
     # because Dative can dynamically change the CSS to different jQueryUI

@@ -978,5 +978,7 @@ p.paragraph-widget {
 div.add-form-widget
 {
   width: 800px;
+  margin-top: -2em;
+  margin-bottom: 2em;
 }
 
