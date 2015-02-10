@@ -133,6 +133,9 @@ define (require) ->
     string.replace(/([A-Z])/g, ($1) ->
       "_#{$1.toLowerCase()}")
 
+  log = (thingToLog) ->
+    console.log JSON.stringify(thingToLog, undefined, 2)
+
   clone: clone
   type: type
   guid: guid
@@ -149,4 +152,5 @@ define (require) ->
   dateString2object: dateString2object
   snake2camel: snake2camel
   camel2snake: camel2snake
+  log: log
 

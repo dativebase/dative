@@ -293,6 +293,3 @@ define [
         .addClass 'ui-button-text-only'
         .html newIconHTML
 
-    log: (thingToLog) ->
-      console.log JSON.stringify(thingToLog, undefined, 2)
-

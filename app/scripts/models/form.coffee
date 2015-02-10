@@ -110,7 +110,7 @@ define [
     # FieldDB-to-Dative Schema stuff
     ############################################################################
 
-    # fieldDb2dative: input: a FieldDB datum object, output: a Dative form model
+    # FieldDb to Dative: input: a FieldDB datum object, output: a Dative form model
     # --------------------------------------------------------------------------
     #
     # Converts attribute names and values, as appropriate. Also stores the
@@ -283,23 +283,37 @@ define [
     # OLD-to-Dative Schema stuff
     ############################################################################
 
+    # Convert an OLD form object to a Dative form object.
+    # An OLD form is received as a JSON object. See
+    # http://online-linguistic-database.readthedocs.org/en/latest/datastructure.html#form
+    # for an exact specification of its attributes and their validation
+    # requirements.
     old2dative: (oldForm) ->
-      # An OLD form is received as a JSON object. See
-      # http://online-linguistic-database.readthedocs.org/en/latest/datastructure.html#form
-      # for an exact specification of its attributes and their validation
-      # requirements.
-
       dativeForm = {}
       for attribute, value of oldForm
         attribute = @oldAttribute2datumAttribute attribute
+        value = @oldValue2datumValue value
         dativeForm[attribute] = value
       dativeForm
 
+    # camelCase-ify the attributes of an OLD object, and perform some
+    # idiosyncratic changes.
     oldAttribute2datumAttribute: (attribute) ->
       switch attribute
         when 'syntactic_category_string' then 'syntacticCategories'
         when 'syntax' then 'syntacticTreePTB'
         else @utils.snake2camel attribute
+
+    # The values of an OLD form object can themselves be objects. In that case,
+    # to Dative-ize them we change their snake case attributes to camelCase.
+    oldValue2datumValue: (value) ->
+      if @utils.type(value) is 'object'
+        newValue = {}
+        for attribute, subValue of value
+          newValue[@utils.snake2camel(attribute)] = subValue
+        newValue
+      else
+        value
 
     # The OLD serves a form as a JSON object. The `Form.get_dict()` method is responsible
     # for transforming a form-as-python-object to a JSON object of the following form:
