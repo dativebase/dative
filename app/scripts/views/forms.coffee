@@ -190,8 +190,18 @@ define [
     # collapse from a form view and respond by restoring the focus and scroll
     # position.
     collapseAllForms: ->
+      @focusEnclosingFormView()
       @listenToOnce Backbone, 'form:formCollapsed', @restoreFocusAndScrollPosition
       Backbone.trigger 'formsView:collapseAllForms'
+
+    # Sets focus to the FormView div that contains the focused control. This is
+    # necessary so that we can restore scroll position after a collapse-all
+    # request wherein a previously focused control will become hidden and thus
+    # unfocusable.
+    focusEnclosingFormView: ->
+      $focusedElement = @$ ':focus'
+      if $focusedElement
+        $focusedElement.closest('.dative-form-object').first().focus()
 
     # Tell the collection to fetch forms from the server and add them to itself.
     # Only `@render` calls this. Note that with a FieldDB backend we fetch

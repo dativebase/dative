@@ -231,7 +231,7 @@ define [
     # <Enter> on a closed and form opens it, <Esc> on an open form closes it.
     keydown: (event) ->
       if @headerVisible
-        if event.which is 27 then @hideFullAnimate()
+        if event.which is 27 then @hideFormDetails()
       else
         if event.which is 13 then @showFullAnimate()
 
@@ -239,7 +239,8 @@ define [
     # Hide & Show stuff
     ############################################################################
 
-    # Clicking on the double-angle-up (hide-form-details) button calls this.
+    # Hide details and self-focus. Clicking on the double-angle-up
+    # (hide-form-details) button calls this, as does `@keydown`.
     hideFormDetails: ->
       @hideFullAnimate()
       @$el.focus()

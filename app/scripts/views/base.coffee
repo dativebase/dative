@@ -186,7 +186,6 @@ define [
 
       # Get the true offset of the element
       initialScrollTop = $pageBody.scrollTop()
-      console.log "initialScrollTop: #{initialScrollTop}"
       $pageBody.scrollTop 0
       trueOffset = $element.offset().top
       $pageBody.scrollTop initialScrollTop
@@ -194,7 +193,6 @@ define [
       windowHeight = $(window).height()
       desiredOffset = windowHeight / 2
       scrollTop = trueOffset - desiredOffset
-      console.log "scrollTop: #{scrollTop}"
       if scrollTop isnt initialScrollTop
         $pageBody.stop().animate
           scrollTop: scrollTop
