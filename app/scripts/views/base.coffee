@@ -186,6 +186,7 @@ define [
 
       # Get the true offset of the element
       initialScrollTop = $pageBody.scrollTop()
+      console.log "initialScrollTop: #{initialScrollTop}"
       $pageBody.scrollTop 0
       trueOffset = $element.offset().top
       $pageBody.scrollTop initialScrollTop
@@ -193,17 +194,19 @@ define [
       windowHeight = $(window).height()
       desiredOffset = windowHeight / 2
       scrollTop = trueOffset - desiredOffset
-      $pageBody.animate
-        scrollTop: scrollTop
-        250
-        'swing'
-        =>
-          # Since Dative tooltips close upon scroll events, we have to re-open
-          # the tooltip of the focused element after we programmatically scroll
-          # here. BUG @jrwdunham: this doesn't work as consistently as I'd like
-          # it to. I don't know why yet...
-          if $element.hasClass('dative-tooltip') and $element.tooltip('instance')
-            $element.tooltip 'open'
+      console.log "scrollTop: #{scrollTop}"
+      if scrollTop isnt initialScrollTop
+        $pageBody.stop().animate
+          scrollTop: scrollTop
+          250
+          'swing'
+          =>
+            # Since Dative tooltips close upon scroll events, we have to re-open
+            # the tooltip of the focused element after we programmatically scroll
+            # here. BUG @jrwdunham: this doesn't work as consistently as I'd like
+            # it to. I don't know why yet...
+            if $element.hasClass('dative-tooltip') and $element.tooltip('instance')
+              $element.tooltip 'open'
 
     scrollToTop: ->
       @$('#dative-page-body').animate
