@@ -66,14 +66,13 @@ define [
     # TODO: AJAX/CORS-fetch the form add metadata (OLD-depending?), if needed
     # and spin() in the meantime ...
     render: (taskId) ->
-      if @activeServerTypeIsOLD() and not @weHaveOLDNewFormData()
-        @model.getOLDNewFormData()
-        return @
       @html()
       @secondaryDataVisibility()
       @guify()
       @fixRoundedBorders() # defined in BaseView
       @listenToEvents()
+      if @activeServerTypeIsOLD() and not @weHaveOLDNewFormData()
+        @model.getOLDNewFormData()
       @
 
     getActiveServerType: ->

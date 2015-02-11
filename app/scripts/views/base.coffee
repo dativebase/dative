@@ -184,15 +184,34 @@ define [
       catch
         $element = @$ ':focus'
 
-      # Get the true offset of the element
-      initialScrollTop = $pageBody.scrollTop()
-      $pageBody.scrollTop 0
-      trueOffset = $element.offset().top
-      $pageBody.scrollTop initialScrollTop
+      # Find the desired `scrollTop`, i.e., the pixel value we should pass to
+      # `$.scrollTop` in order get our focused element where we want it.
 
+      # `scrollTop = true-offset - (window-height / 2)
+      # Initial scroll-top: (hidden) vertical space above the focused element.
+      # `.scrollTop`: "the current vertical position of the scroll bar for the
+      # first element in the set of matched elements. The number of pixels that
+      # are hidden from view above the scrollable area."
+
+      # Calling `scrollTop()` moves us to the top and returns our
+      # `.offset().top` value *prior* to scrolling.
+      initialScrollTop = $pageBody.scrollTop() # where we started from
+
+      # Get the true offset of the element.
+      # That is, find out how far from the top the element is when we are
+      # scrolled to the very top.
+      $pageBody.scrollTop 0 # scroll to the top
+      elementOffset = $element.offset().top
+
+      # Get the window height.
+      $pageBody.scrollTop initialScrollTop # scroll back to where we started from
       windowHeight = $(window).height()
-      desiredOffset = windowHeight / 2
-      scrollTop = trueOffset - desiredOffset
+
+      #desiredOffset = windowHeight / 2
+      desiredOffset = windowHeight * (1 / 4)
+
+      scrollTop = elementOffset - desiredOffset
+
       if scrollTop isnt initialScrollTop
         $pageBody.stop().animate
           scrollTop: scrollTop
