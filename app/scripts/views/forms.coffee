@@ -124,8 +124,6 @@ define [
     # conventions or arrow keys might be better. Alternatively (or in
     # addition), we could have these be user-customizable.
     keyboardShortcuts: (event) ->
-      if @itemsPerPageSelectHasFocus()
-        console.log 'items per page select has focus'
       if not @addFormWidgetHasFocus()
         if not event.ctrlKey
           switch event.which
@@ -140,6 +138,58 @@ define [
               if not @itemsPerPageSelectHasFocus()
                 @$('.collapse-all').click()
             when 65 then @toggleFormAddViewAnimate() # a
+            when 32 # spacebar goes to next form view, shift+spacebar goes to previous.
+              if event.shiftKey
+                @focusPreviousFormView event
+              else
+                @focusNextFormView event
+
+    # Return the (jQuery-wrapped) form view <div> that encloses `$element`, if exists.
+    getEnclosingFormViewDiv: ($element) ->
+      if $element.hasClass '.dative-form-object'
+        $element
+      else if $element.closest('.dative-form-object').first()
+        $element.closest('.dative-form-object').first()
+      else
+        null
+
+    # Get the next (below) form view, if there is one; null otherwise.
+    getNextFormViewDiv: ($formViewDiv) ->
+      $nextFormViewDiv = $formViewDiv
+        .closest('.dative-pagin-item')
+        .next()
+        .find('.dative-form-object')
+      if $nextFormViewDiv then $nextFormViewDiv else null
+
+    # Get the previous (above) form view, if there is one; null otherwise.
+    getPreviousFormViewDiv: ($formViewDiv) ->
+      $nextFormViewDiv = $formViewDiv
+        .closest('.dative-pagin-item')
+        .prev()
+        .find('.dative-form-object')
+      if $nextFormViewDiv then $nextFormViewDiv else null
+
+    # Focus the next (below) form view, or the first one if we're at the top.
+    focusNextFormView: (event) ->
+      $enclosingFormViewDiv = @getEnclosingFormViewDiv @$(event.target)
+      if $enclosingFormViewDiv
+        $nextFormViewDiv = @getNextFormViewDiv $enclosingFormViewDiv
+        @stopEvent event
+        if $nextFormViewDiv.length
+          $nextFormViewDiv.focus()
+        else
+          @focusFirstForm()
+
+    # Focus the previous (above) form view, or the last one if we're at the top.
+    focusPreviousFormView: (event) ->
+      $enclosingFormViewDiv = @getEnclosingFormViewDiv @$(event.target)
+      if $enclosingFormViewDiv
+        $previousFormViewDiv = @getPreviousFormViewDiv $enclosingFormViewDiv
+        @stopEvent event
+        if $previousFormViewDiv.length
+          $previousFormViewDiv.focus()
+        else
+          @focusLastForm()
 
     # Returns true if the Add a Form widget has focus; we don't want the forms
     # browsing shortcuts to be in effect if the user is adding a form.
