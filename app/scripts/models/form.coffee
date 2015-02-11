@@ -9,96 +9,446 @@ define [
   # Form Model
   # ----------
   #
-  # A Backbone model for Dative forms. 
+  # A Backbone model for Dative forms.
+  #
+  # A Dative form model can either have the structure of a FieldDB datum or
+  # that of an OLD form. See `@defaultFieldDBDatum` and `@defaultOLDForm` for a
+  # full specification of each of these data structures.
 
   class FormModel extends BaseModel
 
-    url: 'fakeurl' # Backbone throws 'A "url" property or function must be specified' if this is not present.
+    url: 'fakeurl' # Backbone throws 'A "url" property or function must be
+                   # specified' if this is not present.
+
+    getActiveServerType: ->
+      globals.applicationSettings.get('activeServer').get 'type'
+
 
     ############################################################################
-    # Dative Schema
+    # Questions & TODOs
     ############################################################################
 
-    # Note: the comments in this method definition reflect the OLD's relational schema
-    # and will be removed later.
+    # - datumTags:
+    #   - @cesine: I don't know what to do with this attribute... Is it only
+    #     used in the Prototype?
+    # - comments (in FieldDB):
+    #   - Why do fieldDBComments have timestampModified values when they can't
+    #     be modified? At least, they can't be modified in Spreadsheet.
+
+    # - OLD status options:
+    #   - are these provided when one requests GET /forms/new ?
+
+
+    ############################################################################
+    # Dative Schema (differs depending on server type: FieldDB or OLD)
+    ############################################################################
+
     defaults: ->
-      id: null # integer in OLD, UUID in FieldDB
-      UUID: null # OLD only
-      transcription: "" # Column(Unicode(255), nullable=False)
-      phoneticTranscription: "" # Column(Unicode(255))
-      narrowPhoneticTranscription: "" # Column(Unicode(255))
-      morphemeBreak: "" # Column(Unicode(255))
-      morphemeGloss: "" # Column(Unicode(255))
-      comments: "" # Column(UnicodeText)
-      speakerComments: "" # OLD only; Column(UnicodeText)
-      grammaticality: "" # FieldDB `judgement`; OLD Column(Unicode(255))
-      dateElicited: null # Column(Date)
-      datetimeEntered: null # FieldDB `dateEntered`; OLD Column(DateTime)
-      datetimeModified: null # FieldDB `dateModified`; OLD  Column(DateTime, default=now)
-      syntacticCategories: "" # FieldDB `syntacticCategory`, OLD `syntacticCategoryString` Column(Unicode(255))
-      morphemeBreakIds: [] # OLD only; Column(UnicodeText)
-      morphemeGlossIds: [] # OLD only; Column(UnicodeText)
-      breakGlossCategory: "" # OLD only; Column(Unicode(1023))
-      syntacticTreePTB: "" # OLD `syntax`: Column(Unicode(1023))
-      semantics: "" # OLD only: Column(Unicode(1023))
-      status: "" # `status` in the OLD, `validationStatus` in FieldDB: see the comments in `fieldDB2dative` below. Column(Unicode(40), default=u'tested')  # u'tested' vs. u'requires testing'
+      if @getActiveServerType() is 'FieldDB'
+        @defaultFieldDBDatum()
+      else
+        @defaultOLDForm()
 
-      # FieldDB-only attributes
-      syntacticTreeLaTeX: ""
-      consultants: "" # just a string. In `sessionFields`. Values I've seen are: "AB"; I expect "AB CD FG" would be an anticipated value too.
-      fieldDBTags: "" # just a string. This is FieldDB `tags`.
-      fieldDBDatumTags: [] # Is this an array? This is meant to hold FieldDB `datumTags`. TODO: figure this out.
-      modifiers: [] # This is `datumFields.modifiedByUser`: an array of users who have modified the form; TODO: figure out if these objects are ordered and which attributes they have.
-      fieldDBComments:[] # array of comment objects: {text: '...', username: '...', timestamp: '...'}
 
-      # Template TODOs:
-      # - fieldDBDatumTags: @cesine: I don't know what to do with this attribute... Is it only used in the Prototype?
-      # - modifiers
-      # - fieldDBComments
-      #   - QUESTION: why do fieldDBComments have timestampModified values when
-      #     they can't be modified? At least, they can't be modified in
-      #     Spreadsheet.
+    ############################################################################
+    # FieldDB Schema
+    ############################################################################
 
-      # Many-to-one relations
-      elicitor: @defaultUser() # relation('User', primaryjoin='Form.elicitor_id==User.id') elicitor_id: null # Column(Integer, ForeignKey('user.id', ondelete='SET NULL'))
-      enterer: @defaultUser() # @defaultUser() # relation('User', primaryjoin='Form.enterer_id==User.id') enterer_id: null # Column(Integer, ForeignKey('user.id', ondelete='SET NULL'))
-      modifier: @defaultUser() # relation('User', primaryjoin='Form.modifier_id==User.id') modifier_id: null # Column(Integer, ForeignKey('user.id', ondelete='SET NULL'))
-      verifier: @defaultUser() # relation('User', primaryjoin='Form.verifier_id==User.id') verifier_id: null # Column(Integer, ForeignKey('user.id', ondelete='SET NULL'))
-      speaker: @defaultSpeaker # relation('Speaker') speaker_id: null # Column(Integer, ForeignKey('speaker.id', ondelete='SET NULL'))
-      elicitationMethod: @defaultElicitationMethod # relation('ElicitationMethod') elicitationmethod_id: null # Column(Integer, ForeignKey('elicitationmethod.id', ondelete='SET NULL'))
-      syntacticCategory: @defaultSyntacticCategory() # relation('SyntacticCategory', backref='forms') syntacticcategory_id: null # Column(Integer, ForeignKey('syntacticcategory.id', ondelete='SET NULL'))
-      source: @defaultSource# relation('Source') source_id: null # Column(Integer, ForeignKey('source.id', ondelete='SET NULL'))
+    # Default FieldDB Datum
 
-      # One-to-many relations
-      translations: [] # relation('Translation', backref='form', cascade='all, delete, delete-orphan')
+    # `@defaultFieldDBDatum` returns an object representing a default FieldDB
+    # Datum (i.e., form). Note that most of the "meat" is in `datumFields`,
+    # an array of objects.
 
-      # Many-to-many relations
-      files: [] # relation('File', secondary=FormFile.__table__, backref='forms')
-      collections: [] # relation('Collection', secondary=CollectionForm.__table__, backref='forms')
-      tags: [] # relation('Tag', secondary=FormTag.__table__, backref='forms')
+    # The structure of each of these datum field object is as follows, where
+    # the `label` and `value` are, in general, most important:
 
-    defaultUser: ->
+    #   defaultfield:        <boolean> (presumably indicates whether this is a
+    #                                   "default" field or a "non-standard" one
+    #                                   that a user has chosen to use)
+    #   encryptedValue:      <string>  (= `value` unless encrypted, I think)
+    #   fieldDBtype:         <string>  ("DatumField" is the standard value, I
+    #                                   would think)
+    #   help:                <string>  (help text, e.g., for an HTML title
+    #                                   attribute)
+    #   id:                  <string>  (usually equals `label`; I don't
+    #                                   understand the difference; must be
+    #                                   unique?)
+    #   label:               <string>  (what kind of field this is, e.g.,
+    #                                   `"utterance"`)
+    #   labelFieldLinguists: <string>  (label for field linguists)
+    #   mask:                <string>  (usually = `value` but when encrypted I
+    #                                   think this is a more user-friendly
+    #                                   hidden representation, e.g., "XXX-XX")
+    #   shouldBeEncrypted:   <boolean> (whether the value should be encrypted)
+    #   size:                <string>  (stringified integer; indicates the max
+    #                                   length of the possible values?...)
+    #   value:               <string>  (the value in the field; are values
+    #                                   other than strings permitted?)
+    #   version:             <string>  (the version of the client app (e.g.,
+    #                                   Spreadsheet) or the FieldDB server? A
+    #                                   string like "v2.38.16")
+
+    # Note, however, that a `datumField` object can also have other attributes.
+    # For example, the datum field with label `modifiedByUser` can have a `user`
+    # attribute whose value is an object.
+
+    # The labels of the default datum field objects are:
+
+    #   judgement:          <string> (equivalent to OLD's `grammaticality`; oddly
+    #                                 `grammatical` is sometimes a value here;
+    #                                 "Grammaticality/acceptability judgement
+    #                                 (*,#,?, etc). Leaving it blank can mean
+    #                                 grammatical/acceptable, or you can choose a
+    #                                 new symbol for this meaning.")
+    #   utterance:          <string> (roughly equivalent to OLD's
+    #                                 `transcription`; "Unparsed utterance in the
+    #                                 language, in orthography or transcription.
+    #                                 Line 1 in your LaTeXed examples for
+    #                                 handouts. Sample entry: amigas")
+    #   morphemes:          <string> (sequence of morpheme shapes and delimiters;
+    #                                 equivalent to OLD's `morpheme_break`)
+    #   gloss:              <string> (sequence of morpheme glosses and
+    #                                 delimiters; equivalent to OLD's
+    #                                 `morpheme_glosses`)
+    #   translation:        <string> (no (enforced) conventions for multiple
+    #                                 translations)
+    #   tags:               <string> (tags; just a string with no enforced
+    #                                 delimiter conventions, at least as far as I
+    #                                 can tell)
+    #   validationStatus:   <string> (status of the datum; note: setting to
+    #                                 `"Deleted"` is what "deletes" a datum, I
+    #                                 think. "For example: To be checked with a
+    #                                 language consultant, Checked with Sebrina,
+    #                                 Deleted etc...")
+    #   syntacticCategory:  <string> (sequence of categories and delimiters,
+    #                                 isomorphic with morphemes and gloss values,
+    #                                 equivalent to OLD's
+    #                                 syntactic_category_string)
+    #   syntacticTreeLatex: <string> (tree in LaTeX Qtree bracket notation)
+    #   enteredByUser:      <string> (a username; "The user who originally
+    #                                 entered the datum")
+    #   modifiedByUser:     <array>  (***Note: `value` is a string but `users` is
+    #                                 the real value; it's an array of user objects
+    #                                 each of which has four attributes:
+    #                                   appVersion: "2.38.16.07.59ss Fri Jan 16
+    #                                     08:02:30 EST 2015" #
+    #                                   gravatar:
+    #                                     "5b7145b0f10f7c09be842e9e4e58826d"
+    #                                   timestamp: 1423667274803
+    #                                   username: "jdunham")
+
+    defaultFieldDBDatum: ->
+      _id: ''                           # <string> (UUID generated by CouchDB.)
+      _rev: ''                          # <string> (UUID with a "digit-"
+                                        #           prefix; generated by
+                                        #           CouchDB.)
+      audioVideo: []                    # <array>  (of objects, I presume...)
+      collection: 'datums'              # <string>
+      comments: []                      # <array>  (of comment objects of form: {
+                                        #             text: ''
+                                        #             username: ''
+                                        #             timestamp: ''}.)
+      dateEntered: ''                   # <string> (timestamp in format
+                                        #           2015-02-11T15:07:54.803Z.)
+      dateModified: ''                  # <string> (timestamp in format
+                                        #           2015-02-11T15:07:54.803Z.)
+      datumFields: []                   # <array>  (of objects, all of which
+                                        #           have `label` and `value`
+                                        #           attributes, but others too.
+                                        #           See above.)
+      datumTags: []                     # <array>  (of objects, I presume ...)
+      images: []                        # <array>  (of objects, I presume ...)
+      jsonType: 'Datum'                 # <string>
+      pouchname: ''                     # <string> (<username>-<corpus-name>,
+                                        #           e.g., "jrwdunham-firstcorpus".)
+      session: @defaultFieldDBSession() # <object> (representation of a(n
+                                        #           elicitation) session; see
+                                        #           `@defaultFieldDBSession()`
+                                        #           below.)
+      timestamp: null                   # <number> (Unix timestamp, e.g.,
+                                        #           1423667274803)
+
+    # Default FieldDB Session
+
+    # `@defaultFieldDBSession` returns an object representing a default FieldDB
+    # (elicitation) Session. Here the primary content is in the `sessionFields`
+    # array of objects. Each session field object has the same keys (and value
+    # types) as the datum field objects described above (except the `size`
+    # attribute seems to be # missing).
+
+    # The labels of the default session fields are:
+
+    #   goal:         <string> (the goal of the elicitation session)
+    #   consultants:  <string> (the consultant(s)/speaker(s) of the session)
+    #   dialect:      <string> (the dialect of the consultant)
+    #   language:     <string> (the language being elicited)
+    #   dateElicited: <string> (when the elicitation session took place; format
+    #                           YYY-MM-DD seen, but I don't know if this is
+    #                           enforced)
+    #   user:         <string> (username)
+    #   dateSEntered: <string> (when the session was created; format "Mon Feb 02
+    #                           2015 00:18:20 GMT-0800 (PST)" seen)
+
+    defaultFieldDBSession: ->
+      _id: ''                # <string> (UUID generated by CouchDB.)
+      _rev: ''               # <string> (UUID with a "digit-"
+      collection: 'sessions' # <string>
+      comments: []           # <array>  (of comment objects of form: {
+                             #             text: ''
+                             #             username: ''
+                             #             timestamp: ''}.)
+      dateCreated: ''        # <string> (timestamp in format
+                             #            2015-02-11T15:07:54.803Z.)
+      dateModified: ''       # <string> (timestamp in format
+                             #            2015-02-11T15:07:54.803Z.)
+      lastModifiedBy: ''     # <string> (a username.)
+      pouchname: ''          # <string> (<username>-<corpusname>, e.g.,
+                             #           "jrwdunham-firstcorpus".)
+      sessionFields: []      # <array>  (of objects, all of which have `label` and
+                             #           `value` attributes, but others too. See
+                             #           comments above.)
+      title: ''              # <string> (concatenation of `dateElicited` and
+                             #           `goal` values from `sessionFields`.)
+
+
+    ############################################################################
+    # OLD Schema
+    ############################################################################
+
+    # `@defaultOLDForm` returns a default OLD form. For details on this schema,
+    # see
+    # - https://github.com/jrwdunham/old/blob/master/onlinelinguisticdatabase/model/form.py
+    # - https://github.com/jrwdunham/old/blob/master/onlinelinguisticdatabase/model/model.py
+    # - https://github.com/jrwdunham/old/blob/master/onlinelinguisticdatabase/lib/schemata.py#L289-L316
+
+    # Note that the OLD *emits* relational attributes as JSON objects but it
+    # *accepts* them *only* as integer ids. That is, a GET request for a form
+    # will return an object whose `enterer` value is an object, e.g.,
+    #
+    #   "enterer": {"id": 37, "first_name": "Joel", ...},
+    #
+    # but PUT and POST requests to update/add a form *must* valuate their
+    # relational attributes as integer ids only, e.g.,
+    #
+    #   "enterer": 1,
+
+    # Note that some attributes are commented-out below. This is because these
+    # attributes are valuated server-side and should not have client-side
+    # defaults. That is, the OLD will send them to us, but we cannot directly
+    # modify them on the server with a PUT/POST request. Nevertheless, it is
+    # useful to describe their properties here.
+
+    # For a complete list of the attributes that can be specified when
+    # creating/updating an OLD form, see
+    # https://github.com/jrwdunham/old/blob/master/onlinelinguisticdatabase/lib/schemata.py#L289-L316
+
+    defaultOLDForm: ->
+      # These are the attributes that the OLD will recognize on POST/PUT
+      # (create/update) requests; others *can* be supplied, but the OLD will
+      # ignore them. The "REC TYPE" header indicates the data type that the OLD
+      # sends to us. The notes indicate the type that the OLD expects to
+      # receive, if different.
+
+      # ATTRIBUTE                         EXP TYPE  NOTES & VALIDATION
+      transcription: ""                 # <string>  (required, max length = 255)
+      phonetic_transcription: ""        # <string>  (max length = 255)
+      narrow_phonetic_transcription: "" # <string>  (max length = 255)
+      morpheme_break: ""                # <string>  (max length = 255; sequence
+                                        #            of morpheme shapes and
+                                        #            delimiters; equivalent to
+                                        #            FieldDB `morphemes`.)
+      grammaticality: ""                # <string>  (max length = 255;
+                                        #            grammaticality judgment;
+                                        #            note that the OLD stores
+                                        #            possible values in
+                                        #            server-side
+                                        #            application_settings
+                                        #            resources.)
+      morpheme_gloss: ""                # <string>  (max length = 255; sequence
+                                        #            of morpheme glosses and
+                                        #            delimiters; # equivalent
+                                        #            to FieldDB `gloss`.)
+      translations: []                  # <array>   (of objects, each of which
+                                        #            represents a translation,
+                                        #            with keys for
+                                        #            `transcription` and
+                                        #            `grammaticality`, the
+                                        #            latter being more
+                                        #            correctly labeled
+                                        #            `acceptibility`. *WARN*:
+                                        #            the OLD currently requires
+                                        #            every form to have at
+                                        #            least one
+                                        #            `translation.transcription`
+                                        #            value and all
+                                        #            `translation.grammaticality`
+                                        #            values must be present in
+                                        #            `application_settings.grammaticalities`.)
+      comments: ""                      # <string>  (general notes about the
+                                        #            form.)
+      speaker_comments: ""              # <string>  (comments by the
+                                        #            speaker/consultant.)
+      syntax: ""                        # <string>  (max length = 1023; assumed
+                                        #            this would be a PTB tree,
+                                        #            but no logic yet attached
+                                        #            to that assumption.)
+      semantics: ""                     # <string>  (max length = 1023; intended
+                                        #            for formal semantic
+                                        #            denotations.)
+      status: ""                        # <string>  (max length = 40; indicates
+                                        #            whether this is a form
+                                        #            that has been elicited or
+                                        #            whether it is one that
+                                        #            needs to be elicited
+                                        #            (i.e., is part of an
+                                        #            elicitation plan); default
+                                        #            value is "tested". Only other
+                                        #            licit value is 'requries
+                                        #            testing'. See https://github.com/jrwdunham/old/blob/master/onlinelinguisticdatabase/lib/utils.py#L1483.
+                                        #            Similar to
+                                        #            `validationStatus` in
+                                        #            FieldDB.)
+      elicitation_method: null          # <object>  (method by which the form
+                                        #            was elicited;
+                                        #            received as an object,
+                                        #            returned as an integer id.)
+      syntactic_category: null          # <object>  (category of the form;
+                                        #            received as an object,
+                                        #            returned as an integer id.)
+      speaker: null                     # <object>  (speaker/consultant who
+                                        #            produced/judged the form;
+                                        #            received as an object,
+                                        #            returned as an integer id.)
+      elicitor: null                    # <object>  (elicitor of the form;
+                                        #            received as an object,
+                                        #            returned as an integer id.)
+      verifier: null                    # <object>  (user who has "verified"
+                                        #            quality/accuracy of the
+                                        #            form; received as an
+                                        #            object, returned as an
+                                        #            integer id.)
+      source: null                      # <object>  (textual source (e.g.,
+                                        #            research paper, book of
+                                        #            texts, pedagogical
+                                        #            material, etc.) of the
+                                        #            form, if applicable;
+                                        #            received as an object,
+                                        #            returned as an integer id.)
+      tags: []                          # <array>   (of objects, each of which
+                                        #            represents a tag that is
+                                        #            associated to this form.
+                                        #            Note: sent by OLD as an
+                                        #            array of objects but must
+                                        #            be received as an array of
+                                        #            integer ids.)
+      files: []                         # <array>   (of objects, each of which
+                                        #            represents a file that is
+                                        #            associated to this form.
+                                        #            Note: sent by OLD as an
+                                        #            array of objects but must
+                                        #            be received as an array of
+                                        #            integer ids.)
+      date_elicited: ""                 # <string>  (date elicited; OLD sends
+                                        #            it in ISO 8601 format, i.e.,
+                                        #            "YYYY-MM-DD" but receives it
+                                        #            in "MM/DD/YYYY" format.)
+
+      # These are attributes that the OLD send to us, but will ignore if we try
+      # to send them back. The "REC TYPE" column header indicates the type of
+      # value that we can expect to receive from the OLD.
+
+      # ATTRIBUTE                         REC TYPE  NOTES & VALIDATION
+      id: null                          # <integer> (created by RDBMS on server)
+      UUID: ""                          # <string>  (UUID created by the server;
+                                        #            used to link forms with
+                                        #            their deleted/premodified
+                                        #            copies)
+      datetime_entered: ""              # <string>  (datetime form was
+                                        #            created/entered; generated
+                                        #            on the server as a UTC
+                                        #            datetime; communicated in
+                                        #            JSON as a UTC ISO 8601
+                                        #            datetime, e.g.,
+                                        #            '2015-02-11T10:50:57.821192'.)
+      datetime_modified: ""             # <string>  (datetime form was last
+                                        #            modified; format and
+                                        #            construction same as
+                                        #            `datetime_entered`.)
+      syntactic_category_string: ""     # <string>  (max length = 255; sequence
+                                        #            of morpheme categories and
+                                        #            delimiters; isomorphic to
+                                        #            `morpheme_break` and
+                                        #            `morpheme_gloss` values;
+                                        #            equivalent to FieldDB
+                                        #            `syntacticCategory`.
+                                        #            *WARN*: the OLD currently
+                                        #            only constructs this
+                                        #            server-side and does *not*
+                                        #            allow for it to be
+                                        #            user-specified; it may be
+                                        #            desirable to change this.)
+      morpheme_break_ids: []            # <array>   (array of arrays encoding
+                                        #            the cross-references
+                                        #            between morpheme shapes
+                                        #            in the `morpheme_break`
+                                        #            value and lexical forms in
+                                        #            the database.)
+      morpheme_gloss_ids: []            # <array>   (array of arrays encoding
+                                        #            the cross-references
+                                        #            between morpheme glosses
+                                        #            in the `morpheme_break`
+                                        #            value and lexical forms in
+                                        #            the database.)
+      break_gloss_category: ""          # <string>  (serialized zip of the
+                                        #            `morpheme_break`,
+                                        #            `morpheme_gloss`, and
+                                        #            `syntactic_category_string`
+                                        #            values; e.g.,
+                                        #            "chien|dog|N-s|PL|Num".)
+      enterer: null                     # <object>  (enterer of the form.)
+      modifier: null                    # <object>  (last user to modify the form.)
+      collections: []                   # <array>   (of objects, each of which
+                                        #            represents a collection
+                                        #            that this form belongs to.
+                                        #            Note: emitted but not
+                                        #            received by the OLD; use
+                                        #            the `collections`
+                                        #            interface to manipulate
+                                        #            collection membership.)
+
+    # Schema of a user object as the OLD would send it to us.
+    # Cf. https://github.com/jrwdunham/old/blob/master/onlinelinguisticdatabase/model/model.py#L44
+    defaultUserFromOLD: ->
       id: null
-      firstName: null
-      lastName: null
+      first_name: null
+      last_name: null
       role: null
-      username: null
 
-    defaultSpeaker: ->
+    # Schema of a speaker object as the OLD would send it to us.
+    # Cf. https://github.com/jrwdunham/old/blob/master/onlinelinguisticdatabase/model/model.py#L40
+    defaultSpeakerFromOLD: ->
       id: null
-      firstName: null
-      lastName: null
+      first_name: null
+      last_name: null
       dialect: null
 
-    defaultElicitationMethod: ->
+    # Schema of an elicitation method object as the OLD would send it to us.
+    # Cf. https://github.com/jrwdunham/old/blob/master/onlinelinguisticdatabase/model/model.py#L31
+    defaultElicitationMethodFromOLD: ->
       id: null
       name: null
 
-    defaultSyntacticCategory: ->
+    # Schema of a syntactic category object as the OLD would send it to us.
+    # Cf. https://github.com/jrwdunham/old/blob/master/onlinelinguisticdatabase/model/model.py#L41
+    defaultSyntacticCategoryFromOLD: ->
       id: null
       name: null
 
-    defaultSource: ->
+    # Schema of a source object as the OLD would send it to us.
+    # Note that the data structure here is that of BibTeX.
+    # Cf. https://github.com/jrwdunham/old/blob/master/onlinelinguisticdatabase/model/model.py#L38-L39
+    defaultSourceFromOLD: ->
       id: null
       type: null
       key: null
@@ -115,13 +465,25 @@ define [
       title: null
       node: null
 
+
     ############################################################################
     # FieldDB-to-Dative Schema stuff
     ############################################################################
 
     # FieldDb to Dative: input: a FieldDB datum object, output: a Dative form model
     # --------------------------------------------------------------------------
-    #
+
+    fieldDB2dative: (fieldDBDatum) ->
+      # A FieldDB Datum is, at its core, an array of objects, each of which has
+      # a `label` and a `value` attribute. This method essentially creates a new
+      # object from that label/value information. Certain labels are changed.
+      # The entire fieldDBDatum is stored in the newly created Dative model under
+      # the attribute `fieldDBDatum` so that other # attributes (i.e., `mask`,
+      # `encrypted`, `shouldBeEncrypted`, `help`, `size`, and
+      # `userchooseable` can be recovered).
+
+      @set fieldDBDatum
+
     # Converts attribute names and values, as appropriate. Also stores the
     # FieldDB datum object unmodified in an attribute.
     #
@@ -208,9 +570,7 @@ define [
     # these fields should be the same/ similar, i.e., in terms of IGT
     # formatting.
 
-    fieldDB2dative: (fieldDBDatum) ->
-      # console.log 'in fieldDB2dative'
-      # console.log JSON.stringify(fieldDBDatum, undefined, 2)
+    fieldDB2dative_: (fieldDBDatum) ->
       # A FieldDB Datum is, at its core, an array of objects, each of which has
       # a `label` and a `value` attribute. This method essentially creates a new
       # object from that label/value information. Certain labels are changed.
@@ -266,7 +626,7 @@ define [
     # Dative-style user object with a single valuated attribute: `username`.
     # This applies to `sessionFields.user` and `datumFields.enterer`.
     fieldDBUsername2dativeUser: (value) ->
-      enterer = @defaultUser()
+      enterer = @defaultUserFromOLD()
       enterer.username = value
       enterer
 
