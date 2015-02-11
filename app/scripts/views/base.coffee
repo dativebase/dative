@@ -144,7 +144,7 @@ define [
     focusElement: (index) ->
       $focusables = @$ @focusableSelector
       $elementToSelect = $focusables.eq index
-      if $elementToSelect.hasClass '.ui-state-disabled'
+      if $elementToSelect.hasClass 'ui-state-disabled'
         @focusFirstElement()
       else
         $elementToSelect.focus()

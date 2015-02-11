@@ -125,7 +125,7 @@ define [
     # addition), we could have these be user-customizable.
     keyboardShortcuts: (event) ->
       if not @addFormWidgetHasFocus()
-        if not event.ctrlKey
+        if not event.ctrlKey and not event.metaKey and not event.altKey
           switch event.which
             when 70 then @$('.first-page').click() # f
             when 80 then @$('.previous-page').click() # p
@@ -172,7 +172,7 @@ define [
     # Focus the next (below) form view, or the first one if we're at the top.
     focusNextFormView: (event) ->
       $enclosingFormViewDiv = @getEnclosingFormViewDiv @$(event.target)
-      if $enclosingFormViewDiv
+      if $enclosingFormViewDiv.length
         $nextFormViewDiv = @getNextFormViewDiv $enclosingFormViewDiv
         @stopEvent event
         if $nextFormViewDiv.length
@@ -183,7 +183,7 @@ define [
     # Focus the previous (above) form view, or the last one if we're at the top.
     focusPreviousFormView: (event) ->
       $enclosingFormViewDiv = @getEnclosingFormViewDiv @$(event.target)
-      if $enclosingFormViewDiv
+      if $enclosingFormViewDiv.length
         $previousFormViewDiv = @getPreviousFormViewDiv $enclosingFormViewDiv
         @stopEvent event
         if $previousFormViewDiv.length
