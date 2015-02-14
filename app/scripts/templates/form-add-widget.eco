@@ -32,134 +32,181 @@
 
     <ul class="fieldset igt-data">
 
-      <li>
+      <% if @activeServerType is 'OLD': %>
 
-        <label for="transcription">Transcription</label>
+        <li>
 
-        <select name="grammaticality" class="grammaticality"
-          title="The grammaticality or pragmatic acceptibility judgment of the form">
-          <% for grammaticality in @options.grammaticalities: %>
-            <option value="<%= grammaticality %>"><%= grammaticality %></option>
-          <% end %>
-        </select>
+          <label for="transcription">Transcription</label>
 
-        <textarea rows="1" name="transcription"
-          class="transcription ui-corner-all form-add-input dative-tooltip"
-          maxlength="255"
-          title="A transcription of the form (probably orthographic)"
-          ><%= @model.transcription %></textarea>
-
-      </li>
-
-      <li>
-
-        <label for="morphemeBreak">Morpheme Break</label>
-
-        <textarea name="morphemeBreak" maxlength="255"
-          class="ui-corner-all dative-tooltip"
-          title="A morphological analysis of the form: a sequence of morphemes
-          and delimiters"
-          ><%= @model.morphemeBreak %></textarea>
-
-      </li>
-
-      <li>
-
-        <label for="morphemeGloss">Morpheme Gloss</label>
-
-        <textarea name="morphemeGloss" class="ui-corner-all dative-tooltip"
-          maxlength="255"
-          title="A gloss for each morpheme in the morpheme break line above"
-          ><%= @model.morphemeGloss %></textarea>
-
-      </li>
-
-      <% if @model.translations.length: %>
-
-        <% for translation, index in @model.translations: %>
-
-          <li class="translation-li">
-
-            <label class="translation-label"
-              for="translations-<%= index %>.transcription"
-              >Translation</label>
-
-            <select name="translations-<%= index %>.grammaticality"
-              class="grammaticality translation-grammaticality"
-              title="The acceptibility of this as a translation for the form">
-              <% for grammaticality in @options.grammaticalities: %>
-                <option value="<%= grammaticality %>"
-                  ><%= grammaticality %></option>
-              <% end %>
-            </select>
-
-            <textarea name="translations-<%= index %>.transcription"
-              maxlength="255"
-              title="The text of the translation"
-              class="translation translation-transcription ui-corner-all
-                dative-tooltip"
-              ><%= translation.transcription %>
-            </textarea>
-
-            <% if index is 0: %>
-              <button class="append-translation-field
-                append-remove-translation-field dative-tooltip"
-                title="Add another translation.">
-                <i class="fa fa-fw fa-plus"></i>
-              </button>
-            <% else: %>
-              <button class="remove-translation-field dative-tooltip
-                append-remove-translation-field"
-                title="Delete this translation.">
-                <i class="fa fa-fw fa-minus"></i>
-              </button>
-            <% end %>
-
-          </li>
-
-        <% end %>
-
-      <% else: %>
-
-        <li class="translation-li">
-
-          <label for="translations-0.transcription">Translation</label>
-
-          <select name="translations-0.grammaticality"
-            class="grammaticality translation-grammaticality"
-            title="The acceptibility of this as a translation for the form">
+          <select name="grammaticality" class="grammaticality"
+            title="The grammaticality or pragmatic acceptibility judgment of the form">
             <% for grammaticality in @options.grammaticalities: %>
               <option value="<%= grammaticality %>"><%= grammaticality %></option>
             <% end %>
           </select>
 
-          <textarea name="translations-0.transcription"
+          <textarea rows="1" name="transcription"
+            class="transcription ui-corner-all form-add-input dative-tooltip"
             maxlength="255"
-            class="translation ui-corner-all dative-tooltip"
-            title="The text of the translation"
-            ></textarea>
-
-          <button class="append-translation-field dative-tooltip
-            append-remove-translation-field"
-            title="Add another translation.">
-            <i class="fa fa-fw fa-plus"></i>
-          </button>
+            title="A transcription of the form (probably orthographic)"
+            ><%= @transcription %></textarea>
 
         </li>
 
+        <li>
+
+          <label for="morphemeBreak">Morpheme Break</label>
+
+          <textarea name="morphemeBreak" maxlength="255"
+            class="ui-corner-all dative-tooltip"
+            title="A morphological analysis of the form: a sequence of morphemes
+            and delimiters"
+            ><%= @morphemeBreak %></textarea>
+
+        </li>
+
+        <li>
+
+          <label for="morphemeGloss">Morpheme Gloss</label>
+
+          <textarea name="morphemeGloss" class="ui-corner-all dative-tooltip"
+            maxlength="255"
+            title="A gloss for each morpheme in the morpheme break line above"
+            ><%= @morphemeGloss %></textarea>
+
+        </li>
+
+        <% if @translations.length: %>
+
+          <% for translation, index in @translations: %>
+
+            <li class="translation-li">
+
+              <label class="translation-label"
+                for="translations-<%= index %>.transcription"
+                >Translation</label>
+
+              <select name="translations-<%= index %>.grammaticality"
+                class="grammaticality translation-grammaticality"
+                title="The acceptibility of this as a translation for the form">
+                <% for grammaticality in @options.grammaticalities: %>
+                  <option value="<%= grammaticality %>"
+                    ><%= grammaticality %></option>
+                <% end %>
+              </select>
+
+              <textarea name="translations-<%= index %>.transcription"
+                maxlength="255"
+                title="The text of the translation"
+                class="translation translation-transcription ui-corner-all
+                  dative-tooltip"
+                ><%= translation.transcription %>
+              </textarea>
+
+              <% if index is 0: %>
+                <button class="append-translation-field
+                  append-remove-translation-field dative-tooltip"
+                  title="Add another translation.">
+                  <i class="fa fa-fw fa-plus"></i>
+                </button>
+              <% else: %>
+                <button class="remove-translation-field dative-tooltip
+                  append-remove-translation-field"
+                  title="Delete this translation.">
+                  <i class="fa fa-fw fa-minus"></i>
+                </button>
+              <% end %>
+
+            </li>
+
+          <% end %>
+
+        <% else: %>
+
+          <li class="translation-li">
+
+            <label for="translations-0.transcription">Translation</label>
+
+            <select name="translations-0.grammaticality"
+              class="grammaticality translation-grammaticality"
+              title="The acceptibility of this as a translation for the form">
+              <% for grammaticality in @options.grammaticalities: %>
+                <option value="<%= grammaticality %>"><%= grammaticality %></option>
+              <% end %>
+            </select>
+
+            <textarea name="translations-0.transcription"
+              maxlength="255"
+              class="translation ui-corner-all dative-tooltip"
+              title="The text of the translation"
+              ></textarea>
+
+            <button class="append-translation-field dative-tooltip
+              append-remove-translation-field"
+              title="Add another translation.">
+              <i class="fa fa-fw fa-plus"></i>
+            </button>
+
+          </li>
+
+        <% end %>
+
+      <% # END OLD CASE %>
+
+      <% else if @activeServerType is 'FieldDB': %>
+
+      <% # BEGIN FIELDDB CASE %>
+
+        <!-- COMMENTED OUT FOR NOW: JUST USING GENERIC TEXTAREAS FOR ALL PRIMARY DATUM FIELDS FOR NOW.
+        <li>
+
+          <label for="utterance">Utterance</label>
+
+          <input type="text" name="judgement" class="judgement"
+            title="The judgement or pragmatic acceptibility judgment of the form"
+            value="<%= @h.getDatumFieldValue @datumFields, 'judgement' %>" />
+
+          <textarea rows="1" name="transcription"
+            class="transcription ui-corner-all form-add-input dative-tooltip"
+            title="A transcription of the form (probably orthographic)"
+            ><%= @h.getDatumFieldValue @datumFields, 'utterance' %></textarea>
+
+        </li>
+        -->
+
+        <% for field in @h.getPrimaryDatumFields @datumFields: %>
+
+          <li>
+
+            <label for="<%= field.label %>"><%= @h.getDatumFieldLabel field %></label>
+
+            <textarea name="<%= field.label %>"
+              class="ui-corner-all dative-tooltip"
+              title="<%= field.help %>"
+              ><%= field.value %></textarea>
+
+          </li>
+
+        <% end %>
+
       <% end %>
 
-    </ul>
+      </ul>
+
+
+    <% # Secondary Data %>
 
     <div class="secondary-data">
 
       <ul class="fieldset">
 
+      <% if @activeServerType is 'OLD': %>
+
         <li>
           <label for="comments">General Comments</label>
           <textarea name="comments" class="comments ui-corner-all dative-tooltip"
             title="General-purpose field for comments and notes about the form"
-            ><%= @model.comments %></textarea>
+            ><%= @comments %></textarea>
         </li>
 
         <li>
@@ -167,7 +214,7 @@
           <textarea name="speakerComments"
             class="ui-corner-all speaker-comments dative-tooltip"
             title="Comments made by the speaker that are relevant to this form"
-          ><%= @model.speakerComments %></textarea>
+          ><%= @speakerComments %></textarea>
         </li>
 
         <li>
@@ -255,12 +302,30 @@
           <input type="text" name="dateElicited"
             class="date-elicited ui-corner-all dative-tooltip"
             title="When this form was elicited"
-            value="<%= @model.dateElicited %>"/>
+            value="<%= @dateElicited %>"/>
         </li>
+
+      <% # END OLD CASE %>
+      <% else if @activeServerType is 'FieldDB': %>
+      <% # BEGIN FIELDDB CASE %>
+
+        <% for field in @h.getSecondaryDatumFields @datumFields: %>
+          <li>
+            <label for="<%= field.label %>"><%= @h.getDatumFieldLabel field %></label>
+            <textarea name="<%= field.label %>"
+              class="ui-corner-all dative-tooltip"
+              title="<%= field.help %>"
+              ><%= field.value %></textarea>
+          </li>
+        <% end %>
+
+      <% end %>
+      <% # END FIELDDB CASE %>
 
       </ul>
 
-    </div>
+    </div> <% # END div.secondary-data %>
+
 
     <ul class="fieldset button-only-fieldset">
       <li class="center">

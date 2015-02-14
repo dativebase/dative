@@ -32,6 +32,13 @@
         <i class='fa fa-fw fa-angle-double-up'></i>
       </button>
 
+      <!--
+      <button class="toggle-all-primary-data-labels dative-tooltip"
+        title="show all labels">
+        <i class='fa fa-columns fa-fw'></i>
+      </button>
+      -->
+
     </div>
 
     <div class='button-container-right'>

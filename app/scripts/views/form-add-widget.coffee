@@ -27,6 +27,30 @@ define [
       @wideSelectMenuWidth = 548
       @grammaticalitySelectMenuWidth = 50
       @listenToEvents()
+      @setDatumFieldsArray()
+
+    # These arrays are used to categorize FieldDB's `datumFields` objects by their
+    # keys.
+    # TODO: at least some of this should be in application settings (and saved
+    # to server...)
+    setDatumFieldsArray: ->
+      @primaryDatumFields = [
+        'judgement'
+        'utterance'
+        'morphemes'
+        'gloss'
+        'translation'
+      ]
+      @secondaryDatumFields = [
+        'tags'
+        'validationStatus'
+        'syntacticCategory'
+        'syntacticTreeLatex'
+      ]
+      @autopopulatedDatumFields = [
+        'modifiedByUser'
+        'enteredByUser'
+      ]
 
     events:
       'change': 'setToModel' # fires when multi-select changes
@@ -89,13 +113,37 @@ define [
     weHaveOLDNewFormData: ->
       globals.oldData?
 
+    # Return the primary datum fields, sorted according to the label order given
+    # in `@primaryDatumFields`.
+    getPrimaryDatumFields: (datumFields) =>
+      primaryFields = (field for field in datumFields \
+        when field.label in @primaryDatumFields)
+      _.sortBy(
+        primaryFields
+        (field) => @primaryDatumFields.indexOf(field.label))
+
+    getSecondaryDatumFields: (datumFields) =>
+      secondaryFields = (field for field in datumFields \
+        when field.label not in @primaryDatumFields.concat @autopopulatedDatumFields)
+      _.sortBy(
+        secondaryFields
+        (field) => @secondaryDatumFields.indexOf(field.label))
+
     # Write the initial HTML to the page.
     html: ->
-      params =
+      context = _.extend(@model.toJSON(), {
         headerTitle: 'Add a Form'
-        model: @model.toJSON()
         options: @fakeFormAddOptions # TODO: fetch real data from server (or provide defaults?)
-      @$el.html @template(params)
+        activeServerType: @getActiveServerType()
+        h: # "h" for "helpers"
+          getDatumFields: @getDatumFields
+          getDatumFieldValue: @getDatumFieldValue
+          datumFieldsHasValue: @datumFieldsHasValue
+          getPrimaryDatumFields: @getPrimaryDatumFields
+          getSecondaryDatumFields: @getSecondaryDatumFields
+          getDatumFieldLabel: @getDatumFieldLabel
+      })
+      @$el.html @template(context)
 
     ############################################################################
     # jQuery (UI) GUI stuff.

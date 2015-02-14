@@ -129,6 +129,7 @@ define [
       @applicationSettings.save
         'activeFieldDBCorpus': corpusId
         'activeFieldDBCorpusTitle': @activeFieldDBCorpus.get 'title'
+        'activeFieldDBCorpusModel': @activeFieldDBCorpus # TODO: FIX THIS ABERRATION!
       globals.activeFieldDBCorpus = @activeFieldDBCorpus
       if currentlyActiveFieldDBCorpus is @activeFieldDBCorpus
         @showFormsView fieldDBCorpusHasChanged: false

@@ -1,10 +1,26 @@
-body {
+@font-face
+{
+    font-family: GentiumPlus;
+    src: url(./fonts/GentiumPlus-R.woff);
+}
+
+@font-face
+{
+    font-family: GentiumPlus;
+    font-style: italic;
+    src: url(./fonts/GentiumPlus-I.woff);
+}
+
+body
+{
     font-family: Lucida Grande, Lucida Sans, Arial, sans-serif;
     margin: 0;
     font-size: 12px;
 }
+
 div.mainmenu,
-div#mainmenu {
+div#mainmenu
+{
     width: 100%;
     height: 24px;
     border-bottom-style: solid;
@@ -119,7 +135,11 @@ button.help-button
 }
 
 .form-secondary-data div.dative-tooltip,
-.form-secondary-data span.dative-tooltip
+.form-secondary-data span.dative-tooltip,
+.form-igt-data div.dative-tooltip,
+.form-igt-data span.dative-tooltip,
+.form-translations-data div.dative-tooltip,
+.form-translations-data span.dative-tooltip
 {
     cursor: pointer;
 }
@@ -156,18 +176,28 @@ ul.sf-menu li a
     position: relative;
     padding: 10px;
 }
-.dative-form-secondary-data-label ,
-.form-secondary-data-label {
+.dative-form-secondary-data-label,
+.form-secondary-data-label,
+.form-igt-data-label,
+.form-translations-data-label,
+.form-translation-data-label
+{
     display: inline-block;
-    width: 150px;
+    width: 25%;
     text-align: right;
     margin-right: 10px;
     vertical-align: top;
 }
+
 .dative-form-secondary-data-content ,
-.form-secondary-data-content {
+.form-secondary-data-content,
+.form-igt-data-content,
+.form-translations-data-content,
+.form-translation-data-content
+{
     display: inline-block;
-    width: 500px;
+    width: 70%;
+    font-family: 'GentiumPlus', serif;
 }
 .dative-form-secondary-data > div ,
 .form-secondary-data > div {
@@ -294,11 +324,21 @@ div.dative-page-header-title
 .server-config-widget,
 .add-user-widget,
 .edit-corpus-widget,
-.add-form-widget
+.add-form-widget,
+.dative-form-object.expanded
 {
     box-shadow: 5px 5px 10px rgba(0, 0, 0, 0.5);
     -webkit-box-shadow: 5px 5px 10px rgba(0, 0, 0, 0.5);
     -moz-box-shadow: 5px 5px 10px rgba(0, 0, 0, 0.5);
+}
+
+.dative-form-object.expanded:focus
+{
+    /*outline: none !important;*/
+    /*box-shadow: 0 0 10px orange !important;*/
+    box-shadow: 5px 5px 10px rgba(255, 165, 0, 0.5) !important;
+    -webkit-box-shadow: 5px 5px 10px rgba(255, 165, 0, 0.5) !important;
+    -moz-box-shadow: 5px 5px 10px rgba(255, 165, 0, 0.5) !important;
 }
 
 div.heading {
@@ -387,12 +427,19 @@ div.form-add-form ul.fieldset label,
 .fieldset input[type="password"],
 .fieldset input[type="checkbox"],
 .fieldset select.grammaticality,
+.fieldset input.judgement,
 .fieldset button,
-.fieldset textarea {
+.fieldset textarea
+{
     display: inline-block;
 }
 
-.dative-form-object:focus,
+.fieldset select.grammaticality
+{
+  width: 2.2em;
+}
+
+.dative-form-object:not(.expanded):focus,
 .ui-selectmenu-button:focus,
 .ui-button:focus,
 .ms-list:focus,

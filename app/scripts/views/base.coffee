@@ -2,8 +2,9 @@ define [
   'backbone'
   'jquery'
   './../utils/utils'
+  './../utils/globals'
   'jqueryuicolors'
-], (Backbone, $, utils) ->
+], (Backbone, $, utils, globals) ->
 
   # Base View
   # --------------
@@ -312,4 +313,82 @@ define [
         .removeClass 'ui-button-icon-only'
         .addClass 'ui-button-text-only'
         .html newIconHTML
+
+    getActiveServerType: ->
+      try
+        globals.applicationSettings.get('activeServer').get 'type'
+      catch
+        null
+
+    ############################################################################
+    # FieldDB stuff
+    ############################################################################
+
+    # Get the datum field (an object) such that `label=label`.
+    getDatumField: (datumFields, label) ->
+      _.findWhere(datumFields, label: label)
+
+    # Get the `value` value of the first object in `datumFields`
+    # such that `label=label`.
+    getDatumFieldValue: (datumFields, label) ->
+      try
+        _.findWhere(datumFields, label: label).value
+      catch
+        undefined
+
+    # Get the `help` value of the first object in `datumFields`
+    # such that `label=label`.
+    getDatumFieldHelp: (datumFields, label) ->
+      try
+        _.findWhere(datumFields, label: label).help
+      catch
+        undefined
+
+    # Returns `true` if the first object in `datumFields` such
+    # that `label=label` has a `value` value that is non-empty.
+    datumFieldsHasValue: (datumFields, label) =>
+      not _.isEmpty @getDatumFieldValue(datumFields, label)
+
+    # Get the session field (an object) such that `label=label`.
+    getSessionField: (sessionFields, label) ->
+      _.findWhere(sessionFields, label: label)
+
+    # Get the `value` value of the first object in `sessionFields`
+    # such that `label=label`.
+    getSessionFieldValue: (sessionFields, label) ->
+      try
+        _.findWhere(sessionFields, label: label).value
+      catch
+        undefined
+
+    # Get the `help` value of the first object in `sessionFields`
+    # such that `label=label`.
+    getSessionFieldHelp: (sessionFields, label) ->
+      try
+        _.findWhere(sessionFields, label: label).help
+      catch
+        undefined
+
+    # Return the datumFields of the currently active corpus, if applicable;
+    # otherwise null.
+    getCorpusDatumFields: ->
+      try
+        globals.applicationSettings
+          .get('activeFieldDBCorpusModel').get 'datumFields'
+      catch
+        null
+
+    # FieldDB `judgement` values can be any string. Sometimes that string is
+    # "grammatical". We want this to be "" when displayed.
+    fieldDBJudgementConverter: (grammaticality) ->
+      switch grammaticality
+        when 'grammatical' then ''
+        else grammaticality
+
+    # Return a nice user-facing label for a datum field. I.e., no snakeCase nonsense.
+    getDatumFieldLabel: (field) ->
+      if field.labelFieldLinguists
+        utils.camel2regular field.labelFieldLinguists
+      else
+        utils.camel2regular field.label
 

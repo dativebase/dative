@@ -93,6 +93,11 @@ define [
     # For example, the datum field with label `modifiedByUser` can have a `user`
     # attribute whose value is an object.
 
+    # In fact, it's more complicated since some `datumField` objects have a very
+    # different set of attributes. The datum fields of the ETI 3 Data Tutorial
+    # corpus, for instance, has "label", "value", "mask", "encrypted",
+    # "shouldBeEncrypted", "help", "showToUserTypes", and "userchooseable".
+
     # The labels of the default datum field objects are:
 
     #   judgement:          <string> (equivalent to OLD's `grammaticality`; oddly
@@ -153,8 +158,8 @@ define [
                                         #           2015-02-11T15:07:54.803Z.)
       dateModified: ''                  # <string> (timestamp in format
                                         #           2015-02-11T15:07:54.803Z.)
-      datumFields: []                   # <array>  (of objects, all of which
-                                        #           have `label` and `value`
+      datumFields:                      # <array>  (of objects, all of which
+        @getCorpusDatumFields()         #           have `label` and `value`
                                         #           attributes, but others too.
                                         #           See above.)
       datumTags: []                     # <array>  (of objects, I presume ...)
@@ -482,7 +487,8 @@ define [
       # `encrypted`, `shouldBeEncrypted`, `help`, `size`, and
       # `userchooseable` can be recovered).
 
-      @set fieldDBDatum
+      @set 'id', fieldDBDatum.id
+      @set fieldDBDatum.value
 
     # Converts attribute names and values, as appropriate. Also stores the
     # FieldDB datum object unmodified in an attribute.
@@ -659,12 +665,15 @@ define [
     # OLD-to-Dative Schema stuff
     ############################################################################
 
+    old2dative: (oldForm) ->
+      @set oldForm
+
     # Convert an OLD form object to a Dative form object.
     # An OLD form is received as a JSON object. See
     # http://online-linguistic-database.readthedocs.org/en/latest/datastructure.html#form
     # for an exact specification of its attributes and their validation
     # requirements.
-    old2dative: (oldForm) ->
+    old2dative_: (oldForm) ->
       dativeForm = {}
       for attribute, value of oldForm
         attribute = @oldAttribute2datumAttribute attribute
@@ -837,4 +846,13 @@ define [
             'Error in GET request to OLD server for /forms/new'
           console.log 'Error in GET request to OLD server for /forms/new'
       )
+
+    # Return the datumFields of the currently active corpus, if applicable;
+    # otherwise []. Cf. non-DRY `/views/base.coffee:getCorpusDatumFields`.
+    getCorpusDatumFields: ->
+      try
+        globals.applicationSettings
+          .get('activeFieldDBCorpusModel').get 'datumFields'
+      catch
+        []
 

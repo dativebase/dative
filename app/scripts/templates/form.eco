@@ -12,6 +12,11 @@
       <i class='fa fa-angle-up fa-fw'></i>
     </button>
 
+    <button class="toggle-primary-data-labels dative-tooltip"
+      title="show labels">
+      <i class='fa fa-columns fa-fw'></i>
+    </button>
+
   </div>
 
   <div class='button-container-right'>
@@ -61,33 +66,50 @@
 
     <div class='form-igt-data dative-form-igt'>
 
-      <div class='transcription dative-form-transcription'
-      ><span class='grammaticality'
-        ><%= @fieldDBGrammaticalityConverter @grammaticality %></span
-        ><%= @transcription %>
-      </div>
+      <% if @activeServerType is 'OLD': %>
 
-      <div class='morpheme-break dative-form-morphemeBreak'>
-        <%= @morphemeBreak %>
-      </div>
+        <% for [attribute, displayer] in @h.old.oldFormIGTAttributes: %>
+          <%- @h.old[displayer] attribute, @ %>
+        <% end %>
 
-      <div class='morpheme-gloss dative-form-morphemeGloss'>
-        <%= @morphemeGloss %>
-      </div>
+      <% else if @activeServerType is 'FieldDB': %>
+
+        <% for [attribute, displayer] in @h.fieldDB.fieldDBFormIGTAttributes: %>
+          <%- @h.fieldDB[displayer] attribute, @ %>
+        <% end %>
+
+      <% end %>
 
     </div>
 
     <div class='form-translations-data'>
 
-      <% for translation in @translations: %>
+      <% if @activeServerType is 'OLD': %>
 
-        <div class='translation'>
-          <span class='translation-grammaticality'>
-            <%= translation.grammaticality %>
-          </span>
-          <span class='translation-transcription'>
-            <%= translation.transcription %>
-          </span>
+        <% if @translations.length: %>
+          <div class='form-translations'>
+            <div class='form-translations-data-label dative-tooltip'
+              title="<%= @h.tooltips('old.formAttributes.translations')() %>"
+              >translations</div>
+            <div class='form-translations-data-content'>
+              <% for translation in @translations: %>
+                <span class='translation-grammaticality'
+                  ><%= translation.grammaticality %></span>
+                <span class='translation-transcription'
+                  ><%= translation.transcription %></span>
+              <% end %>
+            </div>
+          </div>
+        <% end %>
+
+      <% else if @activeServerType is 'FieldDB': %>
+
+        <% translation = @h.fieldDB.getDatumFieldValue @datumFields, 'translation' %>
+        <div class='form-translation' <%= @h.displayNoneStyle translation %>>
+          <div class='form-translation-data-label dative-tooltip'
+            title="<%= @h.fieldDB.getFieldDBTooltip 'translation', @ %>"
+            >translation</div>
+          <div class='form-translation-data-content'><%= translation %></div>
         </div>
 
       <% end %>
@@ -96,250 +118,32 @@
 
   </div>
 
+
   <div class='form-secondary-data'>
 
-    <div class='form-phonetic-transcription'
-      <%- @displayNoneStyle 'phoneticTranscription', @ %>>
-      <div class='form-secondary-data-label'>phonetic transcription</div>
-      <div class='form-secondary-data-content'
-        ><%= @phoneticTranscription %></div>
-    </div>
+  <% if @activeServerType is 'OLD': %>
 
-    <div class='form-narrow-phonetic-transcription'
-      <%- @displayNoneStyle 'narrowPhoneticTranscription', @ %>>
-      <div class='form-secondary-data-label'>narrow phonetic transcription</div>
-      <div class='form-secondary-data-content'
-        ><%= @narrowPhoneticTranscription %></div>
-    </div>
-
-    <div class='form-syntactic-categories'
-      <%- @displayNoneStyle 'syntacticCategories', @ %>>
-      <div class='form-secondary-data-label'>syntactic categories</div>
-      <div class='form-secondary-data-content'><%= @syntacticCategories %></div>
-    </div>
-
-    <div class='form-break-gloss-category'
-      <%- @displayNoneStyle 'breakGlossCategory', @ %>>
-      <div class='form-secondary-data-label'>break/gloss/category</div>
-      <div class='form-secondary-data-content'><%= @breakGlossCategory %></div>
-    </div>
-
-    <div class='form-comments'<%- @displayNoneStyle 'comments', @ %>>
-      <div class='form-secondary-data-label'>comments</div>
-      <div class='form-secondary-data-content'><%= @comments %></div>
-    </div>
-
-    <% # FieldDB comments: `comments` is a top-level attribute of a Datum %>
-    <% # object. It is an array of objects with `text`, `username`, `timestamp`, %>
-    <% # `gravatar` and `timestampModified` attributes. %>
-    <div class='form-fielddb-comments'<%- @displayNoneStyle 'fieldDBComments', @ %>>
-      <div class='form-secondary-data-label'>comments</div>
-      <div class='form-secondary-data-content'>
-        <% for comment in @fieldDBComments.reverse(): %>
-          <div class='form-fielddb-comment'>
-            <span class='form-fielddb-comment-text'><%= comment.text %></span>
-            (By <span class='form-fielddb-comment-username'
-              ><%= comment.username %></span>
-              <span class='form-fielddb-comment-timestamp dative-tooltip'
-                title='This comment was made on
-                <%= @humanDatetime(new Date(comment.timestamp)) %>'
-              ><%= @timeSince(new Date(comment.timestamp)) %>)</span>
-          </div>
-        <% end %>
-      </div>
-    </div>
-
-    <div class='form-speaker-comments'<%- @displayNoneStyle 'speakerComments', @ %>>
-      <div class='form-secondary-data-label'>speaker comments</div>
-      <div class='form-secondary-data-content'><%= @speakerComments %></div>
-    </div>
-
-    <div class='form-elicitation-method'<%- @displayNoneStyle 'elicitationMethod', @ %>>
-      <div class='form-secondary-data-label'>elicitation method</div>
-      <div class='form-secondary-data-content'><%= @elicitationMethod?.name %></div>
-    </div>
-
-    <div class='form-tags'<%- @displayNoneStyle 'tags', @ %>>
-      <div class='form-secondary-data-label'>tags</div>
-      <div class='form-secondary-data-content'>
-        <% for tag in @tags: %>
-          <div class='form-tag'><%= tag.name %></div>
-        <% end %>
-      </div>
-    </div>
-
-    <% # FieldDB tags, an object in the `datumFields` whose `value` value is just a string. %>
-    <div class='form-fielddb-tags'<%- @displayNoneStyle 'fieldDBTags', @ %>>
-      <div class='form-secondary-data-label'>tags</div>
-      <div class='form-secondary-data-content'><%= @fieldDBTags %></div>
-    </div>
-
-    <div class='form-syntactic-category'<%- @displayNoneStyle 'syntacticCategory', @ %>>
-      <div class='form-secondary-data-label'>syntactic category</div>
-      <div class='form-secondary-data-content'><%= @syntacticCategory?.name %></div>
-    </div>
-
-    <% # Language: a default FieldDB field in `sessionFields` %>
-    <div class='form-language'
-      <%- @displayNoneStyle 'language', @ %>>
-      <div class='form-secondary-data-label'>language</div>
-      <div class='form-secondary-data-content'><%= @language %></div>
-    </div>
-
-    <% # Dialect: a default FieldDB field in `sessionFields` %>
-    <div class='form-dialect'
-      <%- @displayNoneStyle 'dialect', @ %>>
-      <div class='form-secondary-data-label'>dialect</div>
-      <div class='form-secondary-data-content'><%= @dialect %></div>
-    </div>
-
-    <div class='form-date-elicited'<%- @displayNoneStyle 'dateElicited', @ %>>
-      <div class='form-secondary-data-label'>elicited</div>
-      <div class='form-secondary-data-content dative-tooltip'
-        title='This form was elicited on <%= @humanDate @dateElicited %>'
-      ><%= @timeSince @dateElicited %></div>
-    </div>
-
-    <div class='form-speaker'<%- @displayNoneStyle 'speaker', @ %>>
-      <div class='form-secondary-data-label'>speaker</div>
-      <% speaker = if @speaker then "#{@speaker.firstName} #{@speaker.lastName}" else '' %>
-      <div class='form-secondary-data-content'><%= speaker %></div>
-    </div>
-
-    <% # Consultants: a default FieldDB field in `sessionFields` %>
-    <div class='form-consultants'
-      <%- @displayNoneStyle 'consultants', @ %>>
-      <div class='form-secondary-data-label'>consultants</div>
-      <div class='form-secondary-data-content'><%= @consultants %></div>
-    </div>
-
-    <div class='form-elicitor'<%- @displayNoneStyle 'elicitor', @ %>>
-      <div class='form-secondary-data-label'>elicitor</div>
-      <% elicitor = if @elicitor then "#{@elicitor.firstName} #{@elicitor.lastName}" else '' %>
-      <div class='form-secondary-data-content'><%= elicitor %></div>
-    </div>
-
-    <div class='form-enterer'<%- @displayNoneStyle 'enterer', @ %>>
-      <div class='form-secondary-data-label'>enterer</div>
-      <div class='form-secondary-data-content'>
-        <% if @enterer?.firstName and @enterer?.lastName: %>
-          <%= "#{@enterer.firstName} #{@enterer.lastName}" %>
-        <% else if @enterer?.username: %>
-          <%= @enterer.username %>
-        <% end %>
-      </div>
-    </div>
-
-    <div class='form-datetime-entered'<%- @displayNoneStyle 'datetimeEntered', @ %>>
-      <div class='form-secondary-data-label'>entered</div>
-      <div class='form-secondary-data-content dative-tooltip'
-        title='This form was entered on <%= @humanDatetime @datetimeEntered %>'
-      ><%= @timeSince @datetimeEntered %></div>
-    </div>
-
-    <div class='form-modifier'<%- @displayNoneStyle 'modifier', @ %>>
-      <div class='form-secondary-data-label'>modifier</div>
-      <div class='form-secondary-data-content'>
-        <% if @modifier?.firstName and @modifier?.lastName: %>
-          <%= "#{@modifier.firstName} #{@modifier.lastName}" %>
-        <% else if @modifier?.username: %>
-          <%= @modifier.username %>
-        <% end %>
-      </div>
-    </div>
-
-    <% # FieldDB `modifiedByUsers` from `datumFields` %>
-    <% # Oddly, there is always one modifier object (the first one) that has no %>
-    <% # I opt to avoid diplaying this one (hence the `[...-1]` below). %>
-    <% # @cesine: comments? %>
-    <% if @modifiers.length > 1: %>
-      <div class='form-modifiers'>
-        <div class='form-secondary-data-label'>modifiers</div>
-        <div class='form-secondary-data-content'>
-          <% for modifier in @modifiers.reverse()[...-1]: %>
-            <div class='form-fielddb-modifier'>
-              <span class='form-fielddb-modifier-username'
-                ><%= modifier.username %></span>
-              <% if modifier.timestamp: %>
-                <span class='form-fielddb-modifier-timestamp dative-tooltip'
-                  title='This modification was made on
-                  <%= @humanDatetime(new Date(modifier.timestamp)) %>'
-                  ><%= @timeSince(new Date(modifier.timestamp)) %></span>
-              <% end %>
-            </div>
-          <% end %>
-        </div>
-      </div>
+    <% for [attribute, displayer] in @h.old.oldFormSecondaryAttributes: %>
+      <%- @h.old[displayer] attribute, @ %>
     <% end %>
 
-    <div class='form-datetime-modified'<%- @displayNoneStyle 'datetimeModified', @ %>>
-      <div class='form-secondary-data-label'>last modified</div>
-      <div class='form-secondary-data-content dative-tooltip'
-        title='This form was last modified on <%= @humanDatetime @datetimeModified %>'
-        ><%= @timeSince @datetimeModified %></div>
-    </div>
+  <% else if @activeServerType is 'FieldDB': %>
 
-    <div class='form-verifier'<%- @displayNoneStyle 'verifier', @ %>>
-      <div class='form-secondary-data-label'>verifier</div>
-      <% verifier = if @verifier then "#{@verifier.firstName} #{@verifier.lastName}" else '' %>
-      <div class='form-secondary-data-content'><%= verifier %></div>
-    </div>
+    <% for [attribute, displayer] in @h.fieldDB.fieldDBFormSecondaryAttributes: %>
+      <%- @h.fieldDB[displayer] attribute, @ %>
+    <% end %>
 
-    <div class='form-source'<%- @displayNoneStyle 'source', @ %>>
-      <div class='form-secondary-data-label'>source</div>
-      <% source = if @source then "#{@source.author} (#{@source.year})" else '' %>
-      <div class='form-secondary-data-content'><%= source %></div>
-    </div>
+    <% for datumField in @datumFields: %>
+      <% if datumField.label not in @h.fieldDB.fieldDBAlreadyDisplayedFields: %>
+        <%- @h.fieldDB.fieldDBStringFieldDisplay datumField.label, @ %>
+      <% end %>
+    <% end %>
 
-    <div class='form-files'<%- @displayNoneStyle 'files', @ %>>
-      <div class='form-secondary-data-label'>files</div>
-      <div class='form-secondary-data-content'>
-        <% for file in @files: %>
-          <div class='form-file'><%= file.name %></div>
-        <% end %>
-      </div>
-    </div>
+    <%- @h.fieldDB.fieldDBStringFieldDisplay 'id', @ %>
 
-    <div class='form-collections'<%- @displayNoneStyle 'collections', @ %>>
-      <div class='form-secondary-data-label'>collections</div>
-      <div class='form-secondary-data-content'>
-        <% for collection in @collections: %>
-          <div class='form-file'><%= collection.title %></div>
-        <% end %>
-      </div>
-    </div>
+  <% end %>
 
-    <div class='form-syntactic-tree-ptb'<%- @displayNoneStyle 'syntacticTreePTB', @ %>>
-      <div class='form-secondary-data-label'>syntactic tree (PTB bracket)</div>
-      <div class='form-secondary-data-content'><%= @syntacticTreePTB %></div>
-    </div>
-
-    <div class='form-syntactic-tree-latex'<%- @displayNoneStyle 'syntacticTreeLaTeX', @ %>>
-      <div class='form-secondary-data-label'>syntactic tree (LaTeX Qtree)</div>
-      <div class='form-secondary-data-content'><%= @syntacticTreeLaTeX %></div>
-    </div>
-
-    <div class='form-semantics'<%- @displayNoneStyle 'semantics', @ %>>
-      <div class='form-secondary-data-label'>semantics</div>
-      <div class='form-secondary-data-content'><%= @semantics %></div>
-    </div>
-
-    <div class='form-status'<%- @displayNoneStyle 'status', @ %>>
-      <div class='form-secondary-data-label'>status</div>
-      <div class='form-secondary-data-content'><%= @status %></div>
-    </div>
-
-    <div class='form-uuid'<%- @displayNoneStyle 'UUID', @ %>>
-      <div class='form-secondary-data-label'>UUID</div>
-      <div class='form-secondary-data-content'><%= @UUID %></div>
-    </div>
-
-    <div class='form-id'>
-      <div class='form-secondary-data-label'>id</div>
-      <div class='form-secondary-data-content'><%= @id %></div>
-    </div>
-
-  </div>
+  </div> <% # End div.form-secondary-data %>
 
 </div>
 
