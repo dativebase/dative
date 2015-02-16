@@ -14,7 +14,10 @@
         <span class='form-range'></span>
         of
         <span class='form-count'></span>
-        (<span class='page-count'></span> <span class='page-count-noun'></span>)
+        (page
+        <span class='current-page'></span>
+        of
+        <span class='page-count'></span>)
       </div>
     </div>
 
@@ -32,16 +35,14 @@
         <i class='fa fa-fw fa-angle-double-up'></i>
       </button>
 
-      <!--
-      <button class="toggle-all-primary-data-labels dative-tooltip"
-        title="show all labels">
-        <i class='fa fa-columns fa-fw'></i>
-      </button>
-      -->
-
     </div>
 
     <div class='button-container-right'>
+
+      <button class="toggle-all-labels dative-tooltip"
+        title="form labels are off; click here to turn them on">labels:
+        <i class='fa fa-toggle-off fa-fw'></i>
+      </button>
 
       <button class='forms-browse-help dative-tooltip' title='help with browsing forms'>
         <i class='fa fa-fw fa-question'></i>

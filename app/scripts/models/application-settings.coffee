@@ -72,7 +72,6 @@ define [
     # Attempt to authenticate with the passed-in credentials
     authenticate: (username, password) ->
       if @get('activeServer')?.get('type') is 'FieldDB'
-        # @authenticateFieldDB username: username, password: password
         @authenticateFieldDBAuthService username: username, password: password
       else
         @authenticateOLD username: username, password: password
@@ -455,7 +454,10 @@ define [
       activeFieldDBCorpus: null
       activeFieldDBCorpusTitle: null
 
-      itemsPerPage: 10
+      formsDisplaySettings:
+        itemsPerPage: 10
+        primaryDataLabelsVisible: true
+        allFormsExpanded: false
 
       activeJQueryUITheme: 'cupertino'
       defaultJQueryUITheme: 'cupertino'
@@ -487,6 +489,72 @@ define [
       ]
 
       version: 'da'
+
+      # These objects control how particular FieldDB form (i.e., datum) fields
+      # are displayed.
+      fieldDBFormCategories:
+
+        fieldDBFormIGTAttributes: [
+          'utterance'
+          'morphemes'
+          'gloss'
+        ]
+
+        fieldDBFormSecondaryAttributes: [
+          'syntacticCategory'
+          'comments'
+          'tags'
+          'dateElicited'
+          'language'
+          'dialect'
+          'consultants'
+          'enteredByUser'
+          'dateEntered'
+          'modifiedByUser'
+          'dateModified'
+          'syntacticTreeLatex'
+          'validationStatus'
+        ]
+
+      # These objects are valuated by arrays that determine how OLD form fields
+      # are displayed.
+      oldFormCategories:
+
+        # IGT OLD Form Attributes.
+        oldFormIGTAttributes: [
+          'narrow_phonetic_transcription'
+          'phonetic_transcription'
+          'transcription'
+          'morpheme_break'
+          'morpheme_gloss'
+        ]
+
+        # Secondary OLD Form Attributes.
+        oldFormSecondaryAttributes: [
+          'syntactic_category_string'
+          'break_gloss_category'
+          'comments'
+          'speaker_comments'
+          'elicitation_method'
+          'tags'
+          'syntactic_category'
+          'date_elicited'
+          'speaker'
+          'elicitor'
+          'enterer'
+          'datetime_entered'
+          'modifier'
+          'datetime_modified'
+          'verifier'
+          'source'
+          'files'
+          'collections'
+          'syntax'
+          'semantics'
+          'status'
+          'UUID'
+          'id'
+        ]
 
 
   # Backbone-relational requires this when using CoffeeScript

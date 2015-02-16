@@ -34,6 +34,7 @@ define [
     template: formsTemplate
 
     initialize: (options) ->
+      @getGlobalsFormsDisplaySettings()
       @focusedElementIndex = null
       @formViews = [] # holds a FormView instance for each FormModel in FormsCollection
       @renderedFormViews = [] # references to the FormView instances that are rendered
@@ -47,10 +48,22 @@ define [
         serverType: ''
         serverName: ''
         fieldDBCorpusPouchname: ''
-      @paginator = new Paginator()
+      @paginator = new Paginator page=1, items=0, itemsPerPage=@itemsPerPage
       @paginationMenuTopView = new PaginationMenuTopView paginator: @paginator # This handles the UI for the items-per-page select, the first, prevous, next buttons, etc.
       @collection = new FormsCollection()
       @listenToEvents()
+
+    # Get the global Dative application settings relevant to displaying a form.
+    getGlobalsFormsDisplaySettings: ->
+      defaults =
+        itemsPerPage: 10
+        primaryDataLabelsVisible: false
+        allFormsExpanded: false
+      try
+        formsDisplaySettings = globals.applicationSettings.get 'formsDisplaySettings'
+        _.extend defaults, formsDisplaySettings
+      for key, value of defaults
+        @[key] = value
 
     events:
       'focus .dative-form-object, input, textarea, .ui-selectmenu-button, button':
@@ -59,6 +72,7 @@ define [
       'click .collapse-all': 'collapseAllForms'
       'click .new-form': 'showFormAddViewAnimate'
       'click .forms-browse-help': 'openFormsBrowseHelp'
+      'click .toggle-all-labels': 'toggleAllLabels'
       'keydown': 'keyboardShortcuts'
       # @$el is enclosed in top and bottom invisible divs. These allow us to
       # close-circuit the tab loop and keep focus in the view.
@@ -229,20 +243,110 @@ define [
       @focusLastFocusedElement()
       @scrollToFocusedInput()
 
+    # Toggle all primary data labels. Responds to `.toggle-all-labels` button.
+    toggleAllLabels: ->
+      if @primaryDataLabelsVisible
+        @hideAllLabels()
+      else
+        @showAllLabels()
+
+    # Tell all rendered forms to show their primary data labels. (Also tell
+    # all un-rendered form views to show their labels when they do render.)
+    showAllLabels: ->
+      @primaryDataLabelsVisible = true
+      @setToggleAllLabelsButtonStateOpen()
+      @tellFormSubviewsToShowLabels()
+      Backbone.trigger 'formsView:showAllLabels'
+
+    # Tell all rendered forms to hide their primary data labels. (Also tell
+    # all un-rendered form views to hide their labels when they do render.)
+    hideAllLabels: ->
+      @primaryDataLabelsVisible = false
+      @setToggleAllLabelsButtonStateClosed()
+      @tellFormSubviewsToHideLabels()
+      Backbone.trigger 'formsView:hideAllLabels'
+
+    # Make the "toggle all labels button" match view state.
+    setToggleAllLabelsButtonState: ->
+      if @primaryDataLabelsVisible
+        @setToggleAllLabelsButtonStateOpen()
+      else
+        @setToggleAllLabelsButtonStateClosed()
+
+    # Set "toggle all labels" button to state closed.
+    setToggleAllLabelsButtonStateClosed: ->
+      @$('.toggle-all-labels')
+        .find 'i.fa'
+          .removeClass 'fa-toggle-on'
+          .addClass 'fa-toggle-off'
+          .end()
+        .button()
+        .tooltip
+          items: 'button'
+          content: 'form labels are off; click here to turn them on'
+
+    # Set "toggle all labels" button to state open.
+    setToggleAllLabelsButtonStateOpen: ->
+      @$('.toggle-all-labels')
+        .find 'i.fa'
+          .removeClass 'fa-toggle-off'
+          .addClass 'fa-toggle-on'
+          .end()
+        .button()
+        .tooltip
+          items: 'button'
+          content: 'form labels are on; click here to turn them off'
+
     # Tell all rendered forms to expand themselves; listen for one notice of
     # expansion from a form view and respond by restoring the focus and scroll
-    # position.
+    # position. (Also tell all un-rendered form views to be expanded when they
+    # do render.)
     expandAllForms: ->
+      @allFormsExpanded = true
+      @tellFormSubviewsToBeExpanded()
       @listenToOnce Backbone, 'form:formExpanded', @restoreFocusAndScrollPosition
       Backbone.trigger 'formsView:expandAllForms'
 
     # Tell all rendered forms to collapse themselves; listen for one notice of
     # collapse from a form view and respond by restoring the focus and scroll
-    # position.
+    # position. (Also tell all un-rendered form views to be collapsed when they
+    # do render.)
     collapseAllForms: ->
+      @allFormsExpanded = false
+      @tellFormSubviewsToBeCollapsed()
       @focusEnclosingFormView()
       @listenToOnce Backbone, 'form:formCollapsed', @restoreFocusAndScrollPosition
       Backbone.trigger 'formsView:collapseAllForms'
+
+    # FieldDB form subviews all already exist, so we have to tell them to now be
+    # collapsed by default.
+    tellFormSubviewsToBeCollapsed: ->
+      if @getActiveServerType() is 'FieldDB'
+        for formView in @formViews
+          formView.expanded = false
+          formView.effectuateExpanded()
+
+    # FieldDB form subviews all already exist, so we have to tell them to now be
+    # expanded by default.
+    tellFormSubviewsToBeExpanded: ->
+      if @getActiveServerType() is 'FieldDB'
+        for formView in @formViews
+          formView.expanded = true
+          formView.effectuateExpanded()
+
+    # FieldDB form subviews all already exist, so we have to tell them to now
+    # hide their primary data labels by default.
+    tellFormSubviewsToHideLabels: ->
+      if @getActiveServerType() is 'FieldDB'
+        for formView in @formViews
+          formView.primaryDataLabelsVisible = false
+
+    # FieldDB form subviews all already exist, so we have to tell them to now
+    # show their primary data labels by default.
+    tellFormSubviewsToShowLabels: ->
+      if @getActiveServerType() is 'FieldDB'
+        for formView in @formViews
+          formView.primaryDataLabelsVisible = true
 
     # Sets focus to the FormView div that contains the focused control. This is
     # necessary so that we can restore scroll position after a collapse-all
@@ -409,6 +513,7 @@ define [
       @$('button.expand-all').button 'disable'
       @$('button.collapse-all').button 'disable'
       @$('button.new-form').button 'disable'
+      @$('button.toggle-all-labels').button 'disable'
 
     # Configure the header appropriately for the case where there are no
     # forms to browse.
@@ -419,6 +524,8 @@ define [
       @$('.pagination-info').hide()
       @$('button.expand-all').button 'disable'
       @$('button.collapse-all').button 'disable'
+      @$('button.toggle-all-labels').button 'disable'
+      @setToggleAllLabelsButtonState()
       @setFormAddViewButtonState()
 
     # Configure the header appropriately for the case where we have a page
@@ -428,19 +535,21 @@ define [
       @$('.pagination-info').show()
       @$('button.expand-all').button 'enable'
       @$('button.collapse-all').button 'enable'
+      @$('button.toggle-all-labels').button 'enable'
+      @setToggleAllLabelsButtonState()
       @setFormAddViewButtonState()
       if @paginator.start is @paginator.end
         @$('.form-range')
           .text "form #{@utils.integerWithCommas(@paginator.start + 1)}"
       else
-        @$('.form-range').text ["forms",
-          "#{@utils.integerWithCommas(@paginator.start + 1)}",
-          "to",
-          "#{@utils.integerWithCommas(@paginator.end + 1)}"].join ' '
+        @$('.form-range').text "forms
+          #{@utils.integerWithCommas(@paginator.start + 1)}
+          to
+          #{@utils.integerWithCommas(@paginator.end + 1)}"
       @$('.form-count').text @utils.integerWithCommas(@paginator.items)
       @$('.form-count-noun').text @utils.pluralizeByNum('form', @paginator.items)
+      @$('.current-page').text @utils.integerWithCommas(@paginator.page)
       @$('.page-count').text @utils.integerWithCommas(@paginator.pages)
-      @$('.page-count-noun').text @utils.pluralizeByNum('page', @paginator.pages)
 
     # Tell the pagination menu top view to re-render itself given the current
     # state of the paginator.
@@ -493,8 +602,10 @@ define [
       if @getActiveServerType() is 'OLD'
         @formViews = []
       @collection.each (formModel) =>
-        newFormView = new FormView model: formModel
-        #@formViews.unshift newFormView
+        newFormView = new FormView
+          model: formModel
+          primaryDataLabelsVisible: @primaryDataLabelsVisible
+          expanded: @allFormsExpanded
         @formViews.push newFormView
 
     spinnerOptions: ->
@@ -554,6 +665,13 @@ define [
         .tooltip
           position:
             my: "left+10 center"
+            at: "right center"
+            collision: "flipfit"
+      @$('button.toggle-all-labels')
+        .button()
+        .tooltip
+          position:
+            my: "left+45 center"
             at: "right center"
             collision: "flipfit"
 
@@ -624,6 +742,8 @@ define [
     ############################################################################
 
     changeItemsPerPage: (newItemsPerPage) ->
+      Backbone.trigger 'formsView:itemsPerPageChange', newItemsPerPage
+      @itemsPerPage = newItemsPerPage
       itemsDisplayedBefore = @paginator.itemsDisplayed
       @paginator.setItemsPerPage newItemsPerPage
       itemsDisplayedAfter = @paginator.itemsDisplayed

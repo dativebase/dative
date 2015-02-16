@@ -231,9 +231,9 @@ define [
       activeFieldDBCorpusTitle = globals
         .applicationSettings?.get? 'activeFieldDBCorpusTitle'
       activeServerName = globals
-        .applicationSettings?.get?('activeServer').get? 'name'
+        .applicationSettings?.get?('activeServer')?.get? 'name'
       activeServerType = globals
-        .applicationSettings?.get?('activeServer').get? 'type'
+        .applicationSettings?.get?('activeServer')?.get? 'type'
       loggedIn = globals
         .applicationSettings?.get? 'loggedIn'
       text = null
@@ -251,7 +251,10 @@ define [
               “#{activeServerName}” but have not yet activated a corpus"
         else
           title = "The active server is “#{activeServerName}”"
-      if text
+      else
+        text = ''
+        title = ''
+      if text?
         @$('.active-corpus-name')
           .text text
           .attr 'title', title

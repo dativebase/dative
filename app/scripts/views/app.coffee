@@ -88,6 +88,11 @@ define [
       @listenTo Backbone, 'logout:success', @logoutSuccess
       @listenTo Backbone, 'useFieldDBCorpus', @useFieldDBCorpus
       @listenTo Backbone, 'applicationSettings:changeTheme', @changeTheme
+      @listenTo Backbone, 'formsView:expandAllForms', @setAllFormsExpanded
+      @listenTo Backbone, 'formsView:collapseAllForms', @setAllFormsCollapsed
+      @listenTo Backbone, 'formsView:itemsPerPageChange', @setItemsPerPage
+      @listenTo Backbone, 'formsView:hideAllLabels', @setPrimaryDataLabelsHidden
+      @listenTo Backbone, 'formsView:showAllLabels', @setPrimaryDataLabelsVisible
 
     initializePersistentSubviews: ->
       @mainMenuView = new MainMenuView model: @applicationSettings
@@ -480,4 +485,36 @@ define [
       #       }
       #       });
       #   });
+
+
+    ############################################################################
+    # Persist application settings.
+    ############################################################################
+
+    # Change `attribute` to `value` in applicationSettings.formsDisplaySettings.
+    changeFormsDisplaySetting: (attribute, value) ->
+      try
+        formsDisplaySettings = @applicationSettings.get 'formsDisplaySettings'
+        formsDisplaySettings[attribute] = value
+        @applicationSettings.save 'formsDisplaySettings', formsDisplaySettings
+
+    # Set app settings' "all forms expanded" to true.
+    setAllFormsExpanded: ->
+      @changeFormsDisplaySetting 'allFormsExpanded', true
+
+    # Set app settings' "all forms expanded" to false.
+    setAllFormsCollapsed: ->
+      @changeFormsDisplaySetting 'allFormsExpanded', false
+
+    # Persist the new "items per page" to app settings.
+    setItemsPerPage: (newItemsPerPage) ->
+      @changeFormsDisplaySetting 'itemsPerPage', newItemsPerPage
+
+    # Set app settings' "primary data labels visible" to false.
+    setPrimaryDataLabelsHidden: ->
+      @changeFormsDisplaySetting 'primaryDataLabelsVisible', false
+
+    # Set app settings' "primary data labels visible" to true.
+    setPrimaryDataLabelsVisible: ->
+      @changeFormsDisplaySetting 'primaryDataLabelsVisible', true
 

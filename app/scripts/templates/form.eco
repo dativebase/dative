@@ -13,8 +13,8 @@
     </button>
 
     <button class="toggle-primary-data-labels dative-tooltip"
-      title="show labels">
-      <i class='fa fa-columns fa-fw'></i>
+      title="show labels">labels:
+      <i class='fa fa-toggle-off fa-fw'></i>
     </button>
 
   </div>
@@ -68,14 +68,14 @@
 
       <% if @activeServerType is 'OLD': %>
 
-        <% for [attribute, displayer] in @h.old.oldFormIGTAttributes: %>
-          <%- @h.old[displayer] attribute, @ %>
+        <% for attribute in @h.old.getOLDFormIGTAttributes(): %>
+          <%- @h.old.getOLDFormAttributeDisplayer(attribute) attribute, @ %>
         <% end %>
 
       <% else if @activeServerType is 'FieldDB': %>
 
-        <% for [attribute, displayer] in @h.fieldDB.fieldDBFormIGTAttributes: %>
-          <%- @h.fieldDB[displayer] attribute, @ %>
+        <% for attribute in @h.fieldDB.getFieldDBFormIGTAttributes(): %>
+          <%- @h.fieldDB.getFieldDBFormAttributeDisplayer(attribute) attribute, @ %>
         <% end %>
 
       <% end %>
@@ -86,31 +86,11 @@
 
       <% if @activeServerType is 'OLD': %>
 
-        <% if @translations.length: %>
-          <div class='form-translations'>
-            <div class='form-translations-data-label dative-tooltip'
-              title="<%= @h.tooltips('old.formAttributes.translations')() %>"
-              >translations</div>
-            <div class='form-translations-data-content'>
-              <% for translation in @translations: %>
-                <span class='translation-grammaticality'
-                  ><%= translation.grammaticality %></span>
-                <span class='translation-transcription'
-                  ><%= translation.transcription %></span>
-              <% end %>
-            </div>
-          </div>
-        <% end %>
+        <%- @h.old.getOLDFormAttributeDisplayer('translations') 'translations', @ %>
 
       <% else if @activeServerType is 'FieldDB': %>
 
-        <% translation = @h.fieldDB.getDatumFieldValue @datumFields, 'translation' %>
-        <div class='form-translation' <%= @h.displayNoneStyle translation %>>
-          <div class='form-translation-data-label dative-tooltip'
-            title="<%= @h.fieldDB.getFieldDBTooltip 'translation', @ %>"
-            >translation</div>
-          <div class='form-translation-data-content'><%= translation %></div>
-        </div>
+        <%- @h.fieldDB.getFieldDBFormAttributeDisplayer('translation') 'translation', @ %>
 
       <% end %>
 
@@ -123,14 +103,14 @@
 
   <% if @activeServerType is 'OLD': %>
 
-    <% for [attribute, displayer] in @h.old.oldFormSecondaryAttributes: %>
-      <%- @h.old[displayer] attribute, @ %>
+    <% for attribute in @h.old.getOLDFormSecondaryAttributes(): %>
+      <%- @h.old.getOLDFormAttributeDisplayer(attribute) attribute, @ %>
     <% end %>
 
   <% else if @activeServerType is 'FieldDB': %>
 
-    <% for [attribute, displayer] in @h.fieldDB.fieldDBFormSecondaryAttributes: %>
-      <%- @h.fieldDB[displayer] attribute, @ %>
+    <% for attribute in @h.fieldDB.getFieldDBFormSecondaryAttributes() : %>
+      <%- @h.fieldDB.getFieldDBFormAttributeDisplayer(attribute) attribute, @ %>
     <% end %>
 
     <% for datumField in @datumFields: %>

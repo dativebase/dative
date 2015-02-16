@@ -123,7 +123,6 @@ define (require) ->
 
   # Takes a Date instance and returns a string indicating how long ago it was from now.
   timeSince = (dateObject) ->
-    console.log "In timeSince with something of type #{type dateObject}"
     dateObject = asDateObject dateObject
     if type(dateObject) in ['string', 'null'] then return dateObject
     try
