@@ -866,82 +866,8 @@ define [
     getFieldDBSecondaryFieldContentDiv: (attribute, context, contentCallback) =>
       @getFieldDBFieldContentDiv attribute, context, contentCallback, 'secondary'
 
-    # Get the tooltip for a FieldDB datum field. This is the value of `help` as
-    # supplied by FieldDB, if present; otherwise it's the relevant tooltip (if
-    # any) defined in the `tooltips` module.
-    getFieldDBAttributeTooltip: (attribute, context) =>
-      help = @getFieldDBDatumHelp context, attribute
-      if help and attribute isnt 'dateElicited'
-        help
-      else
-        value = @getFieldDBDatumValue context, attribute
-        tooltips("fieldDB.formAttributes.#{attribute}")(
-          language: 'eng'
-          value: value
-        )
-
-    # Get the value corresponding to the passed-in FieldDB `attribute`.
-    # `datumObject` is `@model.toJSON()`. This abstracts away the idiosyncratic
-    # way in which fieldDB datum data are stored.
-    # WARN: this is potentially problematic since it makes assumptions about
-    # an attribute's location based on its form/name.. That is, if a user defines
-    # a datumField with the label "comments" it will not be displayed since the
-    # top-level "comments" attribute will be returned instead.
-    # NOTE: `getDatumFieldValue` and `getSessionFieldValue` are defined in
-    # views/base.coffee because `form-add-widget.coffee` uses them too.
-    getFieldDBDatumValue: (datumObject, attribute) ->
-      if attribute in @fieldDBDirectAttributes
-        datumObject[attribute]
-      else if attribute in @fieldDBSessionFieldAttributes
-        @getSessionFieldValue datumObject.session.sessionFields, attribute
-      else if attribute is 'modifiedByUser'
-        modifiedByUser = @getDatumField datumObject.datumFields, attribute
-        try
-          modifiedByUser.users
-        catch
-          modifiedByUser
-      else
-        @getDatumFieldValue datumObject.datumFields, attribute
-
-    # Get the `help` value of a FieldDB datum field or session field, if exists.
-    getFieldDBDatumHelp: (datumObject, attribute) ->
-      try
-        if attribute in @fieldDBSessionFieldAttributes
-          @getSessionFieldHelp datumObject.session.sessionFields, attribute
-        else
-          @getDatumFieldHelp datumObject.datumFields, attribute
-      catch
-        null
-
     # TODO/QUESTION: should the `title` of the session that a datum/form
     # belongs to be displayed among the form's secondary attributes?
-
-    # FieldDB direct attributes, i.e., those not in `datumFields` or `session`.
-    # NOTE: these are only the attributes that I consider to be relevant to the
-    # form display. See model/form.coffee for more details.
-    fieldDBDirectAttributes: [
-      'id'
-      'audioVideo'
-      'comments'
-      'dateEntered'
-      'dateModified'
-      'datumTags'
-      'images'
-      'timestamp'
-    ]
-
-    # Attributes of a FieldDB datum's `session.sessionFields` array.
-    # NOTE: these are only the attributes that I consider to be relevant to the
-    # form display.
-    fieldDBSessionFieldAttributes: [
-      'goal'
-      'consultants'
-      'dialect'
-      'language'
-      'dateElicited'
-      'user'
-      'dateSEntered'
-    ]
 
     # Utterance with Judgement Field.
     fieldDBUtteranceJudgementFieldDisplay: (attribute, context) =>
@@ -1021,30 +947,6 @@ define [
       try
         globals.applicationSettings
           .get('oldFormCategories').oldFormIGTAttributes
-      catch
-        []
-
-    # Get Secondary FieldDB Form Attributes.
-    # The returned array defines the order of how the secondary attributes are
-    # displayed. It is defined in models/application-settings because it should
-    # ultimately be user-configurable.
-    # QUESTION: @cesine: how is the elicitor of a FieldDB datum/session
-    # documented?
-    getFieldDBFormSecondaryAttributes: ->
-      try
-        globals.applicationSettings
-          .get('fieldDBFormCategories').fieldDBFormSecondaryAttributes
-      catch
-        []
-
-    # Get IGT FieldDB Form Attributes.
-    # The returned array defines the "IGT" attributes of a FieldDB form (along
-    # with their order). These are those that will be aligned into columns of
-    # one word each.
-    getFieldDBFormIGTAttributes: ->
-      try
-        globals.applicationSettings
-          .get('fieldDBFormCategories').fieldDBFormIGTAttributes
       catch
         []
 

@@ -33,6 +33,7 @@ define [
     # keys.
     # TODO: at least some of this should be in application settings (and saved
     # to server...)
+    # TODO: deprecate this.
     setDatumFieldsArray: ->
       @primaryDatumFields = [
         'judgement'
@@ -122,6 +123,91 @@ define [
         primaryFields
         (field) => @primaryDatumFields.indexOf(field.label))
 
+    # FOX
+    # @h.getPrimaryDatumFields @datumFields: %>
+    #
+    # @getFieldDBFormIGTAttributes()
+    # @getFieldDBFormTranslationAttributes()
+    # @getFieldDBFormSecondaryAttributes()
+
+    # Return an "input generator" (a method that generates data input HTML,
+    # e.g., an input[type=text]) for a FieldDB form attribute.
+    getFieldDBFormAttributeInputGenerator: (attribute) =>
+      if attribute of @fieldDBFormAttribute2InputGenerator
+        @[@fieldDBFormAttribute2InputGenerator[attribute]]
+      else
+        @fieldDBTextareaInputGenerator
+
+    # Map FieldDB form attributes to input generator method names.
+    fieldDBFormAttribute2InputGenerator:
+      'utterance':          'fieldDBUtteranceJudgementInputGenerator'
+      'comments':           'fieldDBCommentsInputGenerator' # direct Datum attribute
+
+    fieldDBGenericInputGenerator: (attribute, context, inputCallback) =>
+      "#{@getFieldDBInputLabel attribute, context}
+       #{inputCallback attribute, context}"
+
+    getFieldDBInputLabel: (attribute, context) =>
+      "<label for='#{@utils.camel2hyphen attribute}'
+        >#{@utils.camel2regular attribute}</label>"
+
+    # Textarea input generator; the default input for FieldDB fields.
+    fieldDBTextareaInputGenerator: (attribute, context) =>
+      inputCallback = (attribute, context) =>
+        tooltip = @getFieldDBAttributeTooltip attribute, context
+        value = @getFieldDBDatumValue context, attribute
+        "<textarea rows='1' name='#{@utils.camel2hyphen attribute}'
+          class='#{@utils.camel2hyphen attribute} ui-corner-all form-add-input dative-tooltip'
+          title='#{tooltip}'
+          >#{value}</textarea>"
+      @fieldDBGenericInputGenerator attribute, context, inputCallback
+
+    # Textarea input generator; the default input for FieldDB fields.
+    fieldDBTranslationInputGenerator: (attribute, context) =>
+      inputCallback = (attribute, context) =>
+        tooltip = @getFieldDBAttributeTooltip attribute, context
+        value = @getFieldDBDatumValue context, attribute
+        "<textarea rows='1' name='#{@utils.camel2hyphen attribute}'
+          class='#{@utils.camel2hyphen attribute} singular-translation
+            ui-corner-all form-add-input dative-tooltip'
+          title='#{tooltip}'
+          >#{value}</textarea>"
+      @fieldDBGenericInputGenerator attribute, context, inputCallback
+
+    # Judgement Input & Utterance Textarea.
+    fieldDBUtteranceJudgementInputGenerator: (attribute, context) =>
+      inputCallback = (attribute, context) =>
+        "#{@fieldDBJudgementInputGenerator context}
+         #{@fieldDBUtteranceInputGenerator attribute, context}"
+      @fieldDBGenericInputGenerator attribute, context, inputCallback
+
+    # Utterance Textarea. TODO: make this different from
+    # fieldDBTextareaInputGenerator in terms of a class that reduces the
+    # textarea's width.
+    fieldDBUtteranceInputGenerator: (attribute, context) =>
+      tooltip = @getFieldDBAttributeTooltip attribute, context
+      value = @getFieldDBDatumValue context, attribute
+      "<textarea rows='1' name='#{@utils.camel2hyphen attribute}'
+        class='#{@utils.camel2hyphen attribute} ui-corner-all form-add-input dative-tooltip'
+        title='#{tooltip}'
+        >#{value}</textarea>"
+
+    # Judgement Input.
+    fieldDBJudgementInputGenerator: (context) =>
+      value = @getFieldDBDatumValue context, 'judgement'
+      tooltip = @getFieldDBAttributeTooltip 'judgement', context
+      "<input name='judgement'
+        type='text'
+        class='judgement ui-corner-all dative-tooltip form-add-input'
+        title='#{tooltip}'
+        value='#{value}' />"
+
+    fieldDBCommentsInputGenerator: (attribute, context) =>
+      inputCallback = (attribute, context) =>
+        # context[attribute]
+        'fieldDB comments go here'
+      @fieldDBGenericInputGenerator attribute, context, inputCallback
+
     getSecondaryDatumFields: (datumFields) =>
       secondaryFields = (field for field in datumFields \
         when field.label not in @primaryDatumFields.concat @autopopulatedDatumFields)
@@ -136,6 +222,17 @@ define [
         options: @fakeFormAddOptions # TODO: fetch real data from server (or provide defaults?)
         activeServerType: @getActiveServerType()
         h: # "h" for "helpers"
+          fieldDB:
+            getFieldDBFormAttributeInputGenerator:
+              @getFieldDBFormAttributeInputGenerator
+            getFieldDBFormIGTAttributes: @getFieldDBFormIGTAttributes
+            getFieldDBFormTranslationAttributes:
+              @getFieldDBFormTranslationAttributes
+            getFieldDBFormSecondaryAttributes:
+              @getFieldDBFormSecondaryAttributes
+            getFieldDBFormReadOnlyAttributes:
+              @getFieldDBFormReadOnlyAttributes
+            getFieldDBFormAttributes: @getFieldDBFormAttributes
           getDatumFields: @getDatumFields
           getDatumFieldValue: @getDatumFieldValue
           datumFieldsHasValue: @datumFieldsHasValue
@@ -144,6 +241,24 @@ define [
           getDatumFieldLabel: @getDatumFieldLabel
       })
       @$el.html @template(context)
+
+    # @getFieldDBFormIGTAttributes()
+    # @getFieldDBFormTranslationAttributes()
+    # @getFieldDBFormSecondaryAttributes()
+
+    # Return an "input generator" (a method that generates data input HTML,
+    # e.g., an input[type=text]) for a FieldDB form attribute.
+    getFieldDBFormAttributeInputGenerator: (attribute) =>
+      if attribute of @fieldDBFormAttribute2InputGenerator
+        @[@fieldDBFormAttribute2InputGenerator[attribute]]
+      else
+        @fieldDBTextareaInputGenerator
+
+    # Map FieldDB form attributes to input generator method names.
+    fieldDBFormAttribute2InputGenerator:
+      'utterance':          'fieldDBUtteranceJudgementInputGenerator'
+      'comments':           'fieldDBCommentsInputGenerator' # direct Datum attribute
+      'translation':        'fieldDBTranslationInputGenerator'
 
     ############################################################################
     # jQuery (UI) GUI stuff.

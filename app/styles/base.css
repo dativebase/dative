@@ -245,6 +245,8 @@ div.dative-page-header-title
 
 .dative-pagin-item-index-cell {
     min-width: 5em;
+    vertical-align: top;
+    padding-top: 1em;
 }
 
 .dative-pagin-item-content {
@@ -434,10 +436,17 @@ div.form-add-form ul.fieldset label,
     display: inline-block;
 }
 
-.fieldset select.grammaticality
+.fieldset select.grammaticality,
+.fieldset input.judgement
 {
   width: 2.2em;
 }
+
+.fieldset input.judgement
+{
+  vertical-align: top;
+}
+
 
 .dative-form-object:not(.expanded):focus,
 .ui-selectmenu-button:focus,
@@ -528,12 +537,16 @@ div.ui-selectmenu-menu li a {
     font-size: 12px;
 }
 
-ul.fieldset textarea.transcription {
+ul.fieldset textarea.utterance,
+ul.fieldset textarea.transcription
+{
     width: 473px;
     max-width: 473px;
     min-width: 473px;
 }
-ul.fieldset textarea.translation {
+
+ul.fieldset textarea.translation:not(.singular-translation)
+{
     width: 441px;
     max-width: 441px;
     min-width: 441px;
@@ -542,14 +555,16 @@ ul.fieldset textarea.translation {
 ul.fieldset select,
 ul.fieldset input,
 ul.fieldset textarea,
-ul.fieldset button.ui-multiselect {
+ul.fieldset button.ui-multiselect
+{
     font-family: inherit;
     font-size: 12px;
 }
 
 ul.fieldset a.grammaticality,
 ul.fieldset a.ui-selectmenu,
-ul.fieldset button.ui-multiselect {
+ul.fieldset button.ui-multiselect
+{
     height: 29px;
     font-size: 13px;
 }

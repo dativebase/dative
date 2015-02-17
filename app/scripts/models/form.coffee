@@ -473,6 +473,7 @@ define [
 
     ############################################################################
     # FieldDB-to-Dative Schema stuff
+    # TODO: deprecate/remove this
     ############################################################################
 
     # FieldDb to Dative: input: a FieldDB datum object, output: a Dative form model
@@ -663,6 +664,7 @@ define [
 
     ############################################################################
     # OLD-to-Dative Schema stuff
+    # TODO: deprecate/remove this
     ############################################################################
 
     old2dative: (oldForm) ->
@@ -834,12 +836,10 @@ define [
         url: "#{@getOLDURL()}/forms/new"
         onload: (responseJSON) =>
           Backbone.trigger 'getOLDNewFormDataEnd'
-          # console.log JSON.stringify(responseJSON, undefined, 2)
           Backbone.trigger 'getOLDNewFormDataSuccess', responseJSON
           # TODO: trigger FAIL event if appropriate (how do we know?)
           # Backbone.trigger 'getOLDNewFormDataFail',
           #     "Failed in fetching the data."
-          # console.log "GET request to OLD server for /forms/new failed"
         onerror: (responseJSON) =>
           Backbone.trigger 'getOLDNewFormDataEnd'
           Backbone.trigger 'getOLDNewFormDataFail',

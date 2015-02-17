@@ -491,13 +491,25 @@ define [
       version: 'da'
 
       # These objects control how particular FieldDB form (i.e., datum) fields
-      # are displayed.
+      # are displayed. Note that FieldDB datumFields can be arbitrarily defined
+      # by users so these fields may not all be present. This simply causes these
+      # fields to be ordered (in both display and input views) as shown here,
+      # if the fields exist. This will need to be made user-configurable and
+      # corpus-specific in the future.
       fieldDBFormCategories:
+
+        fieldDBFormGrammaticalityAttributes: [
+          'judgement'
+        ]
 
         fieldDBFormIGTAttributes: [
           'utterance'
           'morphemes'
           'gloss'
+        ]
+
+        fieldDBFormTranslationAttributes: [
+          'translation'
         ]
 
         fieldDBFormSecondaryAttributes: [
@@ -516,8 +528,16 @@ define [
           'validationStatus'
         ]
 
+        fieldDBFormReadOnlyAttributes: [
+          'enteredByUser'
+          'dateEntered'
+          'modifiedByUser'
+          'dateModified'
+        ]
+
       # These objects are valuated by arrays that determine how OLD form fields
-      # are displayed.
+      # are displayed. Note that the OLD case is simpler than the FieldDB one
+      # since the OLD data structure is (at present) fixed.
       oldFormCategories:
 
         # IGT OLD Form Attributes.
@@ -527,6 +547,12 @@ define [
           'transcription'
           'morpheme_break'
           'morpheme_gloss'
+        ]
+
+        # Note: this is currently not being used (just being consistent with
+        # FieldDB above.)
+        oldFormTranslationAttributes: [
+          'translations'
         ]
 
         # Secondary OLD Form Attributes.

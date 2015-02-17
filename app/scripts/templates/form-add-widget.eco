@@ -28,7 +28,14 @@
 
 <div class="dative-widget-body">
 
-  <div class="form-add-form">
+  <% if @activeServerType is 'OLD': %>
+    <% class_ = ' old' %>
+  <% else if @activeServerType is 'FieldDB': %>
+    <% class_ = ' fielddb' %>
+  <% else: %>
+    <% class_ = '' %>
+  <% end %>
+  <div class="form-add-form<%= class_ %>">
 
     <ul class="fieldset igt-data">
 
@@ -157,36 +164,16 @@
 
       <% # BEGIN FIELDDB CASE %>
 
-        <!-- COMMENTED OUT FOR NOW: JUST USING GENERIC TEXTAREAS FOR ALL PRIMARY DATUM FIELDS FOR NOW.
-        <li>
-
-          <label for="utterance">Utterance</label>
-
-          <input type="text" name="judgement" class="judgement"
-            title="The judgement or pragmatic acceptibility judgment of the form"
-            value="<%= @h.getDatumFieldValue @datumFields, 'judgement' %>" />
-
-          <textarea rows="1" name="transcription"
-            class="transcription ui-corner-all form-add-input dative-tooltip"
-            title="A transcription of the form (probably orthographic)"
-            ><%= @h.getDatumFieldValue @datumFields, 'utterance' %></textarea>
-
-        </li>
-        -->
-
-        <% for field in @h.getPrimaryDatumFields @datumFields: %>
-
+        <% for attribute in @h.fieldDB.getFieldDBFormIGTAttributes(): %>
           <li>
-
-            <label for="<%= field.label %>"><%= @h.getDatumFieldLabel field %></label>
-
-            <textarea name="<%= field.label %>"
-              class="ui-corner-all dative-tooltip"
-              title="<%= field.help %>"
-              ><%= field.value %></textarea>
-
+            <%- @h.fieldDB.getFieldDBFormAttributeInputGenerator(attribute) attribute, @ %>
           </li>
+        <% end %>
 
+        <% for attribute in @h.fieldDB.getFieldDBFormTranslationAttributes(): %>
+          <li>
+            <%- @h.fieldDB.getFieldDBFormAttributeInputGenerator(attribute) attribute, @ %>
+          </li>
         <% end %>
 
       <% end %>
@@ -309,13 +296,35 @@
       <% else if @activeServerType is 'FieldDB': %>
       <% # BEGIN FIELDDB CASE %>
 
-        <% for field in @h.getSecondaryDatumFields @datumFields: %>
+        <% datumFieldLabels = (field.label for field in @datumFields) %>
+        <% secondaryLabels = @h.fieldDB.getFieldDBFormSecondaryAttributes() %>
+        <% readOnlyLabels = @h.fieldDB.getFieldDBFormReadOnlyAttributes() %>
+        <% igtLabels = @h.fieldDB.getFieldDBFormIGTAttributes() %>
+        <% grammaticalityLabels = @h.fieldDB.getFieldDBFormAttributes 'fieldDBFormGrammaticalityAttributes' %>
+        <% console.log 'grammaticalityLabels' %>
+        <% console.log grammaticalityLabels %>
+        <% translationLabels = @h.fieldDB.getFieldDBFormTranslationAttributes() %>
+        <% x = secondaryLabels.concat readOnlyLabels, igtLabels, grammaticalityLabels, translationLabels %>
+        <% console.log 'What we don\'t want' %>
+        <% console.log x %>
+        <% otherSecondaryLabels = (label for label in datumFieldLabels when label not in x) %>
+        <% console.log 'What we got' %>
+        <% console.log otherSecondaryLabels %>
+
+
+        <% for attribute in secondaryLabels: %>
+          <% if attribute in datumFieldLabels and attribute not in readOnlyLabels: %>
+            <li>
+              <% inputGenerator = @h.fieldDB.getFieldDBFormAttributeInputGenerator attribute %>
+              <%- inputGenerator attribute, @ %>
+            </li>
+          <% end %>
+        <% end %>
+
+        <% for attribute in otherSecondaryLabels: %>
           <li>
-            <label for="<%= field.label %>"><%= @h.getDatumFieldLabel field %></label>
-            <textarea name="<%= field.label %>"
-              class="ui-corner-all dative-tooltip"
-              title="<%= field.help %>"
-              ><%= field.value %></textarea>
+            <% inputGenerator = @h.fieldDB.getFieldDBFormAttributeInputGenerator attribute %>
+            <%- inputGenerator attribute, @ %>
           </li>
         <% end %>
 
@@ -325,7 +334,6 @@
       </ul>
 
     </div> <% # END div.secondary-data %>
-
 
     <ul class="fieldset button-only-fieldset">
       <li class="center">

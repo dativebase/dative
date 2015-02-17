@@ -3,8 +3,9 @@ define [
   'jquery'
   './../utils/utils'
   './../utils/globals'
+  './../utils/tooltips'
   'jqueryuicolors'
-], (Backbone, $, utils, globals) ->
+], (Backbone, $, utils, globals, tooltips) ->
 
   # Base View
   # --------------
@@ -278,8 +279,6 @@ define [
         else
           pxVal
       catch e
-        console.log "exception with #{pxVal}"
-        console.log e
         pxVal
 
     # When a widget's body is CLOSED, its header SHOULD have rounded bottom
@@ -333,7 +332,7 @@ define [
     getDatumFieldValue: (datumFields, label) ->
       try
         _.findWhere(datumFields, label: label).value
-      catch
+      catch e
         undefined
 
     # Get the `help` value of the first object in `datumFields`
@@ -387,8 +386,142 @@ define [
 
     # Return a nice user-facing label for a datum field. I.e., no snakeCase nonsense.
     getDatumFieldLabel: (field) ->
-      if field.labelFieldLinguists
+      if field?.labelFieldLinguists
         utils.camel2regular field.labelFieldLinguists
-      else
+      else if field?.label
         utils.camel2regular field.label
+      else
+        null
+
+    # Get FieldDB form attributes category array.
+    # The returned array defines the category of type `category` for FieldDB
+    # forms. It is defined in models/application-settings because it should
+    # ultimately be user-configurable.
+    getFieldDBFormAttributes: (category) =>
+      try
+        globals.applicationSettings
+          .get('fieldDBFormCategories')[category]
+      catch
+        []
+
+    getFieldDBFormReadOnlyAttributes: =>
+      @getFieldDBFormAttributes 'fieldDBFormReadOnlyAttributes'
+
+    # Get FieldDB secondary form attributes.
+    # The returned array defines the order of how the secondary attributes are
+    # displayed. It is defined in models/application-settings because it should
+    # ultimately be user-configurable.
+    # QUESTION: @cesine: how is the elicitor of a FieldDB datum/session
+    # documented?
+    getFieldDBFormSecondaryAttributes: =>
+      @getFieldDBFormAttributes 'fieldDBFormSecondaryAttributes'
+
+    # Get FieldDB IGT form attributes.
+    # The returned array defines the "IGT" attributes of a FieldDB form (along
+    # with their order). These are those that will be aligned into columns of
+    # one word each when displayed in an IGT view.
+    getFieldDBFormIGTAttributes: =>
+      @getFieldDBFormAttributes 'fieldDBFormIGTAttributes'
+
+    # Get FieldDB translation form attributes.
+    getFieldDBFormTranslationAttributes: =>
+      @getFieldDBFormAttributes 'fieldDBFormTranslationAttributes'
+
+    # Get the tooltip for a FieldDB datum field. This is the value of `help` as
+    # supplied by FieldDB, if present; otherwise it's the relevant tooltip (if
+    # any) defined in the `tooltips` module.
+    getFieldDBAttributeTooltip: (attribute, context) =>
+      help = @getFieldDBDatumHelp context, attribute
+      if help and attribute isnt 'dateElicited'
+        help
+      else
+        value = @getFieldDBDatumValue context, attribute
+        tooltips("fieldDB.formAttributes.#{attribute}")(
+          language: 'eng'
+          value: value
+        )
+
+    # Get the `help` value of a FieldDB datum field or session field, if exists.
+    getFieldDBDatumHelp: (datumObject, attribute) ->
+      try
+        if attribute in @fieldDBSessionFieldAttributes
+          @getSessionFieldHelp datumObject.session.sessionFields, attribute
+        else
+          @getDatumFieldHelp datumObject.datumFields, attribute
+      catch
+        null
+
+    # Get the value corresponding to the passed-in FieldDB `attribute`.
+    # `datumObject` is `@model.toJSON()`. This abstracts away the idiosyncratic
+    # way in which fieldDB datum data are stored.
+    # WARN: this is potentially problematic since it makes assumptions about
+    # an attribute's location based on its form/name.. That is, if a user defines
+    # a datumField with the label "comments" it will not be displayed since the
+    # top-level "comments" attribute will be returned instead.
+    # NOTE: `getDatumFieldValue` and `getSessionFieldValue` are defined in
+    # views/base.coffee because `form-add-widget.coffee` uses them too.
+    # getSessionFieldValue
+    # getDatumField
+    # getDatumFieldValue
+    # fieldDBDirectAttributes
+    # fieldDBSessionFieldAttributes
+    getFieldDBDatumValue: (datumObject, attribute) =>
+      if attribute in @fieldDBDirectAttributes
+        type_ = 'direct attribute'
+        x = datumObject[attribute]
+      else if attribute in @fieldDBSessionFieldAttributes
+        type_ = 'session field'
+        try
+          x = @getSessionFieldValue datumObject.session.sessionFields, attribute
+        catch e
+          x = 'fuck you'
+      else if attribute is 'modifiedByUser'
+        type_ = 'modified by user'
+        modifiedByUser = @getDatumField datumObject.datumFields, attribute
+        try
+          x = modifiedByUser.users
+        catch
+          x = modifiedByUser
+      else
+        type_ = 'datum field'
+        x = @getDatumFieldValue datumObject.datumFields, attribute
+      x
+
+    getFieldDBDatum: (datumObject, attribute) =>
+      try
+        if attribute in @fieldDBDirectAttributes
+          null
+        else if attribute in @fieldDBSessionFieldAttributes
+          @getSessionField datumObject.session.sessionFields, attribute
+        else if attribute is 'modifiedByUser'
+          @getDatumField datumObject.datumFields, attribute
+      catch
+        null
+
+    # FieldDB direct attributes, i.e., those not in `datumFields` or `session`.
+    # NOTE: these are only the attributes that I consider to be relevant to the
+    # form display. See model/form.coffee for more details.
+    fieldDBDirectAttributes: [
+      'id'
+      'audioVideo'
+      'comments'
+      'dateEntered'
+      'dateModified'
+      'datumTags'
+      'images'
+      'timestamp'
+    ]
+
+    # Attributes of a FieldDB datum's `session.sessionFields` array.
+    # NOTE: these are only the attributes that I consider to be relevant to the
+    # form display.
+    fieldDBSessionFieldAttributes: [
+      'goal'
+      'consultants'
+      'dialect'
+      'language'
+      'dateElicited'
+      'user'
+      'dateSEntered'
+    ]
 
