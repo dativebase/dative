@@ -1,5 +1,5 @@
 [![Build Status](https://travis-ci.org/OpenSourceFieldlinguistics/dative.svg?branch=master)](https://travis-ci.org/OpenSourceFieldlinguistics/dative)
-# Dative: a GUI for LingSync
+# Dative: a GUI for FieldDB and the OLD
 
 
 ## Description
@@ -9,12 +9,12 @@ documentation.
 
 Its high-level goals are:
 
-- to interface with multiple server-side backends (LingSync corpora, OLDs)
+- to interface with multiple server-side backends (FieldDB corpora, OLDs)
 - to incorporate the best parts of existing linguistic fieldwork database
   application GUIs:
 
-  - [LingSync Spreadsheet](http://app.lingsync.org/)
-  - [LingSync Chrome App](https://chrome.google.com/webstore/detail/lingsync/ocmdknddgpmjngkhcbcofoogkommjfoj)
+  - [Spreadsheet](http://app.lingsync.org/)
+  - [Prototype](https://chrome.google.com/webstore/detail/placeholder/eeipnabdeimobhlkfaiohienhibfcfpa)
   - [OLD](http://www.onlinelinguisticdatabase.org)
   - [FLEx](http://fieldworks.sil.org/flex/)
   - [EOPAS](http://www.eopas.org/)
