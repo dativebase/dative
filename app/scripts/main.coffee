@@ -45,7 +45,7 @@ require.config
     sfjquimatch: 'jquery-extensions/superfish-jqueryui-match'
     # Supersubs plugin removed in v1.6 of superfish. See
     # https://github.com/joeldbirch/superfish.
-    supersubs: 'jquery-extensions/supersubs'
+    supersubs: '../bower_components/superfish/dist/js/supersubs'
     #supersubs: '../bower_components/superfish/dist/js/supersubs'
     #supersubs: 'jquery-extensions/superfish/dist/js/supersubs'
     multiselect: '../bower_components/multiselect/js/jquery.multi-select'
