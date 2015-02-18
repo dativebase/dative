@@ -431,15 +431,19 @@ define [
         serverCode: null
         corpusServerURL: null
 
+      servers = [server3, server4]
+      if window.location.hostname == "localhost"
+        servers = [server1, server2, server3, server4]
+
       id: @guid()
-      activeServer: server1.id
+      activeServer: servers[0].id
       loggedIn: false
       loggedInUser: null
       loggedInUserRoles: []
       baseDBURL: null
       username: ''
       password: '' # WARN: I don't like storing the password in localStorage, but FieldDB needs to send it on subsequent requests, so I'm persisting it for now ...
-      servers: [server1, server2, server3, server4]
+      servers: servers
       serverTypes: ['FieldDB', 'OLD']
       fieldDBServerCodes: [
         'localhost'
