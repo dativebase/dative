@@ -37,7 +37,7 @@ require.config
     text: '../bower_components/requirejs-text/text'
     jqueryui: '../bower_components/jqueryui/jquery-ui'
     superfish: 'jquery-extensions/superfish'
-    superclick: 'jquery-extensions/superclick'
+    superclick: '../bower_components/superclick/dist/js/superclick'
     #superfish: '../bower_components/superfish/dist/js/superfish'
     #superfish: 'jquery-extensions/superfish/dist/js/superfish'
     igt: 'jquery-extensions/igt'
