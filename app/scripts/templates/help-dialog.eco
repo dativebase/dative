@@ -1,0 +1,23 @@
+<div class='dative-help-dialog'>
+
+  <div class="help-search-container">
+
+    <label for="help-search">
+      <i class="fa fa-search black-fa"></i>
+    </label>
+
+    <input class="ui-corner-all dative-tooltip" type="text" name="help-search"
+      title="Search through the help text" spellcheck="false" />
+
+  </div>
+
+  <div class="help-search-spacer"></div>
+
+  <div class="help-content-container">
+    <div class="help-content"></div>
+  </div>
+
+</div>
+
+<div class='dative-help-dialog-target'><div>
+

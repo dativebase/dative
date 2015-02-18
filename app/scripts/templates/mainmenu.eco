@@ -1,43 +1,61 @@
 <ul class="sf-menu">
-    <li><a >Dative</a>
-        <ul>
-            <li><a data-event="request:applicationSettings" data-shortcut="ctrl+x">Application Settings</a>
+
+    <li><a>Dative</a>
+        <ul class='ui-corner-bottom'>
+            <li>
+              <a data-event="request:applicationSettings"
+                 data-shortcut="ctrl+,">Application Settings</a>
             </li>
-            <li><a data-event="request:home" data-shortcut="ctrl+h">Home</a>
+            <li>
+              <a data-event="request:home" data-shortcut="ctrl+h">Home</a>
             </li>
-            <li><a data-event="request:pages" data-shortcut="ctrl+p">Pages</a>
+            <li class="requires-authentication">
+              <a data-event="request:pages" data-shortcut="ctrl+p">Pages</a>
             </li>
-            <li><a data-event="request:openRegisterDialogBox">Register</a>
+            <li class='requires-authentication fielddb'>
+              <a data-event="request:corporaBrowse" data-shortcut="ctrl+c">Corpora</a>
+            </li>
+            <li>
+              <a data-event="request:openRegisterDialogBox" data-shortcut="ctrl+r"
+              >Register</a>
             </li>
         </ul>
     </li>
-    <li><a data-event="request:formsBrowse">Forms</a>
-        <ul>
-            <li><a data-event="request:formAdd"
-                   data-shortcut="ctrl+a">Add</a></li>
-            <li><a data-event="request:formsSearch"
-                   data-shortcut="ctrl+s">Search</a></li>
-            <li><a data-event="request:formsBrowse"
-                   data-shortcut="ctrl+b">Browse</a></li>
-            <li><a data-event="request:quickSearch">Quicksearch</a></li>
+
+    <li class='requires-authentication'><a>Forms</a>
+        <ul class='ui-corner-bottom'>
+            <li class='requires-authentication'>
+              <a data-event="request:formAdd" data-shortcut="ctrl+a">Add</a>
+            </li>
+            <li class='requires-authentication'>
+              <a data-event="request:formsSearch" data-shortcut="ctrl+s">Search</a>
+            </li>
+            <li class='requires-authentication'>
+              <a data-event="request:formsBrowse" data-shortcut="ctrl+b">Browse</a>
+            </li>
+            <!-- <li><a data-event="request:quickSearch">Quicksearch</a></li> -->
         </ul>
     </li>
-    <li><a data-event="request:filesBrowse">Files</a>
-        <ul>
+
+    <!--
+    <li><a>Files</a>
+        <ul class='ui-corner-bottom'>
             <li><a data-event="request:fileAdd">Add</a></li>
             <li><a data-event="request:filesSearch">Search</a></li>
             <li><a data-event="request:filesBrowse">Browse</a></li>
         </ul>
     </li>
-    <li><a data-event="request:collectionsBrowse">Collections</a>
-        <ul>
+
+    <li><a>Collections</a>
+        <ul class='ui-corner-bottom'>
             <li><a data-event="request:collectionAdd">Add</a></li>
             <li><a data-event="request:collectionsSearch">Search</a></li>
             <li><a data-event="request:collectionsBrowse">Browse</a></li>
         </ul>
     </li>
-    <li><a data-event="request:analysis">Analysis</a>
-        <ul>
+
+    <li><a>Analysis</a>
+        <ul class='ui-corner-bottom'>
             <li><a data-event="request:phonology">Phonology</a></li>
             <li><a data-event="request:analyzedWordsCorpus">
                 Analyzed Words Corpus</a></li>
@@ -50,84 +68,74 @@
                 Morphological Parser</a></li>
         </ul>
     </li>
-    <li><a data-event="request:browseDictionary">Dictionary</a>
-        <ul>
+
+    <li><a>Dictionary</a>
+        <ul class='ui-corner-bottom'>
             <li><a data-event="request:dictionarySetup">Setup</a></li>
             <li><a data-event="request:dictionarySearch">Search</a></li>
             <li><a data-event="request:dictionaryBrowse">Browse</a></li>
         </ul>
     </li>
-    <li><a data-event="request:browsePeople">People</a>
-        <ul>
-            <li><a data-event="request:viewSpeakers">Speakers</a>
-                <ul>
-                    <li><a data-event="request:viewSpeakers">View</a></li>
-                    <li><a data-event="request:addSpeaker">Add</a></li>
-                </ul>
-            </li>
-            <li><a data-event="request:viewUsers">Users</a>
-                <ul>
-                    <li><a data-event="request:viewUsers">View</a></li>
-                    <li><a data-event="request:addUser">Add</a></li>
-                </ul>
-            </li>
+
+    <li><a>People</a>
+        <ul class='ui-corner-bottom'>
+            <li><a data-event="request:viewSpeakers">Speakers</a></li>
+            <li><a data-event="request:viewUsers">Users</a></li>
         </ul>
     </li>
-    <li><a >Tags</a>
-        <ul>
-            <li><a >Keywords</a>
-                <ul>
-                    <li><a >View</a></li>
-                    <li><a >Add</a></li>
-                </ul>
-            </li>
-            <li><a >Syntactic Categories</a>
-                <ul>
-                    <li><a >View</a></li>
-                    <li><a >Add</a></li>
-                </ul>
-            </li>
-            <li><a >Elicitation Methods</a>
-                <ul>
-                    <li><a >View</a></li>
-                    <li><a >Add</a></li>
-                </ul>
-            </li>
+
+    <li><a>Tags</a>
+        <ul class='ui-corner-bottom'>
+            <li><a>Tags</a></li>
+            <li><a>Syntactic Categories</a></li>
+            <li><a>Elicitation Methods</a></li>
         </ul>
     </li>
-    <li><a >Sources</a>
-        <ul>
-            <li><a >Add</a></li>
-            <li><a >Browse</a></li>
+
+    <li><a>Sources</a>
+        <ul class='ui-corner-bottom'>
+            <li><a>Add</a></li>
+            <li><a>Browse</a></li>
         </ul>
     </li>
-    <li><a >Help</a>
-        <ul>
-            <li><a >Help Page</a></li>
-            <li><a >Dative Documentation</a></li>
+
+    -->
+
+    <li><a>Help</a>
+        <ul class='ui-corner-bottom'>
+            <li><a data-event="request:toggleHelpDialogBox"
+              data-shortcut="ctrl+?">Help Page</a></li>
+            <li><a >Version <%= @version %></a></li>
         </ul>
     </li>
-    <li><a >Account</a>
-        <ul>
-            <li><a >My Page</a>
-                <ul>
-                    <li><a >View</a></li>
-                    <li><a >Edit</a></li>
-                </ul>
-            </li>
-            <li><a >My Settings</a>
-                <ul>
-                    <li><a >View</a></li>
-                    <li><a >Edit</a></li>
-                </ul>
-            </li>
-            <li><a >My Memory</a></li>
+
+    <li><a>Account</a>
+        <ul class='ui-corner-bottom'>
+            <!--
+            <li><a>My Page</a></li>
+            <li><a>My Settings</a></li>
+            <li><a>My Memory</a></li>
+            -->
             <li><a data-event="request:openLoginDialogBox"
                    data-shortcut="ctrl+l">Login</a></li>
         </ul>
     </li>
 </ul>
-<a  class="dative-authenticated"></a>
-<span class="loggedInUsername"></span>
+
+<div class='container-center active-corpus-name'>
+</div>
+
+<div class='container-right'>
+
+  <a class="dative-help" title="help with using Dative">
+    <i class='fa fa-question fa-fw'></i>
+  </a>
+
+  <a class="dative-authenticated" title="login">
+    <i class='fa fa-lock fa-fw'></i>
+  </a>
+
+  <a class="logged-in-username" title="you are not logged in"></a>
+</div>
 
 

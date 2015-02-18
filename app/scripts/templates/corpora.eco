@@ -1,0 +1,31 @@
+<div id='dative-page-header' class='ui-widget-header ui-corner-top'>
+
+  <div class='dative-page-header-title'>Corpora</div>
+  <div class='button-container-left'>
+
+    <button class="create-corpus dative-tooltip"
+      title="show form for creating a new corpus">
+      <i class="fa fa-plus fa-fw"></i>
+    </button>
+
+    <button class="expand-all-corpora dative-tooltip"
+      title="expand all corpus views">
+      <i class="fa fa-angle-double-down fa-fw"></i>
+    </button>
+
+    <button class="collapse-all-corpora dative-tooltip"
+      title="collapse all corpus views">
+      <i class="fa fa-angle-double-up fa-fw"></i>
+    </button>
+
+  </div>
+
+</div>
+
+<div id='dative-page-body'>
+
+  <div class='create-corpus-widget-container'></div>
+  <div class='corpora-list'></div>
+
+</div>
+

@@ -9,9 +9,9 @@ node_js:
 #   - sh -e /etc/init.d/xvfb start
 
 # whitelist
-branches:
- only:
-   - master
+# branches:
+#  only:
+#    - master
 
 notifications:
   email:
@@ -20,20 +20,15 @@ notifications:
     on_success: change
     on_failure: always
 
-env:
-  matrix:
-    # see set_up_new_machine.sh
-
 before_install:
   # Download and configure deps
+  - export TZ=Canada/Eastern # http://stackoverflow.com/questions/23371542/how-do-i-configure-travis-ci-to-use-the-correct-time-zone-for-a-rails-app
   - sudo apt-get install ncftp
   - npm install -g grunt-cli
   - npm install -g bower
   - npm install -g jasmine-node
   - npm install
   - bower install
-before_script:
-  # Make sure the emulator has started before running tests
 
 script: grunt deploy
 
@@ -46,6 +41,6 @@ env:
 after_success:
   # on:
   #   branch: master
-    - echo $TRAVIS_BRANCH
+  #   condition: $TRAVIS_REPO_SLUG = OpenSourceFieldlinguistics/dative
     - touch "dist/deployed at `date`"
-    - "ncftpput -R -v -u $USERNAME -p $PASSWORD $SERVER /beta dist/*"
+    - '[ "${TRAVIS_PULL_REQUEST}" = "false" ] && [ "${TRAVIS_REPO_SLUG}" = "OpenSourceFieldlinguistics/dative" ]  && ncftpput -R -v -u $USERNAME -p $PASSWORD $SERVER /beta dist/*'

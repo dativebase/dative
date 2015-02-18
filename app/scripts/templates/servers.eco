@@ -1,18 +1,25 @@
 <div class="servers-config-widget dative-widget-center ui-widget
   ui-widget-content ui-corner-all">
 
-  <div class="dative-widget-header ui-widget-header ui-corner-top">
+  <div class="dative-widget-header header-no-body ui-corner-bottom ui-widget-header
+    ui-corner-top dative-tooltip">
 
     <div class='dative-widget-header-title'>Servers</div>
 
-    <button class="float-left toggle-appear"
-      title="toggle server configuration window"></button>
-    <button class="float-left add-server"
-      title="create a new server configuration"></button>
+    <div class='button-container-left'>
+      <button class="toggle-appear dative-tooltip" title="show servers">
+        <i class='fa fa-caret-right fa-fw'></i>
+      </button>
+      <button class="add-server dative-tooltip" title="create a new server">
+        <i class='fa fa-plus fa-fw'></i>
+      </button>
+    </div>
 
   </div>
 
-  <div class="dative-widget-body"></div>
+  <div class="dative-widget-body">
+    <div class="no-servers-msg">There are no server configurations.</div>
+  </div>
 
 </div>
 

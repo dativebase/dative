@@ -17,14 +17,28 @@ define [
       @serverCodes = @applicationSettingsModel.get 'fieldDBServerCodes'
 
     events:
-      'keydown button.delete-server': '_keyboardControl'
-      'click button.delete-server': '_deleteServer'
+      'keydown button.delete-server': 'deleteServerKeys'
+      'click button.delete-server': 'deleteServerConfirm'
+      'keydown button.activate-server': 'activateServerKeys'
+      'click button.activate-server': 'activateServer'
       'selectmenuchange': 'toggleServerCodeSelect'
 
     listenToEvents: ->
+      @stopListening()
+      @undelegateEvents()
       @listenTo @applicationSettingsModel, 'change:activeServer',
         @activeServerChanged
+      @listenTo @applicationSettingsModel, 'change:loggedIn',
+        @loggedInChanged
+      @listenTo @model, 'change:name', @changeHeaderName
+      @listenTo Backbone, 'deleteServer', @deleteServer
       @delegateEvents()
+
+    loggedIn: ->
+      @applicationSettingsModel.get 'loggedIn'
+
+    changeHeaderName: ->
+      @$('.dative-widget-header-title span.header-title-name').text @model.get('name')
 
     toggleServerCodeSelect: ->
       if @$('select[name=type]').first().val() is 'FieldDB'
@@ -33,14 +47,12 @@ define [
         @$('li.serverCode').slideUp()
 
     activeServerChanged: ->
-      if @active()
-        @$('.dative-widget-header-title').text 'Active Server'
-        @$('.dative-widget-body').addClass 'ui-state-highlight'
-      else
-        @$('.dative-widget-header-title').text 'Server'
-        @$('.dative-widget-body').removeClass 'ui-state-highlight'
+      @guify()
 
-    active: ->
+    loggedInChanged: ->
+      @guify()
+
+    isActive: ->
       @model is @model.collection.applicationSettings.get 'activeServer'
 
     setModelFromGUI: ->
@@ -48,84 +60,177 @@ define [
         @model.set $(element).attr('name'), $(element).val()
 
     render: ->
-      headerTitle = if @active() then 'Active Server' else 'Server'
+      @html()
+      @guify()
+      @listenToEvents()
+      @
+
+    html: ->
+      headerTitle = if @isActive() then 'Active Server' else 'Server'
       context = _.extend(@model.attributes
         {
           serverTypes: @serverTypes,
           serverCodes: @serverCodes,
-          isActive: @active(),
+          isActive: @isActive(),
           headerTitle: headerTitle
         }
       )
       @$el.html @template(context)
-      @_guify()
-      @listenToEvents()
-      @
 
-    _deleteServer: (event) ->
-      if event
-        event.preventDefault()
-        event.stopPropagation()
-      @$el.slideUp 'medium', =>
-        @model.trigger 'removeme', @model
-        Backbone.trigger 'removeServerView', @
-        @remove()
+    # Trigger opening of a confirm dialog: if user clicks "Ok", then this
+    # server will be deleted.
+    deleteServerConfirm: (event) ->
+      if event then @stopEvent event
+      options =
+        text: "Do you really want to delete the server called “#{@model.get('name')}”?"
+        confirm: true
+        confirmEvent: 'deleteServer'
+        confirmArgument: @model.get('id')
+      Backbone.trigger 'openAlertDialog', options
 
-    _keyboardControl: (event) ->
-      @_rememberTarget event
+    # Really delete this server
+    deleteServer: (serverId) ->
+      if serverId is @model.get('id')
+        @$el.slideUp 'medium', =>
+          @model.trigger 'removeme', @model
+          Backbone.trigger 'removeServerView', @
+          @remove()
+
+    deleteServerKeys: (event) ->
+      if event.which is 13
+        @stopEvent event
+        @deleteServerConfirm()
+
+    activateServerKeys: ->
       if event.which is 13
         event.preventDefault()
         event.stopPropagation()
-        @_deleteServer()
+        @activateServer()
 
-    _populateSelectFields: ->
-      for serverType in ['FieldDB', 'OLD']
-        @$('select[name="serverType"]', @pageBody)
-          .append($('<option>').attr('value', serverType).text(serverType))
+    setActivateServerButtonStateActive: ->
+      @$('button.activate-server')
+        .find('i').addClass('fa-toggle-on').removeClass('fa-toggle-off').end()
+        .button()
+        .tooltip content: 'this is the active server'
 
-    _guify: ->
+    setActivateServerButtonStateInactive: ->
+      @$('button.activate-server')
+        .find('i').addClass('fa-toggle-off').removeClass('fa-toggle-on').end()
+        .button()
+        .tooltip content: 'make this server the active one'
 
-      @$('button').button().attr('tabindex', 0)
+    activateServer: ->
+      # The ApplicationSettingsView changes the active server.
+      Backbone.trigger 'activateServer', @model.get('id')
 
-      @$('button.delete-server')
+    activateShouldBeDisabled: ->
+      if @loggedIn() or @controlsShouldBeDisabled() then true else false
+
+    controlsShouldBeDisabled: -> if @isActive() then true else false
+
+    guify: ->
+      @buttonSetup()
+      @displayActivity()
+      @inputSetup()
+      @selectmenuSetup()
+      @tabindicesNaught() # active elements have tabindex=0
+
+    # Visual indication reflecting whether the server is active.
+    displayActivity: ->
+      if @isActive()
+        @$('.dative-widget-header-title span.active-indicator')
+          .text '(active)'
+          .css("color", @constructor.jQueryUIColors().defCo)
+        @$('.dative-widget-body').addClass 'ui-state-highlight ui-corner-bottom'
+        @setActivateServerButtonStateActive()
+      else
+        @$('.dative-widget-header-title span.active-indicator').text ''
+        @$('.dative-widget-body').removeClass 'ui-state-highlight ui-corner-bottom'
+        @setActivateServerButtonStateInactive()
+
+    buttonSetup: ->
+
+      #@$('button').button().attr('tabindex', 0)
+
+      $deleteButton = @$('button.delete-server')
+      deleteButtonAlreadyButton = $deleteButton.button 'instance'
+      $deleteButton
         .button
-          icons: {primary: 'ui-icon-trash'}
-          text: false
+          disabled: @controlsShouldBeDisabled()
+        .tooltip
+          position:
+            my: "right-40 center"
+            at: "left center"
+            collision: "flipfit"
+      if deleteButtonAlreadyButton then $deleteButton.button 'refresh'
 
-      @$('button.save-server')
+      $activateButton = @$('button.activate-server')
+      activateButtonAlreadyButton = $activateButton.button 'instance'
+      $activateButton
         .button
-          icons: {primary: 'ui-icon-disk'},
-          text: false
+          disabled: @activateShouldBeDisabled()
+        .tooltip
+          position:
+            my: "right-70 center"
+            at: "left center"
+            collision: "flipfit"
+      if activateButtonAlreadyButton then $activateButton.button 'refresh'
 
-      @_selectmenuify()
+    inputSetup: ->
+      @$('input')
+        .prop 'disabled', @controlsShouldBeDisabled()
+        .tooltip
+          position:
+            my: "right-90 center"
+            at: "left center"
+            collision: "flipfit"
+
+    selectmenuSetup: ->
+
+      controlsShouldBeDisabled = @controlsShouldBeDisabled()
+      width = 320
+
+      $typeSelect = @$('select[name=type]')
+      typeSelectAlreadySelectmenu = $typeSelect.selectmenu 'instance'
+      $typeSelect
+        .selectmenu
+          width: width
+          disabled: controlsShouldBeDisabled
+        .next('.ui-selectmenu-button').addClass 'server-type'
+      if typeSelectAlreadySelectmenu then $typeSelect.selectmenu 'refresh'
+
+      $serverCodeSelect = @$('select[name=serverCode]')
+      serverCodeSelectAlreadySelectmenu = $serverCodeSelect.selectmenu 'instance'
+      $serverCodeSelect
+        .selectmenu
+          width: width
+          disabled: controlsShouldBeDisabled
+        .next('.ui-selectmenu-button').addClass 'server-code'
+      if serverCodeSelectAlreadySelectmenu
+        $serverCodeSelect.selectmenu 'refresh'
+
+      position =
+        my: "right-90 center"
+        at: "left center"
+        collision: "flipfit"
+
+      @$('.ui-selectmenu-button').filter('.server-type')
+        .tooltip
+          items: 'span'
+          content: "is it a FieldDB server or an OLD one?"
+          position: position
+
+      @$('.ui-selectmenu-button').filter('.server-code').each ->
+        $(@).tooltip
+          items: 'span'
+          content: "Choose a server code (for FieldDB servers only)"
+          position: position
+
       if @model.get('type') is 'OLD' then @$('li.serverCode').hide()
-      @_tabindicesNaught() # active elements have tabindex=0
-
-      #@_hoverStateFieldDisplay() # make data display react to focus & hover
-
-    _selectmenuify: ->
-      @$('select').selectmenu width: 320
-      @$('.ui-selectmenu-button').addClass 'dative-input dative-input-display'
 
     # Tabindices=0 and jQueryUI colors
-    _tabindicesNaught: ->
+    tabindicesNaught: ->
       @$('select, input')
-        .css("border-color", @constructor.jQueryUIColors.defBo)
+        .css("border-color", @constructor.jQueryUIColors().defBo)
         .attr('tabindex', 0)
-
-    _rememberTarget: (event) ->
-      try
-        @$('.dative-input-display').each (index, el) =>
-          if el is event.target
-            @focusedElementIndex = index
-
-    _setFocus: (viewType) ->
-      if @focusedElementIndex?
-        @$('.dative-input-display').eq(@focusedElementIndex)
-          .focus().select()
-      else
-        if viewType is 'view'
-          @$('button.edit').first().focus()
-        else if viewType is 'edit'
-          @$('select, input').first().focus().select()
 

@@ -28,29 +28,39 @@ define [
       @bodyVisible = false
 
     listenToEvents: ->
-      @listenTo Backbone, 'removeServerView', @_removeServerView
+      @listenTo Backbone, 'removeServerView', @removeServerView
       @delegateEvents()
 
-    _removeServerView: (serverView) ->
+    removeServerView: (serverView) ->
       @serverViews = _.without @serverViews, serverView
       serverView.close()
       @closed serverView
+      @emptyMessage()
+      @$('button.toggle-appear').first().focus()
+
+    emptyMessage: ->
+      if @serverViews.length is 0
+        @$('div.no-servers-msg').show()
+      else
+        @$('div.no-servers-msg').hide()
 
     events:
-      'keydown button.toggle-appear': 'toggleAppearKeys'
+      'keydown button.toggle-appear': 'toggleServerConfigKeys'
       'keydown button.add-server': 'addServerKeys'
-      'click button.toggle-appear': '_toggleServerConfig'
-      'click button.add-server': '_addServer'
+      'click button.toggle-appear': 'toggleServerConfig'
+      'click button.add-server': 'addServer'
 
     render: ->
       @$el.html @template()
-      @_guify()
+      @guify()
       @$widgetBody = @$('div.dative-widget-body').first()
       container = document.createDocumentFragment()
       for serverView in @serverViews
         container.appendChild serverView.render().el
         @rendered serverView
       @$widgetBody.append container
+      if @bodyVisible then @showServerConfig() else @hideServerConfig()
+      @emptyMessage()
       @listenToEvents()
       @
 
@@ -61,11 +71,11 @@ define [
         updatedServerModels.push serverView.model
       @collection.add updatedServerModels
 
-    _addServer: (event) ->
+    addServer: (event) ->
       if event
         event.preventDefault()
         event.stopPropagation()
-      @_openServerConfig()
+      @openServerConfig()
       serverModel = new ServerModel()
       @collection.unshift serverModel
       serverView = new ServerView
@@ -74,74 +84,98 @@ define [
       @serverViews.unshift serverView
       serverView.render().$el.prependTo(@$widgetBody).hide().slideDown('slow')
       @rendered serverView
+      @emptyMessage()
 
-    _guify: ->
+    guify: ->
 
       @$('button').button().attr('tabindex', 0)
 
-      triangleIcon = 'ui-icon-triangle-1-s'
-      if not @bodyVisible
-        @$('.dative-widget-body').first().hide()
-        triangleIcon = 'ui-icon-triangle-1-e'
-
       @$('button.toggle-appear')
-        .button
-          icons: {primary: triangleIcon}
-          text: false
+        .button()
+        .tooltip
+          position:
+            my: "right-20 center"
+            at: "left center"
+            collision: "flipfit"
 
       @$('button.add-server')
-        .button
-          icons: {primary: 'ui-icon-plusthick'}
-          text: false
+        .button()
+        .tooltip
+          position:
+            my: "right-50 center"
+            at: "left center"
+            collision: "flipfit"
 
-    _toggleServerConfig: (event) ->
-      if event
-        event.preventDefault()
-        event.stopPropagation()
+    toggleServerConfig: (event) ->
+      if event then @stopEvent event
+      $body = @$('.dative-widget-body').first()
+      if $body.is ':visible'
+        @closeServerConfig()
+      else
+        @openServerConfig()
 
-      @$('.toggle-appear .ui-button-icon-primary')
-        .toggleClass 'ui-icon-triangle-1-e ui-icon-triangle-1-s'
+    closeServerConfig: ->
+      @setBodyStateClosed()
+      $body = @$('.dative-widget-body').first()
+      if $body.is ':visible' then $body.slideUp()
 
-      @$('.dative-widget-body').first()
-        .slideToggle
-          complete: =>
-            $firstInput = @$('input[name=name]').first()
-            if $firstInput.is(':visible')
-              $firstInput.focus()
-            @bodyVisible = @$('.dative-widget-body').is(':visible')
+    hideServerConfig: ->
+      @setBodyStateClosed()
+      @$('.dative-widget-body').first().hide()
 
-    _openServerConfig: ->
-      if not @$('.dative-widget-body').is(':visible')
-        @_toggleServerConfig()
+    showServerConfig: ->
+      @setBodyStateOpen()
+      @$('.dative-widget-body').first().show()
 
-    _closeServerConfig: ->
-      if @$('.dative-widget-body').is(':visible')
-        @_toggleServerConfig()
+    openServerConfig: ->
+      @setBodyStateOpen()
+      $body = @$('.dative-widget-body').first()
+      if not $body.is ':visible' then $body.slideDown()
+      # $firstInput = @$('input[name=name]').first()
+      # $firstInput.focus()
 
-    _rememberTarget: (event) ->
+    setBodyStateClosed: ->
+      @bodyVisible = false
+      @setHeaderStateClosed()
+      @setToggleButtonStateClosed()
+
+    setBodyStateOpen: ->
+      @bodyVisible = true
+      @setHeaderStateOpen()
+      @setToggleButtonStateOpen()
+
+    setToggleButtonStateClosed: ->
+      @$('button.toggle-appear')
+        .find('i').removeClass('fa-caret-down').addClass('fa-caret-right').end()
+        .button()
+        .tooltip content: 'show servers'
+
+    setToggleButtonStateOpen: ->
+      @$('button.toggle-appear')
+        .find('i').addClass('fa-caret-down').removeClass('fa-caret-right').end()
+        .button()
+        .tooltip content: 'hide servers'
+
+    rememberTarget: (event) ->
       try
         @$('.dative-input-display').each (index, el) =>
           if el is event.target
             @focusedElementIndex = index
 
-    stopEvent: (event) ->
-      event.preventDefault()
-      event.stopPropagation()
-
-    toggleAppearKeys: (event) ->
-      @_rememberTarget event
+    toggleServerConfigKeys: (event) ->
+      @rememberTarget event
       if event.which in [13, 37, 38, 39, 40] then @stopEvent event
       switch event.which
         when 13 # Enter
-          @_toggleServerConfig()
+          @toggleServerConfig()
         when 37, 38 # left and up arrows
-          @_closeServerConfig()
+          @closeServerConfig()
         when 39, 40 # right and down arrows
-          @_openServerConfig()
+          @openServerConfig()
 
     addServerKeys: (event) ->
-      @_rememberTarget event
+      @rememberTarget event
       if event.which is 13 # Enter
         @stopEvent event
-        @_addServer()
+        @addServer()
 

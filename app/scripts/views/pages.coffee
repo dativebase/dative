@@ -21,10 +21,13 @@ define [
       @pagesCollection.on 'reset', @render, @
       #@pagesCollection.fetch()
 
-    render: ->
+    render: (taskId) ->
       @$el.html @template(headerTitle: 'Pages')
       @matchHeights()
       @addAll()
+      @fixRoundedBorders()
+      Backbone.trigger 'longTask:deregister', taskId
+      @
 
     # Append a single page item to the #dative-page-body div of the pages view.
     addOne: (pageModel) ->

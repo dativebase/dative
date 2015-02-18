@@ -1,7 +1,6 @@
 <div id='dative-page-header' class='ui-widget-header ui-corner-top'>
 
   <div class='dative-page-header-title'><%= @headerTitle %></div>
-  <button class="float-left save" title="save"></span>
 
 </div>
 
@@ -11,9 +10,22 @@
 
       <li class="active-server"></li>
 
-      <li class="active-corpus"></li>
-
       <li class="server-config-container"></li>
+
+      <li class="theme-selector">
+        <label for='css-theme'>Theme</label>
+        <select name='css-theme'>
+          <% for [themeName, themeNameHumanReadable] in @jQueryUIThemes: %>
+            <% if themeName is @activeJQueryUITheme: %>
+              <option value="<%= themeName %>" selected
+              ><%= themeNameHumanReadable %></option>
+            <% else: %>
+              <option value="<%= themeName %>"
+              ><%= themeNameHumanReadable %></option>
+            <% end %>
+          <% end %>
+        </select>
+      </li>
 
     </ul>
   </div>

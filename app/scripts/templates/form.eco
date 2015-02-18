@@ -1,159 +1,134 @@
-<button class='form-hide-button old-form-hide-button
-    float-right'>hide</button>
+<div class="dative-widget-header ui-widget-header ui-corner-top">
 
-<div class='form-buttons old-form-buttons'>
-  <button>Update</button>
-  <button>Associate</button>
-  <button>Export</button>
-  <button>Remember</button>
-  <button>Delete</button>
-  <button>Duplicate</button>
-  <button>History</button>
+  <div class='button-container-left'>
+
+    <button class="hide-form-details dative-tooltip"
+      title="hide the buttons and extra data of this form">
+      <i class='fa fa-angle-double-up fa-fw'></i>
+    </button>
+
+    <button class="toggle-secondary-data dative-tooltip"
+      title="hide the secondary data of this form">
+      <i class='fa fa-angle-up fa-fw'></i>
+    </button>
+
+    <button class="toggle-primary-data-labels dative-tooltip"
+      title="show labels">labels:
+      <i class='fa fa-toggle-off fa-fw'></i>
+    </button>
+
+  </div>
+
+  <div class='button-container-right'>
+
+    <button class="update-form dative-tooltip"
+      title="update this form">
+      <i class='fa fa-pencil-square-o fa-fw'></i>
+    </button>
+
+    <button class="associate-form dative-tooltip"
+      title="associate this form to a file">
+      <i class='fa fa-link fa-fw'></i>
+    </button>
+
+    <button class="export-form dative-tooltip"
+      title="export this form to various file formats">
+      <i class='fa fa-download fa-fw'></i>
+    </button>
+
+    <button class="remember-form dative-tooltip"
+      title="copy this form to your personal clipboard">
+      <i class='fa fa-clipboard fa-fw'></i>
+    </button>
+
+    <button class="delete-form dative-tooltip"
+      title="delete this form">
+      <i class='fa fa-trash fa-fw'></i>
+    </button>
+
+    <button class="duplicate-form dative-tooltip"
+      title="duplicate this form">
+      <i class='fa fa-copy fa-fw'></i>
+    </button>
+
+    <button class="form-history dative-tooltip"
+      title="view the history of this form">
+      <i class='fa fa-history fa-fw'></i>
+    </button>
+
+  </div>
+
 </div>
 
-<div class='form-primary-data old-form-primary-data'>
-  <div class='form-igt-data old-form-igt'>
-    <div class='phonetic-transcription
-        old-form-phoneticTranscription'></div>
-    <div class='transcription old-form-transcription'>
-      <%= @transcription %>
+<div class='dative-widget-body'>
+
+  <div class='form-primary-data dative-form-primary-data'>
+
+    <div class='form-igt-data dative-form-igt'>
+
+      <% if @activeServerType is 'OLD': %>
+
+        <% for attribute in @h.old.getOLDFormIGTAttributes(): %>
+          <%- @h.old.getOLDFormAttributeDisplayer(attribute) attribute, @ %>
+        <% end %>
+
+      <% else if @activeServerType is 'FieldDB': %>
+
+        <% for attribute in @h.fieldDB.getFieldDBFormAttributes 'igt': %>
+          <%- @h.fieldDB.getFieldDBFormAttributeDisplayer(attribute) attribute, @ %>
+        <% end %>
+
+      <% end %>
+
     </div>
-    <div class='morpheme-break old-form-morphemeBreak'></div>
-    <div class='morpheme-gloss old-form-morphemeGloss'></div>
+
+    <div class='form-translations-data'>
+
+      <% if @activeServerType is 'OLD': %>
+
+        <% displayer = @h.old.getOLDFormAttributeDisplayer 'translations' %>
+        <%- displayer 'translations', @ %>
+
+      <% else if @activeServerType is 'FieldDB': %>
+
+        <% displayer = @h.fieldDB.getFieldDBFormAttributeDisplayer 'translation' %>
+        <%- displayer 'translation', @ %>
+
+      <% end %>
+
+    </div>
+
   </div>
-  <div class='form-translations-data old-form-glosses'>
-    <% for translation in @translations: %>
-      <div class='translation old-form-gloss'>
-        <span class='translation-grammaticality old-form-gloss-gram'>
-          <%= translation.grammaticality %>
-        </span>
-        <span class='translation-transcription old-form-gloss-gloss'>
-          <%= translation.transcription %>
-        </span>
-      </div>
+
+
+  <div class='form-secondary-data'>
+
+  <% if @activeServerType is 'OLD': %>
+
+    <% for attribute in @h.old.getOLDFormSecondaryAttributes(): %>
+      <% displayer = @h.old.getOLDFormAttributeDisplayer attribute %>
+      <%- displayer attribute, @ %>
     <% end %>
-  </div>
-</div>
 
-<div class='form-secondary-data old-form-secondary-data'>
+  <% else if @activeServerType is 'FieldDB': %>
 
-  <div class='form-id old-form-id'>
-    <div class='form-secondary-data-label
-      old-form-secondary-data-label'>id</div>
-    <div class='form-secondary-data-content
-      old-form-secondary-data-content'><%= @id %></div>
-  </div>
+    <% for attribute in @h.fieldDB.getFieldDBFormAttributes 'secondary' : %>
+      <% displayer = @h.fieldDB.getFieldDBFormAttributeDisplayer attribute %>
+      <%- displayer attribute, @ %>
+    <% end %>
 
-  <div class='form-comments old-form-comments'>
-    <div class='form-secondary-data-label
-      old-form-secondary-data-label'>comments</div>
-    <div class='form-secondary-data-content
-      old-form-secondary-data-content'><%= @comments %></div>
-  </div>
-
-  <div class='form-speaker-comments old-form-speakerComments'>
-    <div class='form-secondary-data-label
-      old-form-secondary-data-label'>speaker comments</div>
-    <div class='form-secondary-data-content
-      old-form-secondary-data-content'><%= @speaker_comments %></div>
-  </div>
-
-  <div class='form-elicitation-method old-form-elicitationMethod'>
-    <div class='form-secondary-data-label
-      old-form-secondary-data-label'>elicitation method</div>
-    <div class='form-secondary-data-content
-      old-form-secondary-data-content'><%= @elicitation_method %></div>
-  </div>
-
-  <div class='form-tags old-form-keywords'>
-    <div class='form-secondary-data-label
-      old-form-secondary-data-label'>tags</div>
-    <div class='form-secondary-data-content
-      old-form-secondary-data-content'>
-      <% for tag in @tags: %>
-        <div class='form-tag old-form-keyword'><%= tag.name %></div>
+    <% for datumField in @datumFields: %>
+      <% if datumField.label not in @h.fieldDB.alreadyDisplayedFields: %>
+        <% displayer = @h.fieldDB.fieldDBStringFieldDisplay %>
+        <%- displayer datumField.label, @ %>
       <% end %>
-    </div>
-  </div>
+    <% end %>
 
-  <div class='form-syntactic-category-string
-    old-form-syntacticCategoryString'>
-    <div class='form-secondary-data-label
-      old-form-secondary-data-label'>syntactic category string</div>
-    <div class='form-secondary-data-content
-      old-form-secondary-data-content'><%= @syntactic_category_string %></div>
-  </div>
+    <%- @h.fieldDB.fieldDBStringFieldDisplay 'id', @ %>
 
-  <div class='form-syntactic-category old-form-syntacticCategory'>
-    <div class='form-secondary-data-label
-      old-form-secondary-data-label'>syntactic category</div>
-    <div class='form-secondary-data-content
-      old-form-secondary-data-content'><%= @syntactic_category.name %></div>
-  </div>
+  <% end %>
 
-  <div class='form-speaker old-form-speaker'>
-    <div class='form-secondary-data-label
-      old-form-secondary-data-label'>speaker</div>
-    <div class='form-secondary-data-content old-form-secondary-data-content'>
-      <%= "#{@speaker.first_name} #{@speaker.last_name}" %>
-    </div>
-  </div>
-
-  <div class='form-elicitor old-form-elicitor'>
-    <div class='form-secondary-data-label
-      old-form-secondary-data-label'>elicitor</div>
-    <div class='form-secondary-data-content old-form-secondary-data-content'>
-      <%= "#{@elicitor.first_name} #{@elicitor.last_name}" %>
-    </div>
-  </div>
-
-  <div class='form-verifier old-form-verifier'>
-    <div class='form-secondary-data-label
-      old-form-secondary-data-label'>verifier</div>
-    <div class='form-secondary-data-content old-form-secondary-data-content'>
-      <%= "#{@verifier.first_name} #{@verifier.last_name}" %>
-    </div>
-  </div>
-
-  <div class='form-source old-form-source'>
-    <div class='form-secondary-data-label
-      old-form-secondary-data-label'>source</div>
-    <div class='form-secondary-data-content old-form-secondary-data-content'>
-      <%= "#{@source.author} (#{@source.year})" %>
-    </div>
-  </div>
-
-  <div class='form-date-elicited old-form-dateElicited'>
-    <div class='form-secondary-data-label
-      old-form-secondary-data-label'>elicited</div>
-    <div class='form-secondary-data-content
-      old-form-secondary-data-content'><%= @date_elicited %></div>
-  </div>
-
-  <div class='form-datetime-entered old-form-datetimeEntered'>
-    <div class='form-secondary-data-label
-      old-form-secondary-data-label'>entered</div>
-    <div class='form-secondary-data-content
-      old-form-secondary-data-content'><%= @datetime_entered %></div>
-  </div>
-
-  <div class='form-datetime-modified old-form-datetimeModified'>
-    <div class='form-secondary-data-label
-      old-form-secondary-data-label'>last modified</div>
-    <div class='form-secondary-data-content
-      old-form-secondary-data-content'><%= @datetime_modified %></div>
-  </div>
-
-  <div class='form-files old-form-files'>
-    <div class='form-secondary-data-label
-      old-form-secondary-data-label'>files</div>
-    <div class='form-secondary-data-content old-form-secondary-data-content'>
-      <% for file in @files: %>
-        <div class='form-file old-form-file'><%= files.name %></div>
-      <% end %>
-    </div>
-  </div>
+  </div> <% # End div.form-secondary-data %>
 
 </div>
-
 

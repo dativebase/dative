@@ -1,0 +1,49 @@
+  <div class="dative-widget-header ui-widget-header ui-corner-top">
+
+    <div class='dative-widget-header-title'>Edit the details of this
+    corpus</div>
+
+  </div>
+
+  <div class="dative-widget-body">
+
+    <ul class="fieldset">
+
+      <li>
+        <label for='title'>Title</label>
+        <input type="text" maxlength="255" name="title"
+          class="title ui-corner-all corpus-edit-input dative-tooltip"
+          title="Modify the title of this corpus" value="<%= @title %>" />
+        <div class='dative-edit-corpus-failed-container'>
+          <span class='ui-state-error ui-corner-all dative-edit-corpus-failed
+            title-error edit-corpus-error'></span>
+        </div>
+      </li>
+
+      <li>
+        <label for='description'>description</label>
+        <textarea rows="1" name="description"
+          class="description ui-corner-all corpus-edit-input dative-tooltip"
+          title="Modify the description of this corpus"
+        ><%= @description %></textarea>
+        <div class='dative-edit-corpus-failed-container'>
+          <span class='ui-state-error ui-corner-all dative-edit-corpus-failed
+            description-error edit-corpus-error'></span>
+        </div>
+      </li>
+
+      <li>
+        <label for=''></label>
+        <button class='request-edit-corpus dative-tooltip'
+          title='save corpus changes'
+          ><i class="fa fa-fw fa-floppy-o"></i>Save Corpus Details</button>
+      </li>
+
+      <p class='ui-state-error'>WARNing: Corpus metadata update currently
+      deactivated in Dative.</p>
+
+    </ul>
+
+  </div>
+
+

@@ -25,12 +25,27 @@ module.exports = (grunt) ->
 
   grunt.initConfig
 
+    markdown:
+      all:
+        files: [
+          expand: true,
+          flatten: true,
+          src: '<%= yeoman.app %>/help/src/*.md'
+          dest: '<%= yeoman.app %>/help/html/'
+          ext: '.html'
+        ]
+        options:
+          template: '<%= yeoman.app %>/help/src/template.jst'
+
     yeoman: yeomanConfig
 
     watch:
       options:
         nospawn: true
         livereload: true
+      help:
+        files: ['<%= yeoman.app %>/help/src/*.md']
+        tasks: ['markdown:all']
       coffee:
         files: ['<%= yeoman.app %>/scripts/{,*/}*.coffee']
         tasks: ['copy:coffee', 'coffee:serve']
@@ -235,6 +250,7 @@ module.exports = (grunt) ->
             jqueryelastic: ['jquery']
             perfectscrollbar: ['jquery']
             superfish: ['jquery']
+            superclick: ['jquery']
             supersubs: ['jquery']
             backbonerelational: ['backbone']
             backbonelocalstorage: ['backbone']
@@ -250,6 +266,7 @@ module.exports = (grunt) ->
             text: '../../<%= yeoman.app %>/bower_components/requirejs-text/text'
             jqueryui: '../../<%= yeoman.app %>/bower_components/jqueryui/jquery-ui'
             superfish: '../../<%= yeoman.app%>/scripts/jquery-extensions/superfish'
+            superclick: '../../<%= yeoman.app%>/scripts/jquery-extensions/superclick'
             #superfish: '../../<%= yeoman.app%>/scripts/jquery-extensions/superfish/dist/js/superfish'
             #superfish: '../../<%= yeoman.app %>/bower_components/superfish/dist/js/superfish'
             igt: '../../<%= yeoman.app%>/scripts/jquery-extensions/igt'
@@ -340,6 +357,9 @@ module.exports = (grunt) ->
           dest: '.tmp/scripts'
           src: '**/*.coffee'
         ]
+      packagejson:
+        src: 'package.json'
+        dest: '.tmp/'
       dist:
         files: [
           expand: true
@@ -349,6 +369,7 @@ module.exports = (grunt) ->
           src: [
             '*.{ico,txt}'
             '.htaccess'
+            './../package.json'
             'images/{,*/}*.{webp,gif}'
             'styles/fonts/{,*/}*.*'
             'bower_components/sass-bootstrap/fonts/*.*'
@@ -432,6 +453,11 @@ module.exports = (grunt) ->
         dest: '.tmp/scripts/templates'
         ext: '.js'
 
+    exec:
+      setContinuousDeploymentVersion:
+        cmd: ->
+          return 'bash scripts/set_ci_version.sh'
+
     rev:
       dist:
         files:
@@ -472,8 +498,10 @@ module.exports = (grunt) ->
 
     if target is 'test'
       return grunt.task.run [
+        'markdown:all'
         'clean:server'
         'copy:coffee'
+        'copy:packagejson'
         'coffee:serve'
         'coffee:test'
         #'createDefaultTemplate'
@@ -486,8 +514,10 @@ module.exports = (grunt) ->
       ]
 
     grunt.task.run [
+      'markdown:all'
       'clean:server'
       'copy:coffee'
+      'copy:packagejson'
       'coffee:serve'
       #'createDefaultTemplate'
       #'jst'
@@ -520,13 +550,18 @@ module.exports = (grunt) ->
       grunt.task.run testTasks
 
   grunt.registerTask 'build', [
+    'markdown:all'
     'clean:dist' # remove everything in dist/ and .tmp/
     'copy:coffee' # copy all .coffee files in app/scripts/ to .tmp/scripts/
+    'copy:packagejson'
     'coffee:dist' # convert all .coffee files in .tmp/scripts to .js in situ
 
     # eco: convert all .eco files in app/scripts/templates/ to .js files in
     # .tmp/scripts/templates/
     'eco'
+
+    # permits execution of shell scripts
+    'exec'
 
     #'compass:dist' # commented out because not currently using compass
 
@@ -589,5 +624,5 @@ module.exports = (grunt) ->
 
   grunt.registerTask 'docs', ['clean:docs', 'clean:doctmp', 'copy:docco', 'docco', 'clean:doctmp']
 
-  grunt.registerTask 'deploy', ['jshint', 'build']
+  grunt.registerTask 'deploy', ['jshint', 'build', 'exec:setContinuousDeploymentVersion']
 

@@ -1,0 +1,12 @@
+<div id='dative-page-header' class='ui-widget-header ui-corner-top'>
+
+  <div class='dative-page-header-title'>Dative Home Page</div>
+
+</div>
+
+<div id='dative-page-body'>
+  <p class='paragraph-widget ui-corner-all'>Welcome to Dative, an application for linguistic
+  fieldwork.</p>
+</div>
+
+

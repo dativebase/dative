@@ -2,11 +2,11 @@ define [
   'jquery'
   'backbone'
   './base'
+  './../utils/globals'
   './../templates/mainmenu'
-  'superfish'
+  'superclick'
   'supersubs'
-  'sfjquimatch'
-], ($, Backbone, BaseView, mainmenuTemplate) ->
+], ($, Backbone, BaseView, globals, mainmenuTemplate) ->
 
   # Main Menu View
   # --------------
@@ -20,63 +20,144 @@ define [
     template: mainmenuTemplate
 
     initialize: ->
-      @listenTo @model, 'change:loggedIn', @_refreshLoginButton
+      @listenTo @model, 'change:loggedIn', @loggedInChanged
+      @listenTo @model, 'change:activeFieldDBCorpusTitle', @activeFieldDBCorpusChanged
+      @listenTo @model, 'change:activeServer', @activeFieldDBCorpusChanged
+      @listenTo Backbone, 'bodyClicked', @closeSuperclick
+      @listenTo Backbone, 'application-settings:jQueryUIThemeChanged', @jQueryUIThemeChanged
+
+    activeFieldDBCorpusChanged: ->
+      @refreshLoggedInUser()
+      @displayActiveCorpusName()
 
     events:
       'click a.dative-authenticated': 'toggleLoginDialog'
+      'click a.dative-help': 'toggleHelpDialog'
+
+      'mouseenter ul.sf-menu > li > ul > li': 'mouseEnteredMenuItem'
+      'mouseenter ul.sf-menu > li > ul > li > a': 'mouseEnteredMenuItem'
+
+      'mouseleave ul.sf-menu > li > ul > li': 'mouseLeftMenuItem'
+      'mouseleave ul.sf-menu > li > ul > li > a': 'mouseLeftMenuItem'
+
+      'mousedown ul.sf-menu > li': 'mouseDownMenuItem'
+      'mousedown ul.sf-menu > li > a': 'mouseDownMenuItem'
+      'mousedown ul.sf-menu > li > ul > li': 'mouseDownMenuItem'
+      'mousedown ul.sf-menu > li > ul > li > a': 'mouseDownMenuItem'
+
+      'mouseup ul.sf-menu > li': 'mouseUpMenuItem'
+      'mouseup ul.sf-menu > li > a': 'mouseUpMenuItem'
+      'mouseup ul.sf-menu > li > ul > li': 'mouseUpMenuItem'
+      'mouseup ul.sf-menu > li > ul > li > a': 'mouseUpMenuItem'
+
+    loggedInChanged: ->
+      @render()
+
+    jQueryUIThemeChanged: ->
+      @render()
+
+    # Make certain menu items (in)active and (in)visible depending on
+    # authentication status and server type.
+    setActivityAndVisibility: ->
+      if @model.get('loggedIn')
+        @$('li.requires-authentication').not('.fielddb')
+          .show()
+          .find('a').removeClass 'disabled'
+        if @model.get('activeServer')?.get('type') is 'FieldDB'
+          @$('li.fielddb').show()
+            .children('a').removeClass 'disabled'
+        else
+          @$('li.fielddb').hide()
+            .children('a').addClass 'disabled'
+      else
+        @$('li.requires-authentication').hide()
+          .children('a').addClass 'disabled'
 
     render: ->
-      @$el.css(MainMenuView.jQueryUIColors.def).html @template() # match jQueryUI colors
-      @superfishify() # Superfish transmogrifies menu
-      @_refreshLoginButton()
+      @$el
+        .css(@constructor.jQueryUIColors().def) # match jQueryUI colors
+        .html @template(@model.attributes)
+      @setActivityAndVisibility()
+
+      # NOTE @jrwdunham @cesine: I moved to superclick because touchscreen devices
+      # don't support hover events, but apparently superfish does support touchscreen
+      # devices (see http://users.tpg.com.au/j_birch/plugins/superfish/) so maybe we
+      # should switch back.
+      #@superfishify() # Superfish transmogrifies menu
+      @superclickify() # Superclick transmogrifies menu
+
+      @helpButtonState()
+      @refreshLoginButton()
+      @displayActiveCorpusName()
+      @refreshLoggedInUser()
       @bindClickToEventTrigger() # Vivify menu buttons
-      @shortcutConfig() # Keyboard shortcuts
+      @keyboardShortcuts()
 
     # Superfish jQuery plugin turns mainmenu <ul> into a menubar
     superfishify: ->
       @$('.sf-menu').supersubs(minWidth: 12, maxWidth: 27, extraWidth: 2)
         .superfish(autoArrows: false)
-        .superfishJQueryUIMatch(MainMenuView.jQueryUIColors)
+        .superfishJQueryUIMatch(@constructor.jQueryUIColors())
+
+    # Superclick jQuery plugin turns mainmenu <ul> into a menubar
+    superclickify: ->
+      @$('.sf-menu')
+        .supersubs
+          minWidth: 12
+          maxWidth: 27
+          extraWidth: 2
+        .superclick autoArrows: false
+      @matchMenuToJQueryUITheme()
+
+    closeSuperclick: ->
+      @$('.sf-menu').superclick 'reset'
 
     # Menu item clicks and keyboard shortcut behaviours are all defined in the
     # data-event and data-shortcut attributes of the <li>s specified in the
     # template. The following functionality creates the appropriate bindings.
 
     # Bind main menu item clicks to the triggering of the appropriate events.
+    # TODO @jrwdunham: it should be possible to do this in `@events`. It would
+    # be nice to have all DOM event binding in one place.
     bindClickToEventTrigger: ->
-      self = @
-      @$('[data-event]').each ->
-        $(@).click (event) ->
+      @$('[data-event]').each (index, element) =>
+        $(element).click (event) =>
+          @$('.sf-menu').superclick('reset')
           event.stopPropagation()
-          self.trigger $(@).attr('data-event')
+          @trigger $(element).attr('data-event')
 
     # Configure keyboard shortcuts
     # 1. Bind shortcut keystrokes to the appropriate events.
     # 2. Modify the menu items so that shortcut abbreviations are displayed.
-    shortcutConfig: ->
-      self = @
-      $('[data-shortcut][data-event]').each ->
-        event = $(@).attr 'data-event'
-        shortcut = $(@).attr 'data-shortcut'
-        self.bindShortcutToEventTrigger shortcut, event
-        $(@).append $('<span>').addClass('float-right').text(
-          self.getShortcutAbbreviation(shortcut))
+    keyboardShortcuts: ->
+      $(document).off 'keydown'
+      $('[data-shortcut][data-event]').each (index, element) =>
+        if not $(element).hasClass 'disabled'
+          event = $(element).attr 'data-event'
+          shortcut = $(element).attr 'data-shortcut'
+          @bindShortcutToEventTrigger shortcut, event
+          shortcutAbbreviation = @getShortcutAbbreviation(shortcut)
+          $(element).append $('<span>').addClass('float-right').html(
+            @getShortcutInFixedWithSpans(shortcutAbbreviation))
+
+    getShortcutInFixedWithSpans: (shortcut) ->
+      [initial..., last] = shortcut
+      "#{initial.join('')}<span class='fixed-width'>#{last}</span>"
 
     # Bind keyboard shortcut to triggering of event
     bindShortcutToEventTrigger: (shortcutString, eventName) ->
       # Map for 'ctrl+A' would be {ctrlKey: true, shortcutKey: 65}
       map = @getShortcutMap shortcutString
-      self = @
 
       # Bind the keydown event to the function
-      $(document).keydown (event) ->
+      $(document).keydown (event) =>
         if event.ctrlKey is map.ctrlKey and
         event.altKey is map.altKey and
         event.shiftKey is map.shiftKey and
         event.which is map.shortcutKey
           event.preventDefault()
           event.stopPropagation()
-          self.trigger eventName
+          @trigger eventName
 
     # Return a shortcut object from a shortcut string.
     # Shortcut Map for a shortcut string like 'ctrl+A' would be
@@ -90,6 +171,8 @@ define [
           when 'lArrow' then 37
           when 'uArrow' then 38
           when 'dArrow' then 40
+          when ',' then 188
+          when '?' then 191
           else shortcutAsString.toUpperCase().charCodeAt 0
 
       ctrlKey: 'ctrl' in shortcutArray
@@ -119,23 +202,119 @@ define [
         getShortcutKeyAbbrev shortcutArray.pop()
       ].join ''
 
+    helpButtonState: ->
+      @$('a.dative-help')
+        .button()
+        .css 'border-color', @constructor.jQueryUIColors().defBa
+        .tooltip()
+
     # Initialize login/logout icon/button
-    _refreshLoginButton: ->
-      text = 'Login'
-      icon = 'ui-icon-locked'
-      title = 'login'
-      username = ''
+    refreshLoginButton: ->
       if @model.get 'loggedIn'
-        text = 'Logout'
-        icon = 'ui-icon-unlocked'
-        title = 'logout'
+        @$('a.dative-authenticated')
+          .attr 'title', 'logout'
+          .find('i').removeClass('fa-lock').addClass('fa-unlock-alt').end()
+          .button()
+          .css 'border-color', @constructor.jQueryUIColors().defBa
+          .tooltip()
+      else
+        @$('a.dative-authenticated')
+          .attr 'title', 'login'
+          .find('i').removeClass('fa-unlock-alt').addClass('fa-lock').end()
+          .button()
+          .css 'border-color', @constructor.jQueryUIColors().defBa
+          .tooltip()
+
+    # Display the name of the active corpus at the top center of the menu bar.
+    # If there is no active corpus, display the name of the active server.
+    displayActiveCorpusName: ->
+      activeFieldDBCorpusTitle = globals
+        .applicationSettings?.get? 'activeFieldDBCorpusTitle'
+      activeServerName = globals
+        .applicationSettings?.get?('activeServer')?.get? 'name'
+      activeServerType = globals
+        .applicationSettings?.get?('activeServer')?.get? 'type'
+      loggedIn = globals
+        .applicationSettings?.get? 'loggedIn'
+      text = null
+      if activeFieldDBCorpusTitle
+        text = activeFieldDBCorpusTitle
+        title = "You are logged in to “#{activeServerName}” and are using the
+          corpus “#{activeFieldDBCorpusTitle}”"
+      else if activeServerName
+        text = activeServerName
+        if loggedIn
+          if activeServerType is 'OLD'
+            title = "You are logged in to the OLD server “#{activeServerName}”"
+          else
+            title = "You are logged in to the FieldDB server
+              “#{activeServerName}” but have not yet activated a corpus"
+        else
+          title = "The active server is “#{activeServerName}”"
+      else
+        text = ''
+        title = ''
+      if text?
+        @$('.active-corpus-name')
+          .text text
+          .attr 'title', title
+          .tooltip()
+
+    # Reset the tooltip title of the logged-in user's name in the top right.
+    refreshLoggedInUser: ->
+      if @model.get 'loggedIn'
         username = @model.get 'username'
-      @$('a.dative-authenticated').text(text).attr('title', title)
-        .button({icons: {primary: icon}, text: false})
-        .css('border-color', MainMenuView.jQueryUIColors.defBa)
-      @$('.loggedInUsername').text username
+        activeServerName = @model.get('activeServer')?.get 'name'
+        activeServerType = @model.get('activeServer')?.get 'type'
+        activeFieldDBCorpusTitle = @model.get 'activeFieldDBCorpusTitle'
+        title = ["You are logged in to the server “#{activeServerName}”",
+          "as “#{username}”"].join ' '
+        if activeServerType is 'FieldDB' and activeFieldDBCorpusTitle
+          title = ["#{title} and are using the corpus",
+            "“#{activeFieldDBCorpusTitle}”"].join ' '
+        @$('.logged-in-username')
+          .text username
+          .attr 'title', title
+          .tooltip()
 
     # Tell the login dialog box to toggle itself.
     toggleLoginDialog: ->
       Backbone.trigger 'loginDialog:toggle'
+
+    # Tell the help dialog box to toggle itself.
+    toggleHelpDialog: ->
+      Backbone.trigger 'helpDialog:toggle'
+
+    # This replaces the functionality that used to be housed in the jQuery
+    # extension `superclick-jqueryui-match` (and `superfish-jqueryui-match`).
+    # Also see the mouse enter/leave/down/up event binddings in `@events`
+    matchMenuToJQueryUITheme: ->
+
+      selector = [
+        'ul.sf-menu'
+        'ul.sf-menu > li'
+        'ul.sf-menu > li > a'
+        'ul.sf-menu > li > ul'
+        'ul.sf-menu > li > ul > li'
+        'ul.sf-menu > li > ul > li a'
+      ].join ', '
+      @$(selector).css @constructor.jQueryUIColors().def
+
+      selector = [
+        'ul.sf-menu > li > ul > li:last-child',
+        'ul.sf-menu > li > ul > li:last-child a'
+      ].join ', '
+      @$(selector).addClass 'ui-corner-bottom sf-option-bottom'
+
+    mouseEnteredMenuItem: (event) ->
+      $(event.currentTarget).css @constructor.jQueryUIColors().hov
+
+    mouseLeftMenuItem: (event) ->
+      $(event.currentTarget).css @constructor.jQueryUIColors().def
+
+    mouseDownMenuItem: (event) ->
+      $(event.currentTarget).css @constructor.jQueryUIColors().act
+
+    mouseUpMenuItem: (event) ->
+      $(event.currentTarget).css @constructor.jQueryUIColors().def
 
