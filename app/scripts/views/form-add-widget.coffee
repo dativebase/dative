@@ -1,12 +1,12 @@
 define [
   'backbone'
-  './base'
+  './form-handler-base'
   './../models/form'
   './../utils/globals'
   './../templates/form-add-widget'
   'multiselect'
   'jqueryelastic'
-], (Backbone, BaseView, FormModel, globals, formAddTemplate) ->
+], (Backbone, FormHandlerBaseView, FormModel, globals, formAddTemplate) ->
 
   # Form Add Widget View
   # --------------------
@@ -18,7 +18,7 @@ define [
   # (Note: the page-view-level `FormAddView` is currently not being used and
   # may be removed entirely.)
 
-  class FormAddWidgetView extends BaseView
+  class FormAddWidgetView extends FormHandlerBaseView
 
     template: formAddTemplate
 
@@ -123,13 +123,6 @@ define [
         primaryFields
         (field) => @primaryDatumFields.indexOf(field.label))
 
-    # FOX
-    # @h.getPrimaryDatumFields @datumFields: %>
-    #
-    # @getFieldDBFormIGTAttributes()
-    # @getFieldDBFormTranslationAttributes()
-    # @getFieldDBFormSecondaryAttributes()
-
     # Return an "input generator" (a method that generates data input HTML,
     # e.g., an input[type=text]) for a FieldDB form attribute.
     getFieldDBFormAttributeInputGenerator: (attribute) =>
@@ -155,7 +148,7 @@ define [
     fieldDBTextareaInputGenerator: (attribute, context) =>
       inputCallback = (attribute, context) =>
         tooltip = @getFieldDBAttributeTooltip attribute, context
-        value = @getFieldDBDatumValue context, attribute
+        value = @model.getDatumValueSmart attribute
         "<textarea rows='1' name='#{@utils.camel2hyphen attribute}'
           class='#{@utils.camel2hyphen attribute} ui-corner-all form-add-input dative-tooltip'
           title='#{tooltip}'
@@ -166,7 +159,7 @@ define [
     fieldDBTranslationInputGenerator: (attribute, context) =>
       inputCallback = (attribute, context) =>
         tooltip = @getFieldDBAttributeTooltip attribute, context
-        value = @getFieldDBDatumValue context, attribute
+        value = @model.getDatumValueSmart attribute
         "<textarea rows='1' name='#{@utils.camel2hyphen attribute}'
           class='#{@utils.camel2hyphen attribute} singular-translation
             ui-corner-all form-add-input dative-tooltip'
@@ -186,7 +179,7 @@ define [
     # textarea's width.
     fieldDBUtteranceInputGenerator: (attribute, context) =>
       tooltip = @getFieldDBAttributeTooltip attribute, context
-      value = @getFieldDBDatumValue context, attribute
+      value = @model.getDatumValueSmart attribute
       "<textarea rows='1' name='#{@utils.camel2hyphen attribute}'
         class='#{@utils.camel2hyphen attribute} ui-corner-all form-add-input dative-tooltip'
         title='#{tooltip}'
@@ -194,7 +187,7 @@ define [
 
     # Judgement Input.
     fieldDBJudgementInputGenerator: (context) =>
-      value = @getFieldDBDatumValue context, 'judgement'
+      value = @model.getDatumValueSmart 'judgement'
       tooltip = @getFieldDBAttributeTooltip 'judgement', context
       "<input name='judgement'
         type='text'
@@ -223,28 +216,50 @@ define [
         activeServerType: @getActiveServerType()
         h: # "h" for "helpers"
           fieldDB:
-            getFieldDBFormAttributeInputGenerator:
-              @getFieldDBFormAttributeInputGenerator
-            getFieldDBFormIGTAttributes: @getFieldDBFormIGTAttributes
-            getFieldDBFormTranslationAttributes:
-              @getFieldDBFormTranslationAttributes
-            getFieldDBFormSecondaryAttributes:
-              @getFieldDBFormSecondaryAttributes
-            getFieldDBFormReadOnlyAttributes:
-              @getFieldDBFormReadOnlyAttributes
-            getFieldDBFormAttributes: @getFieldDBFormAttributes
-          getDatumFields: @getDatumFields
-          getDatumFieldValue: @getDatumFieldValue
-          datumFieldsHasValue: @datumFieldsHasValue
-          getPrimaryDatumFields: @getPrimaryDatumFields
-          getSecondaryDatumFields: @getSecondaryDatumFields
-          getDatumFieldLabel: @getDatumFieldLabel
+            inputGenerator: @getFieldDBFormAttributeInputGenerator
+            igtAttributes: @getFieldDBFormAttributes 'igt'
+            translationAttributes: @getFieldDBFormAttributes 'translation'
+            secondaryAttributes: @getEditableSecondaryAttributes()
       })
       @$el.html @template(context)
 
-    # @getFieldDBFormIGTAttributes()
-    # @getFieldDBFormTranslationAttributes()
-    # @getFieldDBFormSecondaryAttributes()
+    # Return an array of editable datum attributes (where an attribute may be just that
+    # or it may be the `label` value of a session/datum field).
+    # A datum attribute is editable and secondary iff:
+    # - it is a datum field or it is `datum.comments` AND
+    # - it is not read-only (see app settings model) AND
+    # - it is not "primary" (i.e., IGT, translation or grammaticality, as defined in app settings)
+    getEditableSecondaryAttributes: ->
+
+      # Get the list of *possible* editable secondary attributes: datumField
+      # labels and `comments`
+      datumFieldLabels = (field.label for field in @model.get('datumFields'))
+      possibleEditableSecondaryAttributes = datumFieldLabels.concat ['comments']
+
+      # `secondaryAttributes` is the ordered list of datum attributes that are
+      # specified as "secondary" in the applicationSettings model.
+      orderedSecondaryAttributes = @getFieldDBFormAttributes 'secondary'
+      orderedEditableSecondaryAttributes = (a for a in \
+        orderedSecondaryAttributes when a in \
+        possibleEditableSecondaryAttributes)
+
+      # These attributes can NOT be editable secondary attributes.
+      # (Note: these arrays are all defined in the application settings model.)
+      unavailableAttributes = [].concat(
+        @getFieldDBFormAttributes 'readonly'
+        @getFieldDBFormAttributes 'igt'
+        @getFieldDBFormAttributes 'grammaticality'
+        @getFieldDBFormAttributes 'translation'
+      )
+
+      otherSecondaryAttributes = (a for a in \
+        possibleEditableSecondaryAttributes when a not in \
+        orderedEditableSecondaryAttributes)
+
+      secondaryAttributes = orderedEditableSecondaryAttributes
+        .concat otherSecondaryAttributes
+
+      (a for a in secondaryAttributes when a not in unavailableAttributes)
 
     # Return an "input generator" (a method that generates data input HTML,
     # e.g., an input[type=text]) for a FieldDB form attribute.

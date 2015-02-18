@@ -498,21 +498,31 @@ define [
       # corpus-specific in the future.
       fieldDBFormCategories:
 
-        fieldDBFormGrammaticalityAttributes: [
+        grammaticality: [
           'judgement'
         ]
 
-        fieldDBFormIGTAttributes: [
+        # IGT FieldDB form attributes.
+        # The returned array defines the "IGT" attributes of a FieldDB form (along
+        # with their order). These are those that will be aligned into columns of
+        # one word each when displayed in an IGT view.
+        igt: [
           'utterance'
           'morphemes'
           'gloss'
         ]
 
-        fieldDBFormTranslationAttributes: [
+        translation: [
           'translation'
         ]
 
-        fieldDBFormSecondaryAttributes: [
+        # Secondary FieldDB form attributes.
+        # The returned array defines the order of how the secondary attributes are
+        # displayed. It is defined in models/application-settings because it should
+        # ultimately be user-configurable.
+        # QUESTION: @cesine: how is the elicitor of a FieldDB datum/session
+        # documented?
+        secondary: [
           'syntacticCategory'
           'comments'
           'tags'
@@ -528,7 +538,7 @@ define [
           'validationStatus'
         ]
 
-        fieldDBFormReadOnlyAttributes: [
+        readonly: [
           'enteredByUser'
           'dateEntered'
           'modifiedByUser'

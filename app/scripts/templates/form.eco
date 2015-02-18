@@ -74,7 +74,7 @@
 
       <% else if @activeServerType is 'FieldDB': %>
 
-        <% for attribute in @h.fieldDB.getFieldDBFormIGTAttributes(): %>
+        <% for attribute in @h.fieldDB.getFieldDBFormAttributes 'igt': %>
           <%- @h.fieldDB.getFieldDBFormAttributeDisplayer(attribute) attribute, @ %>
         <% end %>
 
@@ -86,11 +86,13 @@
 
       <% if @activeServerType is 'OLD': %>
 
-        <%- @h.old.getOLDFormAttributeDisplayer('translations') 'translations', @ %>
+        <% displayer = @h.old.getOLDFormAttributeDisplayer 'translations' %>
+        <%- displayer 'translations', @ %>
 
       <% else if @activeServerType is 'FieldDB': %>
 
-        <%- @h.fieldDB.getFieldDBFormAttributeDisplayer('translation') 'translation', @ %>
+        <% displayer = @h.fieldDB.getFieldDBFormAttributeDisplayer 'translation' %>
+        <%- displayer 'translation', @ %>
 
       <% end %>
 
@@ -104,18 +106,21 @@
   <% if @activeServerType is 'OLD': %>
 
     <% for attribute in @h.old.getOLDFormSecondaryAttributes(): %>
-      <%- @h.old.getOLDFormAttributeDisplayer(attribute) attribute, @ %>
+      <% displayer = @h.old.getOLDFormAttributeDisplayer attribute %>
+      <%- displayer attribute, @ %>
     <% end %>
 
   <% else if @activeServerType is 'FieldDB': %>
 
-    <% for attribute in @h.fieldDB.getFieldDBFormSecondaryAttributes() : %>
-      <%- @h.fieldDB.getFieldDBFormAttributeDisplayer(attribute) attribute, @ %>
+    <% for attribute in @h.fieldDB.getFieldDBFormAttributes 'secondary' : %>
+      <% displayer = @h.fieldDB.getFieldDBFormAttributeDisplayer attribute %>
+      <%- displayer attribute, @ %>
     <% end %>
 
     <% for datumField in @datumFields: %>
-      <% if datumField.label not in @h.fieldDB.fieldDBAlreadyDisplayedFields: %>
-        <%- @h.fieldDB.fieldDBStringFieldDisplay datumField.label, @ %>
+      <% if datumField.label not in @h.fieldDB.alreadyDisplayedFields: %>
+        <% displayer = @h.fieldDB.fieldDBStringFieldDisplay %>
+        <%- displayer datumField.label, @ %>
       <% end %>
     <% end %>
 

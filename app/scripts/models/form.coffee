@@ -218,6 +218,117 @@ define [
 
 
     ############################################################################
+    # FieldDB-specific getters
+    ############################################################################
+
+
+    # Datum Field getters
+    ############################################################################
+
+    # Return the datum field (an object) such that `label=label`.
+    # E.g., `@getDatumField 'utterance'`.
+    getDatumField: (label) ->
+      try
+        _.findWhere(@get('datumFields'), label: label)
+      catch
+        undefined
+
+    # Return the value of `attribute` on the datum field (an object) such that
+    # `label=label`. E.g., @getDatumFieldAttributeValue 'utterance', 'value'
+    getDatumFieldAttributeValue: (label, attribute) ->
+      @getDatumField(label)?[attribute]
+
+    # Return the `value` value of the first object in `datumFields`
+    # such that `label=label`.
+    getDatumFieldValue: (label) ->
+      @getDatumFieldAttributeValue label, 'value'
+
+    # Get the `help` value of the first object in `datumFields`
+    # such that `label=label`.
+    getDatumFieldHelp: (label) ->
+      @getDatumFieldAttributeValue label, 'help'
+
+
+    # Session Field getters
+    ############################################################################
+
+    # Return the session field (an object) such that `label=label`.
+    # E.g., `@getSessionField 'goal'`.
+    getSessionField: (label) ->
+      try
+        _.findWhere(@get('session').sessionFields, label: label)
+      catch
+        undefined
+
+    # Return the value of `attribute` on the session field (an object) such that
+    # `label=label`.
+    # E.g., @getSessionFieldAttributeValue 'goal', 'value'
+    getSessionFieldAttributeValue: (label, attribute) ->
+      @getSessionField(label)?[attribute]
+
+    # Return the `value` value of the first object in `sessionFields`
+    # such that `label=label`.
+    getSessionFieldValue: (label) ->
+      @getSessionFieldAttributeValue label, 'value'
+
+    # Get the `help` value of the first object in `sessionFields`
+    # such that `label=label`.
+    getSessionFieldHelp: (label) ->
+      @getSessionFieldAttributeValue label, 'help'
+
+
+    # General Datum getters
+    ############################################################################
+    #
+    # These methods are conveniences that try to treat a FieldDB datum as a
+    # simple object. One passes in an "attribute" and these getters will return
+    # a value by trying to find a match for that "attribute" in a datum/session
+    # field label or by matching the "attribute" to a true attribute of the
+    # datum.
+
+    # Return `@attribute`, `@session.sessionFields(label=attribute)` or
+    # `@datumFields(label=attribute)`, whichever exists first.
+    getDatumValue: (attribute) ->
+      directValue = @get attribute
+      sessionField = @getSessionField attribute
+      datumField = @getDatumField attribute
+      _.filter([directValue, sessionField, datumField])[0]
+
+    # Get the value of `subattr` of the value of the datum's `attribute`.
+    # NOTE: this really only makes sense for session and datum fields, since
+    # only these evaluate to true objects.
+    # E.g., `@getDatumValueAttributeValue 'utterance', 'value'`
+    getDatumValueAttributeValue: (attribute, subattr) ->
+      try
+        @getDatumValue(attribute)[subattr]
+      catch
+        undefined
+
+    # Attempt to intelligently get the value of `attribute` in the datum,
+    # where the value is not always `.value` and where `attribute` is
+    # usually not really an attribute name.
+    # Examples:
+    # - `@getDatumValue 'utterance'` # a string (from datumFields)
+    # - `@getDatumValue 'goal'`      # a string (from sessionFields)
+    # - `@getDatumValue 'comments'`  # an array (a direct attribute)
+    getDatumValueSmart: (attribute) ->
+      datumValue = @getDatumValue attribute
+      if @utils.type(datumValue) is 'object'
+        if attribute is 'modifiedByUser'
+          datumValue.users
+        else
+          datumValue.value
+      else
+        datumValue
+
+    # Get the `help` value of a FieldDB datum field or session field, if exists.
+    getDatumHelp: (label) ->
+      sessionFieldHelp = @getSessionFieldHelp label
+      datumFieldHelp = @getDatumFieldHelp label
+      _.filter([sessionFieldHelp, datumFieldHelp])[0]
+
+
+    ############################################################################
     # OLD Schema
     ############################################################################
 

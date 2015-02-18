@@ -1,17 +1,17 @@
 define [
   'backbone'
-  './base'
+  './form-handler-base'
   './../utils/globals'
   './../utils/tooltips'
   './../templates/form'
-], (Backbone, BaseView, globals, tooltips, formTemplate) ->
+], (Backbone, FormHandlerBaseView, globals, tooltips, formTemplate) ->
 
   # Form View
   # ---------
   #
   # For displaying individual forms with an IGT interface.
 
-  class FormView extends BaseView
+  class FormView extends FormHandlerBaseView
 
     template: formTemplate
     tagName: 'div'
@@ -85,12 +85,9 @@ define [
           tooltips: tooltips
           displayNoneStyle: @displayNoneStyle
           fieldDB:
-            getFieldDBFormIGTAttributes: @getFieldDBFormIGTAttributes
-            getFieldDBFormSecondaryAttributes: @getFieldDBFormSecondaryAttributes
-            getDatumFieldValue: @getDatumFieldValue
+            getFieldDBFormAttributes: @getFieldDBFormAttributes
             getFieldDBFormAttributeDisplayer: @getFieldDBFormAttributeDisplayer
-            getFieldDBAttributeTooltip: @getFieldDBAttributeTooltip
-            fieldDBAlreadyDisplayedFields: @fieldDBAlreadyDisplayedFields()
+            alreadyDisplayedFields: @fieldDBAlreadyDisplayedFields()
             fieldDBStringFieldDisplay: @fieldDBStringFieldDisplay
           old:
             getOLDFormIGTAttributes: @getOLDFormIGTAttributes
@@ -811,7 +808,7 @@ define [
     # i.e., `@` within the template, which has the attributes of
     # `@model.toJSON()`.
     fieldDBGenericIGTFieldDisplay: (attribute, context, contentCallback) =>
-      value = @getFieldDBDatumValue context, attribute
+      value = @model.getDatumValueSmart attribute
       "<div
         class='form-#{@utils.camel2hyphen attribute}'
         #{@displayNoneStyle value}>
@@ -821,7 +818,7 @@ define [
 
     # Return the <div> that displays an OLD translations field.
     fieldDBGenericTranslationFieldDisplay: (attribute, context, contentCallback) =>
-      value = @getFieldDBDatumValue context, attribute
+      value = @model.getDatumValueSmart attribute
       "<div
         class='form-#{@utils.camel2hyphen attribute}'
         #{@displayNoneStyle value}>
@@ -872,15 +869,15 @@ define [
     # Utterance with Judgement Field.
     fieldDBUtteranceJudgementFieldDisplay: (attribute, context) =>
       contentCallback = (attribute, context) =>
-        value = @getFieldDBDatumValue context, attribute
-        judgement = @fieldDBJudgementConverter @getFieldDBDatumValue(context, 'judgement')
+        value = @model.getDatumValueSmart attribute
+        judgement = @fieldDBJudgementConverter @model.getDatumValueSmart('judgement')
         "<span class='judgement'>#{judgement}</span>#{value}"
       @fieldDBGenericIGTFieldDisplay attribute, context, contentCallback
 
     # Morphemes Field.
     fieldDBMorphemesFieldDisplay: (attribute, context) =>
       contentCallback = (attribute, context) =>
-        value = @getFieldDBDatumValue context, attribute
+        value = @model.getDatumValueSmart attribute
         @utils.encloseIfNotAlready value, '/', '/'
       @fieldDBGenericIGTFieldDisplay attribute, context, contentCallback
 
@@ -888,14 +885,14 @@ define [
     # (Potential TODO: small-caps-ify all-caps morpheme abbreviations)
     fieldDBGlossFieldDisplay: (attribute, context) =>
       contentCallback = (attribute, context) =>
-        @getFieldDBDatumValue context, attribute
+        @model.getDatumValueSmart attribute
       @fieldDBGenericIGTFieldDisplay attribute, context, contentCallback
 
     # Translation Field. Note that translations are their own category since
     # they are not "secondary" data but they're also not "igt" data.
     fieldDBTranslationFieldDisplay: (attribute, context) =>
       contentCallback = (attribute, context) =>
-        @getFieldDBDatumValue context, attribute
+        @model.getDatumValueSmart attribute
       @fieldDBGenericTranslationFieldDisplay attribute, context, contentCallback
 
     # Map from OLD attribute names to methods defined here that display them.
@@ -975,8 +972,8 @@ define [
     # Return a list of the Datum attributes that will not be displayed by
     # looping through the defined secondary and IGT attributes.
     fieldDBAlreadyDisplayedFields: =>
-      secondaryAttributes = @getFieldDBFormSecondaryAttributes()
-      igtAttributes = @getFieldDBFormIGTAttributes()
+      secondaryAttributes = @getFieldDBFormAttributes 'secondary'
+      igtAttributes = @getFieldDBFormAttributes 'igt'
       ['judgement', 'translation'].concat secondaryAttributes, igtAttributes
 
     # Return the <div> that displays a FieldDB Secondary Data field (e.g.,
@@ -988,7 +985,7 @@ define [
     # parameter is the context, i.e., `@` within the template, which has the
     # attributes of `@model.toJSON()`.
     fieldDBGenericSecondaryDataFieldDisplay: (attribute, context, contentCallback) =>
-      value = @getFieldDBDatumValue context, attribute
+      value = @model.getDatumValueSmart attribute
       tooltip = @getFieldDBAttributeTooltip attribute, context
       "<div
         class='form-#{@utils.camel2hyphen attribute}'
@@ -1015,13 +1012,13 @@ define [
     # String Field.
     fieldDBStringFieldDisplay: (attribute, context) =>
       contentCallback = (attribute, context) =>
-        @getFieldDBDatumValue context, attribute
+        @model.getDatumValueSmart attribute
       @fieldDBGenericSecondaryDataFieldDisplay attribute, context, contentCallback
 
     # Comments field; schema: {text: '', username: '', timestamp: ''}
     fieldDBCommentsFieldDisplay: (attribute, context) =>
       contentCallback = (attribute, context) =>
-        comments = @getFieldDBDatumValue context, attribute
+        comments = @model.getDatumValueSmart attribute
         result = []
         for comment in comments.reverse()
           result.push "
@@ -1040,7 +1037,7 @@ define [
     # Date(time) Field.
     fieldDBDateFieldDisplay: (attribute, context) =>
       contentCallback = (attribute, context) =>
-        @utils.timeSince @getFieldDBDatumValue(context, attribute)
+        @utils.timeSince @model.getDatumValueSmart(attribute)
       @fieldDBGenericSecondaryDataFieldDisplay attribute, context, contentCallback
 
     # Modified by user (i.e., modifiers) Field.
@@ -1054,7 +1051,7 @@ define [
     # the enterer. Am I right about that?
     fieldDBModifiersArrayFieldDisplay: (attribute, context) =>
       contentCallback = (attribute, context) =>
-        modifiers = @getFieldDBDatumValue context, attribute
+        modifiers = @model.getDatumValueSmart attribute
         result = []
         if modifiers
           try
