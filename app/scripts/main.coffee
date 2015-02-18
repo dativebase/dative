@@ -36,7 +36,7 @@ require.config
     bootstrap: '../bower_components/sass-bootstrap/dist/js/bootstrap'
     text: '../bower_components/requirejs-text/text'
     jqueryui: '../bower_components/jqueryui/jquery-ui'
-    superfish: 'jquery-extensions/superfish'
+    superfish: '../bower_components/superfish/dist/js/superfish'
     superclick: '../bower_components/superclick/dist/js/superclick'
     #superfish: '../bower_components/superfish/dist/js/superfish'
     #superfish: 'jquery-extensions/superfish/dist/js/superfish'
