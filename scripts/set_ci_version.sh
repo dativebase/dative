@@ -8,11 +8,14 @@ todayTimestamp="$(echo `date  +%s`)"
 
 echo ""
 echo "____========== Getting the version code for today =============_______"
+echo " Birthday: $BIRTHDAY"
+echo " Today: $today"
+echo " Birthday: $BIRTHDAY_TIMESTAMP "
+echo " Today: $todayTimestamp"
+echo ""
+echo ""
 
-# echo "Birthday: $BIRTHDAY , $BIRTHDAY_TIMESTAMP "
-# echo "Today: $today , $todayTimestamp"
-
-let WEEK_DIFF=`expr $todayTimestamp - $BIRTHDAY_TIMESTAMP`/60/60/24/7;
+let WEEK_DIFF=`expr $todayTimestamp - $BIRTHDAY_TIMESTAMP`/60/60/24/7 || exit 4;
 
 if [ "$WEEK_DIFF" -gt 208 ]
   then
@@ -35,7 +38,9 @@ else
 fi
 # NOW=`date +%Y.%m.%d.%H.%M`
 MINOR_VERSION=`date +%d.%H.%M`
+DAY=`date +%d`
 
+SHORT_VERSION="$YEAR_DIFF.$WEEK_DIFF.$DAY"
 version="$YEAR_DIFF.$WEEK_DIFF.$MINOR_VERSION"
 echo " Birthday: $BIRTHDAY"
 echo " Today: $today"
@@ -45,10 +50,10 @@ echo "  ->    Version: $version"
 echo ""
 
 echo "... setting version on dative bower"
-sed 's/"version": "[^,]*"/"version": "'$version'"/' bower.json  > output
+sed 's/"version": "[^,]*"/"version": "'$SHORT_VERSION'"/' bower.json  > output
 mv output bower.json
 echo "... setting version on dative package"
-sed 's/"version": "[^,]*"/"version": "'$version'"/' package.json  > output
+sed 's/"version": "[^,]*"/"version": "'$SHORT_VERSION'"/' package.json  > output
 mv output package.json
 
 cp package.json dist/
