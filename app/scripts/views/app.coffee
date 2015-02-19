@@ -379,23 +379,25 @@ define [
     # strategy #1
     listenForLinkOnload: (callback) ->
       link = document.getElementById 'jquery-ui-css'
-      link.onload = -> callback()
+      if link
+        link.onload = -> callback()
 
     # strategy #2
     addEventListenerToLink: (callback) ->
       link = document.getElementById 'jquery-ui-css'
       eventListener = -> callback()
-      if link.addEventListener
+      if link && link.addEventListener
         link.addEventListener 'load', eventListener, false
 
     # strategy #3
     listenForReadyStateChange: (callback) ->
       link = document.getElementById 'jquery-ui-css'
-      link.onreadystatechange = ->
-        state = link.readyState
-        if state is 'loaded' or state is 'complete'
-          link.onreadystatechange = null
-          callback()
+      if link
+        link.onreadystatechange = ->
+          state = link.readyState
+          if state is 'loaded' or state is 'complete'
+            link.onreadystatechange = null
+            callback()
 
     # strategy #4
     checkForChangeInDocumentStyleSheets: (callback) ->
