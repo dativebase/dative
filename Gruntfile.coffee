@@ -375,7 +375,7 @@ module.exports = (grunt) ->
             'images/{,*/}*.{webp,gif}'
             'styles/fonts/{,*/}*.*'
             'bower_components/sass-bootstrap/fonts/*.*'
-            'bower_components/jqueryui/**/*.{png,jpg,jpeg,gif,webp,svg,eot,ttf,woff}' # added, cf. http://stackoverflow.com/questions/20509145/managing-images-in-bower-packages-using-grunt?lq=1
+            'bower_components/jqueryui/**/*.*' # added, cf. http://stackoverflow.com/questions/20509145/managing-images-in-bower-packages-using-grunt?lq=1
           ]
         ]
       disttmp:
