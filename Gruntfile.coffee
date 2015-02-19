@@ -370,6 +370,7 @@ module.exports = (grunt) ->
             '*.{ico,txt}'
             '.htaccess'
             'favicon.ico'
+            'help/html/help.html'
             './../package.json'
             'images/{,*/}*.{webp,gif}'
             'styles/fonts/{,*/}*.*'
@@ -617,6 +618,9 @@ module.exports = (grunt) ->
     # I don't know why dist/bower_components/ is created (...). In any case,
     # I'm just cleaning it up hackily like so.
     # 'clean:postdist'
+
+    # copy everything that is supposed ot be in the dist, not sure why there are other copy tasks like disttmp and distJQueryUIImages and distrequirejs
+    'copy:dist'
   ]
 
   grunt.registerTask 'default', ['jshint', 'test', 'build']
