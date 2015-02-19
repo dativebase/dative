@@ -27,7 +27,7 @@ Using Dative is all about entering linguistic fieldwork data, refining it,
 browsing it, searching through it, and using it to write papers, develop
 learning materials, or generate documentary or archive-quality artifacts.
 
-Dative can work with both [{{FieldDB.FieldDBObject.application.brand}}]({{app.website}}) and
+Dative can work with both [{{FieldDB.FieldDBObject.application.brand}}]({{FieldDB.FieldDBObject.application.website}}) and
 [OLD](http://www.onlinelinguisticdatabase.org/)-type web servers. This means
 that if you have an account with {{FieldDB.FieldDBObject.application.brand}} or an OLD application, you can use
 Dative to work with your existing corpora and data sets.
@@ -75,7 +75,7 @@ IMPLEMENTED IN DATIVE.
 Dative is an application for linguistic fieldwork. It is a graphical user
 interface that runs in modern web browsers. The data that you enter into
 Dative are saved to the web server that you are logged into at the time.
-This may be a [{{FieldDB.FieldDBObject.application.brand}}]({{app.website}}) server or an
+This may be a [{{FieldDB.FieldDBObject.application.brand}}]({{FieldDB.FieldDBObject.application.website}}) server or an
 [OLD](http://www.onlinelinguisticdatabase.org/) one. {{FieldDB.FieldDBObject.application.brand}} and the OLD
 are web services that allow linguistic data to be stored and manipulated
 on web servers by multiple users at the same time.

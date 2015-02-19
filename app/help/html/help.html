@@ -1,3 +1,4 @@
+<div class="markdown-content">
 <h1 id="dative-help">Dative Help</h1>
 <p>Dative is an application for linguistic fieldwork. It helps groups of
 fieldworkers to collaboratively build corpora of language data.</p>
@@ -20,7 +21,7 @@ Help</a> section.</p>
 <p>Using Dative is all about entering linguistic fieldwork data, refining it,
 browsing it, searching through it, and using it to write papers, develop
 learning materials, or generate documentary or archive-quality artifacts.</p>
-<p>Dative can work with both <a href="{{app.website}}">{{FieldDB.FieldDBObject.application.brand}}</a> and
+<p>Dative can work with both <a href="{{FieldDB.FieldDBObject.application.website}}">{{FieldDB.FieldDBObject.application.brand}}</a> and
 <a href="http://www.onlinelinguisticdatabase.org/">OLD</a>-type web servers. This means
 that if you have an account with {{FieldDB.FieldDBObject.application.brand}} or an OLD application, you can use
 Dative to work with your existing corpora and data sets.</p>
@@ -63,7 +64,7 @@ be considered equivalent here.</li>
 <p>Dative is an application for linguistic fieldwork. It is a graphical user
 interface that runs in modern web browsers. The data that you enter into
 Dative are saved to the web server that you are logged into at the time.
-This may be a <a href="{{app.website}}">{{FieldDB.FieldDBObject.application.brand}}</a> server or an
+This may be a <a href="{{FieldDB.FieldDBObject.application.website}}">{{FieldDB.FieldDBObject.application.brand}}</a> server or an
 <a href="http://www.onlinelinguisticdatabase.org/">OLD</a> one. {{FieldDB.FieldDBObject.application.brand}} and the OLD
 are web services that allow linguistic data to be stored and manipulated
 on web servers by multiple users at the same time.</p>
@@ -196,4 +197,21 @@ that particular form:</p>
 <li><strong>shift+tab</strong> focus the previous form</li>
 </ul>
 
-
+</div>
+<script>
+if (FieldDB && FieldDB.FieldDBObject && FieldDB.FieldDBObject.application && FieldDB.FieldDBObject.application.brand) {
+  var replaceVariables = function(content) {
+    alert(" wait here"+ content)
+    content = content.replace(/{{FieldDB.FieldDBObject.application.brand}}/g, FieldDB.FieldDBObject.application.brand)
+                    .replace(/{{FieldDB.FieldDBObject.application.website}}/g, FieldDB.FieldDBObject.application.website);
+    return content;
+  }
+  if ($ && $(".markdown-content")) {
+    $(".markdown-content")
+      .each(function() {
+        console.log(window.markdown = this)
+        $(this).html(replaceVariables($(this).html()));
+      });
+  }
+}
+</script>
