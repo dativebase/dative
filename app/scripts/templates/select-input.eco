@@ -1,0 +1,19 @@
+<select
+  name='<%= @name %>'
+  class='<%= @class %>
+         dative-tooltip'
+  title='<%= @title %>'>
+  <% if not @required: %>
+    <option></option>
+  <% end %>
+  <% for selectOption in @options[@optionsAttribute] or []: %>
+    <% if selectOption.id is @value: %>
+      <option value="<%= selectOption[@selectValueAttribute] %>" selected
+        ><%= @selectTextGenerator selectOption %></option>
+    <% else: %>
+      <option value="<%= selectOption[@selectValueAttribute] %>"
+        ><%= @selectTextGenerator selectOption %></option>
+    <% end %>
+  <% end %>
+</select>
+

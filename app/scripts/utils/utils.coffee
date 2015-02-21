@@ -56,12 +56,26 @@ define (require) ->
     return regex.test(email)
 
   startsWith = (s, prefix) -> s[...prefix.length] is prefix
-  endsWith = (s, prefix) -> prefix is '' or s[-prefix.length..] is prefix
+
+  endsWith = (s, suffix) -> suffix is '' or s[-suffix.length..] is suffix
 
   integerWithCommas = (integer) ->
     integer.toString().replace /\B(?=(\d{3})+(?!\d))/g, ','
 
-  pluralize = (noun) -> "#{noun}s"
+  # Singularize a string by cutting of its last character (REALLY stupid).
+  singularize = (string) ->
+    try
+      string[...-1]
+    catch
+      string
+
+  pluralize = (noun) ->
+    if endsWith noun, 'y'
+      "#{noun[...-1]}ies"
+    else if endsWith(noun, 'z') or endsWith(noun, 's') or endsWith(noun, 'sh')
+      "#{noun}es"
+    else
+      "#{noun}s"
 
   pluralizeByNum = (noun, numeral) ->
     switch numeral
@@ -202,6 +216,7 @@ define (require) ->
   startsWith: startsWith
   endsWith: endsWith
   integerWithCommas: integerWithCommas
+  singularize: singularize
   pluralize: pluralize
   pluralizeByNum: pluralizeByNum
   timeSince: timeSince

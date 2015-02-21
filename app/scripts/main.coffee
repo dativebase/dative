@@ -18,6 +18,7 @@ require.config
     # backboneindexeddb: ['backbone']
     multiselect: ['jquery', 'jqueryui']
     jqueryelastic: ['jquery']
+    autosize: ['jquery']
     perfectscrollbar: ['jquery']
     superfish: ['jquery']
     superclick: ['jquery']
@@ -49,6 +50,7 @@ require.config
     #supersubs: 'jquery-extensions/superfish/dist/js/supersubs'
     multiselect: '../bower_components/multiselect/js/jquery.multi-select'
     jqueryelastic: '../bower_components/jakobmattsson-jquery-elastic/jquery.elastic.source'
+    autosize: '../bower_components/autosize/jquery.autosize'
     #betterelastictextarea: '../bower_components/better-elastic-textarea/dist/better-elastic-textarea'
     spin: '../bower_components/spin.js/spin'
     jqueryspin: '../bower_components/spin.js/jquery.spin'

@@ -17,6 +17,7 @@
     "indexeddb-backbonejs-adapter": "*",
     "multiselect": "*",
     "jakobmattsson-jquery-elastic": "*",
+    "autosize": "1.18.17",
     "better-elastic-textarea": "*",
     "spin.js": "*",
     "perfect-scrollbar": "*",

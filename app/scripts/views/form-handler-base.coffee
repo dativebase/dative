@@ -48,16 +48,20 @@ define [
     # Get the tooltip for a FieldDB datum field. This is the value of `help` as
     # supplied by FieldDB, if present; otherwise it's the relevant tooltip (if
     # any) defined in the `tooltips` module.
-    getFieldDBAttributeTooltip: (attribute, context) =>
+    getFieldDBAttributeTooltip: (attribute) =>
+      # console.log "in getFieldDBAttributeTooltip with #{attribute}"
       help = @model.getDatumHelp attribute
       if help and attribute isnt 'dateElicited'
+        # console.log "returning help: #{help}"
         help
       else
         value = @model.getDatumValueSmart attribute
-        tooltips("fieldDB.formAttributes.#{attribute}")(
+        tooltip = tooltips("fieldDB.formAttributes.#{attribute}")(
           language: 'eng'
           value: value
         )
+        # console.log "returning tooltip: #{tooltip}"
+        tooltip
 
     # Getters for arrays that categorize FieldDB datum attributes
     # ---------------------------------------------------------------------------
@@ -69,10 +73,39 @@ define [
     # The returned array defines the category of type `category` for FieldDB
     # forms. It is defined in models/application-settings because it should
     # ultimately be user-configurable.
+    # TODO: deprecate this in favour of `getFormAttributes`.
     getFieldDBFormAttributes: (category) =>
       try
         globals.applicationSettings
           .get('fieldDBFormCategories')[category]
       catch
         []
+
+    # Get an array of form attributes (form app settings model) for the
+    # specified server type and category (e.g., 'igt' or 'secondary').
+    getFormAttributes: (serverType, category) ->
+      switch serverType
+        when 'FieldDB' then attribute = 'fieldDBFormCategories'
+        when 'OLD' then attribute = 'oldFormCategories'
+      try
+        globals.applicationSettings.get(attribute)[category]
+      catch
+        console.log "WARNING: could not get an attributes array for
+          #{serverType} and #{category}"
+        []
+
+    ############################################################################
+    # OLD stuff
+    ############################################################################
+
+    # Return the tooltip for an OLD form attribute (uses the imported `tooltip`
+    # module). Note that we pass `value` in case `tooltip` uses it in generating
+    # a value-specific tooltip (which isn't always the case.)
+    getOLDAttributeTooltip: (attribute) ->
+      tooltipGenerator = tooltips("old.formAttributes.#{attribute}")
+      value = @model.get attribute
+      tooltipGenerator(
+        language: 'eng' # TODO: make 'eng' configurable
+        value: value
+      )
 

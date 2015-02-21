@@ -1,0 +1,7 @@
+<label
+  for='<%= @name %>'
+  class='dative-field-label
+         dative-tooltip'
+  title='<%= @title %>'
+  ><%= @label %></label>
+

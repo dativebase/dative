@@ -1,0 +1,38 @@
+<select
+  name='<%= @selectName %>'
+  class='<%= @selectClass %>'
+  title='<%= @selectTitle %>'>
+  <option></option>
+  <% for selectOption in @options[@selectOptionsAttribute] or []: %>
+    <% if selectOption is @selectValue: %>
+      <option value="<%= selectOption %>" selected><%= selectOption %></option>
+    <% else: %>
+      <option value="<%= selectOption %>"><%= selectOption %></option>
+    <% end %>
+  <% end %>
+</select>
+
+<textarea
+  rows='1'
+  name='<%= @textareaName %>'
+  class='<%= @textareaClass %>
+         ui-corner-all
+         form-add-input
+         dative-tooltip
+         dative-input-field
+         textarea-select-button'
+  title='<%= @textareaTitle %>'
+  ><%= @textareaValue %></textarea>
+
+<button
+  class='<%= @buttonClass %>
+         dative-tooltip
+         new-remove'
+  title='<%= @buttonTitle %>'
+><i
+  class='fa
+         fa-fw
+         <%= @buttonIconClass %>'
+></i
+></button>
+

@@ -844,8 +844,9 @@ define [
     showFormAddView: ->
       @setFormAddViewButtonHide()
       @formAddViewVisible = true
-      @$('.add-form-widget').show()
-      #@focusFirstFormAddViewTextarea()
+      @$('.add-form-widget').show
+        complete: ->
+          Backbone.trigger 'forms:addFormWidgetVisible'
 
     hideFormAddViewAnimate: ->
       @setFormAddViewButtonShow()
@@ -858,7 +859,8 @@ define [
     showFormAddViewAnimate: ->
       @setFormAddViewButtonHide()
       @formAddViewVisible = true
-      @$('.add-form-widget').slideDown()
+      @$('.add-form-widget').slideDown
+        complete: -> Backbone.trigger 'forms:addFormWidgetVisible'
       @focusFirstFormAddViewTextarea()
       @scrollToBottom()
 

@@ -550,8 +550,12 @@ define [
       # since the OLD data structure is (at present) fixed.
       oldFormCategories:
 
+        grammaticality: [
+          'grammaticality'
+        ]
+
         # IGT OLD Form Attributes.
-        oldFormIGTAttributes: [
+        igt: [
           'narrow_phonetic_transcription'
           'phonetic_transcription'
           'transcription'
@@ -561,12 +565,12 @@ define [
 
         # Note: this is currently not being used (just being consistent with
         # FieldDB above.)
-        oldFormTranslationAttributes: [
+        translation: [
           'translations'
         ]
 
         # Secondary OLD Form Attributes.
-        oldFormSecondaryAttributes: [
+        secondary: [
           'syntactic_category_string'
           'break_gloss_category'
           'comments'
@@ -583,11 +587,22 @@ define [
           'datetime_modified'
           'verifier'
           'source'
-          'files'
-          'collections'
+          #'files'
+          #'collections'
           'syntax'
           'semantics'
           'status'
+          'UUID'
+          'id'
+        ]
+
+        readonly: [
+          'syntactic_category_string'
+          'break_gloss_category'
+          'enterer'
+          'datetime_entered'
+          'modifier'
+          'datetime_modified'
           'UUID'
           'id'
         ]

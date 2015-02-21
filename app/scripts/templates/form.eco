@@ -67,14 +67,13 @@
     <div class='form-igt-data dative-form-igt'>
 
       <% if @activeServerType is 'OLD': %>
-
-        <% for attribute in @h.old.getOLDFormIGTAttributes(): %>
+        <% for attribute in @h.getFormAttributes @activeServerType, 'igt': %>
           <%- @h.old.getOLDFormAttributeDisplayer(attribute) attribute, @ %>
         <% end %>
 
       <% else if @activeServerType is 'FieldDB': %>
 
-        <% for attribute in @h.fieldDB.getFieldDBFormAttributes 'igt': %>
+        <% for attribute in @h.getFormAttributes @activeServerType, 'igt': %>
           <%- @h.fieldDB.getFieldDBFormAttributeDisplayer(attribute) attribute, @ %>
         <% end %>
 
@@ -105,14 +104,14 @@
 
   <% if @activeServerType is 'OLD': %>
 
-    <% for attribute in @h.old.getOLDFormSecondaryAttributes(): %>
+    <% for attribute in @h.getFormAttributes @activeServerType, 'secondary': %>
       <% displayer = @h.old.getOLDFormAttributeDisplayer attribute %>
       <%- displayer attribute, @ %>
     <% end %>
 
   <% else if @activeServerType is 'FieldDB': %>
 
-    <% for attribute in @h.fieldDB.getFieldDBFormAttributes 'secondary' : %>
+    <% for attribute in @h.getFormAttributes @activeServerType, 'secondary': %>
       <% displayer = @h.fieldDB.getFieldDBFormAttributeDisplayer attribute %>
       <%- displayer attribute, @ %>
     <% end %>

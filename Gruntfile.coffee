@@ -71,7 +71,7 @@ module.exports = (grunt) ->
         files: ['<%= yeoman.app %>/scripts/templates/*.ejs']
         tasks: ['jst']
       eco:
-        files: ['<%= yeoman.app %>/scripts/templates/*.eco']
+        files: ['<%= yeoman.app %>/scripts/templates/{,*/}*.eco']
         tasks: ['eco']
       test:
         files: ['<%= yeoman.app %>/scripts/{,*/}*.js', 'test/spec/**/*.js']
@@ -449,7 +449,7 @@ module.exports = (grunt) ->
       files:
         expand: true
         cwd: '<%= yeoman.app %>/scripts/templates'
-        src: ['*.eco']
+        src: ['*.eco', 'fields/*.eco']
         dest: '.tmp/scripts/templates'
         ext: '.js'
 

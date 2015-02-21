@@ -1,0 +1,326 @@
+<div class="dative-widget-header ui-widget-header ui-corner-top">
+
+  <div class='dative-widget-header-title'><%= @headerTitle %></div>
+
+  <div class='button-container-left'>
+
+    <button class="hide-form-add-widget dative-tooltip"
+      title="hide this form add widget">
+      <i class='fa fa-angle-double-up fa-fw'></i>
+    </button>
+
+    <button class="toggle-secondary-data dative-tooltip"
+      title="show the secondary data input fields">
+      <i class='fa fa-angle-down fa-fw'></i>
+    </button>
+
+  </div>
+
+  <div class='button-container-right'>
+
+    <button class='form-add-help dative-tooltip' title='help with adding a form'>
+      <i class='fa fa-fw fa-question'></i>
+    </button>
+
+  </div>
+
+</div>
+
+<div class="dative-widget-body">
+
+  <% if @activeServerType is 'OLD': %>
+    <% class_ = ' old' %>
+  <% else if @activeServerType is 'FieldDB': %>
+    <% class_ = ' fielddb' %>
+  <% else: %>
+    <% class_ = '' %>
+  <% end %>
+  <div class="form-add-form<%= class_ %>">
+
+    <ul class="fieldset igt-data">
+
+      <% if @activeServerType is 'OLD': %>
+
+        <li>
+
+          <label for="transcription">Transcription</label>
+
+          <select name="grammaticality" class="grammaticality"
+            title="The grammaticality or pragmatic acceptibility judgment of the form">
+            <% for grammaticality in @options.grammaticalities: %>
+              <option value="<%= grammaticality %>"><%= grammaticality %></option>
+            <% end %>
+          </select>
+
+          <textarea rows="1" name="transcription"
+            class="transcription ui-corner-all form-add-input dative-tooltip"
+            maxlength="255"
+            title="A transcription of the form (probably orthographic)"
+            ><%= @transcription %></textarea>
+
+        </li>
+
+        <li>
+
+          <label for="morphemeBreak">Morpheme Break</label>
+
+          <textarea name="morphemeBreak" maxlength="255"
+            class="ui-corner-all dative-tooltip"
+            title="A morphological analysis of the form: a sequence of morphemes
+            and delimiters"
+            ><%= @morphemeBreak %></textarea>
+
+        </li>
+
+        <li>
+
+          <label for="morphemeGloss">Morpheme Gloss</label>
+
+          <textarea name="morphemeGloss" class="ui-corner-all dative-tooltip"
+            maxlength="255"
+            title="A gloss for each morpheme in the morpheme break line above"
+            ><%= @morphemeGloss %></textarea>
+
+        </li>
+
+        <% if @translations.length: %>
+
+          <% for translation, index in @translations: %>
+
+            <li class="translation-li">
+
+              <label class="translation-label"
+                for="translations-<%= index %>.transcription"
+                >Translation</label>
+
+              <select name="translations-<%= index %>.grammaticality"
+                class="grammaticality translation-grammaticality"
+                title="The acceptibility of this as a translation for the form">
+                <% for grammaticality in @options.grammaticalities: %>
+                  <option value="<%= grammaticality %>"
+                    ><%= grammaticality %></option>
+                <% end %>
+              </select>
+
+              <textarea name="translations-<%= index %>.transcription"
+                maxlength="255"
+                title="The text of the translation"
+                class="translation translation-transcription ui-corner-all
+                  dative-tooltip"
+                ><%= translation.transcription %>
+              </textarea>
+
+              <% if index is 0: %>
+                <button class="append-translation-field
+                  append-remove-translation-field dative-tooltip"
+                  title="Add another translation.">
+                  <i class="fa fa-fw fa-plus"></i>
+                </button>
+              <% else: %>
+                <button class="remove-translation-field dative-tooltip
+                  append-remove-translation-field"
+                  title="Delete this translation.">
+                  <i class="fa fa-fw fa-minus"></i>
+                </button>
+              <% end %>
+
+            </li>
+
+          <% end %>
+
+        <% else: %>
+
+          <li class="translation-li">
+
+            <label for="translations-0.transcription">Translation</label>
+
+            <select name="translations-0.grammaticality"
+              class="grammaticality translation-grammaticality"
+              title="The acceptibility of this as a translation for the form">
+              <% for grammaticality in @options.grammaticalities: %>
+                <option value="<%= grammaticality %>"><%= grammaticality %></option>
+              <% end %>
+            </select>
+
+            <textarea name="translations-0.transcription"
+              maxlength="255"
+              class="translation ui-corner-all dative-tooltip"
+              title="The text of the translation"
+              ></textarea>
+
+            <button class="append-translation-field dative-tooltip
+              append-remove-translation-field"
+              title="Add another translation.">
+              <i class="fa fa-fw fa-plus"></i>
+            </button>
+
+          </li>
+
+        <% end %>
+
+      <% # END OLD CASE %>
+
+      <% else if @activeServerType is 'FieldDB': %>
+
+      <% # BEGIN FIELDDB CASE %>
+
+        <% for attribute in @h.fieldDB.igtAttributes: %>
+          <li>
+            <%- @h.fieldDB.inputGenerator(attribute) attribute, @ %>
+          </li>
+        <% end %>
+
+        <% for attribute in @h.fieldDB.translationAttributes: %>
+          <li>
+            <%- @h.fieldDB.inputGenerator(attribute) attribute, @ %>
+          </li>
+        <% end %>
+
+      <% end %>
+
+      </ul>
+
+
+    <% # Secondary Data %>
+
+    <div class="secondary-data">
+
+      <ul class="fieldset">
+
+      <% if @activeServerType is 'OLD': %>
+
+        <li>
+          <label for="comments">General Comments</label>
+          <textarea name="comments" class="comments ui-corner-all dative-tooltip"
+            title="General-purpose field for comments and notes about the form"
+            ><%= @comments %></textarea>
+        </li>
+
+        <li>
+          <label for="speakerComments">Speaker Comments</label>
+          <textarea name="speakerComments"
+            class="ui-corner-all speaker-comments dative-tooltip"
+            title="Comments made by the speaker that are relevant to this form"
+          ><%= @speakerComments %></textarea>
+        </li>
+
+        <li>
+          <label for="elicitationMethod">Elicitation Method</label>
+          <select name="elicitationMethod"
+            class="elicitation-method dative-tooltip elicitation-method"
+            title="Method of elicitation, e.g., translation, judgment,
+              spontaneously offered, etc.">
+            <% for [id, elicitationMethod] in @options.elicitationMethods: %>
+              <option value="<%= id %>"><%= elicitationMethod %></option>
+            <% end %>
+          </select>
+        </li>
+
+        <li>
+          <div class="tags-multiselect">
+            <label for="tags">Tags</label>
+            <select name="tags" multiple="multiple" class="dative-tooltip tags"
+              title="Tags for categorizing forms">
+              <% for [id, tag] in @options.tags: %>
+                <option value="<%= id %>"><%= tag %></option>
+              <% end %>
+            </select>
+          </div>
+        </li>
+
+        <li>
+          <label for="syntacticCategory">Category</label>
+          <select name="syntacticCategory"
+            class="syntactic-category dative-tooltip"
+            title="A syntactic or morphological category for this form">
+            <% for [id, category] in @options.categories: %>
+              <option value="<%= id %>"><%= category %></option>
+            <% end %>
+          </select>
+        </li>
+
+      </ul>
+
+      <ul class="fieldset">
+
+        <li>
+          <label for="speaker">Speaker</label>
+          <select name="speaker" class="speaker dative-tooltip"
+            title="The speaker (i.e., consultant) of this form">
+            <% for [id, speaker] in @options.speakers: %>
+              <option value="<%= id %>"><%= speaker %></option>
+            <% end %>
+          </select>
+        </li>
+
+        <li>
+          <label for="elicitor">Elicitor</label>
+          <select name="elicitor" class="elicitor dative-tooltip"
+            title="The fieldworker who elicited (i.e., recorded, transcribed)
+            this form">
+            <% for [id, user] in @options.users: %>
+              <option value="<%= id %>"><%= user %></option>
+            <% end %>
+          </select>
+        </li>
+
+        <li>
+          <label for="verifier">Verifier</label>
+          <select name="verifier" class="verifier dative-tooltip"
+            title="A user who has verified the accuracy of this form">
+            <% for [id, user] in @options.users: %>
+              <option value="<%= id %>"><%= user %></option>
+            <% end %>
+          </select>
+        </li>
+
+        <li>
+          <label for="source">Source</label>
+          <select name="source" class="source dative-tooltip"
+            title="A textual source whence this form was taken">
+            <% for [id, source] in @options.sources: %>
+              <option value="<%= id %>"><%= source %></option>
+            <% end %>
+          </select>
+        </li>
+
+        <li>
+          <label for="dateElicited">Date Elicited</label>
+          <input type="text" name="dateElicited"
+            class="date-elicited ui-corner-all dative-tooltip"
+            title="When this form was elicited"
+            value="<%= @dateElicited %>"/>
+        </li>
+
+      <% # END OLD CASE %>
+      <% else if @activeServerType is 'FieldDB': %>
+
+        <% for attribute in @h.fieldDB.secondaryAttributes: %>
+          <li>
+            <% inputGenerator = @h.fieldDB.inputGenerator attribute %>
+            <%- inputGenerator attribute, @ %>
+          </li>
+        <% end %>
+
+      <% end %>
+
+      </ul>
+
+    </div> <% # END div.secondary-data %>
+
+    <ul class="fieldset button-only-fieldset">
+      <li class="center">
+        <button class="add-form-button dative-tooltip"
+          title="Save this new form">Add Form</button>
+      </li>
+
+      <li class='blargon'>
+          The Blargon of Blargonia.
+      </li>
+
+    </ul>
+
+  </div>
+
+</div>
+

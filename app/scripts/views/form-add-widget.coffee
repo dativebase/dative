@@ -1,12 +1,23 @@
 define [
   'backbone'
   './form-handler-base'
+  './textarea-field'
+  './select-field'
+  './required-select-field'
+  './person-select-field'
+  './user-select-field'
+  './source-select-field'
+  './transcription-grammaticality-field'
+  './translations-field'
   './../models/form'
   './../utils/globals'
   './../templates/form-add-widget'
   'multiselect'
   'jqueryelastic'
-], (Backbone, FormHandlerBaseView, FormModel, globals, formAddTemplate) ->
+], (Backbone, FormHandlerBaseView, TextareaFieldView, SelectFieldView,
+  RequiredSelectFieldView, PersonSelectFieldView, UserSelectFieldView,
+  SourceSelectFieldView, TranscriptionGrammaticalityFieldView,
+  TranslationsFieldView, FormModel, globals, formAddTemplate) ->
 
   # Form Add Widget View
   # --------------------
@@ -23,35 +34,61 @@ define [
     template: formAddTemplate
 
     initialize: ->
+      @activeServerType = @getActiveServerType()
       @secondaryDataVisible = false
       @wideSelectMenuWidth = 548
-      @grammaticalitySelectMenuWidth = 50
       @listenToEvents()
       @setDatumFieldsArray()
 
-    # These arrays are used to categorize FieldDB's `datumFields` objects by their
-    # keys.
-    # TODO: at least some of this should be in application settings (and saved
-    # to server...)
-    # TODO: deprecate this.
-    setDatumFieldsArray: ->
-      @primaryDatumFields = [
-        'judgement'
-        'utterance'
-        'morphemes'
-        'gloss'
-        'translation'
-      ]
-      @secondaryDatumFields = [
-        'tags'
-        'validationStatus'
-        'syntacticCategory'
-        'syntacticTreeLatex'
-      ]
-      @autopopulatedDatumFields = [
-        'modifiedByUser'
-        'enteredByUser'
-      ]
+    # Put the appropriate FieldView instances in `@primaryFieldViews` and.
+    # `@secondaryFieldViews`
+    getFieldViews: ->
+      @getPrimaryFieldViews()
+      @getSecondaryFieldViews()
+
+    # Put the appropriate FieldView instances in `@primaryFieldViews`.
+    getPrimaryFieldViews: ->
+      @primaryFieldViews = []
+      igtAttributes = @getFormAttributes @activeServerType, 'igt'
+      translationAttributes = @getFormAttributes @activeServerType, 'translation'
+      for attribute in igtAttributes.concat translationAttributes
+        @primaryFieldViews.push @getFieldView attribute
+
+    # Put the appropriate FieldView instances in `@secondaryFieldViews`.
+    getSecondaryFieldViews: ->
+      @secondaryFieldViews = []
+      secondaryAttributes = @getEditableSecondaryAttributes()
+      for attribute in secondaryAttributes
+        @secondaryFieldViews.push @getFieldView attribute
+
+    # Return the appropriate FieldView instance for a given attribute.
+    # Default field view is `FieldView`.
+    getFieldView: (attribute) =>
+      params =
+        attribute: attribute
+        model: @model
+        options: @getOptions()
+      if attribute of @attribute2fieldView[@activeServerType]
+        MyFieldView = @attribute2fieldView[@activeServerType][attribute]
+        new MyFieldView params
+      else # the default field view is a(n expandable) textarea.
+        new TextareaFieldView params
+
+    # Maps attributes to their appropriate FieldView classes.
+    #utterance:          'UtteranceJudgementView'
+    #comments:           'CommentsView' # direct Datum attribute
+    attribute2fieldView:
+      FieldDB:{}
+      OLD:
+        transcription:      TranscriptionGrammaticalityFieldView
+        translations:       TranslationsFieldView
+        elicitation_method: SelectFieldView
+        syntactic_category: SelectFieldView
+        speaker:            PersonSelectFieldView
+        elicitor:           UserSelectFieldView
+        verifier:           UserSelectFieldView
+        source:             SourceSelectFieldView
+        status:             RequiredSelectFieldView
 
     events:
       'change': 'setToModel' # fires when multi-select changes
@@ -60,8 +97,6 @@ define [
       'menuselect': 'setToModel' # fires when the tags multi-select changes (not working?...)
       'keydown form.formAdd': 'keyboardEvents'
       'click button.add-form-button': 'submitForm'
-      'click button.append-translation-field': 'appendTranslationField'
-      'click button.remove-translation-field': 'removeTranslationField'
       'click button.hide-form-add-widget': 'hideSelf'
       'click button.toggle-secondary-data': 'toggleSecondaryDataAnimate'
       'click .form-add-help': 'openFormAddHelp'
@@ -88,17 +123,50 @@ define [
         scrollToIndex: 1
       )
 
-    # TODO: AJAX/CORS-fetch the form add metadata (OLD-depending?), if needed
-    # and spin() in the meantime ...
-    render: (taskId) ->
+    render: ->
+      if @activeServerTypeIsOLD() and not @weHaveOLDNewFormData()
+        @model.getOLDNewFormData()
+        return
+      @getFieldViews()
       @html()
       @secondaryDataVisibility()
+      @renderFieldViews()
+      @guify()
+      @fixRoundedBorders() # defined in BaseView
+      @listenToEvents()
+      @
+
+    # TODO: AJAX/CORS-fetch the form add metadata (OLD-depending?), if needed
+    # and spin() in the meantime ...
+    render_: (taskId) ->
+      @html()
+      @secondaryDataVisibility()
+      @renderFieldViews()
       @guify()
       @fixRoundedBorders() # defined in BaseView
       @listenToEvents()
       if @activeServerTypeIsOLD() and not @weHaveOLDNewFormData()
         @model.getOLDNewFormData()
       @
+
+    primaryDataSelector: 'ul.primary-data'
+    secondaryDataSelector: 'ul.secondary-data'
+
+    renderFieldViews: ->
+      @renderPrimaryFieldViews()
+      @renderSecondaryFieldViews()
+
+    renderPrimaryFieldViews: ->
+      $primaryDataUL = @$ 'ul.primary-data'
+      for fieldView in @primaryFieldViews
+        $primaryDataUL.append fieldView.render().el
+        @rendered fieldView
+
+    renderSecondaryFieldViews: ->
+      $secondaryDataUL = @$ @secondaryDataSelector
+      for fieldView in @secondaryFieldViews
+        $secondaryDataUL.append fieldView.render().el
+        @rendered fieldView
 
     getActiveServerType: ->
       try
@@ -114,6 +182,30 @@ define [
     weHaveOLDNewFormData: ->
       globals.oldData?
 
+    # These arrays are used to categorize FieldDB's `datumFields` objects by their
+    # keys.
+    # TODO: at least some of this should be in application settings (and saved
+    # to server...)
+    # TODO: deprecate this.
+    setDatumFieldsArray: ->
+      @primaryDatumFields = [
+        'judgement'
+        'utterance'
+        'morphemes'
+        'gloss'
+        'translation'
+      ]
+      @secondaryDatumFields = [
+        'tags'
+        'validationStatus'
+        'syntacticCategory'
+        'syntacticTreeLatex'
+      ]
+      @autopopulatedDatumFields = [
+        'modifiedByUser'
+        'enteredByUser'
+      ]
+
     # Return the primary datum fields, sorted according to the label order given
     # in `@primaryDatumFields`.
     getPrimaryDatumFields: (datumFields) =>
@@ -122,19 +214,6 @@ define [
       _.sortBy(
         primaryFields
         (field) => @primaryDatumFields.indexOf(field.label))
-
-    # Return an "input generator" (a method that generates data input HTML,
-    # e.g., an input[type=text]) for a FieldDB form attribute.
-    getFieldDBFormAttributeInputGenerator: (attribute) =>
-      if attribute of @fieldDBFormAttribute2InputGenerator
-        @[@fieldDBFormAttribute2InputGenerator[attribute]]
-      else
-        @fieldDBTextareaInputGenerator
-
-    # Map FieldDB form attributes to input generator method names.
-    fieldDBFormAttribute2InputGenerator:
-      'utterance':          'fieldDBUtteranceJudgementInputGenerator'
-      'comments':           'fieldDBCommentsInputGenerator' # direct Datum attribute
 
     fieldDBGenericInputGenerator: (attribute, context, inputCallback) =>
       "#{@getFieldDBInputLabel attribute, context}
@@ -147,7 +226,7 @@ define [
     # Textarea input generator; the default input for FieldDB fields.
     fieldDBTextareaInputGenerator: (attribute, context) =>
       inputCallback = (attribute, context) =>
-        tooltip = @getFieldDBAttributeTooltip attribute, context
+        tooltip = @getFieldDBAttributeTooltip attribute
         value = @model.getDatumValueSmart attribute
         "<textarea rows='1' name='#{@utils.camel2hyphen attribute}'
           class='#{@utils.camel2hyphen attribute} ui-corner-all form-add-input dative-tooltip'
@@ -158,7 +237,7 @@ define [
     # Textarea input generator; the default input for FieldDB fields.
     fieldDBTranslationInputGenerator: (attribute, context) =>
       inputCallback = (attribute, context) =>
-        tooltip = @getFieldDBAttributeTooltip attribute, context
+        tooltip = @getFieldDBAttributeTooltip attribute
         value = @model.getDatumValueSmart attribute
         "<textarea rows='1' name='#{@utils.camel2hyphen attribute}'
           class='#{@utils.camel2hyphen attribute} singular-translation
@@ -178,7 +257,7 @@ define [
     # fieldDBTextareaInputGenerator in terms of a class that reduces the
     # textarea's width.
     fieldDBUtteranceInputGenerator: (attribute, context) =>
-      tooltip = @getFieldDBAttributeTooltip attribute, context
+      tooltip = @getFieldDBAttributeTooltip attribute
       value = @model.getDatumValueSmart attribute
       "<textarea rows='1' name='#{@utils.camel2hyphen attribute}'
         class='#{@utils.camel2hyphen attribute} ui-corner-all form-add-input dative-tooltip'
@@ -188,7 +267,7 @@ define [
     # Judgement Input.
     fieldDBJudgementInputGenerator: (context) =>
       value = @model.getDatumValueSmart 'judgement'
-      tooltip = @getFieldDBAttributeTooltip 'judgement', context
+      tooltip = @getFieldDBAttributeTooltip 'judgement'
       "<input name='judgement'
         type='text'
         class='judgement ui-corner-all dative-tooltip form-add-input'
@@ -212,7 +291,7 @@ define [
     html: ->
       context = _.extend(@model.toJSON(), {
         headerTitle: 'Add a Form'
-        options: @fakeFormAddOptions # TODO: fetch real data from server (or provide defaults?)
+        options: @getOptions()
         activeServerType: @getActiveServerType()
         h: # "h" for "helpers"
           fieldDB:
@@ -223,13 +302,42 @@ define [
       })
       @$el.html @template(context)
 
-    # Return an array of editable datum attributes (where an attribute may be just that
-    # or it may be the `label` value of a session/datum field).
-    # A datum attribute is editable and secondary iff:
+    # Return an object representing the options for forced-choice inputs.
+    # Currently only relevant for the OLD.
+    getOptions: ->
+      if globals.oldData
+        @addOLDStatuses globals.oldData
+      else
+        {}
+
+    addOLDStatuses: (options) ->
+      options.statuses = []
+      for status in ['tested', 'requires testing']
+        options.statuses.push id: status, name: status
+      options
+
+    # Return a crucially ordered array of editable secondary data attributes.
+    getEditableSecondaryAttributes: ->
+      switch @activeServerType
+        when 'FieldDB' then @getFieldDBEditableSecondaryAttributes()
+        when 'OLD' then @getOLDEditableSecondaryAttributes()
+
+    # Return a crucially ordered array of editable form attributes.
+    # A form attribute is editable and secondary iff:
+    # - it is secondary, as specified in the app settings model AND
+    # - it is not read-only (see app settings model)
+    getOLDEditableSecondaryAttributes: ->
+      secondaryAttributes = @getFormAttributes @activeServerType, 'secondary'
+      readonlyAttributes = @getFormAttributes @activeServerType, 'readonly'
+      (a for a in secondaryAttributes when a not in readonlyAttributes)
+
+    # Return a crucially ordered array of editable datum attributes (where an
+    # attribute may be just that or it may be the `label` value of a
+    # session/datum field). A datum attribute is editable and secondary iff:
     # - it is a datum field or it is `datum.comments` AND
     # - it is not read-only (see app settings model) AND
     # - it is not "primary" (i.e., IGT, translation or grammaticality, as defined in app settings)
-    getEditableSecondaryAttributes: ->
+    getFieldDBEditableSecondaryAttributes: ->
 
       # Get the list of *possible* editable secondary attributes: datumField
       # labels and `comments`
@@ -280,13 +388,15 @@ define [
     ############################################################################
 
     # Make the vanilla HTML nice and jQueryUI-ified.
+    # TODO: a lot of the method calls in here should be removed/modified because
+    # the field/input subviews should take care of this themselves.
     guify: ->
-      @selectmenuify()
+      #@selectmenuify()
       @multiSelectify()
       @buttonify()
       @datepickerify()
       @bordercolorify()
-      @elasticize()
+      #@elasticize() # NOTE: this should be done in the individual FieldViews, but that's not working for some reason.
       @tooltipify()
 
     # Make the <select>s into nice jQuery selectmenus.
@@ -309,19 +419,10 @@ define [
         .each (index, element) =>
           @transferClassAndTitle @$(element), '.ms-container'
 
-    # Copy the class and title attributes from a <select> to its corresponding
-    # selectmenu button. This permits later "tooltipification".
-    transferClassAndTitle: ($element, selector='.ui-selectmenu-button') ->
-      class_ = $element.attr 'class'
-      title = $element.attr 'title'
-      $element
-        .next selector
-          .addClass "#{class_} dative-tooltip"
-          .attr 'title', title
-
     # Make the buttons into nice jQuery buttons.
     buttonify: ->
-      @$('button').button()
+      @$('.dative-widget-header button').button()
+      @$('.button-only-fieldset button').button()
 
     # Make the date elicited input into a nice jQuery datepickter.
     datepickerify: ->
@@ -343,42 +444,22 @@ define [
     # Make the `title` attributes of the inputs/controls into tooltips
     # The jQuery chain is simply to get the tooltip positioning right.
     tooltipify: ->
-      @$('.dative-tooltip')
-        .filter('.append-remove-translation-field')
+      @$('.dative-widget-header')
+        .find('.hide-form-add-widget.dative-tooltip')
           .tooltip
-            position: @tooltipPosition -630
+            position: @tooltipPositionLeft '-20'
           .end()
-        .filter('.transcription, .translation')
+        .find('.toggle-secondary-data.dative-tooltip')
           .tooltip
-            position: @tooltipPosition -170
+            position: @tooltipPositionLeft '-70'
           .end()
-        .filter('.add-form-button, .hide-form-add-widget')
+        .find('.form-add-help.dative-tooltip')
           .tooltip
-            position: @tooltipPosition -20
+            position: @tooltipPositionRight '+20'
           .end()
-        .filter('.toggle-secondary-data')
-          .tooltip
-            position: @tooltipPosition -70
-          .end()
-        .filter('.form-add-help')
-          .tooltip
-            position:
-              my: "left+10 center"
-              at: "right center"
-              collision: "flipfit"
-          .end()
-        .not('.transcription, .translation, .append-remove-translation-field,
-          .add-form-button, .hide-form-add-widget, .toggle-secondary-data,
-          .form-add-help')
-          .tooltip
-            position: @tooltipPosition()
-
-    # Return a default tooltip position where the tops are aligned and the right
-    # side of the tooltip is `rightOffset` away from the left side of the target.
-    tooltipPosition: (rightOffset=-120) ->
-      my: "right#{rightOffset} top"
-      at: 'left top'
-      collision: 'flipfit'
+      @$('button.add-form-button')
+        .tooltip
+          position: @tooltipPositionLeft '-20'
 
 
     ############################################################################
@@ -478,22 +559,22 @@ define [
     hideSecondaryData: ->
       @secondaryDataVisible = false
       @setSecondaryDataToggleButtonState()
-      @$('div.secondary-data').hide()
+      @$(@secondaryDataSelector).hide()
 
     showSecondaryData: ->
       @secondaryDataVisible = true
       @setSecondaryDataToggleButtonState()
-      @$('div.secondary-data').show()
+      @$(@secondaryDataSelector).show()
 
     hideSecondaryDataAnimate: ->
       @secondaryDataVisible = false
       @setSecondaryDataToggleButtonState()
-      @$('div.secondary-data').slideUp()
+      @$(@secondaryDataSelector).slideUp()
 
     showSecondaryDataAnimate: ->
       @secondaryDataVisible = true
       @setSecondaryDataToggleButtonState()
-      @$('div.secondary-data').slideDown()
+      @$(@secondaryDataSelector).slideDown()
 
     toggleSecondaryData: ->
       if @secondaryDataVisible
@@ -722,17 +803,17 @@ define [
       $li
         .find('button.dative-tooltip')
           .tooltip
-            position: @tooltipPosition -630
+            position: @tooltipPositionLeft '-630'
           .end()
         .find('textarea.dative-tooltip')
           .tooltip
-            position: @tooltipPosition -170
+            position: @tooltipPositionLeft '-170'
           .end()
         .find('.ui-selectmenu-button').filter('.translation-grammaticality')
           .tooltip
             items: 'span'
             content: 'The acceptibility of this as a translation for the form'
-            position: @tooltipPosition()
+            position: @tooltipPositionLeft()
 
     # This is called when a user clicks on the "-" "remove-this-translation" button.
     removeTranslationField: (event) ->
@@ -802,6 +883,7 @@ define [
       grammaticalities: [
         '',
         '*',
+        '****',
         '?',
         '#'
       ]

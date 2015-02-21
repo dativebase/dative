@@ -19,6 +19,7 @@ define [
       ui-widget-content ui-corner-all'
 
     initialize: (options) ->
+      @activeServerType = @getActiveServerType()
       defaults =
         primaryDataLabelsVisible: false # labels for primary data fields
         expanded: false # TODO: use this!
@@ -80,17 +81,17 @@ define [
     # these are the attributes of `@h.fieldDB` and `@h.old` defined below.
     getContext: ->
       context = _.extend(@model.toJSON(), {
-        activeServerType: @getActiveServerType()
+        activeServerType: @activeServerType
         h: # "h" for "helpers"
           tooltips: tooltips
           displayNoneStyle: @displayNoneStyle
+          getFormAttributes: @getFormAttributes
           fieldDB:
             getFieldDBFormAttributes: @getFieldDBFormAttributes
             getFieldDBFormAttributeDisplayer: @getFieldDBFormAttributeDisplayer
             alreadyDisplayedFields: @fieldDBAlreadyDisplayedFields()
             fieldDBStringFieldDisplay: @fieldDBStringFieldDisplay
           old:
-            getOLDFormIGTAttributes: @getOLDFormIGTAttributes
             getOLDFormSecondaryAttributes: @getOLDFormSecondaryAttributes
             getOLDFormAttributeDisplayer: @getOLDFormAttributeDisplayer
       })
@@ -670,6 +671,8 @@ define [
     # Return the tooltip for an OLD form attribute (uses the imported `tooltip`
     # module). Note that we pass `value` in case `tooltip` uses it in generating
     # a value-specific tooltip (which isn't always the case.)
+    # TODO @jrwdunham: delete this in favour of the `context`-less version in
+    # form-handler-base.
     getOLDAttributeTooltip: (attribute, context) =>
       tooltips("old.formAttributes.#{attribute}")(
         language: 'eng' # TODO: make 'eng' configurable

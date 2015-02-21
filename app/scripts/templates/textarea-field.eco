@@ -1,0 +1,12 @@
+<textarea
+  rows='1'
+  name='<%= @name %>'
+  class='<%= @class %>
+         ui-corner-all
+         form-add-input
+         dative-tooltip
+         dative-input-field
+         dative-field-textarea'
+  title='<%= @title %>'
+  ><%= @value %></textarea>
+
