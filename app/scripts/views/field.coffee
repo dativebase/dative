@@ -141,15 +141,6 @@ define [
         when 'OLD' then @model.get attribute
         else ''
 
-    # Return a `name` value for an input field that holds the value of an
-    # object's `subattribute` where that object is element with index `index`
-    # in an array identified by `attribute`. This is useful for arrays of
-    # translations/comments, etc. Calling `getArrayItemAttributeName
-    # 'translations', 0, 'transcription'` will produce
-    # "translations-0.transcription".
-    getArrayItemAttributeName: (attribute, index, subattribute) ->
-      "#{attribute}-#{index}.#{subattribute}"
-
     # If `options.grammaticalities` is an array, return it with '' as its first
     # member and all other empty strings removed. Useful for grammaticality
     # <select>s for OLD apps where the '' grammatical value may be left

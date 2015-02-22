@@ -1,0 +1,12 @@
+<input
+  type='text'
+  name='<%= @name %>'
+  class='<%= @class %>
+         ui-corner-all
+         form-add-input
+         dative-tooltip
+         dative-input-field
+         date-field'
+  title='<%= @title %>'
+  value='<%= @value %>' />
+

@@ -1,0 +1,24 @@
+<textarea
+  rows='1'
+  name='<%= @subattributeName %>'
+  class='<%= @subattributeClass %>
+         ui-corner-all
+         form-add-input
+         dative-tooltip
+         dative-input-field
+         textarea-button'
+  title='<%= @subattributeTitle %>'
+  ><%= @subattributeValue %></textarea>
+
+<button
+  class='<%= @buttonClass %>
+         dative-tooltip
+         new-remove'
+  title='<%= @buttonTitle %>'
+><i
+  class='fa
+         fa-fw
+         <%= @buttonIconClass %>'
+></i
+></button>
+

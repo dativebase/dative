@@ -8,7 +8,11 @@ define [
   './user-select-field'
   './source-select-field'
   './transcription-grammaticality-field'
+  './utterance-judgement-field'
   './translations-field'
+  './comments-field'
+  './date-field'
+  './multiselect-field'
   './../models/form'
   './../utils/globals'
   './../templates/form-add-widget'
@@ -17,7 +21,8 @@ define [
 ], (Backbone, FormHandlerBaseView, TextareaFieldView, SelectFieldView,
   RequiredSelectFieldView, PersonSelectFieldView, UserSelectFieldView,
   SourceSelectFieldView, TranscriptionGrammaticalityFieldView,
-  TranslationsFieldView, FormModel, globals, formAddTemplate) ->
+  UtteranceJudgementFieldView, TranslationsFieldView, CommentsFieldView,
+  DateFieldView, MultiselectFieldView, FormModel, globals, formAddTemplate) ->
 
   # Form Add Widget View
   # --------------------
@@ -74,11 +79,11 @@ define [
       else # the default field view is a(n expandable) textarea.
         new TextareaFieldView params
 
-    # Maps attributes to their appropriate FieldView classes.
-    #utterance:          'UtteranceJudgementView'
-    #comments:           'CommentsView' # direct Datum attribute
+    # Maps attributes to their appropriate FieldView subclasses.
     attribute2fieldView:
-      FieldDB:{}
+      FieldDB:
+        utterance:          UtteranceJudgementFieldView
+        comments:           CommentsFieldView
       OLD:
         transcription:      TranscriptionGrammaticalityFieldView
         translations:       TranslationsFieldView
@@ -89,6 +94,8 @@ define [
         verifier:           UserSelectFieldView
         source:             SourceSelectFieldView
         status:             RequiredSelectFieldView
+        date_elicited:      DateFieldView
+        tags:               MultiselectFieldView
 
     events:
       'change': 'setToModel' # fires when multi-select changes
@@ -635,6 +642,9 @@ define [
         $('select[name="tags"]', context)
           .multiSelect 'select', @model.get('tags')
 
+
+    # TODO: move this stuff to the field views and have them trigger events
+    # that this parent view can listen to in order to submit the form.
 
     # Handle special keydown events in the HTML form.
     # - <Ctrl+Return> in a textarea submits the form

@@ -1,6 +1,6 @@
 define [
   './field'
-  './../views/select-input'
+  './select-input'
 ], (FieldView, SelectInputView) ->
 
   # Select(menu) Field View

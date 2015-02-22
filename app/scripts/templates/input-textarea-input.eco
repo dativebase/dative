@@ -1,0 +1,24 @@
+<input
+  type='text'
+  name='<%= @inputName %>'
+  class='<%= @inputClass %>
+         ui-corner-all
+         form-add-input
+         dative-tooltip
+         dative-input-field'
+  title='<%= @inputTitle %>'
+  value='<%= @inputValue %>' />
+
+<textarea
+  rows='1'
+  name='<%= @textareaName %>'
+  class='<%= @textareaClass %>
+         ui-corner-all
+         form-add-input
+         dative-tooltip
+         dative-input-field
+         textarea-input'
+  title='<%= @textareaTitle %>'
+  ><%= @textareaValue %></textarea>
+
+

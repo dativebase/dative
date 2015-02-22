@@ -1,0 +1,18 @@
+<select
+  multiple='multiple'
+  name='<%= @name %>'
+  class='<%= @class %>
+         dative-tooltip'
+  title='<%= @title %>'>
+  <% options = @options[@optionsAttribute] or [] %>
+  <% for selectOption in _.sortBy(options, (x) => x[@sortByAttribute].toLowerCase()): %>
+    <% if selectOption.id is @value: %>
+      <option value="<%= selectOption[@selectValueAttribute] %>" selected
+        ><%= @selectTextGenerator selectOption %></option>
+    <% else: %>
+      <option value="<%= selectOption[@selectValueAttribute] %>"
+        ><%= @selectTextGenerator selectOption %></option>
+    <% end %>
+  <% end %>
+</select>
+

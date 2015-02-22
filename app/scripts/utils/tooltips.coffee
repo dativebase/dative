@@ -5,12 +5,25 @@ define ['./utils'], (utils) ->
   # good for future translation/localization, etc.
   #
   # This module returns a function that, when passed in a "dot notation" string
-  # will return the appropriate tooltip function (or a default one, if that the
+  # will return the appropriate tooltip function (or a default one, if the
   # requested tooltip does not exist. For example, to get the tooltip for the
   # syntactic category field of OLD forms:
   #
-  #   tooltips('old.formAttributes.syntactic_category')()
+  #   tooltips('old.formAttributes.syntactic_category')() #
   #
+  # Some tooltips are functions that take an `options` argument. These functions
+  # (generally) expect a `options.value` attribute that is the value of the
+  # item being "tooltipped". Thus, if you pass a `Date` instance to the
+  # `dateElicited` tooltip function, it will be used in the returned tooltip:
+  #
+  #   tooltips('fieldDB.formAttributes.dateEntered') value: new Date()
+
+  dateElicited =
+    eng: (options) ->
+      if options.value
+        "This form was elicited on #{utils.humanDate options.value}"
+      else
+        'The date this form was elicited'
 
   tooltips =
 
@@ -18,9 +31,7 @@ define ['./utils'], (utils) ->
 
       formAttributes:
 
-        dateElicited:
-          eng: (options) ->
-            "This form was elicited on #{utils.humanDate options.value}"
+        dateElicited: dateElicited
 
         dateEntered:
           eng: (options) ->
@@ -32,6 +43,14 @@ define ['./utils'], (utils) ->
 
         id:
           eng: "A unique identifier for this form (a UUID)."
+
+        comments:
+          eng: "Any user with the “commenter” role may add comments to a form.
+            The date and time the comment was made and the commenter are
+            automatically saved when a comment is created."
+
+          text:
+            eng: "The content of the comment."
 
     old:
 
@@ -116,9 +135,7 @@ define ['./utils'], (utils) ->
             value is useful for search since it allows one to search through forms
             according to exactly specified morphemes."
 
-        date_elicited:
-          eng: (options) ->
-            "This form was elicited on #{utils.humanDate options.value}"
+        date_elicited: dateElicited
 
         datetime_entered:
           eng: (options) ->
@@ -185,7 +202,6 @@ define ['./utils'], (utils) ->
           # Note: this should be changed to "appropriateness" in the OLD.
           grammaticality:
             eng: "The appropriateness of this translation for this form."
-
 
   # This is the anonymous function that we return. It returns a second function
   # which returns the tooltip string when called. You use "dot notation" to get

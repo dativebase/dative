@@ -1,8 +1,8 @@
 define [
   'backbone'
   './field'
-  './translations-input'
-], (Backbone, FieldView, TranslationsInputView) ->
+  './translations-input-set'
+], (Backbone, FieldView, TranslationsInputSetView) ->
 
   # Translations Field View
   # -----------------------
@@ -24,7 +24,7 @@ define [
   #
   # - a label (built by the base class `FieldView`)
   # - an input collection (i.e., a set if input sets, one for each translation)
-  #   governed by an instance of `TranslationsInputView`.
+  #   governed by an instance of `TranslationsInputSetView`.
   #
   # NOTE: the translation's `grammaticality` would be more accurately
   # labeled as `acceptibility`; however, this is an issue with the OLD data
@@ -36,7 +36,7 @@ define [
       @context.translationSelectAttribute = 'grammaticality'
       @context.selectOptionsAttribute = 'grammaticalities'
       @context.translationTextareaAttribute = 'transcription'
-      new TranslationsInputView @context
+      new TranslationsInputSetView @context
 
     # This is for testing/debugging and can be safely deleted when no longer
     # useful.
