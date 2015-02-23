@@ -6,7 +6,7 @@
 
     <button class="hide-form-add-widget dative-tooltip"
       title="hide this form add widget">
-      <i class='fa fa-angle-double-up fa-fw'></i>
+      <i class='fa fa-times fa-fw'></i>
     </button>
 
     <button class="toggle-secondary-data dative-tooltip"
@@ -36,8 +36,17 @@
     <ul class="fieldset button-only-fieldset">
 
       <li class="center">
-        <button class="add-form-button dative-tooltip"
-          title="Save this new form">Add Form</button>
+        <button
+          class="add-form-button dative-tooltip"
+          title="Save this new form"
+          >Save<i class="fa fa-fw fa-floppy-o"></i></button>
+
+        <button
+          class="toggle-secondary-data dative-tooltip"
+          title="show the secondary data input fields"
+          ><i class='fa fa-angle-down fa-fw'></i>
+        </button>
+
       </li>
 
     </ul>

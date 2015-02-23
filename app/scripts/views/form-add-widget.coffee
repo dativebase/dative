@@ -345,6 +345,8 @@ define [
         .tooltip position: @tooltipPositionRight('+20')
       @$('button.add-form-button')
         .tooltip position: @tooltipPositionLeft('-20')
+      @$('ul.button-only-fieldset button.toggle-secondary-data')
+        .tooltip position: @tooltipPositionLeft('-90')
 
 
     ############################################################################
@@ -399,14 +401,14 @@ define [
         @$('button.toggle-secondary-data')
           .tooltip
             content: 'hide the secondary data input fields'
-          .find('i').first()
+          .find('i')
             .removeClass 'fa-angle-down'
             .addClass 'fa-angle-up'
       else
         @$('button.toggle-secondary-data')
           .tooltip
             content: 'show the secondary data input fields'
-          .find('i').first()
+          .find('i')
             .removeClass 'fa-angle-up'
             .addClass 'fa-angle-down'
 
