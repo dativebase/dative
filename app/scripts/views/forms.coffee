@@ -854,7 +854,7 @@ define [
       @$('.add-form-widget').slideUp()
       @formAddView.closeAllTooltips()
       @focusLastForm()
-      @scrollToBottom()
+      @scrollToFocusedInput()
 
     showFormAddViewAnimate: ->
       @setFormAddViewButtonHide()
@@ -862,7 +862,7 @@ define [
       @$('.add-form-widget').slideDown
         complete: -> Backbone.trigger 'forms:addFormWidgetVisible'
       @focusFirstFormAddViewTextarea()
-      @scrollToBottom()
+      @scrollToFocusedInput()
 
     toggleFormAddViewAnimate: ->
       if @$('.add-form-widget').is ':visible'

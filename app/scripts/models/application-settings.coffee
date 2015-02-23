@@ -456,7 +456,7 @@ define [
 
       formsDisplaySettings:
         itemsPerPage: 10
-        primaryDataLabelsVisible: true
+        primaryDataLabelsVisible: false
         allFormsExpanded: false
 
       activeJQueryUITheme: 'cupertino'
