@@ -209,6 +209,8 @@ define (require) ->
   log = (thingToLog) ->
     console.log JSON.stringify(thingToLog, undefined, 2)
 
+  getTimestamp = -> new Date().getTime()
+
   clone: clone
   type: type
   guid: guid
@@ -232,4 +234,5 @@ define (require) ->
   camel2hyphen: camel2hyphen
   encloseIfNotAlready: encloseIfNotAlready
   log: log
+  getTimestamp: getTimestamp
 

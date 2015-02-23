@@ -87,7 +87,6 @@ define [
           displayNoneStyle: @displayNoneStyle
           getFormAttributes: @getFormAttributes
           fieldDB:
-            getFieldDBFormAttributes: @getFieldDBFormAttributes
             getFieldDBFormAttributeDisplayer: @getFieldDBFormAttributeDisplayer
             alreadyDisplayedFields: @fieldDBAlreadyDisplayedFields()
             fieldDBStringFieldDisplay: @fieldDBStringFieldDisplay
@@ -975,8 +974,8 @@ define [
     # Return a list of the Datum attributes that will not be displayed by
     # looping through the defined secondary and IGT attributes.
     fieldDBAlreadyDisplayedFields: =>
-      secondaryAttributes = @getFieldDBFormAttributes 'secondary'
-      igtAttributes = @getFieldDBFormAttributes 'igt'
+      secondaryAttributes = @getFormAttributes 'FieldDB', 'secondary'
+      igtAttributes = @getFormAttributes 'FieldDB', 'igt'
       ['judgement', 'translation'].concat secondaryAttributes, igtAttributes
 
     # Return the <div> that displays a FieldDB Secondary Data field (e.g.,

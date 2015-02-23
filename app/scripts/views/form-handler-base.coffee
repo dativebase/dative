@@ -1,11 +1,9 @@
 define [
-  'backbone'
   './base'
-  './../utils/utils'
   './../utils/globals'
   './../utils/tooltips'
   'jqueryuicolors'
-], (Backbone, BaseView, utils, globals, tooltips) ->
+], (BaseView, globals, tooltips) ->
 
   # Form Handler Base View
   # ----------------------
@@ -39,9 +37,9 @@ define [
     # Return a nice user-facing label for a datum field. I.e., no camelCase nonsense.
     getDatumFieldLabel: (field) ->
       if field?.labelFieldLinguists
-        utils.camel2regular field.labelFieldLinguists
+        @utils.camel2regular field.labelFieldLinguists
       else if field?.label
-        utils.camel2regular field.label
+        @utils.camel2regular field.label
       else
         null
 
@@ -62,24 +60,6 @@ define [
         )
         # console.log "returning tooltip: #{tooltip}"
         tooltip
-
-    # Getters for arrays that categorize FieldDB datum attributes
-    # ---------------------------------------------------------------------------
-    #
-    # These methods return specific lists of FieldDB Datum "attributes" (i.e.,
-    # `datumField` or `sessionField` labels) or true attributes like `.comments`.
-
-    # Get FieldDB form attributes category array.
-    # The returned array defines the category of type `category` for FieldDB
-    # forms. It is defined in models/application-settings because it should
-    # ultimately be user-configurable.
-    # TODO: deprecate this in favour of `getFormAttributes`.
-    getFieldDBFormAttributes: (category) =>
-      try
-        globals.applicationSettings
-          .get('fieldDBFormCategories')[category]
-      catch
-        []
 
     # Get an array of form attributes (form app settings model) for the
     # specified server type and category (e.g., 'igt' or 'secondary').

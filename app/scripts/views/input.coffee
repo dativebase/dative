@@ -1,13 +1,11 @@
-define [
-  'backbone'
-  './base'
-  'autosize'
-], (Backbone, BaseView) ->
+define ['./base', 'autosize'], (BaseView) ->
 
   # Input View
   # ----------
   #
   # A base class for views over inputs (i.e., <select>s, <input>s, etc.).
+  # Views that subclass `InputView` must minimally import a template and
+  # set it to `@template`.
 
   class InputView extends BaseView
 
@@ -34,5 +32,11 @@ define [
 
     # Make the border colors match the jQueryUI theme.
     bordercolorify: ->
-      @$('textarea').css "border-color", @constructor.jQueryUIColors().defBo
+      @$('textarea, input')
+        .css "border-color", @constructor.jQueryUIColors().defBo
+
+    # Return an object (attributes are field names) representing the values in
+    # the HTML inputs controlled by this input view.
+    getValueFromDOM: ->
+      @serializeObject @$(':input').serializeArray()
 

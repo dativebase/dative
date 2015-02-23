@@ -35,9 +35,6 @@ define [
     #   - Why do fieldDBComments have timestampModified values when they can't
     #     be modified? At least, they can't be modified in Spreadsheet.
 
-    # - OLD status options:
-    #   - are these provided when one requests GET /forms/new ?
-
 
     ############################################################################
     # Dative Schema (differs depending on server type: FieldDB or OLD)
@@ -320,6 +317,28 @@ define [
           datumValue.value
       else
         datumValue
+
+    # Attempt to intelligently set the value of `attribute` in the datum,
+    # Examples:
+    # - `@getDatumValue 'utterance', 'chien'` # a string (into datumFields)
+    # - `@getDatumValue 'comments', [...]`    # an array (a direct attribute)
+    # NOTE: does not set to sessionFields (contrast with `getDatumValueSmart`
+    # which does get from sessionFields, since we want these data points in
+    # form display but we don't want to edit them via the form edit interface
+    # (at least not yet we don't ...)
+    setDatumValueSmart: (attribute, value) ->
+      if typeof attribute is 'object'
+        for key, value of attribute
+          @_setDatumValueSmart key, value
+      else
+        @_setDatumValueSmart attribute, value
+
+    _setDatumValueSmart: (attribute, value) ->
+      if attribute in _.keys(@attributes)
+        @set attribute, value
+      else
+        datumField = @getDatumField attribute
+        datumField.value = value
 
     # Get the `help` value of a FieldDB datum field or session field, if exists.
     getDatumHelp: (label) ->

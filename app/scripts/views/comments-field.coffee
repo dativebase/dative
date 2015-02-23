@@ -1,8 +1,7 @@
 define [
-  'backbone'
   './field'
   './comments-input-set'
-], (Backbone, FieldView, CommentsInputSetView) ->
+], (FieldView, CommentsInputSetView) ->
 
   # Comments Field View
   # -----------------------

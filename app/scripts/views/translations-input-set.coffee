@@ -68,3 +68,10 @@ define [
         textareaValue:     object[@textareaAttribute]
       )
 
+    # `InputSet`'s `getValueFromDOM` does most of the work. We pass the
+    # textarea attribute (e.g., `"transcription"`) as the required attribute
+    # parameter so that only inputs with transcriptions are added to the
+    # resulting value array.
+    getValueFromDOM: ->
+      super @textareaAttribute
+

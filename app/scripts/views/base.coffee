@@ -1,11 +1,10 @@
 define [
   'backbone'
-  'jquery'
   './../utils/utils'
   './../utils/globals'
   './../utils/tooltips'
   'jqueryuicolors'
-], (Backbone, $, utils, globals, tooltips) ->
+], (Backbone, utils, globals, tooltips) ->
 
   # Base View
   # --------------
@@ -328,6 +327,12 @@ define [
       catch
         null
 
+    getLoggedInUsername: ->
+      try
+        globals.applicationSettings.get 'username'
+      catch
+        null
+
     # Tooltip position: top-aligned and to the left.
     # Return a default tooltip position where the tops are aligned and the right
     # side of the tooltip is `rightOffset` away from the left side of the target.
@@ -355,4 +360,18 @@ define [
           .attr 'title', title
 
     grammaticalitySelectmenuWidth: '8%'
+
+    # Take what jQuery's `serializeArray` gives you and return an object.
+    serializeObject: (arrayOfObjects) ->
+      result = {}
+      for object in arrayOfObjects
+        result[object.name] = object.value
+      result
+
+    # Merge an array of objects: _.extend on an array of objects.
+    arrayOfObjectsToObject: (arrayOfObjects) ->
+      result = {}
+      for object in arrayOfObjects
+        _.extend result, object
+      result
 

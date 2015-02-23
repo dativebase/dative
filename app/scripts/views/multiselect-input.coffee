@@ -33,3 +33,13 @@ define [
         .tooltip
           position: @tooltipPositionLeft '-200'
 
+    # Overrides the `InputView` base class's `getValueFromDOM`. Returns and
+    # object with one attribute whose value is an array of numeric ids. This
+    # assumes that this multiselect is being used for relational attributes.
+    getValueFromDOM: ->
+      value = @$('select').val() or []
+      value = (Number(x) for x in value)
+      result = {}
+      result[@context.attribute] = value
+      result
+

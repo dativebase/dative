@@ -23,6 +23,11 @@ define [
       @inputViews = {}
       @getInputViews()
 
+    # Inheriting from `FieldView` is good for re-using some methods, but we
+    # don't want to doubly listen to events that `FieldView`-inheriting
+    # super-view is already listening to.
+    events: {}
+
     # Add input views to `@inputViews`, one for each object in `@context.value`.
     getInputViews: ->
       if @context.value.length is 0
@@ -143,7 +148,7 @@ define [
         "remove this #{@utils.singularize @context.attribute}"
 
     # Font awesome icon class for the new/remove button.
-    getButtonIconClass: (index) -> if index is 0 then 'fa-plus' else 'fa-minus'
+    getButtonIconClass: (index) -> if index is 0 then 'fa-plus' else 'fa-times'
 
     # Return a `name` value for an input field that holds the value of an
     # object's `subattribute` where that object is element with index `index`
@@ -154,3 +159,47 @@ define [
     getArrayItemAttributeName: (attribute, index, subattribute) ->
       "#{attribute}-#{index}.#{subattribute}"
 
+    # Get value from DOM.
+    # This method first extracts from the input fields an object with
+    # hyphen-dot-notation names; e.g.:
+    #
+    #   { translations-0.grammaticality: "",
+    #     translations-0.transcription: "dog",
+    #     translations-1.grammaticality: "*",
+    #     translations-1.transcription: "hound" }
+    #
+    # From the above, it returns something like:
+    #
+    #   { translations: [
+    #     { grammaticality: "", transcription: "dog" },
+    #     { grammaticality: "*", transcription: "hound" }]}
+    #
+    getValueFromDOM: (requiredAttribute=null) ->
+      result = {}
+      interimResult = {}
+      arrayOfObjects = (val.getValueFromDOM() for key, val of @inputViews)
+      object = @arrayOfObjectsToObject arrayOfObjects
+      for complexName, value of object
+        [attribute, tmp] = complexName.split '-'
+        [index, subattribute] = tmp.split '.'
+        if attribute of interimResult
+          subobject = interimResult[attribute]
+        else
+          subobject = interimResult[attribute] = {}
+        if not (index of subobject)
+          subobject[index] = {}
+        subobject[index][subattribute] = value
+
+      # At this point, `interimResult` should be something like:
+      #   { translations: {
+      #     "0": { "grammaticality": "", "transcription": "dog" },
+      #     "1": { "grammaticality": "*", "transcription": "hound" }}}
+      #
+      array = result[attribute] = []
+      for indexKey in _.keys(interimResult[attribute]).sort()
+        objectValue = interimResult[attribute][indexKey]
+        if requiredAttribute
+          if objectValue[requiredAttribute] then array.push objectValue
+        else
+          array.push objectValue
+      result
