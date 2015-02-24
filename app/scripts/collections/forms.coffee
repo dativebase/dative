@@ -55,7 +55,6 @@ define [
             @add @getDativeFormModelsFromOLDObjects(responseJSON.items)
             Backbone.trigger 'fetchOLDFormsSuccess', responseJSON.paginator
           else
-            # console.log _.keys(responseJSON)
             reason = responseJSON.reason or 'unknown'
             Backbone.trigger 'fetchOLDFormsFail',
               "failed to fetch all old forms; reason: #{reason}"

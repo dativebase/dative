@@ -124,7 +124,7 @@ define [
 
       @listenTo Backbone, 'fetchOLDFormsStart', @fetchAllFormsStart
       @listenTo Backbone, 'fetchOLDFormsEnd', @fetchAllFormsEnd
-      @listenTo Backbone, 'fetchOLDFormsSuccess', @fetchAllFormsFail
+      @listenTo Backbone, 'fetchOLDFormsFail', @fetchAllFormsFail
       @listenTo Backbone, 'fetchOLDFormsSuccess', @fetchOLDFormsSuccess
 
       @listenTo @paginationMenuTopView, 'paginator:changeItemsPerPage', @changeItemsPerPage
@@ -422,6 +422,8 @@ define [
       @stopSpin()
 
     fetchAllFormsFail: (reason) ->
+      console.log 'fetchAllFormsFail'
+      console.log reason
       @$('.no-forms')
         .show()
         .text reason
