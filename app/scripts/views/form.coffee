@@ -1,10 +1,12 @@
 define [
   'backbone'
   './form-handler-base'
+  './form-add-widget'
   './../utils/globals'
   './../utils/tooltips'
   './../templates/form'
-], (Backbone, FormHandlerBaseView, globals, tooltips, formTemplate) ->
+], (Backbone, FormHandlerBaseView, FormAddWidgetView, globals, tooltips,
+  formTemplate) ->
 
   # Form View
   # ---------
@@ -20,16 +22,32 @@ define [
 
     initialize: (options) ->
       @activeServerType = @getActiveServerType()
+      @setState options
+      @updateView = new FormAddWidgetView model: @model, addUpdateType: 'update'
+      @updateViewRendered = false
+
+    # Render the Add a Form view.
+    renderUpdateView: ->
+      @updateView.setElement @$('.update-form-widget').first()
+      @updateView.render()
+      @updateViewRendered = true
+      @rendered @updateView
+
+    # Set the state of the form display: what is visible.
+    setState: (options) ->
       defaults =
         primaryDataLabelsVisible: false # labels for primary data fields
-        expanded: false # TODO: use this!
+        expanded: false
         headerVisible: false # the header full of buttons
         secondaryDataVisible: false # comments, tags, etc.
+        updateViewVisible: false
       _.extend defaults, options
       for key, value of defaults
         @[key] = value
       @effectuateExpanded()
 
+    # `expanded` is a higher-level setting, controlling header and secondary
+    # data visibility.
     effectuateExpanded: ->
       if @expanded
         @headerVisible = true
@@ -42,7 +60,7 @@ define [
       @stopListening()
       @undelegateEvents()
       @delegateEvents()
-      @listenTo @model, 'change', @render
+      @listenTo @model, 'change', @modelChanged
       @listenTo Backbone, 'form:dehighlightAllFormViews', @dehighlight
       @listenTo Backbone, 'formsView:expandAllForms', @expand
       @listenTo Backbone, 'formsView:collapseAllForms', @collapse
@@ -50,6 +68,7 @@ define [
         @hidePrimaryContentAndLabelsThenShowAll
       @listenTo Backbone, 'formsView:hideAllLabels',
         @hidePrimaryContentAndLabelsThenShowContent
+      @listenTo @updateView, 'formAddView:hide', @hideUpdateViewAnimate
 
     events:
       'click .form-primary-data': 'showAndHighlightOnlyMe'
@@ -61,6 +80,14 @@ define [
       'focus': 'focus'
       'focusout': 'focusout'
       'keydown': 'keydown'
+      'click .update-form': 'update'
+
+    update: ->
+      @showUpdateViewAnimate()
+
+    # Note: we can't call `render()` after a model change event because this
+    # will destroy the form update view's HTML in the DOM.
+    modelChanged: ->
 
     render: ->
       @html()
@@ -102,6 +129,7 @@ define [
       @tooltipify()
       @headerVisibility()
       @secondaryDataVisibility()
+      @updateViewVisibility()
 
     # Make the header visible, or not, depending on state.
     headerVisibility: ->
@@ -118,6 +146,13 @@ define [
         @showSecondaryData()
       else
         @hideSecondaryData()
+
+    # Make the update view visible, or not, depending on state.
+    updateViewVisibility: ->
+      if @updateViewVisible
+        @showUpdateView()
+      else
+        @hideUpdateView()
 
     # Hide/show the labels for the primary data, e.g., transcription/utterance,
     # translation(s), etc.
@@ -339,6 +374,10 @@ define [
           items: 'button'
           content: 'hide the secondary data of this form'
 
+    setUpdateButtonStateOpen: -> @$('.update-form').button 'disable'
+
+    setUpdateButtonStateClosed: -> @$('.update-form').button 'enable'
+
     # Expand the form view: show buttons and secondary data.
     expand: ->
       #@$el.addClass 'expanded'
@@ -428,6 +467,7 @@ define [
       @turnOnPrimaryDataTooltip()
       @hideHeaderAnimate()
       @hideSecondaryDataAnimate()
+      @hideUpdateViewAnimate()
 
     # Header
     ############################################################################
@@ -495,6 +535,55 @@ define [
         @hideSecondaryDataAnimate()
       else
         @showSecondaryDataAnimate()
+
+
+    # Update View
+    ############################################################################
+
+    showUpdateView: ->
+      if not @updateViewRendered then @renderUpdateView()
+      @updateViewVisible = true
+      @setUpdateButtonStateOpen()
+      @$('.update-form-widget').show
+        complete: =>
+          Backbone.trigger 'addFormWidgetVisible'
+          @focusFirstUpdateViewTextarea()
+
+    hideUpdateView: ->
+      @updateViewVisible = false
+      @setUpdateButtonStateClosed()
+      @$('.update-form-widget').hide()
+
+    toggleUpdateView: ->
+      if @updateViewVisible
+        @hideUpdateView()
+      else
+        @showUpdateView()
+
+    showUpdateViewAnimate: ->
+      if not @updateViewRendered then @renderUpdateView()
+      @updateViewVisible = true
+      @setUpdateButtonStateOpen()
+      @$('.update-form-widget').slideDown
+        complete: =>
+          Backbone.trigger 'addFormWidgetVisible'
+          @focusFirstUpdateViewTextarea()
+
+    focusFirstUpdateViewTextarea: ->
+      @$('.update-form-widget textarea').first().focus()
+
+    hideUpdateViewAnimate: ->
+      @updateViewVisible = false
+      @setUpdateButtonStateClosed()
+      @$('.update-form-widget').slideUp
+        complete: => @$el.focus()
+
+    toggleUpdateViewAnimate: ->
+      if @updateViewVisible
+        @hideUpdateViewAnimate()
+      else
+        @showUpdateViewAnimate()
+
 
     # Border
     ############################################################################

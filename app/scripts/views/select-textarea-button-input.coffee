@@ -51,7 +51,7 @@ define [
 
     listenToEvents: ->
       super
-      @listenTo Backbone, 'forms:addFormWidgetVisible', @resetTextareaWidth
+      @listenTo Backbone, 'addFormWidgetVisible', @resetTextareaWidth
 
     # Alter the <textarea> width so that the <select> and the <button> are all
     # on the same line. This is called in response to a selectmenu change event.

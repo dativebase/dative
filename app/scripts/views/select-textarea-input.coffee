@@ -33,7 +33,7 @@ define [
 
     listenToEvents: ->
       super
-      @listenTo Backbone, 'forms:addFormWidgetVisible', @resetTextareaWidth
+      @listenTo Backbone, 'addFormWidgetVisible', @resetTextareaWidth
 
     # Make title attrs into jQueryUI tooltips.
     tooltipify: ->

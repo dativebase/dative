@@ -66,8 +66,8 @@ define [
         @[key] = value
 
     events:
-      'focus .dative-form-object, input, textarea, .ui-selectmenu-button, button':
-        'controlFocused'
+      'focus .dative-form-object': 'formFocused'
+      'focus input, textarea, .ui-selectmenu-button, button, .ms-container': 'inputFocused'
       'click .expand-all': 'expandAllForms'
       'click .collapse-all': 'collapseAllForms'
       'click .new-form': 'showFormAddViewAnimate'
@@ -78,6 +78,16 @@ define [
       # close-circuit the tab loop and keep focus in the view.
       'focus .focusable-top':  'focusLastElement'
       'focus .focusable-bottom':  'focusFirstElement'
+
+    formFocused: (event) ->
+      @controlFocused event
+
+    # We stop the event here because otherwise it will be doubly caught by
+    # `formFocused` and `controlFocused` will cause buggy double
+    # auto-scrolling.
+    inputFocused: (event) ->
+      @stopEvent event
+      @controlFocused event
 
     render: (taskId) ->
       @html()
@@ -205,10 +215,12 @@ define [
         else
           @focusLastForm()
 
-    # Returns true if the Add a Form widget has focus; we don't want the forms
-    # browsing shortcuts to be in effect if the user is adding a form.
+    # Returns true if the Add a Form widget (or an update form widget) has
+    # focus; we don't want the forms browsing shortcuts to be in effect if
+    # the user is adding a form.
     addFormWidgetHasFocus: ->
-      @$('.add-form-widget').find(':focus').length > 0
+      @$('.add-form-widget, .update-form-widget')
+        .find(':focus').length > 0
 
     # Returns true if the "items per page" selectmenu in the Pagination Top
     # Menu view has focus; we don't want the expand/collapse shortcuts to
@@ -845,8 +857,7 @@ define [
       @setFormAddViewButtonHide()
       @formAddViewVisible = true
       @$('.add-form-widget').show
-        complete: ->
-          Backbone.trigger 'forms:addFormWidgetVisible'
+        complete: -> Backbone.trigger 'addFormWidgetVisible'
 
     hideFormAddViewAnimate: ->
       @setFormAddViewButtonShow()
@@ -860,7 +871,7 @@ define [
       @setFormAddViewButtonHide()
       @formAddViewVisible = true
       @$('.add-form-widget').slideDown
-        complete: -> Backbone.trigger 'forms:addFormWidgetVisible'
+        complete: -> Backbone.trigger 'addFormWidgetVisible'
       @focusFirstFormAddViewTextarea()
       @scrollToFocusedInput()
 

@@ -60,11 +60,14 @@ define [
   class FormAddWidgetView extends FormHandlerBaseView
 
     template: formAddTemplate
+    className: 'add-form-widget dative-widget-center ui-widget
+      ui-widget-content ui-corner-all'
 
-    initialize: ->
+    initialize: (options) ->
       @activeServerType = @getActiveServerType()
       @secondaryDataVisible = false
       @listenToEvents()
+      @addUpdateType = options.addUpdateType or 'add'
 
     render: ->
       if @activeServerTypeIsOLD() and not @weHaveOLDNewFormData()
@@ -80,10 +83,10 @@ define [
       @
 
     events:
-      'click button.add-form-button':       'submitForm'
-      'click button.hide-form-add-widget':  'hideSelf'
-      'click button.toggle-secondary-data': 'toggleSecondaryDataAnimate'
-      'click .form-add-help':               'openFormAddHelp'
+      'click button.add-form-button':              'submitForm'
+      'click button.hide-form-add-widget':         'hideSelf'
+      'click button.toggle-secondary-data-fields': 'toggleSecondaryDataAnimate'
+      'click .form-add-help':                      'openFormAddHelp'
 
     listenToEvents: ->
       super
@@ -102,9 +105,16 @@ define [
     # Write the initial HTML to the page.
     html: ->
       context =
-        headerTitle: 'Add a Form'
+        addUpdateType: @addUpdateType
+        headerTitle: @getHeaderTitle()
         activeServerType: @getActiveServerType()
       @$el.html @template(context)
+
+    getHeaderTitle: ->
+      if @addUpdateType is 'add'
+        'Add a Form'
+      else
+        'Update this form'
 
     submitForm: (event) ->
       console.log 'submitForm called'
@@ -128,9 +138,13 @@ define [
     # scroll to the second match. WARN: this is brittle because if the help
     # HTML changes, then the second match may not be what we want...
     openFormAddHelp: ->
+      if @addUpdateType is 'add'
+        searchTerm = 'adding a form'
+      else
+        searchTerm = 'updating a form'
       Backbone.trigger(
         'helpDialog:toggle',
-        searchTerm: 'adding a form'
+        searchTerm: searchTerm
         scrollToIndex: 1
       )
 
@@ -339,13 +353,13 @@ define [
     tooltipify: ->
       @$('.dative-widget-header .hide-form-add-widget.dative-tooltip')
           .tooltip position: @tooltipPositionLeft('-20')
-      @$('.dative-widget-header .toggle-secondary-data.dative-tooltip')
+      @$('.dative-widget-header .toggle-secondary-data-fields.dative-tooltip')
           .tooltip position: @tooltipPositionLeft('-70')
       @$('.dative-widget-header .form-add-help.dative-tooltip')
         .tooltip position: @tooltipPositionRight('+20')
       @$('button.add-form-button')
         .tooltip position: @tooltipPositionLeft('-20')
-      @$('ul.button-only-fieldset button.toggle-secondary-data')
+      @$('ul.button-only-fieldset button.toggle-secondary-data-fields')
         .tooltip position: @tooltipPositionLeft('-90')
 
 
@@ -381,7 +395,9 @@ define [
     showSecondaryDataAnimate: ->
       @secondaryDataVisible = true
       @setSecondaryDataToggleButtonState()
-      @$(@secondaryDataSelector).slideDown()
+      @$(@secondaryDataSelector).slideDown
+        complete: =>
+          @$(@secondaryDataSelector).find('textarea').first().focus()
 
     toggleSecondaryData: ->
       if @secondaryDataVisible
@@ -398,14 +414,14 @@ define [
     # Make the "toggle secondary data" button have the appropriate icon and tooltip.
     setSecondaryDataToggleButtonState: ->
       if @secondaryDataVisible
-        @$('button.toggle-secondary-data')
+        @$('button.toggle-secondary-data-fields')
           .tooltip
             content: 'hide the secondary data input fields'
           .find('i')
             .removeClass 'fa-angle-down'
             .addClass 'fa-angle-up'
       else
-        @$('button.toggle-secondary-data')
+        @$('button.toggle-secondary-data-fields')
           .tooltip
             content: 'show the secondary data input fields'
           .find('i')

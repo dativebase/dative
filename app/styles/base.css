@@ -158,6 +158,11 @@ button.help-button
   vertical-align: top;
 }
 
+.update-form-widget .dative-field-label-container
+{
+  width: 35%;
+}
+
 .dative-field-subinput-container
 {
   display: inline-block;
@@ -169,6 +174,11 @@ button.help-button
 {
   display: inline-block;
   width: 60%;
+}
+
+.update-form-widget .dative-field-input-container
+{
+  width: 50%;
 }
 
 .form-secondary-data-content .form-fielddb-comment:not(:first-child)
@@ -354,6 +364,7 @@ div.dative-page-header-title
 .add-user-widget,
 .edit-corpus-widget,
 .add-form-widget,
+.update-form-widget,
 .dative-form-object.expanded
 {
     box-shadow: 5px 5px 10px rgba(0, 0, 0, 0.5);
@@ -918,6 +929,7 @@ div.edit-corpus-widget > div.dative-widget-header > div.dative-widget-header-tit
 div.servers-config-widget > div.dative-widget-header > div.dative-widget-header-title,
 div.server-config-widget > div.dative-widget-header > div.dative-widget-header-title,
 div.add-form-widget > div.dative-widget-header > div.dative-widget-header-title,
+div.update-form-widget > div.dative-widget-header > div.dative-widget-header-title,
 div#dative-page-header > div.dative-page-header-title,
 div#dative-page-header > div.dative-forms-view-header > div.dative-page-header-title,
 div.container-center,
@@ -1158,5 +1170,11 @@ div.add-form-widget
   width: 800px;
   margin-top: -2em;
   margin-bottom: 2em;
+}
+
+div.update-form-widget
+{
+  width: 90%;
+  margin-top: 1em;
 }
 
