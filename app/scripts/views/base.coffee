@@ -181,6 +181,11 @@ define [
 
     # Alter the scroll position so that the focused UI element is centered.
     scrollToFocusedInput: (event) ->
+      try
+        @_scrollToFocusedInput event
+
+    # Alter the scroll position so that the focused UI element is centered.
+    _scrollToFocusedInput: (event) ->
       # Small bug: if you tab really fast through the inputs, the scroll
       # animations will be queued and all jumpy. Calling `.stop` as below
       # does nof fix the issue.
