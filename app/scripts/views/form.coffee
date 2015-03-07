@@ -87,6 +87,10 @@ define [
 
     # Note: we can't call `render()` after a model change event because this
     # will destroy the form update view's HTML in the DOM.
+    # TODO @jrwdunham: each form attribute needs its own display view (just
+    # like each form attribute has its own field view for updating/adding) and
+    # these display views need to listen for model changes and change the
+    # display accordingly and independently.
     modelChanged: ->
 
     render: ->

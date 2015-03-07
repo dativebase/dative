@@ -401,7 +401,7 @@ define [
 
       server1 =
         id: @guid()
-        name: 'FieldDB Development'
+        name: 'FieldDB Local Development'
         type: 'FieldDB'
         url: 'https://localhost:3183'
         serverCode: 'localhost'
@@ -409,7 +409,7 @@ define [
 
       server2 =
         id: @guid()
-        name: 'OLD Development'
+        name: 'OLD Local Development'
         type: 'OLD'
         url: 'http://127.0.0.1:5000'
         serverCode: null
