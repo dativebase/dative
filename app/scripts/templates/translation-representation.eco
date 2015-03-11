@@ -1,0 +1,7 @@
+<div
+  class='<%= @transcriptionClass %>'
+  ><span
+    class='<%= @compatibilityClass %>'
+    ><%= @compatibilityValue %></span
+  ><%= @transcriptionValue %></div>
+

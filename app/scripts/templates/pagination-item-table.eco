@@ -1,7 +1,7 @@
 <tbody>
   <tr>
     <td class='dative-pagin-item-index-cell'>
-      <span class='dative-pagin-item-index'>(<%= @index %>)
+      <span class='dative-pagin-item-index'>(<%= @integerWithCommas @index %>)
     </td>
     <td class='dative-pagin-item-content'>
       <div id='<%= @formId %>'

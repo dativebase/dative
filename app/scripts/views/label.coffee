@@ -1,8 +1,7 @@
 define [
-  'backbone'
   './base'
   './../templates/label'
-], (Backbone, BaseView, labelTemplate) ->
+], (BaseView, labelTemplate) ->
 
   # Label View
   # ----------

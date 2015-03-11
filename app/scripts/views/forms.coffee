@@ -422,8 +422,6 @@ define [
       @stopSpin()
 
     fetchAllFormsFail: (reason) ->
-      console.log 'fetchAllFormsFail'
-      console.log reason
       @$('.no-forms')
         .show()
         .text reason

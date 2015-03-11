@@ -117,7 +117,6 @@ define [
         'Update this form'
 
     submitForm: (event) ->
-      console.log 'submitForm called'
       @stopEvent event
       @setToModel()
 
