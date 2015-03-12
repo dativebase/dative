@@ -140,6 +140,7 @@ define [
       for attribute in secondaryAttributes
         @secondaryDisplayViews.push @getDisplayView attribute
 
+    # TODO: FieldDB array-type fields:
     # 'comments':           'fieldDBCommentsFieldDisplay' # direct Datum attribute
     # 'modifiedByUser':     'fieldDBModifiersArrayFieldDisplay'
 
@@ -212,17 +213,24 @@ define [
           'tabindex': 0
         .html @template(activeServerType: @activeServerType)
 
+    # TODO: do this all in one DOM-manipulation event via a single document
+    # fragment, if possible.
     renderDisplayViews: ->
       @renderPrimaryDisplayViews()
       @renderSecondaryDisplayViews()
 
     renderPrimaryDisplayViews: ->
+      @renderIGTDisplayViews()
+      @renderTranslationDisplayViews()
+
+    renderIGTDisplayViews: ->
       container = document.createDocumentFragment()
       for displayView in @igtDisplayViews
         container.appendChild displayView.render().el
         @rendered displayView
       @$('div.form-igt-data').append container
 
+    renderTranslationDisplayViews: ->
       container = document.createDocumentFragment()
       for displayView in @translationDisplayViews
         container.appendChild displayView.render().el
@@ -239,7 +247,6 @@ define [
     guify: ->
       @primaryDataLabelsVisibility()
       @guifyButtons()
-      @tooltipify()
       @headerVisibility()
       @secondaryDataVisibility()
       @updateViewVisibility()
@@ -281,6 +288,7 @@ define [
         complete: =>
           @showPrimaryDataLabelsAnimate()
           @showPrimaryDataContentAnimate()
+          @$(@primaryDataContentSelector).removeClass 'no-label'
 
     # Fade out primary data and labels, then fade in primary data.
     hidePrimaryContentAndLabelsThenShowContent: ->
@@ -288,6 +296,7 @@ define [
       @$(@primaryDataContentSelector).fadeOut
         complete: =>
           @showPrimaryDataContentAnimate()
+          @$(@primaryDataContentSelector).addClass 'no-label'
 
     # Fade in primary data content.
     showPrimaryDataContentAnimate: ->
@@ -356,26 +365,6 @@ define [
       @primaryDataLabelsVisible = true
       @setPrimaryDataLabelsButtonStateOpen()
       @$(@primaryDataLabelsSelector).show()
-
-    # Turn title attributes into jQueryUI tooltips.
-    tooltipify: ->
-
-      @$('.form-fielddb-modifier-timestamp.dative-tooltip')
-        .tooltip
-          items: 'span'
-          position:
-            my: "left top"
-            at: "right top"
-            collision: "flipfit"
-
-      @$('.form-secondary-data,.form-igt-data,.form-translations-data .dative-tooltip')
-        .not '.form-fielddb-modifier-timestamp'
-        .tooltip
-          items: 'div, span'
-          position:
-            my: "right top"
-            at: "left top"
-            collision: "flipfit"
 
     # jQueryUI-ify <button>s
     guifyButtons: ->
