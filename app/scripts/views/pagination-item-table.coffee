@@ -24,7 +24,6 @@ define [
       context =
         formId: @formId
         index: @index
-        integerWithCommas: @utils.integerWithCommas
       @$el.html @template(context)
       @
 

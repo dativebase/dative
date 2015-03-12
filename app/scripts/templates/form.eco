@@ -63,11 +63,71 @@
 <div class='dative-widget-body'>
 
   <div class='form-primary-data dative-form-primary-data'>
-    <div class='form-igt-data dative-form-igt'></div>
-    <div class='form-translations-data'></div>
+
+    <div class='form-igt-data dative-form-igt'>
+
+      <% if @activeServerType is 'OLD': %>
+        <% for attribute in @h.getFormAttributes @activeServerType, 'igt': %>
+          <%- @h.old.getOLDFormAttributeDisplayer(attribute) attribute, @ %>
+        <% end %>
+
+      <% else if @activeServerType is 'FieldDB': %>
+
+        <% for attribute in @h.getFormAttributes @activeServerType, 'igt': %>
+          <%- @h.fieldDB.getFieldDBFormAttributeDisplayer(attribute) attribute, @ %>
+        <% end %>
+
+      <% end %>
+
+    </div>
+
+    <div class='form-translations-data'>
+
+      <% if @activeServerType is 'OLD': %>
+
+        <% displayer = @h.old.getOLDFormAttributeDisplayer 'translations' %>
+        <%- displayer 'translations', @ %>
+
+      <% else if @activeServerType is 'FieldDB': %>
+
+        <% displayer = @h.fieldDB.getFieldDBFormAttributeDisplayer 'translation' %>
+        <%- displayer 'translation', @ %>
+
+      <% end %>
+
+    </div>
+
   </div>
 
-  <div class='form-secondary-data'></div>
+
+  <div class='form-secondary-data'>
+
+  <% if @activeServerType is 'OLD': %>
+
+    <% for attribute in @h.getFormAttributes @activeServerType, 'secondary': %>
+      <% displayer = @h.old.getOLDFormAttributeDisplayer attribute %>
+      <%- displayer attribute, @ %>
+    <% end %>
+
+  <% else if @activeServerType is 'FieldDB': %>
+
+    <% for attribute in @h.getFormAttributes @activeServerType, 'secondary': %>
+      <% displayer = @h.fieldDB.getFieldDBFormAttributeDisplayer attribute %>
+      <%- displayer attribute, @ %>
+    <% end %>
+
+    <% for datumField in @datumFields: %>
+      <% if datumField.label not in @h.fieldDB.alreadyDisplayedFields: %>
+        <% displayer = @h.fieldDB.fieldDBStringFieldDisplay %>
+        <%- displayer datumField.label, @ %>
+      <% end %>
+    <% end %>
+
+    <%- @h.fieldDB.fieldDBStringFieldDisplay 'id', @ %>
+
+  <% end %>
+
+  </div> <% # End div.form-secondary-data %>
 
   <div class='update-form-widget dative-widget-center ui-widget
     ui-widget-content ui-corner-all'></div>

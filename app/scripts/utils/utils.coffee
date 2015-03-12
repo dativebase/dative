@@ -211,13 +211,6 @@ define (require) ->
 
   getTimestamp = -> new Date().getTime()
 
-  # Returns `string` with all of its acronyms enclosed in `<span
-  # class="small-caps">`. NOTE: assumes that an acronyms is any sequence of two
-  # or more uppercase ASCII characters.
-  smallCapsAcronyms = (string) ->
-    string.replace(/([A-Z]{2,})/g, (match, $1) ->
-      "<span class='small-caps'>#{$1.toLowerCase()}</span>")
-
   clone: clone
   type: type
   guid: guid
@@ -242,5 +235,4 @@ define (require) ->
   encloseIfNotAlready: encloseIfNotAlready
   log: log
   getTimestamp: getTimestamp
-  smallCapsAcronyms: smallCapsAcronyms
 

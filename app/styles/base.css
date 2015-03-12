@@ -151,37 +151,16 @@ button.help-button
   width: 0%;
 }
 
-.dative-field-label-container,
-.dative-field-display-label-container
+.dative-field-label-container
 {
   display: inline-block;
   width: 25%;
   vertical-align: top;
 }
 
-.dative-field-display-label-container
-{
-  width: 35%;
-}
-
-.dative-field-input-container,
-.dative-field-display-representation-container,
-.dative-field-display-label-container,
-.dative-pagin-item-index-cell
-{
-  font-family: 'GentiumPlus', serif;
-}
-
-.dative-field-display-representation-container,
-.dative-field-display-label-container,
-.dative-pagin-item-index-cell
-{
-  font-size: 130%;
-}
-
 .update-form-widget .dative-field-label-container
 {
-  width: 30%;
+  width: 35%;
 }
 
 .dative-field-subinput-container
@@ -191,27 +170,15 @@ button.help-button
   margin-bottom: 0.4em;
 }
 
-.dative-field-display-representation-container
-{
-  display: inline-block;
-  width: 60%;
-}
-
-.dative-field-display-representation-container
-{
-  width: 55%;
-}
-
-.update-form-widget .dative-field-input-container
-{
-  display: inline-block;
-  width: 60%;
-}
-
 .dative-field-input-container
 {
   display: inline-block;
   width: 60%;
+}
+
+.update-form-widget .dative-field-input-container
+{
+  width: 50%;
 }
 
 .form-secondary-data-content .form-fielddb-comment:not(:first-child)
@@ -461,20 +428,14 @@ ul.fieldset label {
 }
 
 div.form-add-form ul.fieldset label,
-.formAdd ul.fieldset label,
-.dative-field-display-label-container label
+.formAdd ul.fieldset label
 {
-    min-width: 95%;
-    max-width: 95%;
-    width: 95%;
+    min-width: 90%;
+    max-width: 90%;
+    width: 90%;
     padding-right: 2%;
     float: right;
     text-align: right;
-}
-
-.dative-form-field-display
-{
-  margin: 0.25em 0;
 }
 
 .applicationSettingsForm ul.fieldset label {
@@ -611,7 +572,8 @@ input.judgement
   width: 5%;
 }
 
-ul.fieldset label.dative-field-label
+ul.fieldset label.dative-field-label,
+label.dative-field-label
 {
   width: 25%;
   max-width: 25%;
@@ -715,6 +677,7 @@ button.ui-multiselect {
 }
 
 .dative-form-transcription,
+.form-primary-data .transcription,
 .italic {
     font-style: italic;
 }
@@ -1213,10 +1176,5 @@ div.update-form-widget
 {
   width: 90%;
   margin-top: 1em;
-}
-
-.small-caps
-{
-  font-variant: small-caps;
 }
 
