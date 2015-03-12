@@ -114,15 +114,12 @@ define [
       context = _.extend(@model.toJSON(), {
         activeServerType: @activeServerType
         h: # "h" for "helpers"
-          tooltips: tooltips
-          displayNoneStyle: @displayNoneStyle
           getFormAttributes: @getFormAttributes
           fieldDB:
             getFieldDBFormAttributeDisplayer: @getFieldDBFormAttributeDisplayer
             alreadyDisplayedFields: @fieldDBAlreadyDisplayedFields()
             fieldDBStringFieldDisplay: @fieldDBStringFieldDisplay
           old:
-            getOLDFormSecondaryAttributes: @getOLDFormSecondaryAttributes
             getOLDFormAttributeDisplayer: @getOLDFormAttributeDisplayer
       })
       context
