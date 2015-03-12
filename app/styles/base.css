@@ -1160,6 +1160,15 @@ p.paragraph-widget
     line-height: 130%;
 }
 
+.form-igt-data,
+.form-translations-data,
+.form-secondary-data,
+.dative-pagin-item-index-cell
+{
+  font-size: 120%;
+  font-family: 'GentiumPlus', serif;
+}
+
 .black-fa
 {
   color: black;
