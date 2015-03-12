@@ -226,7 +226,7 @@ ul.sf-menu li a
     vertical-align: top;
 }
 
-.dative-form-secondary-data-content ,
+.dative-form-secondary-data-content,
 .form-secondary-data-content,
 .form-igt-data-content,
 .form-translations-data-content,
@@ -236,6 +236,16 @@ ul.sf-menu li a
     width: 65%;
     font-family: 'GentiumPlus', serif;
 }
+
+.dative-form-secondary-data-content.no-label,
+.form-secondary-data-content.no-label,
+.form-igt-data-content.no-label,
+.form-translations-data-content.no-label,
+.form-translation-data-content.no-label
+{
+    width: 95%;
+}
+
 .dative-form-secondary-data > div ,
 .form-secondary-data > div {
     margin: 5px 0;

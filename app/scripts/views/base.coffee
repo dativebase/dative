@@ -254,9 +254,7 @@ define [
         250
         'swing'
 
-    # Returns true if the Add a Form widget (or an update form widget) has
-    # focus; we don't want the forms browsing shortcuts to be in effect if
-    # the user is adding or updating a form.
+    # Returns true if a form add or update widget has focus.
     addUpdateFormWidgetHasFocus: ->
       @$('.add-form-widget, .update-form-widget')
         .find(':focus').length > 0

@@ -169,6 +169,7 @@ define [
         complete: =>
           @showPrimaryDataLabelsAnimate()
           @showPrimaryDataContentAnimate()
+          @$(@primaryDataContentSelector).removeClass 'no-label'
 
     # Fade out primary data and labels, then fade in primary data.
     hidePrimaryContentAndLabelsThenShowContent: ->
@@ -176,6 +177,7 @@ define [
       @$(@primaryDataContentSelector).fadeOut
         complete: =>
           @showPrimaryDataContentAnimate()
+          @$(@primaryDataContentSelector).addClass 'no-label'
 
     # Fade in primary data content.
     showPrimaryDataContentAnimate: ->
@@ -241,11 +243,13 @@ define [
       @primaryDataLabelsVisible = false
       @setPrimaryDataLabelsButtonStateClosed()
       @$(@primaryDataLabelsSelector).hide()
+      @$(@primaryDataContentSelector).addClass 'no-label'
 
     showPrimaryDataLabels: ->
       @primaryDataLabelsVisible = true
       @setPrimaryDataLabelsButtonStateOpen()
       @$(@primaryDataLabelsSelector).show()
+      @$(@primaryDataContentSelector).removeClass 'no-label'
 
     # Turn title attributes into jQueryUI tooltips.
     tooltipify: ->
@@ -427,7 +431,6 @@ define [
 
     # <Enter> on a closed form opens it, <Esc> on an open form closes it.
     keydown: (event) ->
-      console.log event.which
       switch event.which
         when 27
           if @headerVisible
