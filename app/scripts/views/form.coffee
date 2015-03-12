@@ -793,7 +793,7 @@ define [
     # Morpheme Gloss Field.
     # (Potential TODO: small-caps-ify all-caps morpheme abbreviations)
     oldMorphemeGlossFieldDisplay: (attribute, context) =>
-      contentCallback = (attribute, context) -> context[attribute]
+      contentCallback = (attribute, context) => @utils.smallCapsAcronyms context[attribute]
       @oldGenericIGTFieldDisplay attribute, context, contentCallback
 
     # String Field.
@@ -977,7 +977,7 @@ define [
     # (Potential TODO: small-caps-ify all-caps morpheme abbreviations)
     fieldDBGlossFieldDisplay: (attribute, context) =>
       contentCallback = (attribute, context) =>
-        @model.getDatumValueSmart attribute
+        @utils.smallCapsAcronyms @model.getDatumValueSmart(attribute)
       @fieldDBGenericIGTFieldDisplay attribute, context, contentCallback
 
     # Translation Field. Note that translations are their own category since

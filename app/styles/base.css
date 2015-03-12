@@ -1160,12 +1160,12 @@ p.paragraph-widget
     line-height: 130%;
 }
 
-.form-igt-data,
-.form-translations-data,
-.form-secondary-data,
-.dative-pagin-item-index-cell
+div.form-igt-data,
+div.form-translations-data,
+div.form-secondary-data,
+div.dative-pagin-item-index-cell
 {
-  font-size: 120%;
+  font-size: 125%;
   font-family: 'GentiumPlus', serif;
 }
 
@@ -1185,5 +1185,10 @@ div.update-form-widget
 {
   width: 90%;
   margin-top: 1em;
+}
+
+.small-caps
+{
+  font-variant: small-caps;
 }
 
