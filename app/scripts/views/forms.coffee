@@ -148,7 +148,7 @@ define [
     # conventions or arrow keys might be better. Alternatively (or in
     # addition), we could have these be user-customizable.
     keyboardShortcuts: (event) ->
-      if not @addFormWidgetHasFocus()
+      if not @addUpdateFormWidgetHasFocus()
         if not event.ctrlKey and not event.metaKey and not event.altKey
           switch event.which
             when 70 then @$('.first-page').click() # f
@@ -214,13 +214,6 @@ define [
           $previousFormViewDiv.focus()
         else
           @focusLastForm()
-
-    # Returns true if the Add a Form widget (or an update form widget) has
-    # focus; we don't want the forms browsing shortcuts to be in effect if
-    # the user is adding a form.
-    addFormWidgetHasFocus: ->
-      @$('.add-form-widget, .update-form-widget')
-        .find(':focus').length > 0
 
     # Returns true if the "items per page" selectmenu in the Pagination Top
     # Menu view has focus; we don't want the expand/collapse shortcuts to

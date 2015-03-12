@@ -254,6 +254,13 @@ define [
         250
         'swing'
 
+    # Returns true if the Add a Form widget (or an update form widget) has
+    # focus; we don't want the forms browsing shortcuts to be in effect if
+    # the user is adding or updating a form.
+    addUpdateFormWidgetHasFocus: ->
+      @$('.add-form-widget, .update-form-widget')
+        .find(':focus').length > 0
+
     # Fix rounded borders so that adjacently nested rounded borders <divs> don't
     # have a gap between them. This must be done in the JS and not the CSS
     # because Dative can dynamically change the CSS to different jQueryUI

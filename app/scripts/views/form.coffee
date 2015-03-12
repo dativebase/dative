@@ -427,10 +427,17 @@ define [
 
     # <Enter> on a closed form opens it, <Esc> on an open form closes it.
     keydown: (event) ->
-      if @headerVisible
-        if event.which is 27 then @hideFormDetails()
-      else
-        if event.which is 13 then @showFullAnimate()
+      console.log event.which
+      switch event.which
+        when 27
+          if @headerVisible
+            @hideFormDetails()
+        when 13
+          if not @headerVisible
+            @showFullAnimate()
+        when 85 # "u" for "update"
+          if not @addUpdateFormWidgetHasFocus()
+            @$('.update-form').first().click()
 
     ############################################################################
     # Hide & Show stuff
