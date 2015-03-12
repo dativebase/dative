@@ -197,9 +197,9 @@ button.help-button
   width: 60%;
 }
 
-.dative-field-display-representation-container.no-label
+.dative-field-display-representation-container
 {
-  width: 95%;
+  width: 55%;
 }
 
 .update-form-widget .dative-field-input-container

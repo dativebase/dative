@@ -81,7 +81,6 @@ define [
       @inputView = @getInputView()
 
     # Default is to call `set` on the model any time a field input changes.
-    # TODO: this may be causing performance issues...
     events:
       'change':                'setToModel' # fires when multi-select changes
       'input':                 'setToModel' # fires when an input, textarea or date-picker changes
