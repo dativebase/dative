@@ -12,7 +12,6 @@ define ['./select-field'], (SelectFieldView) ->
 
     initialize: (options) ->
       options.selectTextGetter = (option) ->
-        console.log 'in selectTextGetter for SourceSelectFieldView'
         "#{option.author} (#{option.year})"
       super options
 

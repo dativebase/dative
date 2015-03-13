@@ -641,8 +641,7 @@ define [
           .tooltip
             open: (event, ui) -> ui.tooltip.css "max-width", "200px"
             items: 'div'
-            content: 'Click here to reveal controls for, and more information
-              about, this form.'
+            content: 'Click here for more controls and data.'
             position:
               my: 'right-10 center'
               at: 'left center'
@@ -699,7 +698,7 @@ define [
     # `@model.toJSON()`.
     oldGenericIGTFieldDisplay: (attribute, context, contentCallback) =>
       "<div
-        class='form-#{@utils.snake2hyphen attribute}'
+        class='form-field-display form-#{@utils.snake2hyphen attribute}'
         #{@displayNoneStyle context[attribute]}>
         #{@getOLDIGTFieldLabelDiv attribute, context}
         #{@getOLDIGTFieldContentDiv attribute, context, contentCallback}
@@ -715,7 +714,7 @@ define [
     # attributes of `@model.toJSON()`.
     oldGenericSecondaryDataFieldDisplay: (attribute, context, contentCallback) =>
       "<div
-        class='form-#{@utils.snake2hyphen attribute}'
+        class='form-field-display form-#{@utils.snake2hyphen attribute}'
         #{@displayNoneStyle context[attribute]}>
         #{@getOLDSecondaryFieldLabelDiv attribute, context}
         #{@getOLDSecondaryFieldContentDiv attribute, context, contentCallback}
@@ -724,7 +723,7 @@ define [
     # Return the <div> that displays an OLD translations field.
     oldGenericTranslationsFieldDisplay: (attribute, context, contentCallback) =>
       "<div
-        class='form-#{@utils.snake2hyphen attribute}'
+        class='form-field-display form-#{@utils.snake2hyphen attribute}'
         #{@displayNoneStyle context[attribute]}>
         #{@getOLDTranslationsFieldLabelDiv attribute, context}
         #{@getOLDTranslationsFieldContentDiv attribute, context, contentCallback}
@@ -912,7 +911,7 @@ define [
     fieldDBGenericIGTFieldDisplay: (attribute, context, contentCallback) =>
       value = @model.getDatumValueSmart attribute
       "<div
-        class='form-#{@utils.camel2hyphen attribute}'
+        class='form-field-display form-#{@utils.camel2hyphen attribute}'
         #{@displayNoneStyle value}>
         #{@getFieldDBIGTFieldLabelDiv attribute, context}
         #{@getFieldDBIGTFieldContentDiv attribute, context, contentCallback}
@@ -922,7 +921,7 @@ define [
     fieldDBGenericTranslationFieldDisplay: (attribute, context, contentCallback) =>
       value = @model.getDatumValueSmart attribute
       "<div
-        class='form-#{@utils.camel2hyphen attribute}'
+        class='form-field-display form-#{@utils.camel2hyphen attribute}'
         #{@displayNoneStyle value}>
         #{@getFieldDBTranslationFieldLabelDiv attribute, context}
         #{@getFieldDBTranslationFieldContentDiv attribute, context, contentCallback}
@@ -1090,7 +1089,7 @@ define [
       value = @model.getDatumValueSmart attribute
       tooltip = @getFieldDBAttributeTooltip attribute, context
       "<div
-        class='form-#{@utils.camel2hyphen attribute}'
+        class='form-field-display form-#{@utils.camel2hyphen attribute}'
         #{@fieldDBDisplayNoneStyle attribute, value}>
         #{@getFieldDBSecondaryFieldLabelDiv attribute, context}
         #{@getFieldDBSecondaryFieldContentDiv attribute, context, contentCallback}
