@@ -576,7 +576,7 @@ textarea.textarea-only
 ul.fieldset textarea.textarea-select-button,
 textarea.textarea-select-button
 {
-  width: 76.5%;
+  width: 73.5%;
   /* max-width: 76.5%;
   min-width: 76.5%; */
 }
@@ -590,7 +590,7 @@ textarea.textarea-button
 ul.fieldset textarea.textarea-select,
 textarea.textarea-select
 {
-  width: 84%;
+  width: 81%;
   /* max-width: 85%;
   min-width: 85%; */
 }
