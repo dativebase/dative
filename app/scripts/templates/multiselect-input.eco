@@ -6,12 +6,14 @@
   title='<%= @title %>'>
   <% options = @options[@optionsAttribute] or [] %>
   <% for selectOption in _.sortBy(options, (x) => x[@sortByAttribute].toLowerCase()): %>
-    <% if selectOption.id is @value: %>
-      <option value="<%= selectOption[@selectValueAttribute] %>" selected
-        ><%= @selectTextGenerator selectOption %></option>
+    <% console.log "comparing #{@selectValueGetter(selectOption)} to #{@selectValueGetter(@value)}" %>
+    <% console.log @value %>
+    <% if @selectValueGetter(selectOption) in (@selectValueGetter(x) for x in @value): %>
+      <option value="<%= @selectValueGetter selectOption %>" selected
+        ><%= @selectTextGetter selectOption %></option>
     <% else: %>
-      <option value="<%= selectOption[@selectValueAttribute] %>"
-        ><%= @selectTextGenerator selectOption %></option>
+      <option value="<%= @selectValueGetter selectOption %>"
+        ><%= @selectTextGetter selectOption %></option>
     <% end %>
   <% end %>
 </select>

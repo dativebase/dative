@@ -5,13 +5,14 @@ define ['./select-field'], (SelectFieldView) ->
   #
   # A specialized SelectFieldView for OLD source objects, i.e,. texts such
   # as Uhlenbeck (1917). The only modification of the base class is that a
-  # `selectTextGenerator` is supplied, i.e., a function that takes a person
+  # `selectTextGetter` is supplied, i.e., a function that takes a person
   # object and returns a string to go between <option> and </option>.
 
-  class PersonSelectFieldView extends SelectFieldView
+  class SourceSelectFieldView extends SelectFieldView
 
     initialize: (options) ->
-      options.selectTextGenerator = (option) ->
+      options.selectTextGetter = (option) ->
+        console.log 'in selectTextGetter for SourceSelectFieldView'
         "#{option.author} (#{option.year})"
-      super
+      super options
 

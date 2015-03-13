@@ -193,3 +193,15 @@ define [
           options.grammaticalities = [''].concat tmp
       options
 
+    defaultSelectValueGetter: (o) ->
+      try
+        o.id
+      catch
+        null
+
+    defaultSelectTextGetter: (o) ->
+      try
+        o.name
+      catch
+        'no text for option'
+

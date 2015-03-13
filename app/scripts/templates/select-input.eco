@@ -7,12 +7,12 @@
     <option></option>
   <% end %>
   <% for selectOption in @options[@optionsAttribute] or []: %>
-    <% if selectOption.id is @value: %>
-      <option value="<%= selectOption[@selectValueAttribute] %>" selected
-        ><%= @selectTextGenerator selectOption %></option>
+    <% if @selectValueGetter(selectOption) is @selectValueGetter(@value): %>
+      <option value="<%= @selectValueGetter selectOption %>" selected
+        ><%= @selectTextGetter selectOption %></option>
     <% else: %>
-      <option value="<%= selectOption[@selectValueAttribute] %>"
-        ><%= @selectTextGenerator selectOption %></option>
+      <option value="<%= @selectValueGetter selectOption %>"
+        ><%= @selectTextGetter selectOption %></option>
     <% end %>
   <% end %>
 </select>

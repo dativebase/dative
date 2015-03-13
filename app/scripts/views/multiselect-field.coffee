@@ -16,8 +16,8 @@ define [
 
     initialize: (options) ->
       @width = options.width or '98.5%' # TODO: is this used?
-      @selectValueAttribute = options.selectValueAttribute or 'id'
-      @selectTextGenerator = options.selectTextGenerator or (o) -> o.name
+      @selectValueGetter = options.selectValueGetter or @defaultSelectValueGetter
+      @selectTextGetter = options.selectTextGetter or @defaultSelectTextGetter
       @sortByAttribute = options.sortByAttribute or 'name'
 
       # `@context.options` is expected to be an object. `optionsAttribute`
@@ -31,8 +31,8 @@ define [
       _.extend(super,
         width: @width
         optionsAttribute: @optionsAttribute
-        selectValueAttribute: @selectValueAttribute
-        selectTextGenerator: @selectTextGenerator
+        selectValueGetter: @selectValueGetter
+        selectTextGetter: @selectTextGetter
         sortByAttribute: @sortByAttribute
       )
 

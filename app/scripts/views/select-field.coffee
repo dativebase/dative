@@ -15,8 +15,8 @@ define [
     initialize: (options) ->
       @required = options.required or false
       @width = options.width or '98.5%'
-      @selectValueAttribute = options.selectValueAttribute or 'id'
-      @selectTextGenerator = options.selectTextGenerator or (o) -> o.name
+      @selectValueGetter = options.selectValueGetter or @defaultSelectValueGetter
+      @selectTextGetter = options.selectTextGetter or @defaultSelectTextGetter
 
       # `@context.options` is expected to be an object. `optionsAttribute`
       # should be a key of that object that returns an array to be used as
@@ -33,7 +33,7 @@ define [
         required: @required
         width: @width
         optionsAttribute: @optionsAttribute
-        selectValueAttribute: @selectValueAttribute
-        selectTextGenerator: @selectTextGenerator
+        selectValueGetter: @selectValueGetter
+        selectTextGetter: @selectTextGetter
       )
 

@@ -227,7 +227,9 @@ define [
     # BUG: tabbing through horizontally aligned buttons causes an annoying jumpiness.
     controlFocused: (event) ->
       @rememberFocusedElement event
-      @scrollToFocusedInput event
+      # 'focus input, textarea, .ui-selectmenu-button, button, .ms-container': 'inputFocused'
+      if not @$(event.target).hasClass('ui-selectmenu-button')
+        @scrollToFocusedInput event
 
     # Tell the Help dialog to open itself and search for "browsing forms" and
     # scroll to the second match. WARN: this is brittle because if the help
