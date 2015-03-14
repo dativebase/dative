@@ -1198,10 +1198,22 @@ p.paragraph-widget
 div.form-igt-data div,
 div.form-translations-data div,
 div.form-secondary-data div,
-span.dative-pagin-item-index
+span.dative-pagin-item-index,
+p.paragraph-widget
 {
   font-size: 12pt;
   font-family: 'GentiumPlus', serif;
+}
+
+p.paragraph-widget
+{
+  font-size: 14pt;
+}
+
+.ui-tooltip
+{
+  line-height: 1.5em;
+  font-size: 110%;
 }
 
 .form-add-form ul.fieldset textarea,
