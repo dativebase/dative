@@ -964,6 +964,7 @@ div.edit-corpus-widget > div.dative-widget-header > div.dative-widget-header-tit
 div.servers-config-widget > div.dative-widget-header > div.dative-widget-header-title,
 div.server-config-widget > div.dative-widget-header > div.dative-widget-header-title,
 div.add-form-widget > div.dative-widget-header > div.dative-widget-header-title,
+div.dative-form-object > div.dative-widget-header > div.dative-widget-header-title,
 div.update-form-widget > div.dative-widget-header > div.dative-widget-header-title,
 div#dative-page-header > div.dative-page-header-title,
 div#dative-page-header > div.dative-forms-view-header > div.dative-page-header-title,
@@ -1263,10 +1264,10 @@ span.dative-pagin-item-index
   color: black;
 }
 
-div.add-form-widget
+div.add-form-widget,
+div.new-form-view
 {
   width: 800px;
-  margin-top: -2em;
   margin-bottom: 2em;
 }
 

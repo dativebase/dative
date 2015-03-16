@@ -38,8 +38,6 @@ define [
       @focusedElementIndex = null
       @formViews = [] # holds a FormView instance for each FormModel in FormsCollection
       @renderedFormViews = [] # references to the FormView instances that are rendered
-      @formAddView = new FormAddWidgetView model: new FormModel()
-      @formAddViewVisible = false
       @weShouldFocusFirstAddViewInput = false # AppView sets this to True when you click Forms > Add
       @renderedPaginationItemTableViews = [] # Each form view is in a 1-row/2-cell table where cell 1 is the index+1, e.g., (1), (2), etc.
       @fetchCompleted = false
@@ -51,26 +49,28 @@ define [
       @paginator = new Paginator page=1, items=0, itemsPerPage=@itemsPerPage
       @paginationMenuTopView = new PaginationMenuTopView paginator: @paginator # This handles the UI for the items-per-page select, the first, prevous, next buttons, etc.
       @collection = new FormsCollection()
-      @listenToEvents()
 
-    # Get the global Dative application settings relevant to displaying a form.
-    getGlobalsFormsDisplaySettings: ->
-      defaults =
-        itemsPerPage: 10
-        primaryDataLabelsVisible: false
-        allFormsExpanded: false
-      try
-        formsDisplaySettings = globals.applicationSettings.get 'formsDisplaySettings'
-        _.extend defaults, formsDisplaySettings
-      for key, value of defaults
-        @[key] = value
+      @newFormView = new FormView
+        headerTitle: 'New Form'
+        model: new FormModel()
+        collection: @collection
+      @newFormViewVisible = false
+
+      # @toBeAddedFormModel = new FormModel()
+      # @toBeAddedFormView = new FormView model: @toBeAddedFormModel
+      # @formAddView = new FormAddWidgetView
+      #   model: @toBeAddedFormModel
+      #   collection: @collection
+      # @formAddViewVisible = false
+
+      @listenToEvents()
 
     events:
       'focus .dative-form-object': 'formFocused'
       'focus input, textarea, .ui-selectmenu-button, button, .ms-container': 'inputFocused'
       'click .expand-all': 'expandAllForms'
       'click .collapse-all': 'collapseAllForms'
-      'click .new-form': 'showFormAddViewAnimate'
+      'click .new-form': 'showNewFormViewAnimate'
       'click .forms-browse-help': 'openFormsBrowseHelp'
       'click .toggle-all-labels': 'toggleAllLabels'
       'keydown': 'keyboardShortcuts'
@@ -95,8 +95,9 @@ define [
       @guify()
       @refreshHeader()
       @renderPaginationMenuTopView()
-      @renderFormAddView()
-      @formAddViewVisibility()
+      @renderNewFormView()
+      @renderNewFormView()
+      @newFormViewVisibility()
       if @weNeedToFetchFormsAgain()
         @fetchFormsToCollection()
       else
@@ -113,9 +114,7 @@ define [
         paginator: @paginator
 
     listenToEvents: ->
-      @stopListening()
-      @undelegateEvents()
-      @delegateEvents()
+      super
 
       @listenTo Backbone, 'fetchAllFieldDBFormsStart', @fetchAllFormsStart
       @listenTo Backbone, 'fetchAllFieldDBFormsEnd', @fetchAllFormsEnd
@@ -126,6 +125,8 @@ define [
       @listenTo Backbone, 'fetchOLDFormsEnd', @fetchAllFormsEnd
       @listenTo Backbone, 'fetchOLDFormsFail', @fetchAllFormsFail
       @listenTo Backbone, 'fetchOLDFormsSuccess', @fetchOLDFormsSuccess
+
+      @listenTo Backbone, 'addOLDFormSuccess', @newFormAdded
 
       @listenTo @paginationMenuTopView, 'paginator:changeItemsPerPage', @changeItemsPerPage
       @listenTo @paginationMenuTopView, 'paginator:showFirstPage', @showFirstPage
@@ -139,7 +140,25 @@ define [
       @listenTo @paginationMenuTopView, 'paginator:showTwoPagesForward', @showTwoPagesForward
       @listenTo @paginationMenuTopView, 'paginator:showThreePagesForward', @showThreePagesForward
 
-      @listenTo @formAddView, 'formAddView:hide', @hideFormAddViewAnimate
+      @listenTo @newFormView, 'newFormView:hide', @hideNewFormViewAnimate
+
+    # Get the global Dative application settings relevant to displaying a form.
+    getGlobalsFormsDisplaySettings: ->
+      defaults =
+        itemsPerPage: 10
+        primaryDataLabelsVisible: false
+        allFormsExpanded: false
+      try
+        formsDisplaySettings = globals.applicationSettings.get 'formsDisplaySettings'
+        _.extend defaults, formsDisplaySettings
+      for key, value of defaults
+        @[key] = value
+
+    newFormAdded: ->
+      # HERE
+      console.log 'new form added triggered in FormsView'
+      #@paginator.setItems(@paginator.items + 1)
+      #@fetchFormsToCollection()
 
     # Keyboard shortcuts for the forms view.
     # Note that the FormsView is listening to events on parts of the DOM that are
@@ -161,7 +180,7 @@ define [
             when 38 # up arrow
               if not @itemsPerPageSelectHasFocus()
                 @$('.collapse-all').click()
-            when 65 then @toggleFormAddViewAnimate() # a
+            when 65 then @toggleNewFormViewAnimate() # a
             when 32 # spacebar goes to next form view, shift+spacebar goes to previous.
               if event.shiftKey
                 @focusPreviousFormView event
@@ -398,11 +417,10 @@ define [
       @rendered @paginationMenuTopView
 
     # Render the Add a Form view.
-    renderFormAddView: ->
-      @formAddView.setElement @$('.add-form-widget').first()
-      @formAddView.render()
-      @rendered @formAddView
-
+    renderNewFormView: ->
+      @newFormView.setElement @$('.new-form-view').first()
+      @newFormView.render()
+      @rendered @newFormView
 
     ############################################################################
     # Respond to `@collection`-issued events related to the "fetch forms" task.
@@ -535,7 +553,7 @@ define [
       @$('button.collapse-all').button 'disable'
       @$('button.toggle-all-labels').button 'disable'
       @setToggleAllLabelsButtonState()
-      @setFormAddViewButtonState()
+      @setNewFormViewButtonState()
 
     # Configure the header appropriately for the case where we have a page
     # that *has* some forms in it.
@@ -546,7 +564,7 @@ define [
       @$('button.collapse-all').button 'enable'
       @$('button.toggle-all-labels').button 'enable'
       @setToggleAllLabelsButtonState()
-      @setFormAddViewButtonState()
+      @setNewFormViewButtonState()
       if @paginator.start is @paginator.end
         @$('.form-range')
           .text "form #{@utils.integerWithCommas(@paginator.start + 1)}"
@@ -629,7 +647,7 @@ define [
         @weShouldFocusFirstAddViewInput = false
         @focusLastFocusedElement()
       else if @weShouldFocusFirstAddViewInput
-        @focusFirstFormAddViewTextarea()
+        @focusFirstNewFormViewTextarea()
       else
         @focusLastForm()
 
@@ -642,8 +660,8 @@ define [
     focusLastForm: ->
       @$('div.dative-form-object').last().focus()
 
-    focusFirstFormAddViewTextarea: ->
-      @$('.add-form-widget textarea').first().focus()
+    focusFirstNewFormViewTextarea: ->
+      @$('.new-form-view .add-form-widget textarea').first().focus()
 
     # GUI-fy: make nice buttons and nice titles/tooltips
     guify: ->
@@ -839,52 +857,56 @@ define [
     ############################################################################
 
     # Make the FormAddWidgetView visible or not, depending on its last state.
-    formAddViewVisibility: ->
-      if @formAddViewVisible
-        @showFormAddView()
+    newFormViewVisibility: ->
+      if @newFormViewVisible
+        @showNewFormView()
       else
-        @hideFormAddView()
+        @hideNewFormView()
 
-    hideFormAddView: ->
-      @setFormAddViewButtonShow()
-      @formAddViewVisible = false
-      @$('.add-form-widget').hide()
+    hideNewFormView: ->
+      @setNewFormViewButtonShow()
+      @newFormViewVisible = false
+      @$('.new-form-view').hide()
 
-    showFormAddView: ->
-      @setFormAddViewButtonHide()
-      @formAddViewVisible = true
-      @$('.add-form-widget').show
-        complete: -> Backbone.trigger 'addFormWidgetVisible'
+    showNewFormView: ->
+      @setNewFormViewButtonHide()
+      @newFormViewVisible = true
+      @$('.new-form-view').show
+        complete: =>
+          @newFormView.showUpdateView()
+          Backbone.trigger 'addFormWidgetVisible'
 
-    hideFormAddViewAnimate: ->
-      @setFormAddViewButtonShow()
-      @formAddViewVisible = false
-      @$('.add-form-widget').slideUp()
-      @formAddView.closeAllTooltips()
+    hideNewFormViewAnimate: ->
+      @setNewFormViewButtonShow()
+      @newFormViewVisible = false
+      @$('.new-form-view').slideUp()
+      @newFormView.closeAllTooltips()
       @focusLastForm()
       @scrollToFocusedInput()
 
-    showFormAddViewAnimate: ->
-      @setFormAddViewButtonHide()
-      @formAddViewVisible = true
-      @$('.add-form-widget').slideDown
-        complete: -> Backbone.trigger 'addFormWidgetVisible'
-      @focusFirstFormAddViewTextarea()
+    showNewFormViewAnimate: ->
+      @setNewFormViewButtonHide()
+      @newFormViewVisible = true
+      @$('.new-form-view').slideDown
+        complete: =>
+          @newFormView.showUpdateViewAnimate()
+          Backbone.trigger 'addFormWidgetVisible'
+      @focusFirstNewFormViewTextarea()
       @scrollToFocusedInput()
 
-    toggleFormAddViewAnimate: ->
-      if @$('.add-form-widget').is ':visible'
-        @hideFormAddViewAnimate()
+    toggleNewFormViewAnimate: ->
+      if @$('.new-form-view').is ':visible'
+        @hideNewFormViewAnimate()
       else
-        @showFormAddViewAnimate()
+        @showNewFormViewAnimate()
 
-    setFormAddViewButtonState: ->
-      if @formAddViewVisible
-        @setFormAddViewButtonHide()
+    setNewFormViewButtonState: ->
+      if @newFormViewVisible
+        @setNewFormViewButtonHide()
       else
-        @setFormAddViewButtonShow()
+        @setNewFormViewButtonShow()
 
-    setFormAddViewButtonShow: ->
+    setNewFormViewButtonShow: ->
       @$('button.new-form')
         .button 'enable'
         .tooltip
@@ -892,7 +914,7 @@ define [
 
     # The form add view show "+" button is disabled when the view is visible; to
     # hide the view, you click on the ^ button on the view itself.
-    setFormAddViewButtonHide: ->
+    setNewFormViewButtonHide: ->
       @$('button.new-form')
         .button 'disable'
 

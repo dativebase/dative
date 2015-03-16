@@ -39,3 +39,9 @@ define [
         textareaValue: defaultContext.value
       )
 
+    getValueFromDOM: ->
+      value = super
+      for k, v of value
+        if not v then value[k] = ''
+      value
+

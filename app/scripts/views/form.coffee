@@ -21,10 +21,15 @@ define [
       ui-widget-content ui-corner-all'
 
     initialize: (options) ->
+      @headerTitle = options.headerTitle or ''
       @activeServerType = @getActiveServerType()
       @setState options
-      @updateView = new FormAddWidgetView model: @model, addUpdateType: 'update'
+      @updateView = new FormAddWidgetView
+        model: @model,
+        addUpdateType: @getUpdateViewType()
       @updateViewRendered = false
+
+    getUpdateViewType: -> if @model.get('id') then 'update' else 'add'
 
     # Render the Add a Form view.
     renderUpdateView: ->
@@ -57,9 +62,7 @@ define [
         @secondaryDataVisible = false
 
     listenToEvents: ->
-      @stopListening()
-      @undelegateEvents()
-      @delegateEvents()
+      super
       @listenTo @model, 'change', @modelChanged
       @listenTo Backbone, 'form:dehighlightAllFormViews', @dehighlight
       @listenTo Backbone, 'formsView:expandAllForms', @expand
@@ -97,6 +100,7 @@ define [
       @html()
       @guify()
       @listenToEvents()
+      @renderUpdateView()
       @
 
     html: ->
@@ -113,6 +117,7 @@ define [
     getContext: ->
       context = _.extend(@model.toJSON(), {
         activeServerType: @activeServerType
+        headerTitle: @headerTitle
         h: # "h" for "helpers"
           getFormAttributes: @getFormAttributes
           fieldDB:
@@ -557,6 +562,7 @@ define [
       @setUpdateButtonStateOpen()
       @$('.update-form-widget').show
         complete: =>
+          @showFull()
           Backbone.trigger 'addFormWidgetVisible'
           @focusFirstUpdateViewTextarea()
 
@@ -572,11 +578,13 @@ define [
         @showUpdateView()
 
     showUpdateViewAnimate: ->
+      console.log @updateView
       if not @updateViewRendered then @renderUpdateView()
       @updateViewVisible = true
       @setUpdateButtonStateOpen()
       @$('.update-form-widget').slideDown
         complete: =>
+          @showFullAnimate()
           Backbone.trigger 'addFormWidgetVisible'
           @focusFirstUpdateViewTextarea()
 

@@ -19,6 +19,8 @@
 
   </div>
 
+  <div class='dative-widget-header-title'><%= @headerTitle or '' %></div>
+
   <div class='button-container-right'>
 
     <button class="update-form dative-tooltip"
@@ -61,6 +63,9 @@
 </div>
 
 <div class='dative-widget-body'>
+
+  <div class='update-form-widget dative-widget-center ui-widget
+    ui-widget-content ui-corner-all'></div>
 
   <div class='form-primary-data dative-form-primary-data'>
 
@@ -128,9 +133,6 @@
   <% end %>
 
   </div> <% # End div.form-secondary-data %>
-
-  <div class='update-form-widget dative-widget-center ui-widget
-    ui-widget-content ui-corner-all'></div>
 
 </div>
 

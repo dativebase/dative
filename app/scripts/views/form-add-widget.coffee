@@ -13,6 +13,7 @@ define [
   './date-field'
   './multiselect-field'
   './../models/form'
+  './../collections/forms'
   './../utils/globals'
   './../templates/form-add-widget'
   'multiselect'
@@ -21,7 +22,8 @@ define [
   RequiredSelectFieldView, PersonSelectFieldView, UserSelectFieldView,
   SourceSelectFieldView, TranscriptionGrammaticalityFieldView,
   UtteranceJudgementFieldView, TranslationsFieldView, CommentsFieldView,
-  DateFieldView, MultiselectFieldView, FormModel, globals, formAddTemplate) ->
+  DateFieldView, MultiselectFieldView, FormModel, FormsCollection, globals,
+  formAddTemplate) ->
 
   # Form Add Widget View
   # --------------------
@@ -117,9 +119,9 @@ define [
         'Update this form'
 
     submitForm: (event) ->
-      console.log 'submitForm called'
       @stopEvent event
       @setToModel()
+      @collection.addOLDForm @model
 
     # Set the state of the "add a form" HTML form on the Dative form model.
     setToModel: -> fv.setToModel() for fv in @fieldViews()

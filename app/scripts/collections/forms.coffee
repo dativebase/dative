@@ -66,6 +66,34 @@ define [
           console.log 'Error in GET request to /forms'
       )
 
+    # Add (create) an OLD form.
+    # POST `<OLD_URL>/forms`
+    addOLDForm: (form, options) ->
+      Backbone.trigger 'addOLDFormStart'
+      FormModel.cors.request(
+        method: 'POST'
+        url: "#{@getOLDURL()}/forms"
+        payload: form.attributes
+        onload: (responseJSON, xhr) =>
+          Backbone.trigger 'addOLDFormEnd'
+          if xhr.status is 200
+            # TODO: listen to collection 'add' event and display the new form
+            # in the browse GUI.
+            @add (new FormModel()).old2dative(responseJSON)
+            console.log 'added a new form in FormsCollection'
+            Backbone.trigger 'addOLDFormSuccess'
+          else
+            errors = responseJSON.errors or {}
+            Backbone.trigger 'addOLDFormFail', errors
+            console.log 'POST request to /forms failed ...'
+            console.log errors
+        onerror: (responseJSON) =>
+          Backbone.trigger 'addOLDFormEnd'
+          Backbone.trigger 'addOLDFormFail', "error in adding form
+            #{form.get 'id'}"
+          console.log 'Error in POST request to /forms'
+      )
+
     ############################################################################
     # Helpers
     ############################################################################

@@ -67,7 +67,7 @@ define [
       @listenTo @mainMenuView, 'request:toggleHelpDialogBox', @toggleHelpDialog
       @listenTo @mainMenuView, 'request:openRegisterDialogBox', @toggleRegisterDialog
       @listenTo @mainMenuView, 'request:corporaBrowse', @showCorporaView
-      @listenTo @mainMenuView, 'request:formAdd', @showFormAddView
+      @listenTo @mainMenuView, 'request:formAdd', @showNewFormView
       @listenTo @mainMenuView, 'request:formsBrowse', @showFormsView
       @listenTo @mainMenuView, 'request:formsSearch', @showFormsSearchView
       @listenTo @mainMenuView, 'request:pages', @showPagesView
@@ -77,7 +77,7 @@ define [
       @listenTo @router, 'route:openLoginDialogBox', @toggleLoginDialog
       @listenTo @router, 'route:openRegisterDialogBox', @toggleRegisterDialog
       @listenTo @router, 'route:corporaBrowse', @showCorporaView
-      @listenTo @router, 'route:formAdd', @showFormAddView
+      @listenTo @router, 'route:formAdd', @showNewFormView
       @listenTo @router, 'route:formsBrowse', @showFormsView
       @listenTo @router, 'route:formsSearch', @showFormsSearchView
       @listenTo @router, 'route:pages', @showPagesView
@@ -230,17 +230,17 @@ define [
           activeFieldDBCorpus: @activeFieldDBCorpus
       @visibleView = @formsView
       # This is relevant if the user is trying to add a new form.
-      if options?.showFormAddView
+      if options?.showNewFormView
         @formsView.formAddViewVisible = true
         @formsView.weShouldFocusFirstAddViewInput = true
       @renderVisibleView taskId
 
-    showFormAddView: ->
+    showNewFormView: ->
       if not @loggedIn() then return
       if @formsView and @visibleView is @formsView
-        @visibleView.toggleFormAddViewAnimate()
+        @visibleView.toggleNewFormViewAnimate()
       else
-        @showFormsView showFormAddView: true
+        @showFormsView showNewFormView: true
 
     # Put out of use for now. Now adding a form is done via the browse
     # interface. See `showFormAddView`.
