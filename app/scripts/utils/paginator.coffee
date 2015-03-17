@@ -103,7 +103,7 @@ define ['./../utils/utils'], (utils) ->
       else
         @itemsDisplayed = @itemsPerPage
 
-    _defaultPossibleItemsPerPage: [1, 5, 10, 25, 50, 100]
+    _defaultPossibleItemsPerPage: [1, 2, 3, 5, 10, 25, 50, 100]
 
     # Return the highest multiple of `newItemsPerPage` such that it is less than
     # or equal to the current `start` value. Also return the `page` value that

@@ -2,11 +2,29 @@ define [
   'backbone'
   './form-handler-base'
   './form-add-widget'
+  './field-display'
+  './phonetic-transcription-field-display'
+  './grammaticality-value-field-display'
+  './judgement-value-field-display'
+  './morpheme-break-field-display'
+  './morpheme-gloss-field-display'
+  './translations-field-display'
+  './object-with-name-field-display'
+  './source-field-display'
+  './date-field-display'
+  './person-field-display'
+  './array-of-objects-with-title-field-display'
+  './array-of-objects-with-name-field-display'
   './../utils/globals'
   './../utils/tooltips'
   './../templates/form'
-], (Backbone, FormHandlerBaseView, FormAddWidgetView, globals, tooltips,
-  formTemplate) ->
+], (Backbone, FormHandlerBaseView, FormAddWidgetView, FieldDisplayView,
+  PhoneticTranscriptionFieldDisplayView, GrammaticalityValueFieldDisplayView,
+  JudgementValueFieldDisplayView, MorphemeBreakFieldDisplayView,
+  MorphemeGlossFieldDisplayView, TranslationsFieldDisplayView,
+  ObjectWithNameFieldDisplayView, SourceFieldDisplayView, DateFieldDisplayView,
+  PersonFieldDisplayView, ArrayOfObjectsWithTitleFieldDisplayView,
+  ArrayOfObjectsWithNameFieldDisplayView, globals, tooltips, formTemplate) ->
 
   # Form View
   # ---------
@@ -97,19 +115,139 @@ define [
     modelChanged: ->
 
     render: ->
+      @getDisplayViews()
       @html()
+      @renderDisplayViews()
       @guify()
       @listenToEvents()
       @renderUpdateView()
       @
 
+
+    getDisplayViews: ->
+      @getPrimaryDisplayViews()
+      @getSecondaryDisplayViews()
+
+    # Put the appropriate DisplayView instances in `@primaryDisplayViews`.
+    getPrimaryDisplayViews: ->
+      @igtDisplayViews = []
+      igtAttributes = @getFormAttributes @activeServerType, 'igt'
+      for attribute in igtAttributes
+        @igtDisplayViews.push @getDisplayView attribute
+      @translationDisplayViews = []
+      translationAttributes = @getFormAttributes @activeServerType, 'translation'
+      for attribute in translationAttributes
+        @translationDisplayViews.push @getDisplayView attribute
+
+    getSecondaryDisplayViews: ->
+      @secondaryDisplayViews = []
+      secondaryAttributes = @getFormAttributes @activeServerType, 'secondary'
+      for attribute in secondaryAttributes
+        @secondaryDisplayViews.push @getDisplayView attribute
+
+    # TODO: FieldDB array-type fields:
+    # 'comments':           'fieldDBCommentsFieldDisplay' # direct Datum attribute
+    # 'modifiedByUser':     'fieldDBModifiersArrayFieldDisplay'
+
+    attribute2displayView:
+      FieldDB:
+        utterance: JudgementValueFieldDisplayView
+        morphemes: MorphemeBreakFieldDisplayView
+        gloss: MorphemeGlossFieldDisplayView
+        dateElicited: DateFieldDisplayView
+        dateEntered: DateFieldDisplayView
+        dateModified: DateFieldDisplayView
+      OLD:
+        narrow_phonetic_transcription: PhoneticTranscriptionFieldDisplayView
+        phonetic_transcription: PhoneticTranscriptionFieldDisplayView
+        transcription: GrammaticalityValueFieldDisplayView
+        translations: TranslationsFieldDisplayView
+        morpheme_break: MorphemeBreakFieldDisplayView
+        morpheme_gloss: MorphemeGlossFieldDisplayView
+        syntactic_category: ObjectWithNameFieldDisplayView
+        elicitation_method: ObjectWithNameFieldDisplayView
+        source: SourceFieldDisplayView
+        date_elicited: DateFieldDisplayView
+        datetime_entered: DateFieldDisplayView
+        datetime_modified: DateFieldDisplayView
+        speaker: PersonFieldDisplayView
+        elicitor: PersonFieldDisplayView
+        enterer: PersonFieldDisplayView
+        modifier: PersonFieldDisplayView
+        verifier: PersonFieldDisplayView
+        collections: ArrayOfObjectsWithTitleFieldDisplayView
+        tags: ArrayOfObjectsWithNameFieldDisplayView
+        files: ArrayOfObjectsWithNameFieldDisplayView
+
+    # Maps attributes to their appropriate DisplayView subclasses.
+    # This is where field-specific configuration should go.
+    # attribute2displayView_:
+    #   FieldDB:
+    #     utterance:          UtteranceJudgementDisplayView
+    #     comments:           CommentsDisplayView
+    #   OLD:
+    #     transcription:      TranscriptionGrammaticalityDisplayView
+    #     translations:       TranslationsDisplayView
+    #     elicitation_method: SelectDisplayView
+    #     syntactic_category: SelectDisplayView
+    #     speaker:            PersonSelectDisplayView
+    #     elicitor:           UserSelectDisplayView
+    #     verifier:           UserSelectDisplayView
+    #     source:             SourceSelectDisplayView
+    #     status:             RequiredSelectDisplayView
+    #     date_elicited:      DateDisplayView
+    #     tags:               MultiselectDisplayView
+
+    # Return the appropriate DisplayView (subclass) instance for a given
+    # attribute, as specified in `@attribute2displayView`. The default display view
+    # is `DisplayView`.
+    getDisplayView: (attribute) ->
+      params = # All `DisplayView` subclasses expect `attribute` and `model` on init
+        attribute: attribute # e.g., "transcription"
+        model: @model # `DisplayView` subclasses expect a form model
+      if attribute of @attribute2displayView[@activeServerType]
+        MyDisplayView = @attribute2displayView[@activeServerType][attribute]
+        new MyDisplayView params
+      else # the default display view is FieldDisplayView
+        new FieldDisplayView params
+
     html: ->
-      context = @getContext()
       @$el
         .attr
           'id': @model.cid
           'tabindex': 0
-        .html @template(context)
+        .html @template(activeServerType: @activeServerType)
+
+    # TODO: do this all in one DOM-manipulation event via a single document
+    # fragment, if possible.
+    renderDisplayViews: ->
+      @renderPrimaryDisplayViews()
+      @renderSecondaryDisplayViews()
+
+    renderPrimaryDisplayViews: ->
+      @renderIGTDisplayViews()
+      @renderTranslationDisplayViews()
+
+    renderIGTDisplayViews: ->
+      container = document.createDocumentFragment()
+      for displayView in @igtDisplayViews
+        container.appendChild displayView.render().el
+        @rendered displayView
+      @$('div.form-igt-data').append container
+
+    renderTranslationDisplayViews: ->
+      container = document.createDocumentFragment()
+      for displayView in @translationDisplayViews
+        container.appendChild displayView.render().el
+        @rendered displayView
+      @$('div.form-translations-data').append container
+
+    renderSecondaryDisplayViews: ->
+      container = document.createDocumentFragment()
+      for displayView in @secondaryDisplayViews
+        container.appendChild displayView.render().el
+        @rendered displayView
+      @$('div.form-secondary-data').append container
 
     # Get the context object for the template.
     # Note that a lot of the heavy lifting is done in methods of this FormView,
@@ -132,7 +270,6 @@ define [
     guify: ->
       @primaryDataLabelsVisibility()
       @guifyButtons()
-      @tooltipify()
       @headerVisibility()
       @secondaryDataVisibility()
       @updateViewVisibility()
@@ -212,11 +349,9 @@ define [
           items: 'button'
           content: 'hide labels'
 
-    primaryDataLabelsSelector: '.form-igt-data-label,
-      .form-translations-data-label, .form-translation-data-label'
+    primaryDataLabelsSelector: '.dative-field-display-label-container'
 
-    primaryDataContentSelector: '.form-igt-data-content,
-      .form-translations-data-content, .form-translation-data-content'
+    primaryDataContentSelector: '.dative-field-display-representation-container'
 
     # Show the labels for the primary data (e.g., transcription, utterance) attributes.
     showPrimaryDataLabelsAnimate: ->
@@ -255,26 +390,6 @@ define [
       @setPrimaryDataLabelsButtonStateOpen()
       @$(@primaryDataLabelsSelector).show()
       @$(@primaryDataContentSelector).removeClass 'no-label'
-
-    # Turn title attributes into jQueryUI tooltips.
-    tooltipify: ->
-
-      @$('.form-fielddb-modifier-timestamp.dative-tooltip')
-        .tooltip
-          items: 'span'
-          position:
-            my: "left top"
-            at: "right top"
-            collision: "flipfit"
-
-      @$('.form-secondary-data,.form-igt-data,.form-translations-data .dative-tooltip')
-        .not '.form-fielddb-modifier-timestamp'
-        .tooltip
-          items: 'div, span'
-          position:
-            my: "right top"
-            at: "left top"
-            collision: "flipfit"
 
     # jQueryUI-ify <button>s
     guifyButtons: ->
@@ -641,24 +756,26 @@ define [
       if not @headerVisible
         @$('.form-primary-data').css 'cursor', 'text'
 
-    # The primary data has a tooltip only when the buttons and secondary data are hidden.
+    # The form display representations in the primary data section have
+    # tooltips only when the buttons and secondary data are hidden.
     turnOnPrimaryDataTooltip: ->
-      $primaryDataDiv = @$('.form-primary-data').first()
-      if not $primaryDataDiv.tooltip 'instance'
-        $primaryDataDiv
-          .tooltip
-            open: (event, ui) -> ui.tooltip.css "max-width", "200px"
-            items: 'div'
-            content: 'Click here for more controls and data.'
-            position:
-              my: 'right-10 center'
-              at: 'left center'
-              collision: 'flipfit'
+      @$('.dative-field-display-representation-container').each (index, element) =>
+        $element = @$ element
+        if not $element.tooltip 'instance'
+          $element
+            .tooltip
+              open: (event, ui) -> ui.tooltip.css "max-width", "200px"
+              items: 'div'
+              content: 'Click here for controls and more data.'
+              position:
+                my: 'right-10 center'
+                at: 'left center'
+                collision: 'flipfit'
 
     turnOffPrimaryDataTooltip: ->
-      $primaryDataDiv = @$('.form-primary-data').first()
-      if $primaryDataDiv.tooltip 'instance'
-        $primaryDataDiv.tooltip 'destroy'
+      @$('.dative-field-display-representation-container').each (index, element) =>
+        $element = @$ element
+        if $element.tooltip 'instance' then $element.tooltip 'destroy'
 
     getActiveServerType: ->
       globals.applicationSettings.get('activeServer').get 'type'
@@ -690,218 +807,6 @@ define [
 
 
     ############################################################################
-    # OLD-specific template helpers
-    ############################################################################
-
-    # The following methods are all responsible for writing OLD field labels and
-    # values to the DOM.
-
-    # Return the <div> that displays an OLD IGT field (e.g., transcription)
-    # The `contentCallback` is a function that returns a string representation
-    # of the field content; by passing different callbacks to
-    # `oldGenericIGTFieldDisplay`, one can build content-specific field
-    # representations. This function is called from (functions that are called
-    # from) within a template; thus the `context` parameter is the context,
-    # i.e., `@` within the template, which has the attributes of
-    # `@model.toJSON()`.
-    oldGenericIGTFieldDisplay: (attribute, context, contentCallback) =>
-      "<div
-        class='form-field-display form-#{@utils.snake2hyphen attribute}'
-        #{@displayNoneStyle context[attribute]}>
-        #{@getOLDIGTFieldLabelDiv attribute, context}
-        #{@getOLDIGTFieldContentDiv attribute, context, contentCallback}
-        </div>"
-
-    # Return the <div> that displays an OLD Secondary Data field (e.g.,
-    # syntactic category). The `contentCallback` is a function that returns a
-    # string representation of the field content; by passing different
-    # callbacks to # `oldGenericSecondaryDataFieldDisplay`, one can build
-    # content-specific field representations. This function is called from
-    # (functions that are called from) within a template; thus the `context`
-    # parameter is the context, i.e., `@` within the template, which has the
-    # attributes of `@model.toJSON()`.
-    oldGenericSecondaryDataFieldDisplay: (attribute, context, contentCallback) =>
-      "<div
-        class='form-field-display form-#{@utils.snake2hyphen attribute}'
-        #{@displayNoneStyle context[attribute]}>
-        #{@getOLDSecondaryFieldLabelDiv attribute, context}
-        #{@getOLDSecondaryFieldContentDiv attribute, context, contentCallback}
-        </div>"
-
-    # Return the <div> that displays an OLD translations field.
-    oldGenericTranslationsFieldDisplay: (attribute, context, contentCallback) =>
-      "<div
-        class='form-field-display form-#{@utils.snake2hyphen attribute}'
-        #{@displayNoneStyle context[attribute]}>
-        #{@getOLDTranslationsFieldLabelDiv attribute, context}
-        #{@getOLDTranslationsFieldContentDiv attribute, context, contentCallback}
-        </div>"
-
-    # Return the <div> containing the content of an OLD form field. `type` is
-    # "igt" or "secondary".
-    getOLDFieldContentDiv: (attribute, context, contentCallback, type) =>
-      "<div class='form-#{type}-data-content'
-        >#{contentCallback attribute, context}</div>"
-
-    # Return the <div> containing the content of an OLD IGT form field.
-    getOLDSecondaryFieldContentDiv: (attribute, context, contentCallback) =>
-      @getOLDFieldContentDiv attribute, context, contentCallback, 'secondary'
-
-    # Return the <div> containing the content of an OLD IGT form field.
-    getOLDIGTFieldContentDiv: (attribute, context, contentCallback) =>
-      @getOLDFieldContentDiv attribute, context, contentCallback, 'igt'
-
-    # Return the <div> containing the content of an OLD translations form field.
-    getOLDTranslationsFieldContentDiv: (attribute, context, contentCallback) =>
-      @getOLDFieldContentDiv attribute, context, contentCallback, 'translations'
-
-    # Return a <div> containing the label of an OLD form field. `type` is "igt"
-    # or "secondary".
-    getOLDFieldLabelDiv: (attribute, context, type) =>
-      "<div class='form-#{type}-data-label dative-tooltip'
-        title='#{@getOLDAttributeTooltip attribute, context}'
-        >#{@utils.snake2regular attribute}</div>"
-
-    # Return the <div> containing the label of an OLD IGT form field.
-    getOLDIGTFieldLabelDiv: (attribute, context) =>
-      @getOLDFieldLabelDiv attribute, context, 'igt'
-
-    # Return the <div> containing the label of an OLD secondary form field.
-    getOLDSecondaryFieldLabelDiv: (attribute, context) =>
-      @getOLDFieldLabelDiv attribute, context, 'secondary'
-
-    # Return the <div> containing the label of an OLD translations form field.
-    getOLDTranslationsFieldLabelDiv: (attribute, context) =>
-      @getOLDFieldLabelDiv attribute, context, 'translations'
-
-    # Return the tooltip for an OLD form attribute (uses the imported `tooltip`
-    # module). Note that we pass `value` in case `tooltip` uses it in generating
-    # a value-specific tooltip (which isn't always the case.)
-    # TODO @jrwdunham: delete this in favour of the `context`-less version in
-    # form-handler-base.
-    getOLDAttributeTooltip: (attribute, context) =>
-      tooltips("old.formAttributes.#{attribute}")(
-        language: 'eng' # TODO: make 'eng' configurable
-        value: context[attribute]
-      )
-
-    # Phonetic Transcription Field.
-    oldPhoneticTranscriptionFieldDisplay: (attribute, context) =>
-      contentCallback = (attribute, context) =>
-        @utils.encloseIfNotAlready context[attribute], '[', ']'
-      @oldGenericIGTFieldDisplay attribute, context, contentCallback
-
-    # Transcription with Grammaticality Field.
-    oldTranscriptionGrammaticalityFieldDisplay: (attribute, context) =>
-      contentCallback = (attribute, context) =>
-        "#{@oldGrammaticalitySpan context}#{context[attribute]}"
-      @oldGenericIGTFieldDisplay attribute, context, contentCallback
-
-    # Grammaticality in a <span>.
-    oldGrammaticalitySpan: (context) =>
-      "<span class='grammaticality'>#{context.grammaticality}</span>"
-
-    # Morpheme Break Field.
-    oldMorphemeBreakFieldDisplay: (attribute, context) =>
-      contentCallback = (attribute, context) =>
-        @utils.encloseIfNotAlready context[attribute], '/', '/'
-      @oldGenericIGTFieldDisplay attribute, context, contentCallback
-
-    # Morpheme Gloss Field.
-    # (Potential TODO: small-caps-ify all-caps morpheme abbreviations)
-    oldMorphemeGlossFieldDisplay: (attribute, context) =>
-      contentCallback = (attribute, context) => @utils.smallCapsAcronyms context[attribute]
-      @oldGenericIGTFieldDisplay attribute, context, contentCallback
-
-    # String Field.
-    oldStringFieldDisplay: (attribute, context) =>
-      contentCallback = (attribute, context) -> context[attribute]
-      @oldGenericSecondaryDataFieldDisplay attribute, context, contentCallback
-
-    # Object-with-a-`name` Field
-    oldObjectWithNameFieldDisplay: (attribute, context) =>
-      contentCallback = (attribute, context) ->
-        value = context[attribute]
-        if value
-          try
-            context[attribute].name
-          catch
-            console.log "Warning: unable to display this #{attribute}"
-            "Warning: unable to display this #{attribute}"
-        else
-          ''
-      @oldGenericSecondaryDataFieldDisplay attribute, context, contentCallback
-
-    # Source Field.
-    oldSourceFieldDisplay: (attribute, context) =>
-      contentCallback = (attribute, context) ->
-        value = context[attribute]
-        if value
-          try
-            source = context[attribute]
-            "#{source.author} (#{source.year})"
-          catch
-            console.log "Warning: unable to display this #{attribute}"
-            "Warning: unable to display this #{attribute}"
-        else
-          ''
-      @oldGenericSecondaryDataFieldDisplay attribute, context, contentCallback
-
-    # Array-of-objects-with-`subattr`-attributes Field. Note the
-    # `attribute[...-1]` which is just simple-minded singularization: "tags" ->
-    # "tag". The text displayed will be, e.g., `tags[0].subattr`.
-    oldArrayOfObjectsWithSubattrFieldDisplay: (attribute, context, subattr) =>
-      contentCallback = (attribute, context) ->
-        result = []
-        for object in context[attribute]
-          try
-            result.push "<div class='form-#{attribute[...-1]}'>#{object[subattr]}</div>"
-        result.join '\n'
-      @oldGenericSecondaryDataFieldDisplay attribute, context, contentCallback
-
-    # Translations Field.
-    oldTranslationsFieldDisplay: (attribute, context) =>
-      contentCallback = (attribute, context) ->
-        result = []
-        for translation in context[attribute]
-          try
-            result.push "
-              <span class='translation-grammaticality'
-                >#{translation.grammaticality}</span>
-              <span class='translation-transcription'
-                >#{translation.transcription}</span>"
-        result.join '\n'
-      @oldGenericTranslationsFieldDisplay attribute, context, contentCallback
-
-    # Array-of-objects-with-`name`-attributes Field. Note the
-    # `attribute[...-1]` which is just simple-minded singularization: "tags" ->
-    # "tag".
-    oldArrayOfObjectsWithNameFieldDisplay: (attribute, context) =>
-      @oldArrayOfObjectsWithSubattrFieldDisplay attribute, context, 'name'
-
-    # Array-of-objects-with-`title`-attributes Field.
-    oldArrayOfObjectsWithTitleFieldDisplay: (attribute, context) =>
-      @oldArrayOfObjectsWithSubattrFieldDisplay attribute, context, 'title'
-
-    # Date(time) Field.
-    oldDateFieldDisplay: (attribute, context) =>
-      contentCallback = (attribute, context) => @utils.timeSince context[attribute]
-      @oldGenericSecondaryDataFieldDisplay attribute, context, contentCallback
-
-    # Person Field.
-    oldPersonFieldDisplay: (attribute, context) =>
-      contentCallback = (attribute, context) ->
-        person = context[attribute]
-        if person
-          firstName = person.first_name or ''
-          lastName = person.last_name or ''
-          "#{firstName} #{lastName}".trim()
-        else
-          ''
-      @oldGenericSecondaryDataFieldDisplay attribute, context, contentCallback
-
-
-    ############################################################################
     # FieldDB-specific template helpers
     ############################################################################
 
@@ -919,7 +824,7 @@ define [
     fieldDBGenericIGTFieldDisplay: (attribute, context, contentCallback) =>
       value = @model.getDatumValueSmart attribute
       "<div
-        class='form-field-display form-#{@utils.camel2hyphen attribute}'
+        class='form-#{@utils.camel2hyphen attribute}'
         #{@displayNoneStyle value}>
         #{@getFieldDBIGTFieldLabelDiv attribute, context}
         #{@getFieldDBIGTFieldContentDiv attribute, context, contentCallback}
@@ -929,7 +834,7 @@ define [
     fieldDBGenericTranslationFieldDisplay: (attribute, context, contentCallback) =>
       value = @model.getDatumValueSmart attribute
       "<div
-        class='form-field-display form-#{@utils.camel2hyphen attribute}'
+        class='form-#{@utils.camel2hyphen attribute}'
         #{@displayNoneStyle value}>
         #{@getFieldDBTranslationFieldLabelDiv attribute, context}
         #{@getFieldDBTranslationFieldContentDiv attribute, context, contentCallback}
@@ -994,7 +899,7 @@ define [
     # (Potential TODO: small-caps-ify all-caps morpheme abbreviations)
     fieldDBGlossFieldDisplay: (attribute, context) =>
       contentCallback = (attribute, context) =>
-        @utils.smallCapsAcronyms @model.getDatumValueSmart(attribute)
+        @model.getDatumValueSmart(attribute)
       @fieldDBGenericIGTFieldDisplay attribute, context, contentCallback
 
     # Translation Field. Note that translations are their own category since
@@ -1097,7 +1002,7 @@ define [
       value = @model.getDatumValueSmart attribute
       tooltip = @getFieldDBAttributeTooltip attribute, context
       "<div
-        class='form-field-display form-#{@utils.camel2hyphen attribute}'
+        class='form-#{@utils.camel2hyphen attribute}'
         #{@fieldDBDisplayNoneStyle attribute, value}>
         #{@getFieldDBSecondaryFieldLabelDiv attribute, context}
         #{@getFieldDBSecondaryFieldContentDiv attribute, context, contentCallback}

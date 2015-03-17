@@ -151,11 +151,32 @@ button.help-button
   width: 0%;
 }
 
-.dative-field-label-container
+.dative-field-label-container,
+.dative-field-display-label-container
 {
   display: inline-block;
   width: 25%;
   vertical-align: top;
+}
+
+.dative-field-display-label-container
+{
+  width: 35%;
+}
+
+.dative-field-input-container,
+.dative-field-display-representation-container,
+.dative-field-display-label-container,
+.dative-pagin-item-index-cell
+{
+  font-family: 'GentiumPlus', serif;
+}
+
+.dative-field-display-representation-container,
+.dative-field-display-label-container,
+.dative-pagin-item-index-cell
+{
+  font-size: 130%;
 }
 
 .update-form-widget .dative-field-label-container
@@ -170,14 +191,21 @@ button.help-button
   margin-bottom: 0.4em;
 }
 
+.dative-field-display-representation-container,
 .dative-field-input-container
 {
   display: inline-block;
   width: 60%;
 }
 
+.dative-field-display-representation-container.no-label
+{
+  width: 95%;
+}
+
 .update-form-widget .dative-field-input-container
 {
+  display: inline-block;
   width: 70%;
 }
 
@@ -1202,8 +1230,13 @@ div.form-secondary-data div,
 span.dative-pagin-item-index,
 p.paragraph-widget
 {
-  font-size: 12pt;
+  font-size: 14pt;
   font-family: 'GentiumPlus', serif;
+}
+
+div.dative-form-field-display
+{
+  line-height: 1.2em;
 }
 
 p.paragraph-widget
@@ -1254,7 +1287,7 @@ span.ui-selectmenu-button {
 
 span.dative-pagin-item-index
 {
-  font-size: 150%;
+  /*font-size: 150%;*/
   position: relative;
   top: 0.1em;
 }

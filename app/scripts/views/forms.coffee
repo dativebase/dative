@@ -96,7 +96,6 @@ define [
       @refreshHeader()
       @renderPaginationMenuTopView()
       @renderNewFormView()
-      @renderNewFormView()
       @newFormViewVisibility()
       if @weNeedToFetchFormsAgain()
         @fetchFormsToCollection()
