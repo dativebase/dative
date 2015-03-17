@@ -25,7 +25,7 @@ define [
       @$('label.dative-tooltip')
         .tooltip
           position:
-            my: "right-10 top"
-            at: 'left top'
+            my: "right-300 top"
+            at: 'right top'
             collision: 'flipfit'
 

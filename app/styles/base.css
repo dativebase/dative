@@ -157,11 +157,13 @@ button.help-button
   display: inline-block;
   width: 25%;
   vertical-align: top;
+  text-align: right;
+  margin-right: 0.75em;
 }
 
 .dative-field-display-label-container
 {
-  width: 35%;
+  width: 36%;
 }
 
 .dative-field-input-container,
@@ -333,7 +335,7 @@ div.dative-page-header-title
 {
     min-width: 5em;
     vertical-align: top;
-    padding-top: 1em;
+    padding-top: 1.15em;
 }
 
 .dative-pagin-item-content
@@ -737,6 +739,12 @@ ul.fieldset button.ui-multiselect
 button.ui-multiselect {
     position: relative;
     top: 1px;
+}
+
+.form-primary-data,
+.form-secondary-data
+{
+  margin: 0.5em;
 }
 
 .dative-form-transcription,
