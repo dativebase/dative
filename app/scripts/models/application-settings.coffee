@@ -455,8 +455,8 @@ define [
       activeFieldDBCorpusTitle: null
 
       formsDisplaySettings:
-        itemsPerPage: 10
-        primaryDataLabelsVisible: false
+        itemsPerPage: 5
+        primaryDataLabelsVisible: true
         allFormsExpanded: false
 
       activeJQueryUITheme: 'cupertino'

@@ -98,6 +98,11 @@ define [
       @listenToEvents()
       @
 
+    listenToEvents: ->
+      super
+      if @inputView
+        @listenTo @inputView, 'setToModel', @setToModel
+
     renderLabelView: ->
       @labelView.setElement @$('.dative-field-label-container')
       @labelView.render()
@@ -139,6 +144,17 @@ define [
       switch @activeServerType
         when 'FieldDB' then @model.setDatumValueSmart domValue
         when 'OLD' then @model.set domValue
+
+    getValueFromRelationalIdFromDOM: (valueFromDOM) ->
+      result = {}
+      try
+        idFromDOM = Number valueFromDOM[@context.attribute]
+        options = @context.options[@optionsAttribute]
+        value = _.findWhere options, {id: idFromDOM}
+        result[@context.attribute] = value
+      catch
+        result[@context.attribute] = undefined
+      result
 
     ############################################################################
     # Helper methods for building a template context out of the form @model and

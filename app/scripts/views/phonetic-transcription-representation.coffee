@@ -6,6 +6,6 @@ define ['./representation'], (RepresentationView) ->
   # A view for the representation of a phonetic transcription field.
 
   class PhoneticTranscriptionRepresentationView extends RepresentationView
-    initialize: (@context) ->
-      @context.value = @utils.encloseIfNotAlready context.value, '[', ']'
+    valueFormatter: (value) =>
+      @utils.encloseIfNotAlready value, '[', ']'
 

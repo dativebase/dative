@@ -48,7 +48,7 @@
           <% else: %>
             title='Save changes to this form'
           <% end %>
-          >Save<i class="fa fa-fw fa-floppy-o"></i></button>
+          >Save</button>
 
         <button
           class="toggle-secondary-data-fields dative-tooltip"

@@ -693,7 +693,6 @@ define [
         @showUpdateView()
 
     showUpdateViewAnimate: ->
-      console.log @updateView
       if not @updateViewRendered then @renderUpdateView()
       @updateViewVisible = true
       @setUpdateButtonStateOpen()

@@ -10,3 +10,6 @@ define [
 
   class PhoneticTranscriptionFieldDisplayView extends FieldDisplayView
 
+    getRepresentationView: ->
+      new PhoneticTranscriptionRepresentationView @context
+

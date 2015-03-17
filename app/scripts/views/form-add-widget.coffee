@@ -1,7 +1,7 @@
 define [
   './form-handler-base'
   './textarea-field'
-  './select-field'
+  './relational-select-field'
   './required-select-field'
   './person-select-field'
   './user-select-field'
@@ -18,7 +18,7 @@ define [
   './../templates/form-add-widget'
   'multiselect'
   'jqueryelastic'
-], (FormHandlerBaseView, TextareaFieldView, SelectFieldView,
+], (FormHandlerBaseView, TextareaFieldView, RelationalSelectFieldView,
   RequiredSelectFieldView, PersonSelectFieldView, UserSelectFieldView,
   SourceSelectFieldView, TranscriptionGrammaticalityFieldView,
   UtteranceJudgementFieldView, TranslationsFieldView, CommentsFieldView,
@@ -170,8 +170,8 @@ define [
       OLD:
         transcription:      TranscriptionGrammaticalityFieldView
         translations:       TranslationsFieldView
-        elicitation_method: SelectFieldView
-        syntactic_category: SelectFieldView
+        elicitation_method: RelationalSelectFieldView
+        syntactic_category: RelationalSelectFieldView
         speaker:            PersonSelectFieldView
         elicitor:           UserSelectFieldView
         verifier:           UserSelectFieldView

@@ -17,12 +17,17 @@ define [
 
     initialize: (@context) ->
 
+    valueFormatter: (value) -> value
+
     template: valueRepresentationTemplate
 
     render: ->
+      @context.valueFormatter = @valueFormatter
       @$el.html @template(@context)
       @tooltipify()
       @
+
+    refresh: (@context) ->
 
     # Make title attrs into jQueryUI tooltips.
     tooltipify: ->

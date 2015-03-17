@@ -15,3 +15,6 @@ define ['./select-field'], (SelectFieldView) ->
         "#{option.author} (#{option.year})"
       super options
 
+    getValueFromDOM: ->
+      @getValueFromRelationalIdFromDOM super
+

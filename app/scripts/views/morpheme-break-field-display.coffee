@@ -10,3 +10,6 @@ define [
 
   class MorphemeBreakFieldDisplayView extends FieldDisplayView
 
+    getRepresentationView: ->
+      new MorphemeBreakRepresentationView @context
+

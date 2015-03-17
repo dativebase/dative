@@ -1,7 +1,7 @@
 define [
   './field-display'
-  './value-representation'
-], (FieldDisplayView, ValueRepresentationView) ->
+  './morpheme-gloss-representation'
+], (FieldDisplayView, MorphemeGlossRepresentationView) ->
 
   # Morpheme Gloss Field Display View
   # ---------------------------------
@@ -10,9 +10,6 @@ define [
 
   class MorphemeGlossFieldDisplayView extends FieldDisplayView
 
-    getContext: ->
-      context = super
-      context.value = @utils.smallCapsAcronyms context.value
-      context
-
+    getRepresentationView: ->
+      new MorphemeGlossRepresentationView @context
 

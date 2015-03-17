@@ -66,24 +66,42 @@ define [
 
     render: ->
       @$el.html @template(@context)
+      @visibility()
+      @labelView.setElement @$('.dative-field-display-label-container')
+      @representationView.setElement @$('.dative-field-display-representation-container')
       @renderLabelView()
       @renderRepresentationView()
       @guify()
       @listenToEvents()
-      @visibility()
       @
+
+    listenToEvents: ->
+      super
+      @listenTo @model, 'change', @refresh
+
+    # Refresh the field display: essentially, make the display reflect the
+    # model state.
+    # NOTE/TODO @jrwdunham: it is inefficient to refresh EVERY field display on
+    # every model change; however, because nearly all FieldDB datum attributes
+    # are associated to a single model attribute (i.e., `datumFields`),
+    # detecting exactly which field displays should be refreshed is not simple.
+    refresh: ->
+      @context = @getContext()
+      @representationView.refresh @context
+      @renderRepresentationView()
+      @visibility()
 
     visibility: ->
       if @shouldBeHidden()
         @$el.hide()
+      else
+        @$el.show()
 
     renderLabelView: ->
-      @labelView.setElement @$('.dative-field-display-label-container')
       @labelView.render()
       @rendered @labelView
 
     renderRepresentationView: ->
-      @representationView.setElement @$('.dative-field-display-representation-container')
       @representationView.render()
       @rendered @representationView
 

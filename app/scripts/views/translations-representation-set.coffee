@@ -10,11 +10,6 @@ define [
 
   class TranslationsRepresentationSetView extends RepresentationSetView
 
-    initialize: (@context) ->
-      @compatibilityAttribute = @context.compatibilityAttribute
-      @transcriptionAttribute = @context.transcriptionAttribute
-      super
-
     # Override `RepresentationSetView`'s default with a translation-appropriate
     # representation view.
     getRepresentationView: (representationContext) ->
@@ -23,6 +18,8 @@ define [
     # Override `RepresentationSetView`'s default with translation-appropriate
     # context attributes.
     getRepresentationContext: (object) ->
+      @compatibilityAttribute = @context.compatibilityAttribute
+      @transcriptionAttribute = @context.transcriptionAttribute
       _.extend(super,
         compatibilityAttribute: @compatibilityAttribute
         compatibilityClass:     @getClass @compatibilityAttribute

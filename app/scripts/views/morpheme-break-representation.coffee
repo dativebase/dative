@@ -3,10 +3,9 @@ define ['./representation'], (RepresentationView) ->
   # Morpheme Break Representation View
   # ----------------------------------
   #
-  # A view for the representation of a morpheme break field such that the representation
-  # consists simply of the field value.
+  # A view for the representation of a morpheme break field.
 
-  class ValueRepresentationView extends RepresentationView
-    initialize: (@context) ->
-      @context.value = @utils.encloseIfNotAlready context.value, '/', '/'
+  class MorphemeBreakRepresentationView extends RepresentationView
+    valueFormatter: (value) =>
+      @utils.encloseIfNotAlready value, '/', '/'
 

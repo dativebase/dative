@@ -66,6 +66,7 @@ define [
             .find('button').focus()
           inputView.$el.remove()
           delete @inputViews[index]
+          @trigger 'setToModel' # FieldView listens for this and calls `setToModel`
 
     # Append a new input view instance's HTML to the DOM.
     # This is called when the "+" button is clicked.
