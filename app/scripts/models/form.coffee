@@ -17,12 +17,38 @@ define [
 
   class FormModel extends BaseModel
 
+    initialize: (options) ->
+      if options?.collection then @collection = options.collection
+      super options
+
     url: 'fakeurl' # Backbone throws 'A "url" property or function must be
                    # specified' if this is not present.
 
     getActiveServerType: ->
       globals.applicationSettings.get('activeServer').get 'type'
 
+    oldManyToOneAttributes: [
+      'elicitation_method'
+      'elicitor'
+      'source'
+      'speaker'
+      'syntactic_category'
+      'verifier'
+    ]
+
+    oldManyToManyAttributes: [
+      'tags'
+    ]
+
+    # Return a representation of the model's state that the OLD likes: i.e.,
+    # with relational values as ids or arrays thereof.
+    toOLD: ->
+      result = _.clone @attributes
+      for attribute in @oldManyToOneAttributes
+        result[attribute] = result[attribute]?.id or null
+      for attribute in @oldManyToManyAttributes
+        result[attribute] = (v.id for v in result[attribute] or [])
+      result
 
     ############################################################################
     # Questions & TODOs

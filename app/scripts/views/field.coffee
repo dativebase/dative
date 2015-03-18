@@ -171,6 +171,12 @@ define [
         result[@context.attribute] = value
       result
 
+    disable: ->
+      @inputView?.disable()
+
+    enable: ->
+      @inputView?.enable()
+
     ############################################################################
     # Helper methods for building a template context out of the form @model and
     # the supplied @attribute.

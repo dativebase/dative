@@ -89,6 +89,7 @@ define [
       'click button.hide-form-add-widget':         'hideSelf'
       'click button.toggle-secondary-data-fields': 'toggleSecondaryDataAnimate'
       'click .form-add-help':                      'openFormAddHelp'
+      'keydown': 'keydown'
 
     listenToEvents: ->
       super
@@ -97,6 +98,12 @@ define [
       @listenTo Backbone, 'getOLDNewFormDataEnd', @getOLDNewFormDataEnd
       @listenTo Backbone, 'getOLDNewFormDataSuccess', @getOLDNewFormDataSuccess
       @listenTo Backbone, 'getOLDNewFormDataFail', @getOLDNewFormDataFail
+
+      @listenTo Backbone, 'addOLDFormStart', @addOLDFormStart
+      @listenTo Backbone, 'addOLDFormEnd', @addOLDFormEnd
+      @listenTo Backbone, 'addOLDFormSuccess', @addOLDFormSuccess
+      @listenTo Backbone, 'addOLDFormFail', @addOLDFormFail
+
       @listenToFieldViews()
 
     listenToFieldViews: ->
@@ -119,9 +126,42 @@ define [
         'Update this form'
 
     submitForm: (event) ->
+      @disableForm()
       @stopEvent event
       @setToModel()
-      @collection.addOLDForm @model
+      if @addUpdateType is 'add'
+        @model.collection.addOLDForm @model
+      else
+        @model.collection.updateOLDForm @model
+
+    disableForm: ->
+      # disable form input fields and submit button
+      @$('button.add-form-button').button 'disable'
+      @disableFieldViews()
+
+    disableFieldViews: ->
+      for fieldView in @fieldViews()
+        fieldView.disable()
+
+    enableForm: ->
+      # disable form input fields and submit button
+      @$('button.add-form-button').button 'enable'
+      @enableFieldViews()
+
+    enableFieldViews: ->
+      for fieldView in @fieldViews()
+        fieldView.enable()
+
+    addOLDFormStart: ->
+      @spin()
+
+    addOLDFormEnd: ->
+      @enableForm()
+      @stopSpin()
+
+    addOLDFormSuccess: ->
+
+    addOLDFormFail: ->
 
     # Set the state of the "add a form" HTML form on the Dative form model.
     setToModel: -> fv.setToModel() for fv in @fieldViews()
@@ -149,6 +189,13 @@ define [
         searchTerm: searchTerm
         scrollToIndex: 1
       )
+
+    # <Enter> on a closed form opens it, <Esc> on an open form closes it. FOX
+    keydown: (event) ->
+      switch event.which
+        when 27
+          @stopEvent event
+          @hideSelf()
 
     activeServerTypeIsOLD: -> @getActiveServerType() is 'OLD'
 

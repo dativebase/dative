@@ -42,9 +42,10 @@ define [
       @headerTitle = options.headerTitle or ''
       @activeServerType = @getActiveServerType()
       @setState options
+      @addUpdateType = @getUpdateViewType()
       @updateView = new FormAddWidgetView
         model: @model,
-        addUpdateType: @getUpdateViewType()
+        addUpdateType: @addUpdateType
       @updateViewRendered = false
 
     getUpdateViewType: -> if @model.get('id') then 'update' else 'add'
@@ -96,6 +97,7 @@ define [
       'mouseenter .form-primary-data': 'mouseenterPrimaryData'
       'mouseleave .form-primary-data': 'mouseleavePrimaryData'
       'click .hide-form-details': 'hideFormDetails'
+      'click .hide-form-widget': 'hideFormWidget'
       'click .toggle-secondary-data': 'toggleSecondaryDataAnimate'
       'click .toggle-primary-data-labels': 'togglePrimaryDataLabelsAnimate'
       'focus': 'focus'
@@ -216,7 +218,11 @@ define [
         .attr
           'id': @model.cid
           'tabindex': 0
-        .html @template(activeServerType: @activeServerType)
+        .html @template(
+          activeServerType: @activeServerType
+          headerTitle: @headerTitle
+          addUpdateType: @addUpdateType
+        )
 
     # TODO: do this all in one DOM-manipulation event via a single document
     # fragment, if possible.
@@ -394,7 +400,7 @@ define [
     # jQueryUI-ify <button>s
     guifyButtons: ->
 
-      @$('button.hide-form-details')
+      @$('button.hide-form-details, button.hide-form-widget')
         .button()
         .tooltip
           items: 'button'
@@ -553,7 +559,9 @@ define [
     keydown: (event) ->
       switch event.which
         when 27
-          if @headerVisible
+          if @addUpdateType is 'add'
+            @hideFormWidget()
+          else if @headerVisible
             @hideFormDetails()
         when 13
           if not @headerVisible
@@ -571,6 +579,11 @@ define [
     hideFormDetails: ->
       @hideFullAnimate()
       @$el.focus()
+
+    # Hide details and then completely hide self. Clicking on the X
+    # (hide-form-widget) button calls this, as does `@keydown` with <Esc>. TODO: <Esc>
+    hideFormWidget: ->
+      @trigger 'newFormView:hide'
 
     # Full = border, header & secondary data
     ############################################################################

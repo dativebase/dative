@@ -40,3 +40,61 @@ define ['./base', 'autosize'], (BaseView) ->
     getValueFromDOM: ->
       @serializeObject @$(':input').serializeArray()
 
+    # Override this in an input-appropriate way, if necessary.
+    disable: ->
+      @disableTextareas()
+      @disableButtons()
+      @disableSelectmenus()
+
+    # Override this in an input-appropriate way, if necessary.
+    enable: ->
+      @enableTextareas()
+      @enableButtons()
+      @enableSelectmenus()
+
+    disableTextareas: ->
+      @$('textarea')
+        .prop 'disabled', true
+        .addClass 'ui-state-disabled'
+
+    enableTextareas: ->
+      @$('textarea')
+        .prop 'disabled', false
+        .removeClass 'ui-state-disabled'
+
+    disableInputs: ->
+      @$('input')
+        .prop 'disabled', true
+        .addClass 'ui-state-disabled'
+
+    enableInputs: ->
+      @$('textarea')
+        .prop 'disabled', false
+        .removeClass 'ui-state-disabled'
+
+    disableButtons: -> @$('button').button 'disable'
+
+    enableButtons: -> @$('button').button 'enable'
+
+    disableSelectmenus: ->
+      @$('select').each (index, element) =>
+        $element = @$ element
+        if $element.selectmenu 'instance'
+          $element.selectmenu 'disable'
+
+    enableSelectmenus: ->
+      @$('select').each (index, element) =>
+        $element = @$ element
+        if $element.selectmenu 'instance'
+          $element.selectmenu 'enable'
+
+    disableMultiSelects: ->
+      @$('select')
+        .prop 'disabled', true
+        .multiSelect 'refresh'
+
+    enableMultiSelects: ->
+      @$('select')
+        .prop 'disabled', false
+        .multiSelect 'refresh'
+

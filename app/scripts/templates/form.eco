@@ -2,10 +2,17 @@
 
   <div class='button-container-left'>
 
-    <button class="hide-form-details dative-tooltip"
-      title="hide the buttons and extra data of this form">
-      <i class='fa fa-angle-double-up fa-fw'></i>
-    </button>
+    <% if @addUpdateType is 'add': %>
+      <button class="hide-form-widget dative-tooltip"
+        title="hide this new form widget">
+        <i class='fa fa-times fa-fw'></i>
+      </button>
+    <% else: %>
+      <button class="hide-form-details dative-tooltip"
+        title="hide the buttons and extra data of this form">
+        <i class='fa fa-angle-double-up fa-fw'></i>
+      </button>
+  <% end %>
 
     <button class="toggle-secondary-data dative-tooltip"
       title="hide the secondary data of this form">

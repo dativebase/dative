@@ -73,7 +73,7 @@ define [
       FormModel.cors.request(
         method: 'POST'
         url: "#{@getOLDURL()}/forms"
-        payload: form.attributes
+        payload: form.toOLD()
         onload: (responseJSON, xhr) =>
           Backbone.trigger 'addOLDFormEnd'
           if xhr.status is 200

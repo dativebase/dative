@@ -204,3 +204,12 @@ define [
         else
           array.push objectValue
       result
+
+    disable: ->
+      for index, inputView of @inputViews
+        inputView.disable()
+
+    enable: ->
+      for index, inputView of @inputViews
+        inputView.enable()
+

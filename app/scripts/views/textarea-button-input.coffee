@@ -54,3 +54,11 @@ define [
         .tooltip
           position: @tooltipPositionRight()
 
+    disable: ->
+      @disableTextareas()
+      @disableButtons()
+
+    enable: ->
+      @enableTextareas()
+      @enableButtons()
+

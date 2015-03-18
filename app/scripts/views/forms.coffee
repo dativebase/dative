@@ -49,20 +49,10 @@ define [
       @paginator = new Paginator page=1, items=0, itemsPerPage=@itemsPerPage
       @paginationMenuTopView = new PaginationMenuTopView paginator: @paginator # This handles the UI for the items-per-page select, the first, prevous, next buttons, etc.
       @collection = new FormsCollection()
-
       @newFormView = new FormView
         headerTitle: 'New Form'
-        model: new FormModel()
-        collection: @collection
+        model: new FormModel(collection: @collection)
       @newFormViewVisible = false
-
-      # @toBeAddedFormModel = new FormModel()
-      # @toBeAddedFormView = new FormView model: @toBeAddedFormModel
-      # @formAddView = new FormAddWidgetView
-      #   model: @toBeAddedFormModel
-      #   collection: @collection
-      # @formAddViewVisible = false
-
       @listenToEvents()
 
     events:
