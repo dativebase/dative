@@ -145,6 +145,8 @@ define [
         when 'FieldDB' then @model.setDatumValueSmart domValue
         when 'OLD' then @model.set domValue
 
+    # If the input view returns a relational id from the DOM, then using this
+    # in an override of `getValueFromDOM` will convert that id to an object.
     getValueFromRelationalIdFromDOM: (valueFromDOM) ->
       result = {}
       try
@@ -154,6 +156,19 @@ define [
         result[@context.attribute] = value
       catch
         result[@context.attribute] = undefined
+      result
+
+    # If the input view returns an array of relational ids from the DOM, then
+    # using this in an override of `getValueFromDOM` will convert that array to
+    # an array of objects.
+    getValueFromArrayOfRelationalIdsFromDOM: (valueFromDOM) ->
+      result = {}
+      result[@context.attribute] = []
+      try
+        arrayOfIdsFromDOM = valueFromDOM[@context.attribute]
+        options = @context.options[@optionsAttribute]
+        value = (o for o in options when o.id in arrayOfIdsFromDOM)
+        result[@context.attribute] = value
       result
 
     ############################################################################
