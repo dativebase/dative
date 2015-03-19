@@ -68,7 +68,7 @@ define ['./base', 'autosize'], (BaseView) ->
         .addClass 'ui-state-disabled'
 
     enableInputs: ->
-      @$('textarea')
+      @$('input')
         .prop 'disabled', false
         .removeClass 'ui-state-disabled'
 

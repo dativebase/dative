@@ -19,6 +19,7 @@ define [
 
     initialize: (options) ->
       if options?.collection then @collection = options.collection
+      @activeServerType = @getActiveServerType()
       super options
 
     url: 'fakeurl' # Backbone throws 'A "url" property or function must be
@@ -39,6 +40,66 @@ define [
     oldManyToManyAttributes: [
       'tags'
     ]
+
+    validate: (attributes, options) ->
+      attributes = attributes or @attributes
+      switch @activeServerType
+        when 'FieldDB' then @validateFieldDB attributes, options
+        when 'OLD' then @validateOLD attributes, options
+
+    validateFieldDB: (attributes, options) ->
+      console.log 'in validateFieldDB'
+
+    validateOLD: (attributes, options) ->
+      errors = {}
+      for attribute, value of attributes
+        attributeValidator = @getOLDValidator attribute
+        if attributeValidator
+          error = attributeValidator.apply @, [value]
+          if error then errors[attribute] = error
+      if _.isEmpty errors then undefined else errors
+
+    getOLDValidator: (attribute) ->
+      switch attribute
+        when 'transcription' then @validOLDTranscription
+        when 'translations' then @validOLDTranslations
+        when 'date_elicited' then @validateOLDDateElicited
+        else null
+
+    validOLDTranscription: (value) ->
+      if value.trim?() is ''
+        'Please enter a value'
+      else
+        null
+
+    validOLDTranslations: (value) ->
+      error = null
+      if (t for t in value when t.trim()).length is 0
+        error = 'Please enter one or more translations'
+      error
+
+    validateOLDDateElicited: (value) ->
+      if value.trim?() is ''
+        null
+      else
+        if not @validDate value
+          'Please enter a valid date in dd/mm/yyyy format'
+        else
+          null
+
+    # Return `true` if `date` is a string in dd/mm/yyyy format. (Obviously
+    # accepts some impossible dates, but shouldn't exclude any possible ones.)
+    validDate: (date) ->
+      date_regex = ///
+        ^
+        ( 0 [1-9] | 1 [0-2] )
+        \/
+        ( 0 [1-9] | 1 \d | 2 \d | 3 [01] )
+        \/
+        [0-2] \d{3}
+        $
+      ///
+      date_regex.test date
 
     # Return a representation of the model's state that the OLD likes: i.e.,
     # with relational values as ids or arrays thereof.
@@ -945,9 +1006,6 @@ define [
       author: null
       title: null
       node: null
-
-    # TODO: if OLD AJAX persistence, validate in accordance with oldFormSchema below.
-    validate: (attrs, options) ->
 
     # oldFormSchema reflects how server-side OLD validation occurs.
     # Modify this to provide client-side OLD-compatible validation.

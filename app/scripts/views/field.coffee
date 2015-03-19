@@ -65,6 +65,7 @@ define [
       title: @getTooltip()
       value: @getValue()
       label: @getLabel()
+      domAttributes: @domAttributes
 
     guify: ->
 
@@ -74,6 +75,7 @@ define [
 
     initialize: (options) ->
       @attribute = options.attribute
+      @domAttributes = options.domAttributes or {}
       @activeServerType = @getActiveServerType()
       @options = options.options # possible values for forced-choice fields, e.g., `users` or `grammaticalities` with an OLD back-end.
       @context = @getContext()
@@ -107,8 +109,9 @@ define [
       @listenTo @context.model, "validationError:#{@attribute}", @validationError
 
     # Display the validation error.
+    # FOX
     validationError: (error) ->
-      @$('.dative-field-validation-error-message').html "#{@context.name}: #{error}"
+      @$('.dative-field-validation-error-message').html "#{@context.label}: #{error}"
       @$('.dative-field-validation-container')
         .hide()
         .slideDown()

@@ -7,6 +7,7 @@
          dative-tooltip
          dative-input-field
          date-field'
+  maxlength='10'
   title='<%= @title %>'
   value='<%= @value %>' />
 

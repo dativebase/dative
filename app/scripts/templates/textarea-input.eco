@@ -7,6 +7,9 @@
          dative-tooltip
          dative-input-field
          textarea-only'
+  <% for attribute, value of @domAttributes: %>
+    <%= attribute %>="<%= value %>"
+  <% end %>
   title='<%= @title %>'
   ><%= @value %></textarea>
 

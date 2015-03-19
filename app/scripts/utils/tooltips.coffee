@@ -192,7 +192,7 @@ define ['./utils'], (utils) ->
 
         morpheme_break:
           eng: "A sequence of morpheme shapes and delimiters. The OLD assumes
-            phonemic shapes (e.g., “in-perfect”, but phonetic (i.e.,
+            phonemic shapes (e.g., “in-perfect”), but phonetic (i.e.,
             allomorphic, e.g., “im-perfect”) ones are ok."
 
         morpheme_gloss:

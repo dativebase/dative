@@ -59,6 +59,36 @@ define [
   #    morpho-lexical cross-referencing. (Note: these are OLD-specific and are
   #    generated server-side.)
 
+  ##############################################################################
+  # Field sub-classes with max lengths
+  ##############################################################################
+
+  class TextareaFieldView255 extends TextareaFieldView
+
+    initialize: (options) ->
+      options.domAttributes =
+        maxlength: 255
+      super options
+
+  class TextareaFieldView1023 extends TextareaFieldView
+
+    initialize: (options) ->
+      options.domAttributes =
+        maxlength: 1023
+      super options
+
+  class TranscriptionGrammaticalityFieldView255 extends TranscriptionGrammaticalityFieldView
+
+    initialize: (options) ->
+      options.domAttributes =
+        maxlength: 255
+      super options
+
+
+  ##############################################################################
+  # Form Add Widget
+  ##############################################################################
+
   class FormAddWidgetView extends FormHandlerBaseView
 
     template: formAddTemplate
@@ -129,13 +159,19 @@ define [
       @disableForm()
       @stopEvent event
       @setToModel()
-      if @addUpdateType is 'add'
-        @model.collection.addOLDForm @model
+      clientSideValidationErrors = @model.validate()
+      if clientSideValidationErrors
+        for attribute, error of clientSideValidationErrors
+          @model.trigger "validationError:#{attribute}", error
+        @enableForm()
       else
-        @model.collection.updateOLDForm @model
+        if @addUpdateType is 'add'
+          @model.collection.addOLDForm @model
+        else
+          @model.collection.updateOLDForm @model
 
+    # Disable form input fields and submit button
     disableForm: ->
-      # disable form input fields and submit button
       @$('button.add-form-button').button 'disable'
       @disableFieldViews()
 
@@ -143,8 +179,8 @@ define [
       for fieldView in @fieldViews()
         fieldView.disable()
 
+    # Enable form input fields and submit button
     enableForm: ->
-      # disable form input fields and submit button
       @$('button.add-form-button').button 'enable'
       @enableFieldViews()
 
@@ -217,20 +253,26 @@ define [
     # This is where field-specific configuration should go.
     attribute2fieldView:
       FieldDB:
-        utterance:          UtteranceJudgementFieldView
-        comments:           CommentsFieldView
+        utterance:                     UtteranceJudgementFieldView
+        comments:                      CommentsFieldView
       OLD:
-        transcription:      TranscriptionGrammaticalityFieldView
-        translations:       TranslationsFieldView
-        elicitation_method: RelationalSelectFieldView
-        syntactic_category: RelationalSelectFieldView
-        speaker:            PersonSelectFieldView
-        elicitor:           UserSelectFieldView
-        verifier:           UserSelectFieldView
-        source:             SourceSelectFieldView
-        status:             RequiredSelectFieldView
-        date_elicited:      DateFieldView
-        tags:               MultiselectFieldView
+        narrow_phonetic_transcription: TextareaFieldView255
+        phonetic_transcription:        TextareaFieldView255
+        transcription:                 TranscriptionGrammaticalityFieldView255
+        morpheme_break:                TextareaFieldView255
+        morpheme_gloss:                TextareaFieldView255
+        syntax:                        TextareaFieldView1023
+        semantics:                     TextareaFieldView1023
+        translations:                  TranslationsFieldView
+        elicitation_method:            RelationalSelectFieldView
+        syntactic_category:            RelationalSelectFieldView
+        speaker:                       PersonSelectFieldView
+        elicitor:                      UserSelectFieldView
+        verifier:                      UserSelectFieldView
+        source:                        SourceSelectFieldView
+        status:                        RequiredSelectFieldView
+        date_elicited:                 DateFieldView
+        tags:                          MultiselectFieldView
 
     # Return the appropriate FieldView (subclass) instance for a given
     # attribute, as specified in `@attribute2fieldView`. The default field view

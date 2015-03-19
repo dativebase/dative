@@ -21,6 +21,9 @@
          dative-tooltip
          dative-input-field
          textarea-select'
+  <% for attribute, value of @domAttributes: %>
+    <%= attribute %>="<%= value %>"
+  <% end %>
   title='<%= @textareaTitle %>'
   ><%= @textareaValue %></textarea>
 
