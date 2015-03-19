@@ -99,10 +99,10 @@ define [
       @listenTo Backbone, 'getOLDNewFormDataSuccess', @getOLDNewFormDataSuccess
       @listenTo Backbone, 'getOLDNewFormDataFail', @getOLDNewFormDataFail
 
-      @listenTo Backbone, 'addOLDFormStart', @addOLDFormStart
-      @listenTo Backbone, 'addOLDFormEnd', @addOLDFormEnd
-      @listenTo Backbone, 'addOLDFormSuccess', @addOLDFormSuccess
-      @listenTo Backbone, 'addOLDFormFail', @addOLDFormFail
+      @listenTo @model, 'addOLDFormStart', @addOLDFormStart
+      @listenTo @model, 'addOLDFormEnd', @addOLDFormEnd
+      @listenTo @model, 'addOLDFormSuccess', @addOLDFormSuccess
+      @listenTo @model, 'addOLDFormFail', @addOLDFormFail
 
       @listenToFieldViews()
 
@@ -161,7 +161,12 @@ define [
 
     addOLDFormSuccess: ->
 
-    addOLDFormFail: ->
+    addOLDFormFail: (errors) ->
+      # The field views are listening for specific `validationError` events on
+      # the form model. They will handle their own validation stuff.
+      Backbone.trigger 'addOLDFormFail'
+      console.log 'addOLDFormFail caught in form add widget; errors are ...'
+      console.log JSON.stringify(errors, undefined, 2)
 
     # Set the state of the "add a form" HTML form on the Dative form model.
     setToModel: -> fv.setToModel() for fv in @fieldViews()

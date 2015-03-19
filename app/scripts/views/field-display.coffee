@@ -76,7 +76,7 @@ define [
       @
 
     listenToEvents: ->
-      super
+      @stopAndRelisten()
       @listenTo @model, 'change', @refresh
 
     # Refresh the field display: essentially, make the display reflect the

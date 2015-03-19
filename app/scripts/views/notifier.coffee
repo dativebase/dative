@@ -24,6 +24,13 @@ define [
       @listenTo Backbone, 'logout:success', @logoutSuccess
       @listenTo Backbone, 'register:fail', @registerFail
       @listenTo Backbone, 'register:success', @registerSuccess
+      @listenTo Backbone, 'addOLDFormFail', @addOLDFormFail
+
+    addOLDFormFail: ->
+      message = "Form creation request failed; see error messages next to form
+        fields"
+      @messages.push message
+      @render()
 
     render: ->
       @$el.html(@template(messages: @messages)).fadeIn(

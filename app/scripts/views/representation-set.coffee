@@ -88,6 +88,9 @@ define [
         @renderRepresentationView representationView
       @listenToEvents()
 
+    listenToEvents: ->
+      @stopAndRelisten()
+
     # Render an representation set view; setting `animate` to true will cause `slideDown`.
     renderRepresentationView: (representationView) ->
       @$el.append representationView.render().el

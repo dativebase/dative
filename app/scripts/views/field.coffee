@@ -92,6 +92,7 @@ define [
 
     render: ->
       @$el.html @template(@context)
+      @$('.dative-field-validation-container').hide()
       @renderLabelView()
       @renderInputView()
       @guify()
@@ -102,6 +103,15 @@ define [
       super
       if @inputView
         @listenTo @inputView, 'setToModel', @setToModel
+      # We listen to validation error events that are relevant to our attribute(s).
+      @listenTo @context.model, "validationError:#{@attribute}", @validationError
+
+    # Display the validation error.
+    validationError: (error) ->
+      @$('.dative-field-validation-error-message').html "#{@context.name}: #{error}"
+      @$('.dative-field-validation-container')
+        .hide()
+        .slideDown()
 
     renderLabelView: ->
       @labelView.setElement @$('.dative-field-label-container')

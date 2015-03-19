@@ -131,7 +131,7 @@ define [
           .slideDown()
 
     listenToEvents: ->
-      super
+      @stopAndRelisten()
       for index, inputView of @inputViews
         @listenToInputView inputView
 

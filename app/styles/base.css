@@ -45,7 +45,8 @@ div#mainmenu
 #dative-page-body
 {
     margin: 10px;
-    overflow: hidden;
+    overflow-y: hidden;
+    overflow-x: visible !important;
     position: relative;
 }
 
@@ -143,12 +144,6 @@ button.help-button
 .dative-field-label.dative-tooltip
 {
     cursor: pointer;
-}
-
-.dative-field-validation-container
-{
-  display: inline-block;
-  width: 0%;
 }
 
 .dative-field-label-container,
@@ -1322,5 +1317,16 @@ div.update-form-widget
 .small-caps
 {
   font-variant: small-caps;
+}
+
+.dative-field-validation-container
+{
+  width: 69.2%;
+  margin-left: 26.7%;
+}
+
+.dative-field-validation-error
+{
+  padding: 0.5em;
 }
 

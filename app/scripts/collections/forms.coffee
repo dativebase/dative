@@ -69,27 +69,31 @@ define [
     # Add (create) an OLD form.
     # POST `<OLD_URL>/forms`
     addOLDForm: (form, options) ->
-      Backbone.trigger 'addOLDFormStart'
+      form.trigger 'addOLDFormStart'
       FormModel.cors.request(
         method: 'POST'
         url: "#{@getOLDURL()}/forms"
         payload: form.toOLD()
         onload: (responseJSON, xhr) =>
-          Backbone.trigger 'addOLDFormEnd'
+          form.trigger 'addOLDFormEnd'
           if xhr.status is 200
             # TODO: listen to collection 'add' event and display the new form
             # in the browse GUI.
+            # TODO/QUESTION: why am I creating a new form model when I already
+            # have one?
             @add (new FormModel()).old2dative(responseJSON)
             console.log 'added a new form in FormsCollection'
-            Backbone.trigger 'addOLDFormSuccess'
+            form.trigger 'addOLDFormSuccess'
           else
             errors = responseJSON.errors or {}
-            Backbone.trigger 'addOLDFormFail', errors
+            form.trigger 'addOLDFormFail', errors
+            for attribute, error of errors
+              form.trigger "validationError:#{attribute}", error
             console.log 'POST request to /forms failed ...'
             console.log errors
         onerror: (responseJSON) =>
-          Backbone.trigger 'addOLDFormEnd'
-          Backbone.trigger 'addOLDFormFail', "error in adding form
+          form.trigger 'addOLDFormEnd'
+          form.trigger 'addOLDFormFail', "error in adding form
             #{form.get 'id'}"
           console.log 'Error in POST request to /forms'
       )

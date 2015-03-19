@@ -60,6 +60,9 @@ define [
     #     super
     #     @listenTo someView, 'someEvent', @someMethod
     listenToEvents: ->
+      @stopAndRelisten()
+
+    stopAndRelisten: ->
       @stopListening()
       @undelegateEvents()
       @delegateEvents()
