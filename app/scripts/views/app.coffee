@@ -101,7 +101,7 @@ define [
       @alertDialog = new AlertDialogView model: @applicationSettings
       @helpDialog = new HelpDialogView()
       @progressWidget = new ProgressWidgetView()
-      @notifier = new NotifierView(@applicationSettings)
+      @notifier = new NotifierView()
 
     renderPersistentSubviews: ->
       @mainMenuView.setElement(@$('#mainmenu')).render()
@@ -110,14 +110,14 @@ define [
       @alertDialog.setElement(@$('#alert-dialog-container')).render()
       @helpDialog.setElement(@$('#help-dialog-container'))
       @progressWidget.setElement(@$('#progress-widget-container')).render()
-      @notifier.setElement @$('#notifier-container')
+      @notifier.setElement(@$('#notifier-container')).render()
 
       @rendered @mainMenuView
       @rendered @loginDialog
       @rendered @registerDialog
       @rendered @alertDialog
       @rendered @progressWidget
-      @rendered @notifier # Notifier self-renders but we register it as rendered anyways so that we can clean up after it if `.close` is ever called
+      @rendered @notifier
 
     renderHelpDialog: ->
       @helpDialog.render()

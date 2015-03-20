@@ -412,7 +412,7 @@ div.dative-page-header-title
 .dative-help-dialog-widget,
 #appview,
 .progress-widget,
-.notifier,
+.notification,
 .corpus-widget,
 .create-corpus-widget,
 .users-widget,
@@ -785,37 +785,58 @@ div.dative-field-input-container > div.ms-container
 }
 
 #progress-widget-container,
-#notifier-container
+#notifier
 {
     position: relative;
 }
 
-.progress-widget,
-.notifier
+.notifications-container
 {
     position: absolute;
-    top: 0;
-    min-height: 40px;
-    width: 100px;
-    margin: 20px;
-    z-index: 100;
+    top: 3em;
+    right: 0.5em;
+    width: 20em;
+    z-index: 999;
 }
 
 .progress-widget
 {
+    position: absolute;
+    top: 3em;
+    z-index: 100;
+}
+
+.notification
+{
+    margin-bottom: 1em;
+    padding: 0.5em;
+    width: 18em;
+}
+
+.notification-title
+{
+    font-size: 110%;
+    margin-bottom: 0.25em;
+}
+
+.notification-content
+{
+    font-weight: normal;
+    line-height: 120%;
+}
+
+.progress-widget
+{
+    min-height: 40px;
+    margin: 20px;
     left: 0;
     padding: 10px 10px 0px 10px;
+    width: 100px;
 }
 
 .progress-widget-spinner
 {
     height: 20px;
-}
-
-.notifier
-{
-    right: 0;
-    padding: 20px;
 }
 
 .pulse1
@@ -834,8 +855,7 @@ div.dative-field-input-container > div.ms-container
 {
     margin-top: 10px;
 }
-.progress-widget-tasks ul li,
-.notifier ul li
+.progress-widget-tasks ul li
 {
     margin-bottom: 10px;
 }

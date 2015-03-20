@@ -163,6 +163,7 @@ define [
       if clientSideValidationErrors
         for attribute, error of clientSideValidationErrors
           @model.trigger "validationError:#{attribute}", error
+        Backbone.trigger 'addOLDFormFail'
         @enableForm()
       else
         if @addUpdateType is 'add'
@@ -196,6 +197,7 @@ define [
       @stopSpin()
 
     addOLDFormSuccess: ->
+      Backbone.trigger 'addOLDFormSuccess'
 
     addOLDFormFail: (errors) ->
       # The field views are listening for specific `validationError` events on

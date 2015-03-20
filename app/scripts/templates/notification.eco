@@ -1,0 +1,3 @@
+<div class='notification-title'><i class='icon'></i><%= @title %></div>
+<div class='notification-content'><%= @content %></div>
+

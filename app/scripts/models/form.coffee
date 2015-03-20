@@ -74,12 +74,12 @@ define [
 
     validOLDTranslations: (value) ->
       error = null
-      if (t for t in value when t.trim()).length is 0
+      if (t for t in value when t.transcription.trim()).length is 0
         error = 'Please enter one or more translations'
       error
 
     validateOLDDateElicited: (value) ->
-      if value.trim?() is ''
+      if value?.trim?() is ''
         null
       else
         if not @validDate value
