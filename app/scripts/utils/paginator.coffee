@@ -89,7 +89,7 @@ define ['./../utils/utils'], (utils) ->
 
     _setEnd: ->
       end = @start + @itemsPerPage - 1
-      if end > @items
+      if end >= @items
         @end = @items - 1
       else
         @end = end

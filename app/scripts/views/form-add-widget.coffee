@@ -156,9 +156,9 @@ define [
         'Update this form'
 
     submitForm: (event) ->
-      @disableForm()
       @stopEvent event
       @setToModel()
+      @disableForm()
       clientSideValidationErrors = @model.validate()
       if clientSideValidationErrors
         for attribute, error of clientSideValidationErrors
@@ -196,15 +196,12 @@ define [
       @enableForm()
       @stopSpin()
 
-    addOLDFormSuccess: ->
-      Backbone.trigger 'addOLDFormSuccess'
+    addOLDFormSuccess: (formModel) ->
 
-    addOLDFormFail: (errors) ->
+    addOLDFormFail: (error) ->
       # The field views are listening for specific `validationError` events on
       # the form model. They will handle their own validation stuff.
-      Backbone.trigger 'addOLDFormFail'
-      console.log 'addOLDFormFail caught in form add widget; errors are ...'
-      console.log JSON.stringify(errors, undefined, 2)
+      Backbone.trigger 'addOLDFormFail', error
 
     # Set the state of the "add a form" HTML form on the Dative form model.
     setToModel: -> fv.setToModel() for fv in @fieldViews()

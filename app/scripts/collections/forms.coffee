@@ -77,24 +77,18 @@ define [
         onload: (responseJSON, xhr) =>
           form.trigger 'addOLDFormEnd'
           if xhr.status is 200
-            # TODO: listen to collection 'add' event and display the new form
-            # in the browse GUI.
-            # TODO/QUESTION: why am I creating a new form model when I already
-            # have one?
-            @add (new FormModel()).old2dative(responseJSON)
-            console.log 'added a new form in FormsCollection'
-            form.trigger 'addOLDFormSuccess'
+            form.set responseJSON
+            form.trigger 'addOLDFormSuccess', form
           else
             errors = responseJSON.errors or {}
             form.trigger 'addOLDFormFail', errors
             for attribute, error of errors
               form.trigger "validationError:#{attribute}", error
-            console.log 'POST request to /forms failed ...'
+            console.log 'POST request to /forms failed (status not 200) ...'
             console.log errors
         onerror: (responseJSON) =>
           form.trigger 'addOLDFormEnd'
-          form.trigger 'addOLDFormFail', "error in adding form
-            #{form.get 'id'}"
+          form.trigger 'addOLDFormFail', responseJSON.error
           console.log 'Error in POST request to /forms'
       )
 

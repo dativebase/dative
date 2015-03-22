@@ -55,6 +55,7 @@ define [
       'click': 'bodyClicked'
 
     render: ->
+      console.clear()
       @$el.html @template()
       @renderPersistentSubviews()
       # @configureFieldDB() # FieldDB stuff commented out until it can be better incorporated

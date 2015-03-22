@@ -14,6 +14,9 @@ define [
   # A Dative form model can either have the structure of a FieldDB datum or
   # that of an OLD form. See `@defaultFieldDBDatum` and `@defaultOLDForm` for a
   # full specification of each of these data structures.
+  #
+  # TODO: this form model should have a string representation of an arbitrary
+  # form.
 
   class FormModel extends BaseModel
 
@@ -105,6 +108,11 @@ define [
     # with relational values as ids or arrays thereof.
     toOLD: ->
       result = _.clone @attributes
+      # Not doing this causes a `RangeError: Maximum call stack size exceeded`
+      # when cors.coffee tries to call `JSON.stringify` on a form model that
+      # contains a forms collection that contains that same form model, etc. ad
+      # infinitum.
+      delete result.collection
       for attribute in @oldManyToOneAttributes
         result[attribute] = result[attribute]?.id or null
       for attribute in @oldManyToManyAttributes

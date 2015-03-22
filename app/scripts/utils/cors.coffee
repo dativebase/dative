@@ -25,6 +25,8 @@ define [], ->
       url = options.url or throw new Error 'A URL is required for CORS requests'
       method = options.method or 'GET'
       timeout = options.timeout or undefined
+      # console.log 'payload prior to serialization:'
+      # console.log options.payload
       payload = JSON.stringify(options.payload) or "{}"
 
       [onload, onerror, onloadstart, onabort, onprogress, ontimeout,

@@ -49,9 +49,7 @@ define [
       @paginator = new Paginator page=1, items=0, itemsPerPage=@itemsPerPage
       @paginationMenuTopView = new PaginationMenuTopView paginator: @paginator # This handles the UI for the items-per-page select, the first, prevous, next buttons, etc.
       @collection = new FormsCollection()
-      @newFormView = new FormView
-        headerTitle: 'New Form'
-        model: new FormModel(collection: @collection)
+      @newFormView = @getNewFormView()
       @newFormViewVisible = false
       @listenToEvents()
 
@@ -115,8 +113,6 @@ define [
       @listenTo Backbone, 'fetchOLDFormsFail', @fetchAllFormsFail
       @listenTo Backbone, 'fetchOLDFormsSuccess', @fetchOLDFormsSuccess
 
-      @listenTo Backbone, 'addOLDFormSuccess', @newFormAdded
-
       @listenTo @paginationMenuTopView, 'paginator:changeItemsPerPage', @changeItemsPerPage
       @listenTo @paginationMenuTopView, 'paginator:showFirstPage', @showFirstPage
       @listenTo @paginationMenuTopView, 'paginator:showLastPage', @showLastPage
@@ -129,7 +125,11 @@ define [
       @listenTo @paginationMenuTopView, 'paginator:showTwoPagesForward', @showTwoPagesForward
       @listenTo @paginationMenuTopView, 'paginator:showThreePagesForward', @showThreePagesForward
 
+      @listenToNewFormView()
+
+    listenToNewFormView: ->
       @listenTo @newFormView, 'newFormView:hide', @hideNewFormViewAnimate
+      @listenTo @newFormView.model, 'addOLDFormSuccess', @newFormAdded
 
     # Get the global Dative application settings relevant to displaying a form.
     getGlobalsFormsDisplaySettings: ->
@@ -143,11 +143,65 @@ define [
       for key, value of defaults
         @[key] = value
 
-    newFormAdded: ->
-      # HERE
-      console.log 'new form added triggered in FormsView'
-      #@paginator.setItems(@paginator.items + 1)
-      #@fetchFormsToCollection()
+    # Instantiate and return a new `FormView` instance. Note that even though
+    # we pass the collection to the form view's model, the collection will not
+    # contain that model.
+    getNewFormView: ->
+      new FormView
+        headerTitle: 'New Form'
+        model: new FormModel(collection: @collection)
+        primaryDataLabelsVisible: @primaryDataLabelsVisible
+        expanded: @allFormsExpanded
+
+    # This is called when the 'addOLDFormSuccess' has been triggered, i.e.,
+    # when a new form has been successfully created on the server.
+    newFormAdded: (formModel) ->
+      # @add (new FormModel()).old2dative(responseJSON)
+      # HERE FOX
+      newFormShouldBeOnCurrentPage = @newFormShouldBeOnCurrentPage()
+      # 1. Make the new form widget disappear.
+      @hideNewFormViewAnimate()
+
+      # 2. refresh the pagination stuff (necessarily changes)
+      @paginator.setItems (@paginator.items + 1)
+      @refreshHeader()
+      @refreshPaginationMenuTop()
+
+      # 3. If the new form should be displayed on the current page, then do that.
+      Backbone.trigger 'addOLDFormSuccess', formModel
+      if newFormShouldBeOnCurrentPage
+        @addNewFormViewToPage()
+      else
+        @newFormView.close()
+        @closed @newFormView
+
+      # 4. create a new new form widget but don't display it.
+      # TODO: maybe the new new form view *should* be displayed ...
+      @newFormViewVisible = false
+      @newFormView = @getNewFormView()
+      @renderNewFormView()
+      @newFormViewVisibility()
+      @listenToNewFormView()
+
+    # Returns true if a new form should be on the currently displayed page.
+    newFormShouldBeOnCurrentPage: ->
+      itemsDisplayedCount = (@paginator.end - @paginator.start) + 1
+      if itemsDisplayedCount < @paginator.itemsPerPage then true else false
+
+    # Add the new form view to the set of paginated form views.
+    # This entails adding the new form view's model to the collection
+    # and then rendering it and adding it to the DOM...
+    addNewFormViewToPage: ->
+      # TODO: change its headers so it's no longer a New Form widget...
+      # TODO: close its update/add interface
+      # TODO: make it match the global form browse settings: expanded?
+      # @collection.add @newFormView.model
+      addedFormView = new FormView
+        model: @newFormView.model
+        primaryDataLabelsVisible: @primaryDataLabelsVisible
+        expanded: @allFormsExpanded
+      @collection.add addedFormView.model
+      @renderFormView addedFormView, @paginator.end
 
     # Keyboard shortcuts for the forms view.
     # Note that the FormsView is listening to events on parts of the DOM that are

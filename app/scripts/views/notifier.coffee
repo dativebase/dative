@@ -51,17 +51,22 @@ define [
       notification.close()
       @closed notification
 
-    addOLDFormSuccess: ->
+    addOLDFormSuccess: (formModel) ->
       notification = new NotificationView
         title: 'Form created'
-        content: 'Your have successfully created a new form.'
+        content: "You have successfully created a new form. Its id is
+          #{formModel.get 'id'}."
       @renderNotification notification
 
-    addOLDFormFail: ->
+    addOLDFormFail: (error) ->
+      if error
+        content = "Your form creation request was unsuccessful. #{error}"
+      else
+        content = "Your form creation request was unsuccessful. See the error
+          message(s) next to the input fields."
       notification = new NotificationView
         title: 'Form creation failed'
-        content: 'Your form creation request was unsuccessful: see the error
-          message(s) next to the input fields.'
+        content: content
         type: 'error'
       @renderNotification notification
 
