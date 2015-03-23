@@ -27,6 +27,11 @@
     ><i class='fa fa-fw fa-question'></i>
     </button>
 
+    <button class="clear-form dative-tooltip"
+      title="clear this form: reset all fields to their default values"
+      ><i class='fa fa-eraser fa-fw'></i>
+    </button>
+
   </div>
 
 </div>

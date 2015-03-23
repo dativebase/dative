@@ -101,6 +101,13 @@ define [
       @listenToEvents()
       @
 
+    # Refresh re-renders all of the input views. This is called by the form add
+    # widget when the “clear form” button is clicked.
+    refresh: ->
+      @context = @getContext()
+      if @inputView
+        @inputView.refresh @context
+
     listenToEvents: ->
       super
       if @inputView

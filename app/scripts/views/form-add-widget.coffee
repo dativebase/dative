@@ -118,8 +118,9 @@ define [
       'click button.add-form-button':              'submitForm'
       'click button.hide-form-add-widget':         'hideSelf'
       'click button.toggle-secondary-data-fields': 'toggleSecondaryDataAnimate'
-      'click .form-add-help':                      'openFormAddHelp'
-      'keydown': 'keydown'
+      'click button.form-add-help':                'openFormAddHelp'
+      'click button.clear-form':                   'clear'
+      'keydown':                                   'keydown'
 
     listenToEvents: ->
       super
@@ -451,12 +452,29 @@ define [
       @$('.dative-widget-header .toggle-secondary-data-fields.dative-tooltip')
           .tooltip position: @tooltipPositionLeft('-70')
       @$('.dative-widget-header .form-add-help.dative-tooltip')
+        .tooltip position: @tooltipPositionRight('+55')
+      @$('.dative-widget-header .clear-form.dative-tooltip')
         .tooltip position: @tooltipPositionRight('+20')
       @$('button.add-form-button')
         .tooltip position: @tooltipPositionLeft('-20')
       @$('ul.button-only-fieldset button.toggle-secondary-data-fields')
         .tooltip position: @tooltipPositionLeft('-90')
 
+    # Reset the model to its default state.
+    clear: ->
+      modelDefaults = @model.defaults()
+      secondaryAttributes = @getEditableSecondaryAttributes()
+      igtAttributes = @getFormAttributes @activeServerType, 'igt'
+      translationAttributes = @getFormAttributes @activeServerType, 'translation'
+      emptyModelObject = {}
+      for attribute in secondaryAttributes.concat translationAttributes, igtAttributes
+        emptyModelObject[attribute] = modelDefaults[attribute]
+      @model.set emptyModelObject
+      @refresh()
+
+    refresh: ->
+      for fieldView in @fieldViews()
+        fieldView.refresh()
 
     ############################################################################
     # Showing, hiding and toggling

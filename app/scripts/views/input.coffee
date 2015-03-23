@@ -15,7 +15,11 @@ define ['./base', 'autosize'], (BaseView) ->
       @$el.html @template(@context)
       @bordercolorify()
       @autosize()
+      @listenToEvents()
       @
+
+    refresh: (@context) ->
+      @render()
 
     autosize: -> @$('textarea').autosize append: false
 

@@ -51,14 +51,7 @@
       ><i class='fa fa-download fa-fw'></i>
     </button>
 
-    <% if @addUpdateType is 'add': %>
-
-      <button class="clear-form dative-tooltip"
-        title="clear this form: empty all attribute values"
-        ><i class='fa fa-eraser fa-fw'></i>
-      </button>
-
-    <% else: %>
+    <% if @addUpdateType is 'update': %>
 
       <button class="remember-form dative-tooltip"
         title="copy this form to your personal clipboard"

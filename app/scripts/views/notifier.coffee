@@ -66,7 +66,7 @@ define [
         content = "Your form creation request was unsuccessful. #{error}"
       else
         content = "Your form creation request was unsuccessful. See the error
-          message(s) next to the input fields."
+          message(s) beneath the input fields."
       notification = new NotificationView
         title: 'Form creation failed'
         content: content

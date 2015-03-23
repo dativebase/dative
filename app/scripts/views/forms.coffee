@@ -991,11 +991,11 @@ define [
       else
         id = formModel.get 'id'
         options =
-          text: "Your new form widget has unsaved data in it. If you proceed
-            with duplicating form #{id}, you will lose those unsaved changes.
-            Click “Cancel” to abort the reduplication so you can save your
-            unsaved form first. If you are ok with discarding your unsaved
-            form, then click “Ok” to proceed with duplicating form #{id}."
+          text: "The “new form” form has unsaved data in it. If you proceed
+            with duplicating form #{id}, you will lose that unsaved information.
+            Click “Cancel” to abort the duplication so you can save your
+            unsaved new form first. If you are okay with discarding your unsaved
+            new form, then click “Ok” to proceed with duplicating form #{id}."
           confirm: true
           confirmEvent: 'duplicateForm'
           confirmArgument: formModel
