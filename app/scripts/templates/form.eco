@@ -31,39 +31,56 @@
   <div class='button-container-right'>
 
     <button class="update-form dative-tooltip"
-      title="update this form">
-      <i class='fa fa-pencil-square-o fa-fw'></i>
+      <% if @addUpdateType is 'add': %>
+        title="edit the details of this form"
+      <% else: %>
+        title="update this form"
+      <% end %>
+      ><i class='fa fa-pencil-square-o fa-fw'></i>
     </button>
 
+    <!-- TODO: make assoiate part of the update interface.
     <button class="associate-form dative-tooltip"
       title="associate this form to a file">
       <i class='fa fa-link fa-fw'></i>
     </button>
+    -->
 
     <button class="export-form dative-tooltip"
-      title="export this form to various file formats">
-      <i class='fa fa-download fa-fw'></i>
+      title="export this form"
+      ><i class='fa fa-download fa-fw'></i>
     </button>
 
-    <button class="remember-form dative-tooltip"
-      title="copy this form to your personal clipboard">
-      <i class='fa fa-clipboard fa-fw'></i>
-    </button>
+    <% if @addUpdateType is 'add': %>
 
-    <button class="delete-form dative-tooltip"
-      title="delete this form">
-      <i class='fa fa-trash fa-fw'></i>
-    </button>
+      <button class="clear-form dative-tooltip"
+        title="clear this form: empty all attribute values"
+        ><i class='fa fa-eraser fa-fw'></i>
+      </button>
 
-    <button class="duplicate-form dative-tooltip"
-      title="duplicate this form">
-      <i class='fa fa-copy fa-fw'></i>
-    </button>
+    <% else: %>
 
-    <button class="form-history dative-tooltip"
-      title="view the history of this form">
-      <i class='fa fa-history fa-fw'></i>
-    </button>
+      <button class="remember-form dative-tooltip"
+        title="copy this form to your personal clipboard"
+        ><i class='fa fa-clipboard fa-fw'></i>
+      </button>
+
+      <button class="delete-form dative-tooltip"
+        title="delete this form"
+        ><i class='fa fa-trash fa-fw'></i>
+      </button>
+
+      <button class="duplicate-form dative-tooltip"
+        title="duplicate this form"
+        ><i class='fa fa-copy fa-fw'></i>
+      </button>
+
+      <button class="form-history dative-tooltip"
+        title="view the history of this form"
+        ><i class='fa fa-history fa-fw'></i>
+      </button>
+
+    <% end %>
 
   </div>
 

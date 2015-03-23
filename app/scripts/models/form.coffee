@@ -141,6 +141,11 @@ define [
       else
         @defaultOLDForm()
 
+    # Returns `true` if the model is empty.
+    isEmpty: ->
+      attributes = _.clone @attributes
+      delete attributes.collection
+      _.isEqual @defaults(), attributes
 
     ############################################################################
     # FieldDB Schema
@@ -584,7 +589,7 @@ define [
                                         #            "YYYY-MM-DD" but receives it
                                         #            in "MM/DD/YYYY" format.)
 
-      # These are attributes that the OLD send to us, but will ignore if we try
+      # These are attributes that the OLD sends to us, but will ignore if we try
       # to send them back. The "REC TYPE" column header indicates the type of
       # value that we can expect to receive from the OLD.
 

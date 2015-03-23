@@ -171,7 +171,8 @@ button.help-button
 
 .dative-field-display-representation-container,
 .dative-field-display-label-container,
-.dative-pagin-item-index-cell
+.dative-pagin-item-index-cell,
+.dative-alert-text
 {
   font-size: 130%;
 }
@@ -1135,7 +1136,8 @@ div.dative-display
   border-width: 4px;
 }
 
-.dative-help-dialog .help-content
+.dative-help-dialog .help-content,
+.dative-alert-text
 {
   line-height: 125%;
 }

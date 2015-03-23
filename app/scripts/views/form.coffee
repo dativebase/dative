@@ -82,7 +82,6 @@ define [
 
     listenToEvents: ->
       super
-      @listenTo @model, 'change', @modelChanged
       @listenTo Backbone, 'form:dehighlightAllFormViews', @dehighlight
       @listenTo Backbone, 'formsView:expandAllForms', @expand
       @listenTo Backbone, 'formsView:collapseAllForms', @collapse
@@ -105,10 +104,14 @@ define [
       'focusout': 'focusout'
       'keydown': 'keydown'
       'click .update-form': 'update'
+      'click .duplicate-form': 'duplicate'
       'click .delete-form': 'deleteConfirm'
 
     update: ->
       @showUpdateViewAnimate()
+
+    duplicate: ->
+      Backbone.trigger 'duplicateFormConfirm', @model
 
     # Trigger opening of a confirm dialog: if user clicks "Ok", then this
     # form will be deleted.
@@ -129,14 +132,6 @@ define [
       if formId is @model.get('id')
         @model.collection.destroyOLDForm @model
 
-    # Note: we can't call `render()` after a model change event because this
-    # will destroy the form update view's HTML in the DOM.
-    # TODO @jrwdunham: each form attribute needs its own display view (just
-    # like each form attribute has its own field view for updating/adding) and
-    # these display views need to listen for model changes and change the
-    # display accordingly and independently.
-    modelChanged: ->
-
     render: ->
       @getDisplayViews()
       @html()
@@ -145,7 +140,6 @@ define [
       @listenToEvents()
       @renderUpdateView()
       @
-
 
     getDisplayViews: ->
       @getPrimaryDisplayViews()
@@ -446,61 +440,18 @@ define [
             at: "left center"
             collision: "flipfit"
 
-      @$('button.update-form')
-        .button()
-        .tooltip
-          position:
-            my: "left+220 center"
-            at: "right center"
-            collision: "flipfit"
-
-      @$('button.associate-form')
-        .button()
-        .tooltip
-          position:
-            my: "left+185 center"
-            at: "right center"
-            collision: "flipfit"
-
-      @$('button.export-form')
-        .button()
-        .tooltip
-          position:
-            my: "left+150 center"
-            at: "right center"
-            collision: "flipfit"
-
-      @$('button.remember-form')
-        .button()
-        .tooltip
-          position:
-            my: "left+115 center"
-            at: "right center"
-            collision: "flipfit"
-
-      @$('button.delete-form')
-        .button()
-        .tooltip
-          position:
-            my: "left+80 center"
-            at: "right center"
-            collision: "flipfit"
-
-      @$('button.duplicate-form')
-        .button()
-        .tooltip
-          position:
-            my: "left+45 center"
-            at: "right center"
-            collision: "flipfit"
-
-      @$('button.form-history')
-        .button()
-        .tooltip
-          position:
-            my: "left+10 center"
-            at: "right center"
-            collision: "flipfit"
+      # Make all of righthand-side buttons into jQuery buttons and set the
+      # position of their tooltips programmatically.
+      @$(@$('.button-container-right button').get().reverse())
+        .each (index, element) =>
+          leftOffset = (index * 35) + 10
+          @$(element)
+            .button()
+            .tooltip
+              position:
+                my: "left+#{leftOffset} center"
+                at: "right center"
+                collision: "flipfit"
 
     # Button for toggling secondary data: when secondary data are hidden.
     setSecondaryDataButtonStateClosed: ->
