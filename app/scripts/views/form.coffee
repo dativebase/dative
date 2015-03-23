@@ -90,6 +90,7 @@ define [
         @hidePrimaryContentAndLabelsThenShowAll
       @listenTo Backbone, 'formsView:hideAllLabels',
         @hidePrimaryContentAndLabelsThenShowContent
+      @listenTo Backbone, 'deleteForm', @delete
       @listenTo @updateView, 'formAddView:hide', @hideUpdateViewAnimate
 
     events:
@@ -104,9 +105,29 @@ define [
       'focusout': 'focusout'
       'keydown': 'keydown'
       'click .update-form': 'update'
+      'click .delete-form': 'deleteConfirm'
 
     update: ->
       @showUpdateViewAnimate()
+
+    # Trigger opening of a confirm dialog: if user clicks "Ok", then this
+    # form will be deleted.
+    deleteConfirm: (event) ->
+      if event then @stopEvent event
+      id = @model.get 'id'
+      options =
+        text: "Do you really want to delete the form with id “#{id}”?"
+        confirm: true
+        confirmEvent: 'deleteForm'
+        confirmArgument: id
+      Backbone.trigger 'openAlertDialog', options
+
+    # Really delete this form.
+    # This is triggered by the "delete form" confirm dialog when the user
+    # clicks "Ok".
+    delete: (formId) ->
+      if formId is @model.get('id')
+        @model.collection.destroyOLDForm @model
 
     # Note: we can't call `render()` after a model change event because this
     # will destroy the form update view's HTML in the DOM.
@@ -569,6 +590,9 @@ define [
         when 85 # "u" for "update"
           if not @addUpdateFormWidgetHasFocus()
             @$('.update-form').first().click()
+        when 68 # "d" for "delete"
+          if not @addUpdateFormWidgetHasFocus()
+            @$('.delete-form').first().click()
 
     ############################################################################
     # Hide & Show stuff

@@ -79,9 +79,10 @@ define ['./../utils/utils'], (utils) ->
     # Private methods
 
     _refresh: ->
+      @_setPages()
+      @_setPage()
       @_setStart()
       @_setEnd()
-      @_setPages()
       @_setItemsDisplayed()
 
     _setStart: ->
@@ -96,6 +97,9 @@ define ['./../utils/utils'], (utils) ->
 
     _setPages: ->
       @pages = Math.ceil(@items / @itemsPerPage)
+
+    _setPage: ->
+      if @page > @pages then @page = @pages
 
     _setItemsDisplayed: ->
       if @itemsPerPage > @items

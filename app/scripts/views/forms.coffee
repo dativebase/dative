@@ -113,6 +113,8 @@ define [
       @listenTo Backbone, 'fetchOLDFormsFail', @fetchAllFormsFail
       @listenTo Backbone, 'fetchOLDFormsSuccess', @fetchOLDFormsSuccess
 
+      @listenTo Backbone, 'destroyOLDFormSuccess', @destroyOLDFormSuccess
+
       @listenTo @paginationMenuTopView, 'paginator:changeItemsPerPage', @changeItemsPerPage
       @listenTo @paginationMenuTopView, 'paginator:showFirstPage', @showFirstPage
       @listenTo @paginationMenuTopView, 'paginator:showLastPage', @showLastPage
@@ -156,8 +158,6 @@ define [
     # This is called when the 'addOLDFormSuccess' has been triggered, i.e.,
     # when a new form has been successfully created on the server.
     newFormAdded: (formModel) ->
-      # @add (new FormModel()).old2dative(responseJSON)
-      # HERE FOX
       newFormShouldBeOnCurrentPage = @newFormShouldBeOnCurrentPage()
       # 1. Make the new form widget disappear.
       @hideNewFormViewAnimate()
@@ -183,6 +183,15 @@ define [
       @newFormViewVisibility()
       @listenToNewFormView()
 
+    destroyOLDFormSuccess: (formModel) ->
+      @paginator.setItems (@paginator.items - 1)
+      @refreshHeader()
+      @refreshPaginationMenuTop()
+      destroyedFormView = _.findWhere @renderedFormViews, {model: formModel}
+      if destroyedFormView
+        destroyedFormView.$el.slideUp()
+      @fetchOLDFormsPageToCollection()
+
     # Returns true if a new form should be on the currently displayed page.
     newFormShouldBeOnCurrentPage: ->
       itemsDisplayedCount = (@paginator.end - @paginator.start) + 1
@@ -190,12 +199,8 @@ define [
 
     # Add the new form view to the set of paginated form views.
     # This entails adding the new form view's model to the collection
-    # and then rendering it and adding it to the DOM...
+    # and then rendering it and adding it to the DOM.
     addNewFormViewToPage: ->
-      # TODO: change its headers so it's no longer a New Form widget...
-      # TODO: close its update/add interface
-      # TODO: make it match the global form browse settings: expanded?
-      # @collection.add @newFormView.model
       addedFormView = new FormView
         model: @newFormView.model
         primaryDataLabelsVisible: @primaryDataLabelsVisible

@@ -30,6 +30,9 @@ define [
       @listenTo Backbone, 'addOLDFormFail', @addOLDFormFail
       @listenTo Backbone, 'addOLDFormSuccess', @addOLDFormSuccess
 
+      @listenTo Backbone, 'destroyOLDFormFail', @destroyOLDFormFail
+      @listenTo Backbone, 'destroyOLDFormSuccess', @destroyOLDFormSuccess
+
     render: ->
       @$el.html @template()
       @
@@ -68,6 +71,20 @@ define [
         title: 'Form creation failed'
         content: content
         type: 'error'
+      @renderNotification notification
+
+    destroyOLDFormFail: (error) ->
+      notification = new NotificationView
+        title: 'Form deletion failed'
+        content: "Your form creation request was unsuccessful. #{error}"
+        type: 'error'
+      @renderNotification notification
+
+    destroyOLDFormSuccess: (formModel) ->
+      notification = new NotificationView
+        title: 'Form deleted'
+        content: "You have successfully deleted the form with id
+          #{formModel.get 'id'}."
       @renderNotification notification
 
     registerFail: (reason) ->

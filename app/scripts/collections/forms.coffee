@@ -92,6 +92,31 @@ define [
           console.log 'Error in POST request to /forms'
       )
 
+    # Destroy an OLD form.
+    # DELETE `<OLD_URL>/forms/<form.id>`
+    destroyOLDForm: (form, options) ->
+      Backbone.trigger 'destroyOLDFormStart'
+      FormModel.cors.request(
+        method: 'DELETE'
+        url: "#{@getOLDURL()}/forms/#{form.get 'id'}"
+        onload: (responseJSON, xhr) =>
+          Backbone.trigger 'destroyOLDFormEnd'
+          if xhr.status is 200
+            @remove form
+            Backbone.trigger 'destroyOLDFormSuccess', form
+          else
+            error = responseJSON.error or 'No error message provided.'
+            Backbone.trigger 'destroyOLDFormFail', error
+            console.log "DELETE request to /forms/#{form.get 'id'} failed (status not 200)."
+            console.log error
+        onerror: (responseJSON) =>
+          Backbone.trigger 'destroyOLDFormEnd'
+          error = responseJSON.error or 'No error message provided.'
+          Backbone.trigger 'destroyOLDFormFail', error
+          console.log "Error in DELETE request to /forms/#{form.get 'id'}
+            (onerror triggered)."
+      )
+
     ############################################################################
     # Helpers
     ############################################################################
