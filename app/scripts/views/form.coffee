@@ -47,7 +47,6 @@ define [
         model: @model,
         addUpdateType: @addUpdateType
       @updateViewRendered = false
-      @originalModelCopy = @model.clone()
 
     getUpdateViewType: -> if @model.get('id') then 'update' else 'add'
 
@@ -102,7 +101,8 @@ define [
         @$('.dative-widget-header').removeClass 'ui-state-error'
         @$('.dative-widget-header-title').first().text @headerTitle
 
-    modelAltered: -> not _.isEqual @originalModelCopy.attributes, @model.attributes
+    modelAltered: ->
+      not _.isEqual(@updateView.originalModelCopy.attributes, @model.attributes)
 
     events:
       'click .form-primary-data': 'showAndHighlightOnlyMe'

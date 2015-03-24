@@ -100,6 +100,7 @@ define [
       @secondaryDataVisible = false
       @listenToEvents()
       @addUpdateType = options.addUpdateType or 'add'
+      @originalModelCopy = @model.clone()
 
     render: ->
       if @activeServerTypeIsOLD() and not @weHaveOLDNewFormData()
@@ -120,6 +121,7 @@ define [
       'click button.toggle-secondary-data-fields': 'toggleSecondaryDataAnimate'
       'click button.form-add-help':                'openFormAddHelp'
       'click button.clear-form':                   'clear'
+      'click button.undo-changes':                 'undoChanges'
       'keydown':                                   'keydown'
 
     listenToEvents: ->
@@ -445,16 +447,26 @@ define [
       @$('.dative-widget-header button').button()
       @$('.button-only-fieldset button').button()
 
+      # Make all of righthand-side buttons into jQuery buttons and set the
+      # position of their tooltips programmatically based on their
+      # position/index.
+      @$(@$('.button-container-right button').get().reverse())
+        .each (index, element) =>
+          leftOffset = (index * 35) + 10
+          @$(element)
+            .button()
+            .tooltip
+              position:
+                my: "left+#{leftOffset} center"
+                at: "right center"
+                collision: "flipfit"
+
     # Make the `title` attributes of the inputs/controls into jQueryUI tooltips.
     tooltipify: ->
       @$('.dative-widget-header .hide-form-add-widget.dative-tooltip')
           .tooltip position: @tooltipPositionLeft('-20')
       @$('.dative-widget-header .toggle-secondary-data-fields.dative-tooltip')
           .tooltip position: @tooltipPositionLeft('-70')
-      @$('.dative-widget-header .form-add-help.dative-tooltip')
-        .tooltip position: @tooltipPositionRight('+55')
-      @$('.dative-widget-header .clear-form.dative-tooltip')
-        .tooltip position: @tooltipPositionRight('+20')
       @$('button.add-form-button')
         .tooltip position: @tooltipPositionLeft('-20')
       @$('ul.button-only-fieldset button.toggle-secondary-data-fields')
@@ -462,6 +474,25 @@ define [
 
     # Reset the model to its default state.
     clear: ->
+      @model.set @getEmptyModelObject()
+      @refresh()
+
+    # Undo the (unsaved!) changes to the form (made presumably via the update
+    # interface): restore the model to its pre-modified state.
+    undoChanges: ->
+      @model.set @originalModelCopy.attributes
+      @refresh()
+
+    # Tell all field views to refresh themselves to match the current state of
+    # the model.
+    refresh: ->
+      for fieldView in @fieldViews()
+        fieldView.refresh()
+
+    # Return a JS object representing an empty form model: note that this
+    # crucially "empties" the editable attributes; that is, a form's id, its
+    # enterer, etc., will not be represented in the returned model object.
+    getEmptyModelObject: ->
       modelDefaults = @model.defaults()
       secondaryAttributes = @getEditableSecondaryAttributes()
       igtAttributes = @getFormAttributes @activeServerType, 'igt'
@@ -469,12 +500,7 @@ define [
       emptyModelObject = {}
       for attribute in secondaryAttributes.concat translationAttributes, igtAttributes
         emptyModelObject[attribute] = modelDefaults[attribute]
-      @model.set emptyModelObject
-      @refresh()
-
-    refresh: ->
-      for fieldView in @fieldViews()
-        fieldView.refresh()
+      emptyModelObject
 
     ############################################################################
     # Showing, hiding and toggling
