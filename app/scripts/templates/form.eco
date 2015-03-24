@@ -1,4 +1,10 @@
-<div class="dative-widget-header ui-widget-header ui-corner-top">
+<div
+  <% if @addUpdateType is 'add': %>
+    class="dative-widget-header ui-widget-header ui-corner-top ui-state-error"
+  <% else: %>
+    class="dative-widget-header ui-widget-header ui-corner-top"
+  <% end %>
+  >
 
   <div class='button-container-left'>
 
