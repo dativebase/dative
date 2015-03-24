@@ -96,10 +96,13 @@ define [
     modelChanged: ->
       if @modelAltered()
         @$('.dative-widget-header').addClass 'ui-state-error'
-        @$('.dative-widget-header-title').first().text 'unsaved changes'
+        headerTitleHTML = "#{@headerTitle} (<i class='fa fa-fw
+          fa-exclamation-triangle'></i>Unsaved changes)"
+        @$('.dative-widget-header-title').first()
+          .html headerTitleHTML
       else
         @$('.dative-widget-header').removeClass 'ui-state-error'
-        @$('.dative-widget-header-title').first().text @headerTitle
+        @$('.dative-widget-header-title').first().html @headerTitle
 
     modelAltered: ->
       not _.isEqual(@updateView.originalModelCopy.attributes, @model.attributes)
