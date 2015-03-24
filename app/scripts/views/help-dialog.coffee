@@ -26,6 +26,7 @@ define [
       @scrolledToMatchedElementIndex = 0
       @postHTMLRetrievedAction = null # may be specified as a method to call once the Help HTML has been retrieved.
       @listenTo Backbone, 'helpDialog:toggle', @toggle
+      @listenTo Backbone, 'helpDialog:openTo', @openTo
 
     collapsedHeight: ->
       @expandedHeight()
@@ -330,6 +331,16 @@ define [
         @dialogClose()
       else
         @dialogOpen()
+        @simulateSearchHelpText options
+
+    openTo: (options) ->
+      if not @hasBeenRendered
+        # This tells us to call `toggle` again once the help dialog has been
+        # rendered (and its HTML have been retrieved from the Dative server).
+        @postHTMLRetrievedAction = => @openTo options
+        @render()
+      else
+        if not @isOpen() then @dialogOpen()
         @simulateSearchHelpText options
 
     # Make it seem as though `options.searchTerm` has been searched in

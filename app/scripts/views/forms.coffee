@@ -305,7 +305,7 @@ define [
     # HTML changes, then the second match may not be what we want.
     openFormsBrowseHelp: ->
       Backbone.trigger(
-        'helpDialog:toggle',
+        'helpDialog:openTo',
         searchTerm: 'browsing forms'
         scrollToIndex: 1
       )

@@ -228,7 +228,7 @@ define [
       else
         searchTerm = 'updating a form'
       Backbone.trigger(
-        'helpDialog:toggle',
+        'helpDialog:openTo',
         searchTerm: searchTerm
         scrollToIndex: 1
       )
