@@ -112,7 +112,8 @@ define [
       @listenTo Backbone, 'duplicateForm', @duplicateForm
       @listenTo Backbone, 'duplicateFormConfirm', @duplicateFormConfirm
 
-      @listenTo Backbone, 'updateOLDFormFail', @updateOLDFormFail
+      @listenTo Backbone, 'updateOLDFormFail', @scrollToFirstValidationError
+      @listenTo Backbone, 'addOLDFormFail', @scrollToFirstValidationError
 
       @listenTo @paginationMenuTopView, 'paginator:changeItemsPerPage', @changeItemsPerPage
       @listenTo @paginationMenuTopView, 'paginator:showFirstPage', @showFirstPage
@@ -132,11 +133,13 @@ define [
       @listenTo @newFormView, 'newFormView:hide', @hideNewFormViewAnimate
       @listenTo @newFormView.model, 'addOLDFormSuccess', @newFormAdded
 
-    updateOLDFormFail: (error, formModel) ->
-      @scrollToFirstValidationError error, formModel
-
     scrollToFirstValidationError: (error, formModel) ->
-      selector = "##{formModel.cid} .dative-field-validation-container"
+      if formModel.id
+        console.log 'we have an id'
+        selector = "##{formModel.cid} .dative-field-validation-container"
+      else
+        console.log 'we DONT have an id'
+        selector = ".new-form-view .dative-field-validation-container"
       $firstValidationError = @$(selector).filter(':visible').first()
       if $firstValidationError then @scrollToElement $firstValidationError
 
