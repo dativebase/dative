@@ -135,12 +135,10 @@ define [
     updateOLDFormFail: (error, formModel) ->
       @scrollToFirstValidationError error, formModel
 
-    # TODO: make this work!
     scrollToFirstValidationError: (error, formModel) ->
-      console.log "you want to scroll to the topmost validation error of form ..."
-      console.log formModel
-      console.log error
-      #{formModel.cid}"
+      selector = "##{formModel.cid} .dative-field-validation-container"
+      $firstValidationError = @$(selector).filter(':visible').first()
+      if $firstValidationError then @scrollToElement $firstValidationError
 
     # Get the global Dative application settings relevant to displaying a form.
     getGlobalsFormsDisplaySettings: ->
