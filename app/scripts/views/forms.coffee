@@ -3,6 +3,7 @@ define [
   './base'
   './form'
   './form-add-widget'
+  './exporter-dialog'
   './pagination-menu-top'
   './pagination-item-table'
   './../collections/forms'
@@ -11,9 +12,9 @@ define [
   './../utils/globals'
   './../templates/forms'
   'perfectscrollbar'
-], (Backbone, BaseView, FormView, FormAddWidgetView, PaginationMenuTopView,
-  PaginationItemTableView, FormsCollection, FormModel, Paginator, globals,
-  formsTemplate) ->
+], (Backbone, BaseView, FormView, FormAddWidgetView, ExporterDialogView,
+  PaginationMenuTopView, PaginationItemTableView, FormsCollection, FormModel,
+  Paginator, globals, formsTemplate) ->
 
   # Forms View
   # -----------
@@ -50,6 +51,7 @@ define [
       @paginationMenuTopView = new PaginationMenuTopView paginator: @paginator # This handles the UI for the items-per-page select, the first, prevous, next buttons, etc.
       @collection = new FormsCollection()
       @newFormView = @getNewFormView()
+      @exporterDialog = new ExporterDialogView()
       @newFormViewVisible = false
       @listenToEvents()
 
@@ -75,6 +77,7 @@ define [
       @refreshHeader()
       @renderPaginationMenuTopView()
       @renderNewFormView()
+      @renderExporterDialogView()
       @newFormViewVisibility()
       if @weNeedToFetchFormsAgain()
         @fetchFormsToCollection()
@@ -87,8 +90,10 @@ define [
       #@monitorPaginItemsHeight()
       @
 
-    onClose: ->
-      clearInterval @paginItemsHeightMonitorId
+    renderExporterDialogView: ->
+      @exporterDialog.setElement(@$('#exporter-dialog-container'))
+      @exporterDialog.render()
+      @rendered @exporterDialog
 
     html: ->
       @$el.html @template
@@ -114,6 +119,8 @@ define [
 
       @listenTo Backbone, 'updateOLDFormFail', @scrollToFirstValidationError
       @listenTo Backbone, 'addOLDFormFail', @scrollToFirstValidationError
+
+      @listenTo Backbone, 'openExporterDialog', @openExporterDialog
 
       @listenTo @paginationMenuTopView, 'paginator:changeItemsPerPage', @changeItemsPerPage
       @listenTo @paginationMenuTopView, 'paginator:showFirstPage', @showFirstPage
@@ -800,6 +807,9 @@ define [
           @refreshPerfectScrollbar()
       @paginItemsHeightMonitorId = setInterval paginItemsHeightMonitor, 1000
 
+    onClose: ->
+      clearInterval @paginItemsHeightMonitorId
+
     # Render a page (pagination) of form views. That is, change which set of
     # `FormView` instances are displayed.
     renderPage: (options) ->
@@ -1068,4 +1078,9 @@ define [
       @renderNewFormView()
       @listenToNewFormView()
       @showNewFormViewAnimate()
+
+    openExporterDialog: (options) ->
+      @exporterDialog.setToBeExported options
+      @exporterDialog.generateExport()
+      @exporterDialog.dialogOpen()
 

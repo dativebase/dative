@@ -411,6 +411,8 @@ div.dative-page-header-title
 .dative-login-dialog-widget,
 .dative-register-dialog-widget,
 .dative-help-dialog-widget,
+.dative-alert-dialog-widget,
+.dative-exporter-dialog-widget,
 #appview,
 .progress-widget,
 .notification,
@@ -1139,6 +1141,26 @@ div.dative-display
   text-align: justify;
 }
 
+.dative-exporter-dialog .dative-exporter-dialog-content-container
+{
+  overflow-y: scroll;
+}
+
+.dative-exporter-dialog .dative-exporter-dialog-content
+{
+  font-size: 120%;
+}
+
+.dative-exporter-dialog-widget
+{
+  padding-bottom: 1em;
+}
+
+.dative-exporter-dialog .dative-exporter-dialog-content pre
+{
+  line-height: 120%;
+}
+
 .dative-help-dialog .focused-help-match
 {
   border-width: 4px;
@@ -1287,7 +1309,8 @@ p.paragraph-widget
 .form-add-form ul.fieldset input,
 .form-add-form ul.fieldset .ui-selectmenu-button,
 .form-add-form ul.fieldset .ms-container,
-.form-add-form ul.fieldset label
+.form-add-form ul.fieldset label,
+.dative-exporter-dialog-container
 {
   font-size: 12pt;
   font-family: 'GentiumPlus', serif;

@@ -126,6 +126,10 @@ define [
       'click .update-form': 'update'
       'click .duplicate-form': 'duplicate'
       'click .delete-form': 'deleteConfirm'
+      'click .export-form': 'exportForm'
+
+    exportForm: ->
+      Backbone.trigger 'openExporterDialog', model: @model
 
     update: ->
       @showUpdateViewAnimate()
@@ -564,6 +568,9 @@ define [
         when 68 # "d" for "delete"
           if not @addUpdateFormWidgetHasFocus()
             @$('.delete-form').first().click()
+        when 69 # "e" for "export"
+          if not @addUpdateFormWidgetHasFocus()
+            @$('.export-form').first().click()
 
     ############################################################################
     # Hide & Show stuff
