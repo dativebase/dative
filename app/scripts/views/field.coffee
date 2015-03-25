@@ -74,6 +74,7 @@ define [
     className: 'dative-form-field'
 
     initialize: (options) ->
+      @submitAttempted = false
       @attribute = options.attribute
       @domAttributes = options.domAttributes or {}
       @activeServerType = @getActiveServerType()
@@ -103,7 +104,8 @@ define [
 
     # Refresh re-renders all of the input views. This is called by the form add
     # widget when the “clear form” button is clicked.
-    refresh: ->
+    refresh: (model) ->
+      if model then @model = model
       @context = @getContext()
       if @inputView
         @inputView.refresh @context
@@ -114,14 +116,6 @@ define [
         @listenTo @inputView, 'setToModel', @setToModel
       # We listen to validation error events that are relevant to our attribute(s).
       @listenTo @context.model, "validationError:#{@attribute}", @validationError
-
-    # Display the validation error.
-    # FOX
-    validationError: (error) ->
-      @$('.dative-field-validation-error-message').html "#{@context.label}: #{error}"
-      @$('.dative-field-validation-container')
-        .hide()
-        .slideDown()
 
     renderLabelView: ->
       @labelView.setElement @$('.dative-field-label-container')
@@ -164,6 +158,27 @@ define [
       switch @activeServerType
         when 'FieldDB' then @model.setDatumValueSmart domValue
         when 'OLD' then @model.set domValue
+      if @submitAttempted then @validate()
+
+    validate: (errors) ->
+      clientSideValidationErrors = errors or @model.validate()
+      if clientSideValidationErrors
+        ourError = clientSideValidationErrors[@attribute]
+        if ourError then @validationError(ourError) else @validationError()
+      else
+        @validationError()
+
+    # Display the validation error display, or remove it if there isn't an error.
+    validationError: (error) ->
+      $validationContainer = @$ '.dative-field-validation-container'
+      if error
+        @$('.dative-field-validation-error-message').html "#{@context.label}: #{error}"
+        if $validationContainer.is ':hidden'
+          $validationContainer.slideDown()
+      else
+        @$('.dative-field-validation-error-message').empty()
+        if $validationContainer.is ':visible'
+          $validationContainer.slideUp()
 
     # If the input view returns a relational id from the DOM, then using this
     # in an override of `getValueFromDOM` will convert that id to an object.

@@ -54,28 +54,19 @@ define [
       @listenToEvents()
 
     events:
-      'focus .dative-form-object': 'formFocused'
       'focus input, textarea, .ui-selectmenu-button, button, .ms-container': 'inputFocused'
+      'focus .dative-form-object': 'formFocused'
       'click .expand-all': 'expandAllForms'
       'click .collapse-all': 'collapseAllForms'
       'click .new-form': 'showNewFormViewAnimate'
       'click .forms-browse-help': 'openFormsBrowseHelp'
       'click .toggle-all-labels': 'toggleAllLabels'
       'keydown': 'keyboardShortcuts'
+      'keyup': 'keyup'
       # @$el is enclosed in top and bottom invisible divs. These allow us to
       # close-circuit the tab loop and keep focus in the view.
       'focus .focusable-top':  'focusLastElement'
       'focus .focusable-bottom':  'focusFirstElement'
-
-    formFocused: (event) ->
-      @controlFocused event
-
-    # We stop the event here because otherwise it will be doubly caught by
-    # `formFocused` and `controlFocused` will cause buggy double
-    # auto-scrolling.
-    inputFocused: (event) ->
-      @stopEvent event
-      @controlFocused event
 
     render: (taskId) ->
       @html()
@@ -93,7 +84,11 @@ define [
       @perfectScrollbar()
       @setFocus()
       Backbone.trigger 'longTask:deregister', taskId
+      #@monitorPaginItemsHeight()
       @
+
+    onClose: ->
+      clearInterval @paginItemsHeightMonitorId
 
     html: ->
       @$el.html @template
@@ -117,6 +112,8 @@ define [
       @listenTo Backbone, 'duplicateForm', @duplicateForm
       @listenTo Backbone, 'duplicateFormConfirm', @duplicateFormConfirm
 
+      @listenTo Backbone, 'updateOLDFormFail', @updateOLDFormFail
+
       @listenTo @paginationMenuTopView, 'paginator:changeItemsPerPage', @changeItemsPerPage
       @listenTo @paginationMenuTopView, 'paginator:showFirstPage', @showFirstPage
       @listenTo @paginationMenuTopView, 'paginator:showLastPage', @showLastPage
@@ -134,6 +131,16 @@ define [
     listenToNewFormView: ->
       @listenTo @newFormView, 'newFormView:hide', @hideNewFormViewAnimate
       @listenTo @newFormView.model, 'addOLDFormSuccess', @newFormAdded
+
+    updateOLDFormFail: (error, formModel) ->
+      @scrollToFirstValidationError error, formModel
+
+    # TODO: make this work!
+    scrollToFirstValidationError: (error, formModel) ->
+      console.log "you want to scroll to the topmost validation error of form ..."
+      console.log formModel
+      console.log error
+      #{formModel.cid}"
 
     # Get the global Dative application settings relevant to displaying a form.
     getGlobalsFormsDisplaySettings: ->
@@ -291,14 +298,26 @@ define [
     itemsPerPageSelectHasFocus: ->
       @$('.ui-selectmenu-button.items-per-page').is ':focus'
 
-    # Respond appropriately when a "control" (input, button, etc.) has been focused.
-    # Basically, remember the focused element and scroll to it.
-    # BUG: tabbing through horizontally aligned buttons causes an annoying jumpiness.
-    controlFocused: (event) ->
+    formFocused: (event) ->
+      if @$(event.target).hasClass 'dative-form-object'
+        @rememberFocusedElement event
+        $element = @$ event.target
+        @scrollToScrollableElement $element
+
+    inputFocused: (event) ->
+      @stopEvent event
       @rememberFocusedElement event
-      # 'focus input, textarea, .ui-selectmenu-button, button, .ms-container': 'inputFocused'
-      if not @$(event.target).hasClass('ui-selectmenu-button')
-        @scrollToFocusedInput event
+
+    keyup: (event) ->
+      if event.which is 9
+        $element = @$ event.target
+        @scrollToScrollableElement $element
+
+    scrollToScrollableElement: ($element) ->
+      if (not $element.hasClass('ui-selectmenu-button')) and
+      (not $element.hasClass('ms-list')) and
+      (not $element.hasClass('hasDatepicker'))
+        @scrollToElement $element
 
     # Tell the Help dialog to open itself and search for "browsing forms" and
     # scroll to the second match. WARN: this is brittle because if the help
@@ -705,6 +724,7 @@ define [
         @focusFirstNewFormViewTextarea()
       else
         @focusLastForm()
+      @scrollToFocusedInput()
 
     focusFirstButton: ->
       @$('button.ui-button').first().focus()
@@ -713,7 +733,8 @@ define [
       @$('div.dative-form-object').first().focus()
 
     focusLastForm: ->
-      @$('div.dative-form-object').last().focus()
+      if @renderedFormViews.length > 0
+        @renderedFormViews[@renderedFormViews.length - 1].$el.focus()
 
     focusFirstNewFormViewTextarea: ->
       @$('.new-form-view .add-form-widget textarea').first().focus()
@@ -761,6 +782,22 @@ define [
       @$('#dative-page-body')
         .perfectScrollbar()
         .scroll => @closeAllTooltips()
+
+    refreshPerfectScrollbar: ->
+      @$('#dative-page-body').perfectScrollbar 'update'
+
+    # This was an attempt to refresh perfectScrollbar when the height of the
+    # pagin items div changes with the goal of stopping the auto-scroll bug. It
+    # was successful in calling `refreshPerfectScrollbar` at the appropriate
+    # time, but this did not fix the bug.
+    monitorPaginItemsHeight: ->
+      @paginItemsHeight = @$('.dative-pagin-items').height()
+      paginItemsHeightMonitor = =>
+        newHeight = @$('.dative-pagin-items').height()
+        if newHeight isnt @paginItemsHeight
+          @paginItemsHeight = newHeight
+          @refreshPerfectScrollbar()
+      @paginItemsHeightMonitorId = setInterval paginItemsHeightMonitor, 1000
 
     # Render a page (pagination) of form views. That is, change which set of
     # `FormView` instances are displayed.

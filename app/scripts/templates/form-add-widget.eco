@@ -18,6 +18,8 @@
 
   <div class='button-container-right'>
 
+    <span class="spinner-container"></span>
+
     <button class="clear-form dative-tooltip"
       title="clear this form: reset all fields to their default values"
       ><i class='fa fa-eraser fa-fw'></i>

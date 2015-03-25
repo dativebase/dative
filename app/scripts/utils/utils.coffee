@@ -218,6 +218,18 @@ define (require) ->
     string.replace(/([A-Z]{2,})/g, (match, $1) ->
       "<span class='small-caps'>#{$1.toLowerCase()}</span>")
 
+  isoDateRegex = /^\d{4}-\d{2}-\d{2}$/
+
+  # Convert a date like "2015-03-16" to "03/16/2015". Note that the OLD
+  # accepts dates in the latter format (because of how Pylons' FormEncode
+  # validation works), but returns them in the former (ISO 8601) format.
+  convertDateISO2mdySlash = (date) ->
+    if isoDateRegex.test date
+      [year, month, day] = date.split '-'
+      "#{month}/#{day}/#{year}"
+    else
+      date
+
   clone: clone
   type: type
   guid: guid
@@ -243,4 +255,5 @@ define (require) ->
   log: log
   getTimestamp: getTimestamp
   smallCapsAcronyms: smallCapsAcronyms
+  convertDateISO2mdySlash: convertDateISO2mdySlash
 

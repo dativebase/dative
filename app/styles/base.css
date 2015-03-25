@@ -791,6 +791,13 @@ div.dative-field-input-container > div.ms-container
     position: relative;
 }
 
+div.notifier-container,
+div.notifier
+{
+    height: 0px;
+    width: 0px;
+}
+
 .notifications-container
 {
     position: absolute;

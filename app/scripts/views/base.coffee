@@ -124,8 +124,8 @@ define [
       corners: 1 # Corner roundness (0..1)
       rotate: 0 # The rotation offset
       direction: 1 # 1: clockwise -1: counterclockwise
-      color: @constructor.jQueryUIColors().defCo
       speed: 2.2 # Rounds per second
+      color: @constructor.jQueryUIColors().defCo
       trail: 60 # Afterglow percentage
       shadow: false # Whether to render a shadow
       hwaccel: false # Whether to use hardware acceleration
@@ -201,6 +201,10 @@ define [
         $element = $ event.currentTarget
       catch
         $element = @$ ':focus'
+      @scrollToElement $element, $pageBody
+
+    scrollToElement: ($element, $pageBody) ->
+      $pageBody = $pageBody or @$('#dative-page-body')
 
       # Find the desired `scrollTop`, i.e., the pixel value we should pass to
       # `$.scrollTop` in order get our focused element where we want it.

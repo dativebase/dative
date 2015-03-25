@@ -92,6 +92,33 @@ define [
           console.log 'Error in POST request to /forms'
       )
 
+    # Update an OLD form.
+    # PUT `<OLD_URL>/forms/<form.id>`
+    updateOLDForm: (form, options) ->
+      form.trigger 'updateOLDFormStart'
+      FormModel.cors.request(
+        method: 'PUT'
+        url: "#{@getOLDURL()}/forms/#{form.get 'id'}"
+        payload: form.toOLD()
+        onload: (responseJSON, xhr) =>
+          form.trigger 'updateOLDFormEnd'
+          if xhr.status is 200
+            form.set responseJSON
+            form.trigger 'updateOLDFormSuccess', form
+          else
+            errors = responseJSON.errors or {}
+            error = responseJSON.error or ''
+            form.trigger 'updateOLDFormFail', error, form
+            for attribute, error of errors
+              form.trigger "validationError:#{attribute}", error
+            console.log 'PUT request to /forms failed (status not 200) ...'
+            console.log errors
+        onerror: (responseJSON) =>
+          form.trigger 'updateOLDFormEnd'
+          form.trigger 'updateOLDFormFail', responseJSON.error
+          console.log 'Error in PUT request to /forms'
+      )
+
     # Destroy an OLD form.
     # DELETE `<OLD_URL>/forms/<form.id>`
     destroyOLDForm: (form, options) ->

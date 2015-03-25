@@ -586,8 +586,9 @@ define [
                                         #            integer ids.)
       date_elicited: ""                 # <string>  (date elicited; OLD sends
                                         #            it in ISO 8601 format, i.e.,
-                                        #            "YYYY-MM-DD" but receives it
-                                        #            in "MM/DD/YYYY" format.)
+                                        #            "YYYY-MM-DD" but expects
+                                        #            to receive it in
+                                        #            "MM/DD/YYYY" format.)
 
       # These are attributes that the OLD sends to us, but will ignore if we try
       # to send them back. The "REC TYPE" column header indicates the type of
@@ -898,6 +899,7 @@ define [
     ############################################################################
 
     old2dative: (oldForm) ->
+      oldForm.date_elicited = @utils.convertDateISO2mdySlash oldForm.date_elicited
       @set oldForm
 
     # Convert an OLD form object to a Dative form object.

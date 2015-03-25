@@ -91,21 +91,26 @@ define [
         @hidePrimaryContentAndLabelsThenShowContent
       @listenTo Backbone, 'deleteForm', @delete
       @listenTo @updateView, 'formAddView:hide', @hideUpdateViewAnimate
-      @listenTo @model, 'change', @modelChanged
+      @listenTo @model, 'change', @indicateModelState
+      @listenTo @updateView, 'forceModelChanged', @indicateModelState
+      @listenTo @model, 'updateOLDFormSuccess', @indicateModelIsUnaltered
 
-    modelChanged: ->
-      if @modelAltered()
-        @$('.dative-widget-header').addClass 'ui-state-error'
-        headerTitleHTML = "#{@headerTitle} (<i class='fa fa-fw
-          fa-exclamation-triangle'></i>Unsaved changes)"
-        @$('.dative-widget-header-title').first()
-          .html headerTitleHTML
+    indicateModelState: ->
+      if @updateView.modelAltered()
+        @indicateModelIsAltered()
       else
-        @$('.dative-widget-header').removeClass 'ui-state-error'
-        @$('.dative-widget-header-title').first().html @headerTitle
+        @indicateModelIsUnaltered()
 
-    modelAltered: ->
-      not _.isEqual(@updateView.originalModelCopy.attributes, @model.attributes)
+    indicateModelIsAltered: ->
+      @$('.dative-widget-header').addClass 'ui-state-error'
+      headerTitleHTML = "#{@headerTitle} (<i class='fa fa-fw
+        fa-exclamation-triangle'></i>Unsaved changes)"
+      @$('.dative-widget-header-title').first()
+        .html headerTitleHTML
+
+    indicateModelIsUnaltered: ->
+      @$('.dative-widget-header').removeClass 'ui-state-error'
+      @$('.dative-widget-header-title').first().html @headerTitle
 
     events:
       'click .form-primary-data': 'showAndHighlightOnlyMe'

@@ -30,6 +30,10 @@ define [
       @listenTo Backbone, 'addOLDFormFail', @addOLDFormFail
       @listenTo Backbone, 'addOLDFormSuccess', @addOLDFormSuccess
 
+      @listenTo Backbone, 'updateOLDFormFail', @updateOLDFormFail
+      # TODO: trigger this in views/forms, as appropriate
+      @listenTo Backbone, 'updateOLDFormSuccess', @updateOLDFormSuccess
+
       @listenTo Backbone, 'destroyOLDFormFail', @destroyOLDFormFail
       @listenTo Backbone, 'destroyOLDFormSuccess', @destroyOLDFormSuccess
 
@@ -61,17 +65,29 @@ define [
           #{formModel.get 'id'}."
       @renderNotification notification
 
-    addOLDFormFail: (error) ->
+    updateOLDFormSuccess: (formModel) ->
+      notification = new NotificationView
+        title: 'Form updated'
+        content: "You have successfully updated form #{formModel.get 'id'}."
+      @renderNotification notification
+
+    addUpdateOLDFormFail: (error, type) ->
       if error
-        content = "Your form creation request was unsuccessful. #{error}"
+        content = "Your form #{type} request was unsuccessful. #{error}"
       else
-        content = "Your form creation request was unsuccessful. See the error
+        content = "Your form #{type} request was unsuccessful. See the error
           message(s) beneath the input fields."
       notification = new NotificationView
-        title: 'Form creation failed'
+        title: "Form #{type} failed"
         content: content
         type: 'error'
       @renderNotification notification
+
+    addOLDFormFail: (error) ->
+      @addUpdateOLDFormFail error, 'creation'
+
+    updateOLDFormFail: (error) ->
+      @addUpdateOLDFormFail error, 'update'
 
     destroyOLDFormFail: (error) ->
       notification = new NotificationView

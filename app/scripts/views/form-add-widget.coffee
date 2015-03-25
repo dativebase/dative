@@ -100,7 +100,17 @@ define [
       @secondaryDataVisible = false
       @listenToEvents()
       @addUpdateType = options.addUpdateType or 'add'
-      @originalModelCopy = @model.clone()
+      @submitAttempted = false
+
+      # TODO: if this is an "add"-type form, then the original model copy
+      # should (maybe) be an empty form.
+      @originalModelCopy = @copyModel @model
+
+    copyModel: (inputModel) ->
+      newModel = new FormModel()
+      for attr, val of @model.attributes
+        newModel.set attr, inputModel.get(attr)
+      newModel
 
     render: ->
       if @activeServerTypeIsOLD() and not @weHaveOLDNewFormData()
@@ -134,8 +144,12 @@ define [
 
       @listenTo @model, 'addOLDFormStart', @addOLDFormStart
       @listenTo @model, 'addOLDFormEnd', @addOLDFormEnd
-      @listenTo @model, 'addOLDFormSuccess', @addOLDFormSuccess
       @listenTo @model, 'addOLDFormFail', @addOLDFormFail
+
+      @listenTo @model, 'updateOLDFormStart', @addOLDFormStart
+      @listenTo @model, 'updateOLDFormEnd', @addOLDFormEnd
+      @listenTo @model, 'updateOLDFormFail', @updateOLDFormFail
+      @listenTo @model, 'updateOLDFormSuccess', @updateOLDFormSuccess
 
       @listenToFieldViews()
 
@@ -158,21 +172,55 @@ define [
       else
         'Update this form'
 
+    propagateSubmitAttempted: ->
+      for fieldView in @fieldViews()
+        fieldView.submitAttempted = true
+
+    modelAltered: ->
+      for attr, val of @model.attributes
+        originalValue = @originalModelCopy.get attr
+        currentValue = @model.get attr
+        if not _.isEqual originalValue, currentValue
+          return true
+      return false
+
+    # TODO: will this one work?
+    modelAltered_: ->
+      not _.isEqual(@originalModelCopy.attributes, @model.attributes)
+
     submitForm: (event) ->
-      @stopEvent event
-      @setToModel()
-      @disableForm()
-      clientSideValidationErrors = @model.validate()
-      if clientSideValidationErrors
-        for attribute, error of clientSideValidationErrors
-          @model.trigger "validationError:#{attribute}", error
-        Backbone.trigger 'addOLDFormFail'
-        @enableForm()
-      else
-        if @addUpdateType is 'add'
-          @model.collection.addOLDForm @model
+      if @modelAltered()
+        @submitAttempted = true
+        @propagateSubmitAttempted()
+        @stopEvent event
+        @setToModel()
+        @disableForm()
+        clientSideValidationErrors = @model.validate()
+        if clientSideValidationErrors
+          for attribute, error of clientSideValidationErrors
+            @model.trigger "validationError:#{attribute}", error
+          msg = 'See the error message(s) beneath the input fields.'
+          Backbone.trigger "#{@addUpdateType}OLDFormFail", msg, @model
+          @enableForm()
         else
-          @model.collection.updateOLDForm @model
+          if @addUpdateType is 'add'
+            @model.collection.addOLDForm @model
+          else
+            @model.collection.updateOLDForm @model
+      else
+        Backbone.trigger("#{@addUpdateType}OLDFormFail",
+          'Please make some changes before attempting to save.')
+
+    spinnerOptions: ->
+      options = super
+      options.top = '50%'
+      options.left = '-15%'
+      options.color = @constructor.jQueryUIColors().errCo
+      options
+
+    spin: -> @$('.spinner-container').spin @spinnerOptions()
+
+    stopSpin: -> @$('.spinner-container').spin false
 
     # Disable form input fields and submit button
     disableForm: ->
@@ -192,19 +240,26 @@ define [
       for fieldView in @fieldViews()
         fieldView.enable()
 
-    addOLDFormStart: ->
-      @spin()
+    addOLDFormStart: -> @spin()
 
     addOLDFormEnd: ->
       @enableForm()
       @stopSpin()
 
-    addOLDFormSuccess: (formModel) ->
-
     addOLDFormFail: (error) ->
       # The field views are listening for specific `validationError` events on
       # the form model. They will handle their own validation stuff.
       Backbone.trigger 'addOLDFormFail', error
+
+    updateOLDFormFail: (error, formModel) ->
+      console.log 'in updateOLDFormFail of FormAddWidget with ...'
+      console.log error
+      console.log formModel
+      Backbone.trigger 'updateOLDFormFail', error, formModel
+
+    updateOLDFormSuccess: (formModel) ->
+      @originalModelCopy = @copyModel @model
+      Backbone.trigger 'updateOLDFormSuccess', formModel
 
     # Set the state of the "add a form" HTML form on the Dative form model.
     setToModel: -> fv.setToModel() for fv in @fieldViews()
@@ -233,7 +288,7 @@ define [
         scrollToIndex: 1
       )
 
-    # <Enter> on a closed form opens it, <Esc> on an open form closes it. FOX
+    # <Enter> on a closed form opens it, <Esc> on an open form closes it.
     keydown: (event) ->
       switch event.which
         when 27
@@ -480,14 +535,25 @@ define [
     # Undo the (unsaved!) changes to the form (made presumably via the update
     # interface): restore the model to its pre-modified state.
     undoChanges: ->
-      @model.set @originalModelCopy.attributes
+      for attr, val of @originalModelCopy.attributes
+        @model.set attr, @originalModelCopy.get(attr)
       @refresh()
+      @setToModel()
+      @originalModelCopy = @copyModel @model
+      @validate()
+      # FormView listens for the following and calls `indicateModelState`.
+      @trigger 'forceModelChanged'
+
+    validate: ->
+      errors = @model.validate()
+      for fieldView in @fieldViews()
+        fieldView.validate errors
 
     # Tell all field views to refresh themselves to match the current state of
     # the model.
     refresh: ->
       for fieldView in @fieldViews()
-        fieldView.refresh()
+        fieldView.refresh @model
 
     # Return a JS object representing an empty form model: note that this
     # crucially "empties" the editable attributes; that is, a form's id, its
