@@ -44,10 +44,13 @@ div#mainmenu
 
 #dative-page-body
 {
-    margin: 10px;
-    overflow-y: hidden;
-    overflow-x: visible !important;
+    margin-top: 1em;
+    margin-bottom: 1em;
+    overflow-y: auto;
+    overflow-x: auto;
+    height: 100%;
     position: relative;
+    width: 100%
 }
 
 .ui-widget {

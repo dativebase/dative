@@ -84,10 +84,8 @@ define [
       else
         @refreshPage()
       @listenToEvents()
-      @perfectScrollbar()
       @setFocus()
       Backbone.trigger 'longTask:deregister', taskId
-      #@monitorPaginItemsHeight()
       @
 
     renderExporterDialogView: ->
