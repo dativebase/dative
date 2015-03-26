@@ -230,6 +230,19 @@ define (require) ->
     else
       date
 
+  # See http://stackoverflow.com/questions/985272/selecting-text-in-an-element-akin-to-highlighting-with-your-mouse
+  selectText = (element) ->
+    if document.body.createTextRange
+      range = document.body.createTextRange()
+      range.moveToElementText element
+      range.select()
+    else if window.getSelection
+      selection = window.getSelection()
+      range = document.createRange()
+      range.selectNodeContents element
+      selection.removeAllRanges()
+      selection.addRange range
+
   clone: clone
   type: type
   guid: guid
@@ -256,4 +269,5 @@ define (require) ->
   getTimestamp: getTimestamp
   smallCapsAcronyms: smallCapsAcronyms
   convertDateISO2mdySlash: convertDateISO2mdySlash
+  selectText: selectText
 

@@ -41,15 +41,28 @@ define [
         show: {effect: 'fade'}
         autoOpen: false
         appendTo: @$('.dative-exporter-dialog-target')
-        buttons: []
+        buttons: [
+            text: 'Select all' # Maybe use font awesome fa-clipboard icon
+            class: 'exporter-select-all exporter-button dative-tooltip'
+            title: 'Select all of the text of this export'
+            click: => @selectAllExportText()
+        ]
         dialogClass: 'dative-exporter-dialog-widget'
         title: 'Export'
         width: width
         height: height
         create: =>
           @fontAwesomateCloseIcon()
+          @tooltipify()
         close: =>
           @closeAllTooltips()
+
+    # Select/highlight all of the export text.
+    selectAllExportText: ->
+      @utils.selectText @$('.dative-exporter-dialog-content pre')[0]
+
+    tooltipify: ->
+      @$('.dative-tooltip').tooltip()
 
     defaultPosition: ->
       my: "center"

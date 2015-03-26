@@ -512,9 +512,9 @@ define [
 
     fetchAllFormsEnd: ->
       @fetchCompleted = true
-      @stopSpin()
 
     fetchAllFormsFail: (reason) ->
+      @stopSpin()
       console.log 'fetchAllFormsFail'
       console.log reason
       @$('.no-forms')
@@ -529,6 +529,7 @@ define [
       @getFormViews()
       @setPaginatorItems()
       @showLastPage()
+      @stopSpin()
 
     # We have succeeded in retrieving a page of forms from an OLD server.
     # `paginator` is an object returned from the OLD. Crucially, it has an
