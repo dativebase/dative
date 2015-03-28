@@ -250,11 +250,14 @@ define [
     # Show the page for browsing subcorpora (i.e., OLD corpora) AND open upt
     # the interface for creating a new subcorpus.
     showNewSubcorpusView: ->
-      console.log 'show new subcorpus view registered in app view'
+      if not @loggedIn() then return
+      if @subcorporaView and @visibleView is @subcorporaView
+        @visibleView.toggleNewSubcorpusViewAnimate()
+      else
+        @showSubcorporaView showNewSubcorpusView: true
 
     # Show the page for browsing subcorpora (i.e., OLD corpora).
-    showSubcorporaView: ->
-      console.log 'show subcorpora view registered in app view'
+    showSubcorporaView: (options) ->
       if not @loggedIn() then return
       if @subcorporaView and @visibleView is @subcorporaView then return
       @router.navigate 'subcorpora-browse'
@@ -265,8 +268,8 @@ define [
         @subcorporaView = new SubcorporaView()
       @visibleView = @subcorporaView
       # This is relevant if the user is trying to add a new corpus.
-      if options?.showNewCorpusView
-        @subcorporaView.newCorpusViewVisible = true
+      if options?.showNewSubcorpusView
+        @subcorporaView.newSubcorpusViewVisible = true
         @subcorporaView.weShouldFocusFirstAddViewInput = true
       @renderVisibleView taskId
 

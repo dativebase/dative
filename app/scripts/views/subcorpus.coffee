@@ -29,6 +29,7 @@ define [
 
     initialize: (options) ->
       @headerTitle = options.headerTitle or ''
+      @headerAlwaysVisible = true # the header full of buttons should always be visible.
       @activeServerType = @getActiveServerType()
       @setState options
       @addUpdateType = @getUpdateViewType()
@@ -50,8 +51,9 @@ define [
     setState: (options) ->
       defaults =
         primaryDataLabelsVisible: false # labels for primary data fields
-        expanded: false
-        headerVisible: false # the header full of buttons
+        expanded: false # means that the header of buttons and the secondary data should both be visible
+        headerVisible: @headerAlwaysVisible or false # the header full of buttons: is it currently visible?
+        headerTitleAttribute: 'name' # the attribute of the model that should be displayed in the header center.
         secondaryDataVisible: false # comments, tags, etc.
         updateViewVisible: false
       _.extend defaults, options
@@ -92,14 +94,14 @@ define [
 
     indicateModelIsAltered: ->
       @$('.dative-widget-header').addClass 'ui-state-error'
-      headerTitleHTML = "#{@headerTitle} (<i class='fa fa-fw
+      headerTitleHTML = "#{@getHeaderTitle()} (<i class='fa fa-fw
         fa-exclamation-triangle'></i>Unsaved changes)"
       @$('.dative-widget-header-title').first()
         .html headerTitleHTML
 
     indicateModelIsUnaltered: ->
       @$('.dative-widget-header').removeClass 'ui-state-error'
-      @$('.dative-widget-header-title').first().html @headerTitle
+      @$('.dative-widget-header-title').first().html @getHeaderTitle()
 
     events:
       'click .subcorpus-primary-data': 'showAndHighlightOnlyMe'
@@ -159,11 +161,11 @@ define [
       @getSecondaryDisplayViews()
 
     primaryAttributes: [
-      'name'
       'description'
     ]
 
     secondaryAttributes: [
+      'name'
       'content'
       'tags'
       'form_search'
@@ -216,9 +218,26 @@ define [
         .attr 'tabindex', 0
         .html @template(
           activeServerType: @activeServerType
-          headerTitle: @headerTitle
+          headerTitle: @getHeaderTitle()
           addUpdateType: @addUpdateType
+          headerAlwaysVisible: @headerAlwaysVisible
         )
+
+    getHeaderTitle: ->
+      if @headerTitle
+        @headerTitle
+      else
+        @getTruncatedNameAndId()
+
+    getTruncatedNameAndId: ->
+      name = @model.get 'name'
+      id = @model.get 'id'
+      if name
+        truncatedName = name[0..40]
+        if truncatedName isnt name then name = "#{truncatedName}..."
+      else
+        name = ''
+      if id then "#{name} (id #{id})" else name
 
     # TODO: do this all in one DOM-manipulation event via a single document
     # fragment, if possible.
@@ -249,6 +268,7 @@ define [
 
     # Make the header visible, or not, depending on state.
     headerVisibility: ->
+      if @headerAlwaysVisible then @addBorder()
       if @headerVisible
         @showHeader()
         @turnOffPrimaryDataTooltip()
@@ -486,8 +506,8 @@ define [
             @hideSubcorpusWidget()
           else if @headerVisible
             @hideSubcorpusDetails()
-        when 13
-          if not @headerVisible
+        when 13 # Enter expands: note if the focused element lacks class, that's because the entire widget is focused.
+          if not @headerVisible or not @$(':focus').attr('class')
             @showFullAnimate()
         when 85 # "u" for "update"
           if not @addUpdateSubcorpusWidgetHasFocus()
@@ -550,16 +570,18 @@ define [
       @$('.dative-widget-header').first().show()
 
     hideHeader: ->
-      @headerVisible = false
-      @$('.dative-widget-header').first().hide()
+      if not @headerAlwaysVisible
+        @headerVisible = false
+        @$('.dative-widget-header').first().hide()
 
     showHeaderAnimate: ->
       @headerVisible = true
       @$('.dative-widget-header').first().slideDown()
 
     hideHeaderAnimate: ->
-      @headerVisible = false
-      @$('.dative-widget-header').first().slideUp()
+      if not @headerAlwaysVisible
+        @headerVisible = false
+        @$('.dative-widget-header').first().slideUp()
 
     # Secondary Data
     ############################################################################
@@ -669,9 +691,10 @@ define [
         .addClass 'expanded'
 
     removeBorder: ->
-      @$el
-        .css 'border-color': 'transparent'
-        .removeClass 'expanded'
+      if not @headerAlwaysVisible
+        @$el
+          .css 'border-color': 'transparent'
+          .removeClass 'expanded'
 
     addBorderAnimate: ->
       @$el
@@ -679,9 +702,10 @@ define [
         .addClass 'expanded'
 
     removeBorderAnimate: ->
-      @$el
-        .animate 'border-color': 'transparent'
-        .removeClass 'expanded'
+      if not @headerAlwaysVisible
+        @$el
+          .animate 'border-color': 'transparent'
+          .removeClass 'expanded'
 
 
     # Primary Data

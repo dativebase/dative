@@ -7,7 +7,7 @@
         title="hide this new subcorpus widget">
         <i class='fa fa-times fa-fw'></i>
       </button>
-    <% else: %>
+    <% else if not @headerAlwaysVisible: %>
       <button class="hide-subcorpus-details dative-tooltip"
         title="hide the buttons and extra data of this subcorpus">
         <i class='fa fa-angle-double-up fa-fw'></i>
@@ -57,10 +57,12 @@
         ><i class='fa fa-copy fa-fw'></i>
       </button>
 
+      <!-- Uncomment this later, once history is implemented.
       <button class="subcorpus-history dative-tooltip"
         title="view the history of this subcorpus"
         ><i class='fa fa-history fa-fw'></i>
       </button>
+      -->
 
     <% end %>
 

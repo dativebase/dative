@@ -1398,6 +1398,12 @@ div.dative-new-item .dative-widget-center
   margin-bottom: 0.75em;
 }
 
+div.dative-paginated-item .dative-widget-header-title,
+div.dative-new-item .dative-widget-header-title
+{
+  font-size: 115%;
+}
+
 .small-caps
 {
   font-variant: small-caps;

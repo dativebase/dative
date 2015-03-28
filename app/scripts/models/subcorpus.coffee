@@ -127,7 +127,6 @@ define [
     # Note: `corpus_formats` is a dict (object) with attributes `treebank` and `transcriptions only`. See
     # - https://github.com/jrwdunham/old/blob/master/onlinelinguisticdatabase/lib/utils.py#L1428-L1439
     getNewSubcorpusData: ->
-      console.log 'in getNewSubcorpusData in subcorpus model'
       Backbone.trigger 'getNewSubcorpusDataStart'
       SubcorpusModel.cors.request(
         method: 'GET'
