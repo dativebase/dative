@@ -256,6 +256,7 @@ define [
     # is `TextareaFieldView`.
     getFieldView: (attribute) ->
       params = # All `FieldView` subclasses expect `attribute` and `model` on init
+        resource: 'subcorpora'
         attribute: attribute # e.g., "name"
         model: @model
         options: @getOptions() # These are the OLD <select> options relevant to OLD corpora, cf. GET requests to corpora/new

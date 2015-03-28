@@ -14,14 +14,16 @@ define [
 
     initialize: (options) ->
       @required = options.required or false
-      @width = options.width or '98.4%'
-      @selectValueGetter = options.selectValueGetter or @defaultSelectValueGetter
+      @width = options.width or '98.3%'
+      @selectValueGetter = options.selectValueGetter or
+        @defaultSelectValueGetter
       @selectTextGetter = options.selectTextGetter or @defaultSelectTextGetter
 
       # `@context.options` is expected to be an object. `optionsAttribute`
       # should be a key of that object that returns an array to be used as
       # options for building the <select>.
-      @optionsAttribute = options.optionsAttribute or @utils.pluralize options.attribute
+      @optionsAttribute = options.optionsAttribute or
+        @utils.pluralize options.attribute
 
       super
 
