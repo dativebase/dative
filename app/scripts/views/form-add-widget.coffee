@@ -496,6 +496,7 @@ define [
     guify: ->
       @buttonify()
       @tooltipify()
+      @$el.css 'border-color': @constructor.jQueryUIColors().defBo
 
     # Make the buttons into jQuery buttons.
     buttonify: ->

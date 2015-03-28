@@ -6,8 +6,8 @@ define [
   './../utils/globals'
   './../utils/tooltips'
   './../templates/field'
-], (Backbone, FormHandlerBaseView, LabelView, TextareaInputView, globals, tooltips,
-  fieldTemplate) ->
+], (Backbone, FormHandlerBaseView, LabelView, TextareaInputView, globals,
+  tooltips, fieldTemplate) ->
 
   # Field View
   # ----------
@@ -74,6 +74,7 @@ define [
     className: 'dative-form-field'
 
     initialize: (options) ->
+      @resource = options.resource or 'forms'
       @submitAttempted = false
       @attribute = options.attribute
       @domAttributes = options.domAttributes or {}
@@ -242,8 +243,8 @@ define [
     # The tooltip (the HTML title attribute) for both the label and the input.
     getTooltip: (attribute=@attribute) ->
       switch @activeServerType
-        when 'FieldDB' then @getFieldDBAttributeTooltip attribute
-        when 'OLD' then @getOLDAttributeTooltip attribute
+        when 'FieldDB' then @getFieldDBAttributeTooltip attribute, @resource
+        when 'OLD' then @getOLDAttributeTooltip attribute, @resource
         else 'default'
 
     # Get the value to go in the input from the model. See the form model for

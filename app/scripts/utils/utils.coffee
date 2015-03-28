@@ -74,6 +74,8 @@ define (require) ->
       "#{noun[...-1]}ies"
     else if endsWith(noun, 'z') or endsWith(noun, 's') or endsWith(noun, 'sh')
       "#{noun}es"
+    else if endsWith noun, 'us' # "corpus/corpora"
+      "#{noun}ora"
     else
       "#{noun}s"
 

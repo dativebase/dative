@@ -21,6 +21,10 @@ define [
   class FormModel extends BaseModel
 
     initialize: (options) ->
+      # Is the following line really necessary? This is what causes the
+      # `collection` attribute to be present and what requires us to call
+      # `delete result.collection` at various points within the code. Why is
+      # this necessary?
       if options?.collection then @collection = options.collection
       @activeServerType = @getActiveServerType()
       super options

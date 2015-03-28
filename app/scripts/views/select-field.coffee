@@ -14,7 +14,7 @@ define [
 
     initialize: (options) ->
       @required = options.required or false
-      @width = options.width or '98.5%'
+      @width = options.width or '98.4%'
       @selectValueGetter = options.selectValueGetter or @defaultSelectValueGetter
       @selectTextGetter = options.selectTextGetter or @defaultSelectTextGetter
 

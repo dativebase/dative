@@ -2,7 +2,6 @@ define [
   'backbone'
   './base'
   './form'
-  './form-add-widget'
   './exporter-dialog'
   './pagination-menu-top'
   './pagination-item-table'
@@ -12,7 +11,7 @@ define [
   './../utils/globals'
   './../templates/forms'
   'perfectscrollbar'
-], (Backbone, BaseView, FormView, FormAddWidgetView, ExporterDialogView,
+], (Backbone, BaseView, FormView, ExporterDialogView,
   PaginationMenuTopView, PaginationItemTableView, FormsCollection, FormModel,
   Paginator, globals, formsTemplate) ->
 
@@ -21,7 +20,7 @@ define [
   #
   # Displays a list of forms for browsing (with pagination).
   #
-  # Also contains a FormAddWidgetView instance for creating new forms
+  # Also contains a model-less FormView instance for creating new forms
   # within the forms browse interface.
   #
   # Note that this view accommodates both client-side pagination for FieldDB
@@ -955,10 +954,10 @@ define [
 
 
     ############################################################################
-    # Show, hide and toggle the Form Add widget view
+    # Show, hide and toggle the new form widget view
     ############################################################################
 
-    # Make the FormAddWidgetView visible or not, depending on its last state.
+    # Make the new form view visible or not, depending on its last state.
     newFormViewVisibility: ->
       if @newFormViewVisible
         @showNewFormView()

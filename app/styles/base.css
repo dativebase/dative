@@ -79,6 +79,7 @@ button.help-button
 
 #dative-page-header,
 #dative-page-header.dative-two-part-header > div.dative-forms-view-header,
+#dative-page-header.dative-two-part-header > div.dative-two-part-header-part-one,
 .dative-widget-header {
     font-weight: normal;
     text-align: center;
@@ -90,7 +91,8 @@ button.help-button
     position: relative;
 }
 
-#dative-page-header.dative-two-part-header > div.dative-forms-view-header
+#dative-page-header.dative-two-part-header > div.dative-forms-view-header,
+#dative-page-header.dative-two-part-header > div.dative-two-part-header-part-one
 {
     border-bottom: none;
 }
@@ -159,7 +161,7 @@ button.help-button
   margin-right: 0.75em;
 }
 
-.dative-field-display-label-container
+.dative-form-object .dative-field-display-label-container
 {
   width: 36%;
 }
@@ -180,7 +182,8 @@ button.help-button
   font-size: 130%;
 }
 
-.update-form-widget .dative-field-label-container
+.update-form-widget .dative-field-label-container,
+.update-widget .dative-field-label-container
 {
   width: 25%;
 }
@@ -196,6 +199,11 @@ button.help-button
 .dative-field-input-container
 {
   display: inline-block;
+  width: 70%;
+}
+
+.dative-form-object .dative-field-display-representation-container
+{
   width: 60%;
 }
 
@@ -204,7 +212,8 @@ button.help-button
   width: 95%;
 }
 
-.update-form-widget .dative-field-input-container
+.update-form-widget .dative-field-input-container,
+.update-widget .dative-field-input-container
 {
   display: inline-block;
   width: 70%;
@@ -226,9 +235,11 @@ ul.sf-menu li a
     padding: 10px 0;
 }
 
-.dative-form-object > .dative-widget-body
+.dative-form-object > .dative-widget-body,
+.dative-paginated-item > .dative-widget-body,
+.dative-new-item > .dative-widget-body
 {
-    padding: 10px;
+    padding: 1em;
 }
 
 .dative-form-object
@@ -322,6 +333,14 @@ div.dative-page-header-title
     color: inherit;
     padding: 10px 0;
     margin: 12px;
+}
+
+.dative-paginated-item,
+.dative-new-item
+{
+  margin-top: 1em;
+  margin-bottom: 1em;
+  width: 90%;
 }
 
 .dative-pagin-item-index
@@ -430,6 +449,7 @@ div.dative-page-header-title
 .edit-corpus-widget,
 .add-form-widget,
 .update-form-widget,
+.dative-shadowed-widget,
 .dative-form-object.expanded
 {
     box-shadow: 5px 5px 10px rgba(0, 0, 0, 0.5);
@@ -437,7 +457,8 @@ div.dative-page-header-title
     -moz-box-shadow: 5px 5px 10px rgba(0, 0, 0, 0.5);
 }
 
-.dative-form-object.expanded:focus
+.dative-form-object.expanded:focus,
+.dative-shadowed-widget.expanded:focus
 {
     /*outline: none !important;*/
     /*box-shadow: 0 0 10px orange !important;*/
@@ -450,7 +471,8 @@ div.heading {
 }
 
 div.dative-widget-center {
-    margin: 0 auto;
+    margin-right: auto;
+    margin-left: auto;
 }
 span.dative-triangle-icon,
 .dative-icon {
@@ -493,6 +515,7 @@ ul.fieldset label {
 }
 
 div.form-add-form ul.fieldset label,
+div.linguistic-data-entry-form ul.fieldset label,
 .formAdd ul.fieldset label
 {
     min-width: 90%;
@@ -1281,7 +1304,8 @@ div.form-igt-data div,
 div.form-translations-data div,
 div.form-secondary-data div,
 span.dative-pagin-item-index,
-p.paragraph-widget
+p.paragraph-widget,
+.large-unicode-font *
 {
   font-size: 14pt;
   font-family: 'GentiumPlus', serif;
@@ -1308,6 +1332,10 @@ p.paragraph-widget
 .form-add-form ul.fieldset .ui-selectmenu-button,
 .form-add-form ul.fieldset .ms-container,
 .form-add-form ul.fieldset label,
+.linguistic-data-entry-form ul.fieldset textarea,
+.linguistic-data-entry-form ul.fieldset input,
+.linguistic-data-entry-form ul.fieldset .ui-selectmenu-button,
+.linguistic-data-entry-form ul.fieldset label,
 .dative-exporter-dialog-container
 {
   font-size: 12pt;
@@ -1315,12 +1343,15 @@ p.paragraph-widget
 }
 
 .form-add-form ul.fieldset textarea,
-.form-add-form ul.fieldset input
+.form-add-form ul.fieldset input,
+.linguistic-data-entry-form ul.fieldset textarea,
+.linguistic-data-entry-form ul.fieldset input
 {
   min-height: 1.5em;
 }
 
-.form-add-form ul.fieldset span.ui-selectmenu-button
+.form-add-form ul.fieldset span.ui-selectmenu-button,
+.linguistic-data-entry-form ul.fieldset span.ui-selectmenu-button
 {
   height: 2.25em;
   vertical-align: top;
@@ -1358,7 +1389,9 @@ div.new-form-view
   margin-bottom: 2em;
 }
 
-div.update-form-widget
+div.update-form-widget,
+div.dative-paginated-item .dative-widget-center,
+div.dative-new-item .dative-widget-center
 {
   width: 98%;
   margin-top: 1em;

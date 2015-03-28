@@ -82,7 +82,7 @@
 
 <div class='dative-widget-body'>
 
-  <div class='update-form-widget dative-widget-center ui-widget
+  <div class='update-form-widget update-widget dative-widget-center ui-widget
     ui-widget-content ui-corner-all'></div>
 
   <div class='form-primary-data dative-form-primary-data'>

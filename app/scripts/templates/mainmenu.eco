@@ -27,13 +27,32 @@
             <li class='requires-authentication'>
               <a data-event="request:formAdd" data-shortcut="ctrl+a">Add</a>
             </li>
+            <!--
             <li class='requires-authentication'>
               <a data-event="request:formsSearch" data-shortcut="ctrl+s">Search</a>
             </li>
+            -->
             <li class='requires-authentication'>
               <a data-event="request:formsBrowse" data-shortcut="ctrl+b">Browse</a>
             </li>
             <!-- <li><a data-event="request:quickSearch">Quicksearch</a></li> -->
+        </ul>
+    </li>
+
+    <li class='requires-authentication old'><a>Subcorpora</a>
+        <ul class='ui-corner-bottom'>
+            <li class='requires-authentication'>
+              <a data-event="request:subcorpusAdd">Add</a>
+            </li>
+            <!--
+            <li class='requires-authentication'>
+              <a data-event="request:subcorporaSearch">Search</a>
+            </li>
+            -->
+            <li class='requires-authentication'>
+                <a data-event="request:subcorporaBrowse"
+                   data-shortcut="ctrl+c">Browse</a>
+            </li>
         </ul>
     </li>
 

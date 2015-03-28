@@ -9,8 +9,8 @@ define [
   # ----------------------
   #
   # This is the common base class of all views that have a FormModel instance as
-  # their model. It inherits from `BaseView` and adds methods specific to handling the display of
-  # forms.
+  # their model. It inherits from `BaseView` and adds methods specific to
+  # handling the display of forms.
 
   class FormHandlerBaseView extends BaseView
 
@@ -46,19 +46,16 @@ define [
     # Get the tooltip for a FieldDB datum field. This is the value of `help` as
     # supplied by FieldDB, if present; otherwise it's the relevant tooltip (if
     # any) defined in the `tooltips` module.
-    getFieldDBAttributeTooltip: (attribute) =>
-      # console.log "in getFieldDBAttributeTooltip with #{attribute}"
+    getFieldDBAttributeTooltip: (attribute, resource='forms') =>
       help = @model.getDatumHelp attribute
       if help and attribute isnt 'dateElicited'
-        # console.log "returning help: #{help}"
         help
       else
         value = @model.getDatumValueSmart attribute
-        tooltip = tooltips("fieldDB.formAttributes.#{attribute}")(
+        tooltip = tooltips("fieldDB.#{resource}.#{attribute}")(
           language: 'eng'
           value: value
         )
-        # console.log "returning tooltip: #{tooltip}"
         tooltip
 
     # Get an array of form attributes (form app settings model) for the
@@ -81,8 +78,8 @@ define [
     # Return the tooltip for an OLD form attribute (uses the imported `tooltip`
     # module). Note that we pass `value` in case `tooltip` uses it in generating
     # a value-specific tooltip (which isn't always the case.)
-    getOLDAttributeTooltip: (attribute) ->
-      tooltipGenerator = tooltips("old.formAttributes.#{attribute}")
+    getOLDAttributeTooltip: (attribute, resource='forms') ->
+      tooltipGenerator = tooltips("old.#{resource}.#{attribute}")
       value = @model.get attribute
       tooltipGenerator(
         language: 'eng' # TODO: make 'eng' configurable

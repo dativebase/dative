@@ -58,6 +58,7 @@ define [
     className: 'dative-form-field-display'
 
     initialize: (options) ->
+      @resource = options.resource or 'forms'
       @attribute = options.attribute
       @activeServerType = @getActiveServerType()
       @context = @getContext()

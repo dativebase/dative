@@ -15,6 +15,7 @@ define [
   './form-add'
   './forms-search'
   './forms'
+  './subcorpora'
   './corpora'
   './../models/application-settings'
   './../models/form'
@@ -24,8 +25,9 @@ define [
 ], (Backbone, Workspace, BaseView, MainMenuView, ProgressWidgetView,
   NotifierView, LoginDialogView, RegisterDialogView, AlertDialogView,
   HelpDialogView, ApplicationSettingsView, PagesView, HomePageView, FormAddView,
-  FormsSearchView, FormsView, CorporaView, ApplicationSettingsModel, FormModel,
-  ApplicationSettingsCollection, globals, appTemplate) ->
+  FormsSearchView, FormsView, SubcorporaView, CorporaView,
+  ApplicationSettingsModel, FormModel, ApplicationSettingsCollection, globals,
+  appTemplate) ->
 
   # App View
   # --------
@@ -71,6 +73,8 @@ define [
       @listenTo @mainMenuView, 'request:formAdd', @showNewFormView
       @listenTo @mainMenuView, 'request:formsBrowse', @showFormsView
       @listenTo @mainMenuView, 'request:formsSearch', @showFormsSearchView
+      @listenTo @mainMenuView, 'request:subcorpusAdd', @showNewSubcorpusView
+      @listenTo @mainMenuView, 'request:subcorporaBrowse', @showSubcorporaView
       @listenTo @mainMenuView, 'request:pages', @showPagesView
 
       @listenTo @router, 'route:home', @showHomePageView
@@ -232,7 +236,7 @@ define [
       @visibleView = @formsView
       # This is relevant if the user is trying to add a new form.
       if options?.showNewFormView
-        @formsView.formAddViewVisible = true
+        @formsView.newFormViewVisible = true
         @formsView.weShouldFocusFirstAddViewInput = true
       @renderVisibleView taskId
 
@@ -242,6 +246,29 @@ define [
         @visibleView.toggleNewFormViewAnimate()
       else
         @showFormsView showNewFormView: true
+
+    # Show the page for browsing subcorpora (i.e., OLD corpora) AND open upt
+    # the interface for creating a new subcorpus.
+    showNewSubcorpusView: ->
+      console.log 'show new subcorpus view registered in app view'
+
+    # Show the page for browsing subcorpora (i.e., OLD corpora).
+    showSubcorporaView: ->
+      console.log 'show subcorpora view registered in app view'
+      if not @loggedIn() then return
+      if @subcorporaView and @visibleView is @subcorporaView then return
+      @router.navigate 'subcorpora-browse'
+      taskId = @guid()
+      Backbone.trigger 'longTask:register', 'Opening corpora browse view', taskId
+      @closeVisibleView()
+      if not @subcorporaView
+        @subcorporaView = new SubcorporaView()
+      @visibleView = @subcorporaView
+      # This is relevant if the user is trying to add a new corpus.
+      if options?.showNewCorpusView
+        @subcorporaView.newCorpusViewVisible = true
+        @subcorporaView.weShouldFocusFirstAddViewInput = true
+      @renderVisibleView taskId
 
     # Put out of use for now. Now adding a form is done via the browse
     # interface. See `showFormAddView`.
