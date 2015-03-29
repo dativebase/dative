@@ -38,7 +38,7 @@ define [
       @paginator = new Paginator page=1, items=0, itemsPerPage=@itemsPerPage
       @paginationMenuTopView = new PaginationMenuTopView paginator: @paginator # This handles the UI for the items-per-page select, the first, prevous, next buttons, etc.
       @collection = new SubcorporaCollection()
-      @newSubcorpusview = @getNewSubcorpusView()
+      @newSubcorpusView = @getNewSubcorpusView()
       @exporterDialog = new ExporterDialogView()
       @newSubcorpusViewVisible = false
       @listenToEvents()
@@ -128,21 +128,19 @@ define [
       @listenToNewSubcorpusView()
 
     listenToNewSubcorpusView: ->
-      @listenTo @newSubcorpusview, 'newSubcorpusView:hide',
+      @listenTo @newSubcorpusView, 'newSubcorpusView:hide',
         @hideNewSubcorpusViewAnimate
-      @listenTo @newSubcorpusview.model, 'addSubcorpusSuccess',
+      @listenTo @newSubcorpusView.model, 'addSubcorpusSuccess',
         @newSubcorpusAdded
 
-    # TODO: fix this!
     scrollToFirstValidationError: (error, subcorpusModel) ->
       if subcorpusModel.id
-        # TODO: this won't work because we don't have pagination tables with
-        # .cid ids in them for subcorpora...
         selector = "##{subcorpusModel.cid} .dative-field-validation-container"
       else
         selector = ".new-subcorpus-view .dative-field-validation-container"
       $firstValidationError = @$(selector).filter(':visible').first()
-      if $firstValidationError then @scrollToElement $firstValidationError
+      if $firstValidationError.length > 0
+        @scrollToElement $firstValidationError
 
     # Get the global Dative application settings relevant to displaying
     # subcorpora.
@@ -162,8 +160,10 @@ define [
     # Instantiate and return a new `SubcorpusView` instance. Note that even
     # though we pass the collection to the subcorpus view's model, the
     # collection will not contain that model.
+    # FOX
     getNewSubcorpusView: (newSubcorpusModel) ->
-      newSubcorpusModel = newSubcorpusModel or new SubcorpusModel(collection: @collection)
+      newSubcorpusModel = newSubcorpusModel or
+        new SubcorpusModel(collection: @collection)
       new SubcorpusView
         headerTitle: 'New Subcorpus'
         model: newSubcorpusModel
@@ -187,18 +187,20 @@ define [
       Backbone.trigger 'addSubcorpusSuccess', subcorpusModel
       if newSubcorpusShouldBeOnCurrentPage
         @addNewSubcorpusViewToPage()
+        @closeNewSubcorpusView()
       else
         @closeNewSubcorpusView()
 
       # 4. create a new new subcorpus widget but don't display it.
       # TODO: maybe the new new subcorpus view *should* be displayed ...
       @newSubcorpusViewVisible = false
-      @newSubcorpusview = @getNewSubcorpusView()
+      @newSubcorpusView = @getNewSubcorpusView()
       @renderNewSubcorpusView()
       @newSubcorpusViewVisibility()
       @listenToNewSubcorpusView()
 
     destroySubcorpusSuccess: (subcorpusModel) ->
+      @collection.remove subcorpusModel
       @paginator.setItems (@paginator.items - 1)
       @refreshHeader()
       @refreshPaginationMenuTop()
@@ -218,7 +220,7 @@ define [
     # and then rendering it and adding it to the DOM.
     addNewSubcorpusViewToPage: ->
       addedSubcorpusView = new SubcorpusView
-        model: @newSubcorpusview.model
+        model: @newSubcorpusView.model
         primaryDataLabelsVisible: @primaryDataLabelsVisible
         expanded: @allSubcorporaExpanded
       @collection.add addedSubcorpusView.model
@@ -447,14 +449,14 @@ define [
 
     # Render the New Subcorpus view.
     renderNewSubcorpusView: ->
-      @newSubcorpusview.setElement @$('.new-subcorpus-view').first()
-      @newSubcorpusview.render()
-      @rendered @newSubcorpusview
+      @newSubcorpusView.setElement @$('.new-subcorpus-view').first()
+      @newSubcorpusView.render()
+      @rendered @newSubcorpusView
 
     # Close the New Subcorpus view.
     closeNewSubcorpusView: ->
-      @newSubcorpusview.close()
-      @closed @newSubcorpusview
+      @newSubcorpusView.close()
+      @closed @newSubcorpusView
 
     ############################################################################
     # Respond to `@collection`-issued events related to the "fetch subcorpora"
@@ -642,6 +644,12 @@ define [
         subcorpusView.close()
         @closed subcorpusView
 
+    closeSubcorpusViews: ->
+      while @subcorpusViews.length
+        subcorpusView = @subcorpusViews.pop()
+        subcorpusView.close()
+        @closed subcorpusView
+
     # Create a `SubcorpusView` instance for each `SubcorpusModel` instance in
     # `@collection` and append it to `@subcorpusViews`.
     # Note that in the OLD case, we reset `subcorpusViews` to `[]` because
@@ -649,13 +657,14 @@ define [
     # models/views at a time.
     getSubcorpusViews: ->
       if @getActiveServerType() is 'OLD'
+        @closeSubcorpusViews()
         @subcorpusViews = []
       @collection.each (subcorpusModel) =>
-        newSubcorpusview = new SubcorpusView
+        newSubcorpusView = new SubcorpusView
           model: subcorpusModel
           primaryDataLabelsVisible: @primaryDataLabelsVisible
           expanded: @allSubcorporaExpanded
-        @subcorpusViews.push newSubcorpusview
+        @subcorpusViews.push newSubcorpusView
 
     spinnerOptions: ->
       _.extend BaseView::spinnerOptions(), {top: '25%', left: '85.5%'}
@@ -909,14 +918,14 @@ define [
       @newSubcorpusViewVisible = true
       @$('.new-subcorpus-view').show
         complete: =>
-          @newSubcorpusview.showUpdateView()
+          @newSubcorpusView.showUpdateView()
           Backbone.trigger 'addSubcorpusWidgetVisible'
 
     hideNewSubcorpusViewAnimate: ->
       @setNewSubcorpusViewButtonShow()
       @newSubcorpusViewVisible = false
       @$('.new-subcorpus-view').slideUp()
-      @newSubcorpusview.closeAllTooltips()
+      @newSubcorpusView.closeAllTooltips()
       @focusLastSubcorpus()
       @scrollToFocusedInput()
 
@@ -925,7 +934,7 @@ define [
       @newSubcorpusViewVisible = true
       @$('.new-subcorpus-view').slideDown
         complete: =>
-          @newSubcorpusview.showUpdateViewAnimate()
+          @newSubcorpusView.showUpdateViewAnimate()
           Backbone.trigger 'addSubcorpusWidgetVisible'
       @focusFirstNewSubcorpusViewTextarea()
       @scrollToFocusedInput()
@@ -954,20 +963,10 @@ define [
       @$('button.new-subcorpus')
         .button 'disable'
 
-    showNewSubcorpusViewAnimate: ->
-      @setNewSubcorpusViewButtonHide()
-      @newSubcorpusViewVisible = true
-      @$('.new-subcorpus-view').slideDown
-        complete: =>
-          @newSubcorpusview.showUpdateViewAnimate()
-          Backbone.trigger 'addSubcorpusWidgetVisible'
-      @focusFirstNewSubcorpusViewTextarea()
-      @scrollToFocusedInput()
-
     # Duplicate the supplied subcorpus model, but display a confirm dialog first if the
     # new subcorpus view has data in it.
     duplicateSubcorpusConfirm: (subcorpusModel) ->
-      if @newSubcorpusview.model.isEmpty()
+      if @newSubcorpusView.model.isEmpty()
         @duplicateSubcorpus subcorpusModel
       else
         id = subcorpusModel.get 'id'
@@ -1007,7 +1006,7 @@ define [
 
       @hideNewSubcorpusViewAnimate()
       @closeNewSubcorpusView()
-      @newSubcorpusview = @getNewSubcorpusView newSubcorpusModel
+      @newSubcorpusView = @getNewSubcorpusView newSubcorpusModel
       @renderNewSubcorpusView()
       @listenToNewSubcorpusView()
       @showNewSubcorpusViewAnimate()

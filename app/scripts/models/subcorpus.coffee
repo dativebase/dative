@@ -36,13 +36,9 @@ define [
       if _.isEmpty errors then undefined else errors
 
     getValidator: (attribute) ->
-      # This is SubcorpusModel residue (fix!):
-      # switch attribute
-      #   when 'transcription' then @validOLDTranscription
-      #   when 'translations' then @validOLDTranslations
-      #   when 'date_elicited' then @validateOLDDateElicited
-      #   else null
-      null
+      switch attribute
+        when 'name' then @requiredString
+        else null
 
     # This is an example validator for later modification...
     validTitle: (value) ->
@@ -143,5 +139,30 @@ define [
           Backbone.trigger 'getNewSubcorpusDataFail',
             'Error in GET request to OLD server for /corpora/new'
           console.log 'Error in GET request to OLD server for /corpora/new'
+      )
+
+    # Destroy an OLD corpus.
+    # DELETE `<OLD_URL>/corpora/<corpus.id>`
+    destroySubcorpus: (options) ->
+      Backbone.trigger 'destroySubcorpusStart'
+      SubcorpusModel.cors.request(
+        method: 'DELETE'
+        url: "#{@getOLDURL()}/corpora/#{@get 'id'}"
+        onload: (responseJSON, xhr) =>
+          Backbone.trigger 'destroySubcorpusEnd'
+          if xhr.status is 200
+            Backbone.trigger 'destroySubcorpusSuccess', @
+          else
+            error = responseJSON.error or 'No error message provided.'
+            Backbone.trigger 'destroySubcorpusFail', error
+            console.log "DELETE request to /corpora/#{@get 'id'}
+              failed (status not 200)."
+            console.log error
+        onerror: (responseJSON) =>
+          Backbone.trigger 'destroySubcorpusEnd'
+          error = responseJSON.error or 'No error message provided.'
+          Backbone.trigger 'destroySubcorpusFail', error
+          console.log "Error in DELETE request to /corpora/#{@get 'id'}
+            (onerror triggered)."
       )
 

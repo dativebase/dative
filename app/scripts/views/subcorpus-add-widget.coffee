@@ -47,7 +47,10 @@ define [
 
       # TODO: if this is an "add"-type form, then the original model copy
       # should (maybe) be an empty subcorpus.
+      #@originalModelCopy = @copyModel @model
       @originalModelCopy = @copyModel @model
+      if @addUpdateType is 'add'
+        @originalModelCopy.set @getEmptyModelObject()
 
     copyModel: (inputModel) ->
       newModel = new SubcorpusModel()
@@ -107,7 +110,9 @@ define [
         addUpdateType: @addUpdateType
         headerTitle: @getHeaderTitle()
         activeServerType: @getActiveServerType()
-      @$el.html @template(context)
+      @$el
+        .attr 'id', @model.cid
+        .html @template(context)
 
     getHeaderTitle: ->
       if @addUpdateType is 'add'
@@ -148,7 +153,7 @@ define [
             @model.collection.updateSubcorpus @model
       else
         Backbone.trigger("#{@addUpdateType}SubcorpusFail",
-          'Please make some changes before attempting to save.')
+          'Please make some changes before attempting to save.', @model)
 
     spinnerOptions: ->
       options = super
@@ -188,14 +193,14 @@ define [
     addSubcorpusFail: (error) ->
       # The field views are listening for specific `validationError` events on
       # the subcorpus model. They will handle their own validation stuff.
-      Backbone.trigger 'addSubcorpusFail', error
+      Backbone.trigger 'addSubcorpusFail', error, @model
 
-    updateSubcorpusFail: (error, subcorpusModel) ->
-      Backbone.trigger 'updateSubcorpusFail', error, subcorpusModel
+    updateSubcorpusFail: (error) ->
+      Backbone.trigger 'updateSubcorpusFail', error, @model
 
-    updateSubcorpusSuccess: (subcorpusModel) ->
+    updateSubcorpusSuccess: ->
       @originalModelCopy = @copyModel @model
-      Backbone.trigger 'updateSubcorpusSuccess', subcorpusModel
+      Backbone.trigger 'updateSubcorpusSuccess', @model
 
     # Set the state of the "add a subcorpus" HTML form on the Dative subcorpus
     # model.

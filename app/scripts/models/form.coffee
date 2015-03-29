@@ -74,10 +74,7 @@ define [
         else null
 
     validOLDTranscription: (value) ->
-      if value.trim?() is ''
-        'Please enter a value'
-      else
-        null
+      @requiredString value
 
     validOLDTranslations: (value) ->
       error = null

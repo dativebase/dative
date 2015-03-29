@@ -173,8 +173,13 @@ define [
     validationError: (error) ->
       $validationContainer = @$ '.dative-field-validation-container'
       if error
-        @$('.dative-field-validation-error-message').html "#{@context.label}: #{error}"
-        if $validationContainer.is ':hidden'
+        @$('.dative-field-validation-error-message').html(
+          "#{@context.label}: #{error}")
+        # The validation error <div> might be in the process of sliding up;
+        # therefore we have to check for an animation queue and clear it.
+        queue = $validationContainer.queue()
+        $validationContainer.stop true, true
+        if $validationContainer.is ':hidden' or queue
           $validationContainer.slideDown()
       else
         @$('.dative-field-validation-error-message').empty()

@@ -81,14 +81,14 @@ define [
             form.trigger 'addOLDFormSuccess', form
           else
             errors = responseJSON.errors or {}
-            form.trigger 'addOLDFormFail', errors
+            form.trigger 'addOLDFormFail', errors, form
             for attribute, error of errors
               form.trigger "validationError:#{attribute}", error
             console.log 'POST request to /forms failed (status not 200) ...'
             console.log errors
         onerror: (responseJSON) =>
           form.trigger 'addOLDFormEnd'
-          form.trigger 'addOLDFormFail', responseJSON.error
+          form.trigger 'addOLDFormFail', responseJSON.error, form
           console.log 'Error in POST request to /forms'
       )
 
@@ -115,7 +115,7 @@ define [
             console.log errors
         onerror: (responseJSON) =>
           form.trigger 'updateOLDFormEnd'
-          form.trigger 'updateOLDFormFail', responseJSON.error
+          form.trigger 'updateOLDFormFail', responseJSON.error, form
           console.log 'Error in PUT request to /forms'
       )
 

@@ -28,6 +28,7 @@ define [
       ui-corner-all'
 
     initialize: (options) ->
+      @myid = @utils.guid()
       @headerTitle = options.headerTitle or ''
       @headerAlwaysVisible = true # the header full of buttons should always be visible.
       @activeServerType = @getActiveServerType()
@@ -145,7 +146,7 @@ define [
     # clicks "Ok".
     delete: (subcorpusId) ->
       if subcorpusId is @model.get('id')
-        @model.collection.destroySubcorpus @model
+        @model.destroySubcorpus @model
 
     render: ->
       @getDisplayViews()

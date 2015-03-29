@@ -15,8 +15,16 @@ define [
 
     initialize: ->
 
+      @crudResources = [
+        'subcorpus'
+      ]
+      @crudRequests = ['add', 'update', 'destroy']
+      @crudOutcomes = ['Success', 'Fail']
       @notifications = []
       @maxNotifications = 3
+      @listenToEvents()
+
+    listenToEvents: ->
 
       @listenTo Backbone, 'authenticate:fail', @authenticateFail
       @listenTo Backbone, 'authenticate:success', @authenticateSuccess
@@ -31,11 +39,20 @@ define [
       @listenTo Backbone, 'addOLDFormSuccess', @addOLDFormSuccess
 
       @listenTo Backbone, 'updateOLDFormFail', @updateOLDFormFail
-      # TODO: trigger this in views/forms, as appropriate
       @listenTo Backbone, 'updateOLDFormSuccess', @updateOLDFormSuccess
 
       @listenTo Backbone, 'destroyOLDFormFail', @destroyOLDFormFail
       @listenTo Backbone, 'destroyOLDFormSuccess', @destroyOLDFormSuccess
+
+      @listenToCRUDResources()
+
+    listenToCRUDResources: ->
+
+      for resource in @crudResources
+        for request in @crudRequests
+          for outcome in @crudOutcomes
+            event = "#{request}#{@utils.capitalize resource}#{outcome}"
+            @listenTo Backbone, event, @[event]
 
     render: ->
       @$el.html @template()
@@ -57,6 +74,11 @@ define [
       notification.$el.slideUp()
       notification.close()
       @closed notification
+
+
+    ############################################################################
+    # Forms
+    ############################################################################
 
     addOLDFormSuccess: (formModel) ->
       notification = new NotificationView
@@ -102,6 +124,72 @@ define [
         content: "You have successfully deleted the form with id
           #{formModel.get 'id'}."
       @renderNotification notification
+
+
+    ############################################################################
+    # Subcorpora: add, update, & destroy notifications
+    ############################################################################
+
+    addSubcorpusSuccess: (model) -> @addResourceSuccess model, 'subcorpus'
+    addSubcorpusFail: (error) -> @addResourceFail error, 'subcorpus'
+    updateSubcorpusSuccess: (model) -> @updateResourceSuccess model, 'subcorpus'
+    updateSubcorpusFail: (error) -> @updateResourceFail error, 'subcorpus'
+    destroySubcorpusFail: (error) -> @destroyResourceFail error, 'subcorpus'
+    destroySubcorpusSuccess: (model) ->
+      @destroyResourceSuccess model, 'subcorpus'
+
+    ############################################################################
+    # Resources: add, update, & destroy notifications
+    ############################################################################
+
+    addResourceSuccess: (model, resource) ->
+      notification = new NotificationView
+        title: "#{@utils.capitalize resource} created"
+        content: "You have successfully created a new #{resource}. Its id is
+          #{model.get 'id'}."
+      @renderNotification notification
+
+    updateResourceSuccess: (model, resource) ->
+      notification = new NotificationView
+        title: "#{@utils.capitalize resource} updated"
+        content: "You have successfully updated #{resource} #{model.get 'id'}."
+      @renderNotification notification
+
+    addUpdateResourceFail: (error, type, resource) ->
+      if error
+        content = "Your #{resource} #{type} request was unsuccessful. #{error}"
+      else
+        content = "Your #{resource} #{type} request was unsuccessful. See the
+          error message(s) beneath the input fields."
+      notification = new NotificationView
+        title: "#{@utils.capitalize resource} #{type} failed"
+        content: content
+        type: 'error'
+      @renderNotification notification
+
+    addResourceFail: (error, resource) ->
+      @addUpdateResourceFail error, 'creation', resource
+
+    updateResourceFail: (error, resource) ->
+      @addUpdateResourceFail error, 'update', resource
+
+    destroyResourceFail: (error, resource) ->
+      notification = new NotificationView
+        title: "#{@utils.capitalize resource} deletion failed"
+        content: "Your #{resource} deletion request was unsuccessful. #{error}"
+        type: 'error'
+      @renderNotification notification
+
+    destroyResourceSuccess: (model, resource) ->
+      notification = new NotificationView
+        title: "#{@utils.capitalize resource} deleted"
+        content: "You have successfully deleted the #{resource} with id
+          #{model.get 'id'}."
+      @renderNotification notification
+
+
+
+
 
     registerFail: (reason) ->
       notification = new NotificationView

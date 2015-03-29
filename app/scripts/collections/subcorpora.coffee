@@ -58,14 +58,15 @@ define [
             subcorpus.trigger 'addSubcorpusSuccess', subcorpus
           else
             errors = responseJSON.errors or {}
-            subcorpus.trigger 'addSubcorpusFail', errors
+            error = errors.error
+            subcorpus.trigger 'addSubcorpusFail', error
             for attribute, error of errors
               subcorpus.trigger "validationError:#{attribute}", error
             console.log 'POST request to /corpora failed (status not 200) ...'
             console.log errors
         onerror: (responseJSON) =>
           subcorpus.trigger 'addSubcorpusEnd'
-          subcorpus.trigger 'addSubcorpusFail', responseJSON.error
+          subcorpus.trigger 'addSubcorpusFail', responseJSON.error, subcorpus
           console.log 'Error in POST request to /corpora'
       )
 
@@ -81,10 +82,10 @@ define [
           subcorpus.trigger 'updateSubcorpusEnd'
           if xhr.status is 200
             subcorpus.set responseJSON
-            subcorpus.trigger 'updateSubcorpusSuccess', subcorpus
+            subcorpus.trigger 'updateSubcorpusSuccess'
           else
             errors = responseJSON.errors or {}
-            error = responseJSON.error or ''
+            error = responseJSON.error
             subcorpus.trigger 'updateSubcorpusFail', error, subcorpus
             for attribute, error of errors
               subcorpus.trigger "validationError:#{attribute}", error
@@ -92,34 +93,8 @@ define [
             console.log errors
         onerror: (responseJSON) =>
           subcorpus.trigger 'updateSubcorpusEnd'
-          subcorpus.trigger 'updateSubcorpusFail', responseJSON.error
+          subcorpus.trigger 'updateSubcorpusFail', responseJSON.error, subcorpus
           console.log 'Error in PUT request to /corpora'
-      )
-
-    # Destroy an OLD corpus.
-    # DELETE `<OLD_URL>/corpora/<corpus.id>`
-    destroySubcorpus: (subcorpus, options) ->
-      Backbone.trigger 'destroySubcorpusStart'
-      SubcorpusModel.cors.request(
-        method: 'DELETE'
-        url: "#{@getOLDURL()}/corpora/#{subcorpus.get 'id'}"
-        onload: (responseJSON, xhr) =>
-          Backbone.trigger 'destroySubcorpusEnd'
-          if xhr.status is 200
-            @remove subcorpus
-            Backbone.trigger 'destroySubcorpusSuccess', subcorpus
-          else
-            error = responseJSON.error or 'No error message provided.'
-            Backbone.trigger 'destroySubcorpusFail', error
-            console.log "DELETE request to /corpora/#{subcorpus.get 'id'}
-              failed (status not 200)."
-            console.log error
-        onerror: (responseJSON) =>
-          Backbone.trigger 'destroySubcorpusEnd'
-          error = responseJSON.error or 'No error message provided.'
-          Backbone.trigger 'destroySubcorpusFail', error
-          console.log "Error in DELETE request to /corpora/#{subcorpus.get 'id'}
-            (onerror triggered)."
       )
 
     ############################################################################

@@ -202,6 +202,12 @@ define (require) ->
       .toLowerCase()
       .trim()
 
+  capitalize = (string) ->
+    try
+      "#{string[0].toUpperCase()}#{string[1..-1]}"
+    catch
+      string
+
   # Enclose `enclosee` in `start` and `end` characters, only if they're not
   # already there.
   encloseIfNotAlready = (enclosee, start, end) ->
@@ -269,6 +275,7 @@ define (require) ->
   camel2snake: camel2snake
   camel2regular: camel2regular
   camel2hyphen: camel2hyphen
+  capitalize: capitalize
   encloseIfNotAlready: encloseIfNotAlready
   log: log
   getTimestamp: getTimestamp
