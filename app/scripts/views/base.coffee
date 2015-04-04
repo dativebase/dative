@@ -271,6 +271,11 @@ define [
       @$('.add-subcorpus-widget, .update-subcorpus-widget')
         .find(':focus').length > 0
 
+    # Returns true if a resource add or update widget has focus.
+    addUpdateResourceWidgetHasFocus: ->
+      @$('.add-resource-widget, .update-resource-widget')
+        .find(':focus').length > 0
+
     # Fix rounded borders so that adjacently nested rounded borders <divs> don't
     # have a gap between them. This must be done in the JS and not the CSS
     # because Dative can dynamically change the CSS to different jQueryUI

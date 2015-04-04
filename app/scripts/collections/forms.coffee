@@ -159,9 +159,12 @@ define [
     # Return a URL for requesting a page of forms from an OLD web service.
     # GET parameters control pagination and ordering.
     getOLDFormsPaginationURL: (options) ->
-      "#{@getOLDURL()}/forms?\
-        page=#{options.page}&\
-        items_per_page=#{options.itemsPerPage}"
+      if options.page and options.itemsPerPage
+        "#{@getOLDURL()}/forms?\
+          page=#{options.page}&\
+          items_per_page=#{options.itemsPerPage}"
+      else
+        "#{@getOLDURL()}/forms"
 
     # Return a URL for requesting a page of forms from an OLD web service.
     # GET parameters control pagination and ordering.

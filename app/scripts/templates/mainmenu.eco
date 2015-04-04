@@ -56,6 +56,23 @@
         </ul>
     </li>
 
+    <li class='requires-authentication old'><a>Phonologies</a>
+        <ul class='ui-corner-bottom'>
+            <li class='requires-authentication'>
+              <a data-event="request:phonologyAdd">Add</a>
+            </li>
+            <!--
+            <li class='requires-authentication'>
+              <a data-event="request:subcorporaSearch">Search</a>
+            </li>
+            -->
+            <li class='requires-authentication'>
+                <a data-event="request:phonologiesBrowse"
+                   data-shortcut="ctrl+f">Browse</a>
+            </li>
+        </ul>
+    </li>
+
     <!--
     <li><a>Files</a>
         <ul class='ui-corner-bottom'>

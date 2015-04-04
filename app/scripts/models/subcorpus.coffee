@@ -41,6 +41,7 @@ define [
         else null
 
     # This is an example validator for later modification...
+    # TODO: delete this method ...
     validTitle: (value) ->
       error = null
       if (t for t in value when t.transcription.trim()).length is 0

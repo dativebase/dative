@@ -536,13 +536,17 @@ define [
     # `setPaginatorItems` uses this to sync the client-side pagination GUI
     # with the OLD's server-side pagination.
     fetchOLDFormsSuccess: (paginator) ->
+      console.log 'fetch OLD forms successful!'
       @saveFetchedMetadata()
       @getFormViews()
       @setPaginatorItems paginator
+      if @paginator.items is 0 then @fetchOLDFormsLastPage = false
       if @fetchOLDFormsLastPage
+        console.log 'gonna show last page'
         @fetchOLDFormsLastPage = false
         @showLastPage() # This will fetch the last page and re-call `fetchOLDFormsSuccess`
       else
+        console.log 'gonna call refresh page fade'
         @refreshPageFade()
 
     # Tell the paginator how many items/forms are in our corpus/database.
@@ -916,10 +920,13 @@ define [
       @paginator.setPageToLast()
       pageAfter = @paginator.page
       if pageBefore isnt pageAfter
+        console.log 'pageBefore isnt pageAfter'
         if @getActiveServerType() is 'FieldDB'
           @refreshPageFade()
         else
           @fetchOLDFormsPageToCollection()
+      else
+        console.log 'pageBefore IS pageAfter'
 
     # Show a new page where `method` determines whether the new page is
     # behind or ahead of the current one and where `n` is the number of

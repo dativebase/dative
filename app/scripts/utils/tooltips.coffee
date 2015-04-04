@@ -54,6 +54,21 @@ define ['./utils'], (utils) ->
 
     old:
 
+      phonologies:
+
+        name:
+          eng: "A name for the phonology. Each phonology must have a name and
+            it must be unique among phonologies."
+
+        description:
+          eng: "A description of the phonology."
+
+        script:
+          eng: "The FST script that defines the phonology. An ordered set of
+            rewrite rules that conforms to the foma regular
+            expression/rewrite rule syntax. See Hulden (2012) and Beesley and
+            Karttunen (2003)."
+
       subcorpora:
 
         name:

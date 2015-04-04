@@ -1421,3 +1421,15 @@ div.dative-new-item .dative-widget-header-title
   padding: 0.5em;
 }
 
+div.script
+{
+  white-space: pre;
+  overflow-x: scroll;
+}
+
+textarea.script
+{
+  white-space: nowrap;
+  overflow-x: scroll;
+}
+

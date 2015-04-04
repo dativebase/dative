@@ -16,6 +16,7 @@ define [
   './forms-search'
   './forms'
   './subcorpora'
+  './phonologies'
   './corpora'
   './../models/application-settings'
   './../models/form'
@@ -25,7 +26,7 @@ define [
 ], (Backbone, Workspace, BaseView, MainMenuView, ProgressWidgetView,
   NotifierView, LoginDialogView, RegisterDialogView, AlertDialogView,
   HelpDialogView, ApplicationSettingsView, PagesView, HomePageView, FormAddView,
-  FormsSearchView, FormsView, SubcorporaView, CorporaView,
+  FormsSearchView, FormsView, SubcorporaView, PhonologiesView, CorporaView,
   ApplicationSettingsModel, FormModel, ApplicationSettingsCollection, globals,
   appTemplate) ->
 
@@ -75,6 +76,8 @@ define [
       @listenTo @mainMenuView, 'request:formsSearch', @showFormsSearchView
       @listenTo @mainMenuView, 'request:subcorpusAdd', @showNewSubcorpusView
       @listenTo @mainMenuView, 'request:subcorporaBrowse', @showSubcorporaView
+      @listenTo @mainMenuView, 'request:phonologyAdd', @showNewPhonologyView
+      @listenTo @mainMenuView, 'request:phonologiesBrowse', @showPhonologiesView
       @listenTo @mainMenuView, 'request:pages', @showPagesView
 
       @listenTo @router, 'route:home', @showHomePageView
@@ -272,6 +275,35 @@ define [
         @subcorporaView.newSubcorpusViewVisible = true
         @subcorporaView.weShouldFocusFirstAddViewInput = true
       @renderVisibleView taskId
+
+    # Show the page for browsing phonologies AND open up the interface for
+    # creating a new phonology.
+    showNewPhonologyView: ->
+      if not @loggedIn() then return
+      if @phonologiesView and @visibleView is @phonologiesView
+        @visibleView.toggleNewResourceViewAnimate()
+      else
+        @showPhonologiesView showNewPhonologyView: true
+
+    # Show the page for browsing phonologies.
+    showPhonologiesView: (options) ->
+      if not @loggedIn() then return
+      if @phonologiesView and @visibleView is @phonologiesView then return
+      @router.navigate 'phonologies-browse'
+      taskId = @guid()
+      Backbone.trigger 'longTask:register', 'Opening phonologies browse view', taskId
+      @closeVisibleView()
+      if not @phonologiesView
+        @phonologiesView = new PhonologiesView()
+      @visibleView = @phonologiesView
+      # This is relevant if the user is trying to add a new corpus.
+      if options?.showNewPhonologyView
+        @phonologiesView.newResourceViewVisible = true
+        @phonologiesView.weShouldFocusFirstAddViewInput = true
+      @renderVisibleView taskId
+
+
+
 
     # Put out of use for now. Now adding a form is done via the browse
     # interface. See `showFormAddView`.
