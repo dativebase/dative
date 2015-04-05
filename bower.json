@@ -20,7 +20,7 @@
     "autosize": "1.18.17",
     "better-elastic-textarea": "*",
     "spin.js": "*",
-    "perfect-scrollbar": "*",
+    "perfect-scrollbar": "~0.6.1",
     "fielddb": "*",
     "backbone.localStorage": "~1.1.14",
     "superclick": "~1.1.0"
