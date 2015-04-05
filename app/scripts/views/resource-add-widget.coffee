@@ -86,10 +86,14 @@ define [
     listenToEvents: ->
       super
       # Events specific to an OLD backend and the request for the data needed to create a resource.
-      @listenTo Backbone, "getNew#{@resourceNameCapitalized}DataStart", @getNewResourceDataStart
-      @listenTo Backbone, "getNew#{@resourceNameCapitalized}DataEnd", @getNewResourceDataEnd
-      @listenTo Backbone, "getNew#{@resourceNameCapitalized}DataSuccess", @getNewResourceDataSuccess
-      @listenTo Backbone, "getNew#{@resourceNameCapitalized}DataFail", @getNewResourceDataFail
+      @listenTo Backbone, "getNew#{@resourceNameCapitalized}DataStart",
+        @getNewResourceDataStart
+      @listenTo Backbone, "getNew#{@resourceNameCapitalized}DataEnd",
+        @getNewResourceDataEnd
+      @listenTo Backbone, "getNew#{@resourceNameCapitalized}DataSuccess",
+        @getNewResourceDataSuccess
+      @listenTo Backbone, "getNew#{@resourceNameCapitalized}DataFail",
+        @getNewResourceDataFail
 
       @listenTo @model, "add#{@resourceNameCapitalized}Start", @addResourceStart
       @listenTo @model, "add#{@resourceNameCapitalized}End", @addResourceEnd
@@ -320,13 +324,13 @@ define [
     # Returns true of `globals` has a key for `resourceData`. The value of
     # this key is an object containing a subset of the following keys:
     # `form_searches`, `users`, `tags`, and `corpus_formats`.
-    weHaveNewResourceData: -> globals.resourceData?
+    weHaveNewResourceData: -> globals["#{@resourceName}Data"]?
 
     # Return an object representing the options for forced-choice inputs.
     # Currently only relevant for the OLD.
     getOptions: ->
-      if globals.resourceData
-        globals.resourceData
+      if globals["#{@resourceName}Data"]
+        globals["#{@resourceName}Data"]
       else
         {}
 
@@ -335,8 +339,11 @@ define [
     getNewResourceDataEnd: -> @stopSpin()
 
     getNewResourceDataSuccess: (data) ->
-      globals.resourceData = data
+      @storeOptionsDataGlobally data
       @render()
+
+    storeOptionsDataGlobally: (data) ->
+      globals["#{@resourceName}Data"] = data
 
     getNewResourceDataFail: ->
       console.log "Failed to retrieve the data from the OLD server which is

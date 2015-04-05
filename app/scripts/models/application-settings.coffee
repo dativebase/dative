@@ -459,6 +459,21 @@ define [
         primaryDataLabelsVisible: true
         allFormsExpanded: false
 
+      subcorporaDisplaySettings:
+        itemsPerPage: 10
+        primaryDataLabelsVisible: true
+        allSubcorporaExpanded: false
+
+      phonologiesDisplaySettings:
+        itemsPerPage: 3
+        primaryDataLabelsVisible: true
+        allPhonologiesExpanded: false
+
+      morphologiesDisplaySettings:
+        itemsPerPage: 3
+        primaryDataLabelsVisible: true
+        allMorphologiesExpanded: false
+
       activeJQueryUITheme: 'cupertino'
       defaultJQueryUITheme: 'cupertino'
       jQueryUIThemes: [

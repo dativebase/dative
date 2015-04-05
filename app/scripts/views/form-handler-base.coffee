@@ -84,5 +84,6 @@ define [
       tooltipGenerator(
         language: 'eng' # TODO: make 'eng' configurable
         value: value
+        resourceName: @resource
       )
 

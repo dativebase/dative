@@ -509,11 +509,11 @@ define [
       @getResourceViews()
       if paginator then @setPaginatorItems paginator
       if @paginator.items is 0 then @fetchResourcesLastPage = false
-      pageBefore = @paginator.page
-      @paginator.setPageToLast()
-      pageAfter = @paginator.page
-      if pageBefore isnt pageAfter
-        if @fetchResourcesLastPage
+      if @fetchResourcesLastPage
+        pageBefore = @paginator.page
+        @paginator.setPageToLast()
+        pageAfter = @paginator.page
+        if pageBefore isnt pageAfter
           @fetchResourcesLastPage = false
           @fetchResourcesPageToCollection()
         else
@@ -832,6 +832,8 @@ define [
     ############################################################################
 
     changeItemsPerPage: (newItemsPerPage) ->
+      # TODO: have the App view listen for this event and persist these
+      # application settings, as it does with forms.
       Backbone.trigger "#{@resourceNamePlural}View:itemsPerPageChange",
         newItemsPerPage
       @itemsPerPage = newItemsPerPage

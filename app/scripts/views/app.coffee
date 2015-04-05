@@ -17,6 +17,7 @@ define [
   './forms'
   './subcorpora'
   './phonologies'
+  './morphologies'
   './corpora'
   './../models/application-settings'
   './../models/form'
@@ -26,9 +27,9 @@ define [
 ], (Backbone, Workspace, BaseView, MainMenuView, ProgressWidgetView,
   NotifierView, LoginDialogView, RegisterDialogView, AlertDialogView,
   HelpDialogView, ApplicationSettingsView, PagesView, HomePageView, FormAddView,
-  FormsSearchView, FormsView, SubcorporaView, PhonologiesView, CorporaView,
-  ApplicationSettingsModel, FormModel, ApplicationSettingsCollection, globals,
-  appTemplate) ->
+  FormsSearchView, FormsView, SubcorporaView, PhonologiesView,
+  MorphologiesView, CorporaView, ApplicationSettingsModel, FormModel,
+  ApplicationSettingsCollection, globals, appTemplate) ->
 
   # App View
   # --------
@@ -54,6 +55,12 @@ define [
       Backbone.history.start()
       @showHomePageView()
 
+    resources: [
+      'subcorpus'
+      'phonology'
+      'morphology'
+    ]
+
     events:
       'click': 'bodyClicked'
 
@@ -78,6 +85,8 @@ define [
       @listenTo @mainMenuView, 'request:subcorporaBrowse', @showSubcorporaView
       @listenTo @mainMenuView, 'request:phonologyAdd', @showNewPhonologyView
       @listenTo @mainMenuView, 'request:phonologiesBrowse', @showPhonologiesView
+      @listenTo @mainMenuView, 'request:morphologyAdd', @showNewMorphologyView
+      @listenTo @mainMenuView, 'request:morphologiesBrowse', @showMorphologiesView
       @listenTo @mainMenuView, 'request:pages', @showPagesView
 
       @listenTo @router, 'route:home', @showHomePageView
@@ -96,11 +105,33 @@ define [
       @listenTo Backbone, 'logout:success', @logoutSuccess
       @listenTo Backbone, 'useFieldDBCorpus', @useFieldDBCorpus
       @listenTo Backbone, 'applicationSettings:changeTheme', @changeTheme
+
       @listenTo Backbone, 'formsView:expandAllForms', @setAllFormsExpanded
       @listenTo Backbone, 'formsView:collapseAllForms', @setAllFormsCollapsed
-      @listenTo Backbone, 'formsView:itemsPerPageChange', @setItemsPerPage
-      @listenTo Backbone, 'formsView:hideAllLabels', @setPrimaryDataLabelsHidden
-      @listenTo Backbone, 'formsView:showAllLabels', @setPrimaryDataLabelsVisible
+      @listenTo Backbone, 'formsView:itemsPerPageChange', @setFormsItemsPerPage
+      @listenTo Backbone, 'formsView:hideAllLabels', @setFormsPrimaryDataLabelsHidden
+      @listenTo Backbone, 'formsView:showAllLabels', @setFormsPrimaryDataLabelsVisible
+
+      @listenToResources()
+
+    # TODO/QUESTION: why not just listen on the resources subclass instead of
+    # on Backbone with all of this complex naming stuff?
+    listenToResources: ->
+      for resource in @resources
+        resourcePlural = @utils.pluralize resource
+        resourcePluralCapitalized = @utils.capitalize resourcePlural
+        @listenTo Backbone,
+          "#{resourcePlural}View:expandAll#{resourcePluralCapitalized}",
+          @["setAll#{resourcePluralCapitalized}Expanded"]
+        @listenTo Backbone,
+          "#{resourcePlural}View:collapseAll#{resourcePluralCapitalized}",
+          @["setAll#{resourcePluralCapitalized}Collapsed"]
+        @listenTo Backbone, "#{resourcePlural}View:itemsPerPageChange",
+          @["set#{resourcePluralCapitalized}ItemsPerPage"]
+        @listenTo Backbone, "#{resourcePlural}View:hideAllLabels",
+          @["set#{resourcePluralCapitalized}PrimaryDataLabelsHidden"]
+        @listenTo Backbone, "#{resourcePlural}View:showAllLabels",
+          @["set#{resourcePluralCapitalized}PrimaryDataLabelsVisible"]
 
     initializePersistentSubviews: ->
       @mainMenuView = new MainMenuView model: @applicationSettings
@@ -302,8 +333,31 @@ define [
         @phonologiesView.weShouldFocusFirstAddViewInput = true
       @renderVisibleView taskId
 
+    # Show the page for browsing morphologies AND open up the interface for
+    # creating a new morphology.
+    showNewMorphologyView: ->
+      if not @loggedIn() then return
+      if @morphologiesView and @visibleView is @morphologiesView
+        @visibleView.toggleNewResourceViewAnimate()
+      else
+        @showMorphologiesView showNewMorphologyView: true
 
-
+    # Show the page for browsing morphologies.
+    showMorphologiesView: (options) ->
+      if not @loggedIn() then return
+      if @morphologiesView and @visibleView is @morphologiesView then return
+      @router.navigate 'morphologies-browse'
+      taskId = @guid()
+      Backbone.trigger 'longTask:register', 'Opening morphologies browse view', taskId
+      @closeVisibleView()
+      if not @morphologiesView
+        @morphologiesView = new MorphologiesView()
+      @visibleView = @morphologiesView
+      # This is relevant if the user is trying to add a new corpus.
+      if options?.showNewMorphologyView
+        @morphologiesView.newResourceViewVisible = true
+        @morphologiesView.weShouldFocusFirstAddViewInput = true
+      @renderVisibleView taskId
 
     # Put out of use for now. Now adding a form is done via the browse
     # interface. See `showFormAddView`.
@@ -570,14 +624,93 @@ define [
       @changeFormsDisplaySetting 'allFormsExpanded', false
 
     # Persist the new "items per page" to app settings.
-    setItemsPerPage: (newItemsPerPage) ->
+    setFormsItemsPerPage: (newItemsPerPage) ->
       @changeFormsDisplaySetting 'itemsPerPage', newItemsPerPage
 
     # Set app settings' "primary data labels visible" to false.
-    setPrimaryDataLabelsHidden: ->
+    setFormsPrimaryDataLabelsHidden: ->
       @changeFormsDisplaySetting 'primaryDataLabelsVisible', false
 
     # Set app settings' "primary data labels visible" to true.
-    setPrimaryDataLabelsVisible: ->
+    setFormsPrimaryDataLabelsVisible: ->
       @changeFormsDisplaySetting 'primaryDataLabelsVisible', true
 
+
+    # Change `attribute` to `value` in
+    # applicationSettings.`resource`DisplaySettings.
+    changeDisplaySetting: (resource, attribute, value) ->
+      try
+        displaySettings = @applicationSettings.get "#{resource}DisplaySettings"
+        displaySettings[attribute] = value
+        @applicationSettings.save "#{resource}DisplaySettings", displaySettings
+
+    # Phonologies Settings
+    ############################################################################
+
+    # Set app settings' "all phonologies expanded" to true.
+    setAllPhonologiesExpanded: ->
+      @changeDisplaySetting 'phonologies', 'allPhonologiesExpanded', true
+
+    # Set app settings' "all phonologies expanded" to false.
+    setAllPhonologiesCollapsed: ->
+      @changeDisplaySetting 'phonologies', 'allPhonologiesExpanded', false
+
+    # Persist the new "items per page" to app settings.
+    setPhonologiesItemsPerPage: (newItemsPerPage) ->
+      @changeDisplaySetting 'phonologies', 'itemsPerPage', newItemsPerPage
+
+    # Set app settings' "primary data labels visible" to false.
+    setPhonologiesPrimaryDataLabelsHidden: ->
+      @changeDisplaySetting 'phonologies', 'primaryDataLabelsVisible', false
+
+    # Set app settings' "primary data labels visible" to true.
+    setPhonologiesPrimaryDataLabelsVisible: ->
+      @changeDisplaySetting 'phonologies', 'primaryDataLabelsVisible', true
+
+
+    # Subcorpora Settings
+    ############################################################################
+
+    # Set app settings' "all subcorpora expanded" to true.
+    setAllSubcorporaExpanded: ->
+      @changeDisplaySetting 'subcorpora', 'allSubcorporaExpanded', true
+
+    # Set app settings' "all subcorpora expanded" to false.
+    setAllSubcorporaCollapsed: ->
+      @changeDisplaySetting 'subcorpora', 'allSubcorporaExpanded', false
+
+    # Persist the new "items per page" to app settings.
+    setSubcorporaItemsPerPage: (newItemsPerPage) ->
+      @changeDisplaySetting 'subcorpora', 'itemsPerPage', newItemsPerPage
+
+    # Set app settings' "primary data labels visible" to false.
+    setSubcorporaPrimaryDataLabelsHidden: ->
+      @changeDisplaySetting 'subcorpora', 'primaryDataLabelsVisible', false
+
+    # Set app settings' "primary data labels visible" to true.
+    setSubcorporaPrimaryDataLabelsVisible: ->
+      @changeDisplaySetting 'subcorpora', 'primaryDataLabelsVisible', true
+
+
+    # Morphologies Settings
+    ############################################################################
+
+    # Set app settings' "all morphologies expanded" to true.
+    setAllMorphologiesExpanded: ->
+      @changeDisplaySetting 'morphologies', 'allMorphologiesExpanded', true
+
+    # Set app settings' "all morphologies expanded" to false.
+    setAllMorphologiesCollapsed: ->
+      @changeDisplaySetting 'morphologies', 'allMorphologiesExpanded', false
+
+    # Persist the new "items per page" to app settings.
+    setMorphologiesItemsPerPage: (newItemsPerPage) ->
+      @changeDisplaySetting 'morphologies', 'itemsPerPage', newItemsPerPage
+
+    # Set app settings' "primary data labels visible" to false.
+    setMorphologiesPrimaryDataLabelsHidden: ->
+      @changeDisplaySetting 'morphologies', 'primaryDataLabelsVisible', false
+
+    # Set app settings' "primary data labels visible" to true.
+    setMorphologiesPrimaryDataLabelsVisible: ->
+      @changeDisplaySetting 'morphologies', 'primaryDataLabelsVisible', true

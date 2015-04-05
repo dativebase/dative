@@ -17,6 +17,8 @@ define [
 
       @crudResources = [
         'subcorpus'
+        'phonology'
+        'morphology'
       ]
       @crudRequests = ['add', 'update', 'destroy']
       @crudOutcomes = ['Success', 'Fail']
@@ -137,6 +139,30 @@ define [
     destroySubcorpusFail: (error) -> @destroyResourceFail error, 'subcorpus'
     destroySubcorpusSuccess: (model) ->
       @destroyResourceSuccess model, 'subcorpus'
+
+    ############################################################################
+    # Phonologies: add, update, & destroy notifications
+    ############################################################################
+
+    addPhonologySuccess: (model) -> @addResourceSuccess model, 'phonology'
+    addPhonologyFail: (error) -> @addResourceFail error, 'phonology'
+    updatePhonologySuccess: (model) -> @updateResourceSuccess model, 'phonology'
+    updatePhonologyFail: (error) -> @updateResourceFail error, 'phonology'
+    destroyPhonologyFail: (error) -> @destroyResourceFail error, 'phonology'
+    destroyPhonologySuccess: (model) ->
+      @destroyResourceSuccess model, 'phonology'
+
+    ############################################################################
+    # Morphologies: add, update, & destroy notifications
+    ############################################################################
+
+    addMorphologySuccess: (model) -> @addResourceSuccess model, 'morphology'
+    addMorphologyFail: (error) -> @addResourceFail error, 'morphology'
+    updateMorphologySuccess: (model) -> @updateResourceSuccess model, 'morphology'
+    updateMorphologyFail: (error) -> @updateResourceFail error, 'morphology'
+    destroyMorphologyFail: (error) -> @destroyResourceFail error, 'morphology'
+    destroyMorphologySuccess: (model) ->
+      @destroyResourceSuccess model, 'morphology'
 
     ############################################################################
     # Resources: add, update, & destroy notifications

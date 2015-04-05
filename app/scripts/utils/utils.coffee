@@ -62,12 +62,14 @@ define (require) ->
   integerWithCommas = (integer) ->
     integer.toString().replace /\B(?=(\d{3})+(?!\d))/g, ','
 
-  # Singularize a string by cutting of its last character (REALLY stupid).
-  singularize = (string) ->
+  singularize = (noun) ->
     try
-      string[...-1]
+      if endsWith(noun, 'ies')
+        "#{noun[0..-4]}y"
+      else
+        noun[...-1]
     catch
-      string
+      noun
 
   pluralize = (noun) ->
     if endsWith noun, 'y'
