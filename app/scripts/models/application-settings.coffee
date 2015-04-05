@@ -401,7 +401,7 @@ define [
 
       server1 =
         id: @guid()
-        name: 'FieldDB Local Development'
+        name: FieldDB.FieldDBObject.application.brand + ' Localhost'
         type: 'FieldDB'
         url: 'https://localhost:3183'
         serverCode: 'localhost'
@@ -417,9 +417,9 @@ define [
 
       server3 =
         id: @guid()
-        name: 'FieldDB'
+        name: FieldDB.FieldDBObject.application.brand
         type: 'FieldDB'
-        url: 'https://auth.lingsync.org'
+        url: FieldDB.Database.prototype.BASE_AUTH_URL
         serverCode: 'production'
         corpusServerURL: null
 
