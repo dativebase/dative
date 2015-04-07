@@ -1,7 +1,7 @@
 define [
   './resources'
   './../models/morphology'
-], (ResourcesCollection, morphologyModel) ->
+], (ResourcesCollection, MorphologyModel) ->
 
   # Morphologies Collection
   # -----------------------
@@ -11,5 +11,5 @@ define [
   class MorphologiesCollection extends ResourcesCollection
 
     resourceName: 'morphology'
-    model: morphologyModel
+    model: MorphologyModel
 

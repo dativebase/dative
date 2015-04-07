@@ -53,15 +53,15 @@ define [
           else
             reason = responseJSON.reason or 'unknown'
             Backbone.trigger "fetch#{@resourceNamePluralCapitalized}Fail",
-              "failed to fetch all #{@resourceNamePlural}; reason:
+              "failed to fetch all #{@getServerSideResourceName()}; reason:
                 #{reason}"
-            console.log "GET request to /#{@resourceNamePlural} failed; reason:
+            console.log "GET request to /#{@getServerSideResourceName()} failed; reason:
               #{reason}"
         onerror: (responseJSON) =>
           Backbone.trigger "fetch#{@resourceNamePluralCapitalized}End"
           Backbone.trigger "fetch#{@resourceNamePluralCapitalized}Fail",
-            "error in fetching #{@resourceNamePlural}"
-          console.log "Error in GET request to /#{@resourceNamePlural}"
+            "error in fetching #{@getServerSideResourceName()}"
+          console.log "Error in GET request to /#{@getServerSideResourceName()}"
       )
 
     # Add (create) a resource.
@@ -70,7 +70,7 @@ define [
       resource.trigger "add#{@resourceNameCapitalized}Start"
       @model.cors.request(
         method: 'POST'
-        url: "#{@getOLDURL()}/#{@resourceNamePlural}"
+        url: "#{@getOLDURL()}/#{@getServerSideResourceName()}"
         payload: resource.toOLD()
         onload: (responseJSON, xhr) =>
           resource.trigger "add#{@resourceNameCapitalized}End"
@@ -83,14 +83,14 @@ define [
             resource.trigger "add#{@resourceNameCapitalized}Fail", error
             for attribute, error of errors
               resource.trigger "validationError:#{attribute}", error
-            console.log "POST request to /#{@resourceNamePlural} failed (status
+            console.log "POST request to /#{@getServerSideResourceName()} failed (status
               not 200) ..."
             console.log errors
         onerror: (responseJSON) =>
           resource.trigger "add#{@resourceNameCapitalized}End"
           resource.trigger "add#{@resourceNameCapitalized}Fail",
             responseJSON.error, resource
-          console.log "Error in POST request to /#{@resourceNamePlural}"
+          console.log "Error in POST request to /#{@getServerSideResourceName()}"
       )
 
     # Update a resource.
@@ -99,7 +99,7 @@ define [
       resource.trigger "update#{@resourceNameCapitalized}Start"
       @model.cors.request(
         method: 'PUT'
-        url: "#{@getOLDURL()}/#{@resourceNamePlural}/#{resource.get 'id'}"
+        url: "#{@getOLDURL()}/#{@getServerSideResourceName()}/#{resource.get 'id'}"
         payload: resource.toOLD()
         onload: (responseJSON, xhr) =>
           resource.trigger "update#{@resourceNameCapitalized}End"
@@ -112,14 +112,14 @@ define [
             resource.trigger "update#{@resourceNameCapitalized}Fail", error, resource
             for attribute, error of errors
               resource.trigger "validationError:#{attribute}", error
-            console.log "PUT request to /#{@resourceNamePlural} failed (status
+            console.log "PUT request to /#{@getServerSideResourceName()} failed (status
               not 200) ..."
             console.log errors
         onerror: (responseJSON) =>
           resource.trigger "update#{@resourceNameCapitalized}End"
           resource.trigger "update#{@resourceNameCapitalized}Fail", responseJSON.error,
             resource
-          console.log "Error in PUT request to /#{@resourceNamePlural}"
+          console.log "Error in PUT request to /#{@getServerSideResourceName()}"
       )
 
     ############################################################################
@@ -129,17 +129,23 @@ define [
     getOLDURL: ->
       globals.applicationSettings.get('activeServer').get 'url'
 
-    # Return a URL for requesting a page of <resource_name_plural> from an OLD web service.
-    # GET parameters control pagination and ordering.
+    # The default is to just use the plural form of the resource name as the
+    # server-side name for the resource; however, this can be overridden with
+    # `@serverSideResourceName`, as is necessary with "subcorpora"/"corpora".
+    getServerSideResourceName: ->
+      @serverSideResourceName or @resourceNamePlural
+
+    # Return a URL for requesting a page of <resource_name_plural> from an OLD
+    # web service. GET parameters control pagination and ordering.
     # Note: other possible parameters: `order_by_model`, `order_by_attribute`,
     # and `order_by_direction`.
     getResourcesPaginationURL: (options) ->
       if options.page and options.itemsPerPage
-        "#{@getOLDURL()}/#{@resourceNamePlural}?\
+        "#{@getOLDURL()}/#{@getServerSideResourceName()}?\
           page=#{options.page}&\
           items_per_page=#{options.itemsPerPage}"
       else
-        "#{@getOLDURL()}/#{@resourceNamePlural}"
+        "#{@getOLDURL()}/#{@getServerSideResourceName()}"
 
     # Return an array of `@model` instances built from OLD objects.
     getDativeResourceModelsFromOLDObjects: (responseJSON) ->

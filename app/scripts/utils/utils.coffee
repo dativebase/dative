@@ -74,13 +74,13 @@ define (require) ->
   pluralize = (noun) ->
     if endsWith noun, 'y'
       "#{noun[...-1]}ies"
+    else if endsWith noun, 'us' # "corpus/corpora"
+      "#{noun[...-2]}ora"
     else if endsWith(noun, 'z') or
     endsWith(noun, 's') or
     endsWith(noun, 'sh') or
     endsWith(noun, 'ch')
       "#{noun}es"
-    else if endsWith noun, 'us' # "corpus/corpora"
-      "#{noun}ora"
     else
       "#{noun}s"
 

@@ -95,6 +95,13 @@ define [
 
     getOLDURL: -> globals.applicationSettings.get('activeServer').get 'url'
 
+    # The default is to just use the plural form of the resource name as the
+    # server-side name for the resource; however, this can be overridden with
+    # `@serverSideResourceName`, as is necessary with OLD "corpora" which are
+    # called "subcorpora" in Dative.
+    getServerSideResourceName: ->
+      @serverSideResourceName or @resourceNamePlural
+
     # Issue a GET request to /<resource_name_plural>/new on the active OLD
     # server. In the OLD API, this type of request returns a JSON object
     # containing the data necessary to create a new OLD resource.
@@ -102,7 +109,7 @@ define [
       Backbone.trigger "getNew#{@resourceNameCapitalized}DataStart"
       @constructor.cors.request(
         method: 'GET'
-        url: "#{@getOLDURL()}/#{@resourceNamePlural}/new"
+        url: "#{@getOLDURL()}/#{@getServerSideResourceName()}/new"
         onload: (responseJSON, xhr) =>
           Backbone.trigger "getNew#{@resourceNameCapitalized}DataEnd"
           if xhr.status is 200
@@ -111,13 +118,13 @@ define [
           else
             Backbone.trigger "getNew#{@resourceNameCapitalized}DataSuccess",
               "Failed in fetching the data required to create new
-                #{@resourceNamePlural}."
+                #{@getServerSideResourceName()}."
         onerror: (responseJSON) =>
           Backbone.trigger "getNew#{@resourceNameCapitalized}DataEnd"
           Backbone.trigger "getNew#{@resourceNameCapitalized}DataFail",
-            "Error in GET request to OLD server for /#{@resourceNamePlural}/new"
+            "Error in GET request to OLD server for /#{@getServerSideResourceName()}/new"
           console.log "Error in GET request to OLD server for
-            /#{@resourceNamePlural}/new")
+            /#{@getServerSideResourceName()}/new")
 
     # Destroy a resource.
     # DELETE `<URL>/<resource_name_plural>/<resource.id>`
@@ -125,7 +132,7 @@ define [
       Backbone.trigger "destroy#{@resourceNameCapitalized}Start"
       @constructor.cors.request(
         method: 'DELETE'
-        url: "#{@getOLDURL()}/#{@resourceNamePlural}/#{@get 'id'}"
+        url: "#{@getOLDURL()}/#{@getServerSideResourceName()}/#{@get 'id'}"
         onload: (responseJSON, xhr) =>
           Backbone.trigger "destroy#{@resourceNameCapitalized}End"
           if xhr.status is 200
@@ -133,7 +140,7 @@ define [
           else
             error = responseJSON.error or 'No error message provided.'
             Backbone.trigger "destroy#{@resourceNameCapitalized}Fail", error
-            console.log "DELETE request to /#{@resourceNamePlural}/#{@get 'id'}
+            console.log "DELETE request to /#{@getServerSideResourceName()}/#{@get 'id'}
               failed (status not 200)."
             console.log error
         onerror: (responseJSON) =>
@@ -141,6 +148,6 @@ define [
           error = responseJSON.error or 'No error message provided.'
           Backbone.trigger "destroy#{@resourceNameCapitalized}Fail", error
           console.log "Error in DELETE request to
-            /#{@resourceNamePlural}/#{@get 'id'} (onerror triggered)."
+            /#{@getServerSideResourceName()}/#{@get 'id'} (onerror triggered)."
       )
 

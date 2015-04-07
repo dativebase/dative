@@ -1,7 +1,4 @@
-define [
-    './../utils/globals'
-    './base'
-  ], (globals, BaseModel) ->
+define ['./resource'], (ResourceModel) ->
 
   # Subcorpus Model
   # ---------------
@@ -12,60 +9,30 @@ define [
   # equivalent in the FieldDB data structure. They are called "subcorpora"
   # because the term "corpora" is used for FieldDB corpora, which are different.
 
-  class SubcorpusModel extends BaseModel
+  class SubcorpusModel extends ResourceModel
 
-    initialize: (options) ->
-      if options?.collection then @collection = options.collection
-      @activeServerType = @getActiveServerType()
-      super options
+    resourceName: 'subcorpus'
 
-    url: 'fakeurl' # Backbone throws 'A "url" property or function must be
-                   # specified' if this is not present.
+    # When requesting from the OLD, we need to request 'corpora', not
+    # 'subcorpora', hence this attribute.
+    serverSideResourceName: 'corpora'
 
-    getActiveServerType: ->
-      globals.applicationSettings.get('activeServer').get 'type'
-
-    validate: (attributes, options) ->
-      attributes = attributes or @attributes
-      errors = {}
-      for attribute, value of attributes
-        attributeValidator = @getValidator attribute
-        if attributeValidator
-          error = attributeValidator.apply @, [value]
-          if error then errors[attribute] = error
-      if _.isEmpty errors then undefined else errors
-
-    getValidator: (attribute) ->
-      switch attribute
-        when 'name' then @requiredString
-        else null
-
-    # This is an example validator for later modification...
-    # TODO: delete this method ...
-    validTitle: (value) ->
-      error = null
-      if (t for t in value when t.transcription.trim()).length is 0
-        error = 'Please enter one or more translations'
-      error
+    editableAttributes: [
+      'name'
+      'description'
+      'content'
+      'tags'
+      'form_search'
+    ]
 
     manyToOneAttributes: ['form_search']
 
     manyToManyAttributes: ['tags']
 
-    # Return a representation of the model's state that the OLD likes: i.e.,
-    # with relational values as ids or arrays thereof.
-    toOLD: ->
-      result = _.clone @attributes
-      # Not doing this causes a `RangeError: Maximum call stack size exceeded`
-      # when cors.coffee tries to call `JSON.stringify` on a subcorpus model that
-      # contains a subcorpora collection that contains that same subcorpus model,
-      # etc. ad infinitum.
-      delete result.collection
-      for attribute in @manyToOneAttributes
-        result[attribute] = result[attribute]?.id or null
-      for attribute in @manyToManyAttributes
-        result[attribute] = (v.id for v in result[attribute] or [])
-      result
+    getValidator: (attribute) ->
+      switch attribute
+        when 'name' then @requiredString
+        else null
 
     ############################################################################
     # Subcorpus Schema
@@ -106,64 +73,4 @@ define [
       files: []             # an array of objects (attributes: `id`, `name`,
                             # `filename`, `MIME_type`, `size`, `url`,
                             # `lossy_filename`)
-
-    # Returns `true` if the model is empty.
-    isEmpty: ->
-      attributes = _.clone @attributes
-      delete attributes.collection
-      _.isEqual @defaults(), attributes
-
-    getOLDURL: -> globals.applicationSettings.get('activeServer').get 'url'
-
-    # Issue a GET request to /corpora/new on the active OLD server.
-    # This returns a JSON object containing the data necessary to
-    # create a new OLD corpus, an object with a subset of the following keys:
-    # `form_searches`, `users`, `tags`, and `corpus_formats`. See:
-    # - https://github.com/jrwdunham/old/blob/master/onlinelinguisticdatabase/controllers/corpora.py#L174
-    # - https://github.com/jrwdunham/old/blob/master/onlinelinguisticdatabase/controllers/corpora.py#L740-L754
-    # Note: `corpus_formats` is a dict (object) with attributes `treebank` and `transcriptions only`. See
-    # - https://github.com/jrwdunham/old/blob/master/onlinelinguisticdatabase/lib/utils.py#L1428-L1439
-    getNewSubcorpusData: ->
-      Backbone.trigger 'getNewSubcorpusDataStart'
-      SubcorpusModel.cors.request(
-        method: 'GET'
-        url: "#{@getOLDURL()}/corpora/new"
-        onload: (responseJSON) =>
-          Backbone.trigger 'getNewSubcorpusDataEnd'
-          Backbone.trigger 'getNewSubcorpusDataSuccess', responseJSON
-          # TODO: trigger FAIL event if appropriate (how do we know?)
-          # We know because the `xhr.status` will not be 200.
-          # Backbone.trigger 'getNewSubcorpusDataFail',
-          #     "Failed in fetching the data."
-        onerror: (responseJSON) =>
-          Backbone.trigger 'getNewSubcorpusDataEnd'
-          Backbone.trigger 'getNewSubcorpusDataFail',
-            'Error in GET request to OLD server for /corpora/new'
-          console.log 'Error in GET request to OLD server for /corpora/new'
-      )
-
-    # Destroy an OLD corpus.
-    # DELETE `<OLD_URL>/corpora/<corpus.id>`
-    destroySubcorpus: (options) ->
-      Backbone.trigger 'destroySubcorpusStart'
-      SubcorpusModel.cors.request(
-        method: 'DELETE'
-        url: "#{@getOLDURL()}/corpora/#{@get 'id'}"
-        onload: (responseJSON, xhr) =>
-          Backbone.trigger 'destroySubcorpusEnd'
-          if xhr.status is 200
-            Backbone.trigger 'destroySubcorpusSuccess', @
-          else
-            error = responseJSON.error or 'No error message provided.'
-            Backbone.trigger 'destroySubcorpusFail', error
-            console.log "DELETE request to /corpora/#{@get 'id'}
-              failed (status not 200)."
-            console.log error
-        onerror: (responseJSON) =>
-          Backbone.trigger 'destroySubcorpusEnd'
-          error = responseJSON.error or 'No error message provided.'
-          Backbone.trigger 'destroySubcorpusFail', error
-          console.log "Error in DELETE request to /corpora/#{@get 'id'}
-            (onerror triggered)."
-      )
 
