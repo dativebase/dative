@@ -62,17 +62,24 @@ define (require) ->
   integerWithCommas = (integer) ->
     integer.toString().replace /\B(?=(\d{3})+(?!\d))/g, ','
 
-  # Singularize a string by cutting of its last character (REALLY stupid).
-  singularize = (string) ->
+  singularize = (noun) ->
     try
-      string[...-1]
+      if endsWith(noun, 'ies')
+        "#{noun[0..-4]}y"
+      else
+        noun[...-1]
     catch
-      string
+      noun
 
   pluralize = (noun) ->
     if endsWith noun, 'y'
       "#{noun[...-1]}ies"
-    else if endsWith(noun, 'z') or endsWith(noun, 's') or endsWith(noun, 'sh')
+    else if endsWith noun, 'us' # "corpus/corpora"
+      "#{noun[...-2]}ora"
+    else if endsWith(noun, 'z') or
+    endsWith(noun, 's') or
+    endsWith(noun, 'sh') or
+    endsWith(noun, 'ch')
       "#{noun}es"
     else
       "#{noun}s"
@@ -197,6 +204,12 @@ define (require) ->
       .toLowerCase()
       .trim()
 
+  capitalize = (string) ->
+    try
+      "#{string[0].toUpperCase()}#{string[1..-1]}"
+    catch
+      string
+
   # Enclose `enclosee` in `start` and `end` characters, only if they're not
   # already there.
   encloseIfNotAlready = (enclosee, start, end) ->
@@ -217,6 +230,31 @@ define (require) ->
   smallCapsAcronyms = (string) ->
     string.replace(/([A-Z]{2,})/g, (match, $1) ->
       "<span class='small-caps'>#{$1.toLowerCase()}</span>")
+
+  isoDateRegex = /^\d{4}-\d{2}-\d{2}$/
+
+  # Convert a date like "2015-03-16" to "03/16/2015". Note that the OLD
+  # accepts dates in the latter format (because of how Pylons' FormEncode
+  # validation works), but returns them in the former (ISO 8601) format.
+  convertDateISO2mdySlash = (date) ->
+    if isoDateRegex.test date
+      [year, month, day] = date.split '-'
+      "#{month}/#{day}/#{year}"
+    else
+      date
+
+  # See http://stackoverflow.com/questions/985272/selecting-text-in-an-element-akin-to-highlighting-with-your-mouse
+  selectText = (element) ->
+    if document.body.createTextRange
+      range = document.body.createTextRange()
+      range.moveToElementText element
+      range.select()
+    else if window.getSelection
+      selection = window.getSelection()
+      range = document.createRange()
+      range.selectNodeContents element
+      selection.removeAllRanges()
+      selection.addRange range
 
   clone: clone
   type: type
@@ -239,8 +277,11 @@ define (require) ->
   camel2snake: camel2snake
   camel2regular: camel2regular
   camel2hyphen: camel2hyphen
+  capitalize: capitalize
   encloseIfNotAlready: encloseIfNotAlready
   log: log
   getTimestamp: getTimestamp
   smallCapsAcronyms: smallCapsAcronyms
+  convertDateISO2mdySlash: convertDateISO2mdySlash
+  selectText: selectText
 

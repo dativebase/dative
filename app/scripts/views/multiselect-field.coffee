@@ -36,3 +36,6 @@ define [
         sortByAttribute: @sortByAttribute
       )
 
+    getValueFromDOM: ->
+      @getValueFromArrayOfRelationalIdsFromDOM super
+

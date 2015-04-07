@@ -455,9 +455,24 @@ define [
       activeFieldDBCorpusTitle: null
 
       formsDisplaySettings:
-        itemsPerPage: 10
-        primaryDataLabelsVisible: false
+        itemsPerPage: 5
+        primaryDataLabelsVisible: true
         allFormsExpanded: false
+
+      subcorporaDisplaySettings:
+        itemsPerPage: 10
+        primaryDataLabelsVisible: true
+        allSubcorporaExpanded: false
+
+      phonologiesDisplaySettings:
+        itemsPerPage: 3
+        primaryDataLabelsVisible: true
+        allPhonologiesExpanded: false
+
+      morphologiesDisplaySettings:
+        itemsPerPage: 3
+        primaryDataLabelsVisible: true
+        allMorphologiesExpanded: false
 
       activeJQueryUITheme: 'cupertino'
       defaultJQueryUITheme: 'cupertino'

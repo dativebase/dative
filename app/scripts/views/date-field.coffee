@@ -14,3 +14,8 @@ define [
     getInputView: ->
       new DateInputView @context
 
+    getContext: ->
+      context = super
+      # context.value = @utils.convertDateISO2mdySlash context.value
+      context
+

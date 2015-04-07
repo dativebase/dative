@@ -43,3 +43,9 @@ define [
       result[@context.attribute] = value
       result
 
+    disable: ->
+      @disableMultiSelects()
+
+    enable: ->
+      @enableMultiSelects()
+

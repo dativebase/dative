@@ -14,8 +14,20 @@ define [
   # A Dative form model can either have the structure of a FieldDB datum or
   # that of an OLD form. See `@defaultFieldDBDatum` and `@defaultOLDForm` for a
   # full specification of each of these data structures.
+  #
+  # TODO: this form model should have a string representation of an arbitrary
+  # form.
 
   class FormModel extends BaseModel
+
+    initialize: (options) ->
+      # Is the following line really necessary? This is what causes the
+      # `collection` attribute to be present and what requires us to call
+      # `delete result.collection` at various points within the code. Why is
+      # this necessary?
+      if options?.collection then @collection = options.collection
+      @activeServerType = @getActiveServerType()
+      super options
 
     url: 'fakeurl' # Backbone throws 'A "url" property or function must be
                    # specified' if this is not present.
@@ -23,6 +35,90 @@ define [
     getActiveServerType: ->
       globals.applicationSettings.get('activeServer').get 'type'
 
+    oldManyToOneAttributes: [
+      'elicitation_method'
+      'elicitor'
+      'source'
+      'speaker'
+      'syntactic_category'
+      'verifier'
+    ]
+
+    oldManyToManyAttributes: [
+      'tags'
+    ]
+
+    validate: (attributes, options) ->
+      attributes = attributes or @attributes
+      switch @activeServerType
+        when 'FieldDB' then @validateFieldDB attributes, options
+        when 'OLD' then @validateOLD attributes, options
+
+    validateFieldDB: (attributes, options) ->
+      console.log 'in validateFieldDB'
+
+    validateOLD: (attributes, options) ->
+      errors = {}
+      for attribute, value of attributes
+        attributeValidator = @getOLDValidator attribute
+        if attributeValidator
+          error = attributeValidator.apply @, [value]
+          if error then errors[attribute] = error
+      if _.isEmpty errors then undefined else errors
+
+    getOLDValidator: (attribute) ->
+      switch attribute
+        when 'transcription' then @validOLDTranscription
+        when 'translations' then @validOLDTranslations
+        when 'date_elicited' then @validateOLDDateElicited
+        else null
+
+    validOLDTranscription: (value) ->
+      @requiredString value
+
+    validOLDTranslations: (value) ->
+      error = null
+      if (t for t in value when t.transcription.trim()).length is 0
+        error = 'Please enter one or more translations'
+      error
+
+    validateOLDDateElicited: (value) ->
+      if value?.trim?() is ''
+        null
+      else
+        if not @validDate value
+          'Please enter a valid date in dd/mm/yyyy format'
+        else
+          null
+
+    # Return `true` if `date` is a string in dd/mm/yyyy format. (Obviously
+    # accepts some impossible dates, but shouldn't exclude any possible ones.)
+    validDate: (date) ->
+      date_regex = ///
+        ^
+        ( 0 [1-9] | 1 [0-2] )
+        \/
+        ( 0 [1-9] | 1 \d | 2 \d | 3 [01] )
+        \/
+        [0-2] \d{3}
+        $
+      ///
+      date_regex.test date
+
+    # Return a representation of the model's state that the OLD likes: i.e.,
+    # with relational values as ids or arrays thereof.
+    toOLD: ->
+      result = _.clone @attributes
+      # Not doing this causes a `RangeError: Maximum call stack size exceeded`
+      # when cors.coffee tries to call `JSON.stringify` on a form model that
+      # contains a forms collection that contains that same form model, etc. ad
+      # infinitum.
+      delete result.collection
+      for attribute in @oldManyToOneAttributes
+        result[attribute] = result[attribute]?.id or null
+      for attribute in @oldManyToManyAttributes
+        result[attribute] = (v.id for v in result[attribute] or [])
+      result
 
     ############################################################################
     # Questions & TODOs
@@ -46,6 +142,11 @@ define [
       else
         @defaultOLDForm()
 
+    # Returns `true` if the model is empty.
+    isEmpty: ->
+      attributes = _.clone @attributes
+      delete attributes.collection
+      _.isEqual @defaults(), attributes
 
     ############################################################################
     # FieldDB Schema
@@ -486,10 +587,11 @@ define [
                                         #            integer ids.)
       date_elicited: ""                 # <string>  (date elicited; OLD sends
                                         #            it in ISO 8601 format, i.e.,
-                                        #            "YYYY-MM-DD" but receives it
-                                        #            in "MM/DD/YYYY" format.)
+                                        #            "YYYY-MM-DD" but expects
+                                        #            to receive it in
+                                        #            "MM/DD/YYYY" format.)
 
-      # These are attributes that the OLD send to us, but will ignore if we try
+      # These are attributes that the OLD sends to us, but will ignore if we try
       # to send them back. The "REC TYPE" column header indicates the type of
       # value that we can expect to receive from the OLD.
 
@@ -798,6 +900,7 @@ define [
     ############################################################################
 
     old2dative: (oldForm) ->
+      oldForm.date_elicited = @utils.convertDateISO2mdySlash oldForm.date_elicited
       @set oldForm
 
     # Convert an OLD form object to a Dative form object.
@@ -919,9 +1022,6 @@ define [
       author: null
       title: null
       node: null
-
-    # TODO: if OLD AJAX persistence, validate in accordance with oldFormSchema below.
-    validate: (attrs, options) ->
 
     # oldFormSchema reflects how server-side OLD validation occurs.
     # Modify this to provide client-side OLD-compatible validation.

@@ -15,3 +15,6 @@ define ['./select-field'], (SelectFieldView) ->
         "#{option.first_name} #{option.last_name}"
       super
 
+    getValueFromDOM: ->
+      @getValueFromRelationalIdFromDOM super
+

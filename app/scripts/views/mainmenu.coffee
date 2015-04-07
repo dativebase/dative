@@ -59,19 +59,51 @@ define [
     # Make certain menu items (in)active and (in)visible depending on
     # authentication status and server type.
     setActivityAndVisibility: ->
-      if @model.get('loggedIn')
-        @$('li.requires-authentication').not('.fielddb')
-          .show()
-          .find('a').removeClass 'disabled'
-        if @model.get('activeServer')?.get('type') is 'FieldDB'
-          @$('li.fielddb').show()
-            .children('a').removeClass 'disabled'
+      if @model.get 'loggedIn'
+        @showAuthenticationRequiredItems()
+        #if @model.get('activeServer')?.get('type') is 'FieldDB'
+        activeServerType = @getActiveServerType()
+        if activeServerType is 'FieldDB'
+          @showFieldDBItems()
+          @hideOLDItems()
+        else if activeServerType is 'OLD'
+          @showOLDItems()
+          @hideFieldDBItems()
         else
-          @$('li.fielddb').hide()
-            .children('a').addClass 'disabled'
+          @hideFieldDBItems()
+          @hideOLDItems()
       else
-        @$('li.requires-authentication').hide()
-          .children('a').addClass 'disabled'
+        @hideAuthenticationRequiredItems()
+
+    showFieldDBItems: ->
+      @$('li.fielddb')
+        .show()
+        .children('a').removeClass 'disabled'
+
+    hideFieldDBItems: ->
+      @$('li.fielddb')
+        .hide()
+        .children('a').addClass 'disabled'
+
+    showOLDItems: ->
+      @$('li.old')
+        .show()
+        .children('a').removeClass 'disabled'
+
+    hideOLDItems: ->
+      @$('li.old')
+        .hide()
+        .children('a').addClass 'disabled'
+
+    hideAuthenticationRequiredItems: ->
+      @$('li.requires-authentication')
+        .hide()
+        .children('a').addClass 'disabled'
+
+    showAuthenticationRequiredItems: ->
+      @$('li.requires-authentication').not('.fielddb, .old')
+        .show()
+        .find('a').removeClass 'disabled'
 
     render: ->
       @$el

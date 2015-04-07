@@ -6,8 +6,8 @@ define [
   './../utils/globals'
   './../utils/tooltips'
   './../templates/field'
-], (Backbone, FormHandlerBaseView, LabelView, TextareaInputView, globals, tooltips,
-  fieldTemplate) ->
+], (Backbone, FormHandlerBaseView, LabelView, TextareaInputView, globals,
+  tooltips, fieldTemplate) ->
 
   # Field View
   # ----------
@@ -65,6 +65,7 @@ define [
       title: @getTooltip()
       value: @getValue()
       label: @getLabel()
+      domAttributes: @domAttributes
 
     guify: ->
 
@@ -73,7 +74,10 @@ define [
     className: 'dative-form-field'
 
     initialize: (options) ->
+      @resource = options.resource or 'forms'
+      @submitAttempted = false
       @attribute = options.attribute
+      @domAttributes = options.domAttributes or {}
       @activeServerType = @getActiveServerType()
       @options = options.options # possible values for forced-choice fields, e.g., `users` or `grammaticalities` with an OLD back-end.
       @context = @getContext()
@@ -92,11 +96,27 @@ define [
 
     render: ->
       @$el.html @template(@context)
+      @$('.dative-field-validation-container').hide()
       @renderLabelView()
       @renderInputView()
       @guify()
       @listenToEvents()
       @
+
+    # Refresh re-renders all of the input views. This is called by the form add
+    # widget when the “clear form” button is clicked.
+    refresh: (model) ->
+      if model then @model = model
+      @context = @getContext()
+      if @inputView
+        @inputView.refresh @context
+
+    listenToEvents: ->
+      super
+      if @inputView
+        @listenTo @inputView, 'setToModel', @setToModel
+      # We listen to validation error events that are relevant to our attribute(s).
+      @listenTo @context.model, "validationError:#{@attribute}", @validationError
 
     renderLabelView: ->
       @labelView.setElement @$('.dative-field-label-container')
@@ -139,6 +159,64 @@ define [
       switch @activeServerType
         when 'FieldDB' then @model.setDatumValueSmart domValue
         when 'OLD' then @model.set domValue
+      if @submitAttempted then @validate()
+
+    validate: (errors) ->
+      clientSideValidationErrors = errors or @model.validate()
+      if clientSideValidationErrors
+        ourError = clientSideValidationErrors[@attribute]
+        if ourError then @validationError(ourError) else @validationError()
+      else
+        @validationError()
+
+    # Display the validation error display, or remove it if there isn't an error.
+    validationError: (error) ->
+      $validationContainer = @$ '.dative-field-validation-container'
+      if error
+        @$('.dative-field-validation-error-message').html(
+          "#{@context.label}: #{error}")
+        # The validation error <div> might be in the process of sliding up;
+        # therefore we have to check for an animation queue and clear it.
+        queue = $validationContainer.queue()
+        $validationContainer.stop true, true
+        if $validationContainer.is ':hidden' or queue
+          $validationContainer.slideDown()
+      else
+        @$('.dative-field-validation-error-message').empty()
+        if $validationContainer.is ':visible'
+          $validationContainer.slideUp()
+
+    # If the input view returns a relational id from the DOM, then using this
+    # in an override of `getValueFromDOM` will convert that id to an object.
+    getValueFromRelationalIdFromDOM: (valueFromDOM) ->
+      result = {}
+      try
+        idFromDOM = Number valueFromDOM[@context.attribute]
+        options = @context.options[@optionsAttribute]
+        value = _.findWhere options, {id: idFromDOM}
+        result[@context.attribute] = value
+      catch
+        result[@context.attribute] = undefined
+      result
+
+    # If the input view returns an array of relational ids from the DOM, then
+    # using this in an override of `getValueFromDOM` will convert that array to
+    # an array of objects.
+    getValueFromArrayOfRelationalIdsFromDOM: (valueFromDOM) ->
+      result = {}
+      result[@context.attribute] = []
+      try
+        arrayOfIdsFromDOM = valueFromDOM[@context.attribute]
+        options = @context.options[@optionsAttribute]
+        value = (o for o in options when o.id in arrayOfIdsFromDOM)
+        result[@context.attribute] = value
+      result
+
+    disable: ->
+      @inputView?.disable()
+
+    enable: ->
+      @inputView?.enable()
 
     ############################################################################
     # Helper methods for building a template context out of the form @model and
@@ -170,8 +248,8 @@ define [
     # The tooltip (the HTML title attribute) for both the label and the input.
     getTooltip: (attribute=@attribute) ->
       switch @activeServerType
-        when 'FieldDB' then @getFieldDBAttributeTooltip attribute
-        when 'OLD' then @getOLDAttributeTooltip attribute
+        when 'FieldDB' then @getFieldDBAttributeTooltip attribute, @resource
+        when 'OLD' then @getOLDAttributeTooltip attribute, @resource
         else 'default'
 
     # Get the value to go in the input from the model. See the form model for

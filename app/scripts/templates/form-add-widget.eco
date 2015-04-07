@@ -18,6 +18,20 @@
 
   <div class='button-container-right'>
 
+    <span class="spinner-container"></span>
+
+    <button class="clear-form dative-tooltip"
+      title="clear this form: reset all fields to their default values"
+      ><i class='fa fa-eraser fa-fw'></i>
+    </button>
+
+    <% if @addUpdateType is 'update': %>
+      <button class="undo-changes dative-tooltip"
+        title="undo changes: restore to pre-modification state"
+        ><i class='fa fa-undo fa-fw'></i>
+      </button>
+    <% end %>
+
     <button class='form-add-help dative-tooltip'
       <% if @addUpdateType is 'add': %>
         title='help with adding a form'
@@ -48,7 +62,7 @@
           <% else: %>
             title='Save changes to this form'
           <% end %>
-          >Save<i class="fa fa-fw fa-floppy-o"></i></button>
+          >Save</button>
 
         <button
           class="toggle-secondary-data-fields dative-tooltip"

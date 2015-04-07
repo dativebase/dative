@@ -44,9 +44,13 @@ div#mainmenu
 
 #dative-page-body
 {
-    margin: 10px;
-    overflow: hidden;
+    margin-top: 1em;
+    margin-bottom: 1em;
+    overflow-y: auto;
+    overflow-x: auto;
+    height: 100%;
     position: relative;
+    width: 100%
 }
 
 .ui-widget {
@@ -75,6 +79,7 @@ button.help-button
 
 #dative-page-header,
 #dative-page-header.dative-two-part-header > div.dative-forms-view-header,
+#dative-page-header.dative-two-part-header > div.dative-two-part-header-part-one,
 .dative-widget-header {
     font-weight: normal;
     text-align: center;
@@ -86,7 +91,8 @@ button.help-button
     position: relative;
 }
 
-#dative-page-header.dative-two-part-header > div.dative-forms-view-header
+#dative-page-header.dative-two-part-header > div.dative-forms-view-header,
+#dative-page-header.dative-two-part-header > div.dative-two-part-header-part-one
 {
     border-bottom: none;
 }
@@ -145,20 +151,39 @@ button.help-button
     cursor: pointer;
 }
 
-.dative-field-validation-container
-{
-  display: inline-block;
-  width: 0%;
-}
-
-.dative-field-label-container
+.dative-field-label-container,
+.dative-field-display-label-container
 {
   display: inline-block;
   width: 25%;
   vertical-align: top;
+  text-align: right;
+  margin-right: 0.75em;
 }
 
-.update-form-widget .dative-field-label-container
+.dative-form-object .dative-field-display-label-container
+{
+  width: 36%;
+}
+
+.dative-field-input-container,
+.dative-field-display-representation-container,
+.dative-field-display-label-container,
+.dative-pagin-item-index-cell
+{
+  font-family: 'GentiumPlus', serif;
+}
+
+.dative-field-display-representation-container,
+.dative-field-display-label-container,
+.dative-pagin-item-index-cell,
+.dative-alert-text
+{
+  font-size: 130%;
+}
+
+.update-form-widget .dative-field-label-container,
+.update-widget .dative-field-label-container
 {
   width: 25%;
 }
@@ -170,14 +195,27 @@ button.help-button
   margin-bottom: 0.4em;
 }
 
+.dative-field-display-representation-container,
 .dative-field-input-container
 {
   display: inline-block;
+  width: 70%;
+}
+
+.dative-form-object .dative-field-display-representation-container
+{
   width: 60%;
 }
 
-.update-form-widget .dative-field-input-container
+.dative-field-display-representation-container.no-label
 {
+  width: 95%;
+}
+
+.update-form-widget .dative-field-input-container,
+.update-widget .dative-field-input-container
+{
+  display: inline-block;
   width: 70%;
 }
 
@@ -197,9 +235,11 @@ ul.sf-menu li a
     padding: 10px 0;
 }
 
-.dative-form-object > .dative-widget-body
+.dative-form-object > .dative-widget-body,
+.dative-paginated-item > .dative-widget-body,
+.dative-new-item > .dative-widget-body
 {
-    padding: 10px;
+    padding: 1em;
 }
 
 .dative-form-object
@@ -295,6 +335,14 @@ div.dative-page-header-title
     margin: 12px;
 }
 
+.dative-paginated-item,
+.dative-new-item
+{
+  margin-top: 1em;
+  margin-bottom: 1em;
+  width: 90%;
+}
+
 .dative-pagin-item-index
 {
     vertical-align: top;
@@ -305,7 +353,7 @@ div.dative-page-header-title
 {
     min-width: 5em;
     vertical-align: top;
-    padding-top: 1em;
+    padding-top: 1.15em;
 }
 
 .dative-pagin-item-content
@@ -385,9 +433,11 @@ div.dative-page-header-title
 .dative-login-dialog-widget,
 .dative-register-dialog-widget,
 .dative-help-dialog-widget,
+.dative-alert-dialog-widget,
+.dative-exporter-dialog-widget,
 #appview,
 .progress-widget,
-.notifier,
+.notification,
 .corpus-widget,
 .create-corpus-widget,
 .users-widget,
@@ -399,6 +449,7 @@ div.dative-page-header-title
 .edit-corpus-widget,
 .add-form-widget,
 .update-form-widget,
+.dative-shadowed-widget,
 .dative-form-object.expanded
 {
     box-shadow: 5px 5px 10px rgba(0, 0, 0, 0.5);
@@ -406,7 +457,8 @@ div.dative-page-header-title
     -moz-box-shadow: 5px 5px 10px rgba(0, 0, 0, 0.5);
 }
 
-.dative-form-object.expanded:focus
+.dative-form-object.expanded:focus,
+.dative-shadowed-widget.expanded:focus
 {
     /*outline: none !important;*/
     /*box-shadow: 0 0 10px orange !important;*/
@@ -419,7 +471,8 @@ div.heading {
 }
 
 div.dative-widget-center {
-    margin: 0 auto;
+    margin-right: auto;
+    margin-left: auto;
 }
 span.dative-triangle-icon,
 .dative-icon {
@@ -462,6 +515,7 @@ ul.fieldset label {
 }
 
 div.form-add-form ul.fieldset label,
+div.linguistic-data-entry-form ul.fieldset label,
 .formAdd ul.fieldset label
 {
     min-width: 90%;
@@ -711,6 +765,12 @@ button.ui-multiselect {
     top: 1px;
 }
 
+.form-primary-data,
+.form-secondary-data
+{
+  margin: 0.5em;
+}
+
 .dative-form-transcription,
 .form-primary-data .transcription,
 .italic {
@@ -754,37 +814,65 @@ div.dative-field-input-container > div.ms-container
 }
 
 #progress-widget-container,
-#notifier-container
+#notifier
 {
     position: relative;
 }
 
-.progress-widget,
-.notifier
+div.notifier-container,
+div.notifier
+{
+    height: 0px;
+    width: 0px;
+}
+
+.notifications-container
 {
     position: absolute;
-    top: 0;
-    min-height: 40px;
-    width: 100px;
-    margin: 20px;
-    z-index: 100;
+    top: 3em;
+    right: 0.5em;
+    width: 20em;
+    z-index: 999;
 }
 
 .progress-widget
 {
+    position: absolute;
+    top: 3em;
+    z-index: 100;
+}
+
+.notification
+{
+    margin-bottom: 1em;
+    padding: 0.5em;
+    width: 18em;
+}
+
+.notification-title
+{
+    font-size: 110%;
+    margin-bottom: 0.25em;
+}
+
+.notification-content
+{
+    font-weight: normal;
+    line-height: 120%;
+}
+
+.progress-widget
+{
+    min-height: 40px;
+    margin: 20px;
     left: 0;
     padding: 10px 10px 0px 10px;
+    width: 100px;
 }
 
 .progress-widget-spinner
 {
     height: 20px;
-}
-
-.notifier
-{
-    right: 0;
-    padding: 20px;
 }
 
 .pulse1
@@ -803,8 +891,7 @@ div.dative-field-input-container > div.ms-container
 {
     margin-top: 10px;
 }
-.progress-widget-tasks ul li,
-.notifier ul li
+.progress-widget-tasks ul li
 {
     margin-bottom: 10px;
 }
@@ -1076,7 +1163,23 @@ div.dative-display
 .dative-help-dialog .help-content
 {
   margin-right: 1.5em;
+  font-size: 120%;
   text-align: justify;
+}
+
+.dative-exporter-dialog .dative-exporter-dialog-content-container
+{
+  overflow-y: scroll;
+}
+
+.dative-exporter-dialog .dative-exporter-dialog-content
+{
+  font-size: 120%;
+}
+
+.dative-exporter-dialog .dative-exporter-dialog-content pre
+{
+  line-height: 120%;
 }
 
 .dative-help-dialog .focused-help-match
@@ -1084,7 +1187,8 @@ div.dative-display
   border-width: 4px;
 }
 
-.dative-help-dialog .help-content
+.dative-help-dialog .help-content,
+.dative-alert-text
 {
   line-height: 125%;
 }
@@ -1200,10 +1304,16 @@ div.form-igt-data div,
 div.form-translations-data div,
 div.form-secondary-data div,
 span.dative-pagin-item-index,
-p.paragraph-widget
+p.paragraph-widget,
+.large-unicode-font *
 {
-  font-size: 12pt;
+  font-size: 14pt;
   font-family: 'GentiumPlus', serif;
+}
+
+div.dative-form-field-display
+{
+  line-height: 1.2em;
 }
 
 p.paragraph-widget
@@ -1221,19 +1331,27 @@ p.paragraph-widget
 .form-add-form ul.fieldset input,
 .form-add-form ul.fieldset .ui-selectmenu-button,
 .form-add-form ul.fieldset .ms-container,
-.form-add-form ul.fieldset label
+.form-add-form ul.fieldset label,
+.linguistic-data-entry-form ul.fieldset textarea,
+.linguistic-data-entry-form ul.fieldset input,
+.linguistic-data-entry-form ul.fieldset .ui-selectmenu-button,
+.linguistic-data-entry-form ul.fieldset label,
+.dative-exporter-dialog-container
 {
   font-size: 12pt;
   font-family: 'GentiumPlus', serif;
 }
 
 .form-add-form ul.fieldset textarea,
-.form-add-form ul.fieldset input
+.form-add-form ul.fieldset input,
+.linguistic-data-entry-form ul.fieldset textarea,
+.linguistic-data-entry-form ul.fieldset input
 {
   min-height: 1.5em;
 }
 
-.form-add-form ul.fieldset span.ui-selectmenu-button
+.form-add-form ul.fieldset span.ui-selectmenu-button,
+.linguistic-data-entry-form ul.fieldset span.ui-selectmenu-button
 {
   height: 2.25em;
   vertical-align: top;
@@ -1254,7 +1372,7 @@ span.ui-selectmenu-button {
 
 span.dative-pagin-item-index
 {
-  font-size: 150%;
+  /*font-size: 150%;*/
   position: relative;
   top: 0.1em;
 }
@@ -1271,15 +1389,47 @@ div.new-form-view
   margin-bottom: 2em;
 }
 
-div.update-form-widget
+div.update-form-widget,
+div.dative-paginated-item .dative-widget-center,
+div.dative-new-item .dative-widget-center
 {
   width: 98%;
   margin-top: 1em;
   margin-bottom: 0.75em;
 }
 
+div.dative-paginated-item .dative-widget-header-title,
+div.dative-new-item .dative-widget-header-title
+{
+  font-size: 115%;
+}
+
 .small-caps
 {
   font-variant: small-caps;
+}
+
+.dative-field-validation-container
+{
+  margin-top: 0.2em;
+  width: 69.2%;
+  margin-left: 26.7%;
+}
+
+.dative-field-validation-error
+{
+  padding: 0.5em;
+}
+
+div.script
+{
+  white-space: pre;
+  overflow-x: scroll;
+}
+
+textarea.script
+{
+  white-space: nowrap;
+  overflow-x: scroll;
 }
 

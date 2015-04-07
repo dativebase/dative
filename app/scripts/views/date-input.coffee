@@ -31,3 +31,9 @@ define [
         .tooltip
           position: @tooltipPositionLeft '-200'
 
+    disable: ->
+      @disableInputs()
+
+    enable: ->
+      @enableInputs()
+
