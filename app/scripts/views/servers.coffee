@@ -4,7 +4,6 @@ define [
   './server'
   './../models/server'
   './../templates/servers'
-  'perfectscrollbar'
 ], (Backbone, BaseView, ServerView, ServerModel, serversTemplate) ->
 
   # Servers View

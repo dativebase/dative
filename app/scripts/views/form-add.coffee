@@ -5,7 +5,6 @@ define [
   './../templates/form-add'
   'multiselect'
   'jqueryelastic'
-  'perfectscrollbar'
 ], (Backbone, BaseView, FormModel, formAddTemplate) ->
 
   # Form Add View
@@ -129,7 +128,6 @@ define [
           .multiSelect 'select', @model.get('tags')
 
     _guify: (context) ->
-      @$('#dative-page-body').perfectScrollbar()
       @_enableAddNewTranslationFieldButton context
       selectmenuWidth = 548
       @_gramSelect = $('select.grammaticality', context).selectmenu width: 50

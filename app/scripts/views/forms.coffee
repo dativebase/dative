@@ -10,7 +10,6 @@ define [
   './../utils/paginator'
   './../utils/globals'
   './../templates/forms'
-  'perfectscrollbar'
 ], (Backbone, BaseView, FormView, ExporterDialogView,
   PaginationMenuTopView, PaginationItemTableView, FormsCollection, FormModel,
   Paginator, globals, formsTemplate) ->
@@ -84,6 +83,7 @@ define [
         @refreshPage()
       @listenToEvents()
       @setFocus()
+      @$('#dative-page-body').scroll => @closeAllTooltips()
       Backbone.trigger 'longTask:deregister', taskId
       @
 
@@ -787,27 +787,6 @@ define [
             my: "left+45 center"
             at: "right center"
             collision: "flipfit"
-
-    perfectScrollbar: ->
-      @$('#dative-page-body')
-        .perfectScrollbar()
-        .scroll => @closeAllTooltips()
-
-    refreshPerfectScrollbar: ->
-      @$('#dative-page-body').perfectScrollbar 'update'
-
-    # This was an attempt to refresh perfectScrollbar when the height of the
-    # pagin items div changes with the goal of stopping the auto-scroll bug. It
-    # was successful in calling `refreshPerfectScrollbar` at the appropriate
-    # time, but this did not fix the bug.
-    monitorPaginItemsHeight: ->
-      @paginItemsHeight = @$('.dative-pagin-items').height()
-      paginItemsHeightMonitor = =>
-        newHeight = @$('.dative-pagin-items').height()
-        if newHeight isnt @paginItemsHeight
-          @paginItemsHeight = newHeight
-          @refreshPerfectScrollbar()
-      @paginItemsHeightMonitorId = setInterval paginItemsHeightMonitor, 1000
 
     onClose: ->
       clearInterval @paginItemsHeightMonitorId

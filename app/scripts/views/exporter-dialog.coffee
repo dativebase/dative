@@ -1,7 +1,6 @@
 define [
   './base'
   './../templates/exporter-dialog'
-  'perfectscrollbar'
 ], (BaseView, exporterDialogTemplate) ->
 
   # Exporter Dialog View
