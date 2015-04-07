@@ -27,30 +27,30 @@ Using Dative is all about entering linguistic fieldwork data, refining it,
 browsing it, searching through it, and using it to write papers, develop
 learning materials, or generate documentary or archive-quality artifacts.
 
-Dative can work with both [LingSync](https://www.lingsync.org/) and
+Dative can work with both [{{FieldDB.FieldDBObject.application.brand}}]({{FieldDB.FieldDBObject.application.website}}) and
 [OLD](http://www.onlinelinguisticdatabase.org/)-type web servers. This means
-that if you have an account with LingSync or an OLD application, you can use
+that if you have an account with {{FieldDB.FieldDBObject.application.brand}} or an OLD application, you can use
 Dative to work with your existing corpora and data sets.
 
-If you have an account with a LingSync or an OLD server, the first step
+If you have an account with a {{FieldDB.FieldDBObject.application.brand}} or an OLD server, the first step
 is to login by clicking on the lock icon <i class="fa fa-fw fa-lock"></i> in
 the top right or by clicking on Account > Login. In the login dialog that
 appears, select the appropriate server, enter your username and password,
-and click the “Login” button. If you have a LingSync account, you will most
-likely want to login to the server called “FieldDB”. If you are unable to
+and click the “Login” button. If you have a {{FieldDB.FieldDBObject.application.brand}} account, you will most
+likely want to login to the server called “{{FieldDB.FieldDBObject.application.brand}}”. If you are unable to
 login, you may need to manually create a new server (see the [application
 settings](#application-settings) section).
 
-If you do not have a LingSync account, you may create one through Dative.
+If you do not have a {{FieldDB.FieldDBObject.application.brand}} account, you may create one through Dative.
 First, open the registration form by clicking on Dative > Register (or
-by pressing ⌃R). Choose a FieldDB/LingSync-type server to register with,
+by pressing ⌃R). Choose a {{FieldDB.FieldDBObject.application.brand}}-type server to register with,
 enter your desired username and password (and your email), and click the
 “Register” button and an account should be generated for you.
 
 Once you have successfully logged in, you will be brought either to the
-corpora interface (if you have logged into a LingSync server) or to the
+corpora interface (if you have logged into a {{FieldDB.FieldDBObject.application.brand}} server) or to the
 browse forms interface (if you have logged into an OLD server). At the
-corpus interface, you must choose the FieldDB/LingSync corpus that you
+corpus interface, you must choose the {{FieldDB.FieldDBObject.application.brand}} corpus that you
 wish to use; you do this by clicking on the “activate corpus” button
 <i class="fa fa-fw fa-toggle-off"></i>. This will take you to the browse
 forms interface where you can view the data in the corpus, modify it,
@@ -62,21 +62,11 @@ IMPLEMENTED IN DATIVE.
 
 ## Frequently Asked Questions<a data-name="frequently-asked-questions"></a>
 
-1. What is the difference between the terms “LingSync” and “FieldDB”?
-    - These terms refer, basically, to the same thing. “LingSync” can be thought
-      of as the more user-friendly label while “FieldDB” is the more technical
-      one. LingSync/FieldDB is a suite of software components designed to
-      assist with linguistic fieldwork, documentation and analysis. Dative
-      can be thought of as a component in this suite. The other major component
-      that is relevant to Dative is the LingSync/FieldDB web service which
-      stores linguistic data on servers so that multiple fieldworkers can
-      build corpora collaboratively.
-
-2. What is a “form”?
+1. What is a “form”?
     - A form is a linguistic form. It is a general term meant to encompass
       all of the data points that you might enter into a linguistic fieldwork/
       language documentation database. In practice, may be a morpheme, word,
-      phrase, sentence, or even a multi-sentential unit. In LingSync
+      phrase, sentence, or even a multi-sentential unit. In {{FieldDB.FieldDBObject.application.brand}}
       applications, the term “datum” is sometimes used. These two terms may
       be considered equivalent here.
 
@@ -85,8 +75,8 @@ IMPLEMENTED IN DATIVE.
 Dative is an application for linguistic fieldwork. It is a graphical user
 interface that runs in modern web browsers. The data that you enter into
 Dative are saved to the web server that you are logged into at the time.
-This may be a [LingSync](https://www.lingsync.org/) server or an
-[OLD](http://www.onlinelinguisticdatabase.org/) one. LingSync and the OLD
+This may be a [{{FieldDB.FieldDBObject.application.brand}}]({{FieldDB.FieldDBObject.application.website}}) server or an
+[OLD](http://www.onlinelinguisticdatabase.org/) one. {{FieldDB.FieldDBObject.application.brand}} and the OLD
 are web services that allow linguistic data to be stored and manipulated
 on web servers by multiple users at the same time.
 
@@ -127,14 +117,12 @@ fa-expand"></i><i class="fa fa-fw fa-compress"></i> at the bottom.
 At this stage of development, Dative’s application settings allow you to
 do two things:
 
-1. Configure servers (e.g., LingSync or OLD servers)
+1. Configure servers (e.g., {{FieldDB.FieldDBObject.application.brand}} or OLD servers)
 2. Change the appearance (i.e., theme) of the application
 
-A “server” in this context is a LingSync or OLD web service that receives,
+A “server” in this context is a {{FieldDB.FieldDBObject.application.brand}} or OLD web service that receives,
 stores, and returns linguistic data. A server is defined by a name, a URL,
-a type (“FieldDB” or “OLD”), and potentially a server code. (Note: the terms
-“LingSync” and “FieldDB” can be considered synonymous in the context of this
-document.)
+a type (“{{FieldDB.FieldDBObject.application.brand}}” or “OLD”), and potentially a server code.
 
 To change the active server, simply select one of the existing servers from
 the *Active Server* select menu.
@@ -150,7 +138,7 @@ you like, whatever will be memorable to you. Then enter the server's URL, its
 type, and (if it’s a FieldDB-type server) its server code. The appropriate
 server code value that you will want to choose is probably “production.” If you
 do not know which values to enter to create a new server, please contact your
-LingSync or OLD server administrator.
+{{FieldDB.FieldDBObject.application.brand}} or OLD server administrator.
 
 Note that you do not need to click “Save” here. Dative saves all of your
 application settings changes automatically to your browser's local storage.
@@ -160,7 +148,7 @@ application settings changes automatically to your browser's local storage.
 ## Browsing Forms<a data-name="browsing-forms"></a>
 
 When you click on the Forms > Browse menu button, enter the keyboard shortcut
-⌃B, or click on a FieldDB “activate corpus” button (<i class="fa fa-fw
+⌃B, or click on a {{FieldDB.FieldDBObject.application.brand}} “activate corpus” button (<i class="fa fa-fw
 fa-toggle-off"></i>), you will be brought to the forms browsing interface.
 This interface displays all of your forms (i.e., data points) in a paginated
 display; that is the forms are split across a number of pages. You may change
@@ -196,7 +184,7 @@ a Form” widget.
 WARN: THIS IS NOT IMPLEMENTED YET.
 
 Dative allows users to control which fields are present on a form. When using
-a FieldDB/LingSync server, the user may define any number of text-based fields,
+a {{FieldDB.FieldDBObject.application.brand}} server, the user may define any number of text-based fields,
 i.e., fields whose values are strings of characters.
 
 
@@ -222,7 +210,7 @@ The list of global shortcuts is as follows:
 - **⌃,** open the application settings page
 - **⌃H** open the home page
 - **⌃P** open the page that lists the user-created pages (*when logged in only*)
-- **⌃C** open the corpora page (for FieldDB corpora, *when logged in only*)
+- **⌃C** open the corpora page (for {{FieldDB.FieldDBObject.application.brand}} corpora, *when logged in only*)
 - **⌃R** open/close the register dialog
 - **⌃A** open the page for adding a new form (*when logged in only*)
 - **⌃S** open the page for searching through your data (*when logged in only*)

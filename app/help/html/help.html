@@ -1,3 +1,4 @@
+<div class="markdown-content">
 <h1 id="dative-help">Dative Help</h1>
 <p>Dative is an application for linguistic fieldwork. It helps groups of
 fieldworkers to collaboratively build corpora of language data.</p>
@@ -20,27 +21,27 @@ Help</a> section.</p>
 <p>Using Dative is all about entering linguistic fieldwork data, refining it,
 browsing it, searching through it, and using it to write papers, develop
 learning materials, or generate documentary or archive-quality artifacts.</p>
-<p>Dative can work with both <a href="https://www.lingsync.org/">LingSync</a> and
+<p>Dative can work with both <a href="{{FieldDB.FieldDBObject.application.website}}">{{FieldDB.FieldDBObject.application.brand}}</a> and
 <a href="http://www.onlinelinguisticdatabase.org/">OLD</a>-type web servers. This means
-that if you have an account with LingSync or an OLD application, you can use
+that if you have an account with {{FieldDB.FieldDBObject.application.brand}} or an OLD application, you can use
 Dative to work with your existing corpora and data sets.</p>
-<p>If you have an account with a LingSync or an OLD server, the first step
+<p>If you have an account with a {{FieldDB.FieldDBObject.application.brand}} or an OLD server, the first step
 is to login by clicking on the lock icon <i class="fa fa-fw fa-lock"></i> in
 the top right or by clicking on Account &gt; Login. In the login dialog that
 appears, select the appropriate server, enter your username and password,
-and click the “Login” button. If you have a LingSync account, you will most
-likely want to login to the server called “FieldDB”. If you are unable to
+and click the “Login” button. If you have a {{FieldDB.FieldDBObject.application.brand}} account, you will most
+likely want to login to the server called “{{FieldDB.FieldDBObject.application.brand}}”. If you are unable to
 login, you may need to manually create a new server (see the <a href="#application-settings">application
 settings</a> section).</p>
-<p>If you do not have a LingSync account, you may create one through Dative.
+<p>If you do not have a {{FieldDB.FieldDBObject.application.brand}} account, you may create one through Dative.
 First, open the registration form by clicking on Dative &gt; Register (or
-by pressing ⌃R). Choose a FieldDB/LingSync-type server to register with,
+by pressing ⌃R). Choose a {{FieldDB.FieldDBObject.application.brand}}-type server to register with,
 enter your desired username and password (and your email), and click the
 “Register” button and an account should be generated for you.</p>
 <p>Once you have successfully logged in, you will be brought either to the
-corpora interface (if you have logged into a LingSync server) or to the
+corpora interface (if you have logged into a {{FieldDB.FieldDBObject.application.brand}} server) or to the
 browse forms interface (if you have logged into an OLD server). At the
-corpus interface, you must choose the FieldDB/LingSync corpus that you
+corpus interface, you must choose the {{FieldDB.FieldDBObject.application.brand}} corpus that you
 wish to use; you do this by clicking on the “activate corpus” button
 <i class="fa fa-fw fa-toggle-off"></i>. This will take you to the browse
 forms interface where you can view the data in the corpus, modify it,
@@ -49,24 +50,11 @@ and add to it.</p>
 IMPLEMENTED IN DATIVE.</p>
 <h2 id="frequently-asked-questions-a-data-name-frequently-asked-questions-a-">Frequently Asked Questions<a data-name="frequently-asked-questions"></a></h2>
 <ol>
-<li><p>What is the difference between the terms “LingSync” and “FieldDB”?</p>
-<ul>
-<li>These terms refer, basically, to the same thing. “LingSync” can be thought
-of as the more user-friendly label while “FieldDB” is the more technical
-one. LingSync/FieldDB is a suite of software components designed to
-assist with linguistic fieldwork, documentation and analysis. Dative
-can be thought of as a component in this suite. The other major component
-that is relevant to Dative is the LingSync/FieldDB web service which
-stores linguistic data on servers so that multiple fieldworkers can
-build corpora collaboratively.</li>
-</ul>
-</li>
-<li><p>What is a “form”?</p>
-<ul>
+<li>What is a “form”?<ul>
 <li>A form is a linguistic form. It is a general term meant to encompass
 all of the data points that you might enter into a linguistic fieldwork/
 language documentation database. In practice, may be a morpheme, word,
-phrase, sentence, or even a multi-sentential unit. In LingSync
+phrase, sentence, or even a multi-sentential unit. In {{FieldDB.FieldDBObject.application.brand}}
 applications, the term “datum” is sometimes used. These two terms may
 be considered equivalent here.</li>
 </ul>
@@ -76,8 +64,8 @@ be considered equivalent here.</li>
 <p>Dative is an application for linguistic fieldwork. It is a graphical user
 interface that runs in modern web browsers. The data that you enter into
 Dative are saved to the web server that you are logged into at the time.
-This may be a <a href="https://www.lingsync.org/">LingSync</a> server or an
-<a href="http://www.onlinelinguisticdatabase.org/">OLD</a> one. LingSync and the OLD
+This may be a <a href="{{FieldDB.FieldDBObject.application.website}}">{{FieldDB.FieldDBObject.application.brand}}</a> server or an
+<a href="http://www.onlinelinguisticdatabase.org/">OLD</a> one. {{FieldDB.FieldDBObject.application.brand}} and the OLD
 are web services that allow linguistic data to be stored and manipulated
 on web servers by multiple users at the same time.</p>
 <p>Dative is written in CoffeeScript (and HTML and CSS) using the Backbone
@@ -107,14 +95,12 @@ fa-expand"></i><i class="fa fa-fw fa-compress"></i> at the bottom.</p>
 <p>At this stage of development, Dative’s application settings allow you to
 do two things:</p>
 <ol>
-<li>Configure servers (e.g., LingSync or OLD servers)</li>
+<li>Configure servers (e.g., {{FieldDB.FieldDBObject.application.brand}} or OLD servers)</li>
 <li>Change the appearance (i.e., theme) of the application</li>
 </ol>
-<p>A “server” in this context is a LingSync or OLD web service that receives,
+<p>A “server” in this context is a {{FieldDB.FieldDBObject.application.brand}} or OLD web service that receives,
 stores, and returns linguistic data. A server is defined by a name, a URL,
-a type (“FieldDB” or “OLD”), and potentially a server code. (Note: the terms
-“LingSync” and “FieldDB” can be considered synonymous in the context of this
-document.)</p>
+a type (“{{FieldDB.FieldDBObject.application.brand}}” or “OLD”), and potentially a server code.</p>
 <p>To change the active server, simply select one of the existing servers from
 the <em>Active Server</em> select menu.</p>
 <p>To create a new server, click on the “show servers” button (with the
@@ -127,12 +113,12 @@ you like, whatever will be memorable to you. Then enter the server&#39;s URL, it
 type, and (if it’s a FieldDB-type server) its server code. The appropriate
 server code value that you will want to choose is probably “production.” If you
 do not know which values to enter to create a new server, please contact your
-LingSync or OLD server administrator.</p>
+{{FieldDB.FieldDBObject.application.brand}} or OLD server administrator.</p>
 <p>Note that you do not need to click “Save” here. Dative saves all of your
 application settings changes automatically to your browser&#39;s local storage.</p>
 <h2 id="browsing-forms-a-data-name-browsing-forms-a-">Browsing Forms<a data-name="browsing-forms"></a></h2>
 <p>When you click on the Forms &gt; Browse menu button, enter the keyboard shortcut
-⌃B, or click on a FieldDB “activate corpus” button (<i class="fa fa-fw
+⌃B, or click on a {{FieldDB.FieldDBObject.application.brand}} “activate corpus” button (<i class="fa fa-fw
 fa-toggle-off"></i>), you will be brought to the forms browsing interface.
 This interface displays all of your forms (i.e., data points) in a paginated
 display; that is the forms are split across a number of pages. You may change
@@ -158,7 +144,7 @@ a Form” widget.</p>
 <h3 id="modifying-the-form-fields">Modifying the Form Fields</h3>
 <p>WARN: THIS IS NOT IMPLEMENTED YET.</p>
 <p>Dative allows users to control which fields are present on a form. When using
-a FieldDB/LingSync server, the user may define any number of text-based fields,
+a {{FieldDB.FieldDBObject.application.brand}} server, the user may define any number of text-based fields,
 i.e., fields whose values are strings of characters.</p>
 <h2 id="keyboard-shortcuts-a-data-name-keyboard-shortcuts-a-">Keyboard Shortcuts<a data-name="keyboard-shortcuts"></a></h2>
 <p>Dative has keyboard shortcuts for most actions. Some keyboard shortcuts are
@@ -176,7 +162,7 @@ navigating to the home page is to hold down the control key and press “H”.</
 <li><strong>⌃,</strong> open the application settings page</li>
 <li><strong>⌃H</strong> open the home page</li>
 <li><strong>⌃P</strong> open the page that lists the user-created pages (<em>when logged in only</em>)</li>
-<li><strong>⌃C</strong> open the corpora page (for FieldDB corpora, <em>when logged in only</em>)</li>
+<li><strong>⌃C</strong> open the corpora page (for {{FieldDB.FieldDBObject.application.brand}} corpora, <em>when logged in only</em>)</li>
 <li><strong>⌃R</strong> open/close the register dialog</li>
 <li><strong>⌃A</strong> open the page for adding a new form (<em>when logged in only</em>)</li>
 <li><strong>⌃S</strong> open the page for searching through your data (<em>when logged in only</em>)</li>
@@ -211,4 +197,21 @@ that particular form:</p>
 <li><strong>shift+tab</strong> focus the previous form</li>
 </ul>
 
-
+</div>
+<script>
+if (FieldDB && FieldDB.FieldDBObject && FieldDB.FieldDBObject.application && FieldDB.FieldDBObject.application.brand) {
+  var replaceVariables = function(content) {
+    alert(" wait here"+ content)
+    content = content.replace(/{{FieldDB.FieldDBObject.application.brand}}/g, FieldDB.FieldDBObject.application.brand)
+                    .replace(/{{FieldDB.FieldDBObject.application.website}}/g, FieldDB.FieldDBObject.application.website);
+    return content;
+  }
+  if ($ && $(".markdown-content")) {
+    $(".markdown-content")
+      .each(function() {
+        console.log(window.markdown = this)
+        $(this).html(replaceVariables($(this).html()));
+      });
+  }
+}
+</script>

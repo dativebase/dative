@@ -193,11 +193,11 @@ define [
 
     ###
     # This is the object that is sent to PUT `<CorpusServiceURL>/<pouchname>/<corpusUUID>
-    # on an update request. It is 
+    # on an update request. It is
     _id: "63ff8fd7b5be6becbd9e5413b3060dd5"
     _rev: "12-d1e6a51f42377dc3803207bbf6a13baa"
     api: "private_corpuses"
-    authUrl: "https://auth.lingsync.org"
+    authUrl: FieldDB.Database.prototype.BASE_AUTH_URL
     collection: "private_corpuses"
     comments: []
     confidential: {fieldDBtype: "Confidential", secretkey: "e14714cb-ddfb-5e4e-bad9-2a75d573dbe0",…}
@@ -221,7 +221,7 @@ define [
     *** timestamp: 1399303339523 # timestamp of corpus creation (I think)
     title: "Big Bear Corpus"
     titleAsUrl: "big_bear_corpus"
-    url: "https://corpus.lingsync.org/jrwdunham-firstcorpus"
+    url: FieldDB.Database.prototype.BASE_DB_URL+"/jrwdunham-firstcorpus"
     version: "v2.38.16"
     ###
 
