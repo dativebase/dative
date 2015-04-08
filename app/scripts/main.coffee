@@ -35,8 +35,8 @@ require.config
     bootstrap: '../bower_components/sass-bootstrap/dist/js/bootstrap'
     text: '../bower_components/requirejs-text/text'
     jqueryui: '../bower_components/jqueryui/jquery-ui'
-    superfish: 'jquery-extensions/superfish'
-    superclick: 'jquery-extensions/superclick'
+    superfish: '../bower_components/superfish/dist/js/superfish'
+    superclick: '../bower_components/superclick/dist/js/superclick'
     #superfish: '../bower_components/superfish/dist/js/superfish'
     #superfish: 'jquery-extensions/superfish/dist/js/superfish'
     igt: 'jquery-extensions/igt'
@@ -44,7 +44,7 @@ require.config
     sfjquimatch: 'jquery-extensions/superfish-jqueryui-match'
     # Supersubs plugin removed in v1.6 of superfish. See
     # https://github.com/joeldbirch/superfish.
-    supersubs: 'jquery-extensions/supersubs'
+    supersubs: '../bower_components/superfish/dist/js/supersubs'
     #supersubs: '../bower_components/superfish/dist/js/supersubs'
     #supersubs: 'jquery-extensions/superfish/dist/js/supersubs'
     multiselect: '../bower_components/multiselect/js/jquery.multi-select'
