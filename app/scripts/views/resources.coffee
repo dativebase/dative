@@ -16,17 +16,31 @@ define [
   # ---------------
   #
   # Displays a collection of resources (e.g., OLD corpora) for browsing, with
-  # pagination. Also contains a model-less ResourceView instance for creating
-  # new resources within the resources browse interface.
+  # pagination. Also contains a ResourceView instance (with a model that hasn't
+  # been saved on the server) for creating new resources within the resources
+  # browse interface.
   #
   # This view is intended to be subclassed and parameterized minimally in order
   # to work with OLD corpora, phonologies, tags, etc.
+  #
+  # TODO: make forms use this same resources paginator view so that there is
+  # not needless code repetition.
 
   class ResourcesView extends BaseView
 
     # Override these four attributes in sub-classes.
+
+    # `@resourceName` should be a singular uncapitalized noun denoting the type
+    # of resource handled by this resources view. Capitalized and pluralized
+    # counterparts are created dynamically.
     resourceName: 'resource'
+
+    # `@resourceView` is a class that displays a single resource, it is
+    # expected that this view will contain an update/add sub-view for updating
+    # the resource.
     resourceView: ResourceView
+
+    # A Backbone collection, and model for the resources.
     resourcesCollection: ResourcesCollection
     resourceModel: ResourceModel
 

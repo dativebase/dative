@@ -208,7 +208,6 @@ if (FieldDB && FieldDB.FieldDBObject && FieldDB.FieldDBObject.application && Fie
   if ($ && $(".markdown-content")) {
     $(".markdown-content")
       .each(function() {
-        console.log(window.markdown = this)
         $(this).html(replaceVariables($(this).html()));
       });
   }

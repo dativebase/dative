@@ -7,5 +7,8 @@ define ['./representation'], (RepresentationView) ->
 
   class PhoneticTranscriptionRepresentationView extends RepresentationView
     valueFormatter: (value) =>
-      @utils.encloseIfNotAlready value, '[', ']'
+      try
+        @utils.encloseIfNotAlready value, '[', ']'
+      catch
+        value
 

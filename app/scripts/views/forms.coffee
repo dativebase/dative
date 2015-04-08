@@ -21,12 +21,6 @@ define [
   #
   # Also contains a model-less FormView instance for creating new forms
   # within the forms browse interface.
-  #
-  # Note that this view accommodates both client-side pagination for FieldDB
-  # backends and server-side pagination for OLD ones. That is, with FieldDB,
-  # all forms are fetched upon first render and pagination involves displaying
-  # certain sets of already-fetched forms. With the OLD, a new fetch is
-  # performed whenever the pagination parameters change.
 
   class FormsView extends BaseView
 
@@ -35,18 +29,24 @@ define [
     initialize: (options) ->
       @getGlobalsFormsDisplaySettings()
       @focusedElementIndex = null
-      @formViews = [] # holds a FormView instance for each FormModel in FormsCollection
-      @renderedFormViews = [] # references to the FormView instances that are rendered
-      @weShouldFocusFirstAddViewInput = false # AppView sets this to True when you click Forms > Add
-      @renderedPaginationItemTableViews = [] # Each form view is in a 1-row/2-cell table where cell 1 is the index+1, e.g., (1), (2), etc.
+      @formViews = []
+      # AppView sets this to `true` when you click Forms > Add
+      @weShouldFocusFirstAddViewInput = false
+      # Each form view is in a 1-row/2-cell table where cell 1 is the form's
+      # index plus 1, e.g., (1), (2), etc.
+      @paginationItemTableViews = []
       @fetchCompleted = false
-      @fetchOLDFormsLastPage = false # This is set to true when we want to fetch the last OLD page immediately after fetching the first one.
-      @lastFetched = # We store this to help us prevent redundant requests to the server for all forms.
-        serverType: ''
+      # This is set to `true` when we want to fetch the last page immediately
+      # after fetching the first one.
+      @fetchFormsLastPage = false
+      @lastFetched =   # We store this to help us prevent redundant requests to
+        serverType: '' # the server for all forms.
         serverName: ''
         fieldDBCorpusPouchname: ''
       @paginator = new Paginator page=1, items=0, itemsPerPage=@itemsPerPage
-      @paginationMenuTopView = new PaginationMenuTopView paginator: @paginator # This handles the UI for the items-per-page select, the first, prevous, next buttons, etc.
+      # This handles the UI for the items-per-page select, the first, prevous,
+      # next buttons, etc.
+      @paginationMenuTopView = new PaginationMenuTopView paginator: @paginator
       @collection = new FormsCollection()
       @newFormView = @getNewFormView()
       @exporterDialog = new ExporterDialogView()
@@ -100,17 +100,17 @@ define [
     listenToEvents: ->
       super
 
-      @listenTo Backbone, 'fetchAllFieldDBFormsStart', @fetchAllFormsStart
-      @listenTo Backbone, 'fetchAllFieldDBFormsEnd', @fetchAllFormsEnd
-      @listenTo Backbone, 'fetchAllFieldDBFormsFail', @fetchAllFormsFail
-      @listenTo Backbone, 'fetchAllFieldDBFormsSuccess', @fetchAllFormsSuccess
+      @listenTo Backbone, 'fetchFieldDBFormsStart', @fetchFormsStart
+      @listenTo Backbone, 'fetchFieldDBFormsEnd', @fetchFormsEnd
+      @listenTo Backbone, 'fetchFieldDBFormsFail', @fetchFormsFail
+      @listenTo Backbone, 'fetchFieldDBFormsSuccess', @fetchFormsSuccess
 
-      @listenTo Backbone, 'fetchOLDFormsStart', @fetchAllFormsStart
-      @listenTo Backbone, 'fetchOLDFormsEnd', @fetchAllFormsEnd
-      @listenTo Backbone, 'fetchOLDFormsFail', @fetchAllFormsFail
-      @listenTo Backbone, 'fetchOLDFormsSuccess', @fetchOLDFormsSuccess
+      @listenTo Backbone, 'fetchOLDFormsStart', @fetchFormsStart
+      @listenTo Backbone, 'fetchOLDFormsEnd', @fetchFormsEnd
+      @listenTo Backbone, 'fetchOLDFormsFail', @fetchFormsFail
+      @listenTo Backbone, 'fetchOLDFormsSuccess', @fetchFormsSuccess
 
-      @listenTo Backbone, 'destroyOLDFormSuccess', @destroyOLDFormSuccess
+      @listenTo Backbone, 'destroyFormSuccess', @destroyFormSuccess
       @listenTo Backbone, 'duplicateForm', @duplicateForm
       @listenTo Backbone, 'duplicateFormConfirm', @duplicateFormConfirm
 
@@ -139,10 +139,8 @@ define [
 
     scrollToFirstValidationError: (error, formModel) ->
       if formModel.id
-        console.log 'we have an id'
         selector = "##{formModel.cid} .dative-field-validation-container"
       else
-        console.log 'we DONT have an id'
         selector = ".new-form-view .dative-field-validation-container"
       $firstValidationError = @$(selector).filter(':visible').first()
       if $firstValidationError then @scrollToElement $firstValidationError
@@ -197,14 +195,14 @@ define [
       @newFormViewVisibility()
       @listenToNewFormView()
 
-    destroyOLDFormSuccess: (formModel) ->
+    destroyFormSuccess: (formModel) ->
       @paginator.setItems (@paginator.items - 1)
       @refreshHeader()
       @refreshPaginationMenuTop()
-      destroyedFormView = _.findWhere @renderedFormViews, {model: formModel}
+      destroyedFormView = _.findWhere @formViews, {model: formModel}
       if destroyedFormView
         destroyedFormView.$el.slideUp()
-      @fetchOLDFormsPageToCollection()
+      @fetchFormsPageToCollection()
 
     # Returns true if a new form should be on the currently displayed page.
     newFormShouldBeOnCurrentPage: ->
@@ -355,7 +353,6 @@ define [
     showAllLabels: ->
       @primaryDataLabelsVisible = true
       @setToggleAllLabelsButtonStateOpen()
-      @tellFormSubviewsToShowLabels()
       Backbone.trigger 'formsView:showAllLabels'
 
     # Tell all rendered forms to hide their primary data labels. (Also tell
@@ -363,7 +360,6 @@ define [
     hideAllLabels: ->
       @primaryDataLabelsVisible = false
       @setToggleAllLabelsButtonStateClosed()
-      @tellFormSubviewsToHideLabels()
       Backbone.trigger 'formsView:hideAllLabels'
 
     # Make the "toggle all labels button" match view state.
@@ -403,7 +399,6 @@ define [
     # do render.)
     expandAllForms: ->
       @allFormsExpanded = true
-      @tellFormSubviewsToBeExpanded()
       @listenToOnce Backbone, 'form:formExpanded', @restoreFocusAndScrollPosition
       Backbone.trigger 'formsView:expandAllForms'
 
@@ -413,40 +408,9 @@ define [
     # do render.)
     collapseAllForms: ->
       @allFormsExpanded = false
-      @tellFormSubviewsToBeCollapsed()
       @focusEnclosingFormView()
       @listenToOnce Backbone, 'form:formCollapsed', @restoreFocusAndScrollPosition
       Backbone.trigger 'formsView:collapseAllForms'
-
-    # FieldDB form subviews all already exist, so we have to tell them to now be
-    # collapsed by default.
-    tellFormSubviewsToBeCollapsed: ->
-      if @getActiveServerType() is 'FieldDB'
-        for formView in @formViews
-          formView.expanded = false
-          formView.effectuateExpanded()
-
-    # FieldDB form subviews all already exist, so we have to tell them to now be
-    # expanded by default.
-    tellFormSubviewsToBeExpanded: ->
-      if @getActiveServerType() is 'FieldDB'
-        for formView in @formViews
-          formView.expanded = true
-          formView.effectuateExpanded()
-
-    # FieldDB form subviews all already exist, so we have to tell them to now
-    # hide their primary data labels by default.
-    tellFormSubviewsToHideLabels: ->
-      if @getActiveServerType() is 'FieldDB'
-        for formView in @formViews
-          formView.primaryDataLabelsVisible = false
-
-    # FieldDB form subviews all already exist, so we have to tell them to now
-    # show their primary data labels by default.
-    tellFormSubviewsToShowLabels: ->
-      if @getActiveServerType() is 'FieldDB'
-        for formView in @formViews
-          formView.primaryDataLabelsVisible = true
 
     # Sets focus to the FormView div that contains the focused control. This is
     # necessary so that we can restore scroll position after a collapse-all
@@ -458,30 +422,30 @@ define [
         $focusedElement.closest('.dative-form-object').first().focus()
 
     # Tell the collection to fetch forms from the server and add them to itself.
-    # Only `@render` calls this. Note that with a FieldDB backend we fetch
-    # everything but with an OLD backend we just fetch the forms for the
-    # current pagination page, i.e., we use the OLD's server-side pagination
-    # feature.
-    # Note that setting `fetchOLDFormsLastPage` to `true` will cause
-    # `@fetchOLDFormsSuccess` to immediately make a second request for the last
-    # page of forms. This is the only way to get the last page of forms from
-    # the OLD via its current API; that is, you first have to make a vacuous
-    # request in order to get the form count so that you know what the last
-    # page is.
+    # Only `@render` calls this. Note that we just fetch the forms for the
+    # current pagination page, i.e., we use the FieldDB's or the OLD's
+    # server-side pagination feature. Note that setting `fetchFormsLastPage` to
+    # `true` will cause `@fetchFormsSuccess` to immediately make a second
+    # request for the last page of forms. This is the strategy chosen to get
+    # the last page of forms from the web service. Note that this is the only
+    # way to do this with the OLD via its current API; that is, you first have
+    # to make a vacuous request in order to get the form count so that you know
+    # what the last page is. With the FieldDB API there may be a better way, cf.
+    # https://github.com/jrwdunham/dative/issues/97.
     fetchFormsToCollection: ->
-      if @getActiveServerType() is 'FieldDB'
-        @collection.fetchAllFieldDBForms()
-      else
-        @fetchOLDFormsLastPage = true
-        @fetchOLDFormsPageToCollection()
+      @fetchFormsLastPage = true
+      @fetchFormsPageToCollection()
 
-    # Get a page of forms from an OLD web service.
-    # Note that when the OLD is the server, the forms collection simply holds
-    # one page at a time; that is, the collection is emptied and refilled on
-    # each pagination action, hence the `.reset()` call here.
-    fetchOLDFormsPageToCollection: ->
+    # Get a page of forms from the web service.
+    # Note that the forms collection simply holds one page at a time; that is,
+    # the collection is emptied and refilled on each pagination action, hence
+    # the `.reset()` call here.
+    fetchFormsPageToCollection: ->
       @collection.reset()
-      @collection.fetchOLDForms @paginator
+      if @getActiveServerType() is 'FieldDB'
+        @collection.fetchFieldDBForms @paginator
+      else
+        @collection.fetchOLDForms @paginator
 
     # Render the pagination top menu view. This is the row of buttons for controlling
     # the visible pagination page and how many items are visible per page.
@@ -505,57 +469,35 @@ define [
     # Respond to `@collection`-issued events related to the "fetch forms" task.
     ############################################################################
 
-    fetchAllFormsStart: ->
+    fetchFormsStart: ->
       @fetchCompleted = false
       @spin()
 
-    fetchAllFormsEnd: ->
+    fetchFormsEnd: ->
       @fetchCompleted = true
 
-    fetchAllFormsFail: (reason) ->
+    fetchFormsFail: (reason) ->
       @stopSpin()
-      console.log 'fetchAllFormsFail'
+      console.log 'fetchFormsFail'
       console.log reason
       @$('.no-forms')
         .show()
         .text reason
 
-    # We have succeeded in retrieving all forms from a FieldDB server.
-    # In the FieldDB case we can call `@showLastPage()` because this method
-    # is only called once: after all forms have been fetched.
-    fetchAllFormsSuccess: ->
-      @saveFetchedMetadata()
-      @getFormViews()
-      @setPaginatorItems()
-      @showLastPage()
-      @stopSpin()
-
-    # We have succeeded in retrieving a page of forms from an OLD server.
-    # `paginator` is an object returned from the OLD. Crucially, it has an
+    # We have succeeded in retrieving a page of forms from the server.
+    # `paginator` is an object returned from the server. Crucially, it has an
     # attribute `count` which tells us how many forms are in the database.
-    # `setPaginatorItems` uses this to sync the client-side pagination GUI
-    # with the OLD's server-side pagination.
-    fetchOLDFormsSuccess: (paginator) ->
-      console.log 'fetch OLD forms successful!'
+    fetchFormsSuccess: (paginator) ->
       @saveFetchedMetadata()
       @getFormViews()
-      @setPaginatorItems paginator
-      if @paginator.items is 0 then @fetchOLDFormsLastPage = false
-      if @fetchOLDFormsLastPage
-        console.log 'gonna show last page'
-        @fetchOLDFormsLastPage = false
-        @showLastPage() # This will fetch the last page and re-call `fetchOLDFormsSuccess`
+      @paginator.setItems paginator.count
+      if @paginator.items is 0 then @fetchFormsLastPage = false
+      if @fetchFormsLastPage
+        @fetchFormsLastPage = false
+        # This will fetch the last page and re-call `fetchFormsSuccess`
+        @showLastPage()
       else
-        console.log 'gonna call refresh page fade'
         @refreshPageFade()
-
-    # Tell the paginator how many items/forms are in our corpus/database.
-    setPaginatorItems: (oldPaginator=null) ->
-      if oldPaginator
-        @paginator.setItems oldPaginator.count # the OLD case
-      else
-        @paginator.setItems @collection.length # the FieldDB case
-      #@paginator.setPageToLast()
 
     # Remember the server type and name (and corpus name) of the last forms
     # fetch, so we don't needlessly repeat it on future renderings of this
@@ -564,7 +506,8 @@ define [
     saveFetchedMetadata: ->
       @lastFetched.serverType = @getActiveServerType()
       @lastFetched.serverName = @getActiveServerName()
-      @lastFetched.fieldDBCorpusPouchname = @getActiveServerFieldDBCorpusPouchname()
+      @lastFetched.fieldDBCorpusPouchname =
+        @getActiveServerFieldDBCorpusPouchname()
 
     getActiveServerType: ->
       globals.applicationSettings.get('activeServer').get 'type'
@@ -674,8 +617,8 @@ define [
       hideOptions =
         complete: =>
           @$('.dative-pagin-items').html ''
-          @closeRenderedFormViews()
-          @closeRenderedPaginationItemTableViews()
+          @closeFormViews()
+          @closePaginationItemTableViews()
           @renderPage options
       if options?.hideEffect
         hideOptions.duration = @getAnimationDuration()
@@ -688,30 +631,29 @@ define [
 
     # Close all rendered form views: remove them from the DOM, but also prevent
     # them from reacting to events.
-    closeRenderedFormViews: ->
-      while @renderedFormViews.length
-        formView = @renderedFormViews.pop()
+    closeFormViews: ->
+      for formView in @formViews
         formView.close()
         @closed formView
+      # while @formViews.length
+      #   formView = @formViews.pop()
+      #   formView.close()
+      #   @closed formView
 
     # Close all rendered pagination item table views, i.e., the mini-tables that
     # hold form views.
-    closeRenderedPaginationItemTableViews: ->
-      while @renderedPaginationItemTableViews.length
-        paginationItemTableView = @renderedPaginationItemTableViews.pop()
+    closePaginationItemTableViews: ->
+      while @paginationItemTableViews.length
+        paginationItemTableView = @paginationItemTableViews.pop()
         paginationItemTableView.close()
         @closed paginationItemTableView
 
     # Create a `FormView` instance for each `FormModel` instance in
     # `@collection` and append it to `@formViews`.
-    # Note that in the OLD case, we reset `formViews` to `[]` because
-    # with server-side pagination we only store one page worth of form
-    # models/views at a time.
-    # TODO (@cesine @jrwdunham): instantiating a FormView for every FormModel
-    # in the collection seems potentially inefficient. Thoughts?
+    # Note that we reset `formViews` to `[]` because with server-side
+    # pagination we only store one page worth of form models/views at a time.
     getFormViews: ->
-      if @getActiveServerType() is 'OLD'
-        @formViews = []
+      @formViews = []
       @collection.each (formModel) =>
         newFormView = new FormView
           model: formModel
@@ -743,8 +685,8 @@ define [
       @$('div.dative-form-object').first().focus()
 
     focusLastForm: ->
-      if @renderedFormViews.length > 0
-        @renderedFormViews[@renderedFormViews.length - 1].$el.focus()
+      if @formViews.length > 0
+        @formViews[@formViews.length - 1].$el.focus()
 
     focusFirstNewFormViewTextarea: ->
       @$('.new-form-view .add-form-widget textarea').first().focus()
@@ -794,29 +736,19 @@ define [
     # Render a page (pagination) of form views. That is, change which set of
     # `FormView` instances are displayed.
     renderPage: (options) ->
-      # @paginator._refresh() # This seems to be unnecessary.
       @renderFormViews()
       @stopSpin()
       @showFormList options
 
     # Render all form views on the current paginator page.
-    # Note the OLD/FieldDB difference: with the OLD, each pagination change
-    # event triggers a new fetch to the OLD server, and a resetting of both
-    # `@collection` and `@formViews`; thus we render all form models in the
-    # collection (and all form views in `@formViews`) using the "indices" from
-    # `@paginator`. With FieldDB, we have already fetched *all* forms/datums
-    # to `@collection` (and we have all of their respective views in
-    # `@formViews`) so we can simply take a slice out of `@formViews` using the
-    # paginator start and end values.
+    # Each pagination change event triggers a new fetch to the server, and
+    # a resetting of both `@collection` and `@formViews`; thus we render all
+    # form models in the collection (and all form views in `@formViews`) using
+    # the "indices" from `@paginator`.
     renderFormViews: ->
       paginationIndices = [@paginator.start..@paginator.end]
-      if @getActiveServerType() is 'OLD'
-        for [index, formView] in _.zip(paginationIndices, @formViews)
-          @renderFormView formView, index
-      else
-        for index in paginationIndices
-          formView = @formViews[index]
-          @renderFormView formView, index
+      for [index, formView] in _.zip(paginationIndices, @formViews)
+        @renderFormView formView, index
 
     # Render a single form view. Embed it in a pagination table view and stick
     # it in the DOM.
@@ -830,9 +762,9 @@ define [
         $formList.append paginationItemTableView.render().el
         formView.setElement @$("##{formId}")
         formView.render()
-        @renderedFormViews.push formView
+        @formViews.push formView
         @rendered formView
-        @renderedPaginationItemTableViews.push paginationItemTableView
+        @paginationItemTableViews.push paginationItemTableView
         @rendered paginationItemTableView
 
     # jQuery-show the list of forms.
@@ -859,53 +791,32 @@ define [
       @paginator.setItemsPerPage newItemsPerPage
       itemsDisplayedAfter = @paginator.itemsDisplayed
       if itemsDisplayedBefore isnt itemsDisplayedAfter
-        if @getActiveServerType() is 'FieldDB'
-          @refreshPageFade()
-        else
-          @fetchOLDFormsPageToCollection()
+        @fetchFormsPageToCollection()
 
     showFirstPage: ->
       pageBefore = @paginator.page
       @paginator.setPageToFirst()
       pageAfter = @paginator.page
-      if pageBefore isnt pageAfter
-        if @getActiveServerType() is 'FieldDB'
-          @refreshPageFade()
-        else
-          @fetchOLDFormsPageToCollection()
+      if pageBefore isnt pageAfter then @fetchFormsPageToCollection()
 
     showPreviousPage: ->
       pageBefore = @paginator.page
       @paginator.setPageToPrevious()
       pageAfter = @paginator.page
-      if pageBefore isnt pageAfter
-        if @getActiveServerType() is 'FieldDB'
-          @refreshPageFade()
-        else
-          @fetchOLDFormsPageToCollection()
+      if pageBefore isnt pageAfter then @fetchFormsPageToCollection()
 
     showNextPage: ->
       pageBefore = @paginator.page
       @paginator.setPageToNext()
       pageAfter = @paginator.page
-      if pageBefore isnt pageAfter
-        if @getActiveServerType() is 'FieldDB'
-          @refreshPageFade()
-        else
-          @fetchOLDFormsPageToCollection()
+      if pageBefore isnt pageAfter then @fetchFormsPageToCollection()
 
     showLastPage: ->
       pageBefore = @paginator.page
       @paginator.setPageToLast()
       pageAfter = @paginator.page
       if pageBefore isnt pageAfter
-        console.log 'pageBefore isnt pageAfter'
-        if @getActiveServerType() is 'FieldDB'
-          @refreshPageFade()
-        else
-          @fetchOLDFormsPageToCollection()
-      else
-        console.log 'pageBefore IS pageAfter'
+        @fetchFormsPageToCollection()
 
     # Show a new page where `method` determines whether the new page is
     # behind or ahead of the current one and where `n` is the number of
@@ -914,11 +825,7 @@ define [
       pageBefore = @paginator.page
       @paginator[method] n
       pageAfter = @paginator.page
-      if pageBefore isnt pageAfter
-        if @getActiveServerType() is 'FieldDB'
-          @refreshPageFade()
-        else
-          @fetchOLDFormsPageToCollection()
+      if pageBefore isnt pageAfter then @fetchFormsPageToCollection()
 
     showThreePagesBack: ->
       @showPage 3, 'decrementPage'
@@ -1043,6 +950,7 @@ define [
       # should be removed here (they will be regenerated by the OLD upon save):
       # morpheme_break_ids, morpheme_gloss_ids, break_gloss_category,
       # syntactic_category_string.
+      # TODO: remove the OLD-specificity and the OLD-form-specificity.
       newFormModel.set
         id: null
         UUID: ''

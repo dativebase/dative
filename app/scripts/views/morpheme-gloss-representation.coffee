@@ -7,5 +7,8 @@ define ['./representation'], (RepresentationView) ->
 
   class MorphemeGlossRepresentationView extends RepresentationView
     valueFormatter: (value) =>
-      @utils.smallCapsAcronyms value
+      try
+        @utils.smallCapsAcronyms value
+      catch
+        value
 

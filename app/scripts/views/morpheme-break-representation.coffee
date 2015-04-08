@@ -7,5 +7,8 @@ define ['./representation'], (RepresentationView) ->
 
   class MorphemeBreakRepresentationView extends RepresentationView
     valueFormatter: (value) =>
-      @utils.encloseIfNotAlready value, '/', '/'
+      try
+        @utils.encloseIfNotAlready value, '/', '/'
+      catch
+        value
 
