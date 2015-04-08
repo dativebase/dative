@@ -265,14 +265,14 @@ module.exports = (grunt) ->
             bootstrap: '../../<%= yeoman.app %>/bower_components/sass-bootstrap/dist/js/bootstrap'
             text: '../../<%= yeoman.app %>/bower_components/requirejs-text/text'
             jqueryui: '../../<%= yeoman.app %>/bower_components/jqueryui/jquery-ui'
-            superfish: '../../<%= yeoman.app%>/scripts/jquery-extensions/superfish'
-            superclick: '../../<%= yeoman.app%>/scripts/jquery-extensions/superclick'
+            superfish: '../../<%= yeoman.app%>/bower_components/superfish/dist/js/superfish'
+            superclick: '../../<%= yeoman.app%>/bower_components/superclick/dist/js/superclick'
             #superfish: '../../<%= yeoman.app%>/scripts/jquery-extensions/superfish/dist/js/superfish'
             #superfish: '../../<%= yeoman.app %>/bower_components/superfish/dist/js/superfish'
             igt: '../../<%= yeoman.app%>/scripts/jquery-extensions/igt'
             jqueryuicolors: '../../<%= yeoman.app%>/scripts/jquery-extensions/jqueryui-colors'
             sfjquimatch: '../../<%= yeoman.app%>/scripts/jquery-extensions/superfish-jqueryui-match'
-            supersubs: '../../<%= yeoman.app%>/scripts/jquery-extensions/supersubs'
+            supersubs: '../../<%= yeoman.app%>/bower_components/superfish/dist/js/supersubs'
             #supersubs: '../../<%= yeoman.app%>/scripts/jquery-extensions/superfish/dist/js/supersubs'
             #supersubs: '../../<%= yeoman.app %>/bower_components/superfish/dist/js/supersubs'
             multiselect: '../../<%= yeoman.app %>/bower_components/multiselect/js/jquery.multi-select'
@@ -369,11 +369,13 @@ module.exports = (grunt) ->
           src: [
             '*.{ico,txt}'
             '.htaccess'
+            'favicon.ico'
+            'help/html/help.html'
             './../package.json'
             'images/{,*/}*.{webp,gif}'
             'styles/fonts/{,*/}*.*'
             'bower_components/sass-bootstrap/fonts/*.*'
-            'bower_components/jqueryui/**/*.{png,jpg,jpeg,gif,webp,svg,eot,ttf,woff}' # added, cf. http://stackoverflow.com/questions/20509145/managing-images-in-bower-packages-using-grunt?lq=1
+            'bower_components/jqueryui/**/*.*' # added, cf. http://stackoverflow.com/questions/20509145/managing-images-in-bower-packages-using-grunt?lq=1
           ]
         ]
       disttmp:
@@ -616,6 +618,9 @@ module.exports = (grunt) ->
     # I don't know why dist/bower_components/ is created (...). In any case,
     # I'm just cleaning it up hackily like so.
     # 'clean:postdist'
+
+    # copy everything that is supposed ot be in the dist, not sure why there are other copy tasks like disttmp and distJQueryUIImages and distrequirejs
+    'copy:dist'
   ]
 
   grunt.registerTask 'default', ['jshint', 'test', 'build']
