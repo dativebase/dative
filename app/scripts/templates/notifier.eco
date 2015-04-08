@@ -1,9 +1,4 @@
-<div class='notifier ui-widget ui-widget-content ui-corner-all'>
-  <ul>
-  <% for message in @messages: %>
-    <li><%= message %></li>
-  <% end %>
-  </ul>
+<div class='notifier'>
+    <div class='notifications-container'></div>
 </div>
-
 

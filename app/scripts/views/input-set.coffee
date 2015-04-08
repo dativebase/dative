@@ -66,6 +66,7 @@ define [
             .find('button').focus()
           inputView.$el.remove()
           delete @inputViews[index]
+          @trigger 'setToModel' # FieldView listens for this and calls `setToModel`
 
     # Append a new input view instance's HTML to the DOM.
     # This is called when the "+" button is clicked.
@@ -120,6 +121,29 @@ define [
         @renderInputView inputView
       @listenToEvents()
 
+    refresh: (@context) ->
+      for index, inputView of @inputViews
+        inputView.remove()
+        inputView.close()
+        @closed inputView
+      @inputViews = {}
+      @getInputViews()
+      @render()
+
+    # Remove the input set view with index = `index` from the DOM and destroy
+    # it. This is called when the "x" button is clicked.
+    removeInputView: (index) ->
+      inputView = @inputViews[index]
+      inputView.$el.slideUp
+        complete: =>
+          inputView.close()
+          inputView.$el
+            .prev()
+            .find('button').focus()
+          inputView.$el.remove()
+          delete @inputViews[index]
+          @trigger 'setToModel' # FieldView listens for this and calls `setToModel`
+
     # Render an input set view; setting `animate` to true will cause `slideDown`.
     renderInputView: (inputView, animate=false) ->
       @$el.append inputView.render().el
@@ -130,7 +154,7 @@ define [
           .slideDown()
 
     listenToEvents: ->
-      super
+      @stopAndRelisten()
       for index, inputView of @inputViews
         @listenToInputView inputView
 
@@ -203,3 +227,12 @@ define [
         else
           array.push objectValue
       result
+
+    disable: ->
+      for index, inputView of @inputViews
+        inputView.disable()
+
+    enable: ->
+      for index, inputView of @inputViews
+        inputView.enable()
+

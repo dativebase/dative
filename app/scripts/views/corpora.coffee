@@ -7,7 +7,6 @@ define [
   './../collections/corpora'
   './../utils/globals'
   './../templates/corpora'
-  'perfectscrollbar'
 ], (Backbone, BaseView, CorpusView, CreateCorpusView, CorpusModel, CorporaCollection,
   globals, corporaTemplate) ->
 
@@ -108,7 +107,7 @@ define [
         @createCorpusView.show()
       else
         @createCorpusView.hide()
-      @perfectScrollbar()
+      @$('div#dative-page-body').first().scroll => @closeAllTooltips()
       @setFocus()
       @fixRoundedBorders()
       Backbone.trigger 'longTask:deregister', taskId
@@ -156,11 +155,6 @@ define [
         container.appendChild corpusView.render().el
         @rendered corpusView
       @$('div.corpora-list').append container
-
-    perfectScrollbar: ->
-      @$('div#dative-page-body').first()
-        .perfectScrollbar()
-        .scroll => @closeAllTooltips()
 
     # The special `onClose` event is called by `close` in base.coffee upon close
     onClose: ->

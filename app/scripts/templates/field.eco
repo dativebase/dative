@@ -1,4 +1,11 @@
 <div class='dative-field-label-container'></div>
 <div class='dative-field-input-container'></div>
-<div class='dative-field-validation-container'></div>
+<div class='dative-field-validation-container'>
+    <div
+        class='ui-state-error
+               ui-corner-all
+               dative-field-validation-error'
+        ><i class='fa fa-fw fa-exclamation-triangle'></i
+        ><span class='dative-field-validation-error-message'></span></div>
+</div>
 

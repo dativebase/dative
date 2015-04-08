@@ -4,8 +4,8 @@ define [
   './servers'
   './active-server'
   './../templates/application-settings'
-  'perfectscrollbar'
-], (Backbone, BaseView, ServersView, ActiveServerView, applicationSettingsTemplate) ->
+], (Backbone, BaseView, ServersView, ActiveServerView,
+  applicationSettingsTemplate) ->
 
   # Application Settings View
   # -------------------------
@@ -102,7 +102,7 @@ define [
         false})
       @$('button.save').button({icons: {primary: 'ui-icon-disk'}, text: false})
 
-      @perfectScrollbar()
+      @$('div#dative-page-body').first().scroll => @closeAllTooltips()
 
       @selectmenuify()
       @hoverStateFieldDisplay() # make data display react to focus & hover
@@ -110,10 +110,6 @@ define [
 
       @$('div.server-config-widget-body').hide()
 
-    perfectScrollbar: ->
-      @$('div#dative-page-body').first()
-        .perfectScrollbar()
-        .scroll => @closeAllTooltips()
 
     # The special `onClose` event is called by `close` in base.coffee upon close
     onClose: ->

@@ -24,3 +24,9 @@ define [
         .tooltip
           position: @tooltipPositionLeft '-200'
 
+    disable: ->
+      @disableSelectmenus()
+
+    enable: ->
+      @enableSelectmenus()
+

@@ -2,7 +2,6 @@ define [
   'backbone'
   './base'
   './../templates/help-dialog'
-  'perfectscrollbar'
 ], (Backbone, BaseView, helpDialogTemplate) ->
 
   # Help Dialog View
@@ -26,6 +25,7 @@ define [
       @scrolledToMatchedElementIndex = 0
       @postHTMLRetrievedAction = null # may be specified as a method to call once the Help HTML has been retrieved.
       @listenTo Backbone, 'helpDialog:toggle', @toggle
+      @listenTo Backbone, 'helpDialog:openTo', @openTo
 
     collapsedHeight: ->
       @expandedHeight()
@@ -208,7 +208,7 @@ define [
       @$target = @$ '.dative-help-dialog-target'
       @dialogify()
       @guify()
-      @perfectScrollbar()
+      @$('div.help-content-container').first().scroll => @closeAllTooltips()
       @getHelpHTML()
       @
 
@@ -234,11 +234,6 @@ define [
     spin: -> @$('.help-content').spin @spinnerOptions()
 
     stopSpin: -> @$('.help-content').spin false
-
-    perfectScrollbar: ->
-      @$('div.help-content-container').first()
-        .perfectScrollbar()
-        .scroll => @closeAllTooltips()
 
     # Transform the help dialog HTML to a jQueryUI dialog box.
     dialogify: ->
@@ -330,6 +325,16 @@ define [
         @dialogClose()
       else
         @dialogOpen()
+        @simulateSearchHelpText options
+
+    openTo: (options) ->
+      if not @hasBeenRendered
+        # This tells us to call `toggle` again once the help dialog has been
+        # rendered (and its HTML have been retrieved from the Dative server).
+        @postHTMLRetrievedAction = => @openTo options
+        @render()
+      else
+        if not @isOpen() then @dialogOpen()
         @simulateSearchHelpText options
 
     # Make it seem as though `options.searchTerm` has been searched in

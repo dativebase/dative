@@ -28,3 +28,9 @@ define [
         .tooltip
           position: @tooltipPositionLeft '-200'
 
+    disable: ->
+      @disableTextareas()
+
+    enable: ->
+      @enableTextareas()
+

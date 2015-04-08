@@ -15,3 +15,6 @@ define [
     @cors: new CORS()
     utils: utils
 
+    requiredString: (value) ->
+      if value.trim?() is '' then 'Please enter a value' else null
+

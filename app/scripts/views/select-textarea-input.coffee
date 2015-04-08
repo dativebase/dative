@@ -54,3 +54,11 @@ define [
         textareaNewWidth = @$el.width() - selectWidth - buffer
         $textarea.css 'width': textareaNewWidth
 
+    disable: ->
+      @disableTextareas()
+      @disableSelectmenus()
+
+    enable: ->
+      @enableTextareas()
+      @enableSelectmenus()
+

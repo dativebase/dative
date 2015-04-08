@@ -1,0 +1,84 @@
+<div class="dative-widget-header ui-widget-header ui-corner-top">
+
+  <div class='button-container-left'>
+
+    <% if @addUpdateType is 'add': %>
+      <button class="hide-subcorpus-widget dative-tooltip"
+        title="hide this new subcorpus widget">
+        <i class='fa fa-times fa-fw'></i>
+      </button>
+    <% else if not @headerAlwaysVisible: %>
+      <button class="hide-subcorpus-details dative-tooltip"
+        title="hide the buttons and extra data of this subcorpus">
+        <i class='fa fa-angle-double-up fa-fw'></i>
+      </button>
+  <% end %>
+
+    <button class="toggle-secondary-data dative-tooltip"
+      title="hide the secondary data of this subcorpus">
+      <i class='fa fa-angle-up fa-fw'></i>
+    </button>
+
+    <button class="toggle-primary-data-labels dative-tooltip"
+      title="show labels">labels:
+      <i class='fa fa-toggle-off fa-fw'></i>
+    </button>
+
+  </div>
+
+  <div class='dative-widget-header-title container-center'
+    ><%= @headerTitle or '' %></div>
+
+  <div class='button-container-right'>
+
+    <button class="update-subcorpus dative-tooltip"
+      <% if @addUpdateType is 'add': %>
+        title="edit the details of this subcorpus"
+      <% else: %>
+        title="update this subcorpus"
+      <% end %>
+      ><i class='fa fa-pencil-square-o fa-fw'></i>
+    </button>
+
+    <button class="export-subcorpus dative-tooltip"
+      title="export this subcorpus"
+      ><i class='fa fa-download fa-fw'></i>
+    </button>
+
+    <% if @addUpdateType is 'update': %>
+
+      <button class="delete-subcorpus dative-tooltip"
+        title="delete this subcorpus"
+        ><i class='fa fa-trash fa-fw'></i>
+      </button>
+
+      <button class="duplicate-subcorpus dative-tooltip"
+        title="duplicate this subcorpus"
+        ><i class='fa fa-copy fa-fw'></i>
+      </button>
+
+      <!-- Uncomment this later, once history is implemented.
+      <button class="subcorpus-history dative-tooltip"
+        title="view the history of this subcorpus"
+        ><i class='fa fa-history fa-fw'></i>
+      </button>
+      -->
+
+    <% end %>
+
+  </div>
+
+</div>
+
+
+<div class='dative-widget-body'>
+
+  <div class='update-subcorpus-widget update-widget dative-widget-center
+    dative-shadowed-widget ui-widget ui-widget-content ui-corner-all'></div>
+
+  <div class='subcorpus-primary-data large-unicode-font'> </div>
+
+  <div class='subcorpus-secondary-data large-unicode-font'></div>
+
+</div>
+

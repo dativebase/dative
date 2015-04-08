@@ -1,7 +1,7 @@
 define [
   './form-handler-base'
   './textarea-field'
-  './select-field'
+  './relational-select-field'
   './required-select-field'
   './person-select-field'
   './user-select-field'
@@ -18,7 +18,7 @@ define [
   './../templates/form-add-widget'
   'multiselect'
   'jqueryelastic'
-], (FormHandlerBaseView, TextareaFieldView, SelectFieldView,
+], (FormHandlerBaseView, TextareaFieldView, RelationalSelectFieldView,
   RequiredSelectFieldView, PersonSelectFieldView, UserSelectFieldView,
   SourceSelectFieldView, TranscriptionGrammaticalityFieldView,
   UtteranceJudgementFieldView, TranslationsFieldView, CommentsFieldView,
@@ -59,6 +59,36 @@ define [
   #    morpho-lexical cross-referencing. (Note: these are OLD-specific and are
   #    generated server-side.)
 
+  ##############################################################################
+  # Field sub-classes with max lengths
+  ##############################################################################
+
+  class TextareaFieldView255 extends TextareaFieldView
+
+    initialize: (options) ->
+      options.domAttributes =
+        maxlength: 255
+      super options
+
+  class TextareaFieldView1023 extends TextareaFieldView
+
+    initialize: (options) ->
+      options.domAttributes =
+        maxlength: 1023
+      super options
+
+  class TranscriptionGrammaticalityFieldView255 extends TranscriptionGrammaticalityFieldView
+
+    initialize: (options) ->
+      options.domAttributes =
+        maxlength: 255
+      super options
+
+
+  ##############################################################################
+  # Form Add Widget
+  ##############################################################################
+
   class FormAddWidgetView extends FormHandlerBaseView
 
     template: formAddTemplate
@@ -70,6 +100,17 @@ define [
       @secondaryDataVisible = false
       @listenToEvents()
       @addUpdateType = options.addUpdateType or 'add'
+      @submitAttempted = false
+
+      # TODO: if this is an "add"-type form, then the original model copy
+      # should (maybe) be an empty form.
+      @originalModelCopy = @copyModel @model
+
+    copyModel: (inputModel) ->
+      newModel = new FormModel()
+      for attr, val of @model.attributes
+        newModel.set attr, inputModel.get(attr)
+      newModel
 
     render: ->
       if @activeServerTypeIsOLD() and not @weHaveOLDNewFormData()
@@ -88,7 +129,10 @@ define [
       'click button.add-form-button':              'submitForm'
       'click button.hide-form-add-widget':         'hideSelf'
       'click button.toggle-secondary-data-fields': 'toggleSecondaryDataAnimate'
-      'click .form-add-help':                      'openFormAddHelp'
+      'click button.form-add-help':                'openFormAddHelp'
+      'click button.clear-form':                   'clear'
+      'click button.undo-changes':                 'undoChanges'
+      'keydown':                                   'keydown'
 
     listenToEvents: ->
       super
@@ -97,6 +141,16 @@ define [
       @listenTo Backbone, 'getOLDNewFormDataEnd', @getOLDNewFormDataEnd
       @listenTo Backbone, 'getOLDNewFormDataSuccess', @getOLDNewFormDataSuccess
       @listenTo Backbone, 'getOLDNewFormDataFail', @getOLDNewFormDataFail
+
+      @listenTo @model, 'addOLDFormStart', @addOLDFormStart
+      @listenTo @model, 'addOLDFormEnd', @addOLDFormEnd
+      @listenTo @model, 'addOLDFormFail', @addOLDFormFail
+
+      @listenTo @model, 'updateOLDFormStart', @addOLDFormStart
+      @listenTo @model, 'updateOLDFormEnd', @addOLDFormEnd
+      @listenTo @model, 'updateOLDFormFail', @updateOLDFormFail
+      @listenTo @model, 'updateOLDFormSuccess', @updateOLDFormSuccess
+
       @listenToFieldViews()
 
     listenToFieldViews: ->
@@ -118,10 +172,94 @@ define [
       else
         'Update this form'
 
+    propagateSubmitAttempted: ->
+      for fieldView in @fieldViews()
+        fieldView.submitAttempted = true
+
+    modelAltered: ->
+      for attr, val of @model.attributes
+        originalValue = @originalModelCopy.get attr
+        currentValue = @model.get attr
+        if not _.isEqual originalValue, currentValue
+          return true
+      return false
+
+    # TODO: will this one work?
+    modelAltered_: ->
+      not _.isEqual(@originalModelCopy.attributes, @model.attributes)
+
     submitForm: (event) ->
-      @stopEvent event
-      @setToModel()
-      @collection.addOLDForm @model
+      if @modelAltered()
+        @submitAttempted = true
+        @propagateSubmitAttempted()
+        @stopEvent event
+        @setToModel()
+        @disableForm()
+        clientSideValidationErrors = @model.validate()
+        if clientSideValidationErrors
+          for attribute, error of clientSideValidationErrors
+            @model.trigger "validationError:#{attribute}", error
+          msg = 'See the error message(s) beneath the input fields.'
+          Backbone.trigger "#{@addUpdateType}OLDFormFail", msg, @model
+          @enableForm()
+        else
+          if @addUpdateType is 'add'
+            @model.collection.addOLDForm @model
+          else
+            @model.collection.updateOLDForm @model
+      else
+        Backbone.trigger("#{@addUpdateType}OLDFormFail",
+          'Please make some changes before attempting to save.')
+
+    spinnerOptions: ->
+      options = super
+      options.top = '50%'
+      options.left = '-15%'
+      options.color = @constructor.jQueryUIColors().errCo
+      options
+
+    spin: -> @$('.spinner-container').spin @spinnerOptions()
+
+    stopSpin: -> @$('.spinner-container').spin false
+
+    # Disable form input fields and submit button
+    disableForm: ->
+      @$('button.add-form-button').button 'disable'
+      @disableFieldViews()
+
+    disableFieldViews: ->
+      for fieldView in @fieldViews()
+        fieldView.disable()
+
+    # Enable form input fields and submit button
+    enableForm: ->
+      @$('button.add-form-button').button 'enable'
+      @enableFieldViews()
+
+    enableFieldViews: ->
+      for fieldView in @fieldViews()
+        fieldView.enable()
+
+    addOLDFormStart: -> @spin()
+
+    addOLDFormEnd: ->
+      @enableForm()
+      @stopSpin()
+
+    addOLDFormFail: (error) ->
+      # The field views are listening for specific `validationError` events on
+      # the form model. They will handle their own validation stuff.
+      Backbone.trigger 'addOLDFormFail', error
+
+    updateOLDFormFail: (error, formModel) ->
+      console.log 'in updateOLDFormFail of FormAddWidget with ...'
+      console.log error
+      console.log formModel
+      Backbone.trigger 'updateOLDFormFail', error, formModel
+
+    updateOLDFormSuccess: (formModel) ->
+      @originalModelCopy = @copyModel @model
+      Backbone.trigger 'updateOLDFormSuccess', formModel
 
     # Set the state of the "add a form" HTML form on the Dative form model.
     setToModel: -> fv.setToModel() for fv in @fieldViews()
@@ -145,10 +283,17 @@ define [
       else
         searchTerm = 'updating a form'
       Backbone.trigger(
-        'helpDialog:toggle',
+        'helpDialog:openTo',
         searchTerm: searchTerm
         scrollToIndex: 1
       )
+
+    # <Enter> on a closed form opens it, <Esc> on an open form closes it.
+    keydown: (event) ->
+      switch event.which
+        when 27
+          @stopEvent event
+          @hideSelf()
 
     activeServerTypeIsOLD: -> @getActiveServerType() is 'OLD'
 
@@ -165,20 +310,26 @@ define [
     # This is where field-specific configuration should go.
     attribute2fieldView:
       FieldDB:
-        utterance:          UtteranceJudgementFieldView
-        comments:           CommentsFieldView
+        utterance:                     UtteranceJudgementFieldView
+        comments:                      CommentsFieldView
       OLD:
-        transcription:      TranscriptionGrammaticalityFieldView
-        translations:       TranslationsFieldView
-        elicitation_method: SelectFieldView
-        syntactic_category: SelectFieldView
-        speaker:            PersonSelectFieldView
-        elicitor:           UserSelectFieldView
-        verifier:           UserSelectFieldView
-        source:             SourceSelectFieldView
-        status:             RequiredSelectFieldView
-        date_elicited:      DateFieldView
-        tags:               MultiselectFieldView
+        narrow_phonetic_transcription: TextareaFieldView255
+        phonetic_transcription:        TextareaFieldView255
+        transcription:                 TranscriptionGrammaticalityFieldView255
+        morpheme_break:                TextareaFieldView255
+        morpheme_gloss:                TextareaFieldView255
+        syntax:                        TextareaFieldView1023
+        semantics:                     TextareaFieldView1023
+        translations:                  TranslationsFieldView
+        elicitation_method:            RelationalSelectFieldView
+        syntactic_category:            RelationalSelectFieldView
+        speaker:                       PersonSelectFieldView
+        elicitor:                      UserSelectFieldView
+        verifier:                      UserSelectFieldView
+        source:                        SourceSelectFieldView
+        status:                        RequiredSelectFieldView
+        date_elicited:                 DateFieldView
+        tags:                          MultiselectFieldView
 
     # Return the appropriate FieldView (subclass) instance for a given
     # attribute, as specified in `@attribute2fieldView`. The default field view
@@ -345,11 +496,26 @@ define [
     guify: ->
       @buttonify()
       @tooltipify()
+      @$el.css 'border-color': @constructor.jQueryUIColors().defBo
 
     # Make the buttons into jQuery buttons.
     buttonify: ->
       @$('.dative-widget-header button').button()
       @$('.button-only-fieldset button').button()
+
+      # Make all of righthand-side buttons into jQuery buttons and set the
+      # position of their tooltips programmatically based on their
+      # position/index.
+      @$(@$('.button-container-right button').get().reverse())
+        .each (index, element) =>
+          leftOffset = (index * 35) + 10
+          @$(element)
+            .button()
+            .tooltip
+              position:
+                my: "left+#{leftOffset} center"
+                at: "right center"
+                collision: "flipfit"
 
     # Make the `title` attributes of the inputs/controls into jQueryUI tooltips.
     tooltipify: ->
@@ -357,13 +523,51 @@ define [
           .tooltip position: @tooltipPositionLeft('-20')
       @$('.dative-widget-header .toggle-secondary-data-fields.dative-tooltip')
           .tooltip position: @tooltipPositionLeft('-70')
-      @$('.dative-widget-header .form-add-help.dative-tooltip')
-        .tooltip position: @tooltipPositionRight('+20')
       @$('button.add-form-button')
         .tooltip position: @tooltipPositionLeft('-20')
       @$('ul.button-only-fieldset button.toggle-secondary-data-fields')
         .tooltip position: @tooltipPositionLeft('-90')
 
+    # Reset the model to its default state.
+    clear: ->
+      @model.set @getEmptyModelObject()
+      @refresh()
+
+    # Undo the (unsaved!) changes to the form (made presumably via the update
+    # interface): restore the model to its pre-modified state.
+    undoChanges: ->
+      for attr, val of @originalModelCopy.attributes
+        @model.set attr, @originalModelCopy.get(attr)
+      @refresh()
+      @setToModel()
+      @originalModelCopy = @copyModel @model
+      @validate()
+      # FormView listens for the following and calls `indicateModelState`.
+      @trigger 'forceModelChanged'
+
+    validate: ->
+      errors = @model.validate()
+      for fieldView in @fieldViews()
+        fieldView.validate errors
+
+    # Tell all field views to refresh themselves to match the current state of
+    # the model.
+    refresh: ->
+      for fieldView in @fieldViews()
+        fieldView.refresh @model
+
+    # Return a JS object representing an empty form model: note that this
+    # crucially "empties" the editable attributes; that is, a form's id, its
+    # enterer, etc., will not be represented in the returned model object.
+    getEmptyModelObject: ->
+      modelDefaults = @model.defaults()
+      secondaryAttributes = @getEditableSecondaryAttributes()
+      igtAttributes = @getFormAttributes @activeServerType, 'igt'
+      translationAttributes = @getFormAttributes @activeServerType, 'translation'
+      emptyModelObject = {}
+      for attribute in secondaryAttributes.concat translationAttributes, igtAttributes
+        emptyModelObject[attribute] = modelDefaults[attribute]
+      emptyModelObject
 
     ############################################################################
     # Showing, hiding and toggling

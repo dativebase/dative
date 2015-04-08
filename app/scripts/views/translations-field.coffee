@@ -33,28 +33,12 @@ define [
   class TranslationsFieldView extends FieldView
 
     getInputView: ->
-      @context.translationSelectAttribute = 'grammaticality'
-      @context.selectOptionsAttribute = 'grammaticalities'
-      @context.translationTextareaAttribute = 'transcription'
       new TranslationsInputSetView @context
 
-    # This is for testing/debugging and can be safely deleted when no longer
-    # useful.
-    addFakeDataToContext: (context) ->
-      context.value = [
-          transcription: 'dog'
-          grammaticality: ''
-        ,
-          transcription: 'hound'
-          grammaticality: '*'
-        ,
-          transcription: 'wolf'
-          grammaticality: '#'
-        ,
-          transcription: 'fox'
-          grammaticality: '*'
-        ,
-          transcription: 'dingo'
-          grammaticality: ''
-      ]
+    getContext: ->
+      context = super
+      context.translationSelectAttribute = 'grammaticality'
+      context.selectOptionsAttribute = 'grammaticalities'
+      context.translationTextareaAttribute = 'transcription'
+      context
 

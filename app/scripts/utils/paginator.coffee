@@ -79,9 +79,10 @@ define ['./../utils/utils'], (utils) ->
     # Private methods
 
     _refresh: ->
+      @_setPages()
+      @_setPage()
       @_setStart()
       @_setEnd()
-      @_setPages()
       @_setItemsDisplayed()
 
     _setStart: ->
@@ -89,7 +90,7 @@ define ['./../utils/utils'], (utils) ->
 
     _setEnd: ->
       end = @start + @itemsPerPage - 1
-      if end > @items
+      if end >= @items
         @end = @items - 1
       else
         @end = end
@@ -97,13 +98,16 @@ define ['./../utils/utils'], (utils) ->
     _setPages: ->
       @pages = Math.ceil(@items / @itemsPerPage)
 
+    _setPage: ->
+      if @page > @pages then @page = @pages
+
     _setItemsDisplayed: ->
       if @itemsPerPage > @items
         @itemsDisplayed = @items
       else
         @itemsDisplayed = @itemsPerPage
 
-    _defaultPossibleItemsPerPage: [1, 5, 10, 25, 50, 100]
+    _defaultPossibleItemsPerPage: [1, 2, 3, 5, 10, 25, 50, 100]
 
     # Return the highest multiple of `newItemsPerPage` such that it is less than
     # or equal to the current `start` value. Also return the `page` value that

@@ -1,0 +1,78 @@
+<div class='focusable-top' tabindex='0'></div>
+
+<div id='dative-page-header'
+  class='ui-widget-header ui-corner-top dative-two-part-header'>
+
+  <div class='dative-subcorpora-view-header dative-two-part-header-part-one'>
+
+    <div class='dative-page-header-title container-center'>
+      <div class='no-subcorpora'>
+        There are no subcorpora to display
+      </div>
+      <div class='pagination-info'>
+        Browsing
+        <span class='subcorpus-range'></span>
+        of
+        <span class='subcorpus-count'></span>
+        (page
+        <span class='current-page'></span>
+        of
+        <span class='page-count'></span>)
+      </div>
+    </div>
+
+    <div class='button-container-left'>
+
+        <button class='new-subcorpus dative-tooltip' title='create a new
+          subcorpus'>
+        <i class='fa fa-fw fa-plus'></i>
+      </button>
+
+      <button class='expand-all dative-tooltip' title='expand all subcorpora'>
+        <i class='fa fa-fw fa-angle-double-down'></i>
+      </button>
+
+      <button class='collapse-all dative-tooltip' title='collapse all
+        subcorpora'>
+        <i class='fa fa-fw fa-angle-double-up'></i>
+      </button>
+
+    </div>
+
+    <div class='button-container-right'>
+
+      <button class="toggle-all-labels dative-tooltip"
+        title="subcorpus labels are off; click here to turn them on">labels:
+        <i class='fa fa-toggle-off fa-fw'></i>
+      </button>
+
+      <button class='subcorpora-browse-help dative-tooltip' title='help with
+          browsing subcorpora'>
+        <i class='fa fa-fw fa-question'></i>
+      </button>
+
+    </div>
+
+  </div>
+
+  <div class='dative-pagination-menu-top dative-two-part-header-part-two'></div>
+
+</div>
+
+<div id='dative-page-body'>
+
+  <div class='dative-pagin-items'></div>
+
+  <div class='new-subcorpus-view dative-subcorpus-object dative-widget-center
+    dative-shadowed-widget ui-widget ui-widget-content ui-corner-all
+    dative-new-item'></div>
+
+  <div class='dative-pagin-nav dative-pagin-nav-bottom'></div>
+
+</div>
+
+<div class='focusable-bottom' tabindex='0'></div>
+
+<div id='exporter-dialog-container'></div>
+
+

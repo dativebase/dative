@@ -1,0 +1,7 @@
+<div
+  class='<%= @class %>'
+  ><span
+    class='<%= @grammaticalityClass %>'
+    ><%= @grammaticalityValue %></span
+  ><%= @value %></div>
+

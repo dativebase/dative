@@ -1,0 +1,85 @@
+<div class="dative-widget-header ui-widget-header ui-corner-top">
+
+  <div class='button-container-left'>
+
+    <% if @addUpdateType is 'add': %>
+      <button class="hide-resource-widget dative-tooltip"
+              title="hide this new <%= @resourceName %> widget">
+        <i class='fa fa-times fa-fw'></i>
+      </button>
+    <% else if not @headerAlwaysVisible: %>
+      <button class="hide-resource-details dative-tooltip"
+              title="hide the buttons and extra data of this <%= @resourceName %>">
+        <i class='fa fa-angle-double-up fa-fw'></i>
+      </button>
+  <% end %>
+
+    <button class="toggle-secondary-data dative-tooltip"
+            title="hide the secondary data of this <%= @resourceName %>">
+      <i class='fa fa-angle-up fa-fw'></i>
+    </button>
+
+    <button class="toggle-primary-data-labels dative-tooltip"
+      title="show labels">labels:
+      <i class='fa fa-toggle-off fa-fw'></i>
+    </button>
+
+  </div>
+
+  <div class='dative-widget-header-title container-center'
+    ><%= @headerTitle or '' %></div>
+
+  <div class='button-container-right'>
+
+    <button class="update-resource dative-tooltip"
+      <% if @addUpdateType is 'add': %>
+            title="edit the details of this <%= @resourceName %>"
+      <% else: %>
+            title="update this <%= @resourceName %>"
+      <% end %>
+      ><i class='fa fa-pencil-square-o fa-fw'></i>
+    </button>
+
+    <button class="export-resource dative-tooltip"
+            title="export this <%= @resourceName %>"
+      ><i class='fa fa-download fa-fw'></i>
+    </button>
+
+    <% if @addUpdateType is 'update': %>
+
+      <button class="delete-resource dative-tooltip"
+              title="delete this <%= @resourceName %>"
+        ><i class='fa fa-trash fa-fw'></i>
+      </button>
+
+      <button class="duplicate-resource dative-tooltip"
+              title="duplicate this <%= @resourceName %>"
+        ><i class='fa fa-copy fa-fw'></i>
+      </button>
+
+      <!-- Uncomment this later, once history is implemented.
+      <button class="resource-history dative-tooltip"
+      title="view the history of this <%= @resourceName %>"
+        ><i class='fa fa-history fa-fw'></i>
+      </button>
+      -->
+
+    <% end %>
+
+  </div>
+
+</div>
+
+
+<div class='dative-widget-body'>
+
+  <div class='update-resource-widget update-widget dative-widget-center
+    dative-shadowed-widget ui-widget ui-widget-content ui-corner-all'></div>
+
+  <div class='resource-primary-data large-unicode-font'> </div>
+
+  <div class='resource-secondary-data large-unicode-font'></div>
+
+</div>
+
+

@@ -2,7 +2,7 @@ define [
   'backbone'
   './base'
   './form'
-  './form-add-widget'
+  './exporter-dialog'
   './pagination-menu-top'
   './pagination-item-table'
   './../collections/forms'
@@ -10,17 +10,16 @@ define [
   './../utils/paginator'
   './../utils/globals'
   './../templates/forms'
-  'perfectscrollbar'
-], (Backbone, BaseView, FormView, FormAddWidgetView, PaginationMenuTopView,
-  PaginationItemTableView, FormsCollection, FormModel, Paginator, globals,
-  formsTemplate) ->
+], (Backbone, BaseView, FormView, ExporterDialogView,
+  PaginationMenuTopView, PaginationItemTableView, FormsCollection, FormModel,
+  Paginator, globals, formsTemplate) ->
 
   # Forms View
   # -----------
   #
   # Displays a list of forms for browsing (with pagination).
   #
-  # Also contains a FormAddWidgetView instance for creating new forms
+  # Also contains a model-less FormView instance for creating new forms
   # within the forms browse interface.
   #
   # Note that this view accommodates both client-side pagination for FieldDB
@@ -49,45 +48,25 @@ define [
       @paginator = new Paginator page=1, items=0, itemsPerPage=@itemsPerPage
       @paginationMenuTopView = new PaginationMenuTopView paginator: @paginator # This handles the UI for the items-per-page select, the first, prevous, next buttons, etc.
       @collection = new FormsCollection()
-
-      @newFormView = new FormView
-        headerTitle: 'New Form'
-        model: new FormModel()
-        collection: @collection
+      @newFormView = @getNewFormView()
+      @exporterDialog = new ExporterDialogView()
       @newFormViewVisible = false
-
-      # @toBeAddedFormModel = new FormModel()
-      # @toBeAddedFormView = new FormView model: @toBeAddedFormModel
-      # @formAddView = new FormAddWidgetView
-      #   model: @toBeAddedFormModel
-      #   collection: @collection
-      # @formAddViewVisible = false
-
       @listenToEvents()
 
     events:
-      'focus .dative-form-object': 'formFocused'
       'focus input, textarea, .ui-selectmenu-button, button, .ms-container': 'inputFocused'
+      'focus .dative-form-object': 'formFocused'
       'click .expand-all': 'expandAllForms'
       'click .collapse-all': 'collapseAllForms'
       'click .new-form': 'showNewFormViewAnimate'
       'click .forms-browse-help': 'openFormsBrowseHelp'
       'click .toggle-all-labels': 'toggleAllLabels'
       'keydown': 'keyboardShortcuts'
+      'keyup': 'keyup'
       # @$el is enclosed in top and bottom invisible divs. These allow us to
       # close-circuit the tab loop and keep focus in the view.
       'focus .focusable-top':  'focusLastElement'
       'focus .focusable-bottom':  'focusFirstElement'
-
-    formFocused: (event) ->
-      @controlFocused event
-
-    # We stop the event here because otherwise it will be doubly caught by
-    # `formFocused` and `controlFocused` will cause buggy double
-    # auto-scrolling.
-    inputFocused: (event) ->
-      @stopEvent event
-      @controlFocused event
 
     render: (taskId) ->
       @html()
@@ -96,17 +75,22 @@ define [
       @refreshHeader()
       @renderPaginationMenuTopView()
       @renderNewFormView()
-      @renderNewFormView()
+      @renderExporterDialogView()
       @newFormViewVisibility()
       if @weNeedToFetchFormsAgain()
         @fetchFormsToCollection()
       else
         @refreshPage()
       @listenToEvents()
-      @perfectScrollbar()
       @setFocus()
+      @$('#dative-page-body').scroll => @closeAllTooltips()
       Backbone.trigger 'longTask:deregister', taskId
       @
+
+    renderExporterDialogView: ->
+      @exporterDialog.setElement(@$('#exporter-dialog-container'))
+      @exporterDialog.render()
+      @rendered @exporterDialog
 
     html: ->
       @$el.html @template
@@ -126,7 +110,14 @@ define [
       @listenTo Backbone, 'fetchOLDFormsFail', @fetchAllFormsFail
       @listenTo Backbone, 'fetchOLDFormsSuccess', @fetchOLDFormsSuccess
 
-      @listenTo Backbone, 'addOLDFormSuccess', @newFormAdded
+      @listenTo Backbone, 'destroyOLDFormSuccess', @destroyOLDFormSuccess
+      @listenTo Backbone, 'duplicateForm', @duplicateForm
+      @listenTo Backbone, 'duplicateFormConfirm', @duplicateFormConfirm
+
+      @listenTo Backbone, 'updateOLDFormFail', @scrollToFirstValidationError
+      @listenTo Backbone, 'addOLDFormFail', @scrollToFirstValidationError
+
+      @listenTo Backbone, 'openExporterDialog', @openExporterDialog
 
       @listenTo @paginationMenuTopView, 'paginator:changeItemsPerPage', @changeItemsPerPage
       @listenTo @paginationMenuTopView, 'paginator:showFirstPage', @showFirstPage
@@ -140,7 +131,21 @@ define [
       @listenTo @paginationMenuTopView, 'paginator:showTwoPagesForward', @showTwoPagesForward
       @listenTo @paginationMenuTopView, 'paginator:showThreePagesForward', @showThreePagesForward
 
+      @listenToNewFormView()
+
+    listenToNewFormView: ->
       @listenTo @newFormView, 'newFormView:hide', @hideNewFormViewAnimate
+      @listenTo @newFormView.model, 'addOLDFormSuccess', @newFormAdded
+
+    scrollToFirstValidationError: (error, formModel) ->
+      if formModel.id
+        console.log 'we have an id'
+        selector = "##{formModel.cid} .dative-field-validation-container"
+      else
+        console.log 'we DONT have an id'
+        selector = ".new-form-view .dative-field-validation-container"
+      $firstValidationError = @$(selector).filter(':visible').first()
+      if $firstValidationError then @scrollToElement $firstValidationError
 
     # Get the global Dative application settings relevant to displaying a form.
     getGlobalsFormsDisplaySettings: ->
@@ -154,11 +159,68 @@ define [
       for key, value of defaults
         @[key] = value
 
-    newFormAdded: ->
-      # HERE
-      console.log 'new form added triggered in FormsView'
-      #@paginator.setItems(@paginator.items + 1)
-      #@fetchFormsToCollection()
+    # Instantiate and return a new `FormView` instance. Note that even though
+    # we pass the collection to the form view's model, the collection will not
+    # contain that model.
+    getNewFormView: (newFormModel) ->
+      newFormModel = newFormModel or new FormModel(collection: @collection)
+      new FormView
+        headerTitle: 'New Form'
+        model: newFormModel
+        primaryDataLabelsVisible: @primaryDataLabelsVisible
+        expanded: @allFormsExpanded
+
+    # This is called when the 'addOLDFormSuccess' has been triggered, i.e.,
+    # when a new form has been successfully created on the server.
+    newFormAdded: (formModel) ->
+      newFormShouldBeOnCurrentPage = @newFormShouldBeOnCurrentPage()
+      # 1. Make the new form widget disappear.
+      @hideNewFormViewAnimate()
+
+      # 2. refresh the pagination stuff (necessarily changes)
+      @paginator.setItems (@paginator.items + 1)
+      @refreshHeader()
+      @refreshPaginationMenuTop()
+
+      # 3. If the new form should be displayed on the current page, then do that.
+      Backbone.trigger 'addOLDFormSuccess', formModel
+      if newFormShouldBeOnCurrentPage
+        @addNewFormViewToPage()
+      else
+        @closeNewFormView()
+
+      # 4. create a new new form widget but don't display it.
+      # TODO: maybe the new new form view *should* be displayed ...
+      @newFormViewVisible = false
+      @newFormView = @getNewFormView()
+      @renderNewFormView()
+      @newFormViewVisibility()
+      @listenToNewFormView()
+
+    destroyOLDFormSuccess: (formModel) ->
+      @paginator.setItems (@paginator.items - 1)
+      @refreshHeader()
+      @refreshPaginationMenuTop()
+      destroyedFormView = _.findWhere @renderedFormViews, {model: formModel}
+      if destroyedFormView
+        destroyedFormView.$el.slideUp()
+      @fetchOLDFormsPageToCollection()
+
+    # Returns true if a new form should be on the currently displayed page.
+    newFormShouldBeOnCurrentPage: ->
+      itemsDisplayedCount = (@paginator.end - @paginator.start) + 1
+      if itemsDisplayedCount < @paginator.itemsPerPage then true else false
+
+    # Add the new form view to the set of paginated form views.
+    # This entails adding the new form view's model to the collection
+    # and then rendering it and adding it to the DOM.
+    addNewFormViewToPage: ->
+      addedFormView = new FormView
+        model: @newFormView.model
+        primaryDataLabelsVisible: @primaryDataLabelsVisible
+        expanded: @allFormsExpanded
+      @collection.add addedFormView.model
+      @renderFormView addedFormView, @paginator.end
 
     # Keyboard shortcuts for the forms view.
     # Note that the FormsView is listening to events on parts of the DOM that are
@@ -241,21 +303,33 @@ define [
     itemsPerPageSelectHasFocus: ->
       @$('.ui-selectmenu-button.items-per-page').is ':focus'
 
-    # Respond appropriately when a "control" (input, button, etc.) has been focused.
-    # Basically, remember the focused element and scroll to it.
-    # BUG: tabbing through horizontally aligned buttons causes an annoying jumpiness.
-    controlFocused: (event) ->
+    formFocused: (event) ->
+      if @$(event.target).hasClass 'dative-form-object'
+        @rememberFocusedElement event
+        $element = @$ event.target
+        @scrollToScrollableElement $element
+
+    inputFocused: (event) ->
+      @stopEvent event
       @rememberFocusedElement event
-      # 'focus input, textarea, .ui-selectmenu-button, button, .ms-container': 'inputFocused'
-      if not @$(event.target).hasClass('ui-selectmenu-button')
-        @scrollToFocusedInput event
+
+    keyup: (event) ->
+      if event.which is 9
+        $element = @$ event.target
+        @scrollToScrollableElement $element
+
+    scrollToScrollableElement: ($element) ->
+      if (not $element.hasClass('ui-selectmenu-button')) and
+      (not $element.hasClass('ms-list')) and
+      (not $element.hasClass('hasDatepicker'))
+        @scrollToElement $element
 
     # Tell the Help dialog to open itself and search for "browsing forms" and
     # scroll to the second match. WARN: this is brittle because if the help
     # HTML changes, then the second match may not be what we want.
     openFormsBrowseHelp: ->
       Backbone.trigger(
-        'helpDialog:toggle',
+        'helpDialog:openTo',
         searchTerm: 'browsing forms'
         scrollToIndex: 1
       )
@@ -422,6 +496,11 @@ define [
       @newFormView.render()
       @rendered @newFormView
 
+    # Close the Add a Form view.
+    closeNewFormView: ->
+      @newFormView.close()
+      @closed @newFormView
+
     ############################################################################
     # Respond to `@collection`-issued events related to the "fetch forms" task.
     ############################################################################
@@ -432,9 +511,9 @@ define [
 
     fetchAllFormsEnd: ->
       @fetchCompleted = true
-      @stopSpin()
 
     fetchAllFormsFail: (reason) ->
+      @stopSpin()
       console.log 'fetchAllFormsFail'
       console.log reason
       @$('.no-forms')
@@ -449,6 +528,7 @@ define [
       @getFormViews()
       @setPaginatorItems()
       @showLastPage()
+      @stopSpin()
 
     # We have succeeded in retrieving a page of forms from an OLD server.
     # `paginator` is an object returned from the OLD. Crucially, it has an
@@ -456,13 +536,17 @@ define [
     # `setPaginatorItems` uses this to sync the client-side pagination GUI
     # with the OLD's server-side pagination.
     fetchOLDFormsSuccess: (paginator) ->
+      console.log 'fetch OLD forms successful!'
       @saveFetchedMetadata()
       @getFormViews()
       @setPaginatorItems paginator
+      if @paginator.items is 0 then @fetchOLDFormsLastPage = false
       if @fetchOLDFormsLastPage
+        console.log 'gonna show last page'
         @fetchOLDFormsLastPage = false
         @showLastPage() # This will fetch the last page and re-call `fetchOLDFormsSuccess`
       else
+        console.log 'gonna call refresh page fade'
         @refreshPageFade()
 
     # Tell the paginator how many items/forms are in our corpus/database.
@@ -650,6 +734,7 @@ define [
         @focusFirstNewFormViewTextarea()
       else
         @focusLastForm()
+      @scrollToFocusedInput()
 
     focusFirstButton: ->
       @$('button.ui-button').first().focus()
@@ -658,7 +743,8 @@ define [
       @$('div.dative-form-object').first().focus()
 
     focusLastForm: ->
-      @$('div.dative-form-object').last().focus()
+      if @renderedFormViews.length > 0
+        @renderedFormViews[@renderedFormViews.length - 1].$el.focus()
 
     focusFirstNewFormViewTextarea: ->
       @$('.new-form-view .add-form-widget textarea').first().focus()
@@ -702,10 +788,8 @@ define [
             at: "right center"
             collision: "flipfit"
 
-    perfectScrollbar: ->
-      @$('#dative-page-body')
-        .perfectScrollbar()
-        .scroll => @closeAllTooltips()
+    onClose: ->
+      clearInterval @paginItemsHeightMonitorId
 
     # Render a page (pagination) of form views. That is, change which set of
     # `FormView` instances are displayed.
@@ -815,10 +899,13 @@ define [
       @paginator.setPageToLast()
       pageAfter = @paginator.page
       if pageBefore isnt pageAfter
+        console.log 'pageBefore isnt pageAfter'
         if @getActiveServerType() is 'FieldDB'
           @refreshPageFade()
         else
           @fetchOLDFormsPageToCollection()
+      else
+        console.log 'pageBefore IS pageAfter'
 
     # Show a new page where `method` determines whether the new page is
     # behind or ahead of the current one and where `n` is the number of
@@ -853,10 +940,10 @@ define [
 
 
     ############################################################################
-    # Show, hide and toggle the Form Add widget view
+    # Show, hide and toggle the new form widget view
     ############################################################################
 
-    # Make the FormAddWidgetView visible or not, depending on its last state.
+    # Make the new form view visible or not, depending on its last state.
     newFormViewVisibility: ->
       if @newFormViewVisible
         @showNewFormView()
@@ -917,4 +1004,67 @@ define [
     setNewFormViewButtonHide: ->
       @$('button.new-form')
         .button 'disable'
+
+    showNewFormViewAnimate: ->
+      @setNewFormViewButtonHide()
+      @newFormViewVisible = true
+      @$('.new-form-view').slideDown
+        complete: =>
+          @newFormView.showUpdateViewAnimate()
+          Backbone.trigger 'addFormWidgetVisible'
+      @focusFirstNewFormViewTextarea()
+      @scrollToFocusedInput()
+
+    # Duplicate the supplied form model, but display a confirm dialog first if the
+    # new form view has data in it.
+    duplicateFormConfirm: (formModel) ->
+      if @newFormView.model.isEmpty()
+        @duplicateForm formModel
+      else
+        id = formModel.get 'id'
+        options =
+          text: "The “new form” form has unsaved data in it. If you proceed
+            with duplicating form #{id}, you will lose that unsaved information.
+            Click “Cancel” to abort the duplication so you can save your
+            unsaved new form first. If you are okay with discarding your unsaved
+            new form, then click “Ok” to proceed with duplicating form #{id}."
+          confirm: true
+          confirmEvent: 'duplicateForm'
+          confirmArgument: formModel
+        Backbone.trigger 'openAlertDialog', options
+
+    # Duplicate a form model and display it for editing in the "New Form"
+    # widget.
+    duplicateForm: (formModel) ->
+      newFormModel = formModel.clone()
+
+      # Remove the server-generated attributes of the form. Note: there are
+      # other attributes that are server-generated but I'm unsure if these
+      # should be removed here (they will be regenerated by the OLD upon save):
+      # morpheme_break_ids, morpheme_gloss_ids, break_gloss_category,
+      # syntactic_category_string.
+      newFormModel.set
+        id: null
+        UUID: ''
+        datetime_entered: ''
+        datetime_modified: ''
+        enterer: null
+        modifier: null
+        collections: []
+
+      # TODO: if the current New Form view has a non-empty model we should
+      # either warn the user about that or we should intelligently store that
+      # model for later ...
+
+      @hideNewFormViewAnimate()
+      @closeNewFormView()
+      @newFormView = @getNewFormView newFormModel
+      @renderNewFormView()
+      @listenToNewFormView()
+      @showNewFormViewAnimate()
+
+    openExporterDialog: (options) ->
+      @exporterDialog.setToBeExported options
+      @exporterDialog.generateExport()
+      @exporterDialog.dialogOpen()
 

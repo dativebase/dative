@@ -1,0 +1,83 @@
+<div class="dative-widget-header ui-widget-header ui-corner-top">
+
+  <div class='dative-widget-header-title container-center'
+    ><%= @headerTitle %></div>
+
+  <div class='button-container-left'>
+
+    <button class="hide-subcorpus-add-widget dative-tooltip"
+            title="hide this subcorpus <%= @addUpdateType %> widget">
+      <i class='fa fa-times fa-fw'></i>
+    </button>
+
+    <button class="toggle-secondary-data-fields dative-tooltip"
+      title="show the secondary data input fields">
+      <i class='fa fa-angle-down fa-fw'></i>
+    </button>
+
+  </div>
+
+  <div class='button-container-right'>
+
+    <span class="spinner-container"></span>
+
+    <button class="clear-form dative-tooltip"
+      title="clear this form: reset all fields to their default values"
+      ><i class='fa fa-eraser fa-fw'></i>
+    </button>
+
+    <% if @addUpdateType is 'update': %>
+      <button class="undo-changes dative-tooltip"
+        title="undo changes: restore to pre-modification state"
+        ><i class='fa fa-undo fa-fw'></i>
+      </button>
+    <% end %>
+
+    <button class='subcorpus-add-help dative-tooltip'
+      <% if @addUpdateType is 'add': %>
+        title='help with adding a subcorpus'
+      <% else: %>
+        title='help with updating a subcorpus'
+      <% end %>
+    ><i class='fa fa-fw fa-question'></i>
+    </button>
+
+  </div>
+
+</div>
+
+<div class="dative-widget-body">
+
+    <div class="subcorpus-add-form linguistic-data-entry-form
+        <%= @activeServerType.toLowerCase() %>">
+
+    <ul class="fieldset primary-data"></ul>
+    <ul class="fieldset secondary-data"></ul>
+
+    <ul class="fieldset button-only-fieldset">
+
+      <li class="center">
+        <button
+          class="add-subcorpus-button dative-tooltip"
+          <% if @addUpdateType is 'add': %>
+            title='Create this new subcorpus'
+          <% else: %>
+            title='Save changes to this subcorpus'
+          <% end %>
+          >Save</button>
+
+        <button
+          class="toggle-secondary-data-fields dative-tooltip"
+          title="show the secondary data input fields"
+          ><i class='fa fa-angle-down fa-fw'></i>
+        </button>
+
+      </li>
+
+    </ul>
+
+  </div>
+
+</div>
+
+

@@ -69,29 +69,79 @@ define [
     # Add (create) an OLD form.
     # POST `<OLD_URL>/forms`
     addOLDForm: (form, options) ->
-      Backbone.trigger 'addOLDFormStart'
+      form.trigger 'addOLDFormStart'
       FormModel.cors.request(
         method: 'POST'
         url: "#{@getOLDURL()}/forms"
-        payload: form.attributes
+        payload: form.toOLD()
         onload: (responseJSON, xhr) =>
-          Backbone.trigger 'addOLDFormEnd'
+          form.trigger 'addOLDFormEnd'
           if xhr.status is 200
-            # TODO: listen to collection 'add' event and display the new form
-            # in the browse GUI.
-            @add (new FormModel()).old2dative(responseJSON)
-            console.log 'added a new form in FormsCollection'
-            Backbone.trigger 'addOLDFormSuccess'
+            form.set responseJSON
+            form.trigger 'addOLDFormSuccess', form
           else
             errors = responseJSON.errors or {}
-            Backbone.trigger 'addOLDFormFail', errors
-            console.log 'POST request to /forms failed ...'
+            form.trigger 'addOLDFormFail', errors, form
+            for attribute, error of errors
+              form.trigger "validationError:#{attribute}", error
+            console.log 'POST request to /forms failed (status not 200) ...'
             console.log errors
         onerror: (responseJSON) =>
-          Backbone.trigger 'addOLDFormEnd'
-          Backbone.trigger 'addOLDFormFail', "error in adding form
-            #{form.get 'id'}"
+          form.trigger 'addOLDFormEnd'
+          form.trigger 'addOLDFormFail', responseJSON.error, form
           console.log 'Error in POST request to /forms'
+      )
+
+    # Update an OLD form.
+    # PUT `<OLD_URL>/forms/<form.id>`
+    updateOLDForm: (form, options) ->
+      form.trigger 'updateOLDFormStart'
+      FormModel.cors.request(
+        method: 'PUT'
+        url: "#{@getOLDURL()}/forms/#{form.get 'id'}"
+        payload: form.toOLD()
+        onload: (responseJSON, xhr) =>
+          form.trigger 'updateOLDFormEnd'
+          if xhr.status is 200
+            form.set responseJSON
+            form.trigger 'updateOLDFormSuccess', form
+          else
+            errors = responseJSON.errors or {}
+            error = responseJSON.error or ''
+            form.trigger 'updateOLDFormFail', error, form
+            for attribute, error of errors
+              form.trigger "validationError:#{attribute}", error
+            console.log 'PUT request to /forms failed (status not 200) ...'
+            console.log errors
+        onerror: (responseJSON) =>
+          form.trigger 'updateOLDFormEnd'
+          form.trigger 'updateOLDFormFail', responseJSON.error, form
+          console.log 'Error in PUT request to /forms'
+      )
+
+    # Destroy an OLD form.
+    # DELETE `<OLD_URL>/forms/<form.id>`
+    destroyOLDForm: (form, options) ->
+      Backbone.trigger 'destroyOLDFormStart'
+      FormModel.cors.request(
+        method: 'DELETE'
+        url: "#{@getOLDURL()}/forms/#{form.get 'id'}"
+        onload: (responseJSON, xhr) =>
+          Backbone.trigger 'destroyOLDFormEnd'
+          if xhr.status is 200
+            @remove form
+            Backbone.trigger 'destroyOLDFormSuccess', form
+          else
+            error = responseJSON.error or 'No error message provided.'
+            Backbone.trigger 'destroyOLDFormFail', error
+            console.log "DELETE request to /forms/#{form.get 'id'} failed (status not 200)."
+            console.log error
+        onerror: (responseJSON) =>
+          Backbone.trigger 'destroyOLDFormEnd'
+          error = responseJSON.error or 'No error message provided.'
+          Backbone.trigger 'destroyOLDFormFail', error
+          console.log "Error in DELETE request to /forms/#{form.get 'id'}
+            (onerror triggered)."
       )
 
     ############################################################################
@@ -109,9 +159,12 @@ define [
     # Return a URL for requesting a page of forms from an OLD web service.
     # GET parameters control pagination and ordering.
     getOLDFormsPaginationURL: (options) ->
-      "#{@getOLDURL()}/forms?\
-        page=#{options.page}&\
-        items_per_page=#{options.itemsPerPage}"
+      if options.page and options.itemsPerPage
+        "#{@getOLDURL()}/forms?\
+          page=#{options.page}&\
+          items_per_page=#{options.itemsPerPage}"
+      else
+        "#{@getOLDURL()}/forms"
 
     # Return a URL for requesting a page of forms from an OLD web service.
     # GET parameters control pagination and ordering.
