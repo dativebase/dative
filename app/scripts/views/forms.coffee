@@ -977,16 +977,20 @@ define [
     # preferably by simply showing the other revision as a model along side in the same views
     fetchHistory: (formModel) ->
 
-      var fielddbHelperModel = new FieldDB.Datum({_id: formModel.id});
-      fielddbHelperModel.fetchRevisions().then(function(revisions){
-        formModel.set("history", revisions.map(function(revisionUrl){
-          # TODO decide what data representation you want for these
-          return {url: revisionUrl};
-      }, function(error){
-        console.log("TODO how do you talk to users about errors contacting the server etc...", error);
-      }).fail(function(error){
-        console.log("TODO how do you talk to users about errors contacting the server etc...", error);
-      });
+      fielddbHelperModel = new (FieldDB.Datum)(_id: formModel.id)
+      fielddbHelperModel.fetchRevisions().then(((revisions) ->
+        formModel.set 'previous_versions', revisions.map((revisionUrl) ->
+          # TODO can we avoid fetching them until the user clicks on the one they want?
+          { url: revisionUrl }
+        )
+        return
+      ), (error) ->
+        console.log 'TODO how do you talk to users about errors contacting the server etc...', error
+        return
+      ).fail (error) ->
+        console.log 'TODO how do you talk to users about errors contacting the server etc...', error
+        return
+
 
     openExporterDialog: (options) ->
       @exporterDialog.setToBeExported options
