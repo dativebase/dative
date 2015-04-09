@@ -940,6 +940,7 @@ define [
           confirmArgument: formModel
         Backbone.trigger 'openAlertDialog', options
 
+
     # Duplicate a form model and display it for editing in the "New Form"
     # widget.
     duplicateForm: (formModel) ->
@@ -970,6 +971,22 @@ define [
       @renderNewFormView()
       @listenToNewFormView()
       @showNewFormViewAnimate()
+
+
+    # Request the history of the form model, the user can click on a revision and see the details
+    # preferably by simply showing the other revision as a model along side in the same views
+    fetchHistory: (formModel) ->
+
+      var fielddbHelperModel = new FieldDB.Datum({_id: formModel.id});
+      fielddbHelperModel.fetchRevisions().then(function(revisions){
+        formModel.set("history", revisions.map(function(revisionUrl){
+          # TODO decide what data representation you want for these
+          return {url: revisionUrl};
+      }, function(error){
+        console.log("TODO how do you talk to users about errors contacting the server etc...", error);
+      }).fail(function(error){
+        console.log("TODO how do you talk to users about errors contacting the server etc...", error);
+      });
 
     openExporterDialog: (options) ->
       @exporterDialog.setToBeExported options

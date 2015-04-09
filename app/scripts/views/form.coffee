@@ -125,6 +125,7 @@ define [
       'keydown': 'keydown'
       'click .update-form': 'update'
       'click .duplicate-form': 'duplicate'
+      'click .form-history': 'fetchHistory'
       'click .delete-form': 'deleteConfirm'
       'click .export-form': 'exportForm'
 
@@ -136,6 +137,9 @@ define [
 
     duplicate: ->
       Backbone.trigger 'duplicateFormConfirm', @model
+
+    fetchHistory: ->
+      Backbone.trigger 'fetchHistory', @model
 
     # Trigger opening of a confirm dialog: if user clicks "Ok", then this
     # form will be deleted.
