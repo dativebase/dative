@@ -23,6 +23,7 @@ define [
   class ApplicationSettingsModel extends BaseRelationalModel
 
     initialize: ->
+      @set('fielddbApplication' , FieldDB.FieldDBObject.application)
       @listenTo Backbone, 'authenticate:login', @authenticate
       @listenTo Backbone, 'authenticate:logout', @logout
       @listenTo Backbone, 'authenticate:register', @register
@@ -81,7 +82,7 @@ define [
     # Attempt to authenticate with the passed-in credentials
     authenticate: (username, password) ->
       if @get('activeServer')?.get('type') is 'FieldDB'
-        @authenticateFieldDBAuthService username: username, password: password
+        @authenticateFieldDBAuthService username: username, password: password, authUrl: @get('activeServer')?.get('url')
       else
         @authenticateOLD username: username, password: password
 
@@ -112,70 +113,35 @@ define [
       )
 
     getFieldDBBaseDBURL: (user) ->
-      if user.corpuses?.length
-        meta = user.corpuses[0]
-        protocol = meta.protocol
-        domain = meta.domain
-        port = if meta.port then ":#{meta.port}" else ''
-        "#{protocol}#{domain}#{port}"
+      if user.corpora?.length
+        user.corpora.collection[0].corpusUrl
 
-    authenticateFieldDBAuthService: (credentials) ->
+    authenticateFieldDBAuthService: (credentials) =>
       taskId = @guid()
       Backbone.trigger 'longTask:register', 'authenticating', taskId
-      BaseRelationalModel.cors.request(
-        method: 'POST'
-        timeout: 3000
-        url: "#{@getURL()}/login"
-        payload: credentials
-        onload: (responseJSON) =>
-          if responseJSON.user
-            # Remember the corpusServiceURL so we can logout.
-            @get('activeServer')?.set(
-              'corpusServerURL', @getFieldDBBaseDBURL(responseJSON.user))
-            @set
-              baseDBURL: @getFieldDBBaseDBURL(responseJSON.user)
-              username: credentials.username,
-              password: credentials.password,
-              loggedInUser: responseJSON.user
-            @save()
-            credentials.name = credentials.username
-            @authenticateFieldDBCorpusService credentials, taskId
-          else
-            Backbone.trigger 'authenticate:fail', responseJSON.userFriendlyErrors
-            @authenticateAttemptDone taskId
-        onerror: (responseJSON) =>
-          Backbone.trigger 'authenticate:fail', responseJSON
-          @authenticateAttemptDone taskId
-        ontimeout: =>
-          Backbone.trigger 'authenticate:fail', error: 'Request timed out'
-          @authenticateAttemptDone taskId
-      )
+      FieldDB.FieldDBObject.application.authentication = FieldDB.FieldDBObject.application.authentication || new FieldDB.Authentication()
+      FieldDB.FieldDBObject.application.authentication.login(credentials).then((promisedResult) =>
+        # Remember the corpusServiceURL so we can logout.
+        @get('activeServer')?.set(
+          'corpusServerURL', @getFieldDBBaseDBURL(FieldDB.FieldDBObject.application.authentication.user) )
+        @set
+          username: credentials.username,
+          password: credentials.password,
+          loggedInUser: FieldDB.FieldDBObject.application.authentication.user
+        @save()
+        Backbone.trigger 'authenticate:success'
+        return
+      , (error) =>
+        Backbone.trigger 'authenticate:fail', error
+        @authenticateAttemptDone taskId
+        return
+      ).fail (error) =>
+        Backbone.trigger 'authenticate:fail', error
+        @authenticateAttemptDone taskId
+        return
 
     authenticateFieldDBCorpusService: (credentials, taskId) ->
-      BaseRelationalModel.cors.request(
-        method: 'POST'
-        timeout: 3000
-        url: "#{@get('baseDBURL')}/_session"
-        payload: credentials
-        onload: (responseJSON) =>
-          # TODO @jrwdunham: this responseJSON has a roles Array attribute which
-          # references more corpora than I'm seeing from the `corpusteam`
-          # request. Why the discrepancy?
-          @authenticateAttemptDone taskId
-          if responseJSON.ok
-            @save
-              loggedIn: true
-              loggedInUserRoles: responseJSON.roles
-            Backbone.trigger 'authenticate:success'
-          else
-            Backbone.trigger 'authenticate:fail', responseJSON
-        onerror: (responseJSON) =>
-          Backbone.trigger 'authenticate:fail', responseJSON
-          @authenticateAttemptDone taskId
-        ontimeout: =>
-          Backbone.trigger 'authenticate:fail', error: 'Request timed out'
-          @authenticateAttemptDone taskId
-      )
+      console.log("dont need this")
 
     # WARN: DEPRECATED until I can figure out the issue detailed in the comment
     # below.
@@ -196,7 +162,7 @@ define [
       # `FieldDB/api/corpus/Database.js` (lines 294-345) logs in to its default
       # DB_URL (https://localhost:6984) immediately after Auth Service
       # authentication succeeds. The request to get the metadata of a corpus,
-      # however, uses http://localhost:5984, wich is from the `user.corpuses`
+      # however, uses http://localhost:5984, wich is from the `user.corpora`
       # array. I am using the following hack to get around this, but either I'm
       # missing something about how to use FieldDB correctly or
       # `FieldDB.Database::login` needs to inspect the response from the Auth
@@ -264,9 +230,7 @@ define [
     logoutFieldDB: ->
       taskId = @guid()
       Backbone.trigger 'longTask:register', 'logout', taskId
-      FieldDB.Database::BASE_AUTH_URL = @getURL()
-      FieldDB.Database::BASE_DB_URL = @getCorpusServerURL()
-      FieldDB.Database::logout().then(
+      FieldDB.FieldDBObject.application.authentication::logout().then(
         (responseJSON) =>
           if responseJSON.ok is true
             @save

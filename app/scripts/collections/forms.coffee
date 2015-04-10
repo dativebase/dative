@@ -205,9 +205,8 @@ define [
     ############################################################################
 
     getFetchAllFieldDBFormsURL: ->
-      url = globals.applicationSettings.get 'baseDBURL'
-      pouchname = globals.applicationSettings.get 'activeFieldDBCorpus'
-      "#{url}/#{pouchname}/_design/pages/_view/datums_chronological"
+      url = globals.applicationSettings.fielddbApplication.corpus.url
+      "#{url}/_design/pages/_view/datums_chronological"
 
     getOLDURL: ->
       globals.applicationSettings.get('activeServer').get 'url'
