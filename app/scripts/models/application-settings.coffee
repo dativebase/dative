@@ -58,8 +58,8 @@ define [
     # Attempt to authenticate with the passed-in credentials
     authenticate: (username, password) ->
       if @get('activeServer')?.get('type') is 'FieldDB'
-        # @authenticateFieldDB username: username, password: password
-        @authenticateFieldDBAuthService username: username, password: password
+        @authenticateFieldDB username: username, password: password
+        # @authenticateFieldDBAuthService username: username, password: password
       else
         @authenticateOLD username: username, password: password
 
@@ -157,7 +157,7 @@ define [
 
     # WARN: DEPRECATED until I can figure out the issue detailed in the comment
     # below.
-    # This is based on the FieldDB AngularJS ("Spreadsheet") source, i.e.,
+    # This is based on the FieldDB AngularJS Core source, i.e.,
     # https://github.com/OpenSourceFieldlinguistics/FieldDB/blob/master/\
     #   angular_client/modules/core/app/scripts/directives/\
     #   fielddb-authentication.js
@@ -175,11 +175,11 @@ define [
       # DB_URL (https://localhost:6984) immediately after Auth Service
       # authentication succeeds. The request to get the metadata of a corpus,
       # however, uses http://localhost:5984, wich is from the `user.corpuses`
-      # array. I am using the following hack to get around this, but either I'm
-      # missing something about how to use FieldDB correctly or
-      # `FieldDB.Database::login` needs to inspect the response from the Auth
-      # Service when constructing BASE_DB.
-      # if @getServerCode() is 'localhost'
+      # array. @jrwdunham corpora not be 'http://localhost:5984' but rather 'https://localhost:6984'
+      # that was an error on the auth service that was never code-reviewed...
+      #
+      # fixed in https://github.com/OpenSourceFieldlinguistics/AuthenticationWebService/pull/35
+      #
       #   FieldDB.Database::BASE_DB_URL = 'http://localhost:5984'
 
       FieldDB.Database::login(credentials).then(
