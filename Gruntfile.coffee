@@ -468,19 +468,24 @@ module.exports = (grunt) ->
           ' echo "Symlinking FieldDB to your local dev version in $FIELDDB_HOME/FieldDB/fielddb.js";' +
           ' rm app/bower_components/fielddb/fielddb.js;' +
           ' ln -s $FIELDDB_HOME/FieldDB/fielddb.js app/bower_components/fielddb/fielddb.js;' +
-          ' grunt; ' +
           ' fi '
       updateFieldDB:
         cmd: ->
           return 'if [ -z ${FIELDDB_HOME} ]; ' +
           ' then ' +
-          ' echo "Not using the updating FieldDB, some functions might not work.";' +
+          ' echo "Not using the most recent FieldDB, some functions might not work.";' +
           ' else ' +
+          ' touch app/scripts/core.js; ' +
           ' echo "Updating FieldDB in $FIELDDB_HOME/FieldDB/fielddb.js";' +
+          ' cd $FIELDDB_HOME;' +
+          ' git clone https://github.com/cesine/FieldDB.git;' +
           ' cd $FIELDDB_HOME/FieldDB;' +
+          ' pwd; '+
+          ' git remote add cesine https://github.com/cesine/FieldDB.git;' +
           ' git checkout master;' +
-          ' git pull upstream master;' +
-          ' grunt; ' +
+          ' git pull cesine master;' +
+          ' npm install; ' +
+          ' grunt browserify; ' +
           ' fi '
 
     rev:
@@ -652,5 +657,5 @@ module.exports = (grunt) ->
 
   grunt.registerTask 'docs', ['clean:docs', 'clean:doctmp', 'copy:docco', 'docco', 'clean:doctmp']
 
-  grunt.registerTask 'deploy', ['jshint', 'build', 'exec:setContinuousDeploymentVersion']
+  grunt.registerTask 'deploy', ['exec:updateFieldDB', 'exec:symlinkFieldDBIfAvailable', 'jshint', 'build', 'exec:setContinuousDeploymentVersion']
 
