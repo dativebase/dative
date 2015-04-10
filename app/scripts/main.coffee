@@ -8,8 +8,8 @@ require.config
       exports: '$'
     lodash:
       exports: '_'
-    # FieldDB:
-    #   exports: 'FieldDB'
+    FieldDB:
+      exports: 'FieldDB'
     backbone:
       exports: 'Backbone'
       deps: ['lodash', 'jquery']
@@ -53,18 +53,19 @@ require.config
     #betterelastictextarea: '../bower_components/better-elastic-textarea/dist/better-elastic-textarea'
     spin: '../bower_components/spin.js/spin'
     jqueryspin: '../bower_components/spin.js/jquery.spin'
-    # FieldDB: '../bower_components/fielddb/fielddb'
+    FieldDB: '../bower_components/fielddb/fielddb'
     backbonerelational: '../bower_components/backbone-relational/backbone-relational'
     backbonelocalstorage: '../bower_components/backbone.localStorage/backbone.localStorage'
 
 require [
     'views/app',
     'routes/router'
+    'FieldDB'
     'multiselect'
     'jqueryelastic'
     'jqueryuicolors'
     'jqueryspin'
-  ], (AppView, Workspace) ->
+  ], (AppView, Workspace, FieldDB) ->
     window.debugMode = false
 
 

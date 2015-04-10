@@ -5,8 +5,9 @@ define [
   './server'
   './../collections/servers'
   './../utils/utils'
+  'FieldDB'
   'backbonelocalstorage'
-], (_, Backbone, BaseRelationalModel, ServerModel, ServersCollection, utils) ->
+], (_, Backbone, BaseRelationalModel, ServerModel, ServersCollection, utils, FieldDB) ->
 
   # Application Settings Model
   # --------------------------
