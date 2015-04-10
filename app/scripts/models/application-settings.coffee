@@ -48,6 +48,14 @@ define [
 
     activeServerChanged: ->
       #console.log 'active server has changed says the app settings model'
+      if !FieldDB.FieldDBObject.application
+        FieldDB.FieldDBObject.application =
+          brand: 'LingSync'
+          website: 'http://lingsync.org'
+
+      FieldDB.FieldDBObject.application.brand = @get('activeServer').get('brand') or @get('activeServer').get('userFriendlyServerName')
+      FieldDB.FieldDBObject.application.brandLowerCase = @get('activeServer').get('brandLowerCase') or @get('activeServer').get('serverCode')
+      return
 
     activeServerURLChanged: ->
       #console.log 'active server URL has changed says the app settings model'
@@ -400,13 +408,10 @@ define [
 
     defaults: ->
 
-      server1 =
-        id: @guid()
-        name: FieldDB.FieldDBObject.application.brand + ' Localhost'
-        type: 'FieldDB'
-        url: 'https://localhost:3183'
-        serverCode: 'localhost'
-        corpusServerURL: null
+      server1 = new FieldDB.Connection(FieldDB.Connection.defaultConnection('localhost') ) ;
+      server1.id = @guid()
+      server1.type = 'FieldDB'
+      server1.name = server1.userFriendlyServerName
 
       server2 =
         id: @guid()
@@ -416,13 +421,10 @@ define [
         serverCode: null
         corpusServerURL: null
 
-      server3 =
-        id: @guid()
-        name: FieldDB.FieldDBObject.application.brand
-        type: 'FieldDB'
-        url: FieldDB.Database.prototype.BASE_AUTH_URL
-        serverCode: 'production'
-        corpusServerURL: null
+      server3 = new FieldDB.Connection(FieldDB.Connection.defaultConnection('lingsync') ) ;
+      server3.id = @guid()
+      server3.type = 'FieldDB'
+      server3.name = server3.userFriendlyServerName
 
       server4 =
         id: @guid()

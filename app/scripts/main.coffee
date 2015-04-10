@@ -68,16 +68,6 @@ require [
   ], (AppView, Workspace, FieldDB) ->
     window.debugMode = false
 
-
-    if FieldDB && FieldDB.Database && FieldDB.Database.prototype
-      FieldDB.Database.prototype.BASE_DB_URL = "https://corpusdev.lingsync.org"
-      FieldDB.Database.prototype.BASE_AUTH_URL = "https://authdev.lingsync.org"
-      FieldDB.AudioVideo.prototype.BASE_SPEECH_URL = "https://speechdev.lingsync.org"
-      FieldDB.FieldDBObject.application = {
-        brand: "LingSync"
-        website: "http://lingsync.org"
-      }
-
     $ ->
       # Backbone.history.start()
       app = new AppView()
