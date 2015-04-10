@@ -459,9 +459,29 @@ module.exports = (grunt) ->
       setContinuousDeploymentVersion:
         cmd: ->
           return 'bash scripts/set_ci_version.sh'
-     symlinkFieldDBIfAvailable:
-       cmd: ->
-         return 'if [ -z ${FIELDDB_HOME} ]; then echo "Not using the most recent FieldDB, some functions might not work."; else echo "Symlinking FieldDB to your local dev version in $FIELDDB_HOME/FieldDB/fielddb.js"; rm app/bower_components/fielddb/fielddb.js; ln -s $FIELDDB_HOME/FieldDB/fielddb.js app/bower_components/fielddb/fielddb.js; fi '
+      symlinkFieldDBIfAvailable:
+        cmd: ->
+          return 'if [ -z ${FIELDDB_HOME} ]; ' +
+          ' then ' +
+          ' echo "Not using the most recent FieldDB, some functions might not work.";' +
+          ' else ' +
+          ' echo "Symlinking FieldDB to your local dev version in $FIELDDB_HOME/FieldDB/fielddb.js";' +
+          ' rm app/bower_components/fielddb/fielddb.js;' +
+          ' ln -s $FIELDDB_HOME/FieldDB/fielddb.js app/bower_components/fielddb/fielddb.js;' +
+          ' grunt ' +
+          ' fi '
+      updateFieldDB:
+        cmd: ->
+          return 'if [ -z ${FIELDDB_HOME} ]; ' +
+          ' then ' +
+          ' echo "Not using the updating FieldDB, some functions might not work.";' +
+          ' else ' +
+          ' echo "Updating FieldDB in $FIELDDB_HOME/FieldDB/fielddb.js";' +
+          ' cd $FIELDDB_HOME/FieldDB;' +
+          ' git checkout master;' +
+          ' git pull upstream master;' +
+          ' grunt ' +
+          ' fi '
 
     rev:
       dist:
