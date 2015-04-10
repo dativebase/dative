@@ -468,7 +468,7 @@ module.exports = (grunt) ->
           ' echo "Symlinking FieldDB to your local dev version in $FIELDDB_HOME/FieldDB/fielddb.js";' +
           ' rm app/bower_components/fielddb/fielddb.js;' +
           ' ln -s $FIELDDB_HOME/FieldDB/fielddb.js app/bower_components/fielddb/fielddb.js;' +
-          ' grunt ' +
+          ' grunt; ' +
           ' fi '
       updateFieldDB:
         cmd: ->
@@ -480,7 +480,7 @@ module.exports = (grunt) ->
           ' cd $FIELDDB_HOME/FieldDB;' +
           ' git checkout master;' +
           ' git pull upstream master;' +
-          ' grunt ' +
+          ' grunt; ' +
           ' fi '
 
     rev:
@@ -586,7 +586,7 @@ module.exports = (grunt) ->
     'eco'
 
     # permits execution of shell scripts
-    'exec'
+    'exec:setContinuousDeploymentVersion'
 
     #'compass:dist' # commented out because not currently using compass
 
