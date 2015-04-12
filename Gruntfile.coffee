@@ -475,7 +475,6 @@ module.exports = (grunt) ->
           ' then ' +
           ' echo "Not using the most recent FieldDB, some functions might not work.";' +
           ' else ' +
-          ' touch app/scripts/core.js; ' +
           ' echo "Updating FieldDB in $FIELDDB_HOME/FieldDB/fielddb.js";' +
           ' cd $FIELDDB_HOME;' +
           ' git clone https://github.com/cesine/FieldDB.git;' +
