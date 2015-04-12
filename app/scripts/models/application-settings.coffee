@@ -62,7 +62,7 @@ define [
       if url.slice(-1) is '/' then url.slice(0, -1) else url
 
     getCorpusServerURL: ->
-      @get('activeServer')?.get 'corpusServerURL'
+      @get('activeServer')?.get 'corpusUrl'
 
     getServerCode: ->
       @get('activeServer')?.get 'serverCode'
