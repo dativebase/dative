@@ -23,7 +23,7 @@ define [
   class ApplicationSettingsModel extends BaseRelationalModel
 
     initialize: ->
-      @set('fielddbApplication' , FieldDB.FieldDBObject.application)
+      @set('fieldDBApplication' , new (FieldDB.App)(@get('fieldDBApplication')))
       @listenTo Backbone, 'authenticate:login', @authenticate
       @listenTo Backbone, 'authenticate:logout', @logout
       @listenTo Backbone, 'authenticate:register', @register
@@ -49,13 +49,9 @@ define [
 
     activeServerChanged: ->
       #console.log 'active server has changed says the app settings model'
-      if !FieldDB.FieldDBObject.application
-        FieldDB.FieldDBObject.application =
-          brand: 'LingSync'
-          website: 'http://lingsync.org'
-
-      FieldDB.FieldDBObject.application.brand = @get('activeServer').get('brand') or @get('activeServer').get('userFriendlyServerName')
-      FieldDB.FieldDBObject.application.brandLowerCase = @get('activeServer').get('brandLowerCase') or @get('activeServer').get('serverCode')
+      @get('fieldDBApplication').website = @get('activeServer').get('website')
+      @get('fieldDBApplication').brand = @get('activeServer').get('brand') or @get('activeServer').get('userFriendlyServerName')
+      @get('fieldDBApplication').brandLowerCase = @get('activeServer').get('brandLowerCase') or @get('activeServer').get('serverCode')
       return
 
     activeServerURLChanged: ->
@@ -119,15 +115,15 @@ define [
     authenticateFieldDBAuthService: (credentials) =>
       taskId = @guid()
       Backbone.trigger 'longTask:register', 'authenticating', taskId
-      FieldDB.FieldDBObject.application.authentication = FieldDB.FieldDBObject.application.authentication || new FieldDB.Authentication()
-      FieldDB.FieldDBObject.application.authentication.login(credentials).then((promisedResult) =>
+      @get('fieldDBApplication').authentication = @get('fieldDBApplication').authentication || new FieldDB.Authentication()
+      @get('fieldDBApplication').authentication.login(credentials).then((promisedResult) =>
         # Remember the corpusServiceURL so we can logout.
         @get('activeServer')?.set(
-          'corpusServerURL', @getFieldDBBaseDBURL(FieldDB.FieldDBObject.application.authentication.user) )
+          'corpusServerURL', @getFieldDBBaseDBURL(@get('fieldDBApplication').authentication.user) )
         @set
           username: credentials.username,
           password: credentials.password,
-          loggedInUser: FieldDB.FieldDBObject.application.authentication.user
+          loggedInUser: @get('fieldDBApplication').authentication.user
         @save()
         Backbone.trigger 'authenticate:success'
         return
@@ -230,7 +226,7 @@ define [
     logoutFieldDB: ->
       taskId = @guid()
       Backbone.trigger 'longTask:register', 'logout', taskId
-      FieldDB.FieldDBObject.application.authentication::logout().then(
+      @get('fieldDBApplication').authentication::logout().then(
         (responseJSON) =>
           if responseJSON.ok is true
             @save
@@ -375,12 +371,14 @@ define [
       server1 = new FieldDB.Connection(FieldDB.Connection.defaultConnection('localhost') ) ;
       server1.id = @guid()
       server1.type = 'FieldDB'
+      website = 'https://localhost:3182'
       server1.name = server1.userFriendlyServerName
 
       server2 =
         id: @guid()
         name: 'OLD Local Development'
         type: 'OLD'
+        website: 'http://www.onlinelinguisticdatabase.org'
         url: 'http://127.0.0.1:5000'
         serverCode: null
         corpusServerURL: null
@@ -388,12 +386,14 @@ define [
       server3 = new FieldDB.Connection(FieldDB.Connection.defaultConnection('lingsync') ) ;
       server3.id = @guid()
       server3.type = 'FieldDB'
+      website = 'http://lingsync.org'
       server3.name = server3.userFriendlyServerName
 
       server4 =
         id: @guid()
         name: 'OLD'
         type: 'OLD'
+        website: 'http://www.onlinelinguisticdatabase.org'
         url: 'http://www.onlinelinguisticdatabase.org'
         serverCode: null
         corpusServerURL: null

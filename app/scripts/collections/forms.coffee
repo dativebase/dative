@@ -205,7 +205,7 @@ define [
     ############################################################################
 
     getFetchAllFieldDBFormsURL: ->
-      url = globals.applicationSettings.fielddbApplication.corpus.url
+      url = globals.applicationSettings.get('fieldDBApplication').corpus.url
       "#{url}/_design/pages/_view/datums_chronological"
 
     getOLDURL: ->

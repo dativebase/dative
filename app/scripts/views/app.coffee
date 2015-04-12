@@ -101,6 +101,7 @@ define [
       @listenTo @loginDialog, 'request:openRegisterDialogBox', @toggleRegisterDialog
       @listenTo Backbone, 'loginSuggest', @openLoginDialogWithDefaults
       @listenTo Backbone, 'authenticate:success', @authenticateSuccess
+      @listenTo $('document'), 'authenticated', @authenticateSuccess
       @listenTo Backbone, 'logout:success', @logoutSuccess
       @listenTo Backbone, 'useFieldDBCorpus', @useFieldDBCorpus
       @listenTo Backbone, 'applicationSettings:changeTheme', @changeTheme
