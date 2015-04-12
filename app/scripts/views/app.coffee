@@ -68,7 +68,6 @@ define [
       console.clear()
       @$el.html @template()
       @renderPersistentSubviews()
-      # @configureFieldDB() # FieldDB stuff commented out until it can be better incorporated
       @matchWindowDimensions()
 
     listenToEvents: ->
@@ -525,23 +524,14 @@ define [
           clearInterval ti
       ti = setInterval func, 10
 
-    configureFieldDB: ->
-        # FieldDB stuff commented out until it can be better incorporated
-        # FieldDB.FieldDBObject.application.currentFieldDB = new FieldDB.Corpus()
-        # FieldDB.FieldDBObject.application.currentFieldDB.loadOrCreateCorpusByPouchName("testdative-firstcorpus")
-        # FieldDB.FieldDBObject.application.currentFieldDB.url = FieldDB.FieldDBObject.application.currentFieldDB.BASE_DB_URL
-
-
     ############################################################################
     # FieldDB .bug, .warn and .confirm hooks
     ############################################################################
-
-    # Overriding FieldDB's logging hooks to do nothing
-    # FieldDB.FieldDBObject.verbose = () -> {}
-    # FieldDB.FieldDBObject.debug = () -> {}
-    # FieldDB.FieldDBObject.todo = () -> {}
-
     overrideFieldDBNotificationHooks: ->
+      # Overriding FieldDB's logging hooks to do nothing
+      FieldDB.FieldDBObject.verbose = () -> {}
+      FieldDB.FieldDBObject.debug = () -> {}
+      FieldDB.FieldDBObject.todo = () -> {}
       FieldDB.FieldDBObject.bug = @displayBugReportDialog
       FieldDB.FieldDBObject.warn = @displayWarningMessagesDialog
       FieldDB.FieldDBObject.confirm = @displayConfirmDialog
