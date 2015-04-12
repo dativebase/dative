@@ -565,16 +565,15 @@ define [
         message].join ' '
 
       # NOTE cesine: overiding confirm MUST return a promise, otherwise its broken.
-      deferred = FieldDB.Q.defer();
-      self = this;
-
-      FieldDB.Q.nextTick(function(){
-        deferred.resolve({
-          message: message,
-          optionalLocale: optionalLocale,
+      deferred = FieldDB.Q.defer()
+      self = this
+      FieldDB.Q.nextTick ->
+        deferred.resolve
+          message: message
+          optionalLocale: optionalLocale
           response: true
-          });
-      });
+        return
+
       return deferred.promise
 
       # NOTE @jrwdunham: this is cesine's first stab at a jQuery-style dialog
