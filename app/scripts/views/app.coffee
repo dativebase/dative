@@ -560,9 +560,22 @@ define [
       # TODO @jrwdunham: use the already-in-place @alertDialog for this
       # TODO @jrwdunham @cesine: figure out how i18n/localization works in
       # FieldDB and begin implementing something similar in Dative.
-      console.log ["TODO show some visual thing here using the app view using",
+      console.log ["Pretending the user said Yes. This is dangerous. TODO show some visual confirm dialog here using the app view using",
         "something like http://jqueryui.com/dialog/#modal-confirmation" ,
         message].join ' '
+
+      # NOTE cesine: overiding confirm MUST return a promise, otherwise its broken.
+      deferred = FieldDB.Q.defer();
+      self = this;
+
+      FieldDB.Q.nextTick(function(){
+        deferred.resolve({
+          message: message,
+          optionalLocale: optionalLocale,
+          response: true
+          });
+      });
+      return deferred.promise
 
       # NOTE @jrwdunham: this is cesine's first stab at a jQuery-style dialog
       # for this:
