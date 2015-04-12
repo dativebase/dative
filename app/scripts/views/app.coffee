@@ -1,5 +1,6 @@
 define [
   'backbone'
+  'FieldDB'
   './../routes/router'
   './base'
   './mainmenu'
@@ -24,7 +25,7 @@ define [
   './../collections/application-settings'
   './../utils/globals'
   './../templates/app'
-], (Backbone, Workspace, BaseView, MainMenuView, ProgressWidgetView,
+], (Backbone, FieldDB, Workspace, BaseView, MainMenuView, ProgressWidgetView,
   NotifierView, LoginDialogView, RegisterDialogView, AlertDialogView,
   HelpDialogView, ApplicationSettingsView, PagesView, HomePageView, FormAddView,
   FormsSearchView, FormsView, SubcorporaView, PhonologiesView,

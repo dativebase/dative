@@ -60,12 +60,11 @@ require.config
 require [
     'views/app',
     'routes/router'
-    'FieldDB'
     'multiselect'
     'jqueryelastic'
     'jqueryuicolors'
     'jqueryspin'
-  ], (AppView, Workspace, FieldDB) ->
+  ], (AppView, Workspace) ->
     window.debugMode = false
 
     $ ->
