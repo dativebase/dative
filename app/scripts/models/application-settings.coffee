@@ -340,7 +340,7 @@ define [
       loggedInUserRoles: []
       baseDBURL: null
       username: ''
-      password: '' # WARN: I don't like storing the password in localStorage, but FieldDB needs to send it on subsequent requests, so I'm persisting it for now ... # TODO trigger authenticate:mustconfirmidentity
+      password: '' # TODO trigger authenticate:mustconfirmidentity instead of storing the password in localStorage
       servers: [server1, server2, server3, server4]
       serverTypes: ['FieldDB', 'OLD']
       fieldDBServerCodes: [
