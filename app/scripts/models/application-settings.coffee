@@ -118,18 +118,14 @@ define [
       Backbone.trigger 'longTask:register', 'authenticating', taskId
       @get('fieldDBApplication').authentication = @get('fieldDBApplication').authentication || new FieldDB.Authentication()
       @get('fieldDBApplication').authentication.login(credentials).then((promisedResult) =>
-        # Remember the corpusServiceURL so we can logout.
-        @get('activeServer')?.set(
-          'corpusServerURL', @getFieldDBBaseDBURL(@get('fieldDBApplication').authentication.user) )
         @set
           username: credentials.username,
           password: credentials.password,
           loggedInUser: @get('fieldDBApplication').authentication.user
         @save()
-        Backbone.trigger 'authenticate:success'
+        @authenticateAttemptDone taskId
         return
       , (error) =>
-        Backbone.trigger 'authenticate:fail', error
         @authenticateAttemptDone taskId
         return
       ).fail (error) =>
