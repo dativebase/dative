@@ -133,9 +133,6 @@ define [
         @authenticateAttemptDone taskId
         return
 
-    authenticateFieldDBCorpusService: (credentials, taskId) ->
-      console.log("dont need this")
-
     # WARN: DEPRECATED until I can figure out the issue detailed in the comment
     # below.
     # This is based on the FieldDB AngularJS ("Spreadsheet") source, i.e.,
