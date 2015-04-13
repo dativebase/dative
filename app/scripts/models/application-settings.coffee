@@ -308,7 +308,6 @@ define [
       server1 = new FieldDB.Connection(FieldDB.Connection.defaultConnection('localhost') ) ;
       server1.id = @guid()
       server1.type = 'FieldDB'
-      website = 'https://localhost:3182'
       server1.name = server1.userFriendlyServerName
 
       server2 =
@@ -323,7 +322,6 @@ define [
       server3 = new FieldDB.Connection(FieldDB.Connection.defaultConnection('lingsync') ) ;
       server3.id = @guid()
       server3.type = 'FieldDB'
-      website = 'http://lingsync.org'
       server3.name = server3.userFriendlyServerName
 
       server4 =
