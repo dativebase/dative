@@ -102,7 +102,7 @@ define [
       @listenTo @loginDialog, 'request:openRegisterDialogBox', @toggleRegisterDialog
       @listenTo Backbone, 'loginSuggest', @openLoginDialogWithDefaults
       @listenTo Backbone, 'authenticate:success', @authenticateSuccess
-      @listenTo $('document'), 'authenticated', @authenticateSuccess
+      @listenTo Backbone, 'authenticate:mustconfirmidentity', @authenticateConfirmIdentity
       @listenTo Backbone, 'logout:success', @logoutSuccess
       @listenTo Backbone, 'useFieldDBCorpus', @useFieldDBCorpus
       @listenTo Backbone, 'applicationSettings:changeTheme', @changeTheme
@@ -199,6 +199,9 @@ define [
         when 'FieldDB' then @showCorporaView()
         when 'OLD' then @showFormsView()
         else console.log 'Error: you logged in to a non-FieldDB/non-OLD server (?).'
+
+    authenticateConfirmIdentity: ->
+      console.warn 'Block UI interaction and show confirm identity dialog box username is known, password is all they need to add '
 
     # Set `@applicationSettings` and `@applicationSettingsCollection`
     getApplicationSettings: (options) ->

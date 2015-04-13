@@ -24,6 +24,7 @@ define [
 
     initialize: ->
       @set('fieldDBApplication' , new (FieldDB.App)(@get('fieldDBApplication')))
+      @get('fieldDBApplication').authentication.eventDispatcher = Backbone;
       @listenTo Backbone, 'authenticate:login', @authenticate
       @listenTo Backbone, 'authenticate:logout', @logout
       @listenTo Backbone, 'authenticate:register', @register
