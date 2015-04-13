@@ -109,10 +109,6 @@ define [
           @authenticateAttemptDone taskId
       )
 
-    getFieldDBBaseDBURL: (user) ->
-      if user.corpora?.length
-        user.corpora.collection[0].corpusUrl
-
     authenticateFieldDBAuthService: (credentials) =>
       taskId = @guid()
       Backbone.trigger 'longTask:register', 'authenticating', taskId
@@ -120,7 +116,7 @@ define [
       @get('fieldDBApplication').authentication.login(credentials).then((promisedResult) =>
         @set
           username: credentials.username,
-          password: credentials.password,
+          password: credentials.password, # TODO dont need this!
           loggedInUser: @get('fieldDBApplication').authentication.user
         @save()
         @authenticateAttemptDone taskId
@@ -132,59 +128,6 @@ define [
         Backbone.trigger 'authenticate:fail', error
         @authenticateAttemptDone taskId
         return
-
-    # WARN: DEPRECATED until I can figure out the issue detailed in the comment
-    # below.
-    # This is based on the FieldDB AngularJS ("Spreadsheet") source, i.e.,
-    # https://github.com/OpenSourceFieldlinguistics/FieldDB/blob/master/\
-    #   angular_client/modules/core/app/scripts/directives/\
-    #   fielddb-authentication.js
-    authenticateFieldDB: (credentials) ->
-      credentials.serverCode = 'production' # debuggin
-      taskId = @guid()
-      Backbone.trigger 'longTask:register', 'authenticating', taskId
-
-      FieldDB.Database::BASE_AUTH_URL = @getURL()
-
-      # ISSUE @cesine @jrwdunham: Dative can't know the DB_URL without first
-      # receiving the response from calling `FieldDB.Database::login`. (Call
-      # `@getFieldDBBaseDBURL user` on the returned user to get it.) However,
-      # `FieldDB/api/corpus/Database.js` (lines 294-345) logs in to its default
-      # DB_URL (https://localhost:6984) immediately after Auth Service
-      # authentication succeeds. The request to get the metadata of a corpus,
-      # however, uses http://localhost:5984, wich is from the `user.corpora`
-      # array. I am using the following hack to get around this, but either I'm
-      # missing something about how to use FieldDB correctly or
-      # `FieldDB.Database::login` needs to inspect the response from the Auth
-      # Service when constructing BASE_DB.
-      # if @getServerCode() is 'localhost'
-      #   FieldDB.Database::BASE_DB_URL = 'http://localhost:5984'
-
-      FieldDB.Database::login(credentials).then(
-        (user) =>
-          try
-            @save
-              username: credentials.username,
-              password: credentials.password,
-              loggedIn: true
-              loggedInUser: user
-            Backbone.trigger 'authenticate:success'
-          catch
-            Backbone.trigger 'authenticate:fail',
-              ['Authentication with the FieldDB server worked, but something',
-                'went wrong with Dative.'].join(' ')
-        ,
-        (reason) ->
-          Backbone.trigger 'authenticate:fail', reason
-      ).catch(
-        ->
-          Backbone.trigger 'authenticate:fail',
-            'FieldDB.Database::login triggered an error'
-      ).done(
-        =>
-          @authenticateAttemptDone taskId
-      )
-
 
     # Logout
     #=========================================================================
@@ -399,7 +342,7 @@ define [
       loggedInUserRoles: []
       baseDBURL: null
       username: ''
-      password: '' # WARN: I don't like storing the password in localStorage, but FieldDB needs to send it on subsequent requests, so I'm persisting it for now ...
+      password: '' # WARN: I don't like storing the password in localStorage, but FieldDB needs to send it on subsequent requests, so I'm persisting it for now ... # TODO trigger authenticate:mustconfirmidentity
       servers: [server1, server2, server3, server4]
       serverTypes: ['FieldDB', 'OLD']
       fieldDBServerCodes: [
