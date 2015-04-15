@@ -334,7 +334,7 @@ define [
         corpusServerURL: null
 
       servers = [server3, server4]
-      if window.location.hostname == "localhost"
+      if window.location.hostname is "localhost"
         servers = [server1, server2, server3, server4]
 
       id: @guid()
