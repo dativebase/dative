@@ -333,15 +333,19 @@ define [
         serverCode: null
         corpusServerURL: null
 
+      servers = [server3, server4]
+      if window.location.hostname == "localhost"
+        servers = [server1, server2, server3, server4]
+
       id: @guid()
-      activeServer: server1.id
+      activeServer: servers[0].id
       loggedIn: false
       loggedInUser: null
       loggedInUserRoles: []
       baseDBURL: null
       username: ''
       password: '' # TODO trigger authenticate:mustconfirmidentity instead of storing the password in localStorage
-      servers: [server1, server2, server3, server4]
+      servers: servers
       serverTypes: ['FieldDB', 'OLD']
       fieldDBServerCodes: [
         'localhost'
