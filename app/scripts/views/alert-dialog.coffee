@@ -80,25 +80,30 @@ define [
 
     triggerConfirmEvent: ->
       if @confirmEvent
+        if @prompt
+          @confirmArgument = @getPromptInput()
         if @confirmArgument
           Backbone.trigger @confirmEvent, @confirmArgument
           @confirmArgument = null
         else
           Backbone.trigger @confirmEvent
         @confirmEvent = null
+      @setPromptInput('')
 
     triggerCancelEvent: ->
       if @cancelEvent
-        if @confirmArgument
+        if @cancelArgument
           Backbone.trigger @cancelEvent, @cancelArgument
           @confirmArgument = null
         else
           Backbone.trigger @cancelEvent
         @cancelEvent = null
+      @setPromptInput('')
 
     dialogOpen: (options) ->
       if options.text then @setText options.text
       if options.confirm then @showCancelButton()
+      if options.prompt then @showPromptInput()
       if options.confirmEvent then @confirmEvent = options.confirmEvent
       if options.cancelEvent then @cancelEvent = options.cancelEvent
       if options.confirmArgument then @confirmArgument = options.confirmArgument
@@ -113,11 +118,21 @@ define [
     showCancelButton: ->
       @$('.dative-alert-dialog-target button.cancel').show()
 
+    showPromptInput: ->
+      @prompt = true
+      @$('.dative-alert-dialog textarea').show()
+
     hideCancelButton: ->
       @$('.dative-alert-dialog-target button.cancel').hide()
 
     setText: (text) ->
       @$('.dative-alert-dialog-target .dative-alert-text').text text
+
+    getPromptInput: () ->
+      @$('.dative-alert-dialog textarea.dative-alert-prompt').val()
+
+    setPromptInput: (value) ->
+      @$('.dative-alert-dialog textarea.dative-alert-prompt').val value
 
     dialogClose: (event) ->
       @$('.dative-alert-dialog').first().dialog 'close'
