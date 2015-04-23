@@ -33,11 +33,12 @@ define [
       # AppView sets this to `true` when you click Forms > Add
       @weShouldFocusFirstAddViewInput = false
       # Each form view is in a 1-row/2-cell table where cell 1 is the form's
-      # index plus 1, e.g., (1), (2), etc.
+      # index plus 1, e.g., (1), (2), etc. The following array holds these
+      # table views.
       @paginationItemTableViews = []
       @fetchCompleted = false
-      # This is set to `true` when we want to fetch the last page immediately
-      # after fetching the first one.
+      # The following is set to `true` when we want to fetch the last page
+      # immediately after fetching the first one.
       @fetchFormsLastPage = false
       @lastFetched =   # We store this to help us prevent redundant requests to
         serverType: '' # the server for all forms.
@@ -110,7 +111,10 @@ define [
       @listenTo Backbone, 'fetchOLDFormsFail', @fetchFormsFail
       @listenTo Backbone, 'fetchOLDFormsSuccess', @fetchFormsSuccess
 
+      # TODO @jrwdunham: merge these two `listenTo`s ...
+      @listenTo Backbone, 'destroyOLDFormSuccess', @destroyFormSuccess
       @listenTo Backbone, 'destroyFormSuccess', @destroyFormSuccess
+
       @listenTo Backbone, 'duplicateForm', @duplicateForm
       @listenTo Backbone, 'duplicateFormConfirm', @duplicateFormConfirm
 
@@ -196,6 +200,7 @@ define [
       @listenToNewFormView()
 
     destroyFormSuccess: (formModel) ->
+      @collection.remove formModel
       @paginator.setItems (@paginator.items - 1)
       @refreshHeader()
       @refreshPaginationMenuTop()
@@ -653,12 +658,14 @@ define [
     # Note that we reset `formViews` to `[]` because with server-side
     # pagination we only store one page worth of form models/views at a time.
     getFormViews: ->
+      console.log 'in getFormViews'
       @formViews = []
       @collection.each (formModel) =>
         newFormView = new FormView
           model: formModel
           primaryDataLabelsVisible: @primaryDataLabelsVisible
           expanded: @allFormsExpanded
+        console.log "adding a new form view to `@formViews`."
         @formViews.push newFormView
 
     spinnerOptions: ->
@@ -746,7 +753,10 @@ define [
     # form models in the collection (and all form views in `@formViews`) using
     # the "indices" from `@paginator`.
     renderFormViews: ->
+      console.log 'in `renderFormViews`'
       paginationIndices = [@paginator.start..@paginator.end]
+      console.log paginationIndices.length
+      console.log @formViews.length
       for [index, formView] in _.zip(paginationIndices, @formViews)
         @renderFormView formView, index
 
@@ -762,7 +772,6 @@ define [
         $formList.append paginationItemTableView.render().el
         formView.setElement @$("##{formId}")
         formView.render()
-        @formViews.push formView
         @rendered formView
         @paginationItemTableViews.push paginationItemTableView
         @rendered paginationItemTableView

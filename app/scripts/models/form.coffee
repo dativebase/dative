@@ -1051,7 +1051,8 @@ define [
     parse: (response, options) ->
       response
 
-    getOLDURL: -> globals.applicationSettings.get('activeServer').get 'url'
+    getOLDURL: ->
+      globals.applicationSettings.get('activeServer').get 'url'
 
     # Issue a GET request to /forms/new on the active OLD server.
     # This returns a JSON object containing the data necessary to
@@ -1085,4 +1086,28 @@ define [
           .get('activeFieldDBCorpusModel').get 'datumFields'
       catch
         []
+
+    # Destroy an OLD form.
+    # DELETE `<OLD_URL>/forms/<form.id>`
+    destroyOLDForm: (options) ->
+      Backbone.trigger 'destroyOLDFormStart'
+      @constructor.cors.request(
+        method: 'DELETE'
+        url: "#{@getOLDURL()}/forms/#{@get 'id'}"
+        onload: (responseJSON, xhr) =>
+          Backbone.trigger 'destroyOLDFormEnd'
+          if xhr.status is 200
+            Backbone.trigger 'destroyOLDFormSuccess', @
+          else
+            error = responseJSON.error or 'No error message provided.'
+            Backbone.trigger 'destroyOLDFormFail', error
+            console.log "DELETE request to /forms/#{@get 'id'} failed (status not 200)."
+            console.log error
+        onerror: (responseJSON) =>
+          Backbone.trigger 'destroyOLDFormEnd'
+          error = responseJSON.error or 'No error message provided.'
+          Backbone.trigger 'destroyOLDFormFail', error
+          console.log "Error in DELETE request to /forms/#{@get 'id'}
+            (onerror triggered)."
+      )
 

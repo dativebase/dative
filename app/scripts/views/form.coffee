@@ -154,7 +154,8 @@ define [
     # clicks "Ok".
     delete: (formId) ->
       if formId is @model.get('id')
-        @model.collection.destroyOLDForm @model
+        #@model.collection.destroyOLDForm @model
+        @model.destroyOLDForm()
 
     render: ->
       @getDisplayViews()
