@@ -570,7 +570,6 @@ define [
 
       # NOTE cesine: overiding confirm MUST return a promise, otherwise its broken.
       deferred = FieldDB.Q.defer()
-      self = this
       FieldDB.Q.nextTick ->
         deferred.resolve
           message: message
