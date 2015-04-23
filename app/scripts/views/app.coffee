@@ -541,44 +541,57 @@ define [
       FieldDB.FieldDBObject.warn = @displayWarningMessagesDialog
       FieldDB.FieldDBObject.confirm = @displayConfirmDialog
 
-    displayBugReportDialog: (message) ->
-      # TODO @jrwdunham: display a Dative-styled dialog explaining the bug and
-      # also displaying a bug report form.
-      console.log ["TODO show some visual contact us or open a bug report in",
-        "a seperate window using probably http://jqueryui.com/dialog/#default",
-        message].join ' '
-      run = ->
+    displayBugReportDialog: (message, optionalLocale) ->
+      deferred = FieldDB.Q.defer()
+      messageChannel = 'bug:' + message.replace(/[^A-Za-z]/g,'')
+
+      @listenTo Backbone, messageChannel, () ->
         window.open(
           "https://docs.google.com/forms/d/18KcT_SO8YxG8QNlHValEztGmFpEc4-ZrjWO76lm0mUQ/viewform")
-      setTimeout run, 1000
+        deferred.resolve
+          message: message
+          optionalLocale: optionalLocale
+          response: true
+        return
+
+      options =
+        text: message
+        confirm: false
+        confirmEvent: messageChannel
+        confirmArgument: message
+      Backbone.trigger 'openAlertDialog', options
+
+      return deferred.promise
 
     displayWarningMessagesDialog: (message, message2, message3, message4) ->
-      # TODO @jrwdunham: display a Dative-styled dialog with "warning-style
-      # visuals" showing the warning messages. This does look like a good
-      # possibility: http://www.erichynds.com/examples/jquery-notify/index.htm
-      console.log "TODO show some visual thing here using the app view using
-        something like http://www.erichynds.com/examples/jquery-notify/"
+      console.log message, message2, message3, message4
 
     displayConfirmDialog: (message, optionalLocale) =>
       # TODO @jrwdunham @cesine: figure out how i18n/localization works in
-      # TODO: @jrdunham how do we listen to the cancel event?
       deferred = FieldDB.Q.defer()
       messageChannel = 'confirm:' + message.replace(/[^A-Za-z]/g,'')
 
       @listenTo Backbone, messageChannel, () ->
-        deferred = FieldDB.Q.defer()
-        FieldDB.Q.nextTick ->
-          deferred.resolve
-            message: message
-            optionalLocale: optionalLocale
-            response: true
-          return
+        deferred.resolve
+          message: message
+          optionalLocale: optionalLocale
+          response: true
+        return
+
+      @listenTo Backbone, 'cancel' + messageChannel, () ->
+        deferred.reject
+          message: message
+          optionalLocale: optionalLocale
+          response: false
+        return
 
       options =
         text: message
         confirm: true
         confirmEvent: messageChannel
+        cancelEvent: 'cancel' + messageChannel
         confirmArgument: message
+        cancelArgument: message
       Backbone.trigger 'openAlertDialog', options
 
       return deferred.promise
