@@ -200,8 +200,25 @@ define [
         when 'OLD' then @showFormsView()
         else console.log 'Error: you logged in to a non-FieldDB/non-OLD server (?).'
 
-    authenticateConfirmIdentity: ->
-      console.warn 'Block UI interaction and show confirm identity dialog box username is known, password is all they need to add '
+    authenticateConfirmIdentity: (message) =>
+      message = message || 'We need to make sure this is you. Confirm your password to continue.'
+      if !@originalMessage
+        @originalMessage = message
+      @displayConfirmIdentityDialog message
+      ,  (loginDetails) => 
+        console.log('no problem.. can keep working');
+        delete @originalMessage
+      , (loginDetails) =>
+        if(@confirmIdentityErrorCount > 3 )
+          console.log ' In this case of confirming identity, the user MUST authenticate. If they cant remember their password, after 4 attempts, log them out.'
+          delete @originalMessage
+          Backbone.trigger 'authenticate:logout' 
+          return
+        console.log('Asking again');
+
+        @confirmIdentityErrorCount = @confirmIdentityErrorCount || 0
+        @confirmIdentityErrorCount++
+        @authenticateConfirmIdentity(@originalMessage + ' ' + loginDetails.userFriendlyErrors.join ' ')
 
     # Set `@applicationSettings` and `@applicationSettingsCollection`
     getApplicationSettings: (options) ->
@@ -543,7 +560,7 @@ define [
 
     displayBugReportDialog: (message, optionalLocale) ->
       deferred = FieldDB.Q.defer()
-      messageChannel = 'bug:' + message.replace(/[^A-Za-z]/g,'')
+      messageChannel = 'bug:' + message?.replace(/[^A-Za-z]/g,'')
 
       @listenTo Backbone, messageChannel, () ->
         window.open(
@@ -569,7 +586,7 @@ define [
     displayConfirmDialog: (message, optionalLocale) =>
       # TODO @jrwdunham @cesine: figure out how i18n/localization works in
       deferred = FieldDB.Q.defer()
-      messageChannel = 'confirm:' + message.replace(/[^A-Za-z]/g,'')
+      messageChannel = 'confirm:' + message?.replace(/[^A-Za-z]/g,'')
 
       @listenTo Backbone, messageChannel, () ->
         deferred.resolve
@@ -595,6 +612,47 @@ define [
       Backbone.trigger 'openAlertDialog', options
 
       return deferred.promise
+
+    displayPromptDialog: (message, optionalLocale) ->
+      # TODO @jrwdunham @cesine: figure out how i18n/localization works in
+      deferred = FieldDB.Q.defer()
+      messageChannel = 'prompt:' + message?.replace(/[^A-Za-z]/g,'')
+
+      @listenTo Backbone, messageChannel, (userInput) ->
+        deferred.resolve
+          message: message
+          optionalLocale: optionalLocale
+          response: userInput
+        return
+
+      @listenTo Backbone, 'cancel' + messageChannel, () ->
+        deferred.reject
+          message: message
+          optionalLocale: optionalLocale
+          response: ""
+        return
+
+      options =
+        text: message
+        confirm: true
+        prompt: true
+        confirmEvent: messageChannel
+        cancelEvent: 'cancel' + messageChannel
+        confirmArgument: message
+        cancelArgument: message
+      Backbone.trigger 'openAlertDialog', options
+
+      return deferred.promise
+
+    displayConfirmIdentityDialog: (message, successCallback, failureCallback, cancelCallback) =>
+      cancelCallback = cancelCallback || failureCallback
+      @displayPromptDialog(message).then (dialog) => 
+        @applicationSettings
+          .get('fieldDBApplication')
+          .authentication
+          .confirmIdentity(password: dialog.response)
+          .then successCallback, failureCallback 
+        , cancelCallback
 
     ############################################################################
     # Persist application settings.
