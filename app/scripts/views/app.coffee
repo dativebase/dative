@@ -556,61 +556,32 @@ define [
       # TODO @jrwdunham: display a Dative-styled dialog with "warning-style
       # visuals" showing the warning messages. This does look like a good
       # possibility: http://www.erichynds.com/examples/jquery-notify/index.htm
-      console.log ["TODO show some visual thing here using the app view using",
-        "something like http://www.erichynds.com/examples/jquery-notify/",
-        message].join ' '
+      console.log "TODO show some visual thing here using the app view using
+        something like http://www.erichynds.com/examples/jquery-notify/"
 
-    displayConfirmDialog: (message, optionalLocale) ->
-      # TODO @jrwdunham: use the already-in-place @alertDialog for this
+    displayConfirmDialog: (message, optionalLocale) =>
       # TODO @jrwdunham @cesine: figure out how i18n/localization works in
-      # FieldDB and begin implementing something similar in Dative.
-      console.log ["Pretending the user said Yes. This is dangerous. TODO show some visual confirm dialog here using the app view using",
-        "something like http://jqueryui.com/dialog/#modal-confirmation" ,
-        message].join ' '
-
-      # NOTE cesine: overiding confirm MUST return a promise, otherwise its broken.
+      # TODO: @jrdunham how do we listen to the cancel event?
       deferred = FieldDB.Q.defer()
-      FieldDB.Q.nextTick ->
-        deferred.resolve
-          message: message
-          optionalLocale: optionalLocale
-          response: true
-        return
+      messageChannel = 'confirm:' + message.replace(/[^A-Za-z]/g,'')
+
+      @listenTo Backbone, messageChannel, () ->
+        deferred = FieldDB.Q.defer()
+        FieldDB.Q.nextTick ->
+          deferred.resolve
+            message: message
+            optionalLocale: optionalLocale
+            response: true
+          return
+
+      options =
+        text: message
+        confirm: true
+        confirmEvent: messageChannel
+        confirmArgument: message
+      Backbone.trigger 'openAlertDialog', options
 
       return deferred.promise
-
-      # NOTE @jrwdunham: this is cesine's first stab at a jQuery-style dialog
-      # for this:
-
-      # deferred = FieldDB.Q.defer(),
-      # self = this;
-
-      # $(function() {
-      #   $( "#dialog-confirm" ).dialog({
-      #     resizable: false,
-      #     height:140,
-      #     modal: true,
-      #     buttons: {
-      #       message: function() {
-      #         $( this ).dialog( "close" );
-      #         deferred.resolve({
-      #           message: message,
-      #           optionalLocale: optionalLocale,
-      #           response: true
-      #           });
-      #         },
-      #         Cancel: function() {
-      #           $( this ).dialog( "close" );
-      #           deferred.reject({
-      #             message: message,
-      #             optionalLocale: optionalLocale,
-      #             response: false
-      #             });
-      #         }
-      #       }
-      #       });
-      #   });
-
 
     ############################################################################
     # Persist application settings.
