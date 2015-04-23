@@ -88,12 +88,21 @@ define [
         @confirmEvent = null
 
     triggerCancelEvent: ->
+      if @cancelEvent
+        if @confirmArgument
+          Backbone.trigger @cancelEvent, @cancelArgument
+          @confirmArgument = null
+        else
+          Backbone.trigger @cancelEvent
+        @cancelEvent = null
 
     dialogOpen: (options) ->
       if options.text then @setText options.text
       if options.confirm then @showCancelButton()
       if options.confirmEvent then @confirmEvent = options.confirmEvent
+      if options.cancelEvent then @cancelEvent = options.cancelEvent
       if options.confirmArgument then @confirmArgument = options.confirmArgument
+      if options.cancelArgument then @cancelArgument = options.cancelArgument
       Backbone.trigger 'alert-dialog:open'
       @$('.dative-alert-dialog').on("dialogopen", => @focusCancelButton)
       @$('.dative-alert-dialog').first().dialog 'open'
