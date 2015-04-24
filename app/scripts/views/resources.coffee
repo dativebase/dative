@@ -302,13 +302,33 @@ define [
         else
           null
 
+    getNextResourceViewDiv: ($enclosingResourceViewDiv) ->
+      if @enumerateResources
+        $nextResourceViewDiv = $enclosingResourceViewDiv
+          .closest('.dative-pagin-item')
+          .next()
+          .find('.dative-resource-widget')
+      else
+        $nextResourceViewDiv = $enclosingResourceViewDiv.next()
+      if $nextResourceViewDiv then $nextResourceViewDiv else null
+
+    getPreviousResourceViewDiv: ($enclosingResourceViewDiv) ->
+      if @enumerateResources
+        $previousResourceViewDiv = $enclosingResourceViewDiv
+          .closest('.dative-pagin-item')
+          .prev()
+          .find('.dative-resource-widget')
+      else
+        $previousResourceViewDiv = $enclosingResourceViewDiv.prev()
+      if $previousResourceViewDiv then $previousResourceViewDiv else null
+
     # Focus the next (below) resource view, or the first one if we're at the
     # top.
     focusNextResourceView: (event) ->
       $enclosingResourceViewDiv = @getEnclosingResourceViewDiv(
         @$(event.target))
       if $enclosingResourceViewDiv
-        $nextResourceViewDiv = $enclosingResourceViewDiv.next()
+        $nextResourceViewDiv = @getNextResourceViewDiv $enclosingResourceViewDiv
         @stopEvent event
         if $nextResourceViewDiv.length
           $nextResourceViewDiv.focus()
@@ -321,7 +341,8 @@ define [
       $enclosingResourceViewDiv = @getEnclosingResourceViewDiv(
         @$(event.target))
       if $enclosingResourceViewDiv.length
-        $previousResourceViewDiv = $enclosingResourceViewDiv.prev()
+        $previousResourceViewDiv =
+          @getPreviousResourceViewDiv $enclosingResourceViewDiv
         @stopEvent event
         if $previousResourceViewDiv.length
           $previousResourceViewDiv.focus()
