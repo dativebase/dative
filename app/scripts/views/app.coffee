@@ -551,9 +551,9 @@ define [
     ############################################################################
     overrideFieldDBNotificationHooks: ->
       # Overriding FieldDB's logging hooks to do nothing
-      FieldDB.FieldDBObject.verbose = () -> {}
-      FieldDB.FieldDBObject.debug = () -> {}
-      FieldDB.FieldDBObject.todo = () -> {}
+      FieldDB.FieldDBObject.verbose = -> {}
+      FieldDB.FieldDBObject.debug = -> {}
+      FieldDB.FieldDBObject.todo = -> {}
       FieldDB.FieldDBObject.bug = @displayBugReportDialog
       FieldDB.FieldDBObject.warn = @displayWarningMessagesDialog
       FieldDB.FieldDBObject.confirm = @displayConfirmDialog
@@ -562,7 +562,7 @@ define [
       deferred = FieldDB.Q.defer()
       messageChannel = 'bug:' + message?.replace(/[^A-Za-z]/g,'')
 
-      @listenTo Backbone, messageChannel, () ->
+      @listenTo Backbone, messageChannel, ->
         window.open(
           "https://docs.google.com/forms/d/18KcT_SO8YxG8QNlHValEztGmFpEc4-ZrjWO76lm0mUQ/viewform")
         deferred.resolve
@@ -588,14 +588,14 @@ define [
       deferred = FieldDB.Q.defer()
       messageChannel = 'confirm:' + message?.replace(/[^A-Za-z]/g,'')
 
-      @listenTo Backbone, messageChannel, () ->
+      @listenTo Backbone, messageChannel, ->
         deferred.resolve
           message: message
           optionalLocale: optionalLocale
           response: true
         return
 
-      @listenTo Backbone, 'cancel' + messageChannel, () ->
+      @listenTo Backbone, 'cancel' + messageChannel, ->
         deferred.reject
           message: message
           optionalLocale: optionalLocale
@@ -625,7 +625,7 @@ define [
           response: userInput
         return
 
-      @listenTo Backbone, 'cancel' + messageChannel, () ->
+      @listenTo Backbone, 'cancel' + messageChannel, ->
         deferred.reject
           message: message
           optionalLocale: optionalLocale
