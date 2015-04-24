@@ -109,3 +109,7 @@ define [
       tags: ArrayOfObjectsWithNameFieldDisplayView
       files: ArrayOfObjectsWithNameFieldDisplayView
 
+    # Override this `resource` method so that there is no header title for form
+    # resources.
+    getHeaderTitle: -> ''
+
