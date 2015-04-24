@@ -103,8 +103,8 @@ define [
       )
 
     getFieldDBBaseDBURL: (user) ->
-      if user.corpuses?.length
-        meta = user.corpuses[0]
+      if user.corpora?.length
+        meta = user.corpora[0]
         protocol = meta.protocol
         domain = meta.domain
         port = if meta.port then ":#{meta.port}" else ''
