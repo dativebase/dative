@@ -21,3 +21,7 @@ define [
     resourcesCollection: FormsCollection
     resourceModel: FormModel
 
+    initialize: (options) ->
+      options.enumerateResources = true
+      super options
+

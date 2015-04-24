@@ -28,6 +28,9 @@ define [
 
   class FormView extends ResourceView
 
+    className: 'dative-resource-widget dative-form-object dative-paginated-item
+      dative-widget-center ui-corner-all'
+
     initialize: (options) ->
       super
       switch @activeServerType
@@ -35,6 +38,7 @@ define [
           @attribute2displayView = @attribute2displayViewFieldDB
         when 'OLD'
           @attribute2displayView = @attribute2displayViewOLD
+      @headerAlwaysVisible = false
 
     resourceName: 'form'
 

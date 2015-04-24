@@ -4,8 +4,7 @@
       <span class='dative-pagin-item-index'>(<%= @integerWithCommas @index %>)
     </td>
     <td class='dative-pagin-item-content'>
-      <div id='<%= @formId %>'
-        class='igt-form dative-form-object ui-corner-all'></div>
+        <div id='<%= @resourceId %>'></div>
     </td>
   </tr>
 </tbody>

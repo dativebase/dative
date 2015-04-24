@@ -128,7 +128,8 @@ button.help-button
     margin-top: 5px;
 }
 
-.dative-form-widget
+/* DELETE THIS */
+.dative-form-widget-
 {
     font-size: inherit;
     padding: 10px;
@@ -163,7 +164,7 @@ button.help-button
 
 .dative-form-object .dative-field-display-label-container
 {
-  width: 36%;
+  width: 40%;
 }
 
 .dative-field-input-container,
@@ -204,7 +205,7 @@ button.help-button
 
 .dative-form-object .dative-field-display-representation-container
 {
-  width: 60%;
+  width: 55%;
 }
 
 .dative-field-display-representation-container.no-label
@@ -1374,7 +1375,7 @@ span.dative-pagin-item-index
 {
   /*font-size: 150%;*/
   position: relative;
-  top: 0.1em;
+  top: 0.5em;
 }
 
 .black-fa

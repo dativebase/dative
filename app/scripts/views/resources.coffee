@@ -3,14 +3,15 @@ define [
   './resource'
   './exporter-dialog'
   './pagination-menu-top'
+  './pagination-item-table'
   './../collections/resources'
   './../models/resource'
   './../utils/paginator'
   './../utils/globals'
   './../templates/resources'
 ], (BaseView, ResourceView, ExporterDialogView, PaginationMenuTopView,
-  ResourcesCollection, ResourceModel, Paginator, globals,
-  resourcesTemplate) ->
+  PaginationItemTableView, ResourcesCollection, ResourceModel, Paginator,
+  globals, resourcesTemplate) ->
 
   # Resources View
   # ---------------
@@ -50,9 +51,11 @@ define [
       @resourceNameCapitalized = @utils.capitalize @resourceName
       @resourceNamePlural = @utils.pluralize @resourceName
       @resourceNamePluralCapitalized = @utils.capitalize @resourceNamePlural
+      @enumerateResources = options?.enumerateResources or false
       @getGlobalsResourcesDisplaySettings()
       @focusedElementIndex = null
       @resourceViews = [] # holds a ResourceView instance for each ResourceModel in ResourcesCollection
+      @paginationItemTableViews = [] # if `@enumerateResources` is true, then this holds an enumeration/pagination superview for each resource view.
       @renderedResourceViews = [] # references to the ResourceView instances that are rendered
       @weShouldFocusFirstAddViewInput = false # AppView sets this to True when you click Resources > Add
       @fetchCompleted = false
@@ -260,7 +263,8 @@ define [
         primaryDataLabelsVisible: @primaryDataLabelsVisible
         expanded: @allResourcesExpanded
       @collection.add addedResourceView.model
-      @renderResourceView addedResourceView, @paginator.end
+      renderedView = @renderResourceView addedResourceView, @paginator.end
+      @$('.dative-pagin-items').append renderedView.el
 
     # Keyboard shortcuts for the resources view.
     # Note that the ResourcesView is listening to events on parts of the DOM
@@ -660,6 +664,7 @@ define [
         complete: =>
           @$('.dative-pagin-items').html ''
           @closeRenderedResourceViews()
+          if @enumerateResources then @closePaginationItemTableViews()
           @renderPage options
       if options?.hideEffect
         hideOptions.duration = @getAnimationDuration()
@@ -683,6 +688,14 @@ define [
         resourceView = @resourceViews.pop()
         resourceView.close()
         @closed resourceView
+
+    # Close all rendered pagination item table views, i.e., the mini-tables that
+    # hold enumerated resource views.
+    closePaginationItemTableViews: ->
+      while @paginationItemTableViews.length
+        paginationItemTableView = @paginationItemTableViews.pop()
+        paginationItemTableView.close()
+        @closed paginationItemTableView
 
     # Create a `ResourceView` instance for each `ResourceModel` instance in
     # `@collection` and append it to `@resourceViews`.
@@ -791,22 +804,36 @@ define [
     # `@resourceViews` using the paginator start and end values.
     renderResourceViews: ->
       paginationIndices = [@paginator.start..@paginator.end]
+      fragment = document.createDocumentFragment()
       if @getActiveServerType() is 'OLD'
         for [index, resourceView] in _.zip(paginationIndices, @resourceViews)
-          @renderResourceView resourceView, index
+          renderedView = @renderResourceView resourceView, index
+          if renderedView then fragment.appendChild renderedView.el
       else
         for index in paginationIndices
           resourceView = @resourceViews[index]
-          @renderResourceView resourceView, index
+          renderedView = @renderResourceView resourceView, index
+          if renderedView then fragment.appendChild renderedView.el
+      @$('.dative-pagin-items').append fragment
 
-    # Render a single resource view.
+    # Render a single resource view, but don't add it to the DOM: just return
+    # it.
     renderResourceView: (resourceView, index) ->
-      $resourceList = @$ '.dative-pagin-items'
       if resourceView # resourceView may be undefined.
-        resourceId = resourceView.model.get 'id'
-        $resourceList.append resourceView.render().el
+        if @enumerateResources # i.e., add example numbers, e.g.,  "(1)"
+          resourceId = resourceView.model.get 'id'
+          viewToReturn = new PaginationItemTableView
+            resourceId: resourceId
+            index: index + 1
+          viewToReturn.render()
+          viewToReturn.$("##{resourceId}").html resourceView.render().el
+          @paginationItemTableViews.push viewToReturn
+          @rendered viewToReturn
+        else
+          viewToReturn = resourceView.render()
         @renderedResourceViews.push resourceView
         @rendered resourceView
+        viewToReturn
 
     # jQuery-show the list of resources.
     showResourceList: (options) ->
