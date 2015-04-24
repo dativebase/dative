@@ -194,16 +194,18 @@ define [
     # attribute, as specified in `@attribute2displayView`. The default display
     # view is `FieldDisplayView`.
     getDisplayView: (attribute) ->
-      # All `DisplayView` subclasses expect `attribute` and `model` on init.
-      params =
-        resource: @resourceNamePlural
-        attribute: attribute # e.g., "name"
-        model: @model
       if attribute of @attribute2displayView
         MyDisplayView = @attribute2displayView[attribute]
-        new MyDisplayView params
+        new MyDisplayView(@getDisplayViewParams(attribute))
       else # the default display view is FieldDisplayView
-        new FieldDisplayView params
+        new FieldDisplayView(@getDisplayViewParams(attribute))
+
+    # Return the params for initializing a new `DisplayView` subclass; they all
+    # expect `attribute` and `model` on init.
+    getDisplayViewParams: (attribute) ->
+      resource: @resourceNamePlural
+      attribute: attribute # e.g., "name"
+      model: @model
 
     html: ->
       @$el

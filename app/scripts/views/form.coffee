@@ -5,9 +5,21 @@ define [
   './date-field-display'
   './object-with-name-field-display'
   './array-of-objects-with-name-field-display'
+  './judgement-value-field-display'
+  './morpheme-break-field-display'
+  './morpheme-gloss-field-display'
+  './phonetic-transcription-field-display'
+  './grammaticality-value-field-display'
+  './translations-field-display'
+  './source-field-display'
+  './array-of-objects-with-title-field-display'
 ], (ResourceView, FormAddWidgetView, PersonFieldDisplayView,
   DateFieldDisplayView, ObjectWithNameFieldDisplayView,
-  ArrayOfObjectsWithNameFieldDisplayView) ->
+  ArrayOfObjectsWithNameFieldDisplayView, JudgementValueFieldDisplayView,
+  MorphemeBreakFieldDisplayView, MorphemeGlossFieldDisplayView,
+  PhoneticTranscriptionFieldDisplayView, GrammaticalityValueFieldDisplayView,
+  TranslationsFieldDisplayView, SourceFieldDisplayView,
+  ArrayOfObjectsWithTitleFieldDisplayView) ->
 
   # Form View
   # --------------
@@ -15,6 +27,14 @@ define [
   # For displaying individual forms.
 
   class FormView extends ResourceView
+
+    initialize: (options) ->
+      super
+      switch @activeServerType
+        when 'FieldDB'
+          @attribute2displayView = @attribute2displayViewFieldDB
+        when 'OLD'
+          @attribute2displayView = @attribute2displayViewOLD
 
     resourceName: 'form'
 
@@ -32,9 +52,16 @@ define [
 
     # Attributes that may be hidden.
     secondaryAttributes: [
+      'comments'
+      'speaker_comments'
+      'syntax'
+      'semantics'
+      'status'
       'elicitation_method'
       'tags'
       'syntactic_category'
+      'syntactic_category_string'
+      'break_gloss_category'
       'date_elicited'
       'speaker'
       'elicitor'
@@ -46,14 +73,39 @@ define [
       'source'
       'files'
       'collections'
+      'UUID'
+      'id'
     ]
 
-    attribute2displayView:
-      tags: ArrayOfObjectsWithNameFieldDisplayView
-      form_search: ObjectWithNameFieldDisplayView
-      enterer: PersonFieldDisplayView
-      modifier: PersonFieldDisplayView
+    attribute2displayView: {}
+
+    attribute2displayViewFieldDB:
+      utterance: JudgementValueFieldDisplayView
+      morphemes: MorphemeBreakFieldDisplayView
+      gloss: MorphemeGlossFieldDisplayView
+      dateElicited: DateFieldDisplayView
+      dateEntered: DateFieldDisplayView
+      dateModified: DateFieldDisplayView
+
+    attribute2displayViewOLD:
+      narrow_phonetic_transcription: PhoneticTranscriptionFieldDisplayView
+      phonetic_transcription: PhoneticTranscriptionFieldDisplayView
+      transcription: GrammaticalityValueFieldDisplayView
+      translations: TranslationsFieldDisplayView
+      morpheme_break: MorphemeBreakFieldDisplayView
+      morpheme_gloss: MorphemeGlossFieldDisplayView
+      syntactic_category: ObjectWithNameFieldDisplayView
+      elicitation_method: ObjectWithNameFieldDisplayView
+      source: SourceFieldDisplayView
+      date_elicited: DateFieldDisplayView
       datetime_entered: DateFieldDisplayView
       datetime_modified: DateFieldDisplayView
+      speaker: PersonFieldDisplayView
+      elicitor: PersonFieldDisplayView
+      enterer: PersonFieldDisplayView
+      modifier: PersonFieldDisplayView
+      verifier: PersonFieldDisplayView
+      collections: ArrayOfObjectsWithTitleFieldDisplayView
+      tags: ArrayOfObjectsWithNameFieldDisplayView
       files: ArrayOfObjectsWithNameFieldDisplayView
 

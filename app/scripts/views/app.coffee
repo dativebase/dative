@@ -277,7 +277,7 @@ define [
     showNewFormView: ->
       if not @loggedIn() then return
       if @formsView and @visibleView is @formsView
-        @visibleView.toggleNewFormViewAnimate()
+        @visibleView.toggleNewResourceViewAnimate()
       else
         @showFormsView showNewFormView: true
 

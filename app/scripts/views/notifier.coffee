@@ -16,6 +16,7 @@ define [
     initialize: ->
 
       @crudResources = [
+        'form'
         'subcorpus'
         'phonology'
         'morphology'
@@ -82,20 +83,20 @@ define [
     # Forms
     ############################################################################
 
-    addOLDFormSuccess: (formModel) ->
+    addFormSuccess: (formModel) ->
       notification = new NotificationView
         title: 'Form created'
         content: "You have successfully created a new form. Its id is
           #{formModel.get 'id'}."
       @renderNotification notification
 
-    updateOLDFormSuccess: (formModel) ->
+    updateFormSuccess: (formModel) ->
       notification = new NotificationView
         title: 'Form updated'
         content: "You have successfully updated form #{formModel.get 'id'}."
       @renderNotification notification
 
-    addUpdateOLDFormFail: (error, type) ->
+    addUpdateFormFail: (error, type) ->
       if error
         content = "Your form #{type} request was unsuccessful. #{error}"
       else
@@ -107,20 +108,20 @@ define [
         type: 'error'
       @renderNotification notification
 
-    addOLDFormFail: (error) ->
-      @addUpdateOLDFormFail error, 'creation'
+    addFormFail: (error) ->
+      @addUpdateFormFail error, 'creation'
 
-    updateOLDFormFail: (error) ->
-      @addUpdateOLDFormFail error, 'update'
+    updateFormFail: (error) ->
+      @addUpdateFormFail error, 'update'
 
-    destroyOLDFormFail: (error) ->
+    destroyFormFail: (error) ->
       notification = new NotificationView
         title: 'Form deletion failed'
         content: "Your form creation request was unsuccessful. #{error}"
         type: 'error'
       @renderNotification notification
 
-    destroyOLDFormSuccess: (formModel) ->
+    destroyFormSuccess: (formModel) ->
       notification = new NotificationView
         title: 'Form deleted'
         content: "You have successfully deleted the form with id
