@@ -172,7 +172,7 @@ define [
       @renderDisplayViews()
       @guify()
       @listenToEvents()
-      @renderUpdateView()
+      #@renderUpdateView()
       @
 
     getDisplayViews: ->
