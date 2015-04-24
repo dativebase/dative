@@ -8,7 +8,7 @@ Dative is a browser-based application for linguistic fieldwork and language
 documentation.
 
 Its high-level goals are:
- 
+
 - to interface with multiple server-side backends (FieldDB corpora, OLDs)
 - to incorporate the best parts of existing linguistic fieldwork database
   application GUIs:
