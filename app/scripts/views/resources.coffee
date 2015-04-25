@@ -1043,7 +1043,7 @@ define [
             #{@resourceName}, then click “Ok” to proceed with duplicating
             #{@resourceName} #{id}."
           confirm: true
-          confirmEvent: 'duplicateResource'
+          confirmEvent: "duplicate#{@resourceNameCapitalized}"
           confirmArgument: resourceModel
         Backbone.trigger 'openAlertDialog', options
 

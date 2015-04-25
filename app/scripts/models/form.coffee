@@ -19,10 +19,35 @@ define ['./resource'], (ResourceModel) ->
       if @activeServerType is 'OLD'
         @manyToOneAttributes = @manyToOneAttributesOLD
         @manyToManyAttributes = @manyToManyAttributesOLD
+        @editableAttributes = @editableAttributesOLD
 
     resourceName: 'form'
 
     editableAttributes: []
+
+    editableAttributesOLD: [
+      'transcription'
+      'phonetic_transcription'
+      'narrow_phonetic_transcription'
+      'morpheme_break'
+      'grammaticality'
+      'morpheme_gloss'
+      'translations'
+      'comments'
+      'speaker_comments'
+      'syntax'
+      'semantics'
+      'status'
+      'elicitation_method'
+      'syntactic_category'
+      'speaker'
+      'elicitor'
+      'verifier'
+      'source'
+      'tags'
+      'files'
+      'date_elicited'
+    ]
 
     manyToOneAttributes: []
     manyToManyAttributes: []
