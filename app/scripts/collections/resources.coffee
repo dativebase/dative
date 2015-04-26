@@ -40,29 +40,32 @@ define [
         method: 'GET'
         url: @getResourcesPaginationURL options
         onload: (responseJSON) =>
-          Backbone.trigger "fetch#{@resourceNamePluralCapitalized}End"
-          if 'items' of responseJSON
-            @add @getDativeResourceModelsFromOLDObjects(responseJSON.items)
-            Backbone.trigger "fetch#{@resourceNamePluralCapitalized}Success",
-              responseJSON.paginator
-          # The OLD returns `[]` if there are no resources. This is
-          # inconsistent and should probably be changed OLD-side.
-          else if utils.type(responseJSON) is 'array' and
-          responseJSON.length is 0
-            Backbone.trigger "fetch#{@resourceNamePluralCapitalized}Success"
-          else
-            reason = responseJSON.reason or 'unknown'
-            Backbone.trigger "fetch#{@resourceNamePluralCapitalized}Fail",
-              "failed to fetch all #{@getServerSideResourceName()}; reason:
-                #{reason}"
-            console.log "GET request to /#{@getServerSideResourceName()} failed; reason:
-              #{reason}"
+          @fetchResourcesOnloadHandler responseJSON
         onerror: (responseJSON) =>
           Backbone.trigger "fetch#{@resourceNamePluralCapitalized}End"
           Backbone.trigger "fetch#{@resourceNamePluralCapitalized}Fail",
             "error in fetching #{@getServerSideResourceName()}"
           console.log "Error in GET request to /#{@getServerSideResourceName()}"
       )
+
+    fetchResourcesOnloadHandler: (responseJSON) ->
+      Backbone.trigger "fetch#{@resourceNamePluralCapitalized}End"
+      if 'items' of responseJSON
+        @add @getDativeResourceModelsFromOLDObjects(responseJSON.items)
+        Backbone.trigger "fetch#{@resourceNamePluralCapitalized}Success",
+          responseJSON.paginator
+      # The OLD returns `[]` if there are no resources. This is
+      # inconsistent and should probably be changed OLD-side.
+      else if utils.type(responseJSON) is 'array' and
+      responseJSON.length is 0
+        Backbone.trigger "fetch#{@resourceNamePluralCapitalized}Success"
+      else
+        reason = responseJSON.reason or 'unknown'
+        Backbone.trigger "fetch#{@resourceNamePluralCapitalized}Fail",
+          "failed to fetch all #{@getServerSideResourceName()}; reason:
+            #{reason}"
+        console.log "GET request to /#{@getServerSideResourceName()} failed; reason:
+          #{reason}"
 
     # Add (create) a resource.
     # POST `<URL>/<resource_name_plural>`
