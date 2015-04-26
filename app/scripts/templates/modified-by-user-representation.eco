@@ -1,0 +1,12 @@
+<div
+  class='<%= @class %>'
+  ><span
+    class='<%= @usernameClass %>'
+    ><%= @usernameValue%></span
+  > (<span
+    class='<%= @timestampClass %>
+           dative-tooltip'
+    title='This modification was made on <%= @humanDatetime @timestampValue %>'
+    ><%= @timeSince @timestampValue %></span
+  >)</div>
+

@@ -30,7 +30,8 @@ define [
 
     # Add representation views to `@representationViews`, one for each object in `@context.value`.
     getRepresentationViews: ->
-      for object in @context.value
+      value = @context.value or []
+      for object in value
         @pushRepresentationView object
 
     # Override this in sub-classes in order to change the type of sub-representation.

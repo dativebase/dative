@@ -13,13 +13,17 @@ define [
   './translations-field-display'
   './source-field-display'
   './array-of-objects-with-title-field-display'
+  './comments-field-display'
+  './modified-by-user-field-display'
+  './../utils/globals'
 ], (ResourceView, FormAddWidgetView, PersonFieldDisplayView,
   DateFieldDisplayView, ObjectWithNameFieldDisplayView,
   ArrayOfObjectsWithNameFieldDisplayView, JudgementValueFieldDisplayView,
   MorphemeBreakFieldDisplayView, MorphemeGlossFieldDisplayView,
   PhoneticTranscriptionFieldDisplayView, GrammaticalityValueFieldDisplayView,
   TranslationsFieldDisplayView, SourceFieldDisplayView,
-  ArrayOfObjectsWithTitleFieldDisplayView) ->
+  ArrayOfObjectsWithTitleFieldDisplayView, CommentsFieldDisplayView,
+  ModifiedByUserFieldDisplayView, globals) ->
 
   # Form View
   # --------------
@@ -33,53 +37,33 @@ define [
 
     initialize: (options) ->
       super
+      @headerAlwaysVisible = false
+      @setAttribute2DisplayView()
+      @setAttributeClasses()
+
+    setAttributeClasses: ->
+      @setPrimaryAttributes()
+      @setSecondaryAttributes()
+
+    setPrimaryAttributes: ->
+      igtAttributes = @getFormAttributes @activeServerType, 'igt'
+      translationAttributes =
+        @getFormAttributes @activeServerType, 'translation'
+      @primaryAttributes = igtAttributes.concat translationAttributes
+
+    setSecondaryAttributes: ->
+      @secondaryAttributes = @getFormAttributes @activeServerType, 'secondary'
+
+    setAttribute2DisplayView: ->
       switch @activeServerType
         when 'FieldDB'
           @attribute2displayView = @attribute2displayViewFieldDB
         when 'OLD'
           @attribute2displayView = @attribute2displayViewOLD
-      @headerAlwaysVisible = false
 
     resourceName: 'form'
 
     resourceAddWidgetView: FormAddWidgetView
-
-    # Attributes that are always displayed.
-    primaryAttributes: [
-      'narrow_phonetic_transcription'
-      'phonetic_transcription'
-      'transcription'
-      'morpheme_break'
-      'morpheme_gloss'
-      'translations'
-    ]
-
-    # Attributes that may be hidden.
-    secondaryAttributes: [
-      'comments'
-      'speaker_comments'
-      'syntax'
-      'semantics'
-      'status'
-      'elicitation_method'
-      'tags'
-      'syntactic_category'
-      'syntactic_category_string'
-      'break_gloss_category'
-      'date_elicited'
-      'speaker'
-      'elicitor'
-      'enterer'
-      'datetime_entered'
-      'modifier'
-      'datetime_modified'
-      'verifier'
-      'source'
-      'files'
-      'collections'
-      'UUID'
-      'id'
-    ]
 
     attribute2displayView: {}
 
@@ -90,6 +74,8 @@ define [
       dateElicited: DateFieldDisplayView
       dateEntered: DateFieldDisplayView
       dateModified: DateFieldDisplayView
+      comments: CommentsFieldDisplayView
+      modifiedByUser: ModifiedByUserFieldDisplayView
 
     attribute2displayViewOLD:
       narrow_phonetic_transcription: PhoneticTranscriptionFieldDisplayView
@@ -113,7 +99,19 @@ define [
       tags: ArrayOfObjectsWithNameFieldDisplayView
       files: ArrayOfObjectsWithNameFieldDisplayView
 
-    # Override this `resource` method so that there is no header title for form
-    # resources.
+    # We don't want form widgets to have headers.
     getHeaderTitle: -> ''
+
+    # Get an array of form attributes (form app settings model) for the
+    # specified server type and category (e.g., 'igt' or 'secondary').
+    getFormAttributes: (serverType, category) ->
+      switch serverType
+        when 'FieldDB' then attribute = 'fieldDBFormCategories'
+        when 'OLD' then attribute = 'oldFormCategories'
+      try
+        globals.applicationSettings.get(attribute)[category]
+      catch
+        console.log "WARNING: could not get an attributes array for
+          #{serverType} and #{category}"
+        []
 

@@ -22,6 +22,7 @@ define [
     resourceModel: FormModel
 
     initialize: (options) ->
+      # Put "(1)", "(2)", etc. before form resource representations.
       options.enumerateResources = true
       super options
 

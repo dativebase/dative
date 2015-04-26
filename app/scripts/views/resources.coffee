@@ -16,16 +16,14 @@ define [
   # Resources View
   # ---------------
   #
-  # Displays a collection of resources (e.g., OLD corpora) for browsing, with
-  # pagination. Also contains a ResourceView instance (with a model that hasn't
-  # been saved on the server) for creating new resources within the resources
-  # browse interface.
+  # Displays a collection of resources (e.g., FieldDB datums or OLD forms) for
+  # browsing, with pagination. Also contains a ResourceView instance (with a
+  # model that hasn't been saved on the server) for creating new resources
+  # within the resources browse interface.
   #
   # This view is intended to be subclassed and parameterized minimally in order
-  # to work with OLD corpora, phonologies, tags, etc.
-  #
-  # TODO: make forms use this same resources paginator view so that there is
-  # not needless code repetition.
+  # to work with various FieldDB/OLD resources, e.g., corpora, phonologies,
+  # tags, etc.
 
   class ResourcesView extends BaseView
 
@@ -95,7 +93,8 @@ define [
       @renderExporterDialogView()
       @newResourceViewVisibility()
       if @weNeedToFetchResourcesAgain()
-        @fetchResourcesToCollection()
+        @fetchResourcesLastPage = true
+        @fetchResourcesPageToCollection()
       else
         @refreshPage()
       @listenToEvents()
@@ -478,23 +477,10 @@ define [
       if $focusedElement
         $focusedElement.closest('.dative-resource-widget').first().focus()
 
-    # Tell the collection to fetch resources from the server and add them to
-    # itself. Only `@render` calls this. Note that we just fetch the resources
-    # for the current pagination page, i.e., we use server-side pagination.
-    # Note also that setting `fetchResourcesLastPage` to `true` will cause
-    # `@fetchResourcesSuccess` to immediately make a second request for the
-    # last page of resources. This is the only way to get the last page of
-    # resources from the OLD via its current API; that is, you first have to
-    # make a vacuous request in order to get the resource count so that you
-    # know what the last page is.
-    fetchResourcesToCollection: ->
-      @fetchResourcesLastPage = true
-      @fetchResourcesPageToCollection()
-
-    # Get a page of resources from an OLD web service. Note that the
-    # resources collection only holds one page at a time; that is, the
-    # collection is emptied and refilled on each pagination action, hence the
-    # `.reset()` call here.
+    # Get a page of resources from a web service. Note that the resources
+    # collection only holds one page at a time; that is, the collection is
+    # emptied and refilled on each pagination action, hence the `.reset()` call
+    # here.
     fetchResourcesPageToCollection: ->
       @collection.reset()
       @collection.fetchResources @paginator
@@ -539,15 +525,13 @@ define [
         .show()
         .text reason
 
-    # We have succeeded in retrieving a page of resources from an OLD server.
-    # `paginator` is an object returned from the OLD. Crucially, it has an
+    # We have succeeded in retrieving a page of resources from a server.
+    # `paginator` is an object returned from the server. Crucially, it has an
     # attribute `count` which tells us how many resources are in the database.
-    # `setPaginatorItems` uses this to sync the client-side pagination GUI
-    # with the OLD's server-side pagination.
     fetchResourcesSuccess: (paginator) ->
       @saveFetchedMetadata()
       @getResourceViews()
-      if paginator then @setPaginatorItems paginator
+      if paginator then @paginator.setItems paginator.count
       if @paginator.items is 0 then @fetchResourcesLastPage = false
       if @fetchResourcesLastPage
         pageBefore = @paginator.page
@@ -562,12 +546,6 @@ define [
         @refreshPageFade()
 
     # Tell the paginator how many items/resources are in our corpus/database.
-    setPaginatorItems: (oldPaginator=null) ->
-      if oldPaginator
-        @paginator.setItems oldPaginator.count # the OLD case
-      else
-        @paginator.setItems @collection.length # the FieldDB case
-      #@paginator.setPageToLast()
 
     # Remember the server type and name (and corpus name) of the last resources
     # fetch, so we don't needlessly repeat it on future renderings of this
@@ -720,13 +698,12 @@ define [
 
     # Create a `ResourceView` instance for each `ResourceModel` instance in
     # `@collection` and append it to `@resourceViews`.
-    # Note that in the OLD case, we reset `resourceViews` to `[]` because
-    # with server-side pagination we only store one page worth of resource
-    # models/views at a time.
+    # Note that we reset `resourceViews` to `[]` because with server-side
+    # pagination we only store one page worth of resource models/views at a
+    # time.
     getResourceViews: ->
-      if @getActiveServerType() is 'OLD'
-        @closeResourceViews()
-        @resourceViews = []
+      @closeResourceViews()
+      @resourceViews = []
       @collection.each (resourceModel) =>
         newResourceView = new @resourceView
           model: resourceModel
@@ -815,26 +792,16 @@ define [
       @showResourceList options
 
     # Render all resource views on the current paginator page.
-    # Note the OLD/FieldDB difference: with the OLD, each pagination change
-    # event triggers a new fetch to the OLD server, and a resetting of both
-    # `@collection` and `@resourceViews`; thus we render all resource models in the
-    # collection (and all resource views in `@resourceViews`) using the "indices"
-    # from `@paginator`. With FieldDB, we have already fetched *all*
-    # resources to `@collection` (and we have all of their respective views
-    # in `@resourceViews`) so we can simply take a slice out of
-    # `@resourceViews` using the paginator start and end values.
+    # Note that each pagination change event triggers a new fetch to the
+    # server, and a resetting of both `@collection` and `@resourceViews`; thus
+    # we render all resource models in the collection (and all resource views
+    # in `@resourceViews`) using the "indices" from `@paginator`.
     renderResourceViews: ->
       paginationIndices = [@paginator.start..@paginator.end]
       fragment = document.createDocumentFragment()
-      if @getActiveServerType() is 'OLD'
-        for [index, resourceView] in _.zip(paginationIndices, @resourceViews)
-          renderedView = @renderResourceView resourceView, index
-          if renderedView then fragment.appendChild renderedView.el
-      else
-        for index in paginationIndices
-          resourceView = @resourceViews[index]
-          renderedView = @renderResourceView resourceView, index
-          if renderedView then fragment.appendChild renderedView.el
+      for [index, resourceView] in _.zip(paginationIndices, @resourceViews)
+        renderedView = @renderResourceView resourceView, index
+        if renderedView then fragment.appendChild renderedView.el
       @$('.dative-pagin-items').append fragment
 
     # Render a single resource view, but don't add it to the DOM: just return
@@ -883,50 +850,35 @@ define [
       @paginator.setItemsPerPage newItemsPerPage
       itemsDisplayedAfter = @paginator.itemsDisplayed
       if itemsDisplayedBefore isnt itemsDisplayedAfter
-        if @getActiveServerType() is 'FieldDB'
-          @refreshPageFade()
-        else
-          @fetchResourcesPageToCollection()
+        @fetchResourcesPageToCollection()
 
     showFirstPage: ->
       pageBefore = @paginator.page
       @paginator.setPageToFirst()
       pageAfter = @paginator.page
       if pageBefore isnt pageAfter
-        if @getActiveServerType() is 'FieldDB'
-          @refreshPageFade()
-        else
-          @fetchResourcesPageToCollection()
+        @fetchResourcesPageToCollection()
 
     showPreviousPage: ->
       pageBefore = @paginator.page
       @paginator.setPageToPrevious()
       pageAfter = @paginator.page
       if pageBefore isnt pageAfter
-        if @getActiveServerType() is 'FieldDB'
-          @refreshPageFade()
-        else
-          @fetchResourcesPageToCollection()
+        @fetchResourcesPageToCollection()
 
     showNextPage: ->
       pageBefore = @paginator.page
       @paginator.setPageToNext()
       pageAfter = @paginator.page
       if pageBefore isnt pageAfter
-        if @getActiveServerType() is 'FieldDB'
-          @refreshPageFade()
-        else
-          @fetchResourcesPageToCollection()
+        @fetchResourcesPageToCollection()
 
     showLastPage: ->
       pageBefore = @paginator.page
       @paginator.setPageToLast()
       pageAfter = @paginator.page
       if pageBefore isnt pageAfter
-        if @getActiveServerType() is 'FieldDB'
-          @refreshPageFade()
-        else
-          @fetchResourcesPageToCollection()
+        @fetchResourcesPageToCollection()
 
     # Show a new page where `method` determines whether the new page is
     # behind or ahead of the current one and where `n` is the number of
@@ -936,10 +888,7 @@ define [
       @paginator[method] n
       pageAfter = @paginator.page
       if pageBefore isnt pageAfter
-        if @getActiveServerType() is 'FieldDB'
-          @refreshPageFade()
-        else
-          @fetchResourcesPageToCollection()
+        @fetchResourcesPageToCollection()
 
     showThreePagesBack: ->
       @showPage 3, 'decrementPage'
