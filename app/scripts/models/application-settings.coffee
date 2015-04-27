@@ -81,7 +81,7 @@ define [
       Backbone.trigger 'longTask:register', 'authenticating', taskId
       BaseRelationalModel.cors.request(
         method: 'POST'
-        timeout: 3000
+        timeout: 20000
         url: "#{@getURL()}/login/authenticate"
         payload: credentials
         onload: (responseJSON) =>
@@ -115,7 +115,7 @@ define [
       Backbone.trigger 'longTask:register', 'authenticating', taskId
       BaseRelationalModel.cors.request(
         method: 'POST'
-        timeout: 3000
+        timeout: 20000
         url: "#{@getURL()}/login"
         payload: credentials
         onload: (responseJSON) =>
@@ -532,9 +532,9 @@ define [
         ]
 
         # Secondary FieldDB form attributes.
-        # The returned array defines the order of how the secondary attributes are
-        # displayed. It is defined in models/application-settings because it should
-        # ultimately be user-configurable.
+        # The returned array defines the order of how the secondary attributes
+        # are displayed. It is defined in models/application-settings because
+        # it should ultimately be user-configurable.
         # QUESTION: @cesine: how is the elicitor of a FieldDB datum/session
         # documented?
         secondary: [
