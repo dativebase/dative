@@ -940,6 +940,7 @@ define [
           confirmArgument: formModel
         Backbone.trigger 'openAlertDialog', options
 
+
     # Duplicate a form model and display it for editing in the "New Form"
     # widget.
     duplicateForm: (formModel) ->
@@ -970,6 +971,26 @@ define [
       @renderNewFormView()
       @listenToNewFormView()
       @showNewFormViewAnimate()
+
+
+    # Request the history of the form model, the user can click on a revision and see the details
+    # preferably by simply showing the other revision as a model along side in the same views
+    fetchHistory: (formModel) ->
+
+      fielddbHelperModel = new (FieldDB.Datum)(_id: formModel.id)
+      fielddbHelperModel.fetchRevisions().then(((revisions) ->
+        formModel.set 'previous_versions', revisions.map((revisionUrl) ->
+          # TODO can we avoid fetching them until the user clicks on the one they want?
+          { url: revisionUrl }
+        )
+        return
+      ), (error) ->
+        console.log 'TODO how do you talk to users about errors contacting the server etc...', error
+        return
+      ).fail (error) ->
+        console.log 'TODO how do you talk to users about errors contacting the server etc...', error
+        return
+
 
     openExporterDialog: (options) ->
       @exporterDialog.setToBeExported options
