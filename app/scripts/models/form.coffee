@@ -422,7 +422,11 @@ define ['./resource'], (ResourceModel) ->
         @set attribute, value
       else
         datumField = @getDatumField attribute
-        datumField.value = value
+        if datumField
+          oldValue = datumField.value
+          if oldValue isnt value
+            datumField.value = value
+            @trigger 'change'
 
     # Get the `help` value of a FieldDB datum field or session field, if exists.
     getDatumHelp: (label) ->

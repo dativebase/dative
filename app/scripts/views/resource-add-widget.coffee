@@ -50,7 +50,6 @@ define [
 
       # TODO: if this is an "add"-type form, then the original model copy
       # should (maybe) be an empty resource.
-      #@originalModelCopy = @copyModel @model
       @originalModelCopy = @copyModel @model
       if @addUpdateType is 'add'
         @originalModelCopy.set @getEmptyModelObject()
@@ -58,7 +57,8 @@ define [
     copyModel: (inputModel) ->
       newModel = new @resourceModel()
       for attr, val of @model.attributes
-        newModel.set attr, inputModel.get(attr)
+        inputValue = @utils.clone inputModel.get(attr)
+        newModel.set attr, inputValue
       newModel
 
     render: ->
