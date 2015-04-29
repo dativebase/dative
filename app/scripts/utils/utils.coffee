@@ -152,17 +152,27 @@ define (require) ->
       return null
     if isNaN date then return ''
     seconds = Math.floor((new Date() - date) / 1000)
+
+    # Handle future dates
+    if seconds < 0 then
+      prefix = "in "
+      suffix = ""
+    else 
+      prefix = ""
+      suffix = " ago"
+    seconds = Math.abs(seconds)
+
     interval = Math.floor(seconds / 31536000)
-    if interval > 1 then return "#{interval} years ago"
+    if interval > 1 then return prefix + "#{interval} years" + suffix
     interval = Math.floor(seconds / 2592000)
-    if interval > 1 then return "#{interval} months ago"
+    if interval > 1 then return prefix + "#{interval} months" + suffix
     interval = Math.floor(seconds / 86400)
-    if interval > 1 then return "#{interval} days ago"
+    if interval > 1 then return prefix + "#{interval} days" + suffix
     interval = Math.floor(seconds / 3600)
-    if interval > 1 then return "#{interval} hours ago"
+    if interval > 1 then return prefix + "#{interval} hours" + suffix
     interval = Math.floor(seconds / 60)
-    if interval > 1 then return "#{interval} minutes ago"
-    return "#{Math.floor(seconds)} seconds ago"
+    if interval > 1 then return prefix + "#{interval} minutes" + suffix
+    return prefix + "#{Math.floor(seconds)} seconds" + suffix
 
   # "snake_case" to "camelCase"
   snake2camel = (string) ->
