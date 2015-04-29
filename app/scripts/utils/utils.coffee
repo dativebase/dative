@@ -154,12 +154,12 @@ define (require) ->
     seconds = Math.floor((new Date() - date) / 1000)
 
     # Handle future dates
-    if seconds < 0 then
-      prefix = "in "
-      suffix = ""
+    if seconds < 0
+      prefix = 'in '
+      suffix = ''
     else 
-      prefix = ""
-      suffix = " ago"
+      prefix = ''
+      suffix = ' ago'
     seconds = Math.abs(seconds)
 
     interval = Math.floor(seconds / 31536000)
