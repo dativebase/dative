@@ -438,6 +438,20 @@ define ['./resource'], (ResourceModel) ->
       @set 'id', fieldDBDatum.id
       @set fieldDBDatum.value
 
+    # Return a representation of the model's state that the OLD likes: i.e.,
+    # with relational values as ids or arrays thereof.
+    toFieldDB: ->
+      result = _.clone @attributes
+      # Not doing this causes a `RangeError: Maximum call stack size exceeded`
+      # when cors.coffee tries to call `JSON.stringify` on a form model that
+      # contains a forms collection that contains that same form model, etc. ad
+      # infinitum.
+      # TODO: this should be fixed once we take `collection` out of the
+      # `attributes` input array in the constructor!
+      delete result.collection
+      delete result.id
+      result
+
 
     ############################################################################
     # OLD Schema

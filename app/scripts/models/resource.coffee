@@ -65,7 +65,10 @@ define [
     manyToManyAttributes: []
 
     # Return a representation of the model's state that the OLD likes: i.e.,
-    # with relational values as ids or arrays thereof.
+    # with relational values as ids or arrays thereof. Note that there is no
+    # general `toFieldDB` method, since I am unsure a) whether other FieldDB
+    # objects expose a similar RESTful resource-based interface (sessions?,
+    # comments?, corpora?, message_feeds?)
     toOLD: ->
       result = _.clone @attributes
       # Not doing this causes a `RangeError: Maximum call stack size exceeded`

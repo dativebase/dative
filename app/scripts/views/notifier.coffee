@@ -1,8 +1,9 @@
 define [
   './base'
   './notification'
+  './../utils/globals'
   './../templates/notifier'
-], (BaseView, NotificationView, notifierTemplate) ->
+], (BaseView, NotificationView, globals, notifierTemplate) ->
 
   # Notifier
   # --------
@@ -83,17 +84,24 @@ define [
     # Forms
     ############################################################################
 
+    getFormId: (formModel) ->
+      id = formModel.get 'id'
+      activeServerType = globals
+        .applicationSettings.get('activeServer').get 'type'
+      if activeServerType is 'FieldDB' then id = id[...7]
+      id
+
     addFormSuccess: (formModel) ->
       notification = new NotificationView
         title: 'Form created'
         content: "You have successfully created a new form. Its id is
-          #{formModel.get 'id'}."
+          #{@getFormId formModel}."
       @renderNotification notification
 
     updateFormSuccess: (formModel) ->
       notification = new NotificationView
         title: 'Form updated'
-        content: "You have successfully updated form #{formModel.get 'id'}."
+        content: "You have successfully updated form #{@getFormId formModel}."
       @renderNotification notification
 
     addUpdateFormFail: (error, type) ->
@@ -125,7 +133,7 @@ define [
       notification = new NotificationView
         title: 'Form deleted'
         content: "You have successfully deleted the form with id
-          #{formModel.get 'id'}."
+          #{@getFormId formModel}."
       @renderNotification notification
 
 
