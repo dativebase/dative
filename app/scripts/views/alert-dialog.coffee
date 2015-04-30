@@ -101,6 +101,9 @@ define [
       @setPromptInput('')
 
     dialogOpen: (options) ->
+      @prompt = false
+      @$('.dative-alert-dialog textarea').hide()
+
       if options.text then @setText options.text
       if options.confirm then @showCancelButton()
       if options.prompt then @showPromptInput()

@@ -568,7 +568,7 @@ define [
       FieldDB.FieldDBObject.warn = @displayWarningMessagesDialog
       FieldDB.FieldDBObject.confirm = @displayConfirmDialog
 
-    displayBugReportDialog: (message, optionalLocale) ->
+    displayBugReportDialog: (message, optionalLocale) =>
       deferred = FieldDB.Q.defer()
       messageChannel = 'bug:' + message?.replace(/[^A-Za-z]/g,'')
 
