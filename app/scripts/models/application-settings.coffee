@@ -23,8 +23,8 @@ define [
   class ApplicationSettingsModel extends BaseRelationalModel
 
     initialize: ->
-      @set('fieldDBApplication' , new (FieldDB.App)(@get('fieldDBApplication')))
-      @get('fieldDBApplication').authentication.eventDispatcher = Backbone;
+      fieldDBTempApp = new (FieldDB.App)(@get('fieldDBApplication'))
+      fieldDBTempApp.authentication.eventDispatcher = Backbone
       @listenTo Backbone, 'authenticate:login', @authenticate
       @listenTo Backbone, 'authenticate:logout', @logout
       @listenTo Backbone, 'authenticate:register', @register
@@ -50,9 +50,10 @@ define [
 
     activeServerChanged: ->
       #console.log 'active server has changed says the app settings model'
-      @get('fieldDBApplication').website = @get('activeServer').get('website')
-      @get('fieldDBApplication').brand = @get('activeServer').get('brand') or @get('activeServer').get('userFriendlyServerName')
-      @get('fieldDBApplication').brandLowerCase = @get('activeServer').get('brandLowerCase') or @get('activeServer').get('serverCode')
+      if @get('fieldDBApplication')
+        @get('fieldDBApplication').website = @get('activeServer').get('website')
+        @get('fieldDBApplication').brand = @get('activeServer').get('brand') or @get('activeServer').get('userFriendlyServerName')
+        @get('fieldDBApplication').brandLowerCase = @get('activeServer').get('brandLowerCase') or @get('activeServer').get('serverCode')
       return
 
     activeServerURLChanged: ->
@@ -112,6 +113,8 @@ define [
     authenticateFieldDBAuthService: (credentials) =>
       taskId = @guid()
       Backbone.trigger 'longTask:register', 'authenticating', taskId
+      if !@get 'fieldDBApplication'
+        @set 'fieldDBApplication', FieldDB.FieldDBObject.application
       @get('fieldDBApplication').authentication = @get('fieldDBApplication').authentication || new FieldDB.Authentication()
       @get('fieldDBApplication').authentication.login(credentials).then((promisedResult) =>
         @set
@@ -163,20 +166,19 @@ define [
     logoutFieldDB: ->
       taskId = @guid()
       Backbone.trigger 'longTask:register', 'logout', taskId
-      @get('fieldDBApplication').authentication::logout().then(
+      if !@get 'fieldDBApplication'
+        @set 'fieldDBApplication', FieldDB.FieldDBObject.application
+      @get('fieldDBApplication').authentication.logout({letClientHandleCleanUp: 'dontReloadWeNeedToCleanUpInDativeClient'}).then(
         (responseJSON) =>
-          if responseJSON.ok is true
-            @save
-              loggedIn: false
-              activeFieldDBCorpus: null
-              activeFieldDBCorpusTitle: null
-            Backbone.trigger 'logout:success'
-          else
-            Backbone.trigger 'logout:fail',
-              "server #{@getURL()} did not accept logout request."
+          @set 'fieldDBApplication', null
+          @save
+            loggedIn: false
+            activeFieldDBCorpus: null
+            activeFieldDBCorpusTitle: null
+          Backbone.trigger 'logout:success'
         ,
         (reason) ->
-          Backbone.trigger 'logout:fail', reason
+          Backbone.trigger 'logout:fail', reason.userFriendlyErrors.join ' '
       ).done(=> @authenticateAttemptDone taskId)
 
 

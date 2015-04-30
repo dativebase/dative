@@ -196,7 +196,10 @@ define [
     authenticateSuccess: ->
       activeServerType = @activeServerType()
       switch activeServerType
-        when 'FieldDB' then @showCorporaView()
+        when 'FieldDB' 
+          if @applicationSettings.get 'fieldDBApplication' != FieldDB.FieldDBObject.application
+            @applicationSettings.set 'fieldDBApplication', FieldDB.FieldDBObject.application
+          @showCorporaView()
         when 'OLD' then @showFormsView()
         else console.log 'Error: you logged in to a non-FieldDB/non-OLD server (?).'
 
@@ -653,6 +656,8 @@ define [
 
     displayConfirmIdentityDialog: (message, successCallback, failureCallback, cancelCallback) =>
       cancelCallback = cancelCallback || failureCallback
+      if @applicationSettings.get 'fieldDBApplication' != FieldDB.FieldDBObject.application
+        @applicationSettings.set 'fieldDBApplication', FieldDB.FieldDBObject.application
       @displayPromptDialog(message).then (dialog) => 
         @applicationSettings
           .get('fieldDBApplication')
