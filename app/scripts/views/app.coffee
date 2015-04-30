@@ -251,7 +251,14 @@ define [
         @visibleView.close()
         @closed @visibleView
 
-    loggedIn: -> @applicationSettings.get 'loggedIn'
+    loggedIn: -> 
+      if @applicationSettings.get('fieldDBApplication') and
+      @applicationSettings.get('fieldDBApplication').authentication and 
+      @applicationSettings.get('fieldDBApplication').authentication.user and 
+      @applicationSettings.get('fieldDBApplication').authentication.user.authenticated
+        @applicationSettings.set 'loggedIn', true
+        @applicationSettings.set 'loggedInUserRoles', @applicationSettings.get('fieldDBApplication').authentication.user.roles
+      @applicationSettings.get 'loggedIn'
 
     ############################################################################
     # Methods for showing the main "pages" of Dative                           #
