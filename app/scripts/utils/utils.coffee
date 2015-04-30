@@ -163,16 +163,16 @@ define (require) ->
     seconds = Math.abs(seconds)
 
     interval = Math.floor(seconds / 31536000)
-    if interval > 1 then return prefix + "#{interval} years" + suffix
+    if interval > 1 then return "#{prefix}#{interval} years#{suffix}"
     interval = Math.floor(seconds / 2592000)
-    if interval > 1 then return prefix + "#{interval} months" + suffix
+    if interval > 1 then return "#{prefix}#{interval} months#{suffix}"
     interval = Math.floor(seconds / 86400)
-    if interval > 1 then return prefix + "#{interval} days" + suffix
+    if interval > 1 then return "#{prefix}#{interval} days#{suffix}"
     interval = Math.floor(seconds / 3600)
-    if interval > 1 then return prefix + "#{interval} hours" + suffix
+    if interval > 1 then return "#{prefix}#{interval} hours#{suffix}"
     interval = Math.floor(seconds / 60)
-    if interval > 1 then return prefix + "#{interval} minutes" + suffix
-    return prefix + "#{Math.floor(seconds)} seconds" + suffix
+    if interval > 1 then return "#{prefix}#{interval} minutes#{suffix}"
+    return "#{prefix}#{Math.floor(seconds)} seconds#{suffix}"
 
   # "snake_case" to "camelCase"
   snake2camel = (string) ->
