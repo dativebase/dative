@@ -197,7 +197,6 @@ define [
     # Instantiate and return a new `ResourceView` instance. Note that even
     # though we pass the collection to the resource view's model, the
     # collection will not contain that model.
-    # FOX
     getNewResourceView: (newResourceModel) ->
       newResourceModel = newResourceModel or
         new @resourceModel({}, collection: @collection)
@@ -619,7 +618,7 @@ define [
     headerForEmptyDataSet: ->
       @$('.no-resources')
         .show()
-        .text 'There are no resources to display'
+        .text "There are no #{@resourceNamePlural} to display"
       @$('.pagination-info').hide()
       @$('button.expand-all').button 'disable'
       @$('button.collapse-all').button 'disable'

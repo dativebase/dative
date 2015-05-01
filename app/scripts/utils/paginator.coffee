@@ -100,6 +100,7 @@ define ['./../utils/utils'], (utils) ->
 
     _setPage: ->
       if @page > @pages then @page = @pages
+      if @page is 0 then @page = 1
 
     _setItemsDisplayed: ->
       if @itemsPerPage > @items
