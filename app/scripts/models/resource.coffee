@@ -28,8 +28,7 @@ define [
       @resourceNameCapitalized = @utils.capitalize @resourceName
       @resourceNamePlural = @utils.pluralize @resourceName
       @resourceNamePluralCapitalized = @utils.capitalize @resourceNamePlural
-      # TODO: this `collection` should be in options, not attributes ...
-      if attributes?.collection then @collection = attributes.collection
+      if options?.collection then @collection = options.collection
       @activeServerType = @getActiveServerType()
       super attributes, options
 
@@ -75,8 +74,6 @@ define [
       # when cors.coffee tries to call `JSON.stringify` on a resource model that
       # contains a resources collection that contains that same resource model,
       # etc. ad infinitum.
-      # TODO: this should be fixed once we take `collection` out of the
-      # `attributes` input array in the constructor!
       delete result.collection
       for attribute in @manyToOneAttributes
         result[attribute] = result[attribute]?.id or null
@@ -91,8 +88,6 @@ define [
     # Returns `true` if the model is empty.
     isEmpty: ->
       attributes = _.clone @attributes
-      # TODO: this should be fixed once we take `collection` out of the
-      # `attributes` input array in the constructor!
       delete attributes.collection
       _.isEqual @defaults(), attributes
 

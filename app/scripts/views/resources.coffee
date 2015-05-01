@@ -200,7 +200,7 @@ define [
     # FOX
     getNewResourceView: (newResourceModel) ->
       newResourceModel = newResourceModel or
-        new @resourceModel(collection: @collection)
+        new @resourceModel({}, collection: @collection)
       new @resourceView
         headerTitle: "New #{@resourceNameCapitalized}"
         model: newResourceModel
@@ -209,7 +209,8 @@ define [
 
     # This is called when the 'addResourceSuccess' has been triggered, i.e.,
     # when a new resource has been successfully created on the server.
-    newResourceAdded: (resourceModel) ->
+    newResourceAdded: ->
+      resourceModel = @newResourceView.model
       newResourceShouldBeOnCurrentPage = @newResourceShouldBeOnCurrentPage()
       # 1. Make the new resource widget disappear.
       @hideNewResourceViewAnimate()

@@ -145,6 +145,7 @@ define [
         @submitAttempted = true
         @propagateSubmitAttempted()
         @stopEvent event
+        # Here is the problem
         @setToModel()
         @disableForm()
         clientSideValidationErrors = @model.validate()
@@ -212,7 +213,9 @@ define [
 
     # Set the state of the "add a resource" HTML form on the Dative resource
     # model.
-    setToModel: -> fv.setToModel() for fv in @fieldViews()
+    #setToModel: -> fv.setToModel() for fv in @fieldViews()
+    setToModel: ->
+      fv.setToModel() for fv in @fieldViews()
 
     # Focus the previous field. This is a hack that is required because the
     # multiSelect does not correctly move the focus on a Shift+Tab event.

@@ -14,7 +14,7 @@ define [
   #
   # Note: most functionality is coded in the `ResourcesView` base class.
 
-  class SubcorporaView extends ResourcesView
+  class FormsView extends ResourcesView
 
     resourceName: 'form'
     resourceView: FormView

@@ -31,7 +31,6 @@ define [
 
     url: 'fake-url'
 
-
     ############################################################################
     # FETCH.
     ############################################################################
@@ -86,30 +85,37 @@ define [
     # POST `<URL>/<resource_name_plural>`
     addResource: (resource, options) ->
       resource.trigger "add#{@resourceNameCapitalized}Start"
+      payload = @getResourceForServerCreate resource
       @model.cors.request(
         method: 'POST'
-        url: "#{@getOLDURL()}/#{@getServerSideResourceName()}"
-        payload: @getResourceForServer resource
+        url: @getAddResourceURL resource
+        payload: payload
         onload: (responseJSON, xhr) =>
-          resource.trigger "add#{@resourceNameCapitalized}End"
-          if xhr.status is 200
-            resource.set responseJSON
-            resource.trigger "add#{@resourceNameCapitalized}Success", resource
-          else
-            errors = responseJSON.errors or {}
-            error = errors.error
-            resource.trigger "add#{@resourceNameCapitalized}Fail", error
-            for attribute, error of errors
-              resource.trigger "validationError:#{attribute}", error
-            console.log "POST request to /#{@getServerSideResourceName()} failed (status
-              not 200) ..."
-            console.log errors
+          @addResourceOnloadHandler resource, responseJSON, xhr, payload
         onerror: (responseJSON) =>
           resource.trigger "add#{@resourceNameCapitalized}End"
           resource.trigger "add#{@resourceNameCapitalized}Fail",
             responseJSON.error, resource
           console.log "Error in POST request to /#{@getServerSideResourceName()}"
       )
+
+    # Method to handle the `onload` event of a CORS request to add a
+    # particular resource. The default behaviour currently expects an OLD
+    # backend. See `collections/forms.coffee` for a FieldDB override/fork.
+    addResourceOnloadHandler: (resource, responseJSON, xhr, payload) ->
+      resource.trigger "add#{@resourceNameCapitalized}End"
+      if xhr.status is 200
+        resource.set responseJSON
+        resource.trigger "add#{@resourceNameCapitalized}Success", resource
+      else
+        errors = responseJSON.errors or {}
+        error = errors.error
+        resource.trigger "add#{@resourceNameCapitalized}Fail", error
+        for attribute, error of errors
+          resource.trigger "validationError:#{attribute}", error
+        console.log "POST request to /#{@getServerSideResourceName()} failed (status
+          not 200) ..."
+        console.log errors
 
 
     ############################################################################
@@ -120,12 +126,13 @@ define [
     # PUT `<URL>/<resource_name_plural>/<resource.id>`
     updateResource: (resource, options) ->
       resource.trigger "update#{@resourceNameCapitalized}Start"
+      payload = @getResourceForServerUpdate resource
       @model.cors.request(
         method: 'PUT'
         url: @getUpdateResourceURL resource
-        payload: @getResourceForServer resource
+        payload: payload
         onload: (responseJSON, xhr) =>
-          @updateResourcesOnloadHandler resource, responseJSON, xhr
+          @updateResourceOnloadHandler resource, responseJSON, xhr, payload
         onerror: (responseJSON) =>
           resource.trigger "update#{@resourceNameCapitalized}End"
           resource.trigger("update#{@resourceNameCapitalized}Fail",
@@ -136,7 +143,7 @@ define [
     # Method to handle the `onload` event of a CORS request to update a
     # particular resource. The default behaviour currently expects an OLD
     # backend. See `collections/forms.coffee` for a FieldDB override/fork.
-    updateResourcesOnloadHandler: (resource, responseJSON, xhr) ->
+    updateResourceOnloadHandler: (resource, responseJSON, xhr, payload) ->
       resource.trigger "update#{@resourceNameCapitalized}End"
       if xhr.status is 200
         resource.set responseJSON
@@ -183,11 +190,26 @@ define [
     getUpdateResourceURL: (resource) ->
       "#{@getOLDURL()}/#{@getServerSideResourceName()}/#{resource.get 'id'}"
 
+    # Return a URL for adding a resource to an OLD web service. See
+    # `collections/forms.coffee for a FieldDB-specific override.
+    getAddResourceURL: (resource) ->
+      "#{@getOLDURL()}/#{@getServerSideResourceName()}"
+
     # Return a representation of `resource` that the server will accept (for a
     # create or update request). See `collections/forms.coffee for a
     # FieldDB-specific override.
     getResourceForServer: (resource) ->
       resource.toOLD()
+
+    # Return a representation of `resource` that the server will accept for a
+    # create request.
+    getResourceForServerCreate: (resource) ->
+      @getResourceForServer resource
+
+    # Return a representation of `resource` that the server will accept for an
+    # update request.
+    getResourceForServerUpdate: (resource) ->
+      @getResourceForServer resource
 
     # Return an array of `@model` instances built from OLD objects.
     getDativeResourceModelsFromOLDObjects: (responseJSON) ->

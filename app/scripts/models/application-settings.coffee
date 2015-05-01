@@ -127,6 +127,7 @@ define [
               baseDBURL: @getFieldDBBaseDBURL(responseJSON.user)
               username: credentials.username,
               password: credentials.password,
+              gravatar: responseJSON.user.gravatar,
               loggedInUser: responseJSON.user
             @save()
             credentials.name = credentials.username

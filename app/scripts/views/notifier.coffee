@@ -88,7 +88,7 @@ define [
       id = formModel.get 'id'
       activeServerType = globals
         .applicationSettings.get('activeServer').get 'type'
-      if activeServerType is 'FieldDB' then id = id[...7]
+      if activeServerType is 'FieldDB' then id = id[-7..]
       id
 
     addFormSuccess: (formModel) ->

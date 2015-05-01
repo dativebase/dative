@@ -45,9 +45,53 @@ define [
         reason = responseJSON.reason or 'unknown'
         Backbone.trigger("fetch#{@resourceNamePluralCapitalized}Fail",
           "Failed in fetching the data. #{reason}")
-        console.log ["request to datums_chronological failed;",
-          "reason: #{reason}"].join ' '
+        console.log "request to datums_chronological failed; reason: #{reason}"
 
+    ############################################################################
+    # CREATE.
+    ############################################################################
+
+    # Method to handle the `onload` event of a CORS request to create a
+    # form. Delegates to the superclass's method in the OLD case and to a method
+    # defined here in the FieldDB case.
+    addResourceOnloadHandler: (resource, responseJSON, xhr, payload) ->
+      switch globals.applicationSettings.get('activeServer').get('type')
+        when 'OLD'
+          super resource, responseJSON, xhr, payload
+        when 'FieldDB'
+          @addResourceOnloadHandlerFieldDB resource, responseJSON, xhr, payload
+
+    # Method to handle the `onload` event of a CORS request to add a
+    # FieldDB datum (form).
+    addResourceOnloadHandlerFieldDB: (resource, responseJSON, xhr, payload) ->
+      resource.trigger "add#{@resourceNameCapitalized}End"
+      if xhr.status is 201 and responseJSON.ok is true
+        resource.set
+          id: responseJSON.id
+          _id: responseJSON.id
+          _rev: responseJSON.rev
+          dateEntered: payload.dateEntered
+          dateModified: payload.dateModified
+          timestamp: payload.timestamp
+          pouchname: payload.pouchname
+          comments: payload.comments
+        newEnteredByUser = _.findWhere payload.datumFields, label: 'enteredByUser'
+        enteredByUser = _.findWhere resource.get('datumFields'), label: 'enteredByUser'
+        enteredByUser.value = newEnteredByUser.username
+        enteredByUser.mask = newEnteredByUser.username
+        enteredByUser.user = newEnteredByUser.user
+        resource.trigger 'change'
+        resource.trigger "add#{@resourceNameCapitalized}Success"
+      else
+        errors = responseJSON.errors or {}
+        error = responseJSON.error
+        resource.trigger "add#{@resourceNameCapitalized}Fail", error, resource
+        for attribute, error of errors
+          resource.trigger "validationError:#{attribute}", error
+        console.log "add (POST) request to
+          /#{@getAddResourceURLFieldDB resource} failed (status not 201
+          and/or `response.ok != true`)"
+        console.log errors
 
     ############################################################################
     # UPDATE.
@@ -56,21 +100,30 @@ define [
     # Method to handle the `onload` event of a CORS request to update a
     # form. Delegates to the superclass's method in the OLD case and to a method
     # defined here in the FieldDB case.
-    updateResourcesOnloadHandler: (resource, responseJSON, xhr) ->
+    updateResourceOnloadHandler: (resource, responseJSON, xhr, payload) ->
       switch globals.applicationSettings.get('activeServer').get('type')
         when 'OLD'
-          super resource, responseJSON, xhr
+          super resource, responseJSON, xhr, payload
         when 'FieldDB'
-          @updateResourcesOnloadHandlerFieldDB resource, responseJSON, xhr
+          @updateResourceOnloadHandlerFieldDB resource, responseJSON, xhr, payload
 
     # Method to handle the `onload` event of a CORS request to update a
     # FieldDB datum (form).
-    updateResourcesOnloadHandlerFieldDB: (resource, responseJSON, xhr) ->
+    updateResourceOnloadHandlerFieldDB: (resource, responseJSON, xhr, payload) ->
       resource.trigger "update#{@resourceNameCapitalized}End"
       if xhr.status is 201 and responseJSON.ok is true
         # FieldDB does no server-side processing. We just need to update the
         # CouchDB revision UUID:
-        resource.set '_rev', responseJSON.rev
+        resource.set
+          _rev: responseJSON.rev
+          dateModified: payload.dateModified
+          timestamp: payload.timestamp
+          pouchname: payload.pouchname
+          comments: payload.comments
+        newModifiedByUser = _.findWhere payload.datumFields, label: 'modifiedByUser'
+        modifiedByUser = _.findWhere resource.get('datumFields'), label: 'modifiedByUser'
+        modifiedByUser.users = newModifiedByUser.users
+        resource.trigger 'change'
         resource.trigger "update#{@resourceNameCapitalized}Success"
       else
         errors = responseJSON.errors or {}
@@ -117,17 +170,102 @@ define [
         when 'FieldDB' then @getUpdateResourceURLFieldDB resource
 
     # Returns a URL for updating a resource on a FieldDB web service.
-    # GET <corpus_url>/<pouchname>/<datum_id>?rev=<datum_rev>
+    # PUT <corpus_url>/<pouchname>/<datum_id>?rev=<datum_rev>
     getUpdateResourceURLFieldDB: (resource) ->
       url = globals.applicationSettings.get 'baseDBURL'
       pouchname = globals.applicationSettings.get 'activeFieldDBCorpus'
       "#{url}/#{pouchname}/#{resource.get '_id'}?rev=#{resource.get '_rev'}"
 
-    # Returns a representation of a form that a server will accept.
-    getResourceForServer: (resource) ->
+    # Return a URL for adding a resource to a web service.
+    getAddResourceURL: (resource) ->
       switch globals.applicationSettings.get('activeServer').get('type')
         when 'OLD' then super resource
-        when 'FieldDB' then resource.toFieldDB()
+        when 'FieldDB' then @getAddResourceURLFieldDB resource
+
+    # Returns a URL for adding a resource to a FieldDB web service.
+    # POST <corpus_url>/<pouchname>/
+    getAddResourceURLFieldDB: (resource) ->
+      url = globals.applicationSettings.get 'baseDBURL'
+      pouchname = globals.applicationSettings.get 'activeFieldDBCorpus'
+      "#{url}/#{pouchname}"
+
+
+    ############################################################################
+    # TODOs related to the following two methods.
+    ############################################################################
+
+    # TODO: How do I valuate the `version` field of a particular datum field
+    # object? Example value I've seen in Spreadsheet: "v2.45.02".
+    # Relatedly, How do I set the `version` attribute of a user in
+    # `enteredByUser` or `modifiedByUser`?
+    # Example value seen: '2.45.02.01.33ss Mon Mar  2 01:37:08 EST 2015'
+
+    # TODO: most FieldDB apps treat the session as a many-to-one required
+    # relation; however, I want to treat them as a many-to-many optional
+    # relation, i.e., any datum can belong to zero or more sessions. The only
+    # problem with this is that some session attributes will need to be
+    # present on datums and the denotation of "session" needs to be more
+    # general. Here, provisionally, I delete an empty `session` attribute on a
+    # create request.
+
+    # TODO: blank comments should never be `setToModel` in the first place.
+    # This needs to be handled in the field view.
+
+    # TODO: stop Dative from valuating the timestamps of previously created
+    # comments.
+
+    # TODO: the attributes set here for server consumption need to be carefully
+    # saved to the client-side model, iff save has succeeded.
+
+    # Returns a representation of a form that a server will accept for form
+    # creation.
+    getResourceForServerCreate: (resource) ->
+      switch globals.applicationSettings.get('activeServer').get('type')
+        when 'OLD' then super resource
+        when 'FieldDB'
+          resource = resource.toFieldDB()
+          if 'id' of resource then delete resource.id
+          if '_id' of resource then delete resource._id
+          if '_rev' of resource then delete resource._rev
+          if resource.session and not 'id' of resource.session
+            delete resource.session
+          now = new Date()
+          resource.dateEntered = now.toISOString()
+          resource.dateModified = now.toISOString()
+          resource.timestamp = now.valueOf()
+          resource.pouchname = globals.applicationSettings.get 'activeFieldDBCorpus'
+          resource.comments = (c for c in resource.comments when c.text)
+          username = globals.applicationSettings.get 'username'
+          gravatar = globals.applicationSettings.get 'gravatar'
+          enteredByUser = _.findWhere resource.datumFields, label: 'enteredByUser'
+          enteredByUser.value = username
+          enteredByUser.mask = username
+          enteredByUser.user =
+            username: username
+            gravatar: gravatar
+            appVersion: '' # TODO: how?
+          resource
+
+    getResourceForServerUpdate: (resource) ->
+      switch globals.applicationSettings.get('activeServer').get('type')
+        when 'OLD' then super resource
+        when 'FieldDB'
+          resource = resource.toFieldDB()
+          now = new Date()
+          resource.dateModified = now.toISOString()
+          resource.timestamp = now.valueOf()
+          resource.pouchname = globals.applicationSettings.get 'activeFieldDBCorpus'
+          resource.comments = (c for c in resource.comments when c.text)
+          username = globals.applicationSettings.get 'username'
+          gravatar = globals.applicationSettings.get 'gravatar'
+          modifiedByUser = _.findWhere resource.datumFields, label: 'modifiedByUser'
+          modifiedByUser.users.push(
+            username: username
+            gravatar: gravatar
+            timestamp: now.valueOf()
+            appVersion: '' # TODO: how?
+          )
+          resource
 
     # Return an array of `FormModel` instances built from FieldDB objects.
     getDativeFormModelsFromFieldDBObjects: (responseJSON) ->

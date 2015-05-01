@@ -1,4 +1,7 @@
-define ['./resource'], (ResourceModel) ->
+define [
+  './resource'
+  './../utils/globals'
+], (ResourceModel, globals) ->
 
   # Form Model
   # ---------------
@@ -426,6 +429,7 @@ define ['./resource'], (ResourceModel) ->
           oldValue = datumField.value
           if oldValue isnt value
             datumField.value = value
+            datumField.mask = value
             @trigger 'change'
 
     # Get the `help` value of a FieldDB datum field or session field, if exists.
@@ -446,10 +450,7 @@ define ['./resource'], (ResourceModel) ->
       # when cors.coffee tries to call `JSON.stringify` on a form model that
       # contains a forms collection that contains that same form model, etc. ad
       # infinitum.
-      # TODO: this should be fixed once we take `collection` out of the
-      # `attributes` input array in the constructor!
       delete result.collection
-      delete result.id
       result
 
 
