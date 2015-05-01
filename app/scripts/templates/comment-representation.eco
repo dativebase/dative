@@ -12,5 +12,5 @@
            dative-tooltip'
     title='This comment was made on <%= @humanDatetime @timestampValue %>'
     ><%= @timeSince @timestampValue %></span
-  ></div>
+  >)</div>
 

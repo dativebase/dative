@@ -129,18 +129,11 @@ define [
     destroyResource: (options) ->
       Backbone.trigger "destroy#{@resourceNameCapitalized}Start"
       @constructor.cors.request(
-        method: 'DELETE'
-        url: "#{@getOLDURL()}/#{@getServerSideResourceName()}/#{@get 'id'}"
+        method: @getDestroyResourceHTTPMethod()
+        url: @getDestroyResourceURL()
+        payload: @getDestroyResourcePayload()
         onload: (responseJSON, xhr) =>
-          Backbone.trigger "destroy#{@resourceNameCapitalized}End"
-          if xhr.status is 200
-            Backbone.trigger "destroy#{@resourceNameCapitalized}Success", @
-          else
-            error = responseJSON.error or 'No error message provided.'
-            Backbone.trigger "destroy#{@resourceNameCapitalized}Fail", error
-            console.log "DELETE request to /#{@getServerSideResourceName()}/#{@get 'id'}
-              failed (status not 200)."
-            console.log error
+          @destroyResourceOnloadHandler responseJSON, xhr
         onerror: (responseJSON) =>
           Backbone.trigger "destroy#{@resourceNameCapitalized}End"
           error = responseJSON.error or 'No error message provided.'
@@ -148,4 +141,27 @@ define [
           console.log "Error in DELETE request to
             /#{@getServerSideResourceName()}/#{@get 'id'} (onerror triggered)."
       )
+
+    destroyResourceOnloadHandler: (responseJSON, xhr) ->
+      Backbone.trigger "destroy#{@resourceNameCapitalized}End"
+      if xhr.status is 200
+        Backbone.trigger "destroy#{@resourceNameCapitalized}Success", @
+      else
+        error = responseJSON.error or 'No error message provided.'
+        Backbone.trigger "destroy#{@resourceNameCapitalized}Fail", error
+        console.log "DELETE request to /#{@getServerSideResourceName()}/#{@get 'id'}
+          failed (status not 200)."
+        console.log error
+
+    # This is its own function because in the FieldDB case it's a PUT request.
+    getDestroyResourceHTTPMethod: ->
+      'DELETE'
+
+    # The type of URL used to destroy a resource on an OLD backend.
+    getDestroyResourceURL: ->
+      "#{@getOLDURL()}/#{@getServerSideResourceName()}/#{@get 'id'}"
+
+    # The JSON payload for destroying a resource; the OLD doesn't use this, but
+    # FieldDB crucially does.
+    getDestroyResourcePayload: -> null
 

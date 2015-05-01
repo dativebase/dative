@@ -442,8 +442,8 @@ define [
       @set 'id', fieldDBDatum.id
       @set fieldDBDatum.value
 
-    # Return a representation of the model's state that the OLD likes: i.e.,
-    # with relational values as ids or arrays thereof.
+    # Return a representation of the model's state that FieldDB likes: just a
+    # clone of the attributes with the `collection` removed.
     toFieldDB: ->
       result = _.clone @attributes
       # Not doing this causes a `RangeError: Maximum call stack size exceeded`
@@ -453,6 +453,51 @@ define [
       delete result.collection
       result
 
+    # Return a representation of the model's state that FieldDB likes for
+    # updating.
+    toFieldDBForUpdate: ->
+      resource = @toFieldDB()
+      now = new Date()
+      resource.dateModified = now.toISOString()
+      resource.timestamp = now.valueOf()
+      resource.pouchname = globals.applicationSettings.get 'activeFieldDBCorpus'
+      resource.comments = (c for c in resource.comments when c.text)
+      username = globals.applicationSettings.get 'username'
+      gravatar = globals.applicationSettings.get 'gravatar'
+      modifiedByUser = _.findWhere resource.datumFields, label: 'modifiedByUser'
+      modifiedByUser.users.push(
+        username: username
+        gravatar: gravatar
+        timestamp: now.valueOf()
+        appVersion: '' # TODO: how?
+      )
+      resource
+
+    # Return a representation of the model's state that FieldDB likes for
+    # creating.
+    toFieldDBForCreate: ->
+      resource = @toFieldDB()
+      if 'id' of resource then delete resource.id
+      if '_id' of resource then delete resource._id
+      if '_rev' of resource then delete resource._rev
+      if resource.session and not 'id' of resource.session
+        delete resource.session
+      now = new Date()
+      resource.dateEntered = now.toISOString()
+      resource.dateModified = now.toISOString()
+      resource.timestamp = now.valueOf()
+      resource.pouchname = globals.applicationSettings.get 'activeFieldDBCorpus'
+      resource.comments = (c for c in resource.comments when c.text)
+      username = globals.applicationSettings.get 'username'
+      gravatar = globals.applicationSettings.get 'gravatar'
+      enteredByUser = _.findWhere resource.datumFields, label: 'enteredByUser'
+      enteredByUser.value = username
+      enteredByUser.mask = username
+      enteredByUser.user =
+        username: username
+        gravatar: gravatar
+        appVersion: '' # TODO: how?
+      resource
 
     ############################################################################
     # OLD Schema
@@ -659,4 +704,61 @@ define [
                                         #            the `collections`
                                         #            interface to manipulate
                                         #            collection membership.)
+
+
+    ############################################################################
+    # FieldDB-specific DELETE/DESTROY stuff.
+    ############################################################################
+
+    # To destroy a FieldDB datum, you do a PUT request where
+    # `.trashed='deleted'`.
+
+    destroyResourceOnloadHandler: (responseJSON, xhr) ->
+      switch globals.applicationSettings.get('activeServer').get('type')
+        when 'OLD'
+          super responseJSON, xhr
+        when 'FieldDB'
+          @destroyResourceOnloadHandlerFieldDB responseJSON, xhr
+
+    destroyResourceOnloadHandlerFieldDB: (responseJSON, xhr) ->
+      Backbone.trigger "destroy#{@resourceNameCapitalized}End"
+      if xhr.status is 201 and responseJSON.ok is true
+        Backbone.trigger "destroy#{@resourceNameCapitalized}Success", @
+      else
+        error = responseJSON.error or 'No error message provided.'
+        Backbone.trigger "destroy#{@resourceNameCapitalized}Fail", error
+        console.log "Request to delete FieldDB datum #{@get 'id'} failed
+          (status not 201)."
+        console.log error
+
+    getDestroyResourceHTTPMethod: ->
+      switch globals.applicationSettings.get('activeServer').get('type')
+        when 'OLD' then super
+        when 'FieldDB' then 'PUT'
+
+    getDestroyResourceURL: ->
+      switch globals.applicationSettings.get('activeServer').get('type')
+        when 'OLD' then super
+        when 'FieldDB' then @getDestroyResourceURLFieldDB()
+
+    # Returns a URL for deleting a resource on a FieldDB web service.
+    # NOTE: you don't really delete FieldDB datums and you don't make a DELETE
+    # HTTP request; you just set the `trashed` attribute to "deleted".
+    # PUT <corpus_url>/<pouchname>/<datum_id>?rev=<datum_rev>
+    getDestroyResourceURLFieldDB: ->
+      url = globals.applicationSettings.get 'baseDBURL'
+      pouchname = globals.applicationSettings.get 'activeFieldDBCorpus'
+      "#{url}/#{pouchname}/#{@get '_id'}?rev=#{@get '_rev'}"
+
+    getDestroyResourcePayload: ->
+      switch globals.applicationSettings.get('activeServer').get('type')
+        when 'OLD' then super
+        when 'FieldDB' then @getDestroyResourcePayloadFieldDB()
+
+    # Return the payload for deleting a FieldDB datum: here I use the same
+    # object used to update a datum, except I add `datum.trashed='deleted'`.
+    getDestroyResourcePayloadFieldDB: ->
+      payload = @toFieldDBForUpdate()
+      payload.trashed = 'deleted'
+      payload
 

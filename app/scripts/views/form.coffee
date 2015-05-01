@@ -52,7 +52,17 @@ define [
       @primaryAttributes = igtAttributes.concat translationAttributes
 
     setSecondaryAttributes: ->
-      @secondaryAttributes = @getFormAttributes @activeServerType, 'secondary'
+      secondaryAttributes = @getFormAttributes @activeServerType, 'secondary'
+      if @activeServerType is 'FieldDB'
+        # In the FieldDB case, we want to display all datum fields, even if
+        # they're not listed in the secondary attributes array of the
+        # application settings model.
+        datumFields = (x.label for x in @model.get('datumFields'))
+        for field in datumFields
+          if field not in secondaryAttributes and
+          field not in @primaryAttributes
+            secondaryAttributes.push field
+      @secondaryAttributes = secondaryAttributes
 
     setAttribute2DisplayView: ->
       switch @activeServerType

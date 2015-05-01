@@ -538,20 +538,23 @@ define [
         # it should ultimately be user-configurable.
         # QUESTION: @cesine: how is the elicitor of a FieldDB datum/session
         # documented?
+        # TODO: `audioVideo`, `images`
         secondary: [
           'syntacticCategory'
           'comments'
           'tags'
-          'dateElicited'
-          'language'
-          'dialect'
-          'consultants'
+          'dateElicited' # session field
+          'language' # session field
+          'dialect' # session field
+          'consultants' # session field
           'enteredByUser'
           'dateEntered'
           'modifiedByUser'
           'dateModified'
           'syntacticTreeLatex'
           'validationStatus'
+          'timestamp' # make this visible?
+          'id'
         ]
 
         readonly: [

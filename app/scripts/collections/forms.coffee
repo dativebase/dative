@@ -222,50 +222,12 @@ define [
     getResourceForServerCreate: (resource) ->
       switch globals.applicationSettings.get('activeServer').get('type')
         when 'OLD' then super resource
-        when 'FieldDB'
-          resource = resource.toFieldDB()
-          if 'id' of resource then delete resource.id
-          if '_id' of resource then delete resource._id
-          if '_rev' of resource then delete resource._rev
-          if resource.session and not 'id' of resource.session
-            delete resource.session
-          now = new Date()
-          resource.dateEntered = now.toISOString()
-          resource.dateModified = now.toISOString()
-          resource.timestamp = now.valueOf()
-          resource.pouchname = globals.applicationSettings.get 'activeFieldDBCorpus'
-          resource.comments = (c for c in resource.comments when c.text)
-          username = globals.applicationSettings.get 'username'
-          gravatar = globals.applicationSettings.get 'gravatar'
-          enteredByUser = _.findWhere resource.datumFields, label: 'enteredByUser'
-          enteredByUser.value = username
-          enteredByUser.mask = username
-          enteredByUser.user =
-            username: username
-            gravatar: gravatar
-            appVersion: '' # TODO: how?
-          resource
+        when 'FieldDB' then resource.toFieldDBForCreate()
 
     getResourceForServerUpdate: (resource) ->
       switch globals.applicationSettings.get('activeServer').get('type')
         when 'OLD' then super resource
-        when 'FieldDB'
-          resource = resource.toFieldDB()
-          now = new Date()
-          resource.dateModified = now.toISOString()
-          resource.timestamp = now.valueOf()
-          resource.pouchname = globals.applicationSettings.get 'activeFieldDBCorpus'
-          resource.comments = (c for c in resource.comments when c.text)
-          username = globals.applicationSettings.get 'username'
-          gravatar = globals.applicationSettings.get 'gravatar'
-          modifiedByUser = _.findWhere resource.datumFields, label: 'modifiedByUser'
-          modifiedByUser.users.push(
-            username: username
-            gravatar: gravatar
-            timestamp: now.valueOf()
-            appVersion: '' # TODO: how?
-          )
-          resource
+        when 'FieldDB' then resource.toFieldDBForUpdate()
 
     # Return an array of `FormModel` instances built from FieldDB objects.
     getDativeFormModelsFromFieldDBObjects: (responseJSON) ->
