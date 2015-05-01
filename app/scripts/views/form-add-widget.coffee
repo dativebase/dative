@@ -190,3 +190,20 @@ define [
           #{serverType} and #{category}"
         []
 
+    # Return a JS object representing an empty resource model: note that this
+    # crucially "empties" the editable attributes; that is, a resource's id,
+    # its enterer, etc., will not be represented in the returned model object.
+    getEmptyModelObject: ->
+      switch globals.applicationSettings.get('activeServer').get('type')
+        when 'OLD' then super
+        when 'FieldDB'
+          modelDefaults = @utils.clone @model.defaults()
+          emptyModelObject = {}
+          editableAttributes =
+            @editableSecondaryAttributes.concat @primaryAttributes
+          for attribute in editableAttributes
+            if attribute of modelDefaults
+              emptyModelObject[attribute] = modelDefaults[attribute]
+          emptyModelObject.datumFields = modelDefaults.datumFields
+          emptyModelObject
+

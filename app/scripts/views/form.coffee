@@ -58,9 +58,12 @@ define [
         # they're not listed in the secondary attributes array of the
         # application settings model.
         datumFields = (x.label for x in @model.get('datumFields'))
+        grammaticalityAttributes =
+          @getFormAttributes @activeServerType, 'grammaticality'
+        accountedForAttributes = grammaticalityAttributes.concat(
+          secondaryAttributes, @primaryAttributes)
         for field in datumFields
-          if field not in secondaryAttributes and
-          field not in @primaryAttributes
+          if field not in accountedForAttributes
             secondaryAttributes.push field
       @secondaryAttributes = secondaryAttributes
 
