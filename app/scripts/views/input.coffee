@@ -47,12 +47,14 @@ define ['./base', 'autosize'], (BaseView) ->
     # Override this in an input-appropriate way, if necessary.
     disable: ->
       @disableTextareas()
+      @disableTextInputs()
       @disableButtons()
       @disableSelectmenus()
 
     # Override this in an input-appropriate way, if necessary.
     enable: ->
       @enableTextareas()
+      @enableTextInputs()
       @enableButtons()
       @enableSelectmenus()
 
@@ -63,6 +65,16 @@ define ['./base', 'autosize'], (BaseView) ->
 
     enableTextareas: ->
       @$('textarea')
+        .prop 'disabled', false
+        .removeClass 'ui-state-disabled'
+
+    disableTextInputs: ->
+      @$('input[type=text]')
+        .prop 'disabled', true
+        .addClass 'ui-state-disabled'
+
+    enableTextInputs: ->
+      @$('input[type=text]')
         .prop 'disabled', false
         .removeClass 'ui-state-disabled'
 
