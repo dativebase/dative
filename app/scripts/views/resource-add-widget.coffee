@@ -425,7 +425,7 @@ define [
     # crucially "empties" the editable attributes; that is, a resource's id,
     # its enterer, etc., will not be represented in the returned model object.
     getEmptyModelObject: ->
-      modelDefaults = @model.defaults()
+      modelDefaults = @utils.clone @model.defaults()
       emptyModelObject = {}
       for attribute in @editableSecondaryAttributes.concat @primaryAttributes
         emptyModelObject[attribute] = modelDefaults[attribute]
