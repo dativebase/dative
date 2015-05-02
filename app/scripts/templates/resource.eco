@@ -31,6 +31,8 @@
 
   <div class='button-container-right'>
 
+    <span class="spinner-container"></span>
+
     <button class="update-resource dative-tooltip"
       <% if @addUpdateType is 'add': %>
             title="edit the details of this <%= @resourceName %>"
@@ -57,12 +59,12 @@
         ><i class='fa fa-copy fa-fw'></i>
       </button>
 
-      <!-- Uncomment this later, once history is implemented.
-      <button class="resource-history dative-tooltip"
-      title="view the history of this <%= @resourceName %>"
-        ><i class='fa fa-history fa-fw'></i>
-      </button>
-      -->
+      <% if @activeServerType in ['FieldDB', 'OLD']: %>
+        <button class="resource-history dative-tooltip"
+        title="view the history of this <%= @resourceName %>"
+          ><i class='fa fa-history fa-fw'></i>
+        </button>
+      <% end %>
 
     <% end %>
 
@@ -79,6 +81,8 @@
   <div class='resource-primary-data large-unicode-font'> </div>
 
   <div class='resource-secondary-data large-unicode-font'></div>
+
+  <div class='resource-previous-versions large-unicode-font'></div>
 
 </div>
 

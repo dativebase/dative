@@ -133,6 +133,7 @@ define [
       'focusout': 'focusout'
       'keydown': 'keydown'
       'click .update-resource': 'update'
+      'click .resource-history': 'fetchHistory'
       'click .duplicate-resource': 'duplicate'
       'click .delete-resource': 'deleteConfirm'
       'click .export-resource': 'exportResource'
@@ -142,6 +143,11 @@ define [
 
     update: ->
       @showUpdateViewAnimate()
+
+    fetchHistory: ->
+      console.log 'in fetchHistory of resource view.'
+      try
+        @model.fetchHistory()
 
     duplicate: ->
       Backbone.trigger "duplicate#{@resourceNameCapitalized}Confirm", @model
@@ -771,4 +777,16 @@ define [
       _.isObject(thing) and
       (not _.isArray(thing)) and
       _.isEmpty(_.filter(_.values(thing), (x) -> x isnt null and x isnt ''))
+
+
+    spinnerOptions: ->
+      options = super
+      options.top = '50%'
+      options.left = '-15%'
+      options.color = @constructor.jQueryUIColors().errCo
+      options
+
+    spin: -> @$('.spinner-container').spin @spinnerOptions()
+
+    stopSpin: -> @$('.spinner-container').spin false
 

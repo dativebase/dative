@@ -770,6 +770,8 @@ define [
 
     # Destroy an OLD form.
     # DELETE `<OLD_URL>/forms/<form.id>`
+    # TODO: I think I can safely delete this since `destroyResource` in the
+    # super class is doing what this used to.
     destroyOLDForm: (options) ->
       Backbone.trigger 'destroyOLDFormStart'
       @constructor.cors.request(
@@ -790,5 +792,74 @@ define [
           Backbone.trigger 'destroyOLDFormFail', error
           console.log "Error in DELETE request to /forms/#{@get 'id'}
             (onerror triggered)."
+      )
+
+    ############################################################################
+    # HISTORY.
+    ############################################################################
+
+    fetchHistory: ->
+      switch @activeServerType
+        when 'OLD' then @fetchHistoryOLD()
+        when 'FieldDB' then @fetchHistoryFieldDB()
+
+    # GET /forms/<id>/history
+    # If successful, returns `{"form": { ... }, "previous_versions": [ ... ]}`
+    fetchHistoryOLD: ->
+      @trigger 'fetchHistoryFormStart'
+      @constructor.cors.request(
+        method: 'GET'
+        url: "#{@getOLDURL()}/forms/#{@get 'id'}/history"
+        onload: (responseJSON, xhr) =>
+          @trigger 'fetchHistoryFormEnd'
+          if xhr.status is 200
+            console.log 'SUCCESS'
+            @trigger 'fetchHistoryFormSuccess', responseJSON
+          else
+            error = responseJSON.error or 'No error message provided.'
+            @trigger 'fetchHistoryFormFail', error
+            console.log "GET request to /forms/#{@get 'id'}/history failed (status not 200)."
+            console.log error
+        onerror: (responseJSON) =>
+          @trigger 'fetchHistoryFormEnd'
+          error = responseJSON.error or 'No error message provided.'
+          @trigger 'fetchHistoryFormFail', error
+          console.log "Error in GET request to /forms/#{@get 'id'}/history
+            (onerror triggered)."
+      )
+
+    # Request the history of the form model, the user can click on a revision
+    # and see the details preferably by simply showing the other revision as a
+    # model along side in the same views
+    fetchHistoryFieldDB: ->
+      fielddb#2.45.3
+      console.log "you want to fetch the history of OLD form #{@get 'id'}"
+      console.log (new FieldDB.FieldDBObject()).version
+      console.log 'FieldDB.Datum'
+      console.log FieldDB.Datum
+      console.log @id
+      fielddbHelperModel = new FieldDB.Datum(_id: @id)
+      console.log 'got fielddbHelperModel'
+      console.log fielddbHelperModel
+      console.log 'fielddbHelperModel.fetchRevisions()'
+      console.log fielddbHelperModel.fetch_revisions
+      fielddbHelperModel.fetch_revisions().then(
+          (revisions) ->
+            # TODO: not sure we want to set this on the model ...
+            # TODO can we avoid fetching them until the user clicks on the one they want?
+            console.log 'got revisions'
+            console.log revisions
+            previousVersions = revisions.map((revisionUrl) -> url: revisionUrl)
+            console.log 'got previousVersions'
+            console.log previousVersions
+            @set 'previousVersions', previousVersions
+        ,
+          (error) ->
+            console.log 'TODO how do you talk to users about errors contacting
+              the server etc...', error
+      ).fail(
+        (error) ->
+          console.log 'TODO how do you talk to users about errors contacting
+            the server etc...', error
       )
 

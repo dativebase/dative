@@ -15,6 +15,7 @@ define [
   './array-of-objects-with-title-field-display'
   './comments-field-display'
   './modified-by-user-field-display'
+  './../models/form'
   './../utils/globals'
 ], (ResourceView, FormAddWidgetView, PersonFieldDisplayView,
   DateFieldDisplayView, ObjectWithNameFieldDisplayView,
@@ -23,7 +24,7 @@ define [
   PhoneticTranscriptionFieldDisplayView, GrammaticalityValueFieldDisplayView,
   TranslationsFieldDisplayView, SourceFieldDisplayView,
   ArrayOfObjectsWithTitleFieldDisplayView, CommentsFieldDisplayView,
-  ModifiedByUserFieldDisplayView, globals) ->
+  ModifiedByUserFieldDisplayView, FormModel, globals) ->
 
   # Form View
   # --------------
@@ -35,11 +36,40 @@ define [
     className: 'dative-resource-widget dative-form-object dative-paginated-item
       dative-widget-center ui-corner-all'
 
+    # TODO: listenTo `fetchHistory...`-type events on Backbone
     initialize: (options) ->
       super
       @headerAlwaysVisible = false
       @setAttribute2DisplayView()
       @setAttributeClasses()
+
+    listenToEvents: ->
+      super
+      @listenTo @model, "fetchHistoryFormStart", @fetchHistoryFormStart
+      @listenTo @model, "fetchHistoryFormEnd", @fetchHistoryFormEnd
+      @listenTo @model, "fetchHistoryFormFail", @fetchHistoryFormFail
+      @listenTo @model, "fetchHistoryFormSuccess", @fetchHistoryFormSuccess
+
+    fetchHistoryFormStart: ->
+      console.log 'fetchHistoryFormStart'
+      @spin()
+
+    fetchHistoryFormEnd: ->
+      console.log 'fetchHistoryFormEnd'
+      @stopSpin()
+
+    fetchHistoryFormFail: ->
+      console.log 'fetchHistoryFormFail'
+
+    fetchHistoryFormSuccess: (responseJSON) ->
+      console.log 'fetchHistoryFormSuccess'
+      console.log responseJSON
+      console.log responseJSON.previous_versions
+      @previousVersionModels = ((new FormModel(pv)) for pv in responseJSON.previous_versions)
+      # D'oh, circular FormView reference rquired ...
+      #@previousVersionViews = ((new FormView
+      console.log @previousVersions
+
 
     setAttributeClasses: ->
       @setPrimaryAttributes()
