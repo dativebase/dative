@@ -1,16 +1,12 @@
 <div
   class='<%= @class %>'
   ><span
-    class='<%= @textClass %>'
-    ><%= @textValue %></span>
-  (By
-  <span
     class='<%= @usernameClass %>'
-    ><%= @usernameValue%></span>
-  <span
+    ><%= @usernameValue%></span
+  > (<span
     class='<%= @timestampClass %>
            dative-tooltip'
-    title='This comment was made on <%= @humanDatetime @timestampValue %>'
+    title='This modification was made on <%= @humanDatetime @timestampValue %>'
     ><%= @timeSince @timestampValue %></span
   >)</div>
 

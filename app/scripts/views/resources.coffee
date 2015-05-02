@@ -3,28 +3,27 @@ define [
   './resource'
   './exporter-dialog'
   './pagination-menu-top'
+  './pagination-item-table'
   './../collections/resources'
   './../models/resource'
   './../utils/paginator'
   './../utils/globals'
   './../templates/resources'
 ], (BaseView, ResourceView, ExporterDialogView, PaginationMenuTopView,
-  ResourcesCollection, ResourceModel, Paginator, globals,
-  resourcesTemplate) ->
+  PaginationItemTableView, ResourcesCollection, ResourceModel, Paginator,
+  globals, resourcesTemplate) ->
 
   # Resources View
   # ---------------
   #
-  # Displays a collection of resources (e.g., OLD corpora) for browsing, with
-  # pagination. Also contains a ResourceView instance (with a model that hasn't
-  # been saved on the server) for creating new resources within the resources
-  # browse interface.
+  # Displays a collection of resources (e.g., FieldDB datums or OLD forms) for
+  # browsing, with pagination. Also contains a ResourceView instance (with a
+  # model that hasn't been saved on the server) for creating new resources
+  # within the resources browse interface.
   #
   # This view is intended to be subclassed and parameterized minimally in order
-  # to work with OLD corpora, phonologies, tags, etc.
-  #
-  # TODO: make forms use this same resources paginator view so that there is
-  # not needless code repetition.
+  # to work with various FieldDB/OLD resources, e.g., corpora, phonologies,
+  # tags, etc.
 
   class ResourcesView extends BaseView
 
@@ -50,9 +49,11 @@ define [
       @resourceNameCapitalized = @utils.capitalize @resourceName
       @resourceNamePlural = @utils.pluralize @resourceName
       @resourceNamePluralCapitalized = @utils.capitalize @resourceNamePlural
+      @enumerateResources = options?.enumerateResources or false
       @getGlobalsResourcesDisplaySettings()
       @focusedElementIndex = null
       @resourceViews = [] # holds a ResourceView instance for each ResourceModel in ResourcesCollection
+      @paginationItemTableViews = [] # if `@enumerateResources` is true, then this holds an enumeration/pagination superview for each resource view.
       @renderedResourceViews = [] # references to the ResourceView instances that are rendered
       @weShouldFocusFirstAddViewInput = false # AppView sets this to True when you click Resources > Add
       @fetchCompleted = false
@@ -92,7 +93,8 @@ define [
       @renderExporterDialogView()
       @newResourceViewVisibility()
       if @weNeedToFetchResourcesAgain()
-        @fetchResourcesToCollection()
+        @fetchResourcesLastPage = true
+        @fetchResourcesPageToCollection()
       else
         @refreshPage()
       @listenToEvents()
@@ -195,10 +197,9 @@ define [
     # Instantiate and return a new `ResourceView` instance. Note that even
     # though we pass the collection to the resource view's model, the
     # collection will not contain that model.
-    # FOX
     getNewResourceView: (newResourceModel) ->
       newResourceModel = newResourceModel or
-        new @resourceModel(collection: @collection)
+        new @resourceModel({}, collection: @collection)
       new @resourceView
         headerTitle: "New #{@resourceNameCapitalized}"
         model: newResourceModel
@@ -207,7 +208,8 @@ define [
 
     # This is called when the 'addResourceSuccess' has been triggered, i.e.,
     # when a new resource has been successfully created on the server.
-    newResourceAdded: (resourceModel) ->
+    newResourceAdded: ->
+      resourceModel = @newResourceView.model
       newResourceShouldBeOnCurrentPage = @newResourceShouldBeOnCurrentPage()
       # 1. Make the new resource widget disappear.
       @hideNewResourceViewAnimate()
@@ -260,7 +262,8 @@ define [
         primaryDataLabelsVisible: @primaryDataLabelsVisible
         expanded: @allResourcesExpanded
       @collection.add addedResourceView.model
-      @renderResourceView addedResourceView, @paginator.end
+      renderedView = @renderResourceView addedResourceView, @paginator.end
+      @$('.dative-pagin-items').append renderedView.el
 
     # Keyboard shortcuts for the resources view.
     # Note that the ResourcesView is listening to events on parts of the DOM
@@ -298,13 +301,33 @@ define [
         else
           null
 
+    getNextResourceViewDiv: ($enclosingResourceViewDiv) ->
+      if @enumerateResources
+        $nextResourceViewDiv = $enclosingResourceViewDiv
+          .closest('.dative-pagin-item')
+          .next()
+          .find('.dative-resource-widget')
+      else
+        $nextResourceViewDiv = $enclosingResourceViewDiv.next()
+      if $nextResourceViewDiv then $nextResourceViewDiv else null
+
+    getPreviousResourceViewDiv: ($enclosingResourceViewDiv) ->
+      if @enumerateResources
+        $previousResourceViewDiv = $enclosingResourceViewDiv
+          .closest('.dative-pagin-item')
+          .prev()
+          .find('.dative-resource-widget')
+      else
+        $previousResourceViewDiv = $enclosingResourceViewDiv.prev()
+      if $previousResourceViewDiv then $previousResourceViewDiv else null
+
     # Focus the next (below) resource view, or the first one if we're at the
     # top.
     focusNextResourceView: (event) ->
       $enclosingResourceViewDiv = @getEnclosingResourceViewDiv(
         @$(event.target))
       if $enclosingResourceViewDiv
-        $nextResourceViewDiv = $enclosingResourceViewDiv.next()
+        $nextResourceViewDiv = @getNextResourceViewDiv $enclosingResourceViewDiv
         @stopEvent event
         if $nextResourceViewDiv.length
           $nextResourceViewDiv.focus()
@@ -317,7 +340,8 @@ define [
       $enclosingResourceViewDiv = @getEnclosingResourceViewDiv(
         @$(event.target))
       if $enclosingResourceViewDiv.length
-        $previousResourceViewDiv = $enclosingResourceViewDiv.prev()
+        $previousResourceViewDiv =
+          @getPreviousResourceViewDiv $enclosingResourceViewDiv
         @stopEvent event
         if $previousResourceViewDiv.length
           $previousResourceViewDiv.focus()
@@ -453,23 +477,10 @@ define [
       if $focusedElement
         $focusedElement.closest('.dative-resource-widget').first().focus()
 
-    # Tell the collection to fetch resources from the server and add them to
-    # itself. Only `@render` calls this. Note that we just fetch the resources
-    # for the current pagination page, i.e., we use server-side pagination.
-    # Note also that setting `fetchResourcesLastPage` to `true` will cause
-    # `@fetchResourcesSuccess` to immediately make a second request for the
-    # last page of resources. This is the only way to get the last page of
-    # resources from the OLD via its current API; that is, you first have to
-    # make a vacuous request in order to get the resource count so that you
-    # know what the last page is.
-    fetchResourcesToCollection: ->
-      @fetchResourcesLastPage = true
-      @fetchResourcesPageToCollection()
-
-    # Get a page of resources from an OLD web service. Note that the
-    # resources collection only holds one page at a time; that is, the
-    # collection is emptied and refilled on each pagination action, hence the
-    # `.reset()` call here.
+    # Get a page of resources from a web service. Note that the resources
+    # collection only holds one page at a time; that is, the collection is
+    # emptied and refilled on each pagination action, hence the `.reset()` call
+    # here.
     fetchResourcesPageToCollection: ->
       @collection.reset()
       @collection.fetchResources @paginator
@@ -514,15 +525,13 @@ define [
         .show()
         .text reason
 
-    # We have succeeded in retrieving a page of resources from an OLD server.
-    # `paginator` is an object returned from the OLD. Crucially, it has an
+    # We have succeeded in retrieving a page of resources from a server.
+    # `paginator` is an object returned from the server. Crucially, it has an
     # attribute `count` which tells us how many resources are in the database.
-    # `setPaginatorItems` uses this to sync the client-side pagination GUI
-    # with the OLD's server-side pagination.
     fetchResourcesSuccess: (paginator) ->
       @saveFetchedMetadata()
       @getResourceViews()
-      if paginator then @setPaginatorItems paginator
+      if paginator then @paginator.setItems paginator.count
       if @paginator.items is 0 then @fetchResourcesLastPage = false
       if @fetchResourcesLastPage
         pageBefore = @paginator.page
@@ -537,12 +546,6 @@ define [
         @refreshPageFade()
 
     # Tell the paginator how many items/resources are in our corpus/database.
-    setPaginatorItems: (oldPaginator=null) ->
-      if oldPaginator
-        @paginator.setItems oldPaginator.count # the OLD case
-      else
-        @paginator.setItems @collection.length # the FieldDB case
-      #@paginator.setPageToLast()
 
     # Remember the server type and name (and corpus name) of the last resources
     # fetch, so we don't needlessly repeat it on future renderings of this
@@ -615,7 +618,7 @@ define [
     headerForEmptyDataSet: ->
       @$('.no-resources')
         .show()
-        .text 'There are no resources to display'
+        .text "There are no #{@resourceNamePlural} to display"
       @$('.pagination-info').hide()
       @$('button.expand-all').button 'disable'
       @$('button.collapse-all').button 'disable'
@@ -660,6 +663,7 @@ define [
         complete: =>
           @$('.dative-pagin-items').html ''
           @closeRenderedResourceViews()
+          if @enumerateResources then @closePaginationItemTableViews()
           @renderPage options
       if options?.hideEffect
         hideOptions.duration = @getAnimationDuration()
@@ -684,15 +688,22 @@ define [
         resourceView.close()
         @closed resourceView
 
+    # Close all rendered pagination item table views, i.e., the mini-tables that
+    # hold enumerated resource views.
+    closePaginationItemTableViews: ->
+      while @paginationItemTableViews.length
+        paginationItemTableView = @paginationItemTableViews.pop()
+        paginationItemTableView.close()
+        @closed paginationItemTableView
+
     # Create a `ResourceView` instance for each `ResourceModel` instance in
     # `@collection` and append it to `@resourceViews`.
-    # Note that in the OLD case, we reset `resourceViews` to `[]` because
-    # with server-side pagination we only store one page worth of resource
-    # models/views at a time.
+    # Note that we reset `resourceViews` to `[]` because with server-side
+    # pagination we only store one page worth of resource models/views at a
+    # time.
     getResourceViews: ->
-      if @getActiveServerType() is 'OLD'
-        @closeResourceViews()
-        @resourceViews = []
+      @closeResourceViews()
+      @resourceViews = []
       @collection.each (resourceModel) =>
         newResourceView = new @resourceView
           model: resourceModel
@@ -781,32 +792,36 @@ define [
       @showResourceList options
 
     # Render all resource views on the current paginator page.
-    # Note the OLD/FieldDB difference: with the OLD, each pagination change
-    # event triggers a new fetch to the OLD server, and a resetting of both
-    # `@collection` and `@resourceViews`; thus we render all resource models in the
-    # collection (and all resource views in `@resourceViews`) using the "indices"
-    # from `@paginator`. With FieldDB, we have already fetched *all*
-    # resources to `@collection` (and we have all of their respective views
-    # in `@resourceViews`) so we can simply take a slice out of
-    # `@resourceViews` using the paginator start and end values.
+    # Note that each pagination change event triggers a new fetch to the
+    # server, and a resetting of both `@collection` and `@resourceViews`; thus
+    # we render all resource models in the collection (and all resource views
+    # in `@resourceViews`) using the "indices" from `@paginator`.
     renderResourceViews: ->
       paginationIndices = [@paginator.start..@paginator.end]
-      if @getActiveServerType() is 'OLD'
-        for [index, resourceView] in _.zip(paginationIndices, @resourceViews)
-          @renderResourceView resourceView, index
-      else
-        for index in paginationIndices
-          resourceView = @resourceViews[index]
-          @renderResourceView resourceView, index
+      fragment = document.createDocumentFragment()
+      for [index, resourceView] in _.zip(paginationIndices, @resourceViews)
+        renderedView = @renderResourceView resourceView, index
+        if renderedView then fragment.appendChild renderedView.el
+      @$('.dative-pagin-items').append fragment
 
-    # Render a single resource view.
+    # Render a single resource view, but don't add it to the DOM: just return
+    # it.
     renderResourceView: (resourceView, index) ->
-      $resourceList = @$ '.dative-pagin-items'
       if resourceView # resourceView may be undefined.
-        resourceId = resourceView.model.get 'id'
-        $resourceList.append resourceView.render().el
+        if @enumerateResources # i.e., add example numbers, e.g.,  "(1)"
+          resourceId = resourceView.model.get 'id'
+          viewToReturn = new PaginationItemTableView
+            resourceId: resourceId
+            index: index + 1
+          viewToReturn.render()
+          viewToReturn.$("##{resourceId}").html resourceView.render().el
+          @paginationItemTableViews.push viewToReturn
+          @rendered viewToReturn
+        else
+          viewToReturn = resourceView.render()
         @renderedResourceViews.push resourceView
         @rendered resourceView
+        viewToReturn
 
     # jQuery-show the list of resources.
     showResourceList: (options) ->
@@ -835,50 +850,35 @@ define [
       @paginator.setItemsPerPage newItemsPerPage
       itemsDisplayedAfter = @paginator.itemsDisplayed
       if itemsDisplayedBefore isnt itemsDisplayedAfter
-        if @getActiveServerType() is 'FieldDB'
-          @refreshPageFade()
-        else
-          @fetchResourcesPageToCollection()
+        @fetchResourcesPageToCollection()
 
     showFirstPage: ->
       pageBefore = @paginator.page
       @paginator.setPageToFirst()
       pageAfter = @paginator.page
       if pageBefore isnt pageAfter
-        if @getActiveServerType() is 'FieldDB'
-          @refreshPageFade()
-        else
-          @fetchResourcesPageToCollection()
+        @fetchResourcesPageToCollection()
 
     showPreviousPage: ->
       pageBefore = @paginator.page
       @paginator.setPageToPrevious()
       pageAfter = @paginator.page
       if pageBefore isnt pageAfter
-        if @getActiveServerType() is 'FieldDB'
-          @refreshPageFade()
-        else
-          @fetchResourcesPageToCollection()
+        @fetchResourcesPageToCollection()
 
     showNextPage: ->
       pageBefore = @paginator.page
       @paginator.setPageToNext()
       pageAfter = @paginator.page
       if pageBefore isnt pageAfter
-        if @getActiveServerType() is 'FieldDB'
-          @refreshPageFade()
-        else
-          @fetchResourcesPageToCollection()
+        @fetchResourcesPageToCollection()
 
     showLastPage: ->
       pageBefore = @paginator.page
       @paginator.setPageToLast()
       pageAfter = @paginator.page
       if pageBefore isnt pageAfter
-        if @getActiveServerType() is 'FieldDB'
-          @refreshPageFade()
-        else
-          @fetchResourcesPageToCollection()
+        @fetchResourcesPageToCollection()
 
     # Show a new page where `method` determines whether the new page is
     # behind or ahead of the current one and where `n` is the number of
@@ -888,10 +888,7 @@ define [
       @paginator[method] n
       pageAfter = @paginator.page
       if pageBefore isnt pageAfter
-        if @getActiveServerType() is 'FieldDB'
-          @refreshPageFade()
-        else
-          @fetchResourcesPageToCollection()
+        @fetchResourcesPageToCollection()
 
     showThreePagesBack: ->
       @showPage 3, 'decrementPage'
@@ -995,7 +992,7 @@ define [
             #{@resourceName}, then click “Ok” to proceed with duplicating
             #{@resourceName} #{id}."
           confirm: true
-          confirmEvent: 'duplicateResource'
+          confirmEvent: "duplicate#{@resourceNameCapitalized}"
           confirmArgument: resourceModel
         Backbone.trigger 'openAlertDialog', options
 

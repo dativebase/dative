@@ -1,8 +1,9 @@
 define [
   './base'
   './notification'
+  './../utils/globals'
   './../templates/notifier'
-], (BaseView, NotificationView, notifierTemplate) ->
+], (BaseView, NotificationView, globals, notifierTemplate) ->
 
   # Notifier
   # --------
@@ -16,6 +17,7 @@ define [
     initialize: ->
 
       @crudResources = [
+        'form'
         'subcorpus'
         'phonology'
         'morphology'
@@ -82,20 +84,27 @@ define [
     # Forms
     ############################################################################
 
-    addOLDFormSuccess: (formModel) ->
+    getFormId: (formModel) ->
+      id = formModel.get 'id'
+      activeServerType = globals
+        .applicationSettings.get('activeServer').get 'type'
+      if activeServerType is 'FieldDB' then id = id[-7..]
+      id
+
+    addFormSuccess: (formModel) ->
       notification = new NotificationView
         title: 'Form created'
         content: "You have successfully created a new form. Its id is
-          #{formModel.get 'id'}."
+          #{@getFormId formModel}."
       @renderNotification notification
 
-    updateOLDFormSuccess: (formModel) ->
+    updateFormSuccess: (formModel) ->
       notification = new NotificationView
         title: 'Form updated'
-        content: "You have successfully updated form #{formModel.get 'id'}."
+        content: "You have successfully updated form #{@getFormId formModel}."
       @renderNotification notification
 
-    addUpdateOLDFormFail: (error, type) ->
+    addUpdateFormFail: (error, type) ->
       if error
         content = "Your form #{type} request was unsuccessful. #{error}"
       else
@@ -107,24 +116,24 @@ define [
         type: 'error'
       @renderNotification notification
 
-    addOLDFormFail: (error) ->
-      @addUpdateOLDFormFail error, 'creation'
+    addFormFail: (error) ->
+      @addUpdateFormFail error, 'creation'
 
-    updateOLDFormFail: (error) ->
-      @addUpdateOLDFormFail error, 'update'
+    updateFormFail: (error) ->
+      @addUpdateFormFail error, 'update'
 
-    destroyOLDFormFail: (error) ->
+    destroyFormFail: (error) ->
       notification = new NotificationView
         title: 'Form deletion failed'
         content: "Your form creation request was unsuccessful. #{error}"
         type: 'error'
       @renderNotification notification
 
-    destroyOLDFormSuccess: (formModel) ->
+    destroyFormSuccess: (formModel) ->
       notification = new NotificationView
         title: 'Form deleted'
         content: "You have successfully deleted the form with id
-          #{formModel.get 'id'}."
+          #{@getFormId formModel}."
       @renderNotification notification
 
 

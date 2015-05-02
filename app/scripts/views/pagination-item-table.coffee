@@ -7,8 +7,9 @@ define [
   # Pagination Item Table View
   # --------------------------
   #
-  # An HTML table to hold the HTML of a form view. It contains a single row where
-  # the first cell contains the index and the second contains the form view's HTML.
+  # An HTML table to hold the HTML of a resource view. It contains a single row
+  # where the first cell contains the index and the second contains the
+  # resource view's HTML.
 
   class PaginationItemTableView extends BaseView
 
@@ -17,12 +18,12 @@ define [
     className: 'dative-pagin-item'
 
     initialize: (options) ->
-      @formId = options.formId
+      @resourceId = options.resourceId
       @index = options.index
 
     render: ->
       context =
-        formId: @formId
+        resourceId: @resourceId
         index: @index
         integerWithCommas: @utils.integerWithCommas
       @$el.html @template(context)

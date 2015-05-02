@@ -81,7 +81,7 @@ define [
       Backbone.trigger 'longTask:register', 'authenticating', taskId
       BaseRelationalModel.cors.request(
         method: 'POST'
-        timeout: 3000
+        timeout: 20000
         url: "#{@getURL()}/login/authenticate"
         payload: credentials
         onload: (responseJSON) =>
@@ -103,8 +103,8 @@ define [
       )
 
     getFieldDBBaseDBURL: (user) ->
-      if user.corpuses?.length
-        meta = user.corpuses[0]
+      if user.corpora?.length
+        meta = user.corpora[0]
         protocol = meta.protocol
         domain = meta.domain
         port = if meta.port then ":#{meta.port}" else ''
@@ -115,7 +115,7 @@ define [
       Backbone.trigger 'longTask:register', 'authenticating', taskId
       BaseRelationalModel.cors.request(
         method: 'POST'
-        timeout: 3000
+        timeout: 20000
         url: "#{@getURL()}/login"
         payload: credentials
         onload: (responseJSON) =>
@@ -127,6 +127,7 @@ define [
               baseDBURL: @getFieldDBBaseDBURL(responseJSON.user)
               username: credentials.username,
               password: credentials.password,
+              gravatar: responseJSON.user.gravatar,
               loggedInUser: responseJSON.user
             @save()
             credentials.name = credentials.username
@@ -536,25 +537,28 @@ define [
         ]
 
         # Secondary FieldDB form attributes.
-        # The returned array defines the order of how the secondary attributes are
-        # displayed. It is defined in models/application-settings because it should
-        # ultimately be user-configurable.
+        # The returned array defines the order of how the secondary attributes
+        # are displayed. It is defined in models/application-settings because
+        # it should ultimately be user-configurable.
         # QUESTION: @cesine: how is the elicitor of a FieldDB datum/session
         # documented?
+        # TODO: `audioVideo`, `images`
         secondary: [
           'syntacticCategory'
           'comments'
           'tags'
-          'dateElicited'
-          'language'
-          'dialect'
-          'consultants'
+          'dateElicited' # session field
+          'language' # session field
+          'dialect' # session field
+          'consultants' # session field
           'enteredByUser'
           'dateEntered'
           'modifiedByUser'
           'dateModified'
           'syntacticTreeLatex'
           'validationStatus'
+          'timestamp' # make this visible?
+          'id'
         ]
 
         readonly: [
