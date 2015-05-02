@@ -470,6 +470,7 @@ define [
       username = globals.applicationSettings.get 'username'
       gravatar = globals.applicationSettings.get 'gravatar'
       modifiedByUser = _.findWhere resource.datumFields, label: 'modifiedByUser'
+      modifiedByUser.users = @utils.clone modifiedByUser.users
       modifiedByUser.users.push(
         username: username
         gravatar: gravatar

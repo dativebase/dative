@@ -25,12 +25,12 @@ define [
       new ModifiedByUserRepresentationSetView @context
 
     getContext: ->
-      _.extend(super,
-        subattribute: 'username')
+      _.extend(super, subattribute: 'username')
 
     # If the `modifiedByUser` is an array with 1 or fewer elements, we don't
     # display anything.
     shouldBeHidden: ->
       modifiersArray = @context.value or []
-      if modifiersArray.length < 2 then true else false
+      # if modifiersArray.length < 2 then true else false
+      if modifiersArray.length < 1 then true else false
 

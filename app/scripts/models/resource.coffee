@@ -122,7 +122,7 @@ define [
           Backbone.trigger "getNew#{@resourceNameCapitalized}DataFail",
             "Error in GET request to OLD server for /#{@getServerSideResourceName()}/new"
           console.log "Error in GET request to OLD server for
-            /#{@getServerSideResourceName()}/new")
+            /#{@getServerSideResourceName()}/new"
 
     # Destroy a resource.
     # DELETE `<URL>/<resource_name_plural>/<resource.id>`

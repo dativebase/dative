@@ -113,7 +113,8 @@ define [
       resource.trigger "update#{@resourceNameCapitalized}End"
       if xhr.status is 201 and responseJSON.ok is true
         # FieldDB does no server-side processing. We just need to update the
-        # CouchDB revision UUID:
+        # CouchDB revision UUID and add the client-side-created update-related
+        # attributes ...
         resource.set
           _rev: responseJSON.rev
           dateModified: payload.dateModified

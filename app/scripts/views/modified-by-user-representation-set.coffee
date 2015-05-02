@@ -28,7 +28,8 @@ define [
       )
 
     render: ->
-      for representationView in @representationViews.reverse()[...-1]
+      # for representationView in @representationViews.reverse()[...-1]
+      for representationView in @representationViews.reverse()
         @renderRepresentationView representationView
       @listenToEvents()
 
