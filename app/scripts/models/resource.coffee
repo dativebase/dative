@@ -123,6 +123,7 @@ define [
             "Error in GET request to OLD server for /#{@getServerSideResourceName()}/new"
           console.log "Error in GET request to OLD server for
             /#{@getServerSideResourceName()}/new"
+      )
 
     # Destroy a resource.
     # DELETE `<URL>/<resource_name_plural>/<resource.id>`
