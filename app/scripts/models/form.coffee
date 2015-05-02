@@ -832,7 +832,6 @@ define [
     # and see the details preferably by simply showing the other revision as a
     # model along side in the same views
     fetchHistoryFieldDB: ->
-      fielddb#2.45.3
       console.log "you want to fetch the history of OLD form #{@get 'id'}"
       console.log (new FieldDB.FieldDBObject()).version
       console.log 'FieldDB.Datum'
