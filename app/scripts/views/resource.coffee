@@ -48,6 +48,12 @@ define [
         addUpdateType: @addUpdateType
       @updateViewRendered = false
 
+    # An array of actions that are not relevant to this resource, e.g.,
+    # 'update', 'delete', 'export', 'history'.
+    excludedActions: [
+      'history'
+    ]
+
     getUpdateViewType: -> if @model.get('id') then 'update' else 'add'
 
     # Render the Add a Resource view.
@@ -133,7 +139,6 @@ define [
       'focusout': 'focusout'
       'keydown': 'keydown'
       'click .update-resource': 'update'
-      'click .resource-history': 'fetchHistory'
       'click .duplicate-resource': 'duplicate'
       'click .delete-resource': 'deleteConfirm'
       'click .export-resource': 'exportResource'
@@ -143,11 +148,6 @@ define [
 
     update: ->
       @showUpdateViewAnimate()
-
-    fetchHistory: ->
-      console.log 'in fetchHistory of resource view.'
-      try
-        @model.fetchHistory()
 
     duplicate: ->
       Backbone.trigger "duplicate#{@resourceNameCapitalized}Confirm", @model
@@ -213,6 +213,8 @@ define [
       attribute: attribute # e.g., "name"
       model: @model
 
+    resourceNameHumanReadable: -> @resourceName
+
     html: ->
       @$el
         .attr 'tabindex', 0
@@ -222,6 +224,8 @@ define [
           addUpdateType: @addUpdateType
           headerAlwaysVisible: @headerAlwaysVisible
           resourceName: @resourceName
+          resourceNameHumanReadable: @resourceNameHumanReadable
+          excludedActions: @excludedActions
         )
 
     getHeaderTitle: ->
@@ -261,7 +265,7 @@ define [
       for displayView in @secondaryDisplayViews
         container.appendChild displayView.render().el
         @rendered displayView
-      @$('div.resource-secondary-data').append container
+      @$('div.resource-secondary-data').first().append container
 
     guify: ->
       @primaryDataLabelsVisibility()
@@ -295,7 +299,10 @@ define [
         @hideUpdateView()
 
     # Hide/show the labels for the primary data.
-    togglePrimaryDataLabelsAnimate: ->
+    togglePrimaryDataLabelsAnimate: (event) ->
+      # We don't want this event to bubble up to other form views that may
+      # contain this one.
+      if event then @stopEvent event
       if @primaryDataLabelsVisible
         @hidePrimaryContentAndLabelsThenShowContent()
       else
@@ -399,7 +406,7 @@ define [
             at: "left center"
             collision: "flipfit"
 
-      @$('button.toggle-secondary-data')
+      @$('button.toggle-secondary-data').first()
         .button()
         .tooltip
           position:
@@ -430,7 +437,7 @@ define [
 
     # Button for toggling secondary data: when secondary data are hidden.
     setSecondaryDataButtonStateClosed: ->
-      @$('.toggle-secondary-data')
+      @$('.toggle-secondary-data').first()
         .find('i')
           .removeClass('fa-angle-up')
           .addClass('fa-angle-down')
@@ -438,11 +445,11 @@ define [
         .button()
         .tooltip
           items: 'button'
-          content: "show the secondary data of this #{@resourceName}"
+          content: "show the secondary data of this #{@resourceNameHumanReadable()}"
 
     # Button for toggling secondary data: when secondary data are visible.
     setSecondaryDataButtonStateOpen: ->
-      @$('.toggle-secondary-data')
+      @$('.toggle-secondary-data').first()
         .find('i')
           .removeClass('fa-angle-down')
           .addClass('fa-angle-up')
@@ -450,7 +457,7 @@ define [
         .button()
         .tooltip
           items: 'button'
-          content: "hide the secondary data of this #{@resourceName}"
+          content: "hide the secondary data of this #{@resourceNameHumanReadable()}"
 
     setUpdateButtonStateOpen: -> @$('.update-resource').button 'disable'
 
@@ -598,13 +605,13 @@ define [
       @secondaryDataVisible = true
       @setSecondaryDataButtonStateOpen()
       @addBorder()
-      @$('.resource-secondary-data').show()
+      @$('.resource-secondary-data').first().show()
 
     hideSecondaryData: ->
       @secondaryDataVisible = false
       @setSecondaryDataButtonStateClosed()
       @removeBorder()
-      @$('.resource-secondary-data').hide()
+      @$('.resource-secondary-data').first().hide()
 
     toggleSecondaryData: ->
       if @secondaryDataVisible
@@ -616,7 +623,7 @@ define [
       @secondaryDataVisible = true
       @setSecondaryDataButtonStateOpen()
       @addBorderAnimate()
-      @$('.resource-secondary-data').slideDown
+      @$('.resource-secondary-data').first().slideDown
         complete: =>
           # ResourcesView listens once for this and fixes scroll position and focus in response
           if @showSecondaryDataEvent
@@ -626,14 +633,15 @@ define [
     hideSecondaryDataAnimate: (event) ->
       @secondaryDataVisible = false
       @setSecondaryDataButtonStateClosed()
-      @$('.resource-secondary-data').slideUp
+      @$('.resource-secondary-data').first().slideUp
         complete: =>
           # ResourcesView listens once for this and fixes scroll position and focus in response
           if @hideSecondaryDataEvent
             Backbone.trigger @hideSecondaryDataEvent
             @hideSecondaryDataEvent = null
 
-    toggleSecondaryDataAnimate: ->
+    toggleSecondaryDataAnimate: (event) ->
+      if event then @stopEvent event
       if @secondaryDataVisible
         @hideSecondaryDataAnimate()
       else
@@ -647,7 +655,7 @@ define [
       if not @updateViewRendered then @renderUpdateView()
       @updateViewVisible = true
       @setUpdateButtonStateOpen()
-      @$('.update-resource-widget').show
+      @$('.update-resource-widget').first().show
         complete: =>
           @showFull()
           Backbone.trigger "add#{@resourceNameCapitalized}WidgetVisible"
@@ -656,7 +664,7 @@ define [
     hideUpdateView: ->
       @updateViewVisible = false
       @setUpdateButtonStateClosed()
-      @$('.update-resource-widget').hide()
+      @$('.update-resource-widget').first().hide()
 
     toggleUpdateView: ->
       if @updateViewVisible
@@ -668,7 +676,7 @@ define [
       if not @updateViewRendered then @renderUpdateView()
       @updateViewVisible = true
       @setUpdateButtonStateOpen()
-      @$('.update-resource-widget').slideDown
+      @$('.update-resource-widget').first().slideDown
         complete: =>
           @showFullAnimate()
           Backbone.trigger "add#{@resourceNameCapitalized}WidgetVisible"
@@ -680,7 +688,7 @@ define [
     hideUpdateViewAnimate: ->
       @updateViewVisible = false
       @setUpdateButtonStateClosed()
-      @$('.update-resource-widget').slideUp
+      @$('.update-resource-widget').first().slideUp
         complete: => @$el.focus()
 
     toggleUpdateViewAnimate: ->

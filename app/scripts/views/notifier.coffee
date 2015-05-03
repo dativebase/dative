@@ -39,14 +39,8 @@ define [
       @listenTo Backbone, 'register:fail', @registerFail
       @listenTo Backbone, 'register:success', @registerSuccess
 
-      @listenTo Backbone, 'addOLDFormFail', @addOLDFormFail
-      @listenTo Backbone, 'addOLDFormSuccess', @addOLDFormSuccess
-
-      @listenTo Backbone, 'updateOLDFormFail', @updateOLDFormFail
-      @listenTo Backbone, 'updateOLDFormSuccess', @updateOLDFormSuccess
-
-      @listenTo Backbone, 'destroyOLDFormFail', @destroyOLDFormFail
-      @listenTo Backbone, 'destroyOLDFormSuccess', @destroyOLDFormSuccess
+      @listenTo Backbone, 'fetchHistoryFormFail', @fetchHistoryFormFail
+      @listenTo Backbone, 'fetchHistoryFormFailNoHistory', @fetchHistoryFormFailNoHistory
 
       @listenToCRUDResources()
 
@@ -222,9 +216,19 @@ define [
           #{model.get 'id'}."
       @renderNotification notification
 
+    fetchHistoryFormFail: (formModel) ->
+      notification = new NotificationView
+        title: "Form history fetch failed"
+        content: "Unable to fetch the history of form #{formModel.id}"
+        type: 'error'
+      @renderNotification notification
 
-
-
+    fetchHistoryFormFailNoHistory: (formModel) ->
+      notification = new NotificationView
+        title: "No history"
+        content: "There are no previous versions for form #{formModel.id}"
+        type: 'warning'
+      @renderNotification notification
 
     registerFail: (reason) ->
       notification = new NotificationView

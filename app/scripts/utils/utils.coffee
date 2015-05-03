@@ -109,12 +109,12 @@ define (require) ->
       null
 
   # Returns a `Date` instance as "January 1, 2015 at 5:45 p.m.", etc.
-  humanDatetime = (dateObject) ->
+  humanDatetime = (dateObject, showSeconds=false) ->
     dateObject = asDateObject dateObject
     if type(dateObject) in ['string', 'null'] then return dateObject
     humanDateString = humanDate dateObject
     if not humanDateString then return null
-    "#{humanDateString} at #{humanTime dateObject}"
+    "#{humanDateString} at #{humanTime dateObject, showSeconds}"
 
   # Returns a `Date` instance as "January 1, 2015", etc.
   humanDate = (dateObject) ->
@@ -130,7 +130,7 @@ define (require) ->
       null
 
   # Returns the time portion of a `Date` instance as "5:45 p.m.", etc.
-  humanTime = (dateObject) ->
+  humanTime = (dateObject, showSeconds=false) ->
     try
       hours = dateObject.getHours()
       minutes = dateObject.getMinutes()
@@ -138,7 +138,12 @@ define (require) ->
       hours = hours % 12
       hours = if hours then hours else 12 # the hour '0' should be '12'
       minutes = if minutes < 10 then "0#{minutes}" else minutes
-      "#{hours}:#{minutes} #{ampm}"
+      if showSeconds
+        seconds = dateObject.getSeconds()
+        seconds = if seconds < 10 then "0#{seconds}" else seconds
+        "#{hours}:#{minutes}:#{seconds} #{ampm}"
+      else
+        "#{hours}:#{minutes} #{ampm}"
     catch
       return null
 

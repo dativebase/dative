@@ -813,7 +813,6 @@ define [
         onload: (responseJSON, xhr) =>
           @trigger 'fetchHistoryFormEnd'
           if xhr.status is 200
-            console.log 'SUCCESS'
             @trigger 'fetchHistoryFormSuccess', responseJSON
           else
             error = responseJSON.error or 'No error message provided.'

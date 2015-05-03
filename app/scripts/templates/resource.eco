@@ -4,18 +4,20 @@
 
     <% if @addUpdateType is 'add': %>
       <button class="hide-resource-widget dative-tooltip"
-              title="hide this new <%= @resourceName %> widget">
+              title="hide this new <%= @resourceNameHumanReadable() %> widget">
         <i class='fa fa-times fa-fw'></i>
       </button>
     <% else if not @headerAlwaysVisible: %>
       <button class="hide-resource-details dative-tooltip"
-              title="hide the buttons and extra data of this <%= @resourceName %>">
+              title="hide the buttons and extra data of this
+                <%= @resourceNameHumanReadable() %>">
         <i class='fa fa-angle-double-up fa-fw'></i>
       </button>
-  <% end %>
+    <% end %>
 
     <button class="toggle-secondary-data dative-tooltip"
-            title="hide the secondary data of this <%= @resourceName %>">
+            title="hide the secondary data of this
+                <%= @resourceNameHumanReadable() %>">
       <i class='fa fa-angle-up fa-fw'></i>
     </button>
 
@@ -33,35 +35,43 @@
 
     <span class="spinner-container"></span>
 
-    <button class="update-resource dative-tooltip"
-      <% if @addUpdateType is 'add': %>
-            title="edit the details of this <%= @resourceName %>"
-      <% else: %>
-            title="update this <%= @resourceName %>"
-      <% end %>
-      ><i class='fa fa-pencil-square-o fa-fw'></i>
-    </button>
+    <% if 'update' not in @excludedActions: %>
+      <button class="update-resource dative-tooltip"
+        <% if @addUpdateType is 'add': %>
+              title="edit the details of this <%= @resourceNameHumanReadable() %>"
+        <% else: %>
+              title="update this <%= @resourceNameHumanReadable() %>"
+        <% end %>
+        ><i class='fa fa-pencil-square-o fa-fw'></i>
+      </button>
+    <% end %>
 
-    <button class="export-resource dative-tooltip"
-            title="export this <%= @resourceName %>"
-      ><i class='fa fa-download fa-fw'></i>
-    </button>
+    <% if 'export' not in @excludedActions: %>
+      <button class="export-resource dative-tooltip"
+              title="export this <%= @resourceNameHumanReadable() %>"
+        ><i class='fa fa-download fa-fw'></i>
+      </button>
+    <% end %>
 
     <% if @addUpdateType is 'update': %>
 
-      <button class="delete-resource dative-tooltip"
-              title="delete this <%= @resourceName %>"
-        ><i class='fa fa-trash fa-fw'></i>
-      </button>
+      <% if 'delete' not in @excludedActions: %>
+        <button class="delete-resource dative-tooltip"
+                title="delete this <%= @resourceNameHumanReadable() %>"
+          ><i class='fa fa-trash fa-fw'></i>
+        </button>
+      <% end %>
 
-      <button class="duplicate-resource dative-tooltip"
-              title="duplicate this <%= @resourceName %>"
-        ><i class='fa fa-copy fa-fw'></i>
-      </button>
+      <% if 'duplicate' not in @excludedActions: %>
+        <button class="duplicate-resource dative-tooltip"
+                title="duplicate this <%= @resourceNameHumanReadable() %>"
+          ><i class='fa fa-copy fa-fw'></i>
+        </button>
+      <% end %>
 
-      <% if @activeServerType in ['FieldDB', 'OLD']: %>
+      <% if 'history' not in @excludedActions: %>
         <button class="resource-history dative-tooltip"
-        title="view the history of this <%= @resourceName %>"
+        title="view the history of this <%= @resourceNameHumanReadable() %>"
           ><i class='fa fa-history fa-fw'></i>
         </button>
       <% end %>
@@ -82,7 +92,9 @@
 
   <div class='resource-secondary-data large-unicode-font'></div>
 
-  <div class='resource-previous-versions large-unicode-font'></div>
+  <% if 'history' not in @excludedActions: %>
+    <div class='resource-previous-versions'></div>
+  <% end %>
 
 </div>
 
