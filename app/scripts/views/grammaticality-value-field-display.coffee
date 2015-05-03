@@ -15,13 +15,14 @@ define [
   class GrammaticalityValueFieldDisplayView extends FieldDisplayView
 
     getContext: ->
-      grammaticalityAttribute = 'grammaticality'
+      @grammaticalityAttribute = 'grammaticality'
       _.extend super,
-        grammaticalityAttribute: grammaticalityAttribute
-        grammaticalityClass: @getClass grammaticalityAttribute
-        grammaticalityValue: @getValue grammaticalityAttribute
+        grammaticalityAttribute: @grammaticalityAttribute
+        grammaticalityClass: @getClass @grammaticalityAttribute
+        grammaticalityValue: @getValue @grammaticalityAttribute
 
     getRepresentationView: ->
       new GrammaticalityValueRepresentationView @context
 
+    governedAttributes: -> [@grammaticalityAttribute, @attribute]
 

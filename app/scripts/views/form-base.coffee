@@ -126,3 +126,22 @@ define [
           #{serverType} and #{category}"
         []
 
+    # Highlight any differences between this view's model and its comparator
+    # model, if there is one.
+    diffThis: ->
+      if @comparatorModel
+        for attribute, value of @model.attributes
+          @displayViews = @primaryDisplayViews.concat @secondaryDisplayViews
+          if attribute not in ['id', 'datetime_modified'] and
+          not _.isEqual(@comparatorModel.get(attribute), value)
+            for displayView in @displayViews
+              if attribute in displayView.governedAttributes()
+                displayView.representationView.$el.addClass 'ui-state-error diffed'
+
+    # Un-highlight any differences between this view's model and its comparator
+    # model that may have been previously highlighted.
+    undiffThis: ->
+      @displayViews = @primaryDisplayViews.concat @secondaryDisplayViews
+      for displayView in @displayViews
+        displayView.representationView.$el.removeClass 'ui-state-error diffed'
+

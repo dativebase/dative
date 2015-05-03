@@ -48,6 +48,7 @@ define [
         catch
           @enableHistoryButton()
       else
+        @undiffThis()
         @destroyPreviousVersions()
 
     # Destroy any present previous versions: hide dome stuff, delete models,
@@ -102,10 +103,18 @@ define [
       if responseJSON.previous_versions.length
         @previousVersionModels =
           ((new FormModel(pv)) for pv in responseJSON.previous_versions)
+        @comparatorModel = @previousVersionModels[0]
+        @diffThis()
         @previousVersionViews = []
-        for formModel in @previousVersionModels
+        for formModel, index in @previousVersionModels
+          nextIndex = index + 1
+          if nextIndex is @previousVersionModels.length
+            nextFormModel = null
+          else
+            nextFormModel = @previousVersionModels[nextIndex]
           formView = new FormPreviousVersionView
             model: formModel
+            comparatorModel: nextFormModel
             expanded: @secondaryDataVisible
             dataLabelsVisible: @dataLabelsVisible
           @previousVersionViews.push formView

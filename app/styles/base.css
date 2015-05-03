@@ -1434,3 +1434,8 @@ textarea.script
   overflow-x: scroll;
 }
 
+.diffed
+{
+  padding: 0.1em;
+}
+

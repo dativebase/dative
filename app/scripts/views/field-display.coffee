@@ -51,6 +51,11 @@ define [
       value: @getValue()
       label: @getLabel()
 
+    # Return an array of model attributes that this field display "governs".
+    # This defaults to `[@attribute]` but for field display views that govern
+    # multiple attributes, this should be overridden.
+    governedAttributes: -> [@attribute]
+
     guify: ->
 
     template: fieldDisplayTemplate
