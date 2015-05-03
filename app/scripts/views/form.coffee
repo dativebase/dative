@@ -8,14 +8,17 @@ define [
   # ---------
   #
   # For displaying individual forms.
+  #
+  # Most form-relevant logic is in `FormBaseView`, which is also sublcassed by
+  # `FormPreviousVersionView`. Only `FormView` has logic for fetching and
+  # displaying previous versions.
 
   class FormView extends FormBaseView
 
     initialize: (options) ->
       super
-      @events['click .resource-history'] = 'fetchHistory'
+      @events['click .resource-history'] = 'toggleHistory'
       @headerAlwaysVisible = false
-      @historyFetched = false
       @previousVersionModels = []
       @previousVersionViews = []
 
@@ -35,8 +38,9 @@ define [
       @listenTo @model, "fetchHistoryFormFail", @fetchHistoryFormFail
       @listenTo @model, "fetchHistoryFormSuccess", @fetchHistoryFormSuccess
 
-    # Tell the model to fetch its history, i.e., previous versions of itself.
-    fetchHistory: ->
+    # Show or hide the previous versions, depending on whether there are any
+    # previous versions currently visible.
+    toggleHistory: ->
       @disableHistoryButton()
       if @previousVersionsIsEmpty()
         try
@@ -44,30 +48,46 @@ define [
         catch
           @enableHistoryButton()
       else
-        @hidePreviousVersionsAnimate()
-        @previousVersionModels = []
-        for previousVersionView in @previousVersionViews
-          previousVersionView.close()
-          @closed previousVersionView
+        @destroyPreviousVersions()
+
+    # Destroy any present previous versions: hide dome stuff, delete models,
+    # close views.
+    destroyPreviousVersions: ->
+      @hidePreviousVersionsAnimate()
+      @previousVersionModels = []
+      for previousVersionView in @previousVersionViews
+        previousVersionView.close()
+        @closed previousVersionView
 
     hidePreviousVersionsAnimate: ->
       @$('div.resource-previous-versions').slideUp
         complete: =>
           @enableHistoryButton()
           @emptyPreviousVersions()
+          @setHistoryButtonStateEmpty()
 
     previousVersionsIsEmpty: ->
       @$('div.resource-previous-versions').is ':empty'
 
-    emptyPreviousVersions: ->
-      @$('div.resource-previous-versions').empty()
+    emptyPreviousVersions: -> @$('div.resource-previous-versions').empty()
 
     disableHistoryButton: -> @$('.resource-history').button 'disable'
 
+    setHistoryButtonStateEmpty: ->
+      @$('.resource-history')
+        .tooltip
+          items: 'button'
+          content: 'view the history of this form'
+
+    setHistoryButtonStateNotEmpty: ->
+      @$('.resource-history')
+        .tooltip
+          items: 'button'
+          content: 'hide the history of this form'
+
     enableHistoryButton: -> @$('.resource-history').button 'enable'
 
-    fetchHistoryFormStart: ->
-      @spin()
+    fetchHistoryFormStart: -> @spin()
 
     fetchHistoryFormEnd: ->
       @enableHistoryButton()
@@ -76,6 +96,8 @@ define [
     fetchHistoryFormFail: ->
       Backbone.trigger 'fetchHistoryFormFail', @model
 
+    # We have successfully requested previous versions, so we create models and
+    # views and display them.
     fetchHistoryFormSuccess: (responseJSON) ->
       if responseJSON.previous_versions.length
         @previousVersionModels =
@@ -89,7 +111,8 @@ define [
         @$('div.resource-previous-versions')
           .append container
           .hide()
-          .slideDown()
+          .slideDown
+            complete: => @setHistoryButtonStateNotEmpty()
       else
         Backbone.trigger 'fetchHistoryFormFailNoHistory', @model
 
