@@ -143,7 +143,8 @@ define [
       'click .delete-resource': 'deleteConfirm'
       'click .export-resource': 'exportResource'
 
-    exportResource: ->
+    exportResource: (event) ->
+      if event then @stopEvent event
       Backbone.trigger 'openExporterDialog', model: @model
 
     update: ->
