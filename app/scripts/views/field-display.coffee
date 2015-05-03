@@ -55,7 +55,7 @@ define [
 
     template: fieldDisplayTemplate
     tagName: 'div'
-    className: 'dative-form-field-display'
+    className: 'dative-field-display'
 
     initialize: (options) ->
       @resource = options.resource or 'forms'
