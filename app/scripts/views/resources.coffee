@@ -185,7 +185,7 @@ define [
     getGlobalsResourcesDisplaySettings: ->
       defaults =
         itemsPerPage: 10
-        primaryDataLabelsVisible: true
+        dataLabelsVisible: true
         allResourcesExpanded: false
       try
         resourcesDisplaySettings = globals.applicationSettings.get(
@@ -203,7 +203,7 @@ define [
       new @resourceView
         headerTitle: "New #{@resourceNameCapitalized}"
         model: newResourceModel
-        primaryDataLabelsVisible: @primaryDataLabelsVisible
+        dataLabelsVisible: @dataLabelsVisible
         expanded: @allResourcesExpanded
 
     # This is called when the 'addResourceSuccess' has been triggered, i.e.,
@@ -259,7 +259,7 @@ define [
     addNewResourceViewToPage: ->
       addedResourceView = new @resourceView
         model: @newResourceView.model
-        primaryDataLabelsVisible: @primaryDataLabelsVisible
+        dataLabelsVisible: @dataLabelsVisible
         expanded: @allResourcesExpanded
       @collection.add addedResourceView.model
       renderedView = @renderResourceView addedResourceView, @paginator.end
@@ -397,7 +397,7 @@ define [
 
     # Toggle all primary data labels. Responds to `.toggle-all-labels` button.
     toggleAllLabels: ->
-      if @primaryDataLabelsVisible
+      if @dataLabelsVisible
         @hideAllLabels()
       else
         @showAllLabels()
@@ -405,20 +405,20 @@ define [
     # Tell all rendered resources to show their primary data labels. (Also tell
     # all un-rendered resource views to show their labels when they do render.)
     showAllLabels: ->
-      @primaryDataLabelsVisible = true
+      @dataLabelsVisible = true
       @setToggleAllLabelsButtonStateOpen()
       Backbone.trigger "#{@resourceNamePlural}View:showAllLabels"
 
     # Tell all rendered resources to hide their primary data labels. (Also tell
     # all un-rendered resource views to hide their labels when they do render.)
     hideAllLabels: ->
-      @primaryDataLabelsVisible = false
+      @dataLabelsVisible = false
       @setToggleAllLabelsButtonStateClosed()
       Backbone.trigger "#{@resourceNamePlural}View:hideAllLabels"
 
     # Make the "toggle all labels button" match view state.
     setToggleAllLabelsButtonState: ->
-      if @primaryDataLabelsVisible
+      if @dataLabelsVisible
         @setToggleAllLabelsButtonStateOpen()
       else
         @setToggleAllLabelsButtonStateClosed()
@@ -707,7 +707,7 @@ define [
       @collection.each (resourceModel) =>
         newResourceView = new @resourceView
           model: resourceModel
-          primaryDataLabelsVisible: @primaryDataLabelsVisible
+          dataLabelsVisible: @dataLabelsVisible
           expanded: @allResourcesExpanded
         @resourceViews.push newResourceView
 

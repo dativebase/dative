@@ -10,7 +10,7 @@ define [
 
   class FormPreviousVersionView extends FormBaseView
 
-    # These actions are not relevant to a previous version resource view.
+    # These actions are not relevant to a previous version form view.
     excludedActions: [
       'update'
       'delete'

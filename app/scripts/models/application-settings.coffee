@@ -461,22 +461,22 @@ define [
 
       formsDisplaySettings:
         itemsPerPage: 5
-        primaryDataLabelsVisible: true
+        dataLabelsVisible: true
         allFormsExpanded: false
 
       subcorporaDisplaySettings:
         itemsPerPage: 10
-        primaryDataLabelsVisible: true
+        dataLabelsVisible: true
         allSubcorporaExpanded: false
 
       phonologiesDisplaySettings:
         itemsPerPage: 3
-        primaryDataLabelsVisible: true
+        dataLabelsVisible: true
         allPhonologiesExpanded: false
 
       morphologiesDisplaySettings:
         itemsPerPage: 3
-        primaryDataLabelsVisible: true
+        dataLabelsVisible: true
         allMorphologiesExpanded: false
 
       activeJQueryUITheme: 'cupertino'

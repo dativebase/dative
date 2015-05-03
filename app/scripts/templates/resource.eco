@@ -21,7 +21,7 @@
       <i class='fa fa-angle-up fa-fw'></i>
     </button>
 
-    <button class="toggle-primary-data-labels dative-tooltip"
+    <button class="toggle-data-labels dative-tooltip"
       title="show labels">labels:
       <i class='fa fa-toggle-off fa-fw'></i>
     </button>

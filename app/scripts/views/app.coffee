@@ -631,11 +631,11 @@ define [
 
     # Set app settings' "primary data labels visible" to false.
     setFormsPrimaryDataLabelsHidden: ->
-      @changeFormsDisplaySetting 'primaryDataLabelsVisible', false
+      @changeFormsDisplaySetting 'dataLabelsVisible', false
 
     # Set app settings' "primary data labels visible" to true.
     setFormsPrimaryDataLabelsVisible: ->
-      @changeFormsDisplaySetting 'primaryDataLabelsVisible', true
+      @changeFormsDisplaySetting 'dataLabelsVisible', true
 
 
     # Change `attribute` to `value` in
@@ -663,11 +663,11 @@ define [
 
     # Set app settings' "primary data labels visible" to false.
     setPhonologiesPrimaryDataLabelsHidden: ->
-      @changeDisplaySetting 'phonologies', 'primaryDataLabelsVisible', false
+      @changeDisplaySetting 'phonologies', 'dataLabelsVisible', false
 
     # Set app settings' "primary data labels visible" to true.
     setPhonologiesPrimaryDataLabelsVisible: ->
-      @changeDisplaySetting 'phonologies', 'primaryDataLabelsVisible', true
+      @changeDisplaySetting 'phonologies', 'dataLabelsVisible', true
 
 
     # Subcorpora Settings
@@ -687,11 +687,11 @@ define [
 
     # Set app settings' "primary data labels visible" to false.
     setSubcorporaPrimaryDataLabelsHidden: ->
-      @changeDisplaySetting 'subcorpora', 'primaryDataLabelsVisible', false
+      @changeDisplaySetting 'subcorpora', 'dataLabelsVisible', false
 
     # Set app settings' "primary data labels visible" to true.
     setSubcorporaPrimaryDataLabelsVisible: ->
-      @changeDisplaySetting 'subcorpora', 'primaryDataLabelsVisible', true
+      @changeDisplaySetting 'subcorpora', 'dataLabelsVisible', true
 
 
     # Morphologies Settings
@@ -711,8 +711,9 @@ define [
 
     # Set app settings' "primary data labels visible" to false.
     setMorphologiesPrimaryDataLabelsHidden: ->
-      @changeDisplaySetting 'morphologies', 'primaryDataLabelsVisible', false
+      @changeDisplaySetting 'morphologies', 'dataLabelsVisible', false
 
     # Set app settings' "primary data labels visible" to true.
     setMorphologiesPrimaryDataLabelsVisible: ->
-      @changeDisplaySetting 'morphologies', 'primaryDataLabelsVisible', true
+      @changeDisplaySetting 'morphologies', 'dataLabelsVisible', true
+

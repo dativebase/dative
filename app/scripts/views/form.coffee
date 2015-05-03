@@ -102,8 +102,13 @@ define [
       if responseJSON.previous_versions.length
         @previousVersionModels =
           ((new FormModel(pv)) for pv in responseJSON.previous_versions)
-        @previousVersionViews =
-          ((new FormPreviousVersionView(model: fm)) for fm in @previousVersionModels)
+        @previousVersionViews = []
+        for formModel in @previousVersionModels
+          formView = new FormPreviousVersionView
+            model: formModel
+            expanded: @secondaryDataVisible
+            dataLabelsVisible: @dataLabelsVisible
+          @previousVersionViews.push formView
         container = document.createDocumentFragment()
         for previousVersionView in @previousVersionViews
           container.appendChild previousVersionView.render().el

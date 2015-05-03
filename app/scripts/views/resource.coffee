@@ -66,7 +66,7 @@ define [
     # Set the state of the resource display: what is visible.
     setState: (options) ->
       defaults =
-        primaryDataLabelsVisible: false # labels for primary data fields
+        dataLabelsVisible: false # labels for data fields
         expanded: false # means that the header of buttons and the secondary data should both be visible
         headerVisible: @headerAlwaysVisible or false # the header full of buttons: is it currently visible?
         headerTitleAttribute: 'name' # the attribute of the model that should be displayed in the header center.
@@ -99,9 +99,9 @@ define [
         "#{@resourceNamePlural}View:collapseAll#{@resourceNamePluralCapitalized}",
         @collapse
       @listenTo Backbone, "#{@resourceNamePlural}View:showAllLabels",
-        @hidePrimaryContentAndLabelsThenShowAll
+        @hideContentAndLabelsThenShowAll
       @listenTo Backbone, "#{@resourceNamePlural}View:hideAllLabels",
-        @hidePrimaryContentAndLabelsThenShowContent
+        @hideContentAndLabelsThenShowContent
       @listenTo Backbone, "delete#{@resourceNameCapitalized}", @delete
       @listenTo @updateView, "#{@resourceName}AddView:hide",
         @hideUpdateViewAnimate
@@ -134,7 +134,7 @@ define [
       'click .hide-resource-details': 'hideResourceDetails'
       'click .hide-resource-widget': 'hideResourceWidget'
       'click .toggle-secondary-data': 'toggleSecondaryDataAnimate'
-      'click .toggle-primary-data-labels': 'togglePrimaryDataLabelsAnimate'
+      'click .toggle-data-labels': 'toggleDataLabelsAnimate'
       'focus': 'focus'
       'focusout': 'focusout'
       'keydown': 'keydown'
@@ -268,7 +268,7 @@ define [
       @$('div.resource-secondary-data').first().append container
 
     guify: ->
-      @primaryDataLabelsVisibility()
+      @dataLabelsVisibility()
       @guifyButtons()
       @headerVisibility()
       @secondaryDataVisibility()
@@ -298,39 +298,42 @@ define [
       else
         @hideUpdateView()
 
-    # Hide/show the labels for the primary data.
-    togglePrimaryDataLabelsAnimate: (event) ->
+    # Hide/show the labels for the data.
+    toggleDataLabelsAnimate: (event) ->
       # We don't want this event to bubble up to other form views that may
       # contain this one.
       if event then @stopEvent event
-      if @primaryDataLabelsVisible
-        @hidePrimaryContentAndLabelsThenShowContent()
+      if @dataLabelsVisible
+        @hideContentAndLabelsThenShowContent()
       else
-        @hidePrimaryContentAndLabelsThenShowAll()
+        @hideContentAndLabelsThenShowAll()
 
-    # Fade out primary data, then fade in primary data and labels.
-    hidePrimaryContentAndLabelsThenShowAll: ->
-      @$(@primaryDataContentSelector).fadeOut
-        complete: =>
-          @showPrimaryDataLabelsAnimate()
-          @showPrimaryDataContentAnimate()
-          @$(@primaryDataContentSelector).removeClass 'no-label'
+    # Fade out data, then fade in data and labels.
+    hideContentAndLabelsThenShowAll: ->
+      @getFieldContainers().find('.dative-field-display').each (index, element) =>
+        $element = @$ element
+        $content = $element.find @dataContentSelector
+        $label = $element.find @dataLabelsSelector
+        $content.fadeOut
+          complete: =>
+            $label.fadeIn().css('display', 'inline-block')
+            $content.fadeIn().removeClass 'no-label'
+      @dataLabelsVisible = true
+      @setDataLabelsButtonStateOpen()
 
-    # Fade out primary data and labels, then fade in primary data.
-    hidePrimaryContentAndLabelsThenShowContent: ->
-      @hidePrimaryDataLabelsAnimate()
-      @$(@primaryDataContentSelector).fadeOut
-        complete: =>
-          @showPrimaryDataContentAnimate()
-          @$(@primaryDataContentSelector).addClass 'no-label'
-
-    # Fade in primary data content.
-    showPrimaryDataContentAnimate: ->
-      @$(@primaryDataContentSelector).fadeIn()
+    # Fade out data and labels, then fade in data.
+    hideContentAndLabelsThenShowContent: ->
+      @hideDataLabelsAnimate()
+      @getFieldContainers().find('.dative-field-display').each (index, element) =>
+        $element = @$ element
+        $content = $element.find @dataContentSelector
+        $content.fadeOut
+          complete: =>
+            $content.fadeIn().addClass 'no-label'
 
     # "Show labels" button.
-    setPrimaryDataLabelsButtonStateClosed: ->
-      @$('.toggle-primary-data-labels')
+    setDataLabelsButtonStateClosed: ->
+      @$('.toggle-data-labels').first()
         .find 'i.fa'
           .removeClass 'fa-toggle-on'
           .addClass 'fa-toggle-off'
@@ -341,8 +344,8 @@ define [
           content: 'show labels'
 
     # "Hide labels" button.
-    setPrimaryDataLabelsButtonStateOpen: ->
-      @$('.toggle-primary-data-labels')
+    setDataLabelsButtonStateOpen: ->
+      @$('.toggle-data-labels').first()
         .find 'i.fa'
           .removeClass 'fa-toggle-off'
           .addClass 'fa-toggle-on'
@@ -352,47 +355,50 @@ define [
           items: 'button'
           content: 'hide labels'
 
-    primaryDataLabelsSelector: '.dative-field-display-label-container'
+    dataLabelsSelector: '.dative-field-display-label-container'
 
-    primaryDataContentSelector: '.dative-field-display-representation-container'
+    getDataLabels: ->
+      $primaryLabels =
+        @$('.resource-primary-data').first().find(@dataLabelsSelector)
+      $secondaryLabels =
+        @$('.resource-secondary-data').first().find(@dataLabelsSelector)
+      $primaryLabels.add $secondaryLabels
 
-    # Show the labels for the primary data attributes.
-    showPrimaryDataLabelsAnimate: ->
-      @primaryDataLabelsVisible = true
-      @setPrimaryDataLabelsButtonStateOpen()
-      @$(@primaryDataLabelsSelector).fadeIn().css('display', 'inline-block')
+    # Return a jQuery set that combines the primary and secondary data divs;
+    # needed so that we don't inadvertently modify the DOM in other areas,
+    # e.g., div.previous_versions.
+    getFieldContainers: ->
+      $primaryData = @$('.resource-primary-data').first()
+      $secondaryData = @$('.resource-secondary-data').first()
+      $primaryData.add $secondaryData
 
-    # Hide the labels for the primary data attributes.
-    hidePrimaryDataLabelsAnimate: (event) ->
-      @primaryDataLabelsVisible = false
-      @setPrimaryDataLabelsButtonStateClosed()
-      @$(@primaryDataLabelsSelector).fadeOut()
+    dataContentSelector: '.dative-field-display-representation-container'
 
-    # Make the primary data visible, or not, depending on state.
-    primaryDataLabelsVisibility: ->
-      if @primaryDataLabelsVisible
-        @showPrimaryDataLabels()
-      else
-        @hidePrimaryDataLabels()
+    # Hide the labels for the data attributes.
+    hideDataLabelsAnimate: (event) ->
+      @dataLabelsVisible = false
+      @setDataLabelsButtonStateClosed()
+      @getDataLabels().fadeOut()
 
-    # Toggle the visibility of the primary data labels.
-    togglePrimaryDataLabels: ->
-      if @primaryDataLabelsVisible
-        @hidePrimaryDataLabels()
-      else
-        @showPrimaryDataLabels()
+    # Make the data visible, or not, depending on state.
+    dataLabelsVisibility: ->
+      if @dataLabelsVisible then @showDataLabels() else @hideDataLabels()
 
-    hidePrimaryDataLabels: ->
-      @primaryDataLabelsVisible = false
-      @setPrimaryDataLabelsButtonStateClosed()
-      @$(@primaryDataLabelsSelector).hide()
-      @$(@primaryDataContentSelector).addClass 'no-label'
+    # Toggle the visibility of the data labels.
+    toggleDataLabels: ->
+      if @dataLabelsVisible then @hideDataLabels() else @showDataLabels()
 
-    showPrimaryDataLabels: ->
-      @primaryDataLabelsVisible = true
-      @setPrimaryDataLabelsButtonStateOpen()
-      @$(@primaryDataLabelsSelector).show().css 'display', 'inline-block'
-      @$(@primaryDataContentSelector).removeClass 'no-label'
+    hideDataLabels: ->
+      @dataLabelsVisible = false
+      @setDataLabelsButtonStateClosed()
+      @getDataLabels().hide()
+      @$(@dataContentSelector).addClass 'no-label'
+
+    showDataLabels: ->
+      @dataLabelsVisible = true
+      @setDataLabelsButtonStateOpen()
+      @getDataLabels().hide().show().css 'display', 'inline-block'
+      @$(@dataContentSelector).removeClass 'no-label'
 
     # jQueryUI-ify <button>s
     guifyButtons: ->
@@ -414,7 +420,7 @@ define [
             at: "left center"
             collision: "flipfit"
 
-      @$('button.toggle-primary-data-labels')
+      @$('button.toggle-data-labels').first()
         .button()
         .tooltip
           position:
