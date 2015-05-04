@@ -69,7 +69,7 @@
         </button>
       <% end %>
 
-      <% if 'history' not in @excludedActions: %>
+      <% if 'history' not in @excludedActions and @activeServerType is 'OLD': %>
         <button class="resource-history dative-tooltip"
         title="view the history of this <%= @resourceNameHumanReadable() %>"
           ><i class='fa fa-history fa-fw'></i>
