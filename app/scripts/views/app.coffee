@@ -4,7 +4,6 @@ define [
   './../routes/router'
   './base'
   './mainmenu'
-  './progress-widget'
   './notifier'
   './login-dialog'
   './register-dialog'
@@ -25,12 +24,12 @@ define [
   './../collections/application-settings'
   './../utils/globals'
   './../templates/app'
-], (Backbone, FieldDB, Workspace, BaseView, MainMenuView, ProgressWidgetView,
-  NotifierView, LoginDialogView, RegisterDialogView, AlertDialogView,
-  HelpDialogView, ApplicationSettingsView, PagesView, HomePageView, FormAddView,
-  FormsSearchView, FormsView, SubcorporaView, PhonologiesView,
-  MorphologiesView, CorporaView, ApplicationSettingsModel, FormModel,
-  ApplicationSettingsCollection, globals, appTemplate) ->
+], (Backbone, FieldDB, Workspace, BaseView, MainMenuView, NotifierView, LoginDialogView,
+  RegisterDialogView, AlertDialogView, HelpDialogView, ApplicationSettingsView,
+  PagesView, HomePageView, FormAddView, FormsSearchView, FormsView,
+  SubcorporaView, PhonologiesView, MorphologiesView, CorporaView,
+  ApplicationSettingsModel, FormModel, ApplicationSettingsCollection, globals,
+  appTemplate) ->
 
   # App View
   # --------
@@ -101,8 +100,10 @@ define [
 
       @listenTo @loginDialog, 'request:openRegisterDialogBox', @toggleRegisterDialog
       @listenTo Backbone, 'loginSuggest', @openLoginDialogWithDefaults
+      @listenTo Backbone, 'authenticateSuccess', @authenticateSuccess
       @listenTo Backbone, 'authenticate:success', @authenticateSuccess
       @listenTo Backbone, 'authenticate:mustconfirmidentity', @authenticateConfirmIdentity
+      @listenTo Backbone, 'logoutSuccess', @logoutSuccess
       @listenTo Backbone, 'logout:success', @logoutSuccess
       @listenTo Backbone, 'useFieldDBCorpus', @useFieldDBCorpus
       @listenTo Backbone, 'applicationSettings:changeTheme', @changeTheme
@@ -140,7 +141,6 @@ define [
       @registerDialog = new RegisterDialogView model: @applicationSettings
       @alertDialog = new AlertDialogView model: @applicationSettings
       @helpDialog = new HelpDialogView()
-      @progressWidget = new ProgressWidgetView()
       @notifier = new NotifierView()
 
     renderPersistentSubviews: ->
@@ -149,14 +149,12 @@ define [
       @registerDialog.setElement(@$('#register-dialog-container')).render()
       @alertDialog.setElement(@$('#alert-dialog-container')).render()
       @helpDialog.setElement(@$('#help-dialog-container'))
-      @progressWidget.setElement(@$('#progress-widget-container')).render()
       @notifier.setElement(@$('#notifier-container')).render()
 
       @rendered @mainMenuView
       @rendered @loginDialog
       @rendered @registerDialog
       @rendered @alertDialog
-      @rendered @progressWidget
       @rendered @notifier
 
     renderHelpDialog: ->
@@ -308,7 +306,7 @@ define [
     showNewFormView: ->
       if not @loggedIn() then return
       if @formsView and @visibleView is @formsView
-        @visibleView.toggleNewFormViewAnimate()
+        @visibleView.toggleNewResourceViewAnimate()
       else
         @showFormsView showNewFormView: true
 
@@ -691,11 +689,11 @@ define [
 
     # Set app settings' "primary data labels visible" to false.
     setFormsPrimaryDataLabelsHidden: ->
-      @changeFormsDisplaySetting 'primaryDataLabelsVisible', false
+      @changeFormsDisplaySetting 'dataLabelsVisible', false
 
     # Set app settings' "primary data labels visible" to true.
     setFormsPrimaryDataLabelsVisible: ->
-      @changeFormsDisplaySetting 'primaryDataLabelsVisible', true
+      @changeFormsDisplaySetting 'dataLabelsVisible', true
 
 
     # Change `attribute` to `value` in
@@ -723,11 +721,11 @@ define [
 
     # Set app settings' "primary data labels visible" to false.
     setPhonologiesPrimaryDataLabelsHidden: ->
-      @changeDisplaySetting 'phonologies', 'primaryDataLabelsVisible', false
+      @changeDisplaySetting 'phonologies', 'dataLabelsVisible', false
 
     # Set app settings' "primary data labels visible" to true.
     setPhonologiesPrimaryDataLabelsVisible: ->
-      @changeDisplaySetting 'phonologies', 'primaryDataLabelsVisible', true
+      @changeDisplaySetting 'phonologies', 'dataLabelsVisible', true
 
 
     # Subcorpora Settings
@@ -747,11 +745,11 @@ define [
 
     # Set app settings' "primary data labels visible" to false.
     setSubcorporaPrimaryDataLabelsHidden: ->
-      @changeDisplaySetting 'subcorpora', 'primaryDataLabelsVisible', false
+      @changeDisplaySetting 'subcorpora', 'dataLabelsVisible', false
 
     # Set app settings' "primary data labels visible" to true.
     setSubcorporaPrimaryDataLabelsVisible: ->
-      @changeDisplaySetting 'subcorpora', 'primaryDataLabelsVisible', true
+      @changeDisplaySetting 'subcorpora', 'dataLabelsVisible', true
 
 
     # Morphologies Settings
@@ -771,8 +769,9 @@ define [
 
     # Set app settings' "primary data labels visible" to false.
     setMorphologiesPrimaryDataLabelsHidden: ->
-      @changeDisplaySetting 'morphologies', 'primaryDataLabelsVisible', false
+      @changeDisplaySetting 'morphologies', 'dataLabelsVisible', false
 
     # Set app settings' "primary data labels visible" to true.
     setMorphologiesPrimaryDataLabelsVisible: ->
-      @changeDisplaySetting 'morphologies', 'primaryDataLabelsVisible', true
+      @changeDisplaySetting 'morphologies', 'dataLabelsVisible', true
+

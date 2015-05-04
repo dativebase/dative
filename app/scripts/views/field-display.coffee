@@ -51,11 +51,16 @@ define [
       value: @getValue()
       label: @getLabel()
 
+    # Return an array of model attributes that this field display "governs".
+    # This defaults to `[@attribute]` but for field display views that govern
+    # multiple attributes, this should be overridden.
+    governedAttributes: -> [@attribute]
+
     guify: ->
 
     template: fieldDisplayTemplate
     tagName: 'div'
-    className: 'dative-form-field-display'
+    className: 'dative-field-display'
 
     initialize: (options) ->
       @resource = options.resource or 'forms'

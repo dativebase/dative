@@ -1,8 +1,9 @@
 define [
   './base'
   './notification'
+  './../utils/globals'
   './../templates/notifier'
-], (BaseView, NotificationView, notifierTemplate) ->
+], (BaseView, NotificationView, globals, notifierTemplate) ->
 
   # Notifier
   # --------
@@ -16,6 +17,7 @@ define [
     initialize: ->
 
       @crudResources = [
+        'form'
         'subcorpus'
         'phonology'
         'morphology'
@@ -28,23 +30,17 @@ define [
 
     listenToEvents: ->
 
-      @listenTo Backbone, 'authenticate:fail', @authenticateFail
-      @listenTo Backbone, 'authenticate:success', @authenticateSuccess
+      @listenTo Backbone, 'authenticateFail', @authenticateFail
+      @listenTo Backbone, 'authenticateSuccess', @authenticateSuccess
 
-      @listenTo Backbone, 'logout:fail', @logoutFail
-      @listenTo Backbone, 'logout:success', @logoutSuccess
+      @listenTo Backbone, 'logoutFail', @logoutFail
+      @listenTo Backbone, 'logoutSuccess', @logoutSuccess
 
       @listenTo Backbone, 'register:fail', @registerFail
       @listenTo Backbone, 'register:success', @registerSuccess
 
-      @listenTo Backbone, 'addOLDFormFail', @addOLDFormFail
-      @listenTo Backbone, 'addOLDFormSuccess', @addOLDFormSuccess
-
-      @listenTo Backbone, 'updateOLDFormFail', @updateOLDFormFail
-      @listenTo Backbone, 'updateOLDFormSuccess', @updateOLDFormSuccess
-
-      @listenTo Backbone, 'destroyOLDFormFail', @destroyOLDFormFail
-      @listenTo Backbone, 'destroyOLDFormSuccess', @destroyOLDFormSuccess
+      @listenTo Backbone, 'fetchHistoryFormFail', @fetchHistoryFormFail
+      @listenTo Backbone, 'fetchHistoryFormFailNoHistory', @fetchHistoryFormFailNoHistory
 
       @listenToCRUDResources()
 
@@ -82,20 +78,27 @@ define [
     # Forms
     ############################################################################
 
-    addOLDFormSuccess: (formModel) ->
+    getFormId: (formModel) ->
+      id = formModel.get 'id'
+      activeServerType = globals
+        .applicationSettings.get('activeServer').get 'type'
+      if activeServerType is 'FieldDB' then id = id[-7..]
+      id
+
+    addFormSuccess: (formModel) ->
       notification = new NotificationView
         title: 'Form created'
         content: "You have successfully created a new form. Its id is
-          #{formModel.get 'id'}."
+          #{@getFormId formModel}."
       @renderNotification notification
 
-    updateOLDFormSuccess: (formModel) ->
+    updateFormSuccess: (formModel) ->
       notification = new NotificationView
         title: 'Form updated'
-        content: "You have successfully updated form #{formModel.get 'id'}."
+        content: "You have successfully updated form #{@getFormId formModel}."
       @renderNotification notification
 
-    addUpdateOLDFormFail: (error, type) ->
+    addUpdateFormFail: (error, type) ->
       if error
         content = "Your form #{type} request was unsuccessful. #{error}"
       else
@@ -107,24 +110,24 @@ define [
         type: 'error'
       @renderNotification notification
 
-    addOLDFormFail: (error) ->
-      @addUpdateOLDFormFail error, 'creation'
+    addFormFail: (error) ->
+      @addUpdateFormFail error, 'creation'
 
-    updateOLDFormFail: (error) ->
-      @addUpdateOLDFormFail error, 'update'
+    updateFormFail: (error) ->
+      @addUpdateFormFail error, 'update'
 
-    destroyOLDFormFail: (error) ->
+    destroyFormFail: (error) ->
       notification = new NotificationView
         title: 'Form deletion failed'
         content: "Your form creation request was unsuccessful. #{error}"
         type: 'error'
       @renderNotification notification
 
-    destroyOLDFormSuccess: (formModel) ->
+    destroyFormSuccess: (formModel) ->
       notification = new NotificationView
         title: 'Form deleted'
         content: "You have successfully deleted the form with id
-          #{formModel.get 'id'}."
+          #{@getFormId formModel}."
       @renderNotification notification
 
 
@@ -213,9 +216,19 @@ define [
           #{model.get 'id'}."
       @renderNotification notification
 
+    fetchHistoryFormFail: (formModel) ->
+      notification = new NotificationView
+        title: "Form history fetch failed"
+        content: "Unable to fetch the history of form #{formModel.id}"
+        type: 'error'
+      @renderNotification notification
 
-
-
+    fetchHistoryFormFailNoHistory: (formModel) ->
+      notification = new NotificationView
+        title: "No history"
+        content: "There are no previous versions for form #{formModel.id}"
+        type: 'warning'
+      @renderNotification notification
 
     registerFail: (reason) ->
       notification = new NotificationView

@@ -50,7 +50,6 @@ define [
 
       # TODO: if this is an "add"-type form, then the original model copy
       # should (maybe) be an empty resource.
-      #@originalModelCopy = @copyModel @model
       @originalModelCopy = @copyModel @model
       if @addUpdateType is 'add'
         @originalModelCopy.set @getEmptyModelObject()
@@ -58,7 +57,8 @@ define [
     copyModel: (inputModel) ->
       newModel = new @resourceModel()
       for attr, val of @model.attributes
-        newModel.set attr, inputModel.get(attr)
+        inputValue = @utils.clone inputModel.get(attr)
+        newModel.set attr, inputValue
       newModel
 
     render: ->
@@ -145,6 +145,7 @@ define [
         @submitAttempted = true
         @propagateSubmitAttempted()
         @stopEvent event
+        # Here is the problem
         @setToModel()
         @disableForm()
         clientSideValidationErrors = @model.validate()
@@ -212,7 +213,9 @@ define [
 
     # Set the state of the "add a resource" HTML form on the Dative resource
     # model.
-    setToModel: -> fv.setToModel() for fv in @fieldViews()
+    #setToModel: -> fv.setToModel() for fv in @fieldViews()
+    setToModel: ->
+      fv.setToModel() for fv in @fieldViews()
 
     # Focus the previous field. This is a hack that is required because the
     # multiSelect does not correctly move the focus on a Shift+Tab event.
@@ -422,7 +425,7 @@ define [
     # crucially "empties" the editable attributes; that is, a resource's id,
     # its enterer, etc., will not be represented in the returned model object.
     getEmptyModelObject: ->
-      modelDefaults = @model.defaults()
+      modelDefaults = @utils.clone @model.defaults()
       emptyModelObject = {}
       for attribute in @editableSecondaryAttributes.concat @primaryAttributes
         emptyModelObject[attribute] = modelDefaults[attribute]

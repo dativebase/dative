@@ -109,12 +109,12 @@ define (require) ->
       null
 
   # Returns a `Date` instance as "January 1, 2015 at 5:45 p.m.", etc.
-  humanDatetime = (dateObject) ->
+  humanDatetime = (dateObject, showSeconds=false) ->
     dateObject = asDateObject dateObject
     if type(dateObject) in ['string', 'null'] then return dateObject
     humanDateString = humanDate dateObject
     if not humanDateString then return null
-    "#{humanDateString} at #{humanTime dateObject}"
+    "#{humanDateString} at #{humanTime dateObject, showSeconds}"
 
   # Returns a `Date` instance as "January 1, 2015", etc.
   humanDate = (dateObject) ->
@@ -130,7 +130,7 @@ define (require) ->
       null
 
   # Returns the time portion of a `Date` instance as "5:45 p.m.", etc.
-  humanTime = (dateObject) ->
+  humanTime = (dateObject, showSeconds=false) ->
     try
       hours = dateObject.getHours()
       minutes = dateObject.getMinutes()
@@ -138,7 +138,12 @@ define (require) ->
       hours = hours % 12
       hours = if hours then hours else 12 # the hour '0' should be '12'
       minutes = if minutes < 10 then "0#{minutes}" else minutes
-      "#{hours}:#{minutes} #{ampm}"
+      if showSeconds
+        seconds = dateObject.getSeconds()
+        seconds = if seconds < 10 then "0#{seconds}" else seconds
+        "#{hours}:#{minutes}:#{seconds} #{ampm}"
+      else
+        "#{hours}:#{minutes} #{ampm}"
     catch
       return null
 
@@ -152,17 +157,27 @@ define (require) ->
       return null
     if isNaN date then return ''
     seconds = Math.floor((new Date() - date) / 1000)
+
+    # Handle future dates
+    if seconds < 0
+      prefix = 'in '
+      suffix = ''
+    else 
+      prefix = ''
+      suffix = ' ago'
+    seconds = Math.abs(seconds)
+
     interval = Math.floor(seconds / 31536000)
-    if interval > 1 then return "#{interval} years ago"
+    if interval > 1 then return "#{prefix}#{interval} years#{suffix}"
     interval = Math.floor(seconds / 2592000)
-    if interval > 1 then return "#{interval} months ago"
+    if interval > 1 then return "#{prefix}#{interval} months#{suffix}"
     interval = Math.floor(seconds / 86400)
-    if interval > 1 then return "#{interval} days ago"
+    if interval > 1 then return "#{prefix}#{interval} days#{suffix}"
     interval = Math.floor(seconds / 3600)
-    if interval > 1 then return "#{interval} hours ago"
+    if interval > 1 then return "#{prefix}#{interval} hours#{suffix}"
     interval = Math.floor(seconds / 60)
-    if interval > 1 then return "#{interval} minutes ago"
-    return "#{Math.floor(seconds)} seconds ago"
+    if interval > 1 then return "#{prefix}#{interval} minutes#{suffix}"
+    return "#{prefix}#{Math.floor(seconds)} seconds#{suffix}"
 
   # "snake_case" to "camelCase"
   snake2camel = (string) ->

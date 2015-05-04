@@ -78,27 +78,27 @@ define [
     showFieldDBItems: ->
       @$('li.fielddb')
         .show()
-        .children('a').removeClass 'disabled'
+        .find('a').removeClass 'disabled'
 
     hideFieldDBItems: ->
       @$('li.fielddb')
         .hide()
-        .children('a').addClass 'disabled'
+        .find('a').addClass 'disabled'
 
     showOLDItems: ->
       @$('li.old')
         .show()
-        .children('a').removeClass 'disabled'
+        .find('a').removeClass 'disabled'
 
     hideOLDItems: ->
       @$('li.old')
         .hide()
-        .children('a').addClass 'disabled'
+        .find('a').addClass 'disabled'
 
     hideAuthenticationRequiredItems: ->
       @$('li.requires-authentication')
         .hide()
-        .children('a').addClass 'disabled'
+        .find('a').addClass 'disabled'
 
     showAuthenticationRequiredItems: ->
       @$('li.requires-authentication').not('.fielddb, .old')
@@ -163,13 +163,15 @@ define [
     # 2. Modify the menu items so that shortcut abbreviations are displayed.
     keyboardShortcuts: ->
       $(document).off 'keydown'
+      activeServerType = @getActiveServerType()
       $('[data-shortcut][data-event]').each (index, element) =>
-        if not $(element).hasClass 'disabled'
-          event = $(element).attr 'data-event'
-          shortcut = $(element).attr 'data-shortcut'
+        $element = $ element
+        if (not $element.hasClass('disabled'))
+          event = $element.attr 'data-event'
+          shortcut = $element.attr 'data-shortcut'
           @bindShortcutToEventTrigger shortcut, event
           shortcutAbbreviation = @getShortcutAbbreviation(shortcut)
-          $(element).append $('<span>').addClass('float-right').html(
+          $element.append $('<span>').addClass('float-right').html(
             @getShortcutInFixedWithSpans(shortcutAbbreviation))
 
     getShortcutInFixedWithSpans: (shortcut) ->

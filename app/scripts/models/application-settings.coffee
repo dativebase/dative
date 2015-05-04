@@ -87,32 +87,37 @@ define [
     authenticateOLD: (credentials) ->
       taskId = @guid()
       Backbone.trigger 'longTask:register', 'authenticating', taskId
+      Backbone.trigger 'authenticateStart'
       BaseRelationalModel.cors.request(
         method: 'POST'
-        timeout: 3000
+        timeout: 20000
         url: "#{@getURL()}/login/authenticate"
         payload: credentials
         onload: (responseJSON) =>
           @authenticateAttemptDone taskId
+          Backbone.trigger 'authenticateEnd'
           if responseJSON.authenticated is true
             @save
               username: credentials.username
               password: credentials.password
               loggedIn: true
-            Backbone.trigger 'authenticate:success'
+            Backbone.trigger 'authenticateSuccess'
           else
-            Backbone.trigger 'authenticate:fail', responseJSON
+            Backbone.trigger 'authenticateFail', responseJSON
         onerror: (responseJSON) =>
-          Backbone.trigger 'authenticate:fail', responseJSON
+          Backbone.trigger 'authenticateEnd'
+          Backbone.trigger 'authenticateFail', responseJSON
           @authenticateAttemptDone taskId
         ontimeout: =>
-          Backbone.trigger 'authenticate:fail', error: 'Request timed out'
+          Backbone.trigger 'authenticateEnd'
+          Backbone.trigger 'authenticateFail', error: 'Request timed out'
           @authenticateAttemptDone taskId
       )
 
     authenticateFieldDBAuthService: (credentials) =>
       taskId = @guid()
       Backbone.trigger 'longTask:register', 'authenticating', taskId
+      Backbone.trigger 'authenticateStart'
       if !@get 'fieldDBApplication'
         @set 'fieldDBApplication', FieldDB.FieldDBObject.application
       @get('fieldDBApplication').authentication = @get('fieldDBApplication').authentication || new FieldDB.Authentication()
@@ -122,13 +127,19 @@ define [
           password: credentials.password, # TODO dont need this!
           loggedInUser: @get('fieldDBApplication').authentication.user
         @save()
+        Backbone.trigger 'authenticateEnd'
+        Backbone.trigger 'authenticateSuccess'
         @authenticateAttemptDone taskId
         return
       , (error) =>
         @authenticateAttemptDone taskId
+        Backbone.trigger 'authenticateEnd'
+        Backbone.trigger 'authenticateFail', responseJSON.userFriendlyErrors
         return
       ).fail (error) =>
-        Backbone.trigger 'authenticate:fail', error
+        # Backbone.trigger 'authenticate:fail', error
+        Backbone.trigger 'authenticateEnd'
+        Backbone.trigger 'authenticateFail', error: 'Request timed out'
         @authenticateAttemptDone taskId
         return
 
@@ -144,28 +155,33 @@ define [
     logoutOLD: ->
       taskId = @guid()
       Backbone.trigger 'longTask:register', 'logout', taskId
+      Backbone.trigger 'logoutStart'
       BaseRelationalModel.cors.request(
         url: "#{@getURL()}/login/logout"
         method: 'GET'
         timeout: 3000
         onload: (responseJSON) =>
           @authenticateAttemptDone taskId
+          Backbone.trigger 'logoutEnd'
           if responseJSON.authenticated is false
             @save 'loggedIn', false
-            Backbone.trigger 'logout:success'
+            Backbone.trigger 'logoutSuccess'
           else
-            Backbone.trigger 'logout:fail'
+            Backbone.trigger 'logoutFail'
         onerror: (responseJSON) =>
+          Backbone.trigger 'logoutEnd'
           @authenticateAttemptDone taskId
-          Backbone.trigger 'logout:fail'
+          Backbone.trigger 'logoutFail'
         ontimeout: =>
+          Backbone.trigger 'logoutEnd'
           @authenticateAttemptDone taskId
-          Backbone.trigger 'logout:fail', error: 'Request timed out'
+          Backbone.trigger 'logoutFail', error: 'Request timed out'
       )
 
     logoutFieldDB: ->
       taskId = @guid()
       Backbone.trigger 'longTask:register', 'logout', taskId
+      Backbone.trigger 'logoutStart'
       if !@get 'fieldDBApplication'
         @set 'fieldDBApplication', FieldDB.FieldDBObject.application
       @get('fieldDBApplication').authentication.logout({letClientHandleCleanUp: 'dontReloadWeNeedToCleanUpInDativeClient'}).then(
@@ -175,11 +191,15 @@ define [
             loggedIn: false
             activeFieldDBCorpus: null
             activeFieldDBCorpusTitle: null
-          Backbone.trigger 'logout:success'
+          Backbone.trigger 'logoutSuccess'
         ,
         (reason) ->
-          Backbone.trigger 'logout:fail', reason.userFriendlyErrors.join ' '
-      ).done(=> @authenticateAttemptDone taskId)
+          Backbone.trigger 'logoutFail', reason.userFriendlyErrors.join ' '
+      ).done(
+        =>
+          Backbone.trigger 'logoutEnd'
+          @authenticateAttemptDone taskId
+      )
 
 
     # Check if logged in
@@ -203,17 +223,17 @@ define [
           @authenticateAttemptDone(taskId)
           if utils.type(responseJSON) is 'array'
             @save 'loggedIn', true
-            Backbone.trigger 'authenticate:success'
+            Backbone.trigger 'authenticateSuccess'
           else
             @save 'loggedIn', false
-            Backbone.trigger 'authenticate:fail'
+            Backbone.trigger 'authenticateFail'
         onerror: (responseJSON) =>
           @save 'loggedIn', false
-          Backbone.trigger 'authenticate:fail', responseJSON
+          Backbone.trigger 'authenticateFail', responseJSON
           @authenticateAttemptDone(taskId)
         ontimeout: =>
           @save 'loggedIn', false
-          Backbone.trigger 'authenticate:fail', error: 'Request timed out'
+          Backbone.trigger 'authenticateFail', error: 'Request timed out'
           @authenticateAttemptDone(taskId)
       )
 
@@ -225,14 +245,14 @@ define [
         (sessionInfo) =>
           if sessionInfo.ok and sessionInfo.userCtx.name
             @save 'loggedIn', true
-            Backbone.trigger 'authenticate:success'
+            Backbone.trigger 'authenticateSuccess'
           else
             @save 'loggedIn', false
-            Backbone.trigger 'authenticate:fail'
+            Backbone.trigger 'authenticateFail'
         ,
         (reason) =>
           @save 'loggedIn', false
-          Backbone.trigger 'authenticate:fail', reason
+          Backbone.trigger 'authenticateFail', reason
       ).done(=> @authenticateAttemptDone taskId)
 
 
@@ -364,22 +384,22 @@ define [
 
       formsDisplaySettings:
         itemsPerPage: 5
-        primaryDataLabelsVisible: true
+        dataLabelsVisible: true
         allFormsExpanded: false
 
       subcorporaDisplaySettings:
         itemsPerPage: 10
-        primaryDataLabelsVisible: true
+        dataLabelsVisible: true
         allSubcorporaExpanded: false
 
       phonologiesDisplaySettings:
         itemsPerPage: 3
-        primaryDataLabelsVisible: true
+        dataLabelsVisible: true
         allPhonologiesExpanded: false
 
       morphologiesDisplaySettings:
         itemsPerPage: 3
-        primaryDataLabelsVisible: true
+        dataLabelsVisible: true
         allMorphologiesExpanded: false
 
       activeJQueryUITheme: 'cupertino'
@@ -440,25 +460,28 @@ define [
         ]
 
         # Secondary FieldDB form attributes.
-        # The returned array defines the order of how the secondary attributes are
-        # displayed. It is defined in models/application-settings because it should
-        # ultimately be user-configurable.
+        # The returned array defines the order of how the secondary attributes
+        # are displayed. It is defined in models/application-settings because
+        # it should ultimately be user-configurable.
         # QUESTION: @cesine: how is the elicitor of a FieldDB datum/session
         # documented?
+        # TODO: `audioVideo`, `images`
         secondary: [
           'syntacticCategory'
           'comments'
           'tags'
-          'dateElicited'
-          'language'
-          'dialect'
-          'consultants'
+          'dateElicited' # session field
+          'language' # session field
+          'dialect' # session field
+          'consultants' # session field
           'enteredByUser'
           'dateEntered'
           'modifiedByUser'
           'dateModified'
           'syntacticTreeLatex'
           'validationStatus'
+          'timestamp' # make this visible?
+          'id'
         ]
 
         readonly: [

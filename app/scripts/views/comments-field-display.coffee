@@ -12,6 +12,10 @@ define [
 
   class CommentsFieldDisplayView extends FieldDisplayView
 
+    getContext: ->
+      _.extend(super,
+        subattribute: 'text')
+
     getRepresentationView: ->
       new CommentsRepresentationSetView @context
 

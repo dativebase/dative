@@ -31,6 +31,7 @@ define [
 
     render: ->
       for representationView in @representationViews.reverse()
-        @renderRepresentationView representationView
+        if representationView.context.textValue
+          @renderRepresentationView representationView
       @listenToEvents()
 

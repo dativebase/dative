@@ -9,6 +9,8 @@ define [
   # --------------------
   #
   # Displays spinning ball and flashes messages when events occur.
+  #
+  # TODO: deprecate this, and just call `spin()` on the relevant view.
 
   class ProgressWidgetView extends BaseView
 
