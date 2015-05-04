@@ -79,6 +79,7 @@ define [
     authenticateOLD: (credentials) ->
       taskId = @guid()
       Backbone.trigger 'longTask:register', 'authenticating', taskId
+      Backbone.trigger 'authenticateStart'
       BaseRelationalModel.cors.request(
         method: 'POST'
         timeout: 20000
@@ -86,19 +87,22 @@ define [
         payload: credentials
         onload: (responseJSON) =>
           @authenticateAttemptDone taskId
+          Backbone.trigger 'authenticateEnd'
           if responseJSON.authenticated is true
             @save
               username: credentials.username
               password: credentials.password
               loggedIn: true
-            Backbone.trigger 'authenticate:success'
+            Backbone.trigger 'authenticateSuccess'
           else
-            Backbone.trigger 'authenticate:fail', responseJSON
+            Backbone.trigger 'authenticateFail', responseJSON
         onerror: (responseJSON) =>
-          Backbone.trigger 'authenticate:fail', responseJSON
+          Backbone.trigger 'authenticateEnd'
+          Backbone.trigger 'authenticateFail', responseJSON
           @authenticateAttemptDone taskId
         ontimeout: =>
-          Backbone.trigger 'authenticate:fail', error: 'Request timed out'
+          Backbone.trigger 'authenticateEnd'
+          Backbone.trigger 'authenticateFail', error: 'Request timed out'
           @authenticateAttemptDone taskId
       )
 
@@ -113,6 +117,7 @@ define [
     authenticateFieldDBAuthService: (credentials) ->
       taskId = @guid()
       Backbone.trigger 'longTask:register', 'authenticating', taskId
+      Backbone.trigger 'authenticateStart'
       BaseRelationalModel.cors.request(
         method: 'POST'
         timeout: 20000
@@ -133,13 +138,15 @@ define [
             credentials.name = credentials.username
             @authenticateFieldDBCorpusService credentials, taskId
           else
-            Backbone.trigger 'authenticate:fail', responseJSON.userFriendlyErrors
+            Backbone.trigger 'authenticateFail', responseJSON.userFriendlyErrors
             @authenticateAttemptDone taskId
         onerror: (responseJSON) =>
-          Backbone.trigger 'authenticate:fail', responseJSON
+          Backbone.trigger 'authenticateEnd'
+          Backbone.trigger 'authenticateFail', responseJSON
           @authenticateAttemptDone taskId
         ontimeout: =>
-          Backbone.trigger 'authenticate:fail', error: 'Request timed out'
+          Backbone.trigger 'authenticateEnd'
+          Backbone.trigger 'authenticateFail', error: 'Request timed out'
           @authenticateAttemptDone taskId
       )
 
@@ -153,19 +160,22 @@ define [
           # TODO @jrwdunham: this responseJSON has a roles Array attribute which
           # references more corpora than I'm seeing from the `corpusteam`
           # request. Why the discrepancy?
+          Backbone.trigger 'authenticateEnd'
           @authenticateAttemptDone taskId
           if responseJSON.ok
             @save
               loggedIn: true
               loggedInUserRoles: responseJSON.roles
-            Backbone.trigger 'authenticate:success'
+            Backbone.trigger 'authenticateSuccess'
           else
-            Backbone.trigger 'authenticate:fail', responseJSON
+            Backbone.trigger 'authenticateFail', responseJSON
         onerror: (responseJSON) =>
-          Backbone.trigger 'authenticate:fail', responseJSON
+          Backbone.trigger 'authenticateEnd'
+          Backbone.trigger 'authenticateFail', responseJSON
           @authenticateAttemptDone taskId
         ontimeout: =>
-          Backbone.trigger 'authenticate:fail', error: 'Request timed out'
+          Backbone.trigger 'authenticateEnd'
+          Backbone.trigger 'authenticateFail', error: 'Request timed out'
           @authenticateAttemptDone taskId
       )
 
@@ -204,17 +214,17 @@ define [
               password: credentials.password,
               loggedIn: true
               loggedInUser: user
-            Backbone.trigger 'authenticate:success'
+            Backbone.trigger 'authenticateSuccess'
           catch
-            Backbone.trigger 'authenticate:fail',
+            Backbone.trigger 'authenticateFail',
               ['Authentication with the FieldDB server worked, but something',
                 'went wrong with Dative.'].join(' ')
         ,
         (reason) ->
-          Backbone.trigger 'authenticate:fail', reason
+          Backbone.trigger 'authenticateFail', reason
       ).catch(
         ->
-          Backbone.trigger 'authenticate:fail',
+          Backbone.trigger 'authenticateFail',
             'FieldDB.Database::login triggered an error'
       ).done(
         =>
@@ -234,28 +244,33 @@ define [
     logoutOLD: ->
       taskId = @guid()
       Backbone.trigger 'longTask:register', 'logout', taskId
+      Backbone.trigger 'logoutStart'
       BaseRelationalModel.cors.request(
         url: "#{@getURL()}/login/logout"
         method: 'GET'
         timeout: 3000
         onload: (responseJSON) =>
           @authenticateAttemptDone taskId
+          Backbone.trigger 'logoutEnd'
           if responseJSON.authenticated is false
             @save 'loggedIn', false
-            Backbone.trigger 'logout:success'
+            Backbone.trigger 'logoutSuccess'
           else
-            Backbone.trigger 'logout:fail'
+            Backbone.trigger 'logoutFail'
         onerror: (responseJSON) =>
+          Backbone.trigger 'logoutEnd'
           @authenticateAttemptDone taskId
-          Backbone.trigger 'logout:fail'
+          Backbone.trigger 'logoutFail'
         ontimeout: =>
+          Backbone.trigger 'logoutEnd'
           @authenticateAttemptDone taskId
-          Backbone.trigger 'logout:fail', error: 'Request timed out'
+          Backbone.trigger 'logoutFail', error: 'Request timed out'
       )
 
     logoutFieldDB: ->
       taskId = @guid()
       Backbone.trigger 'longTask:register', 'logout', taskId
+      Backbone.trigger 'logoutStart'
       FieldDB.Database::BASE_AUTH_URL = @getURL()
       FieldDB.Database::BASE_DB_URL = @getCorpusServerURL()
       FieldDB.Database::logout().then(
@@ -265,14 +280,18 @@ define [
               loggedIn: false
               activeFieldDBCorpus: null
               activeFieldDBCorpusTitle: null
-            Backbone.trigger 'logout:success'
+            Backbone.trigger 'logoutSuccess'
           else
-            Backbone.trigger 'logout:fail',
+            Backbone.trigger 'logoutFail',
               "server #{@getURL()} did not accept logout request."
         ,
         (reason) ->
-          Backbone.trigger 'logout:fail', reason
-      ).done(=> @authenticateAttemptDone taskId)
+          Backbone.trigger 'logoutFail', reason
+      ).done(
+        =>
+          Backbone.trigger 'logoutEnd'
+          @authenticateAttemptDone taskId
+      )
 
 
     # Check if logged in
@@ -296,17 +315,17 @@ define [
           @authenticateAttemptDone(taskId)
           if utils.type(responseJSON) is 'array'
             @save 'loggedIn', true
-            Backbone.trigger 'authenticate:success'
+            Backbone.trigger 'authenticateSuccess'
           else
             @save 'loggedIn', false
-            Backbone.trigger 'authenticate:fail'
+            Backbone.trigger 'authenticateFail'
         onerror: (responseJSON) =>
           @save 'loggedIn', false
-          Backbone.trigger 'authenticate:fail', responseJSON
+          Backbone.trigger 'authenticateFail', responseJSON
           @authenticateAttemptDone(taskId)
         ontimeout: =>
           @save 'loggedIn', false
-          Backbone.trigger 'authenticate:fail', error: 'Request timed out'
+          Backbone.trigger 'authenticateFail', error: 'Request timed out'
           @authenticateAttemptDone(taskId)
       )
 
@@ -318,14 +337,14 @@ define [
         (sessionInfo) =>
           if sessionInfo.ok and sessionInfo.userCtx.name
             @save 'loggedIn', true
-            Backbone.trigger 'authenticate:success'
+            Backbone.trigger 'authenticateSuccess'
           else
             @save 'loggedIn', false
-            Backbone.trigger 'authenticate:fail'
+            Backbone.trigger 'authenticateFail'
         ,
         (reason) =>
           @save 'loggedIn', false
-          Backbone.trigger 'authenticate:fail', reason
+          Backbone.trigger 'authenticateFail', reason
       ).done(=> @authenticateAttemptDone taskId)
 
 

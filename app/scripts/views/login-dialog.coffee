@@ -17,13 +17,20 @@ define [
     template: loginDialogTemplate
 
     initialize: ->
-      @listenTo Backbone, 'authenticate:fail', @_authenticateFail
-      @listenTo Backbone, 'authenticate:end', @_authenticateEnd
-      @listenTo Backbone, 'authenticate:success', @_authenticateSuccess
+
+      @listenTo Backbone, 'authenticateStart', @authenticateStart
+      @listenTo Backbone, 'authenticateEnd', @authenticateEnd
+      @listenTo Backbone, 'authenticateSuccess', @authenticateSuccess
+      @listenTo Backbone, 'authenticateFail', @authenticateFail
+
+      @listenTo Backbone, 'logoutStart', @logoutStart
+      @listenTo Backbone, 'logoutEnd', @logoutEnd
+      @listenTo Backbone, 'logoutSuccess', @logoutSuccess
+      @listenTo Backbone, 'logoutFail', @logoutFail
+
       @listenTo Backbone, 'loginDialog:toggle', @toggle
-      @listenTo Backbone, 'logout:success', @logoutSuccess
       @listenTo Backbone, 'register-dialog:open', @dialogClose
-      @listenTo @model, 'change:loggedIn', @_disableButtons
+      @listenTo @model, 'change:loggedIn', @setButtonState
 
       @activeServerView = new ActiveServerView
         model: @model
@@ -37,10 +44,10 @@ define [
 
     events:
       'keyup .dative-login-dialog-widget .username': 'validate'
-      'keydown .dative-login-dialog-widget .username': '_submitWithEnter'
+      'keydown .dative-login-dialog-widget .username': 'submitWithEnter'
       'keyup .dative-login-dialog-widget .password': 'validate'
-      'keydown .dative-login-dialog-widget .password': '_submitWithEnter'
-      'keydown .dative-login-dialog-widget .dative-select-active-server': '_submitWithEnter'
+      'keydown .dative-login-dialog-widget .password': 'submitWithEnter'
+      'keydown .dative-login-dialog-widget .dative-select-active-server': 'submitWithEnter'
       'dialogdragstart': 'closeAllTooltips'
 
     render: ->
@@ -50,7 +57,7 @@ define [
       @$target = @$ '.dative-login-dialog-target' # outer DIV to which jQueryUI dialog appends
       @dialogify()
       @tooltipify()
-      @_disableButtons()
+      @setButtonState()
       @
 
     renderActiveServerView: ->
@@ -95,7 +102,7 @@ define [
           @fontAwesomateCloseIcon()
         open: =>
           @_initializeDialog()
-          @_disableButtons()
+          @setButtonState()
         close: =>
           @closeAllTooltips()
 
@@ -137,7 +144,7 @@ define [
         .find('span.dative-login-failed').text('').hide()
       @focusAppropriateInput()
 
-    _disableButtons: ->
+    setButtonState: ->
       if @model.get 'loggedIn'
         @$target.find('.login').button('disable').end()
           .find('.logout').button('enable').focus().end()
@@ -162,16 +169,31 @@ define [
       if @model.get 'username'
         @$target.find('.username').val @model.get('username')
 
+    authenticateStart: -> @spin()
+
+    authenticateEnd: ->
+      @stopSpin()
+      @setButtonState()
+
+    authenticateSuccess: -> @dialogClose()
+
     # OLD server responds with validation errors as well as authentication
     # errors. Authentication form should handle as much validation as possible,
     # preventing a request to the server when data are invalid.
-    _authenticateFail: (failObject) ->
+    authenticateFail: (failObject) ->
 
-    _authenticateSuccess: -> @dialogClose()
+    logoutStart: -> @spin()
 
-    _authenticateEnd: -> @_disableButtons()
+    logoutEnd: ->
+      @stopSpin()
+      @setButtonState()
 
-    _submitWithEnter: (event) ->
+    logoutSuccess: ->
+      @focusAppropriateInput()
+
+    logoutFail: ->
+
+    submitWithEnter: (event) ->
       if event.which is 13
         event.stopPropagation()
         loginButton = @$target.find '.login'
@@ -217,6 +239,7 @@ define [
       {username, password} = @validate()
       if username and password
         @$target.find('.login').button 'disable'
+        @spin()
         Backbone.trigger 'authenticate:login', username, password
 
     logout: ->
@@ -229,6 +252,16 @@ define [
     registerAccount: ->
       @trigger 'request:openRegisterDialogBox'
 
-    logoutSuccess: ->
-      @focusAppropriateInput()
+    spinnerOptions: ->
+      options = super
+      options.top = '7%'
+      options.left = '90%'
+      options
+
+    spin: ->
+      @$('.ui-dialog-buttonpane .ui-dialog-buttonset')
+        .spin @spinnerOptions()
+
+    stopSpin: ->
+      @$('.ui-dialog-buttonpane .ui-dialog-buttonset').spin false
 

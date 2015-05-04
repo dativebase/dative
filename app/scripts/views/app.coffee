@@ -3,7 +3,6 @@ define [
   './../routes/router'
   './base'
   './mainmenu'
-  './progress-widget'
   './notifier'
   './login-dialog'
   './register-dialog'
@@ -24,12 +23,12 @@ define [
   './../collections/application-settings'
   './../utils/globals'
   './../templates/app'
-], (Backbone, Workspace, BaseView, MainMenuView, ProgressWidgetView,
-  NotifierView, LoginDialogView, RegisterDialogView, AlertDialogView,
-  HelpDialogView, ApplicationSettingsView, PagesView, HomePageView, FormAddView,
-  FormsSearchView, FormsView, SubcorporaView, PhonologiesView,
-  MorphologiesView, CorporaView, ApplicationSettingsModel, FormModel,
-  ApplicationSettingsCollection, globals, appTemplate) ->
+], (Backbone, Workspace, BaseView, MainMenuView, NotifierView, LoginDialogView,
+  RegisterDialogView, AlertDialogView, HelpDialogView, ApplicationSettingsView,
+  PagesView, HomePageView, FormAddView, FormsSearchView, FormsView,
+  SubcorporaView, PhonologiesView, MorphologiesView, CorporaView,
+  ApplicationSettingsModel, FormModel, ApplicationSettingsCollection, globals,
+  appTemplate) ->
 
   # App View
   # --------
@@ -101,8 +100,8 @@ define [
 
       @listenTo @loginDialog, 'request:openRegisterDialogBox', @toggleRegisterDialog
       @listenTo Backbone, 'loginSuggest', @openLoginDialogWithDefaults
-      @listenTo Backbone, 'authenticate:success', @authenticateSuccess
-      @listenTo Backbone, 'logout:success', @logoutSuccess
+      @listenTo Backbone, 'authenticateSuccess', @authenticateSuccess
+      @listenTo Backbone, 'logoutSuccess', @logoutSuccess
       @listenTo Backbone, 'useFieldDBCorpus', @useFieldDBCorpus
       @listenTo Backbone, 'applicationSettings:changeTheme', @changeTheme
 
@@ -139,7 +138,6 @@ define [
       @registerDialog = new RegisterDialogView model: @applicationSettings
       @alertDialog = new AlertDialogView model: @applicationSettings
       @helpDialog = new HelpDialogView()
-      @progressWidget = new ProgressWidgetView()
       @notifier = new NotifierView()
 
     renderPersistentSubviews: ->
@@ -148,14 +146,12 @@ define [
       @registerDialog.setElement(@$('#register-dialog-container')).render()
       @alertDialog.setElement(@$('#alert-dialog-container')).render()
       @helpDialog.setElement(@$('#help-dialog-container'))
-      @progressWidget.setElement(@$('#progress-widget-container')).render()
       @notifier.setElement(@$('#notifier-container')).render()
 
       @rendered @mainMenuView
       @rendered @loginDialog
       @rendered @registerDialog
       @rendered @alertDialog
-      @rendered @progressWidget
       @rendered @notifier
 
     renderHelpDialog: ->

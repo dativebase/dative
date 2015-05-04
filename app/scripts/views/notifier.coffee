@@ -30,11 +30,11 @@ define [
 
     listenToEvents: ->
 
-      @listenTo Backbone, 'authenticate:fail', @authenticateFail
-      @listenTo Backbone, 'authenticate:success', @authenticateSuccess
+      @listenTo Backbone, 'authenticateFail', @authenticateFail
+      @listenTo Backbone, 'authenticateSuccess', @authenticateSuccess
 
-      @listenTo Backbone, 'logout:fail', @logoutFail
-      @listenTo Backbone, 'logout:success', @logoutSuccess
+      @listenTo Backbone, 'logoutFail', @logoutFail
+      @listenTo Backbone, 'logoutSuccess', @logoutSuccess
 
       @listenTo Backbone, 'register:fail', @registerFail
       @listenTo Backbone, 'register:success', @registerSuccess
