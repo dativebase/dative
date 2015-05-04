@@ -208,6 +208,10 @@ define [
       @displayConfirmIdentityDialog message
       ,  (loginDetails) => 
         console.log('no problem.. can keep working');
+        @set
+          username: @applicationSettings.get('fieldDBApplication').authentication.user.username,
+          loggedInUser: @applicationSettings.get('fieldDBApplication').authentication.user
+        @save()
         delete @originalMessage
       , (loginDetails) =>
         if(@confirmIdentityErrorCount > 3 )
