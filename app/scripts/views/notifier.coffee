@@ -42,6 +42,7 @@ define [
       @listenTo Backbone, 'fetchHistoryFormFail', @fetchHistoryFormFail
       @listenTo Backbone, 'fetchHistoryFormFailNoHistory', @fetchHistoryFormFailNoHistory
 
+      @listenTo Backbone, 'newResourceOnLastPage', @newResourceOnLastPage
       @listenToCRUDResources()
 
     listenToCRUDResources: ->
@@ -227,6 +228,13 @@ define [
       notification = new NotificationView
         title: "No history"
         content: "There are no previous versions for form #{formModel.id}"
+        type: 'warning'
+      @renderNotification notification
+
+    newResourceOnLastPage: (resourceModel, resourceName) ->
+      notification = new NotificationView
+        title: "New #{resourceName} on last page"
+        content: "The #{resourceName} that you just created can be viewed on the last page"
         type: 'warning'
       @renderNotification notification
 

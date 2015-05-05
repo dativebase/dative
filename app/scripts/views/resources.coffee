@@ -221,12 +221,13 @@ define [
       @refreshPaginationMenuTop()
 
       # 3. If the new resource should be displayed on the current page, then
-      # do that.
+      # do that; otherwise notify the user that it's on the last page.
       Backbone.trigger "add#{@resourceNameCapitalized}Success", resourceModel
       if newResourceShouldBeOnCurrentPage
         @addNewResourceViewToPage()
         @closeNewResourceView()
       else
+        @notifyNewResourceOnLastPage resourceModel
         @closeNewResourceView()
 
       # 4. create a new new resource widget but don't display it.
@@ -236,6 +237,9 @@ define [
       @renderNewResourceView()
       @newResourceViewVisibility()
       @listenToNewResourceView()
+
+    notifyNewResourceOnLastPage: (resourceModel) ->
+      Backbone.trigger 'newResourceOnLastPage', resourceModel, @resourceName
 
     destroyResourceSuccess: (resourceModel) ->
       @collection.remove resourceModel
