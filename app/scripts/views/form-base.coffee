@@ -160,8 +160,8 @@ define [
     interlinearize: ->
 
       # Params
-      @igtWordBuffer = 60 # How many pixels between IGT word columns.
-      @igtRowStepIndent = 50 # How many pixels to indent each subsequent IGT row.
+      @igtWordBuffer = 40 # How many pixels between IGT word columns.
+      @igtRowStepIndent = 30 # How many pixels to indent each subsequent IGT row.
       @igtMaxIndentations = 5 # When we stop indenting IGT rows.
       @igtRowVerticalSpacer = 10 # How many pixels of vertical space between IGT rows.
 
@@ -259,7 +259,9 @@ define [
 
     # Return the data needed to create the set of IGT tables. This is an array
     # of index-containing arrays. Each array of indices represents the words
-    # that will be present in that table.
+    # that will be present in that table. Here we divide the word indices into
+    # arrays such that no IGT line (i.e., table) will exceed the width of the
+    # containing <div>.
     getIGTTablesData: (wordWidths) ->
       maxWidth = @$('.resource-primary-data').first().width()
       tablesData = []
@@ -270,11 +272,14 @@ define [
         index = Number index
         rowWidth += wordWidth
         row.push index
+        leftIndent = @getIGTTableLeftIndent tablesData.length
+        if row.length is 1 then rowWidth += leftIndent
         if rowWidth > maxWidth and row.length > 1
           rowWidth = wordWidth
           row.pop()
           tablesData.push row[...]
           row = [index]
+          rowWidth += leftIndent
         if index is lastIndex
           tablesData.push row
       tablesData
@@ -298,16 +303,20 @@ define [
             wordWidths[index] = width
       wordWidths
 
+    # Return the number of pixels that IGT table `index` should be indented to.
+    getIGTTableLeftIndent: (index) ->
+      if index < @igtMaxIndentations
+        leftIndent = index * @igtRowStepIndent
+      else
+        leftIndent = @igtMaxIndentations * @igtRowStepIndent
+
     # Write the IGT data to the DOM as a series of IGT tables. There is one
     # table for each line of IGT, i.e., one table for each columnarly aligned
     # group of words.
     displayIGTTables: (tablesData, igtMap, wordWidths) ->
       $tablesContainer = $ '<div>'
       for tableData, index in tablesData
-        if index < @igtMaxIndentations
-          leftIndent = index * @igtRowStepIndent
-        else
-          leftIndent = @igtMaxIndentations * @igtRowStepIndent
+        leftIndent = @getIGTTableLeftIndent index
         $table = $ "<table class='igt-table' style='margin-bottom:
           #{@igtRowVerticalSpacer }px;'>"
         for attribute, vector of igtMap
