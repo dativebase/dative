@@ -39,7 +39,7 @@
         </ul>
     </li>
 
-    <li class='requires-authentication old'><a>Subcorpora</a>
+    <li class='requires-authentication old'><a>Corpora</a>
         <ul class='ui-corner-bottom'>
             <li class='requires-authentication'>
               <a data-event="request:subcorpusAdd">Add</a>
@@ -56,36 +56,15 @@
         </ul>
     </li>
 
-    <li class='requires-authentication old'><a>Phonologies</a>
+    <li class='requires-authentication old'><a>Analysis</a>
         <ul class='ui-corner-bottom'>
-            <li class='requires-authentication'>
-              <a data-event="request:phonologyAdd">Add</a>
+            <li class='requires-authentication'
+              ><a data-event="request:phonologiesBrowse"
+                  data-shortcut="ctrol+f">Phonologies</a>
             </li>
-            <!--
-            <li class='requires-authentication'>
-              <a data-event="request:subcorporaSearch">Search</a>
-            </li>
-            -->
-            <li class='requires-authentication'>
-                <a data-event="request:phonologiesBrowse"
-                   data-shortcut="ctrl+f">Browse</a>
-            </li>
-        </ul>
-    </li>
-
-    <li class='requires-authentication old'><a>Morphologies</a>
-        <ul class='ui-corner-bottom'>
-            <li class='requires-authentication'>
-              <a data-event="request:morphologyAdd">Add</a>
-            </li>
-            <!--
-            <li class='requires-authentication'>
-              <a data-event="request:subcorporaSearch">Search</a>
-            </li>
-            -->
-            <li class='requires-authentication'>
-                <a data-event="request:morphologiesBrowse"
-                   data-shortcut="ctrl+m">Browse</a>
+            <li class='requires-authentication'
+              ><a data-event="request:morphologiesBrowse"
+                  data-shortcut="ctrol+m">Morphologies</a>
             </li>
         </ul>
     </li>
