@@ -1439,3 +1439,19 @@ textarea.script
   padding: 0.1em;
 }
 
+div.igt-word
+{
+  display: inline-block;
+}
+
+div.igt-word,
+td.igt-word-cell
+{
+  white-space: nowrap;
+}
+
+table.igt-table tr td
+{
+  padding-bottom: 0.25em;
+}
+

@@ -253,6 +253,11 @@ define [
     renderDisplayViews: ->
       @renderPrimaryDisplayViews()
       @renderSecondaryDisplayViews()
+      @renderDisplayViewsPost()
+
+    # Override this in subclasses if you want to do some post-render processing
+    # on display views, e.g., interlinearize (see form-base.coffee).
+    renderDisplayViewsPost: ->
 
     renderPrimaryDisplayViews: ->
       container = document.createDocumentFragment()
