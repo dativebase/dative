@@ -17,6 +17,8 @@ define [
   './subcorpora'
   './phonologies'
   './morphologies'
+  './language-models'
+  './morphological-parsers'
   './corpora'
   './../models/application-settings'
   './../models/form'
@@ -26,9 +28,9 @@ define [
 ], (Backbone, Workspace, BaseView, MainMenuView, NotifierView, LoginDialogView,
   RegisterDialogView, AlertDialogView, HelpDialogView, ApplicationSettingsView,
   PagesView, HomePageView, FormAddView, FormsSearchView, FormsView,
-  SubcorporaView, PhonologiesView, MorphologiesView, CorporaView,
-  ApplicationSettingsModel, FormModel, ApplicationSettingsCollection, globals,
-  appTemplate) ->
+  SubcorporaView, PhonologiesView, MorphologiesView, LanguageModelsView,
+  MorphologicalParsersView, CorporaView, ApplicationSettingsModel, FormModel,
+  ApplicationSettingsCollection, globals, appTemplate) ->
 
   # App View
   # --------
@@ -86,6 +88,8 @@ define [
       @listenTo @mainMenuView, 'request:phonologiesBrowse', @showPhonologiesView
       @listenTo @mainMenuView, 'request:morphologyAdd', @showNewMorphologyView
       @listenTo @mainMenuView, 'request:morphologiesBrowse', @showMorphologiesView
+      @listenTo @mainMenuView, 'request:languageModelsBrowse', @showLanguageModelsView
+      @listenTo @mainMenuView, 'request:morphologicalParsersBrowse', @showMorphologicalParsersView
       @listenTo @mainMenuView, 'request:pages', @showPagesView
 
       @listenTo @router, 'route:home', @showHomePageView
@@ -349,10 +353,42 @@ define [
       if not @morphologiesView
         @morphologiesView = new MorphologiesView()
       @visibleView = @morphologiesView
-      # This is relevant if the user is trying to add a new corpus.
+      # This is relevant if the user is trying to add a new morphology.
       if options?.showNewMorphologyView
         @morphologiesView.newResourceViewVisible = true
         @morphologiesView.weShouldFocusFirstAddViewInput = true
+      @renderVisibleView taskId
+
+    # Show the page for browsing morpheme language models.
+    showLanguageModelsView: (options) ->
+      if not @loggedIn() then return
+      if @languageModelsView and
+      @visibleView is @languageModelsView
+        return
+      @router.navigate 'language-models-browse'
+      taskId = @guid()
+      Backbone.trigger(
+        'longTask:register', 'Opening language models browse view', taskId)
+      @closeVisibleView()
+      if not @languageModelsView
+        @languageModelsView = new LanguageModelsView()
+      @visibleView = @languageModelsView
+      @renderVisibleView taskId
+
+    # Show the page for browsing morphological parsers.
+    showMorphologicalParsersView: (options) ->
+      if not @loggedIn() then return
+      if @morphologicalParsersView and
+      @visibleView is @morphologicalParsersView
+        return
+      @router.navigate 'morphologies-browse'
+      taskId = @guid()
+      Backbone.trigger(
+        'longTask:register', 'Opening morphologies browse view', taskId)
+      @closeVisibleView()
+      if not @morphologicalParsersView
+        @morphologicalParsersView = new MorphologicalParsersView()
+      @visibleView = @morphologicalParsersView
       @renderVisibleView taskId
 
     # Put out of use for now. Now adding a form is done via the browse

@@ -60,11 +60,19 @@
         <ul class='ui-corner-bottom'>
             <li class='requires-authentication'
               ><a data-event="request:phonologiesBrowse"
-                  data-shortcut="ctrol+f">Phonologies</a>
+                  data-shortcut="ctrl+f">Phonologies</a>
             </li>
             <li class='requires-authentication'
               ><a data-event="request:morphologiesBrowse"
-                  data-shortcut="ctrol+m">Morphologies</a>
+                  data-shortcut="ctrl+m">Morphologies</a>
+            </li>
+            <li class='requires-authentication'
+              ><a data-event="request:languageModelsBrowse"
+                  data-shortcut="ctrl+z">Language Models</a>
+            </li>
+            <li class='requires-authentication'
+              ><a data-event="request:morphologicalParsersBrowse"
+                  data-shortcut="ctrl+y">Morphological Parsers</a>
             </li>
         </ul>
     </li>
