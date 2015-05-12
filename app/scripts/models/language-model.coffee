@@ -8,6 +8,7 @@ define ['./resource'], (ResourceModel) ->
   class LanguageModelModel extends ResourceModel
 
     resourceName: 'languageModel'
+    serverSideResourceName: 'morphemelanguagemodels'
 
     ############################################################################
     # Language Model Schema
@@ -20,23 +21,23 @@ define ['./resource'], (ResourceModel) ->
 
     defaults: ->
 
-      name: ''
-      description: ''
-      corpus: null                # Corpus from which to extract the
-                                  # morpheme-based N-grams.
-      vocabulary_morphology: null # A morphology object from which a vocabulary
-                                  # of 1-grams may be extracted.
-      toolkit: 'mitlm'            # Name of the LM estimating toolkit;
+      name: ''                    # <string>
+      description: ''             # <string>
+      corpus: null                # <int id>/<object> Corpus from which to
+                                  # extract the morpheme-based N-grams.
+      vocabulary_morphology: null # <int id>/<object> A morphology object from
+                                  # which a vocabulary of 1-grams may be extracted.
+      toolkit: 'mitlm'            # <string> Name of the LM estimating toolkit;
                                   # currently the only possible value is
                                   # "mitlm".
-      order: 3                    # bigram to quinquegram: integer between 2
+      order: 3                    # <int> bigram to quinquegram: integer between 2
                                   # and 5, defaults to 3.
-      smoothing: ''               # The name of a smoothing algorithm that is
+      smoothing: 'ModKN'          # <string> The name of a smoothing algorithm that is
                                   # defined by the specified toolkit; for
                                   # "mitlm" these are 'ML', 'FixKN',
                                   # 'FixModKN', 'FixKNn', 'KN', 'ModKN', and
                                   # 'KNn'.
-      categorial: ''              # Boolean (default is false); a categorial LM
+      categorial: false           # <boolean> (default is false); a categorial LM
                                   # scopes over morpheme categories whereas a
                                   # non-categorial one scopes over specific
                                   # morphemes.
@@ -102,13 +103,12 @@ define ['./resource'], (ResourceModel) ->
 
     requiredCorpus: (value) ->
       error = null
-      if @get('corpus').trim() is '' and not @get('rules_corpus')?
-        error = 'You must either specify rules or a rules corpus'
+      if _.isEmpty @get('corpus')
+        error = 'You must choose a corpus to estimate the language model from'
       error
 
     manyToOneAttributes: [
-      'lexicon_corpus'
-      'rules_corpus'
+      'corpus'
+      'vocabulary_morphology'
     ]
-
 

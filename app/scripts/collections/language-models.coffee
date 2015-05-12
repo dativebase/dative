@@ -13,4 +13,5 @@ define [
     resourceName: 'languageModel'
     model: LanguageModelModel
 
+    serverSideResourceName: 'morphemelanguagemodels'
 

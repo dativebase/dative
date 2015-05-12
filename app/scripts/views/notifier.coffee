@@ -21,6 +21,7 @@ define [
         'subcorpus'
         'phonology'
         'morphology'
+        'languageModel'
       ]
       @crudRequests = ['add', 'update', 'destroy']
       @crudOutcomes = ['Success', 'Fail']
@@ -167,6 +168,18 @@ define [
     destroyMorphologyFail: (error) -> @destroyResourceFail error, 'morphology'
     destroyMorphologySuccess: (model) ->
       @destroyResourceSuccess model, 'morphology'
+
+    ############################################################################
+    # Language models: add, update, & destroy notifications
+    ############################################################################
+
+    addLanguageModelSuccess: (model) -> @addResourceSuccess model, 'language model'
+    addLanguageModelFail: (error) -> @addResourceFail error, 'language model'
+    updateLanguageModelSuccess: (model) -> @updateResourceSuccess model, 'language model'
+    updateLanguageModelFail: (error) -> @updateResourceFail error, 'language model'
+    destroyLanguageModelFail: (error) -> @destroyResourceFail error, 'language model'
+    destroyLanguageModelSuccess: (model) ->
+      @destroyResourceSuccess model, 'language model'
 
     ############################################################################
     # Resources: add, update, & destroy notifications

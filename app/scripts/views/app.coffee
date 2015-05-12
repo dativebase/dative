@@ -18,7 +18,7 @@ define [
   './phonologies'
   './morphologies'
   './language-models'
-  './morphological-parsers'
+  #'./morphological-parsers'
   './corpora'
   './../models/application-settings'
   './../models/form'
@@ -29,7 +29,7 @@ define [
   RegisterDialogView, AlertDialogView, HelpDialogView, ApplicationSettingsView,
   PagesView, HomePageView, FormAddView, FormsSearchView, FormsView,
   SubcorporaView, PhonologiesView, MorphologiesView, LanguageModelsView,
-  MorphologicalParsersView, CorporaView, ApplicationSettingsModel, FormModel,
+  CorporaView, ApplicationSettingsModel, FormModel,
   ApplicationSettingsCollection, globals, appTemplate) ->
 
   # App View
