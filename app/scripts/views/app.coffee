@@ -18,7 +18,7 @@ define [
   './phonologies'
   './morphologies'
   './language-models'
-  #'./morphological-parsers'
+  './morphological-parsers'
   './corpora'
   './../models/application-settings'
   './../models/form'
@@ -29,7 +29,7 @@ define [
   RegisterDialogView, AlertDialogView, HelpDialogView, ApplicationSettingsView,
   PagesView, HomePageView, FormAddView, FormsSearchView, FormsView,
   SubcorporaView, PhonologiesView, MorphologiesView, LanguageModelsView,
-  CorporaView, ApplicationSettingsModel, FormModel,
+  MorphologicalParsersView, CorporaView, ApplicationSettingsModel, FormModel,
   ApplicationSettingsCollection, globals, appTemplate) ->
 
   # App View
@@ -74,10 +74,12 @@ define [
 
     listenToEvents: ->
       @listenTo @mainMenuView, 'request:home', @showHomePageView
-      @listenTo @mainMenuView, 'request:applicationSettings', @showApplicationSettingsView
+      @listenTo @mainMenuView, 'request:applicationSettings',
+        @showApplicationSettingsView
       @listenTo @mainMenuView, 'request:openLoginDialogBox', @toggleLoginDialog
       @listenTo @mainMenuView, 'request:toggleHelpDialogBox', @toggleHelpDialog
-      @listenTo @mainMenuView, 'request:openRegisterDialogBox', @toggleRegisterDialog
+      @listenTo @mainMenuView, 'request:openRegisterDialogBox',
+        @toggleRegisterDialog
       @listenTo @mainMenuView, 'request:corporaBrowse', @showCorporaView
       @listenTo @mainMenuView, 'request:formAdd', @showNewFormView
       @listenTo @mainMenuView, 'request:formsBrowse', @showFormsView
@@ -87,13 +89,17 @@ define [
       @listenTo @mainMenuView, 'request:phonologyAdd', @showNewPhonologyView
       @listenTo @mainMenuView, 'request:phonologiesBrowse', @showPhonologiesView
       @listenTo @mainMenuView, 'request:morphologyAdd', @showNewMorphologyView
-      @listenTo @mainMenuView, 'request:morphologiesBrowse', @showMorphologiesView
-      @listenTo @mainMenuView, 'request:languageModelsBrowse', @showLanguageModelsView
-      @listenTo @mainMenuView, 'request:morphologicalParsersBrowse', @showMorphologicalParsersView
+      @listenTo @mainMenuView, 'request:morphologiesBrowse',
+        @showMorphologiesView
+      @listenTo @mainMenuView, 'request:languageModelsBrowse',
+        @showLanguageModelsView
+      @listenTo @mainMenuView, 'request:morphologicalParsersBrowse',
+        @showMorphologicalParsersView
       @listenTo @mainMenuView, 'request:pages', @showPagesView
 
       @listenTo @router, 'route:home', @showHomePageView
-      @listenTo @router, 'route:applicationSettings', @showApplicationSettingsView
+      @listenTo @router, 'route:applicationSettings',
+        @showApplicationSettingsView
       @listenTo @router, 'route:openLoginDialogBox', @toggleLoginDialog
       @listenTo @router, 'route:openRegisterDialogBox', @toggleRegisterDialog
       @listenTo @router, 'route:corporaBrowse', @showCorporaView
@@ -102,7 +108,8 @@ define [
       @listenTo @router, 'route:formsSearch', @showFormsSearchView
       @listenTo @router, 'route:pages', @showPagesView
 
-      @listenTo @loginDialog, 'request:openRegisterDialogBox', @toggleRegisterDialog
+      @listenTo @loginDialog, 'request:openRegisterDialogBox',
+        @toggleRegisterDialog
       @listenTo Backbone, 'loginSuggest', @openLoginDialogWithDefaults
       @listenTo Backbone, 'authenticateSuccess', @authenticateSuccess
       @listenTo Backbone, 'logoutSuccess', @logoutSuccess
@@ -112,8 +119,10 @@ define [
       @listenTo Backbone, 'formsView:expandAllForms', @setAllFormsExpanded
       @listenTo Backbone, 'formsView:collapseAllForms', @setAllFormsCollapsed
       @listenTo Backbone, 'formsView:itemsPerPageChange', @setFormsItemsPerPage
-      @listenTo Backbone, 'formsView:hideAllLabels', @setFormsPrimaryDataLabelsHidden
-      @listenTo Backbone, 'formsView:showAllLabels', @setFormsPrimaryDataLabelsVisible
+      @listenTo Backbone, 'formsView:hideAllLabels',
+        @setFormsPrimaryDataLabelsHidden
+      @listenTo Backbone, 'formsView:showAllLabels',
+        @setFormsPrimaryDataLabelsVisible
 
       @listenToResources()
 
@@ -381,10 +390,10 @@ define [
       if @morphologicalParsersView and
       @visibleView is @morphologicalParsersView
         return
-      @router.navigate 'morphologies-browse'
+      @router.navigate 'morphological-parsers-browse'
       taskId = @guid()
-      Backbone.trigger(
-        'longTask:register', 'Opening morphologies browse view', taskId)
+      Backbone.trigger('longTask:register', 'Opening morphological parsers
+        browse view', taskId)
       @closeVisibleView()
       if not @morphologicalParsersView
         @morphologicalParsersView = new MorphologicalParsersView()

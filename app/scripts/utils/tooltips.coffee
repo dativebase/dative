@@ -124,6 +124,55 @@ define ['./utils'], (utils) ->
 
     old:
 
+      morphologicalParsers:
+        id: id
+        UUID: uuid
+        name: name
+        description: description
+        datetime_entered: datetimeEntered
+        datetime_modified: datetimeModified
+        enterer: enterer
+        modifier: modifier
+
+        phonology:
+          eng: 'The phonology of the morphological parser.'
+
+        morphology:
+          eng: 'The morphology of the morphological parser.'
+
+        language_model:
+          eng: 'The language model of the morphological parser.'
+
+        generate_message:
+          eng: 'The message returned by the OLD after an attempt to generate
+            this morphological parser based on the values specified here.'
+
+        generate_attempt:
+          eng: 'A unique value (a UUID) created by the OLD after each attempt
+            to generate a morphological parser based on the values specified
+            here.'
+
+        generate_succeeded:
+          eng: 'Will be true if the last generate attempt succeeded; false
+          otherwise.'
+
+        compile_message:
+          eng: 'The message returned by the OLD after an attempt to compile
+            this morphological parser.'
+
+        compile_attempt:
+          eng: 'A unique value (a UUID) created by the OLD after each attempt
+            to compile a morphological parser.'
+
+        compile_succeeded:
+          eng: 'Will be true if the last compile attempt succeeded; false
+          otherwise.'
+
+        morphology_rare_delimiter:
+          eng: 'A Unicode character used to separate shape, gloss and category
+            in the morpheme representations of the morphology of this
+            morphological parser.'
+
       languageModels:
         id: id
         UUID: uuid

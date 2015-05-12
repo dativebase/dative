@@ -48,6 +48,7 @@ define [
     initialize: (options) ->
       @resourceNameCapitalized = @utils.capitalize @resourceName
       @resourceNamePlural = @utils.pluralize @resourceName
+      @resourceNameHuman = @utils.camel2regular @resourceName
       @resourceNamePluralCapitalized = @utils.capitalize @resourceNamePlural
       @enumerateResources = options?.enumerateResources or false
       @getGlobalsResourcesDisplaySettings()
@@ -111,7 +112,9 @@ define [
     html: ->
       @$el.html @template
         resourceName: @resourceName
+        resourceNameHuman: @utils.camel2regular @resourceName
         resourceNamePlural: @resourceNamePlural
+        resourceNamePluralHuman: @utils.camel2regular @resourceNamePlural
         pluralizeByNum: @utils.pluralizeByNum
         paginator: @paginator
 
@@ -386,7 +389,7 @@ define [
     openResourcesBrowseHelp: ->
       Backbone.trigger(
         'helpDialog:openTo',
-        searchTerm: "browsing #{@resourceNamePlural}"
+        searchTerm: "browsing #{@utils.camel2regular @resourceNamePlural}"
         scrollToIndex: 1
       )
 
@@ -437,7 +440,8 @@ define [
         .button()
         .tooltip
           items: 'button'
-          content: "#{@resourceName} labels are off; click here to turn them on"
+          content: "#{@resourceNameHuman} labels are off; click here to turn
+            them on"
 
     # Set "toggle all labels" button to state open.
     setToggleAllLabelsButtonStateOpen: ->
@@ -449,7 +453,8 @@ define [
         .button()
         .tooltip
           items: 'button'
-          content: "#{@resourceName} labels are on; click here to turn them off"
+          content: "#{@resourceNameHuman} labels are on; click here to turn
+            them off"
 
     # Tell all rendered resources to expand themselves; listen for one notice
     # of expansion from a resource view and respond by restoring the focus and
@@ -973,7 +978,7 @@ define [
       @$('button.new-resource')
         .button 'enable'
         .tooltip
-          content: "create a new #{@resourceName}"
+          content: "create a new #{@resourceNameHuman}"
 
     # The resource add view show "+" button is disabled when the view is visible; to
     # hide the view, you click on the ^ button on the view itself.

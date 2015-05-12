@@ -22,6 +22,7 @@ define [
         'phonology'
         'morphology'
         'languageModel'
+        'morphologicalParser'
       ]
       @crudRequests = ['add', 'update', 'destroy']
       @crudOutcomes = ['Success', 'Fail']
@@ -163,7 +164,8 @@ define [
 
     addMorphologySuccess: (model) -> @addResourceSuccess model, 'morphology'
     addMorphologyFail: (error) -> @addResourceFail error, 'morphology'
-    updateMorphologySuccess: (model) -> @updateResourceSuccess model, 'morphology'
+    updateMorphologySuccess: (model) ->
+      @updateResourceSuccess model, 'morphology'
     updateMorphologyFail: (error) -> @updateResourceFail error, 'morphology'
     destroyMorphologyFail: (error) -> @destroyResourceFail error, 'morphology'
     destroyMorphologySuccess: (model) ->
@@ -173,13 +175,35 @@ define [
     # Language models: add, update, & destroy notifications
     ############################################################################
 
-    addLanguageModelSuccess: (model) -> @addResourceSuccess model, 'language model'
-    addLanguageModelFail: (error) -> @addResourceFail error, 'language model'
-    updateLanguageModelSuccess: (model) -> @updateResourceSuccess model, 'language model'
-    updateLanguageModelFail: (error) -> @updateResourceFail error, 'language model'
-    destroyLanguageModelFail: (error) -> @destroyResourceFail error, 'language model'
+    addLanguageModelSuccess: (model) ->
+      @addResourceSuccess model, 'language model'
+    addLanguageModelFail: (error) ->
+      @addResourceFail error, 'language model'
+    updateLanguageModelSuccess: (model) ->
+      @updateResourceSuccess model, 'language model'
+    updateLanguageModelFail: (error) ->
+      @updateResourceFail error, 'language model'
+    destroyLanguageModelFail: (error) ->
+      @destroyResourceFail error, 'language model'
     destroyLanguageModelSuccess: (model) ->
       @destroyResourceSuccess model, 'language model'
+
+    ############################################################################
+    # Morphological parsers: add, update, & destroy notifications
+    ############################################################################
+
+    addMorphologicalParserSuccess: (model) ->
+      @addResourceSuccess model, 'morphological parser'
+    addMorphologicalParserFail: (error) ->
+      @addResourceFail error, 'morphological parser'
+    updateMorphologicalParserSuccess: (model) ->
+      @updateResourceSuccess model, 'morphological parser'
+    updateMorphologicalParserFail: (error) ->
+      @updateResourceFail error, 'morphological parser'
+    destroyMorphologicalParserFail: (error) ->
+      @destroyResourceFail error, 'morphological parser'
+    destroyMorphologicalParserSuccess: (model) ->
+      @destroyResourceSuccess model, 'morphological parser'
 
     ############################################################################
     # Resources: add, update, & destroy notifications
