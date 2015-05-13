@@ -66,7 +66,11 @@ define [
       'click': 'bodyClicked'
 
     render: ->
-      console.clear()
+      if window.location.hostname == 'localhost'
+        setTimeout -> 
+          console.clear()
+        , 2000 
+      # console.clear()
       @$el.html @template()
       @renderPersistentSubviews()
       # @configureFieldDB() # FieldDB stuff commented out until it can be better incorporated
