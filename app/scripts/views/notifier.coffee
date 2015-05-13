@@ -42,9 +42,19 @@ define [
       @listenTo Backbone, 'register:success', @registerSuccess
 
       @listenTo Backbone, 'fetchHistoryFormFail', @fetchHistoryFormFail
-      @listenTo Backbone, 'fetchHistoryFormFailNoHistory', @fetchHistoryFormFailNoHistory
+      @listenTo Backbone, 'fetchHistoryFormFailNoHistory',
+        @fetchHistoryFormFailNoHistory
 
       @listenTo Backbone, 'newResourceOnLastPage', @newResourceOnLastPage
+
+      @listenTo Backbone, 'morphologicalParseFail', @morphologicalParseFail
+      @listenTo Backbone, 'morphologicalParseSuccess',
+        @morphologicalParseSuccess
+      @listenTo Backbone, 'morphologicalParserGenerateAndCompileFail',
+        @morphologicalParserGenerateAndCompileFail
+      @listenTo Backbone, 'morphologicalParserGenerateAndCompileSuccess',
+        @morphologicalParserGenerateAndCompileSuccess
+
       @listenToCRUDResources()
 
     listenToCRUDResources: ->
@@ -273,6 +283,36 @@ define [
         title: "New #{resourceName} on last page"
         content: "The #{resourceName} that you just created can be viewed on the last page"
         type: 'warning'
+      @renderNotification notification
+
+    morphologicalParseFail: (error, parserId) ->
+      notification = new NotificationView
+        title: "Parse fail"
+        content: "Your attempt to parse using morphological parser #{parserId}
+          failed: #{error}"
+        type: 'error'
+      @renderNotification notification
+
+    morphologicalParseSuccess: (parserId) ->
+      notification = new NotificationView
+        title: "Parse success"
+        content: "Your attempt to parse using morphological parser #{parserId}
+          was successful; see the parses below the word input field."
+      @renderNotification notification
+
+    morphologicalParserGenerateAndCompileFail: (error, parserId) ->
+      notification = new NotificationView
+        title: "Parser generate and compile fail"
+        content: "Your attempt to generate and compile parser #{parserId}
+          failed: #{error}"
+        type: 'error'
+      @renderNotification notification
+
+    morphologicalParserGenerateAndCompileSuccess: (parserId) ->
+      notification = new NotificationView
+        title: "Parse success"
+        content: "Your attempt to parse using morphological parser #{parserId}
+          was successful"
       @renderNotification notification
 
     registerFail: (reason) ->

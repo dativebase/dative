@@ -105,3 +105,61 @@ define ['./resource'], (ResourceModel) ->
       'language_model'
     ]
 
+    # Request a parse for a word.
+    # PUT `<URL>/morphologicalparsers/<id>/parse`
+    parse: (words) ->
+      @trigger "parseStart"
+      @constructor.cors.request(
+        method: 'PUT'
+        url: "#{@getOLDURL()}/morphologicalparsers/#{@get 'id'}/parse"
+        payload: @getParsePayload words
+        onload: (responseJSON, xhr) =>
+          @trigger "parseEnd"
+          if xhr.status is 200
+            @trigger "parseSuccess", responseJSON
+          else
+            error = responseJSON.error or 'No error message provided.'
+            @trigger "parseFail", error
+            console.log "PUT request to
+              #{@getOLDURL()}/morphologicalparsers/#{@get 'id'}/parse
+              failed (status not 200)."
+            console.log error
+        onerror: (responseJSON) =>
+          @trigger "parseEnd"
+          error = responseJSON.error or 'No error message provided.'
+          @trigger "parseFail", error
+          console.log "Error in PUT request to
+            #{@getOLDURL()}/morphologicalparsers/#{@get 'id'}/parse
+            (onerror triggered)."
+      )
+
+    getParsePayload: (words) ->
+      {transcriptions: words.split(/\s+/)}
+
+
+    # Perform a "generate and compile" request.
+    # PUT `<URL>/morphologicalparsers/{id}/generate_and_compile`
+    generateAndCompile: ->
+      @trigger "generateAndCompileStart"
+      @constructor.cors.request(
+        method: 'PUT'
+        url: "#{@getOLDURL()}/morphologicalparsers/#{@get 'id'}/generate_and_compile"
+        onload: (responseJSON, xhr) =>
+          @trigger "generateAndCompileEnd"
+          if xhr.status is 200
+            @trigger "generateAndCompileSuccess", responseJSON
+          else
+            error = responseJSON.error or 'No error message provided.'
+            @trigger "generateAndCompileFail", error
+            console.log "PUT request to
+              #{@getOLDURL()}/morphologicalparsers/#{@get 'id'}/generate_and_compile
+              failed (status not 200)."
+            console.log error
+        onerror: (responseJSON) =>
+          @trigger "generateAndCompileEnd"
+          error = responseJSON.error or 'No error message provided.'
+          @trigger "generateAndCompileFail", error
+          console.log "Error in PUT request to
+            #{@getOLDURL()}/morphologicalparsers/#{@get 'id'}/generate_and_compile
+            (onerror triggered)."
+      )

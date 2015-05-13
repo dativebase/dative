@@ -52,6 +52,7 @@ define [
     # 'update', 'delete', 'export', 'history'.
     excludedActions: [
       'history'
+      'extra-actions'
     ]
 
     getUpdateViewType: -> if @model.get('id') then 'update' else 'add'
@@ -545,6 +546,10 @@ define [
         when 69 # "e" for "export"
           if not @addUpdateResourceWidgetHasFocus()
             @$('.export-resource').first().click()
+        when 88 # "x" for "eXtra actions"
+          if not @addUpdateResourceWidgetHasFocus()
+            @$('.resource-actions').first().click()
+
 
     ############################################################################
     # Hide & Show stuff

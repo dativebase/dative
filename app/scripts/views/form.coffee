@@ -26,7 +26,7 @@ define [
     getHeaderTitle: -> ''
 
     # Forms have histories, so we remove 'history' from the excluded actions.
-    excludedActions: []
+    excludedActions: ['extra-actions']
 
     listenToEvents: ->
       super

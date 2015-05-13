@@ -6,7 +6,7 @@
   <div class='button-container-left'>
 
     <button class="hide-resource-add-widget dative-tooltip"
-            title="hide this <%= @resourceName %> <%= @addUpdateType %> widget">
+            title="hide this <%= @resourceNameHuman %> <%= @addUpdateType %> widget">
       <i class='fa fa-times fa-fw'></i>
     </button>
 
@@ -35,9 +35,9 @@
 
     <button class='resource-add-help dative-tooltip'
       <% if @addUpdateType is 'add': %>
-            title='help with adding a <%= @resourceName %>'
+            title='help with adding a <%= @resourceNameHuman %>'
       <% else: %>
-            title='help with updating a <%= @resourceName %>'
+            title='help with updating a <%= @resourceNameHuman %>'
       <% end %>
     ><i class='fa fa-fw fa-question'></i>
     </button>
@@ -60,9 +60,9 @@
         <button
           class="add-resource-button dative-tooltip"
           <% if @addUpdateType is 'add': %>
-              title='Create this new <%= @resourceName %>'
+              title='Create this new <%= @resourceNameHuman %>'
           <% else: %>
-              title='Save changes to this <%= @resourceName %>'
+              title='Save changes to this <%= @resourceNameHuman %>'
           <% end %>
           >Save</button>
 

@@ -71,6 +71,7 @@ define [
       @renderPersistentSubviews()
       # @configureFieldDB() # FieldDB stuff commented out until it can be better incorporated
       @matchWindowDimensions()
+      @
 
     listenToEvents: ->
       @listenTo @mainMenuView, 'request:home', @showHomePageView
@@ -443,6 +444,7 @@ define [
       if not @homePageView then @homePageView = new HomePageView()
       @visibleView = @homePageView
       @renderVisibleView()
+      console.clear()
 
     showCorporaView: ->
       if not @loggedIn() then return

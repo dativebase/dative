@@ -76,6 +76,14 @@
         </button>
       <% end %>
 
+      <% if 'extra-actions' not in @excludedActions: %>
+        <button class="resource-actions dative-tooltip"
+                title="view additional actions related to this
+                <%= @resourceNameHumanReadable() %>"
+                ><i class='fa fa-cog fa-fw'></i>
+        </button>
+      <% end %>
+
     <% end %>
 
   </div>
@@ -84,6 +92,11 @@
 
 
 <div class='dative-widget-body'>
+
+  <% if 'extra-actions' not in @excludedActions: %>
+    <div class='resource-actions-widget dative-widget-center
+      dative-shadowed-widget ui-widget ui-widget-content ui-corner-all'></div>
+  <% end %>
 
   <div class='update-resource-widget update-widget dative-widget-center
     dative-shadowed-widget ui-widget ui-widget-content ui-corner-all'></div>

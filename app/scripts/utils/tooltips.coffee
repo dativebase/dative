@@ -33,6 +33,30 @@ define ['./utils'], (utils) ->
       else
         "The date and time when this resource was entered"
 
+  parserGenerateSucceeded =
+    eng: (options) ->
+      if 'value' of options
+        if options.value is true
+          'The most recent attempt to generate a FST script for this parser was
+            successful.'
+        else
+          'The most recent attempt to generate a FST script for this parser was
+            NOT successful.'
+      else
+        'Will be true if the last generate attempt succeeded; false otherwise.'
+
+  parserCompileSucceeded =
+    eng: (options) ->
+      if 'value' of options
+        if options.value is true
+          'The most recent attempt to compile the FST script of this parser was
+            successful.'
+        else
+          'The most recent attempt to compile the FST script for this parser was
+            NOT successful.'
+      else
+        'Will be true if the last generate attempt succeeded; false otherwise.'
+
   datetimeModified =
     eng: (options) ->
       if options.value and options.resourceName
@@ -133,6 +157,8 @@ define ['./utils'], (utils) ->
         datetime_modified: datetimeModified
         enterer: enterer
         modifier: modifier
+        generate_succeeded: parserGenerateSucceeded
+        compile_succeeded: parserCompileSucceeded
 
         phonology:
           eng: 'The phonology of the morphological parser.'
@@ -152,10 +178,6 @@ define ['./utils'], (utils) ->
             to generate a morphological parser based on the values specified
             here.'
 
-        generate_succeeded:
-          eng: 'Will be true if the last generate attempt succeeded; false
-          otherwise.'
-
         compile_message:
           eng: 'The message returned by the OLD after an attempt to compile
             this morphological parser.'
@@ -163,10 +185,6 @@ define ['./utils'], (utils) ->
         compile_attempt:
           eng: 'A unique value (a UUID) created by the OLD after each attempt
             to compile a morphological parser.'
-
-        compile_succeeded:
-          eng: 'Will be true if the last compile attempt succeeded; false
-          otherwise.'
 
         morphology_rare_delimiter:
           eng: 'A Unicode character used to separate shape, gloss and category
