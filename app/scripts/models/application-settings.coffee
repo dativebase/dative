@@ -328,9 +328,14 @@ define [
     defaults: ->
 
       server1 = new FieldDB.Connection(FieldDB.Connection.defaultConnection('localhost') ) ;
-      server1.id = @guid()
-      server1.type = 'FieldDB'
-      server1.name = server1.userFriendlyServerName
+      server1 = 
+        id: @guid()
+        name: server1.userFriendlyServerName
+        type: 'FieldDB'
+        website: server1.website
+        url: server1.authUrl
+        serverCode: server1.serverLabel
+        corpusServerURL: server1.corpusUrl
 
       server2 =
         id: @guid()
@@ -342,9 +347,14 @@ define [
         corpusServerURL: null
 
       server3 = new FieldDB.Connection(FieldDB.Connection.defaultConnection('lingsync') ) ;
-      server3.id = @guid()
-      server3.type = 'FieldDB'
-      server3.name = server3.userFriendlyServerName
+      server3 = 
+        id: @guid()
+        name: server3.userFriendlyServerName
+        type: 'FieldDB'
+        website: server3.website
+        url: server3.authUrl
+        serverCode: server3.serverLabel
+        corpusServerURL: server3.corpusUrl
 
       server4 =
         id: @guid()
