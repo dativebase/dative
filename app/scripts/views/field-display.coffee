@@ -116,7 +116,7 @@ define [
     # context.
     shouldBeHidden: ->
       value = @context.value
-      if _.isDate(value) or _.isNumber(value)
+      if _.isDate(value) or _.isNumber(value) or _.isBoolean(value)
         false
       else if _.isEmpty(value) or @isValueless(value)
         true

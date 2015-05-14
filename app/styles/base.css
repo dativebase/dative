@@ -200,6 +200,11 @@ button.help-button
   margin-bottom: 0.4em;
 }
 
+.dative-field-display-representation-container
+{
+  overflow-x: scroll;
+}
+
 .dative-field-display-representation-container,
 .dative-field-input-container
 {
@@ -1441,5 +1446,48 @@ textarea.script
 .diffed
 {
   padding: 0.1em;
+}
+
+div.igt-word
+{
+  display: inline-block;
+}
+
+div.igt-word,
+td.igt-word-cell
+{
+  white-space: nowrap;
+}
+
+table.igt-table tr td
+{
+  padding-bottom: 0.25em;
+}
+
+button.align-top
+{
+  vertical-align: top;
+}
+
+.resource-action-input
+{
+  width: 80%;
+  max-width: 80%;
+  min-width: 80%;
+}
+
+i.boolean-icon
+{
+  font-family: FontAwesome;
+}
+
+i.boolean-icon.false
+{
+  color: red;
+}
+
+i.boolean-icon.true
+{
+  color: green;
 }
 

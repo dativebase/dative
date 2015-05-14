@@ -48,6 +48,7 @@ define [
     initialize: (options) ->
       @resourceNameCapitalized = @utils.capitalize @resourceName
       @resourceNamePlural = @utils.pluralize @resourceName
+      @resourceNameHuman = @utils.camel2regular @resourceName
       @resourceNamePluralCapitalized = @utils.capitalize @resourceNamePlural
       @enumerateResources = options?.enumerateResources or false
       @getGlobalsResourcesDisplaySettings()
@@ -111,7 +112,9 @@ define [
     html: ->
       @$el.html @template
         resourceName: @resourceName
+        resourceNameHuman: @utils.camel2regular @resourceName
         resourceNamePlural: @resourceNamePlural
+        resourceNamePluralHuman: @utils.camel2regular @resourceNamePlural
         pluralizeByNum: @utils.pluralizeByNum
         paginator: @paginator
 
@@ -221,12 +224,13 @@ define [
       @refreshPaginationMenuTop()
 
       # 3. If the new resource should be displayed on the current page, then
-      # do that.
+      # do that; otherwise notify the user that it's on the last page.
       Backbone.trigger "add#{@resourceNameCapitalized}Success", resourceModel
       if newResourceShouldBeOnCurrentPage
         @addNewResourceViewToPage()
         @closeNewResourceView()
       else
+        @notifyNewResourceOnLastPage resourceModel
         @closeNewResourceView()
 
       # 4. create a new new resource widget but don't display it.
@@ -236,6 +240,9 @@ define [
       @renderNewResourceView()
       @newResourceViewVisibility()
       @listenToNewResourceView()
+
+    notifyNewResourceOnLastPage: (resourceModel) ->
+      Backbone.trigger 'newResourceOnLastPage', resourceModel, @resourceName
 
     destroyResourceSuccess: (resourceModel) ->
       @collection.remove resourceModel
@@ -382,7 +389,7 @@ define [
     openResourcesBrowseHelp: ->
       Backbone.trigger(
         'helpDialog:openTo',
-        searchTerm: "browsing #{@resourceNamePlural}"
+        searchTerm: "browsing #{@utils.camel2regular @resourceNamePlural}"
         scrollToIndex: 1
       )
 
@@ -433,7 +440,8 @@ define [
         .button()
         .tooltip
           items: 'button'
-          content: "#{@resourceName} labels are off; click here to turn them on"
+          content: "#{@resourceNameHuman} labels are off; click here to turn
+            them on"
 
     # Set "toggle all labels" button to state open.
     setToggleAllLabelsButtonStateOpen: ->
@@ -445,7 +453,8 @@ define [
         .button()
         .tooltip
           items: 'button'
-          content: "#{@resourceName} labels are on; click here to turn them off"
+          content: "#{@resourceNameHuman} labels are on; click here to turn
+            them off"
 
     # Tell all rendered resources to expand themselves; listen for one notice
     # of expansion from a resource view and respond by restoring the focus and
@@ -638,12 +647,13 @@ define [
       @setNewResourceViewButtonState()
       if @paginator.start is @paginator.end
         @$('.resource-range')
-          .text "#{@resourceName} #{@utils.integerWithCommas(@paginator.start + 1)}"
+          .text("#{@utils.camel2regular @resourceName}
+            #{@utils.integerWithCommas(@paginator.start + 1)}")
       else
-        @$('.resource-range').text "#{@resourceNamePlural}
+        @$('.resource-range').text("#{@utils.camel2regular @resourceNamePlural}
           #{@utils.integerWithCommas(@paginator.start + 1)}
           to
-          #{@utils.integerWithCommas(@paginator.end + 1)}"
+          #{@utils.integerWithCommas(@paginator.end + 1)}")
       @$('.resource-count').text @utils.integerWithCommas(@paginator.items)
       @$('.resource-count-noun').text(
         @utils.pluralizeByNum(@resourceName, @paginator.items))
@@ -968,7 +978,7 @@ define [
       @$('button.new-resource')
         .button 'enable'
         .tooltip
-          content: "create a new #{@resourceName}"
+          content: "create a new #{@resourceNameHuman}"
 
     # The resource add view show "+" button is disabled when the view is visible; to
     # hide the view, you click on the ^ button on the view itself.
@@ -1008,6 +1018,7 @@ define [
       for attribute in editableAttributes
         delete defaults[attribute]
       newResourceModel.set defaults
+      newResourceModel.collection = @collection
 
       # TODO: if the current New Resource view has a non-empty model we should
       # either warn the user about that or we should intelligently store that

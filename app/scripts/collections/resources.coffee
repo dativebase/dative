@@ -170,7 +170,7 @@ define [
     # server-side name for the resource; however, this can be overridden with
     # `@serverSideResourceName`, as is necessary with "subcorpora"/"corpora".
     getServerSideResourceName: ->
-      @serverSideResourceName or @resourceNamePlural
+      @serverSideResourceName or @resourceNamePlural.toLowerCase()
 
     # Return a URL for requesting a page of <resource_name_plural> from an OLD
     # web service. GET parameters control pagination and ordering. See

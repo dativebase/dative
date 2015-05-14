@@ -8,4 +8,5 @@ test/bower_components/
 *.sw?
 docs
 notes
+app/styles/font-awesome-4.2.0
 

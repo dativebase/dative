@@ -28,7 +28,8 @@ define [
       @resourceNameCapitalized = @utils.capitalize @resourceName
       @resourceNamePlural = @utils.pluralize @resourceName
       @resourceNamePluralCapitalized = @utils.capitalize @resourceNamePlural
-      if options?.collection then @collection = options.collection
+      options = options or {}
+      if options.collection then @collection = options.collection
       @activeServerType = @getActiveServerType()
       super attributes, options
 

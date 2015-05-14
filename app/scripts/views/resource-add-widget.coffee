@@ -118,6 +118,7 @@ define [
         headerTitle: @getHeaderTitle()
         activeServerType: @getActiveServerType()
         resourceName: @resourceName
+        resourceNameHuman: @utils.camel2regular @resourceName
       @$el
         .attr 'id', @model.cid
         .html @template(context)

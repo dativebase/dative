@@ -21,6 +21,8 @@ define [
         'subcorpus'
         'phonology'
         'morphology'
+        'languageModel'
+        'morphologicalParser'
       ]
       @crudRequests = ['add', 'update', 'destroy']
       @crudOutcomes = ['Success', 'Fail']
@@ -40,7 +42,18 @@ define [
       @listenTo Backbone, 'register:success', @registerSuccess
 
       @listenTo Backbone, 'fetchHistoryFormFail', @fetchHistoryFormFail
-      @listenTo Backbone, 'fetchHistoryFormFailNoHistory', @fetchHistoryFormFailNoHistory
+      @listenTo Backbone, 'fetchHistoryFormFailNoHistory',
+        @fetchHistoryFormFailNoHistory
+
+      @listenTo Backbone, 'newResourceOnLastPage', @newResourceOnLastPage
+
+      @listenTo Backbone, 'morphologicalParseFail', @morphologicalParseFail
+      @listenTo Backbone, 'morphologicalParseSuccess',
+        @morphologicalParseSuccess
+      @listenTo Backbone, 'morphologicalParserGenerateAndCompileFail',
+        @morphologicalParserGenerateAndCompileFail
+      @listenTo Backbone, 'morphologicalParserGenerateAndCompileSuccess',
+        @morphologicalParserGenerateAndCompileSuccess
 
       @listenToCRUDResources()
 
@@ -161,11 +174,46 @@ define [
 
     addMorphologySuccess: (model) -> @addResourceSuccess model, 'morphology'
     addMorphologyFail: (error) -> @addResourceFail error, 'morphology'
-    updateMorphologySuccess: (model) -> @updateResourceSuccess model, 'morphology'
+    updateMorphologySuccess: (model) ->
+      @updateResourceSuccess model, 'morphology'
     updateMorphologyFail: (error) -> @updateResourceFail error, 'morphology'
     destroyMorphologyFail: (error) -> @destroyResourceFail error, 'morphology'
     destroyMorphologySuccess: (model) ->
       @destroyResourceSuccess model, 'morphology'
+
+    ############################################################################
+    # Language models: add, update, & destroy notifications
+    ############################################################################
+
+    addLanguageModelSuccess: (model) ->
+      @addResourceSuccess model, 'language model'
+    addLanguageModelFail: (error) ->
+      @addResourceFail error, 'language model'
+    updateLanguageModelSuccess: (model) ->
+      @updateResourceSuccess model, 'language model'
+    updateLanguageModelFail: (error) ->
+      @updateResourceFail error, 'language model'
+    destroyLanguageModelFail: (error) ->
+      @destroyResourceFail error, 'language model'
+    destroyLanguageModelSuccess: (model) ->
+      @destroyResourceSuccess model, 'language model'
+
+    ############################################################################
+    # Morphological parsers: add, update, & destroy notifications
+    ############################################################################
+
+    addMorphologicalParserSuccess: (model) ->
+      @addResourceSuccess model, 'morphological parser'
+    addMorphologicalParserFail: (error) ->
+      @addResourceFail error, 'morphological parser'
+    updateMorphologicalParserSuccess: (model) ->
+      @updateResourceSuccess model, 'morphological parser'
+    updateMorphologicalParserFail: (error) ->
+      @updateResourceFail error, 'morphological parser'
+    destroyMorphologicalParserFail: (error) ->
+      @destroyResourceFail error, 'morphological parser'
+    destroyMorphologicalParserSuccess: (model) ->
+      @destroyResourceSuccess model, 'morphological parser'
 
     ############################################################################
     # Resources: add, update, & destroy notifications
@@ -228,6 +276,43 @@ define [
         title: "No history"
         content: "There are no previous versions for form #{formModel.id}"
         type: 'warning'
+      @renderNotification notification
+
+    newResourceOnLastPage: (resourceModel, resourceName) ->
+      notification = new NotificationView
+        title: "New #{resourceName} on last page"
+        content: "The #{resourceName} that you just created can be viewed on the last page"
+        type: 'warning'
+      @renderNotification notification
+
+    morphologicalParseFail: (error, parserId) ->
+      notification = new NotificationView
+        title: "Parse fail"
+        content: "Your attempt to parse using morphological parser #{parserId}
+          failed: #{error}"
+        type: 'error'
+      @renderNotification notification
+
+    morphologicalParseSuccess: (parserId) ->
+      notification = new NotificationView
+        title: "Parse success"
+        content: "Your attempt to parse using morphological parser #{parserId}
+          was successful; see the parses below the word input field."
+      @renderNotification notification
+
+    morphologicalParserGenerateAndCompileFail: (error, parserId) ->
+      notification = new NotificationView
+        title: "Parser generate and compile fail"
+        content: "Your attempt to generate and compile parser #{parserId}
+          failed: #{error}"
+        type: 'error'
+      @renderNotification notification
+
+    morphologicalParserGenerateAndCompileSuccess: (parserId) ->
+      notification = new NotificationView
+        title: "Parse success"
+        content: "Your attempt to parse using morphological parser #{parserId}
+          was successful"
       @renderNotification notification
 
     registerFail: (reason) ->
