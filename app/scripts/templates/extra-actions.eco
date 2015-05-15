@@ -1,0 +1,35 @@
+<div class="dative-widget-header ui-widget-header ui-corner-top">
+
+  <div class='dative-widget-header-title container-center'
+    ><%= @headerTitle %></div>
+
+  <div class='button-container-left'>
+
+    <button class="hide-resource-actions-widget dative-tooltip"
+            title="hide this <%= @resourceName %> extra actions widget">
+      <i class='fa fa-times fa-fw'></i>
+    </button>
+
+  </div>
+
+  <div class='button-container-right'>
+
+    <span class="spinner-container"></span>
+
+    <button class='resource-actions-help dative-tooltip'
+            title='help with using the additional actions of this
+              <%= @resourceName %>'
+    ><i class='fa fa-fw fa-question'></i>
+    </button>
+
+  </div>
+
+</div>
+
+<div class="dative-widget-body">
+
+  <div class="resource-actions-container"></div>
+
+</div>
+
+

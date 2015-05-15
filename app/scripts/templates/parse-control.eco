@@ -1,0 +1,18 @@
+<textarea
+    rows='1'
+    name='parse'
+    class='ui-corner-all
+           form-add-input
+           dative-tooltip
+           dative-input-field
+           resource-action-input'
+    title='Enter one or more words here and click the “Parse” button
+        in order to parse those words using this parser.'
+></textarea>
+<button
+    class='parse align-top dative-tooltip'
+    title='Enter one or more words in the input on the left and click here
+        in order to parse those words using this parser.'
+>Parse</button>
+<div class='parse-results'></div>
+

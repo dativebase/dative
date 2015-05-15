@@ -1,0 +1,7 @@
+<button
+    class='generate-and-compile dative-tooltip'
+    title='Click this button to request that this parser’s FST script be
+        generated and compiled so that it can be used to parse.'
+>Generate &amp; Compile</button>
+<div class='generate-and-compile-results'></div>
+

@@ -402,3 +402,6 @@ define [
         _.extend result, object
       result
 
+    # Can be overridden in sub-classes with more sophisticated button behaviour.
+    buttonify: -> @$('button').button()
+

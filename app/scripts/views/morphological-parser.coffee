@@ -20,23 +20,9 @@ define [
 
     resourceName: 'morphologicalParser'
 
-    initialize: (options) ->
-      console.clear() # For development purposes, can be removed later.
-      super options
-      @events['click .resource-actions'] = 'toggleExtraActionsViewAnimate'
-      @extraActionsView = new MorphologicalParserExtraActionsView(model: @model)
-      @extraActionsViewRendered = false
-      @resourceNameHumanReadable = =>
-        @utils.camel2regular @resourceName
+    excludedActions: ['history']
 
-    listenToEvents: ->
-      super
-      @listenTo @extraActionsView, "extraActionsView:hide",
-        @hideExtraActionsViewAnimate
-
-    guify: ->
-      super
-      @extraActionsViewVisibility()
+    extraActionsViewClass: MorphologicalParserExtraActionsView
 
     resourceAddWidgetView: MorphologicalParserAddWidgetView
 
@@ -78,81 +64,4 @@ define [
       generate_succeeded: BooleanIconFieldDisplayView
       compile_succeeded: BooleanIconFieldDisplayView
 
-    # An array of actions that are not relevant to this resource, e.g.,
-    # 'update', 'delete', 'export', 'history'.
-    excludedActions: [
-      'history'
-    ]
-
-    setState: (options) ->
-      options.extraActionsViewVisible = false
-      super options
-
-
-    # Extra Actions View
-    ############################################################################
-
-    # Make the extra actions view visible, or not, depending on state.
-    extraActionsViewVisibility: ->
-      if @extraActionsViewVisible
-        @showExtraActionsView()
-      else
-        @hideExtraActionsView()
-
-    setExtraActionsButtonStateOpen: -> @$('.resource-actions').button 'disable'
-
-    setExtraActionsButtonStateClosed: -> @$('.resource-actions').button 'enable'
-
-    # Render the extra actions view.
-    renderExtraActionsView: ->
-      @extraActionsView.setElement @$('.resource-actions-widget').first()
-      @extraActionsView.render()
-      @extraActionsViewRendered = true
-      @rendered @extraActionsView
-
-    showExtraActionsView: ->
-      if not @extraActionsViewRendered then @renderExtraActionsView()
-      @extraActionsViewVisible = true
-      @setExtraActionsButtonStateOpen()
-      @$('.resource-actions-widget').first().show
-        complete: =>
-          @showFull()
-          Backbone.trigger "add#{@resourceNameCapitalized}WidgetVisible"
-          @focusFirstExtraActionsViewTextarea()
-
-    hideExtraActionsView: ->
-      @extraActionsViewVisible = false
-      @setExtraActionsButtonStateClosed()
-      @$('.resource-actions-widget').first().hide()
-
-    toggleExtraActionsView: ->
-      if @extraActionsViewVisible
-        @hideExtraActionsView()
-      else
-        @showExtraActionsView()
-
-    showExtraActionsViewAnimate: ->
-      if not @extraActionsViewRendered then @renderExtraActionsView()
-      @extraActionsViewVisible = true
-      @setExtraActionsButtonStateOpen()
-      @$('.resource-actions-widget').first().slideDown
-        complete: =>
-          @showFullAnimate()
-          Backbone.trigger "showExtraActionsViewVisible"
-          @focusFirstExtraActionsViewTextarea()
-
-    focusFirstExtraActionsViewTextarea: ->
-      @$('.resource-actions-widget textarea').first().focus()
-
-    hideExtraActionsViewAnimate: ->
-      @extraActionsViewVisible = false
-      @setExtraActionsButtonStateClosed()
-      @$('.resource-actions-widget').first().slideUp
-        complete: => @$el.focus()
-
-    toggleExtraActionsViewAnimate: ->
-      if @extraActionsViewVisible
-        @hideExtraActionsViewAnimate()
-      else
-        @showExtraActionsViewAnimate()
 

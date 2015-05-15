@@ -55,6 +55,12 @@ define [
       @listenTo Backbone, 'morphologicalParserGenerateAndCompileSuccess',
         @morphologicalParserGenerateAndCompileSuccess
 
+      @listenTo Backbone, 'phonologyApplyDownFail', @phonologyApplyDownFail
+      @listenTo Backbone, 'phonologyApplyDownSuccess',
+        @phonologyApplyDownSuccess
+      @listenTo Backbone, 'phonologyCompileFail', @phonologyCompileFail
+      @listenTo Backbone, 'phonologyCompileSuccess', @phonologyCompileSuccess
+
       @listenToCRUDResources()
 
     listenToCRUDResources: ->
@@ -310,9 +316,39 @@ define [
 
     morphologicalParserGenerateAndCompileSuccess: (parserId) ->
       notification = new NotificationView
-        title: "Parse success"
-        content: "Your attempt to parse using morphological parser #{parserId}
-          was successful"
+        title: "Parser generate and compile success"
+        content: "Your attempt to generate and compile the morphological parser
+          #{parserId} was successful"
+      @renderNotification notification
+
+    phonologyCompileFail: (error, phonologyId) ->
+      notification = new NotificationView
+        title: "Phonology compile fail"
+        content: "Your attempt to compile phonology #{phonologyId}
+          failed: #{error}"
+        type: 'error'
+      @renderNotification notification
+
+    phonologyCompileSuccess: (message, phonologyId) ->
+      notification = new NotificationView
+        title: "Phonology compile success"
+        content: "Your attempt to compile phonology #{phonologyId} was
+          successful: #{message}"
+      @renderNotification notification
+
+    phonologyApplyDownFail: (error, phonologyId) ->
+      notification = new NotificationView
+        title: "Phonologize fail"
+        content: "Your attempt to phonologize using phonology #{phonologyId}
+          failed: #{error}"
+        type: 'error'
+      @renderNotification notification
+
+    phonologyApplyDownSuccess: (phonologyId) ->
+      notification = new NotificationView
+        title: "Phonologize success"
+        content: "Your attempt to phonologize using phonology #{phonologyId}
+          was successful; see the surface forms below the word input field."
       @renderNotification notification
 
     registerFail: (reason) ->

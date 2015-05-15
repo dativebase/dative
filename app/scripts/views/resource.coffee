@@ -34,6 +34,10 @@ define [
       dative-paginated-item dative-widget-center ui-widget ui-widget-content
       ui-corner-all'
 
+    # Since this will be called from within templates, the `=>` is necessary.
+    resourceNameHumanReadable: =>
+      @utils.camel2regular @resourceName
+
     initialize: (options) ->
       @resourceNameCapitalized = @utils.capitalize @resourceName
       @resourceNamePlural = @utils.pluralize @resourceName
@@ -47,13 +51,20 @@ define [
         model: @model,
         addUpdateType: @addUpdateType
       @updateViewRendered = false
+      if 'extra-actions' not in @excludedActions
+        @extraActionsView = new @extraActionsViewClass(model: @model)
+        @extraActionsViewRendered = false
 
     # An array of actions that are not relevant to this resource, e.g.,
-    # 'update', 'delete', 'export', 'history'.
+    # 'history', and 'extra-actions'.
+    # WARN: if you remove 'extra-actions' from this array, then you MUST assign
+    # a working "extra actions" view to `@extraActionsViewClass`.
     excludedActions: [
       'history'
       'extra-actions'
     ]
+
+    extraActionsViewClass: null
 
     getUpdateViewType: -> if @model.get('id') then 'update' else 'add'
 
@@ -73,6 +84,7 @@ define [
         headerTitleAttribute: 'name' # the attribute of the model that should be displayed in the header center.
         secondaryDataVisible: false # comments, tags, etc.
         updateViewVisible: false
+        extraActionsViewVisible: false
       _.extend defaults, options
       for key, value of defaults
         @[key] = value
@@ -110,6 +122,9 @@ define [
       @listenTo @updateView, 'forceModelChanged', @indicateModelState
       @listenTo @model, "update#{@resourceNameCapitalized}Success",
         @indicateModelIsUnaltered
+      if 'extra-actions' not in @excludedActions
+        @listenTo @extraActionsView, "extraActionsView:hide",
+          @hideExtraActionsViewAnimate
 
     indicateModelState: ->
       if @updateView.modelAltered()
@@ -143,6 +158,7 @@ define [
       'click .duplicate-resource': 'duplicate'
       'click .delete-resource': 'deleteConfirm'
       'click .export-resource': 'exportResource'
+      'click .resource-actions': 'toggleExtraActionsViewAnimate'
 
     exportResource: (event) ->
       if event then @stopEvent event
@@ -215,8 +231,6 @@ define [
       attribute: attribute # e.g., "name"
       model: @model
 
-    resourceNameHumanReadable: -> @resourceName
-
     html: ->
       @$el
         .attr 'tabindex', 0
@@ -280,6 +294,8 @@ define [
       @headerVisibility()
       @secondaryDataVisibility()
       @updateViewVisibility()
+      if 'extra-actions' not in @excludedActions
+        @extraActionsViewVisibility()
 
     # Make the header visible, or not, depending on state.
     headerVisibility: ->
@@ -814,4 +830,72 @@ define [
     spin: -> @$('.spinner-container').spin @spinnerOptions()
 
     stopSpin: -> @$('.spinner-container').spin false
+
+
+    # Extra Actions View
+    ############################################################################
+
+    # Make the extra actions view visible, or not, depending on state.
+    extraActionsViewVisibility: ->
+      if @extraActionsViewVisible
+        @showExtraActionsView()
+      else
+        @hideExtraActionsView()
+
+    setExtraActionsButtonStateOpen: -> @$('.resource-actions').button 'disable'
+
+    setExtraActionsButtonStateClosed: -> @$('.resource-actions').button 'enable'
+
+    # Render the extra actions view.
+    renderExtraActionsView: ->
+      @extraActionsView.setElement @$('.resource-actions-widget').first()
+      @extraActionsView.render()
+      @extraActionsViewRendered = true
+      @rendered @extraActionsView
+
+    showExtraActionsView: ->
+      if not @extraActionsViewRendered then @renderExtraActionsView()
+      @extraActionsViewVisible = true
+      @setExtraActionsButtonStateOpen()
+      @$('.resource-actions-widget').first().show
+        complete: =>
+          @showFull()
+          Backbone.trigger "add#{@resourceNameCapitalized}WidgetVisible"
+          @focusFirstExtraActionsViewTextarea()
+
+    hideExtraActionsView: ->
+      @extraActionsViewVisible = false
+      @setExtraActionsButtonStateClosed()
+      @$('.resource-actions-widget').first().hide()
+
+    toggleExtraActionsView: ->
+      if @extraActionsViewVisible
+        @hideExtraActionsView()
+      else
+        @showExtraActionsView()
+
+    showExtraActionsViewAnimate: ->
+      if not @extraActionsViewRendered then @renderExtraActionsView()
+      @extraActionsViewVisible = true
+      @setExtraActionsButtonStateOpen()
+      @$('.resource-actions-widget').first().slideDown
+        complete: =>
+          @showFullAnimate()
+          Backbone.trigger "showExtraActionsViewVisible"
+          @focusFirstExtraActionsViewTextarea()
+
+    focusFirstExtraActionsViewTextarea: ->
+      @$('.resource-actions-widget textarea').first().focus()
+
+    hideExtraActionsViewAnimate: ->
+      @extraActionsViewVisible = false
+      @setExtraActionsButtonStateClosed()
+      @$('.resource-actions-widget').first().slideUp
+        complete: => @$el.focus()
+
+    toggleExtraActionsViewAnimate: ->
+      if @extraActionsViewVisible
+        @hideExtraActionsViewAnimate()
+      else
+        @showExtraActionsViewAnimate()
 

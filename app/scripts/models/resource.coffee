@@ -101,6 +101,38 @@ define [
     getServerSideResourceName: ->
       @serverSideResourceName or @resourceNamePlural
 
+    # Fetch a resource by id.
+    # GET `<URL>/<resource_name_plural>/<resource.id>`
+    fetchResource: (id) ->
+      @trigger "fetch#{@resourceNameCapitalized}Start"
+      @constructor.cors.request(
+        method: 'GET'
+        url: @getFetchResourceURL id
+        onload: (responseJSON, xhr) =>
+          @fetchResourceOnloadHandler responseJSON, xhr
+        onerror: (responseJSON) =>
+          @trigger "fetch#{@resourceNameCapitalized}End"
+          error = responseJSON.error or 'No error message provided.'
+          @trigger "fetch#{@resourceNameCapitalized}Fail", error
+          console.log "Error in DELETE request to
+            /#{@getServerSideResourceName()}/#{@get 'id'} (onerror triggered)."
+      )
+
+    # The type of URL used to fetch a resource on an OLD backend.
+    getFetchResourceURL: (id) ->
+      "#{@getOLDURL()}/#{@getServerSideResourceName()}/#{id}"
+
+    fetchResourceOnloadHandler: (responseJSON, xhr) ->
+      @trigger "fetch#{@resourceNameCapitalized}End"
+      if xhr.status is 200
+        @trigger "fetch#{@resourceNameCapitalized}Success", responseJSON
+      else
+        error = responseJSON.error or 'No error message provided.'
+        @trigger "fetch#{@resourceNameCapitalized}Fail", error
+        console.log "GET request to /#{@getServerSideResourceName()}/#{@get 'id'}
+          failed (status not 200)."
+        console.log error
+
     # Issue a GET request to /<resource_name_plural>/new on the active OLD
     # server. In the OLD API, this type of request returns a JSON object
     # containing the data necessary to create a new OLD resource.

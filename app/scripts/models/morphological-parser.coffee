@@ -163,3 +163,4 @@ define ['./resource'], (ResourceModel) ->
             #{@getOLDURL()}/morphologicalparsers/#{@get 'id'}/generate_and_compile
             (onerror triggered)."
       )
+

@@ -1,10 +1,12 @@
 define [
   './resource'
+  './phonology-extra-actions'
   './phonology-add-widget'
   './person-field-display'
   './date-field-display'
-], (ResourceView, PhonologyAddWidgetView, PersonFieldDisplayView,
-  DateFieldDisplayView) ->
+  './boolean-icon-display'
+], (ResourceView, PhonologyExtraActionsView, PhonologyAddWidgetView,
+  PersonFieldDisplayView, DateFieldDisplayView, BooleanIconFieldDisplayView) ->
 
   # Phonology View
   # --------------
@@ -14,6 +16,10 @@ define [
   class PhonologyView extends ResourceView
 
     resourceName: 'phonology'
+
+    excludedActions: ['history']
+
+    extraActionsViewClass: PhonologyExtraActionsView
 
     resourceAddWidgetView: PhonologyAddWidgetView
 
@@ -25,7 +31,6 @@ define [
 
     # Attributes that may be hidden.
     secondaryAttributes: [
-      'script'
       'compile_succeeded'
       'compile_message'
       'compile_attempt'
@@ -35,6 +40,7 @@ define [
       'datetime_modified'
       'UUID'
       'id'
+      'script'
     ]
 
     # Map attribute names to display view class names.
@@ -43,4 +49,5 @@ define [
       modifier: PersonFieldDisplayView
       datetime_entered: DateFieldDisplayView
       datetime_modified: DateFieldDisplayView
+      compile_succeeded: BooleanIconFieldDisplayView
 
