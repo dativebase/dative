@@ -1,0 +1,17 @@
+<textarea
+  rows='1'
+  name='<%= @name %>'
+  class='<%= @class %>
+         ui-corner-all
+         form-add-input
+         dative-tooltip
+         dative-input-field
+         textarea-only
+         script-textarea'
+  <% for attribute, value of @domAttributes: %>
+    <%= attribute %>="<%= value %>"
+  <% end %>
+  title='<%= @title %>'
+  ><%= @value %></textarea>
+
+

@@ -98,7 +98,6 @@ define [
     fetch: -> @model.fetchResource @model.get('id')
 
     fetchPhonologySuccess: (phonologyObject) ->
-      console.log phonologyObject
       if phonologyObject.compile_attempt is @compileAttempt
         @poll()
       else
@@ -120,5 +119,5 @@ define [
       @stopSpin 'button.compile'
       @enableCompileButton()
 
-    poll: -> setTimeout((=> @fetch()), 2000)
+    poll: -> setTimeout((=> @fetch()), 500)
 

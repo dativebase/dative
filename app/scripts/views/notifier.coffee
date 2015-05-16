@@ -60,6 +60,8 @@ define [
         @phonologyApplyDownSuccess
       @listenTo Backbone, 'phonologyCompileFail', @phonologyCompileFail
       @listenTo Backbone, 'phonologyCompileSuccess', @phonologyCompileSuccess
+      @listenTo Backbone, 'phonologyRunTestsFail', @phonologyRunTestsFail
+      @listenTo Backbone, 'phonologyRunTestsSuccess', @phonologyRunTestsSuccess
 
       @listenToCRUDResources()
 
@@ -349,6 +351,22 @@ define [
         title: "Phonologize success"
         content: "Your attempt to phonologize using phonology #{phonologyId}
           was successful; see the surface forms below the word input field."
+      @renderNotification notification
+
+    phonologyRunTestsFail: (error, phonologyId) ->
+      notification = new NotificationView
+        title: "Run tests fail"
+        content: "Your attempt to run the tests of phonology #{phonologyId}
+          was not successful: #{error}"
+        type: 'error'
+      @renderNotification notification
+
+    phonologyRunTestsSuccess: (phonologyId) ->
+      notification = new NotificationView
+        title: "Run tests success"
+        content: "Your attempt to run the tests of phonology #{phonologyId}
+          was successful; see the results in the table below the “Run
+          Tests” button."
       @renderNotification notification
 
     registerFail: (reason) ->

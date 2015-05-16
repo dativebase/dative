@@ -17,6 +17,19 @@ define [
 
     resourceName: 'phonology'
 
+    keydown: (event) ->
+      super event
+      switch event.which
+        when 67
+          if not @addUpdateResourceWidgetHasFocus()
+            @$('button.compile').click()
+        when 82
+          if not @addUpdateResourceWidgetHasFocus()
+            @$('button.run-tests').click()
+        when 191
+          if not @addUpdateResourceWidgetHasFocus()
+            @$('textarea[name=apply-down]').first().focus()
+
     excludedActions: ['history']
 
     extraActionsViewClass: PhonologyExtraActionsView

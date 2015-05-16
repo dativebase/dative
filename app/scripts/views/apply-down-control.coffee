@@ -117,7 +117,7 @@ define [
       @model.applyDown input
 
     applyDownStart: ->
-      @spin 'button.apply-down', '50%', '135%'
+      @spin 'button.apply-down', '50%', '120%'
       @disableApplyDownButton()
 
     applyDownEnd: ->
@@ -129,11 +129,25 @@ define [
 
     applyDownSuccess: (applyDownResults) ->
       Backbone.trigger 'phonologyApplyDownSuccess', @model.get('id')
-      table = ['<table><tr><td>inputs</td><td>surface correspondances</td></tr>']
+      @displayApplyDownResultsInTable applyDownResults
+
+    displayApplyDownResultsInTable: (applyDownResults) ->
+      table = ['<table class="io-results-table">
+        <tr><th>inputs</th><th>outputs</th></tr>']
+      oddEven = 0
       for uf, sfSet of applyDownResults
-        table.push "<tr><td>#{uf}</td><td>#{sfSet.join ', '}</td></tr>"
+        if oddEven is 0
+          oddEven = 1
+          table.push "<tr class='even'><td>#{uf}</td>
+            <td>#{sfSet.join ', '}</td></tr>"
+        else
+          oddEven = 0
+          table.push "<tr><td>#{uf}</td><td>#{sfSet.join ', '}</td></tr>"
       table.push "</table>"
-      @$('.apply-down-results').html table.join('')
+      @$('.apply-down-results')
+        .hide()
+        .html table.join('')
+        .slideDown()
 
     disableApplyDownButton: -> @$('button.apply-down').button 'disable'
 

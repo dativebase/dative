@@ -165,6 +165,16 @@ button.help-button
   margin-right: 0.75em;
 }
 
+.dative-field-label-container.top
+{
+  display: block;
+}
+
+.dative-field-label-container.top label {
+  text-align: left;
+  margin-bottom: 0.5em;
+}
+
 .dative-form-object .dative-field-display-label-container
 {
   width: 40%;
@@ -209,6 +219,20 @@ button.help-button
 {
   display: inline-block;
   width: 70%;
+}
+
+.update-widget .dative-field-input-container.full-width,
+.dative-field-input-container.full-width
+{
+  display: block;
+  width: 96%;
+  margin: auto;
+}
+
+.update-widget .dative-field-input-container.full-width textarea,
+.dative-field-input-container.full-widt textarea
+{
+  overflow: scroll;
 }
 
 .dative-form-object .dative-field-display-representation-container
@@ -1492,5 +1516,62 @@ i.boolean-icon.false
 i.boolean-icon.true
 {
   color: green;
+}
+
+.io-results-table
+{
+  margin: 0.5em 2em 2em 2em;
+}
+
+.io-results-table td,
+.io-results-table th
+{
+  padding: 0.25em;
+  font-size: 12pt;
+  text-align: left;
+}
+
+.io-results-table th
+{
+  font-weight: bold;
+  max-width: 23%;
+  min-width: 23%;
+  width: 23%;
+}
+
+.io-results-table tr.even td
+{
+  background-color: white;
+}
+
+.nowrap
+{
+  white-space: nowrap;
+}
+
+ul.fieldset .script-textarea,
+.script-textarea
+{
+  height: 25em;
+  min-height: 25em;
+  max-height: 40em;
+  white-space: normal;
+}
+
+.run-tests-results
+{
+  display: block;
+  max-width: 100%;
+  max-height: 300px;
+  overflow: scroll;
+  margin: 0.5em auto;
+  border: 1px solid;
+  border-radius: 4px;
+}
+
+.run-tests-summary
+{
+  display: inline-block;
+  font-size: 12pt;
 }
 

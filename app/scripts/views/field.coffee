@@ -66,6 +66,14 @@ define [
       value: @getValue()
       label: @getLabel()
       domAttributes: @domAttributes
+      fieldLabelContainerClass: @getFieldLabelContainerClass()
+      fieldInputContainerClass: @getFieldInputContainerClass()
+
+    getFieldInputContainerClass: ->
+      'dative-field-input-container'
+
+    getFieldLabelContainerClass: ->
+      'dative-field-label-container'
 
     guify: ->
 

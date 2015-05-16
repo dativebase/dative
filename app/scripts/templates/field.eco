@@ -1,5 +1,5 @@
-<div class='dative-field-label-container'></div>
-<div class='dative-field-input-container'></div>
+<div class='<%= @fieldLabelContainerClass %>'></div>
+<div class='<%= @fieldInputContainerClass %>'></div>
 <div class='dative-field-validation-container'>
     <div
         class='ui-state-error

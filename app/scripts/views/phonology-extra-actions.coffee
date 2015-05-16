@@ -28,3 +28,17 @@ define [
       ServeCompiledControlView
     ]
 
+    initialize: (options) ->
+      super
+      @events['keydown'] = 'keyboardShortcuts'
+
+    keyboardShortcuts: (event) ->
+      switch event.which
+        when 67
+          @$('button.compile').click()
+        when 82
+          @$('button.run-tests').click()
+        when 191
+          @$('textarea[name=apply-down]').first().focus()
+
+
