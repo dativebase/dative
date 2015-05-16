@@ -5,8 +5,10 @@ define [
   './person-field-display'
   './date-field-display'
   './boolean-icon-display'
+  './script-display'
 ], (ResourceView, PhonologyExtraActionsView, PhonologyAddWidgetView,
-  PersonFieldDisplayView, DateFieldDisplayView, BooleanIconFieldDisplayView) ->
+  PersonFieldDisplayView, DateFieldDisplayView, BooleanIconFieldDisplayView,
+  ScriptFieldDisplayView) ->
 
   # Phonology View
   # --------------
@@ -63,4 +65,5 @@ define [
       datetime_entered: DateFieldDisplayView
       datetime_modified: DateFieldDisplayView
       compile_succeeded: BooleanIconFieldDisplayView
+      script: ScriptFieldDisplayView
 

@@ -50,6 +50,13 @@ define [
       title: @getTooltip()
       value: @getValue()
       label: @getLabel()
+      fieldDisplayLabelContainerClass: @fieldDisplayLabelContainerClass
+      fieldDisplayRepresentationContainerClass:
+        @fieldDisplayRepresentationContainerClass
+
+    fieldDisplayLabelContainerClass: 'dative-field-display-label-container'
+    fieldDisplayRepresentationContainerClass:
+      'dative-field-display-representation-container'
 
     # Return an array of model attributes that this field display "governs".
     # This defaults to `[@attribute]` but for field display views that govern

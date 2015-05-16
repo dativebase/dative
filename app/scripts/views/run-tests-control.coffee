@@ -124,7 +124,7 @@ define [
 
       for array, index in testsArray
         [input, expected, actual, passedFailed] = array
-        if (index % 2 is 0) then class_ = " class='even'" else class_ = ''
+        if (index % 2 is 0) then class_ = " class='ui-state-highlight'" else class_ = ''
         table.push "<tr #{class_}>
           <td>#{input}</td>
           <td>#{expected}</td>

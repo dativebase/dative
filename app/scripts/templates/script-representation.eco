@@ -1,0 +1,4 @@
+<div
+  class='<%= @class %>'
+  ><%= @valueFormatter @value %></div>
+

@@ -165,12 +165,15 @@ button.help-button
   margin-right: 0.75em;
 }
 
-.dative-field-label-container.top
+.dative-field-label-container.top,
+.dative-field-display-label-container.top
 {
-  display: block;
+  display: block !important;
 }
 
-.dative-field-label-container.top label {
+.dative-field-label-container.top label,
+.dative-field-display-label-container.top label
+{
   text-align: left;
   margin-bottom: 0.5em;
 }
@@ -222,11 +225,18 @@ button.help-button
 }
 
 .update-widget .dative-field-input-container.full-width,
-.dative-field-input-container.full-width
+.dative-field-input-container.full-width,
+.dative-field-display-representation-container.full-width
 {
   display: block;
   width: 96%;
-  margin: auto;
+  margin: 0.5em auto;
+}
+
+.dative-field-display-representation-container.script
+{
+  border: solid 1px;
+  border-radius: 4px;
 }
 
 .update-widget .dative-field-input-container.full-width textarea,
@@ -1462,6 +1472,10 @@ div.script
 {
   white-space: pre;
   overflow-x: scroll;
+  max-height: 40em;
+  min-height: 25em;
+  height: 25em;
+  padding: 0.2em;
 }
 
 textarea.script
@@ -1573,5 +1587,10 @@ ul.fieldset .script-textarea,
 {
   display: inline-block;
   font-size: 12pt;
+}
+
+.button-control-summary
+{
+  display: inline-block;
 }
 

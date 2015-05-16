@@ -32,7 +32,22 @@ define [
       @listenTo @model, "fetchPhonologySuccess", @fetchPhonologySuccess
       @listenTo @model, "fetchPhonologyFail", @fetchPhonologyFail
 
+    actionSummaryClass: 'compile-summary'
+    actionResultsClass: 'compile-results'
+    actionResults: ''
+
+    getActionSummary: ->
+      if @model.get('compile_succeeded')
+        @actionSummary = "<i class='fa fa-check boolean-icon true'></i>
+          Compile succeeded: #{@model.get('compile_message')}"
+      else
+        @actionSummary = "<i class='fa fa-times boolean-icon false'></i>
+          Compile failed: #{@model.get('compile_message')}"
+
     # Write the initial HTML to the page.
+    # TODO: the OLD should give us a timestamp of the last compile attempt so
+    # we can know whether our most recent compile attempt corresponds to the
+    # current state of the FST-based resource being compiled here.
     html: ->
       context =
         buttonClass: 'compile'
@@ -40,7 +55,10 @@ define [
           #{@resourceName}’s FST script be compiled so that it can be used to
           map underlying representations to surface ones or vice versa."
         buttonText: 'Compile'
-        actionResultsClass: 'compile-results'
+        actionResultsClass: @actionResultsClass
+        actionSummaryClass: @actionSummaryClass
+        actionResults: @actionResults
+        actionSummary: @getActionSummary()
       @$el.html @template(context)
 
     render: ->
@@ -77,6 +95,7 @@ define [
     compile: -> @model.compile()
 
     compileStart: ->
+      @$(".#{@actionSummaryClass}").html ''
       @spin 'button.compile', '50%', '135%'
       @disableCompileButton()
 
@@ -99,12 +118,17 @@ define [
 
     fetchPhonologySuccess: (phonologyObject) ->
       if phonologyObject.compile_attempt is @compileAttempt
+        console.log "gonna poll again: phonologyObject.datetime_modified is #{phonologyObject.datetime_modified}"
         @poll()
       else
+        console.log "done polling: phonologyObject.datetime_modified is #{phonologyObject.datetime_modified}"
+        @$(".#{@actionSummaryClass}").html @getActionSummary()
         @model.set
           compile_succeeded: phonologyObject.compile_succeeded
           compile_attempt: phonologyObject.compile_attempt
           compile_message: phonologyObject.compile_message
+          datetime_modified: phonologyObject.datetime_modified
+          modifier: phonologyObject.modifier
         if @model.get('compile_succeeded')
           Backbone.trigger("#{@resourceName}CompileSuccess",
             @model.get('compile_message'), @model.get('id'))

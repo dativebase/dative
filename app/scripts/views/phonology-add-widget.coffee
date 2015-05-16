@@ -47,6 +47,8 @@ define [
     # It is crucial that we remove any U+00a0 characters from the script.
     setToModel: ->
       super
-      newValue = @model.get('script').replace(/\u00a0/g, '')
+      newValue = @model.get('script')
+        .replace(/\u00a0/g, '')
+        .replace(/\u000d/g, '')
       @model.set 'script', newValue
 
