@@ -1589,8 +1589,22 @@ ul.fieldset .script-textarea,
   font-size: 12pt;
 }
 
+.button-control-button
+{
+  vertical-align: top;
+}
+
 .button-control-summary
 {
   display: inline-block;
+  max-width: 80%;
+  font-size: 12pt;
+  overflow-x: scroll;
+  margin-top: 0.25em;
+}
+
+span.match
+{
+  font-weight: bold;
 }
 

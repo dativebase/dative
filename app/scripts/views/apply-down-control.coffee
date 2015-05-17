@@ -32,7 +32,7 @@ define [
             event.preventDefault()
             @$('button.apply-down').first().click()
         when 27
-          console.log 'ESC'
+          false
         else
           event.stopPropagation()
 
@@ -42,6 +42,21 @@ define [
       @listenTo @model, "applyDownEnd", @applyDownEnd
       @listenTo @model, "applyDownFail", @applyDownFail
       @listenTo @model, "applyDownSuccess", @applyDownSuccess
+      @listenTo @model, "change:compile_succeeded", @compileSucceededChanged
+
+    compileSucceededChanged: ->
+      if @model.get('compile_succeeded') is false
+        @disableApplyDownButton()
+        @disableApplyDownInput()
+      else
+        @enableApplyDownButton()
+        @enableApplyDownInput()
+
+    applyDownInputAbility: ->
+      if @model.get('compile_succeeded') is false
+        @disableApplyDownInput()
+      else
+        @enableApplyDownInput()
 
     # Write the initial HTML to the page.
     html: ->
@@ -62,6 +77,7 @@ define [
       @html()
       @guify()
       @disableApplyDownButton()
+      @applyDownInputAbility()
       @listenToEvents()
       @
 
@@ -150,6 +166,11 @@ define [
         .slideDown()
 
     disableApplyDownButton: -> @$('button.apply-down').button 'disable'
-
     enableApplyDownButton: -> @$('button.apply-down').button 'enable'
+
+    disableApplyDownInput: ->
+      @$('textarea[name=apply-down]').attr 'disabled', true
+
+    enableApplyDownInput: ->
+      @$('textarea[name=apply-down]').attr 'disabled', false
 

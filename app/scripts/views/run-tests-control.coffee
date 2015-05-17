@@ -32,6 +32,7 @@ define [
       @listenTo @model, "runTestsEnd", @runTestsEnd
       @listenTo @model, "runTestsFail", @runTestsFail
       @listenTo @model, "runTestsSuccess", @runTestsSuccess
+      @listenTo @model, "change:compile_succeeded", @runTestsButtonAbility
 
     # Write the initial HTML to the page.
     html: ->
@@ -51,6 +52,7 @@ define [
       @guify()
       @listenToEvents()
       @$(".#{@actionResultsClass}").hide()
+      @runTestsButtonAbility()
       @
 
     guify: ->
@@ -84,6 +86,7 @@ define [
       @model.runTests()
 
     runTestsStart: ->
+      @$(".#{@actionSummaryClass}").hide()
       @spin 'button.run-tests', '50%', '135%'
       @disableRunTestsButton()
 
@@ -105,13 +108,21 @@ define [
         tmp = [
           uf
           rObj.expected.join(', ')
-          rObj.actual.join(', ')
         ]
         if (x for x in rObj.expected when x in rObj.actual).length
           passedCount += 1
+          actualOutputs = []
+          for output in rObj.expected
+            if output in rObj.actual
+              actualOutputs.push "<span class='match'>#{output}</span>"
+          for output in rObj.actual
+            if output not in rObj.expected
+              actualOutputs.push "<span>#{output}</span>"
+          tmp.push actualOutputs.join ', '
           tmp.push "<i class='boolean-icon true fa fa-check'>"
           testsArray.push tmp
         else
+          tmp.push rObj.expected.join(', ')
           tmp.push "<i class='boolean-icon false fa fa-times'>"
           testsArray.unshift tmp
 
@@ -153,4 +164,9 @@ define [
     enableRunTestsButton: ->
       @$('button.run-tests').button 'enable'
 
+    runTestsButtonAbility: ->
+      if @model.get('compile_succeeded') is false
+        @disableRunTestsButton()
+      else
+        @enableRunTestsButton()
 

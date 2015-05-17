@@ -35,6 +35,9 @@ define [], ->
       xhr = @_getXHR url, method
       if timeout then xhr.timeout = timeout
 
+      if options.responseType
+        xhr.responseType = options.responseType
+
       # Set content-type
       # Note: apparently "You cannot add custom headers to an XDR object", cf.
       # http://stackoverflow.com/questions/2657180/setting-headers-in-xdomainrequest-or-activexobjectmicrosoft-xmlhttp #
@@ -105,7 +108,10 @@ define [], ->
         try
           responseJSON = JSON.parse xhr.responseText
         catch error
-          responseJSON = xhr.responseText
+          try
+            responseJSON = xhr.responseText
+          catch error
+            responseJSON = xhr.response
         callback responseJSON, xhr
 
 

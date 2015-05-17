@@ -145,6 +145,7 @@ define ['./resource'], (ResourceModel) ->
     serveCompiled: ->
       @trigger "serveCompiledStart"
       @constructor.cors.request(
+        responseType: 'blob'
         method: 'GET'
         url: "#{@getOLDURL()}/phonologies/#{@get 'id'}/servecompiled"
         onload: (responseJSON, xhr) =>
@@ -154,7 +155,7 @@ define ['./resource'], (ResourceModel) ->
           else
             error = responseJSON.error or 'No error message provided.'
             @trigger "serveCompiledFail", error
-            console.log "PUT request to
+            console.log "GET request to
               #{@getOLDURL()}/phonologies/#{@get 'id'}/servecompiled
               failed (status not 200)."
             console.log error
@@ -162,7 +163,7 @@ define ['./resource'], (ResourceModel) ->
           @trigger "serveCompiledEnd"
           error = responseJSON.error or 'No error message provided.'
           @trigger "serveCompiledFail", error
-          console.log "Error in PUT request to
+          console.log "Error in GET request to
             #{@getOLDURL()}/phonologies/#{@get 'id'}/servecompiled
             (onerror triggered)."
       )

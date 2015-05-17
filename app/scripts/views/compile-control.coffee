@@ -41,8 +41,13 @@ define [
         @actionSummary = "<i class='fa fa-check boolean-icon true'></i>
           Compile succeeded: #{@model.get('compile_message')}"
       else
-        @actionSummary = "<i class='fa fa-times boolean-icon false'></i>
-          Compile failed: #{@model.get('compile_message')}"
+        compileAttempt = @model.get 'compile_attempt'
+        if compileAttempt is null
+          @actionSummary = "Nobody has yet attempted to compile this
+            #{@resourceName}"
+        else
+          @actionSummary = "<i class='fa fa-times boolean-icon false'></i>
+            Compile failed: #{@model.get('compile_message')}"
 
     # Write the initial HTML to the page.
     # TODO: the OLD should give us a timestamp of the last compile attempt so
@@ -118,17 +123,15 @@ define [
 
     fetchPhonologySuccess: (phonologyObject) ->
       if phonologyObject.compile_attempt is @compileAttempt
-        console.log "gonna poll again: phonologyObject.datetime_modified is #{phonologyObject.datetime_modified}"
         @poll()
       else
-        console.log "done polling: phonologyObject.datetime_modified is #{phonologyObject.datetime_modified}"
-        @$(".#{@actionSummaryClass}").html @getActionSummary()
         @model.set
           compile_succeeded: phonologyObject.compile_succeeded
           compile_attempt: phonologyObject.compile_attempt
           compile_message: phonologyObject.compile_message
           datetime_modified: phonologyObject.datetime_modified
           modifier: phonologyObject.modifier
+        @$(".#{@actionSummaryClass}").html @getActionSummary()
         if @model.get('compile_succeeded')
           Backbone.trigger("#{@resourceName}CompileSuccess",
             @model.get('compile_message'), @model.get('id'))

@@ -62,6 +62,8 @@ define [
       @listenTo Backbone, 'phonologyCompileSuccess', @phonologyCompileSuccess
       @listenTo Backbone, 'phonologyRunTestsFail', @phonologyRunTestsFail
       @listenTo Backbone, 'phonologyRunTestsSuccess', @phonologyRunTestsSuccess
+      @listenTo Backbone, 'phonologyServeCompiledFail', @phonologyServeCompiledFail
+      @listenTo Backbone, 'phonologyServeCompiledSuccess', @phonologyServeCompiledSuccess
 
       @listenToCRUDResources()
 
@@ -367,6 +369,22 @@ define [
         content: "Your attempt to run the tests of phonology #{phonologyId}
           was successful; see the results in the table below the “Run
           Tests” button."
+      @renderNotification notification
+
+    phonologyServeCompiledFail: (error, phonologyId) ->
+      notification = new NotificationView
+        title: "Serve compiled fail"
+        content: "Your attempt to download the compiled binary file
+          representing phonology #{phonologyId} was unsuccessful: #{error}"
+        type: 'error'
+      @renderNotification notification
+
+    phonologyServeCompiledSuccess: (phonologyId) ->
+      notification = new NotificationView
+        title: "Serve compiled success"
+        content: "Your attempt to download the compiled binary file
+          representing phonology #{phonologyId} was successful: click
+          the link next to the button to download the file to your computer"
       @renderNotification notification
 
     registerFail: (reason) ->

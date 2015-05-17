@@ -1,5 +1,5 @@
 <button
-    class='<%= @buttonClass %> dative-tooltip'
+    class='button-control-button <%= @buttonClass %> dative-tooltip'
     title='<%= @buttonTitle %>'><%= @buttonText %></button>
 <div class='button-control-summary <%= @actionSummaryClass %>'
     ><%- @actionSummary %></div>
