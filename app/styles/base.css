@@ -1197,9 +1197,9 @@ div.dative-display
 
 .dative-help-dialog .help-content-container
 {
-  margin-right: -1em;
+  margin-right: -2em;
   padding-bottom: 5em;
-  overflow: hidden;
+  overflow: scroll;
   height: 85%;
   position: relative;
 }
