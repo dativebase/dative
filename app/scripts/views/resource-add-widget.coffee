@@ -133,12 +133,31 @@ define [
       for fieldView in @fieldViews()
         fieldView.submitAttempted = true
 
+    # Add the names of attributes here that the client canNOT alter. This is
+    # useful because sometimes the server will alter these and we don't
+    # (necessarily) want server-side modifications to cause `modelAltered()` to
+    # return `true`.
+    # TODO: maybe the `editableAttributes` of the model serve this purpose.
+    clientSideUnalterableAttributes: [
+      'datetime_modified'
+      'datetime_entered'
+      'modifier'
+      'enterer'
+      'compile_attempt'
+      'compile_message'
+      'compile_succeeded'
+      'generate_attempt'
+      'generate_message'
+      'generate_succeeded'
+    ]
+
     modelAltered: ->
       for attr, val of @model.attributes
-        originalValue = @originalModelCopy.get attr
-        currentValue = @model.get attr
-        if not _.isEqual originalValue, currentValue
-          return true
+        if attr not in @clientSideUnalterableAttributes
+          originalValue = @originalModelCopy.get attr
+          currentValue = @model.get attr
+          if not _.isEqual originalValue, currentValue
+            return true
       return false
 
     submitForm: (event) ->

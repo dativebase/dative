@@ -1478,10 +1478,16 @@ div.script
   padding: 0.2em;
 }
 
-textarea.script
+textarea.script,
+.resource-add-form ul.fieldset textarea.script
 {
   white-space: nowrap;
   overflow-x: scroll;
+
+  font-size: 9.5pt;
+  font-family: monospace;
+  min-width: 95%;
+  max-width: 95%;
 }
 
 .diffed

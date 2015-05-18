@@ -122,7 +122,7 @@ define [
           tmp.push "<i class='boolean-icon true fa fa-check'>"
           testsArray.push tmp
         else
-          tmp.push rObj.expected.join(', ')
+          tmp.push rObj.actual.join(', ')
           tmp.push "<i class='boolean-icon false fa fa-times'>"
           testsArray.unshift tmp
 
