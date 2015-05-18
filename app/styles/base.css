@@ -1476,6 +1476,8 @@ div.script
   min-height: 25em;
   height: 25em;
   padding: 0.2em;
+  font-family: monospace;
+  font-size: 10.5pt;
 }
 
 textarea.script,

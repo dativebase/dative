@@ -80,7 +80,7 @@
         <button class="resource-actions dative-tooltip"
                 title="view additional actions related to this
                 <%= @resourceNameHumanReadable() %>"
-                ><i class='fa fa-cog fa-fw'></i>
+                ><i class='fa fa-tachometer fa-fw'></i>
         </button>
       <% end %>
 

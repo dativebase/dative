@@ -33,29 +33,43 @@ define ['./utils'], (utils) ->
       else
         "The date and time when this resource was entered"
 
-  parserGenerateSucceeded =
+  generateSucceeded =
     eng: (options) ->
       if 'value' of options
         if options.value is true
-          'The most recent attempt to generate a FST script for this parser was
-            successful.'
+          "The most recent attempt to generate a FST script for this
+            #{utils.camel2regular(utils.singularize(options.resourceName))} was
+            successful."
         else
-          'The most recent attempt to generate a FST script for this parser was
-            NOT successful.'
+          "The most recent attempt to generate a FST script for this
+            #{utils.camel2regular(utils.singularize(options.resourceName))} was
+            NOT successful."
       else
         'Will be true if the last generate attempt succeeded; false otherwise.'
 
-  parserCompileSucceeded =
+  compileSucceeded =
     eng: (options) ->
       if 'value' of options
         if options.value is true
-          'The most recent attempt to compile the FST script of this parser was
-            successful.'
+          "The most recent attempt to compile the FST script of this
+            #{utils.camel2regular(utils.singularize(options.resourceName))} was
+            successful."
         else
-          'The most recent attempt to compile the FST script for this parser was
-            NOT successful.'
+          "The most recent attempt to compile the FST script for this
+            #{utils.camel2regular(utils.singularize(options.resourceName))} was
+            NOT successful."
       else
         'Will be true if the last generate attempt succeeded; false otherwise.'
+
+  compileMessage =
+    eng: (options) ->
+      "The message returned by the OLD after an attempt to compile this
+        #{utils.camel2regular(utils.singularize(options.resourceName))}."
+
+  compileAttempt =
+    eng: (options) ->
+      "A unique value (a UUID) created by the OLD after each attempt to compile
+        a #{utils.camel2regular(utils.singularize(options.resourceName))}."
 
   datetimeModified =
     eng: (options) ->
@@ -157,8 +171,8 @@ define ['./utils'], (utils) ->
         datetime_modified: datetimeModified
         enterer: enterer
         modifier: modifier
-        generate_succeeded: parserGenerateSucceeded
-        compile_succeeded: parserCompileSucceeded
+        generate_succeeded: generateSucceeded
+        compile_succeeded: compileSucceeded
 
         phonology:
           eng: 'The phonology of the morphological parser.'
@@ -178,13 +192,8 @@ define ['./utils'], (utils) ->
             to generate a morphological parser based on the values specified
             here.'
 
-        compile_message:
-          eng: 'The message returned by the OLD after an attempt to compile
-            this morphological parser.'
-
-        compile_attempt:
-          eng: 'A unique value (a UUID) created by the OLD after each attempt
-            to compile a morphological parser.'
+        compile_message: compileMessage
+        compile_attempt: compileAttempt
 
         morphology_rare_delimiter:
           eng: 'A Unicode character used to separate shape, gloss and category
@@ -319,6 +328,11 @@ define ['./utils'], (utils) ->
         datetime_modified: datetimeModified
         enterer: enterer
         modifier: modifier
+        UUID: uuid
+        id: id
+        compile_succeeded: compileSucceeded
+        compile_message: compileMessage
+        compile_attempt: compileAttempt
 
         script:
           eng: "The FST script that defines the phonology. An ordered set of
