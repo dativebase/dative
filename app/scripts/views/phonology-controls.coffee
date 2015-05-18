@@ -1,13 +1,13 @@
 define [
-  './extra-actions'
+  './controls'
   './compile-control'
   './apply-down-control'
   './run-tests-control'
   './serve-compiled-control'
-], (ExtraActionsView, CompileControlView, ApplyDownControlView,
+], (ControlsView, CompileControlView, ApplyDownControlView,
   RunTestsControlView, ServeCompiledControlView) ->
 
-  # Phonology Extra Actions View
+  # Phonology Controls View
   # ----------------------------
   #
   # View for a widget containing inputs and controls for manipulating the extra
@@ -19,7 +19,7 @@ define [
   # 3. running any tests defined in the phonology.
   # 4. requesting the compiled phonology file for download.
 
-  class PhonologyExtraActionsView extends ExtraActionsView
+  class PhonologyControlsView extends ControlsView
 
     actionViewClasses: [
       CompileControlView

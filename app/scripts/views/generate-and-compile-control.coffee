@@ -38,7 +38,7 @@ define [
         buttonTitle: 'Click this button to request that this parser’s FST
           script be generated and compiled so that it can be used to parse.'
         buttonText: 'Generate & Compile'
-        actionResultsClass: 'generate-and-compile-results'
+        controlResultsClass: 'generate-and-compile-results'
       @$el.html @template(context)
 
     render: ->

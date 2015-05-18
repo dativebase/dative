@@ -1,7 +1,7 @@
 define [
   './base'
   './../utils/globals'
-  './../templates/extra-actions'
+  './../templates/controls'
   'autosize'
 ], (BaseView, globals, controlTemplate) ->
 
@@ -23,7 +23,7 @@ define [
       @listenToEvents()
 
     events:
-      'click button.hide-resource-actions-widget': 'hideSelf'
+      'click button.hide-controls-widget': 'hideSelf'
       'click button.generate-and-compile':         'generateAndCompile'
       'click button.parse':                        'parse'
       'keydown':                                   'keydown'
@@ -36,7 +36,7 @@ define [
       # 'click button.serve-compiled':               'serveCompiled'
 
     # The resource super-view will handle this hiding.
-    hideSelf: -> @trigger "extraActionsView:hide"
+    hideSelf: -> @trigger "controlsView:hide"
 
     keydown: (event) ->
       event.stopPropagation()
@@ -45,7 +45,7 @@ define [
           if event.ctrlKey
             event.preventDefault()
             @$('button.parse').first().click()
-        when 27 # ESC closes the extra actions widget
+        when 27 # ESC closes the controls widget
           @stopEvent event
           @hideSelf()
 
@@ -65,7 +65,7 @@ define [
     # Write the initial HTML to the page.
     html: ->
       context =
-        headerTitle: 'Extra Actions'
+        headerTitle: 'Controls'
         activeServerType: @getActiveServerType()
       @$el.html @template(context)
 

@@ -1,10 +1,10 @@
 define [
-  './extra-actions'
+  './controls'
   './parse-control'
   './generate-and-compile-control'
-], (ExtraActionsView, ParseControlView, GenerateAndCompileControlView) ->
+], (ControlsView, ParseControlView, GenerateAndCompileControlView) ->
 
-  # Morphological Parser Extra Actions View
+  # Morphological Parser Controls View
   # ---------------------------------------
   #
   # View for a widget containing inputs and controls for manipulating the extra
@@ -20,7 +20,7 @@ define [
   # GET /morphologicalparsers/{id}/history
   # GET /morphologicalparsers/{id}/servecompiled
 
-  class MorphologicalParserExtraActionsView extends ExtraActionsView
+  class MorphologicalParserControlsView extends ControlsView
 
     actionViewClasses: [
       ParseControlView

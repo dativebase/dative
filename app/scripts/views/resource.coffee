@@ -51,20 +51,20 @@ define [
         model: @model,
         addUpdateType: @addUpdateType
       @updateViewRendered = false
-      if 'extra-actions' not in @excludedActions
-        @extraActionsView = new @extraActionsViewClass(model: @model)
-        @extraActionsViewRendered = false
+      if 'controls' not in @excludedActions
+        @controlsView = new @controlsViewClass(model: @model)
+        @controlsViewRendered = false
 
     # An array of actions that are not relevant to this resource, e.g.,
-    # 'history', and 'extra-actions'.
-    # WARN: if you remove 'extra-actions' from this array, then you MUST assign
-    # a working "extra actions" view to `@extraActionsViewClass`.
+    # 'history', and 'controls'.
+    # WARN: if you remove 'controls' from this array, then you MUST assign
+    # a working "controls" view to `@controlsViewClass`.
     excludedActions: [
       'history'
-      'extra-actions'
+      'controls'
     ]
 
-    extraActionsViewClass: null
+    controlsViewClass: null
 
     getUpdateViewType: -> if @model.get('id') then 'update' else 'add'
 
@@ -84,7 +84,7 @@ define [
         headerTitleAttribute: 'name' # the attribute of the model that should be displayed in the header center.
         secondaryDataVisible: false # comments, tags, etc.
         updateViewVisible: false
-        extraActionsViewVisible: false
+        controlsViewVisible: false
       _.extend defaults, options
       for key, value of defaults
         @[key] = value
@@ -122,9 +122,9 @@ define [
       @listenTo @updateView, 'forceModelChanged', @indicateModelState
       @listenTo @model, "update#{@resourceNameCapitalized}Success",
         @indicateModelIsUnaltered
-      if 'extra-actions' not in @excludedActions
-        @listenTo @extraActionsView, "extraActionsView:hide",
-          @hideExtraActionsViewAnimate
+      if 'controls' not in @excludedActions
+        @listenTo @controlsView, "controlsView:hide",
+          @hideControlsViewAnimate
 
     indicateModelState: ->
       if @updateView.modelAltered()
@@ -158,7 +158,7 @@ define [
       'click .duplicate-resource': 'duplicate'
       'click .delete-resource': 'deleteConfirm'
       'click .export-resource': 'exportResource'
-      'click .resource-actions': 'toggleExtraActionsViewAnimate'
+      'click .controls': 'toggleControlsViewAnimate'
 
     exportResource: (event) ->
       if event then @stopEvent event
@@ -294,8 +294,8 @@ define [
       @headerVisibility()
       @secondaryDataVisibility()
       @updateViewVisibility()
-      if 'extra-actions' not in @excludedActions
-        @extraActionsViewVisibility()
+      if 'controls' not in @excludedActions
+        @controlsViewVisibility()
 
     # Make the header visible, or not, depending on state.
     headerVisibility: ->
@@ -562,9 +562,9 @@ define [
         when 69 # "e" for "export"
           if not @addUpdateResourceWidgetHasFocus()
             @$('.export-resource').first().click()
-        when 88 # "x" for "eXtra actions"
+        when 88 # "x" for "eXtra actions (i.e., controls)"
           if not @addUpdateResourceWidgetHasFocus()
-            @$('.resource-actions').first().click()
+            @$('.controls').first().click()
 
 
     ############################################################################
@@ -832,70 +832,70 @@ define [
     stopSpin: -> @$('.spinner-container').spin false
 
 
-    # Extra Actions View
+    # Controls View
     ############################################################################
 
-    # Make the extra actions view visible, or not, depending on state.
-    extraActionsViewVisibility: ->
-      if @extraActionsViewVisible
-        @showExtraActionsView()
+    # Make the controls view visible, or not, depending on state.
+    controlsViewVisibility: ->
+      if @controlsViewVisible
+        @showControlsView()
       else
-        @hideExtraActionsView()
+        @hideControlsView()
 
-    setExtraActionsButtonStateOpen: -> @$('.resource-actions').button 'disable'
+    setControlsButtonStateOpen: -> @$('.controls').button 'disable'
 
-    setExtraActionsButtonStateClosed: -> @$('.resource-actions').button 'enable'
+    setControlsButtonStateClosed: -> @$('.controls').button 'enable'
 
-    # Render the extra actions view.
-    renderExtraActionsView: ->
-      @extraActionsView.setElement @$('.resource-actions-widget').first()
-      @extraActionsView.render()
-      @extraActionsViewRendered = true
-      @rendered @extraActionsView
+    # Render the controls view.
+    renderControlsView: ->
+      @controlsView.setElement @$('.controls-widget').first()
+      @controlsView.render()
+      @controlsViewRendered = true
+      @rendered @controlsView
 
-    showExtraActionsView: ->
-      if not @extraActionsViewRendered then @renderExtraActionsView()
-      @extraActionsViewVisible = true
-      @setExtraActionsButtonStateOpen()
-      @$('.resource-actions-widget').first().show
+    showControlsView: ->
+      if not @controlsViewRendered then @renderControlsView()
+      @controlsViewVisible = true
+      @setControlsButtonStateOpen()
+      @$('.controls-widget').first().show
         complete: =>
           @showFull()
           Backbone.trigger "add#{@resourceNameCapitalized}WidgetVisible"
-          @focusFirstExtraActionsViewTextarea()
+          @focusFirstControlsViewTextarea()
 
-    hideExtraActionsView: ->
-      @extraActionsViewVisible = false
-      @setExtraActionsButtonStateClosed()
-      @$('.resource-actions-widget').first().hide()
+    hideControlsView: ->
+      @controlsViewVisible = false
+      @setControlsButtonStateClosed()
+      @$('.controls-widget').first().hide()
 
-    toggleExtraActionsView: ->
-      if @extraActionsViewVisible
-        @hideExtraActionsView()
+    toggleControlsView: ->
+      if @controlsViewVisible
+        @hideControlsView()
       else
-        @showExtraActionsView()
+        @showControlsView()
 
-    showExtraActionsViewAnimate: ->
-      if not @extraActionsViewRendered then @renderExtraActionsView()
-      @extraActionsViewVisible = true
-      @setExtraActionsButtonStateOpen()
-      @$('.resource-actions-widget').first().slideDown
+    showControlsViewAnimate: ->
+      if not @controlsViewRendered then @renderControlsView()
+      @controlsViewVisible = true
+      @setControlsButtonStateOpen()
+      @$('.controls-widget').first().slideDown
         complete: =>
           @showFullAnimate()
-          Backbone.trigger "showExtraActionsViewVisible"
-          @focusFirstExtraActionsViewTextarea()
+          Backbone.trigger "showControlsViewVisible"
+          @focusFirstControlsViewTextarea()
 
-    focusFirstExtraActionsViewTextarea: ->
-      @$('.resource-actions-widget textarea').first().focus()
+    focusFirstControlsViewTextarea: ->
+      @$('.controls-widget textarea').first().focus()
 
-    hideExtraActionsViewAnimate: ->
-      @extraActionsViewVisible = false
-      @setExtraActionsButtonStateClosed()
-      @$('.resource-actions-widget').first().slideUp
+    hideControlsViewAnimate: ->
+      @controlsViewVisible = false
+      @setControlsButtonStateClosed()
+      @$('.controls-widget').first().slideUp
         complete: => @$el.focus()
 
-    toggleExtraActionsViewAnimate: ->
-      if @extraActionsViewVisible
-        @hideExtraActionsViewAnimate()
+    toggleControlsViewAnimate: ->
+      if @controlsViewVisible
+        @hideControlsViewAnimate()
       else
-        @showExtraActionsViewAnimate()
+        @showControlsViewAnimate()
 

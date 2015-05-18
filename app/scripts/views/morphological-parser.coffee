@@ -1,12 +1,12 @@
 define [
   './resource'
-  './morphological-parser-extra-actions'
+  './morphological-parser-controls'
   './morphological-parser-add-widget'
   './person-field-display'
   './date-field-display'
   './object-with-name-field-display'
   './boolean-icon-display'
-], (ResourceView, MorphologicalParserExtraActionsView,
+], (ResourceView, MorphologicalParserControlsView,
   MorphologicalParserAddWidgetView, PersonFieldDisplayView,
   DateFieldDisplayView, ObjectWithNameFieldDisplayView,
   BooleanIconFieldDisplayView) ->
@@ -22,7 +22,7 @@ define [
 
     excludedActions: ['history']
 
-    extraActionsViewClass: MorphologicalParserExtraActionsView
+    controlsViewClass: MorphologicalParserControlsView
 
     resourceAddWidgetView: MorphologicalParserAddWidgetView
 

@@ -1,20 +1,20 @@
 define [
   './base'
-  './../templates/extra-actions'
-], (BaseView, extraActionsTemplate) ->
+  './../templates/controls'
+], (BaseView, controlsTemplate) ->
 
-  # Extra Actions View
+  # Controls View
   # ------------------
   #
-  # View for a widget containing inputs and controls for manipulating the extra
-  # actions of a resource, actions like requesting parses or generating FST
-  # scripts. This base class is justified by the fact that many resources have
-  # "extra actions".
+  # View for a widget containing inputs and controls for manipulating the
+  # controls of a resource, i.e., actions like requesting parses or generating
+  # FST scripts. This base class is justified by the fact that many resources
+  # have controls, or "controls".
 
-  class ExtraActionsView extends BaseView
+  class ControlsView extends BaseView
 
-    template: extraActionsTemplate
-    className: 'resource-actions-widget dative-widget-center
+    template: controlsTemplate
+    className: 'controls-widget dative-widget-center
       dative-shadowed-widget ui-widget ui-widget-content ui-corner-all'
 
     # An array of action view classes. Subclasses should override this with
@@ -33,7 +33,7 @@ define [
         @actionViews.push actionView
 
     events:
-      'click button.hide-resource-actions-widget': 'hideSelf'
+      'click button.hide-controls-widget': 'hideSelf'
       'keydown':                                   'keydown'
 
     render: ->
@@ -45,7 +45,7 @@ define [
 
     html: ->
       context =
-        headerTitle: 'Extra Actions'
+        headerTitle: 'Controls'
         activeServerType: @activeServerType
       @$el.html @template(context)
 
@@ -54,7 +54,7 @@ define [
       for actionView in @actionViews
         container.appendChild actionView.render().el
         @rendered actionView
-      @$('div.resource-actions-container').html container
+      @$('div.controls-container').html container
 
     guify: ->
       @fixRoundedBorders() # defined in BaseView
@@ -69,9 +69,9 @@ define [
         .tooltip position: @tooltipPositionLeft('-20')
 
     # The resource super-view will handle this hiding.
-    hideSelf: -> @trigger "extraActionsView:hide"
+    hideSelf: -> @trigger "controlsView:hide"
 
-    # ESC hides the extra actions widget
+    # ESC hides the controls widget
     keydown: (event) ->
       event.stopPropagation()
       switch event.which

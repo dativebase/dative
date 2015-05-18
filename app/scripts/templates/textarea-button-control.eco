@@ -5,7 +5,7 @@
            form-add-input
            dative-tooltip
            dative-input-field
-           resource-action-input'
+           control-input'
     title='<%= @textareaTitle %>'
 ></textarea>
 <button

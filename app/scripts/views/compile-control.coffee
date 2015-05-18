@@ -32,21 +32,21 @@ define [
       @listenTo @model, "fetchPhonologySuccess", @fetchPhonologySuccess
       @listenTo @model, "fetchPhonologyFail", @fetchPhonologyFail
 
-    actionSummaryClass: 'compile-summary'
-    actionResultsClass: 'compile-results'
-    actionResults: ''
+    controlSummaryClass: 'compile-summary'
+    controlResultsClass: 'compile-results'
+    controlResults: ''
 
-    getActionSummary: ->
+    getControlSummary: ->
       if @model.get('compile_succeeded')
-        @actionSummary = "<i class='fa fa-check boolean-icon true'></i>
+        @controlSummary = "<i class='fa fa-check boolean-icon true'></i>
           Compile succeeded: #{@model.get('compile_message')}"
       else
         compileAttempt = @model.get 'compile_attempt'
         if compileAttempt is null
-          @actionSummary = "Nobody has yet attempted to compile this
+          @controlSummary = "Nobody has yet attempted to compile this
             #{@resourceName}"
         else
-          @actionSummary = "<i class='fa fa-times boolean-icon false'></i>
+          @controlSummary = "<i class='fa fa-times boolean-icon false'></i>
             Compile failed: #{@model.get('compile_message')}"
 
     # Write the initial HTML to the page.
@@ -60,10 +60,10 @@ define [
           #{@resourceName}’s FST script be compiled so that it can be used to
           map underlying representations to surface ones or vice versa."
         buttonText: 'Compile'
-        actionResultsClass: @actionResultsClass
-        actionSummaryClass: @actionSummaryClass
-        actionResults: @actionResults
-        actionSummary: @getActionSummary()
+        controlResultsClass: @controlResultsClass
+        controlSummaryClass: @controlSummaryClass
+        controlResults: @controlResults
+        controlSummary: @getControlSummary()
       @$el.html @template(context)
 
     render: ->
@@ -100,7 +100,7 @@ define [
     compile: -> @model.compile()
 
     compileStart: ->
-      @$(".#{@actionSummaryClass}").html ''
+      @$(".#{@controlSummaryClass}").html ''
       @spin 'button.compile', '50%', '135%'
       @disableCompileButton()
 
@@ -131,7 +131,7 @@ define [
           compile_message: phonologyObject.compile_message
           datetime_modified: phonologyObject.datetime_modified
           modifier: phonologyObject.modifier
-        @$(".#{@actionSummaryClass}").html @getActionSummary()
+        @$(".#{@controlSummaryClass}").html @getControlSummary()
         if @model.get('compile_succeeded')
           Backbone.trigger("#{@resourceName}CompileSuccess",
             @model.get('compile_message'), @model.get('id'))

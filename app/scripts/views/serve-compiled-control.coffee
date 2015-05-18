@@ -31,8 +31,8 @@ define [
       @listenTo @model, "serveCompiledSuccess", @serveCompiledSuccess
       @listenTo @model, "change:compile_succeeded", @serveCompiledButtonAbility
 
-    actionResultsClass: 'serve-compiled-results'
-    actionSummaryClass: 'serve-compiled-summary'
+    controlResultsClass: 'serve-compiled-results'
+    conrolSummaryClass: 'serve-compiled-summary'
 
     # Write the initial HTML to the page.
     html: ->
@@ -42,8 +42,8 @@ define [
           represents the compiled #{@resourceName} to be downloaded from the
           server."
         buttonText: 'Serve Compiled'
-        actionResultsClass: @actionResultsClass
-        actionSummaryClass: @actionSummaryClass
+        controlResultsClass: @controlResultsClass
+        conrolSummaryClass: @conrolSummaryClass
       @$el.html @template(context)
 
     render: ->
@@ -83,7 +83,7 @@ define [
 
     serveCompiledStart: ->
       @spin 'button.serve-compiled', '50%', '135%'
-      @$(".#{@actionSummaryClass}").html ''
+      @$(".#{@conrolSummaryClass}").html ''
       @disableServeCompiledButton()
 
     serveCompiledEnd: ->
@@ -111,7 +111,7 @@ define [
           title: title
         .html "#{filename}<i class='fa fa-fw fa-download'></i>"
         .tooltip()
-      @$(".#{@actionSummaryClass}").html $anchor
+      @$(".#{@conrolSummaryClass}").html $anchor
 
     disableServeCompiledButton: ->
       @$('button.serve-compiled').button 'disable'

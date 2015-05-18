@@ -15,8 +15,8 @@ define [
     template: buttonControlTemplate
     className: 'run-tests-control-view control-view dative-widget-center'
 
-    actionResultsClass: 'run-tests-results'
-    actionSummaryClass: 'run-tests-summary'
+    controlResultsClass: 'run-tests-results'
+    controlSummaryClass: 'run-tests-summary'
 
     initialize: (options) ->
       @activeServerType = @getActiveServerType()
@@ -42,8 +42,8 @@ define [
           in this phonology’s FST script to be performed and the results to be
           displayed."
         buttonText: 'Run Tests'
-        actionResultsClass: @actionResultsClass
-        actionSummaryClass: @actionSummaryClass
+        controlResultsClass: @controlResultsClass
+        controlSummaryClass: @controlSummaryClass
 
       @$el.html @template(context)
 
@@ -51,14 +51,14 @@ define [
       @html()
       @guify()
       @listenToEvents()
-      @$(".#{@actionResultsClass}").hide()
+      @$(".#{@controlResultsClass}").hide()
       @runTestsButtonAbility()
       @
 
     guify: ->
       @buttonify()
       @tooltipify()
-      @$(".#{@actionResultsClass}")
+      @$(".#{@controlResultsClass}")
        .css 'border-color': @constructor.jQueryUIColors().defBo
 
     tooltipify: ->
@@ -86,7 +86,7 @@ define [
       @model.runTests()
 
     runTestsStart: ->
-      @$(".#{@actionSummaryClass}").hide()
+      @$(".#{@controlSummaryClass}").hide()
       @spin 'button.run-tests', '50%', '135%'
       @disableRunTestsButton()
 
@@ -148,12 +148,12 @@ define [
         Math.round((passedCount / testsArray.length) * 10000) / 100
       msg = "#{percentPassed}% accurate: #{passedCount}/#{testsArray.length}
         tests passed."
-      @$(".#{@actionSummaryClass}")
+      @$(".#{@controlSummaryClass}")
         .hide()
         .html msg
         .slideDown()
 
-      @$(".#{@actionResultsClass}")
+      @$(".#{@controlResultsClass}")
         .hide()
         .html table.join('')
         .slideDown()

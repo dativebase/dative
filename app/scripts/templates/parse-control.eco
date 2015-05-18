@@ -5,7 +5,7 @@
            form-add-input
            dative-tooltip
            dative-input-field
-           resource-action-input'
+           control-input'
     title='Enter one or more words here and click the “Parse” button
         in order to parse those words using this parser.'
 ></textarea>

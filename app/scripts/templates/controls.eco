@@ -5,8 +5,8 @@
 
   <div class='button-container-left'>
 
-    <button class="hide-resource-actions-widget dative-tooltip"
-            title="hide this <%= @resourceName %> extra actions widget">
+    <button class="hide-controls-widget dative-tooltip"
+            title="hide this <%= @resourceName %> controls widget">
       <i class='fa fa-times fa-fw'></i>
     </button>
 
@@ -16,8 +16,8 @@
 
     <span class="spinner-container"></span>
 
-    <button class='resource-actions-help dative-tooltip'
-            title='help with using the additional actions of this
+    <button class='controls-help dative-tooltip'
+            title='help with using the controls of this
               <%= @resourceName %>'
     ><i class='fa fa-fw fa-question'></i>
     </button>
@@ -28,7 +28,7 @@
 
 <div class="dative-widget-body">
 
-  <div class="resource-actions-container"></div>
+  <div class="controls-container"></div>
 
 </div>
 

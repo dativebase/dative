@@ -76,10 +76,9 @@
         </button>
       <% end %>
 
-      <% if 'extra-actions' not in @excludedActions: %>
-        <button class="resource-actions dative-tooltip"
-                title="view additional actions related to this
-                <%= @resourceNameHumanReadable() %>"
+      <% if 'controls' not in @excludedActions: %>
+        <button class="controls dative-tooltip"
+                title="more controls"
                 ><i class='fa fa-tachometer fa-fw'></i>
         </button>
       <% end %>
@@ -93,8 +92,8 @@
 
 <div class='dative-widget-body'>
 
-  <% if 'extra-actions' not in @excludedActions: %>
-    <div class='resource-actions-widget dative-widget-center
+  <% if 'controls' not in @excludedActions: %>
+    <div class='controls-widget dative-widget-center
       dative-shadowed-widget ui-widget ui-widget-content ui-corner-all'></div>
   <% end %>
 

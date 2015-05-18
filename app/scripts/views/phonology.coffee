@@ -1,12 +1,12 @@
 define [
   './resource'
-  './phonology-extra-actions'
+  './phonology-controls'
   './phonology-add-widget'
   './person-field-display'
   './date-field-display'
   './boolean-icon-display'
   './script-display'
-], (ResourceView, PhonologyExtraActionsView, PhonologyAddWidgetView,
+], (ResourceView, PhonologyControlsView, PhonologyAddWidgetView,
   PersonFieldDisplayView, DateFieldDisplayView, BooleanIconFieldDisplayView,
   ScriptFieldDisplayView) ->
 
@@ -34,7 +34,7 @@ define [
 
     excludedActions: ['history']
 
-    extraActionsViewClass: PhonologyExtraActionsView
+    controlsViewClass: PhonologyControlsView
 
     resourceAddWidgetView: PhonologyAddWidgetView
 

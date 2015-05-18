@@ -1159,7 +1159,7 @@ ul.fieldset select[name="elicitor"],
 ul.fieldset select[name="verifier"],
 ul.fieldset select[name="source"],
 .dative-help-dialog input[type="text"],
-textarea.resource-action-input,
+textarea.control-input,
 div.dative-display
 {
     border-style: solid;
@@ -1380,7 +1380,7 @@ p.paragraph-widget
 .linguistic-data-entry-form ul.fieldset input,
 .linguistic-data-entry-form ul.fieldset .ui-selectmenu-button,
 .linguistic-data-entry-form ul.fieldset label,
-textarea.resource-action-input,
+textarea.control-input,
 .dative-exporter-dialog-container
 {
   font-size: 12pt;
@@ -1391,7 +1391,7 @@ textarea.resource-action-input,
 .form-add-form ul.fieldset input,
 .linguistic-data-entry-form ul.fieldset textarea,
 .linguistic-data-entry-form ul.fieldset input,
-textarea.resource-action-input
+textarea.control-input
 {
   min-height: 1.5em;
 }
@@ -1518,7 +1518,7 @@ button.align-top
   vertical-align: top;
 }
 
-.resource-action-input
+.control-input
 {
   width: 80%;
   max-width: 80%;
