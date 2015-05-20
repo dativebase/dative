@@ -18,6 +18,7 @@ define [
       dative-widget-center'
 
     initialize: (options) ->
+      @resourceName = options?.resourceName or 'morphologicalParser'
       @activeServerType = @getActiveServerType()
       @listenToEvents()
 
@@ -30,15 +31,38 @@ define [
       @listenTo @model, "generateAndCompileEnd", @generateAndCompileEnd
       @listenTo @model, "generateAndCompileFail", @generateAndCompileFail
       @listenTo @model, "generateAndCompileSuccess", @generateAndCompileSuccess
+      @listenTo @model, "fetch#{@utils.capitalize @resourceName}Success", @fetchResourceSuccess
+      @listenTo @model, "fetch#{@utils.capitalize @resourceName}Fail", @fetchResourceFail
+
+    buttonClass: 'generate-and-compile'
+    controlSummaryClass: 'generate-and-compile-summary'
+    controlResultsClass: 'generate-and-compile-results'
+    controlResults: ''
+
+    getControlSummary: ->
+      switch @model.get('compile_succeeded')
+        when true
+          @controlSummary = "<i class='fa fa-check boolean-icon true'></i>
+            Compile succeeded: #{@model.get('compile_message')}"
+        when false
+          @controlSummary = "<i class='fa fa-check boolean-icon false'></i>
+            Compile failed: #{@model.get('compile_message')}"
+        when null
+          @controlSummary = "Nobody has yet attempted to compile this
+            #{@resourceName}"
 
     # Write the initial HTML to the page.
     html: ->
       context =
-        buttonClass: 'generate-and-compile'
-        buttonTitle: 'Click this button to request that this parser’s FST
-          script be generated and compiled so that it can be used to parse.'
+        buttonClass: @buttonClass
+        buttonTitle: "Click this button to request that this
+          #{@utils.camel2regular @resourceName}’s FST script be generated and
+          compiled so that it can be used."
         buttonText: 'Generate & Compile'
-        controlResultsClass: 'generate-and-compile-results'
+        controlResultsClass: @controlResultsClass
+        controlSummaryClass: @controlSummaryClass
+        controlResults: @controlResults
+        controlSummary: @getControlSummary()
       @$el.html @template(context)
 
     render: ->
@@ -72,34 +96,56 @@ define [
     # Generate & Compile
     ############################################################################
 
-    generateAndCompile: ->
-      console.log "start: generate_attempt is #{@model.get('generate_attempt')}"
-      console.log "start: compile_attempt is #{@model.get('compile_attempt')}"
-      @model.generateAndCompile()
+    generateAndCompile: -> @model.generateAndCompile()
 
     generateAndCompileStart: ->
-      @spin 'button.generate-and-compile', '50%', '135%'
+      @$(".#{@controlSummaryClass}").html ''
+      @spin "button.#{@buttonClass}", '50%', '135%'
       @disableGenerateAndCompileButton()
 
     generateAndCompileEnd: ->
-      @stopSpin 'button.generate-and-compile'
-      @enableGenerateAndCompileButton()
 
     generateAndCompileFail: (error) ->
-      Backbone.trigger 'morphologicalParserGenerateAndCompileFail', error,
+      Backbone.trigger "#{@resourceName}GenerateAndCompileFail", error,
         @model.get('id')
 
-    # TODO: this isn't really a success. Now we must poll GET
-    # /morphologicalparsers/id until compile attempt changes.
     generateAndCompileSuccess: ->
-      console.log "success: generate_attempt is #{@model.get('generate_attempt')}"
-      console.log "success: compile_attempt is #{@model.get('compile_attempt')}"
-      Backbone.trigger 'morphologicalParserGenerateAndCompileSuccess',
-        @model.get('id')
+      @compileAttempt = @model.get('compile_attempt')
+      @poll()
 
     disableGenerateAndCompileButton: ->
-      @$('button.generate-and-compile').button 'disable'
+      @$("button.#{@buttonClass}").button 'disable'
 
     enableGenerateAndCompileButton: ->
-      @$('button.generate-and-compile').button 'enable'
+      @$("button.#{@buttonClass}").button 'enable'
+
+    fetch: ->
+      @model.fetchResource @model.get('id')
+
+    fetchResourceSuccess: (resourceObject) ->
+      if resourceObject.compile_attempt is @compileAttempt
+        @poll()
+      else
+        @model.set
+          compile_succeeded: resourceObject.compile_succeeded
+          compile_attempt: resourceObject.compile_attempt
+          compile_message: resourceObject.compile_message
+          datetime_modified: resourceObject.datetime_modified
+          modifier: resourceObject.modifier
+        @$(".#{@controlSummaryClass}").html @getControlSummary()
+        if @model.get('compile_succeeded')
+          Backbone.trigger("#{@resourceName}CompileSuccess",
+            @model.get('compile_message'), @model.get('id'))
+        else
+          Backbone.trigger("#{@resourceName}CompileFail",
+            @model.get('compile_message'), @model.get('id'))
+        @stopSpin "button.#{@buttonClass}"
+        @enableGenerateAndCompileButton()
+
+    fetchResourceFail: (error) ->
+      Backbone.trigger "#{@resourceName}GenerateAndCompileFail", error, @model.get('id')
+      @stopSpin "button.#{@buttonClass}"
+      @enableGenerateAndCompileButton()
+
+    poll: -> setTimeout((=> @fetch()), 500)
 

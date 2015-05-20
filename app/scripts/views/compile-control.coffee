@@ -16,9 +16,9 @@ define [
     className: 'compile-control-view control-view dative-widget-center'
 
     initialize: (options) ->
+      @resourceName = options?.resourceName or 'phonology'
       @activeServerType = @getActiveServerType()
       @listenToEvents()
-      @resourceName = options.resourceName or 'phonology'
 
     events:
       'click button.compile':         'compile'

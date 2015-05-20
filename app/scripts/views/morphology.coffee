@@ -4,8 +4,11 @@ define [
   './person-field-display'
   './date-field-display'
   './object-with-name-field-display'
+  './boolean-icon-display'
+  './morphology-controls'
 ], (ResourceView, MorphologyAddWidgetView, PersonFieldDisplayView,
-  DateFieldDisplayView, ObjectWithNameFieldDisplayView) ->
+  DateFieldDisplayView, ObjectWithNameFieldDisplayView,
+  BooleanIconFieldDisplayView, MorphologyControlsView) ->
 
   # Morphology View
   # ---------------
@@ -55,4 +58,9 @@ define [
       datetime_modified: DateFieldDisplayView
       lexicon_corpus: ObjectWithNameFieldDisplayView
       rules_corpus: ObjectWithNameFieldDisplayView
+      compile_succeeded: BooleanIconFieldDisplayView
+
+    excludedActions: ['history']
+
+    controlsViewClass: MorphologyControlsView
 

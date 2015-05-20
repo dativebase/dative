@@ -1369,6 +1369,7 @@ p.paragraph-widget
 {
   line-height: 1.5em;
   font-size: 110%;
+  max-width: 20%;
 }
 
 .form-add-form ul.fieldset textarea,

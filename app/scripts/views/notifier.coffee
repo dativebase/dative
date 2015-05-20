@@ -65,6 +65,10 @@ define [
       @listenTo Backbone, 'phonologyServeCompiledFail', @phonologyServeCompiledFail
       @listenTo Backbone, 'phonologyServeCompiledSuccess', @phonologyServeCompiledSuccess
 
+      @listenTo Backbone, 'morphologyGenerateAndCompileFail', @morphologyGenerateAndCompileFail
+      @listenTo Backbone, 'morphologyCompileFail', @morphologyCompileFail
+      @listenTo Backbone, 'morphologyCompileSuccess', @morphologyCompileSuccess
+
       @listenToCRUDResources()
 
     listenToCRUDResources: ->
@@ -385,6 +389,29 @@ define [
         content: "Your attempt to download the compiled binary file
           representing phonology #{phonologyId} was successful: click
           the link next to the button to download the file to your computer"
+      @renderNotification notification
+
+    morphologyGenerateAndCompileFail: (error, morphologyId) ->
+      notification = new NotificationView
+        title: "Morphology generate and compile failed"
+        content: "Your attempt to generate and compile morphology
+          #{morphologyId} failed: #{error}"
+        type: 'error'
+      @renderNotification notification
+
+    morphologyCompileFail: (error, morphologyId) ->
+      notification = new NotificationView
+        title: "Morphology compile failed"
+        content: "Your attempt to compile morphology #{morphologyId} failed:
+          #{error}"
+        type: 'error'
+      @renderNotification notification
+
+    morphologyCompileSuccess: (message, morphologyId) ->
+      notification = new NotificationView
+        title: "Morphology compile success"
+        content: "Your attempt to compile morphology #{morphologyId} was
+          successful: #{message}"
       @renderNotification notification
 
     registerFail: (reason) ->

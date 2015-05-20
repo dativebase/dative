@@ -99,7 +99,7 @@ define [
     # `@serverSideResourceName`, as is necessary with OLD "corpora" which are
     # called "subcorpora" in Dative.
     getServerSideResourceName: ->
-      @serverSideResourceName or @resourceNamePlural
+      @serverSideResourceName or @resourceNamePlural.toLowerCase()
 
     # Fetch a resource by id.
     # GET `<URL>/<resource_name_plural>/<resource.id>`
@@ -198,4 +198,31 @@ define [
     # The JSON payload for destroying a resource; the OLD doesn't use this, but
     # FieldDB crucially does.
     getDestroyResourcePayload: -> null
+
+    # Perform a "generate and compile" request.
+    # PUT `<URL>/morphologicalparsers/{id}/generate_and_compile`
+    generateAndCompile: ->
+      @trigger "generateAndCompileStart"
+      @constructor.cors.request(
+        method: 'PUT'
+        url: "#{@getOLDURL()}/#{@getServerSideResourceName()}/#{@get 'id'}/generate_and_compile"
+        onload: (responseJSON, xhr) =>
+          @trigger "generateAndCompileEnd"
+          if xhr.status is 200
+            @trigger "generateAndCompileSuccess", responseJSON
+          else
+            error = responseJSON.error or 'No error message provided.'
+            @trigger "generateAndCompileFail", error
+            console.log "PUT request to
+              #{@getOLDURL()}/#{@getServerSideResourceName()}/#{@get 'id'}/generate_and_compile
+              failed (status not 200)."
+            console.log error
+        onerror: (responseJSON) =>
+          @trigger "generateAndCompileEnd"
+          error = responseJSON.error or 'No error message provided.'
+          @trigger "generateAndCompileFail", error
+          console.log "Error in PUT request to
+            #{@getOLDURL()}/#{@getServerSideResourceName()}/#{@get 'id'}/generate_and_compile
+            (onerror triggered)."
+      )
 
