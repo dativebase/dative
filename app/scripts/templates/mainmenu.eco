@@ -27,11 +27,9 @@
             <li class='requires-authentication'>
               <a data-event="request:formAdd" data-shortcut="ctrl+a">Add</a>
             </li>
-            <!--
             <li class='requires-authentication'>
-              <a data-event="request:formsSearch" data-shortcut="ctrl+s">Search</a>
+              <a data-event="request:searchesBrowse" data-shortcut="ctrl+s">Search</a>
             </li>
-            -->
             <li class='requires-authentication'>
               <a data-event="request:formsBrowse" data-shortcut="ctrl+b">Browse</a>
             </li>

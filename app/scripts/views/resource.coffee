@@ -257,7 +257,7 @@ define [
       name = @model.get 'name'
       id = @model.get 'id'
       if name
-        truncatedName = name[0..40]
+        truncatedName = name[0..35]
         if truncatedName isnt name then name = "#{truncatedName}..."
       else
         name = ''

@@ -1617,3 +1617,24 @@ span.match
   font-weight: bold;
 }
 
+div.search
+{
+  white-space: pre;
+}
+
+div.search table td
+{
+  padding: 0.5em;
+}
+
+td.middle-cell
+{
+  vertical-align: middle;
+}
+
+div.scoped-cell
+{
+  border-left: 2px solid black;
+  border-radius: 15px;
+}
+

@@ -20,6 +20,7 @@ define [
   './language-models'
   './morphological-parsers'
   './corpora'
+  './searches'
   './../models/application-settings'
   './../models/form'
   './../collections/application-settings'
@@ -29,8 +30,9 @@ define [
   RegisterDialogView, AlertDialogView, HelpDialogView, ApplicationSettingsView,
   PagesView, HomePageView, FormAddView, FormsSearchView, FormsView,
   SubcorporaView, PhonologiesView, MorphologiesView, LanguageModelsView,
-  MorphologicalParsersView, CorporaView, ApplicationSettingsModel, FormModel,
-  ApplicationSettingsCollection, globals, appTemplate) ->
+  MorphologicalParsersView, CorporaView, SearchesView,
+  ApplicationSettingsModel, FormModel, ApplicationSettingsCollection, globals,
+  appTemplate) ->
 
   # App View
   # --------
@@ -100,6 +102,8 @@ define [
         @showLanguageModelsView
       @listenTo @mainMenuView, 'request:morphologicalParsersBrowse',
         @showMorphologicalParsersView
+      @listenTo @mainMenuView, 'request:searchesBrowse',
+        @showSearchesView
       @listenTo @mainMenuView, 'request:pages', @showPagesView
 
       @listenTo @router, 'route:home', @showHomePageView
@@ -403,6 +407,22 @@ define [
       if not @morphologicalParsersView
         @morphologicalParsersView = new MorphologicalParsersView()
       @visibleView = @morphologicalParsersView
+      @renderVisibleView taskId
+
+    # Show the page for browsing searches.
+    showSearchesView: (options) ->
+      if not @loggedIn() then return
+      if @searchesView and
+      @visibleView is @searchesView
+        return
+      @router.navigate 'searches-browse'
+      taskId = @guid()
+      Backbone.trigger('longTask:register', 'Opening searches browse view',
+        taskId)
+      @closeVisibleView()
+      if not @searchesView
+        @searchesView = new SearchesView()
+      @visibleView = @searchesView
       @renderVisibleView taskId
 
     # Put out of use for now. Now adding a form is done via the browse

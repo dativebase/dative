@@ -66,6 +66,8 @@ define (require) ->
     try
       if endsWith(noun, 'ies')
         "#{noun[0..-4]}y"
+      else if endsWith(noun, 'es')
+        noun[...-2]
       else
         noun[...-1]
     catch
