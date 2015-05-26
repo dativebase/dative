@@ -2,33 +2,51 @@
     <tr>
 
         <% if @filterExpression[0] in ['and', 'or', 'not']: %>
-            <td class='middle-cell'>
-                <div class='operator'>
-                    <select name='operator' class='operator' tabindex='0'>
-                        <% for operator in ['', 'and', 'or', 'not']: %>
-                            <% if operator is @filterExpression[0]: %>
-                                <option value='<%= operator %>' selected
-                                    ><%= operator %></option>
-                            <% else: %>
-                                <option value='<%= operator %>'
-                                    ><%= operator %></option>
-                            <% end %>
-                        <% end %>
-                    </select>
-                </div>
-            </td>
-            <td>
-                <% if @filterExpression[0] in ['and', 'or']: %>
-                    <div class='filter-expression-operand
-                                filter-expression-operand-array'></div>
-                <% else: %>
-                    <div class='filter-expression-operand'></div>
-                <% end %>
-            </td>
+            <% buttonText = @filterExpression[0] %>
         <% else: %>
-            <td>
+            <% buttonText = '<i class="fa fa-ellipsis-h"></i>' %>
+        <% end %>
 
-                <div class='filter-expression'>
+        <td class='middle-cell'>
+            <div class='operator'>
+                <button class='operator'><%- buttonText %></button>
+                <div class='filter-expression-action-widget-container'>
+                    <div class='filter-expression-action-widget ui-corner-all'>
+                        <button class='make-and dative-tooltip'
+                                title='transform this to “and”, i.e., to a
+                                    conjunction of search
+                                    expressions.'>and</button>
+                        <button class='make-or dative-tooltip'
+                                title='transform this to “or”, i.e., to a
+                                    disjunction of search
+                                    expressions.'>or</button>
+                        <button class='make-not dative-tooltip'
+                                title='negate this search
+                                    expression'>not</button>
+                        <!-- <button class='make- dative-tooltip'
+                            ><i class='fa fa-ellipsis-h'></i></button> -->
+                        <button class='add-coordinand dative-tooltip'
+                                title='add another search expression beneath
+                                    this one'><i class='fa fa-plus'
+                                    ></i></button>
+                        <button class='destroy dative-tooltip'
+                                title='destroy this search expression'
+                            ><i class='fa fa-times'></i></button>
+                    </div>
+                </div>
+            </div>
+        </td>
+
+        <td>
+            <% if @filterExpression[0] in ['and', 'or']: %>
+                <% operandClass = 'filter-expression-operand filter-expression-operand-array' %>
+            <% else: %>
+                <% operandClass = 'filter-expression-operand' %>
+            <% end %>
+
+            <div class='<%= operandClass %>'>
+
+                <% if @filterExpression.length > 3: %>
 
                     <% if @filterExpression.length is 5: %>
                         <% [myModel, myAttribute, mySubattribute, myRelation, myValue] = @filterExpression %>
@@ -77,11 +95,11 @@
                     <textarea name='value' name='value' class='value ui-corner-all'
                         tabindex='0'><%= myValue %></textarea>
 
-                </div>
+                <% end %>
 
-            </td>
+            </div>
 
-        <% end %>
+        </td>
 
     </tr>
 </table>

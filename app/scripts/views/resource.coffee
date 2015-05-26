@@ -496,8 +496,11 @@ define [
     expand: ->
       # ResourcesView listens for this once in order to scroll to the correct
       # place.
-      @showSecondaryDataEvent = "#{@resourceName}:#{@resourceName}Expanded"
+      @showSecondaryDataEvent = @getShowSecondaryDataEvent()
       @showFullAnimate()
+
+    getShowSecondaryDataEvent: ->
+      "#{@resourceName}:#{@resourceName}Expanded"
 
     # Collapse the resource view: hide buttons and secondary data.
     collapse: ->
@@ -706,11 +709,14 @@ define [
         @showUpdateView()
 
     showUpdateViewAnimate: ->
+      @spin()
       if not @updateViewRendered then @renderUpdateView()
       @updateViewVisible = true
       @setUpdateButtonStateOpen()
       @$('.update-resource-widget').first().slideDown
         complete: =>
+          @showSecondaryDataEvent = @getShowSecondaryDataEvent()
+          @listenToOnce Backbone, @getShowSecondaryDataEvent(), @stopSpin
           @showFullAnimate()
           Backbone.trigger "add#{@resourceNameCapitalized}WidgetVisible"
           @focusFirstUpdateViewTextarea()
@@ -824,7 +830,8 @@ define [
       options = super
       options.top = '50%'
       options.left = '-15%'
-      options.color = @constructor.jQueryUIColors().errCo
+      # options.color = @constructor.jQueryUIColors().errCo
+      options.color = @constructor.jQueryUIColors().defCo
       options
 
     spin: -> @$('.spinner-container').spin @spinnerOptions()

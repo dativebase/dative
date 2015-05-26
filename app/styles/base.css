@@ -1628,6 +1628,7 @@ span.match
   min-width: 100%;
   max-width: 100%;
   max-height: 40em;
+  padding-bottom: 3em;
 }
 
 div.search table td
@@ -1656,8 +1657,29 @@ div.filter-expression
 }
 
 div.operand select,
-div.operand textarea
+div.operand textarea,
+div.filter-expression-operand select,
+div.filter-expression-operand textarea
 {
   vertical-align: middle;
+}
+
+div.filter-expression-action-widget-container
+{
+  position: relative;
+}
+
+div.filter-expression-action-widget
+{
+  position: absolute;
+  white-space: nowrap;
+  z-index: 999;
+  padding: 0.25em;
+  border: 1px solid;
+}
+
+table.filter-expression-table
+{
+  /*border: 1px solid green;*/
 }
 
