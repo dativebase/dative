@@ -11,6 +11,12 @@ define [
 
   class SearchFieldView extends FieldView
 
+    getFieldLabelContainerClass: ->
+      "#{super} top"
+
+    getFieldInputContainerClass: ->
+      "#{super} full-width"
+
     getInputView: ->
       new SearchInputView @context
 

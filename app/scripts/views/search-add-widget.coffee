@@ -38,9 +38,8 @@ define [
     primaryAttributes: [
       'name'
       'description'
-    ]
-
-    editableSecondaryAttributes: [
       'search'
     ]
+
+    editableSecondaryAttributes: []
 

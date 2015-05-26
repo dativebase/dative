@@ -158,6 +158,31 @@ define [
             /#{@getServerSideResourceName()}/new"
       )
 
+    # Issue a GET request to /<resource_name_plural>/new_search on the active OLD
+    # server. In the OLD API, this type of request returns a JSON object
+    # containing the data necessary to create a new OLD search over that resource.
+    getNewSearchData: ->
+      Backbone.trigger "getNew#{@resourceNameCapitalized}SearchDataStart"
+      @constructor.cors.request(
+        method: 'GET'
+        url: "#{@getOLDURL()}/#{@getServerSideResourceName()}/new_search"
+        onload: (responseJSON, xhr) =>
+          Backbone.trigger "getNew#{@resourceNameCapitalized}SearchDataEnd"
+          if xhr.status is 200
+            Backbone.trigger "getNew#{@resourceNameCapitalized}SearchDataSuccess",
+              responseJSON
+          else
+            Backbone.trigger "getNew#{@resourceNameCapitalized}SearchDataSuccess",
+              "Failed in fetching the data required to create a new search over
+                #{@resourceNamePlural}."
+        onerror: (responseJSON) =>
+          Backbone.trigger "getNew#{@resourceNameCapitalized}SearchDataEnd"
+          Backbone.trigger "getNew#{@resourceNameCapitalized}SearchDataFail",
+            "Error in GET request to OLD server for /#{@getServerSideResourceName()}/new_search"
+          console.log "Error in GET request to OLD server for
+            /#{@getServerSideResourceName()}/new_search"
+      )
+
     # Destroy a resource.
     # DELETE `<URL>/<resource_name_plural>/<resource.id>`
     destroyResource: (options) ->

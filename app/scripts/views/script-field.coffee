@@ -14,10 +14,10 @@ define [
   class ScriptFieldView extends FieldView
 
     getFieldLabelContainerClass: ->
-      'dative-field-label-container top'
+      "#{super} top"
 
     getFieldInputContainerClass: ->
-      'dative-field-input-container full-width'
+      "#{super} full-width"
 
     getInputView: ->
       new ScriptInputView @context

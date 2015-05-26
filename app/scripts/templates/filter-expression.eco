@@ -1,0 +1,88 @@
+<table class='filter-expression-table'>
+    <tr>
+
+        <% if @filterExpression[0] in ['and', 'or', 'not']: %>
+            <td class='middle-cell'>
+                <div class='operator'>
+                    <select name='operator' class='operator' tabindex='0'>
+                        <% for operator in ['', 'and', 'or', 'not']: %>
+                            <% if operator is @filterExpression[0]: %>
+                                <option value='<%= operator %>' selected
+                                    ><%= operator %></option>
+                            <% else: %>
+                                <option value='<%= operator %>'
+                                    ><%= operator %></option>
+                            <% end %>
+                        <% end %>
+                    </select>
+                </div>
+            </td>
+            <td>
+                <% if @filterExpression[0] in ['and', 'or']: %>
+                    <div class='filter-expression-operand
+                                filter-expression-operand-array'></div>
+                <% else: %>
+                    <div class='filter-expression-operand'></div>
+                <% end %>
+            </td>
+        <% else: %>
+            <td>
+
+                <div class='filter-expression'>
+
+                    <% if @filterExpression.length is 5: %>
+                        <% [myModel, myAttribute, mySubattribute, myRelation, myValue] = @filterExpression %>
+                    <% else: %>
+                        <% [myModel, myAttribute, myRelation, myValue] = @filterExpression %>
+                    <% end %>
+
+                    <select name='attribute' class='attribute' tabindex='0'>
+                        <% for attribute in @attributes: %>
+                            <% if attribute is myAttribute: %>
+                                <option value='<%= attribute %>' selected
+                                    ><%= @snake2regular attribute %></option>
+                            <% else: %>
+                                <option value='<%= attribute %>'
+                                    ><%= @snake2regular attribute %></option>
+                            <% end %>
+                        <% end %>
+                    </select>
+
+                    <% if @filterExpression.length is 5: %>
+                        <select name='sub-attribute' class='sub-attribute' tabindex='0'>
+                            <% for attribute in @subattributes[myAttribute] or []: %>
+                                <% if attribute is mySubattribute: %>
+                                    <option value='<%= attribute %>' selected
+                                        ><%= @snake2regular attribute %></option>
+                                <% else: %>
+                                    <option value='<%= attribute %>'
+                                        ><%= @snake2regular attribute %></option>
+                                <% end %>
+                            <% end %>
+                        </select>
+                    <% end %>
+
+                    <select name='relation' class='relation' tabindex='0'>
+                        <% for relation in @relations: %>
+                            <% if relation is myRelation: %>
+                                <option value='<%= relation %>' selected
+                                    ><%= relation %></option>
+                            <% else: %>
+                                <option value='<%= relation %>'
+                                    ><%= relation %></option>
+                            <% end %>
+                        <% end %>
+                    </select>
+
+                    <textarea name='value' name='value' class='value ui-corner-all'
+                        tabindex='0'><%= myValue %></textarea>
+
+                </div>
+
+            </td>
+
+        <% end %>
+
+    </tr>
+</table>
+
