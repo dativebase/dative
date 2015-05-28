@@ -228,14 +228,17 @@ define [
         $subAttributeSelect.html ''
 
         # Note that we remember the last attribute-subattribute correlation and
-        # implement that here.
-        previouslySelectedSubattribute = null
+        # implement that here. If there is no last correlation, we use the
+        # default subattribute for the given attribute, if there is one.
+        valueThatShouldBeSelected = null
         if attribute of @subattributeMemoryMap
-          previouslySelectedSubattribute =
+          valueThatShouldBeSelected =
             @subattributeMemoryMap[attribute]
+        else if attribute of @subattributeDefaults
+          valueThatShouldBeSelected = @subattributeDefaults[attribute]
         for subattribute in subattributes[attribute]
-          if previouslySelectedSubattribute and
-          previouslySelectedSubattribute is subattribute
+          if valueThatShouldBeSelected and
+          valueThatShouldBeSelected is subattribute
             $subAttributeSelect.append "<option value='#{subattribute}'
               selected>#{@utils.snake2regular subattribute}</option>"
           else
@@ -248,6 +251,11 @@ define [
           .selectmenu()
           .each (index, element) =>
             @transferClassAndTitle @$(element) # so we can tooltipify the selectmenu
+        @$('.ui-selectmenu-button.sub-attribute').first()
+          .tooltip
+            content: "select a sub-attribute for the
+              #{@utils.snake2regular(attribute)}"
+
       else
         # If `attribute` is non-relational, we hide the sub-attribute selectmenu.
         @$('select.sub-attribute').first().hide()
@@ -303,7 +311,9 @@ define [
           @initializeFilterExpressionSubviews()
           @$el.empty()
           @render()
-          @$el.fadeIn()
+          @$el.fadeIn
+            complete: =>
+              @$('button, .ui-selectmenu-button, .textarea').first().focus()
       @triggerChanged()
 
     # Add an "and" with scope over this filter expression.
@@ -338,7 +348,9 @@ define [
           @initializeFilterExpressionSubviews()
           @$el.empty()
           @render()
-          @$el.fadeIn()
+          @$el.fadeIn
+            complete: =>
+              @$('button, .ui-selectmenu-button, .textarea').first().focus()
       @triggerChanged()
 
     # Remove the "not" operator from this filter expression.
@@ -353,7 +365,9 @@ define [
           @initializeFilterExpressionSubviews()
           @$el.empty()
           @render()
-          @$el.fadeIn()
+          @$el.fadeIn
+            complete: =>
+              @$('button, .ui-selectmenu-button, .textarea').first().focus()
       @triggerChanged()
 
     # Change our filter expression array so that it begins with a 'not'.
@@ -397,10 +411,18 @@ define [
         @$('div.filter-expression-action-widget-container').first()
       if $actionWidgetContainer.is ':visible'
         $actionWidgetContainer.slideUp('fast')
+        @$('button.operator').first()
+          .tooltip
+            content: 'click here to reveal buttons for changing this node.'
+            position: @tooltipPositionLeft('-20')
       else
         @consentToHideActionWidget = false
         Backbone.trigger 'filterExpressionsHideActionWidgets'
         $actionWidgetContainer.slideDown('fast')
+        @$('button.operator').first()
+          .tooltip
+            content: 'click here to hide the buttons for changing this node.'
+            position: @tooltipPositionLeft('-20')
 
     hideActionWidget: ->
       @$('div.filter-expression-action-widget-container').first().hide()
@@ -429,6 +451,7 @@ define [
         subattributes: @subattributes() # TODO: we have to do this ourselves! The OLD should provide it though...
         relations: @getRelations @options
         snake2regular: @utils.snake2regular
+        pluralize: @utils.pluralize
       @$el.html @template(context)
       @bordercolorify()
       $filterExpressionTable = @$('.filter-expression-table').first()
@@ -439,7 +462,10 @@ define [
       $filterExpressionTable
         .find('textarea').autosize().end()
         .find('button').button().end()
-        .find('.dative-tooltip').tooltip()
+        .find('.dative-tooltip.operator')
+          .tooltip position: @tooltipPositionLeft('-20')
+          .end()
+        .find('.dative-tooltip').not('.operator').tooltip().end()
       @renderFilterExpressionSubviews()
       @hideActionWidget()
       @actionButtonsVisibility()
@@ -669,6 +695,23 @@ define [
       'datetime_modified'
     ]
 
+    # Maps attributes to the default subattribute that should be displayed when
+    # the attribute is selected.
+    subattributeDefaults:
+      collections: 'title'
+      corpora: 'name'
+      elicitation_method: 'name'
+      elicitor: 'last_name'
+      enterer: 'last_name'
+      files: 'filename'
+      memorizers: 'last_name'
+      source: 'author'
+      speaker: 'last_name'
+      syntactic_category: 'name'
+      tags: 'name'
+      translations: 'transcription'
+      verifier: 'last_name'
+
     renderFilterExpressionSubviews: ->
       for filterExpressionSubview in @filterExpressionSubviews
         @renderFilterExpressionSubview filterExpressionSubview
@@ -678,7 +721,11 @@ define [
         .append filterExpressionSubview.render().el
       if animate
         filterExpressionSubview.$el
-          .hide().fadeIn()
+          .hide()
+          .fadeIn
+            complete: =>
+              filterExpressionSubview
+                .$('button, .ui-selectmenu-button, .textarea').first().focus()
       @rendered filterExpressionSubview
 
     # Make the border colors match the jQueryUI theme.

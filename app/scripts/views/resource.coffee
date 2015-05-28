@@ -715,11 +715,13 @@ define [
       @setUpdateButtonStateOpen()
       @$('.update-resource-widget').first().slideDown
         complete: =>
+          tmp = =>
+            @stopSpin()
+            @focusFirstUpdateViewTextarea()
           @showSecondaryDataEvent = @getShowSecondaryDataEvent()
-          @listenToOnce Backbone, @getShowSecondaryDataEvent(), @stopSpin
+          @listenToOnce Backbone, @getShowSecondaryDataEvent(), tmp
           @showFullAnimate()
           Backbone.trigger "add#{@resourceNameCapitalized}WidgetVisible"
-          @focusFirstUpdateViewTextarea()
 
     focusFirstUpdateViewTextarea: ->
       @$('.update-resource-widget textarea').first().focus()

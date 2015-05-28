@@ -9,7 +9,10 @@
 
         <td class='middle-cell'>
             <div class='operator'>
-                <button class='operator'><%- buttonText %></button>
+                <button class='operator dative-tooltip'
+                        title='click here to reveal buttons for changing this
+                            node.'><%- buttonText %></button>
+
                 <div class='filter-expression-action-widget-container'>
                     <div class='filter-expression-action-widget ui-corner-all
                         dative-shadowed-widget'>
@@ -39,14 +42,10 @@
                                 title='remove the negation from this search
                                 expression'><i>not</i></button>
 
-                        <!-- <button class='add-simplex dative-tooltip'
-                                title='add a new search expression here'
-                                ><i class='fa fa-ellipsis-h'></i></button> -->
-
                         <button class='add-operand dative-tooltip'
                                 title='add another search expression beneath
                                     this one'><i class='fa fa-plus'
-                                    ></i></button>
+                                    ></i>&nbsp;<i class='fa fa-arrow-right'></i></button>
 
                         <button class='destroy dative-tooltip'
                                 title='destroy this search expression'
@@ -74,7 +73,9 @@
                         <% [myModel, myAttribute, myRelation, myValue] = @filterExpression %>
                     <% end %>
 
-                    <select name='attribute' class='attribute' tabindex='0'>
+                    <select name='attribute' class='attribute dative-tooltip'
+                            tabindex='0' title='select a form attribute to build a
+                            search expression on.'>
                         <% for attribute in @attributes: %>
                             <% if attribute is myAttribute: %>
                                 <option value='<%= attribute %>' selected
@@ -86,7 +87,15 @@
                         <% end %>
                     </select>
 
-                    <select name='sub-attribute' class='sub-attribute' tabindex='0'>
+                    <% if @filterExpression.length is 5: %>
+                        <select name='sub-attribute' class='sub-attribute
+                            dative-tooltip' tabindex='0' title='select a
+                            sub-attribute for the
+                            <%= @snake2regular(myAttribute) %>'>
+                    <% else: %>
+                        <select name='sub-attribute' class='sub-attribute
+                            dative-tooltip' tabindex='0' title=''>
+                    <% end %>
                         <% if @filterExpression.length is 5: %>
                             <% for attribute in @subattributes[myAttribute].sort() or []: %>
                                 <% if attribute is mySubattribute: %>
@@ -100,7 +109,9 @@
                         <% end %>
                     </select>
 
-                    <select name='relation' class='relation' tabindex='0'>
+                    <select name='relation' class='relation dative-tooltip'
+                            tabindex='0'
+                            title='select a relation for the search expression'>
                         <% for relation in @relations: %>
                             <% if relation is myRelation: %>
                                 <option value='<%= relation %>' selected
@@ -112,9 +123,11 @@
                         <% end %>
                     </select>
 
-                    <textarea name='value' name='value' class='value ui-corner-all'
+                    <textarea name='value' name='value'
+                        class='value ui-corner-all dative-tooltip'
+                        title='enter an expression that the (sub)attribute
+                            should match, given the specified relation'
                         tabindex='0'><%= myValue %></textarea>
-
                 <% end %>
 
             </div>
