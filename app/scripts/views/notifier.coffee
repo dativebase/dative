@@ -69,6 +69,9 @@ define [
       @listenTo Backbone, 'morphologyCompileFail', @morphologyCompileFail
       @listenTo Backbone, 'morphologyCompileSuccess', @morphologyCompileSuccess
 
+      @listenTo Backbone, 'cantDeleteFilterExpressionOnlyChild',
+        @cantDeleteFilterExpressionOnlyChild
+
       @listenToCRUDResources()
 
     listenToCRUDResources: ->
@@ -404,6 +407,14 @@ define [
         title: "Morphology compile failed"
         content: "Your attempt to compile morphology #{morphologyId} failed:
           #{error}"
+        type: 'error'
+      @renderNotification notification
+
+    cantDeleteFilterExpressionOnlyChild: ->
+      notification = new NotificationView
+        title: "Search expression destroy failed"
+        content: "You cannot destroy a search expression if it is an only child
+          of “or” or “and” or if it follows “not”."
         type: 'error'
       @renderNotification notification
 

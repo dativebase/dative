@@ -11,27 +11,47 @@
             <div class='operator'>
                 <button class='operator'><%- buttonText %></button>
                 <div class='filter-expression-action-widget-container'>
-                    <div class='filter-expression-action-widget ui-corner-all'>
+                    <div class='filter-expression-action-widget ui-corner-all
+                        dative-shadowed-widget'>
+
+                        <button class='conjoin dative-tooltip'
+                                title='add an “and” to the left of this
+                                search expression.'
+                                >and<i class='fa fa-arrow-left'></i></button>
+
                         <button class='make-and dative-tooltip'
-                                title='transform this to “and”, i.e., to a
-                                    conjunction of search
-                                    expressions.'>and</button>
+                                title='change this to an “and”.'>and</button>
+
+                        <button class='disjoin dative-tooltip'
+                                title='add an “or” to the left of this
+                                    search expression.'
+                                >or<i class='fa fa-arrow-left'></i></button>
+
                         <button class='make-or dative-tooltip'
-                                title='transform this to “or”, i.e., to a
-                                    disjunction of search
-                                    expressions.'>or</button>
-                        <button class='make-not dative-tooltip'
+                                title='change this to an “or”.'>or</button>
+
+                        <button class='negate dative-tooltip'
                                 title='negate this search
-                                    expression'>not</button>
-                        <!-- <button class='make- dative-tooltip'
-                            ><i class='fa fa-ellipsis-h'></i></button> -->
-                        <button class='add-coordinand dative-tooltip'
+                                    expression'
+                                >not<i class='fa fa-arrow-left'></i></button>
+
+                        <button class='make-not-not dative-tooltip'
+                                title='remove the negation from this search
+                                expression'><i>not</i></button>
+
+                        <!-- <button class='add-simplex dative-tooltip'
+                                title='add a new search expression here'
+                                ><i class='fa fa-ellipsis-h'></i></button> -->
+
+                        <button class='add-operand dative-tooltip'
                                 title='add another search expression beneath
                                     this one'><i class='fa fa-plus'
                                     ></i></button>
+
                         <button class='destroy dative-tooltip'
                                 title='destroy this search expression'
                             ><i class='fa fa-times'></i></button>
+
                     </div>
                 </div>
             </div>
@@ -66,9 +86,9 @@
                         <% end %>
                     </select>
 
-                    <% if @filterExpression.length is 5: %>
-                        <select name='sub-attribute' class='sub-attribute' tabindex='0'>
-                            <% for attribute in @subattributes[myAttribute] or []: %>
+                    <select name='sub-attribute' class='sub-attribute' tabindex='0'>
+                        <% if @filterExpression.length is 5: %>
+                            <% for attribute in @subattributes[myAttribute].sort() or []: %>
                                 <% if attribute is mySubattribute: %>
                                     <option value='<%= attribute %>' selected
                                         ><%= @snake2regular attribute %></option>
@@ -77,8 +97,8 @@
                                         ><%= @snake2regular attribute %></option>
                                 <% end %>
                             <% end %>
-                        </select>
-                    <% end %>
+                        <% end %>
+                    </select>
 
                     <select name='relation' class='relation' tabindex='0'>
                         <% for relation in @relations: %>

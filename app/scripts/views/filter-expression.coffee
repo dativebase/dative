@@ -59,6 +59,12 @@ define [
 
       @filterExpression = options.filterExpression
 
+      # We remember the correlations between attributes and subattributes so if
+      # we reselect a previously selected attribute we can restore its previous
+      # subattribute value.
+      if @filterExpression.length is 5
+        @subattributeMemoryMap[@filterExpression[1]] = @filterExpression[2]
+
       # `@options` is an object of options for building filter expressions,
       # i.e., the attributes of forms and the attributes of their relational
       # attributes and the possible relations.
@@ -80,6 +86,8 @@ define [
           @getNewFilterExpressionView @filterExpression[1]
         @filterExpressionSubviews.push filterExpressionSubview
 
+    subattributeMemoryMap: {}
+
     listenToEvents: ->
       super
       @listenTo Backbone, 'filterExpressionsHideActionWidgets',
@@ -89,19 +97,35 @@ define [
 
     listenToSubviews: ->
       for filterExpressionSubview in @filterExpressionSubviews
-        @listenTo filterExpressionSubview, 'destroyMe',
-          @destroyFilterExpressionSubview
+        @listenToSubview filterExpressionSubview
+
+    listenToSubview: (subview) ->
+      @listenTo subview, 'destroyMe', @destroyFilterExpressionSubview
+      @listenTo subview, 'changed', @triggerChanged
+
+    triggerChanged: -> @trigger 'changed'
 
     # Destroy a specific filter expression subview: remove it from our "model"
     # (i.e., our `@filterExpression` array) and from our array of subviews.
     destroyFilterExpressionSubview: (filterExpressionSubview) ->
-      if @filterExpression[0] in ['and', 'or']
-        filterExpressionSubview.close()
-        @closed filterExpressionSubview
-        index = @filterExpressionSubviews.indexOf filterExpressionSubview
-        @filterExpressionSubviews.splice index, 1
-        @filterExpression[1].splice index, 1
-        @actionButtonsVisibility()
+      operator = @filterExpression[0]
+      if operator in ['and', 'or', 'not']
+        if operator is 'not' or
+        (operator in ['and', 'or'] and @filterExpression[1].length is 1)
+          Backbone.trigger 'cantDeleteFilterExpressionOnlyChild'
+        else
+          filterExpressionSubview.$el.fadeOut
+            complete: =>
+              filterExpressionSubview.close()
+              @closed filterExpressionSubview
+              index = @filterExpressionSubviews.indexOf filterExpressionSubview
+              @filterExpressionSubviews.splice index, 1
+              if @filterExpression[0] is 'not'
+                @filterExpression.pop 1
+              else
+                @filterExpression[1].splice index, 1
+              @actionButtonsVisibility()
+              @triggerChanged()
 
     # Hide our action widget. `@consentToHideActionWidget` will only be false if
     # this view is the one who triggered the event that causes this method to
@@ -111,35 +135,147 @@ define [
       @consentToHideActionWidget = true
 
     events:
-      'click button.operator':       'toggleActionWidget'
-      'click button.make-and':       'makeOperatorAnd'
-      'click button.make-or':        'makeOperatorOr'
-      'click button.make-not':       'makeOperatorNot'
-      'click button.make-':          'emptyOperator'
-      'click button.destroy':        'destroyFilterExpression'
-      'click button.add-coordinand': 'addCoordinand'
-      'selectmenuchange .attribute': 'attributeChanged'
+      'click button.operator':           'toggleActionWidget'
+      'click button.make-and':           'makeOperatorAnd'
+      'click button.conjoin':            'conjoin'
+      'click button.make-or':            'makeOperatorOr'
+      'click button.disjoin':            'disjoin'
+      'click button.negate':             'negate'
+      'click button.make-not-not':       'removeNotOperator'
+      'click button.destroy':            'destroyFilterExpression'
+      'click button.add-operand':        'addOperand'
+      'selectmenuchange .attribute':     'attributeChanged'
+      'selectmenuchange .sub-attribute': 'subattributeChanged'
+      'selectmenuchange .relation':      'relationChanged'
+      'input .value':                    'valueChanged'
+
+    valueChanged: (event) ->
+      @stopEvent event
+      $valueTextarea = @$('textarea.value').first()
+      value = $valueTextarea.val()
+      if @filterExpression.length is 5
+        @filterExpression[4] = value
+      else
+        @filterExpression[3] = value
+      @triggerChanged()
+
+    relationChanged: (event) ->
+      @stopEvent event
+      $relationSelect = @$('select.relation').first()
+      relation = $relationSelect.val()
+      if @filterExpression.length is 5
+        @filterExpression[3] = relation
+      else
+        @filterExpression[2] = relation
+      @triggerChanged()
 
     attributeChanged: (event) ->
       @stopEvent event
-      # TODO: change/create/destroy subattribute selectmenu based on this ...
-      console.log 'attributeChanged called'
+      @syncAttributeSubattributeSelects()
+      attribute = @$('select.attribute').first().val()
+      @filterExpression[1] = attribute
+      $subAttributeSelect = @$('select.sub-attribute').first()
+      $subAttributeSelectmenu = @$('.ui-selectmenu-button.sub-attribute').first()
+      if $subAttributeSelectmenu.is ':visible'
+        subAttribute = $subAttributeSelect.val()
+        if @filterExpression.length is 5
+          @filterExpression[2] = subAttribute
+        else
+          @filterExpression.splice 2, 0, subAttribute
+      else
+        if @filterExpression.length is 5
+          @filterExpression.splice 2, 1
+      @triggerChanged()
+
+    # Alter `@filterExpression` so that it accords with the DOM representation
+    # of the subattribute.
+    #  model   attribute        subattribute  relation value
+    # ['Form', 'enterer',       'first_name', 'is',    'John']
+    #  0       1                2             3        4
+    #
+    #  model   attribute        relation      value
+    # ['Form', 'transcription', 'is',         'John']
+    #  0       1                2             3
+    subattributeChanged: (event, triggerChanged=true) ->
+      if event then @stopEvent event
+      $subAttributeSelect = @$('select.sub-attribute').first()
+      $subAttributeSelectmenu = @$('.ui-selectmenu-button.sub-attribute').first()
+      if $subAttributeSelectmenu.is ':visible'
+        subAttribute = $subAttributeSelect.val()
+        @subattributeMemoryMap[@filterExpression[1]] = subAttribute
+        if @filterExpression.length is 5
+          @filterExpression[2] = subAttribute
+        else
+          @filterExpression.splice 2, 0, subAttribute
+        if triggerChanged then @triggerChanged()
+      else
+        if @filterExpression.length is 5
+          @filterExpression.splice 2, 1
+
+    # Synchronize the attribute and subattribute selectmenus.
+    # That is, if attribute is relational (i.e., valuated by reference to
+    # another object), then the sub-attribute select needs to be visible and it
+    # needs to be populated with the sub-attribute options relevant to its
+    # parent relational attribute.
+    # TODO: this view should remember the last selected sub-attribute of a
+    # given attribute.
+    syncAttributeSubattributeSelects: ->
+      attribute = @$('select.attribute').first().val()
+      subattributes = @subattributes()
+      if attribute of subattributes
+        # If `attribute` is relational, we rebuild its selectmenu.
+        $subAttributeSelect = @$('select.sub-attribute').first()
+        $subAttributeSelect.html ''
+
+        # Note that we remember the last attribute-subattribute correlation and
+        # implement that here.
+        previouslySelectedSubattribute = null
+        if attribute of @subattributeMemoryMap
+          previouslySelectedSubattribute =
+            @subattributeMemoryMap[attribute]
+        for subattribute in subattributes[attribute]
+          if previouslySelectedSubattribute and
+          previouslySelectedSubattribute is subattribute
+            $subAttributeSelect.append "<option value='#{subattribute}'
+              selected>#{@utils.snake2regular subattribute}</option>"
+          else
+            $subAttributeSelect.append "<option value='#{subattribute}'
+              >#{@utils.snake2regular subattribute}</option>"
+
+        # Rebuild the selectmenu machinery.
+        $subAttributeSelect
+          .selectmenu 'destroy'
+          .selectmenu()
+          .each (index, element) =>
+            @transferClassAndTitle @$(element) # so we can tooltipify the selectmenu
+      else
+        # If `attribute` is non-relational, we hide the sub-attribute selectmenu.
+        @$('select.sub-attribute').first().hide()
+        @$('.ui-selectmenu-button.sub-attribute').first().hide()
 
     # If this filter expression has a boolean (and/or) as its non-terminal, add
     # a new coordinand, i.e., a new filter expression under the scope of the
-    # boolean. Note: this button should only be visible/available if the
-    # non-terminal is a boolean.
-    addCoordinand: (event) ->
+    # boolean. If there is a "not" as the non-terminal, add an
+    # operand/complement under its scope. Note: this button should only be
+    # visible/available if the non-terminal is a boolean OR if the non-terminal
+    # is a stranded negation.
+    addOperand: (event) ->
       @stopEvent event
-      booleans = ['or', 'and']
       @hideActionWidgetAnimate()
-      if @filterExpression[0] in booleans
+      operator = @filterExpression[0]
+      if operator in ['or', 'and'] or
+      (operator is 'not' and @filterExpression.legnth is 1)
         newFilterExpression = @getDefaultFilterExpression()
-        @filterExpression[1].push newFilterExpression
+        if operator in ['or', 'and']
+          @filterExpression[1].push newFilterExpression
+        else if operator is 'not'
+          @filterExpression.push newFilterExpression
         filterExpressionSubview =
           @getNewFilterExpressionView newFilterExpression
         @filterExpressionSubviews.push filterExpressionSubview
         @renderFilterExpressionSubview filterExpressionSubview, true
+        @listenToSubview filterExpressionSubview
+        @triggerChanged()
 
     getDefaultFilterExpression: ->
       ['Form', 'transcription', 'like', '%']
@@ -154,16 +290,31 @@ define [
           .button 'option', 'label', boolean
           .button 'refresh'
         @actionButtonsVisibility()
-      else
-        @filterExpression = [boolean, [@filterExpression]]
-        @$el.fadeOut
-          complete: =>
-            for subview in @filterExpressionSubviews
-              subview.close()
-            @initializeFilterExpressionSubviews()
-            @$el.empty()
-            @render()
-            @$el.fadeIn()
+
+    # Add a boolean ('and' or 'or') with scope over this filter expression.
+    coordinate: (boolean) ->
+      booleans = ['or', 'and']
+      @hideActionWidgetAnimate()
+      @coordinateFilterExpression boolean
+      @$el.fadeOut
+        complete: =>
+          for subview in @filterExpressionSubviews
+            subview.close()
+          @initializeFilterExpressionSubviews()
+          @$el.empty()
+          @render()
+          @$el.fadeIn()
+      @triggerChanged()
+
+    # Add an "and" with scope over this filter expression.
+    conjoin: (event) ->
+      @stopEvent event
+      @coordinate 'and'
+
+    # Add an "or" with scope over this filter expression.
+    disjoin: (event) ->
+      @stopEvent event
+      @coordinate 'or'
 
     # Change the operator of this filter expression to 'and'.
     makeOperatorAnd: (event) ->
@@ -176,10 +327,10 @@ define [
       @makeOperatorBoolean 'or'
 
     # Change the operator of this filter expression to 'not'.
-    makeOperatorNot: (event) ->
+    negate: (event) ->
       @stopEvent event
       @hideActionWidgetAnimate()
-      @filterExpression = ['not', @filterExpression]
+      @negateFilterExpression()
       @$el.fadeOut
         complete: =>
           for subview in @filterExpressionSubviews
@@ -188,20 +339,55 @@ define [
           @$el.empty()
           @render()
           @$el.fadeIn()
+      @triggerChanged()
 
-    # TODO: delete this? is this button ever being used?
-    emptyOperator: (event) ->
-      @hideActionWidgetAnimate()
+    # Remove the "not" operator from this filter expression.
+    removeNotOperator: (event) ->
       @stopEvent event
+      @hideActionWidgetAnimate()
+      @removeNegationFromFilterExpression()
+      @$el.fadeOut
+        complete: =>
+          for subview in @filterExpressionSubviews
+            subview.close()
+          @initializeFilterExpressionSubviews()
+          @$el.empty()
+          @render()
+          @$el.fadeIn()
+      @triggerChanged()
+
+    # Change our filter expression array so that it begins with a 'not'.
+    negateFilterExpression: ->
+      @filterExpression.unshift (x for x in @filterExpression)
+      @filterExpression.unshift 'not'
+      while @filterExpression.length > 2
+        @filterExpression.pop()
+
+    # Change our filter expression array so that it NO LONGER begins with a
+    # 'not'.
+    removeNegationFromFilterExpression: ->
+      for element in @filterExpression[1]
+        @filterExpression.push element
+      @filterExpression.shift()
+      @filterExpression.shift()
+
+    # Change our filter expression array so that it begins with an 'and' or an
+    # 'or'. Here we have to shift things in the array around so that we're in a
+    # proper and/or configuration, i.e., go from FE to ['and/or', [FE]],
+    # all while not replacing any existing arrays; that is, we need to keep
+    # the whole filter expression array intact, no copying.
+    coordinateFilterExpression: (coordinator) ->
+      @filterExpression.unshift [(x for x in @filterExpression)]
+      @filterExpression.unshift coordinator
+      while @filterExpression.length > 2
+        @filterExpression.pop()
 
     # Destroy this filter expression. Note: we trigger a `destroyMe` event and
     # let the parent `FilterExpression` view handle most of the destruction.
     destroyFilterExpression: (event) ->
       @stopEvent event
       @hideActionWidgetAnimate()
-      @$el.fadeOut
-        complete: =>
-          @trigger 'destroyMe', @
+      @trigger 'destroyMe', @
 
     # Toggle the action widget, i.e., the <div> full of buttons that pops up
     # when you click on an "operator" button.
@@ -230,6 +416,7 @@ define [
         model: @model
         filterExpression: subFilterExpression
         options: @options
+        rootNode: false
       )
 
     template: filterExpressionTemplate
@@ -238,16 +425,17 @@ define [
       context =
         filterExpression: @filterExpression
         options: @options
-        attributes: _.keys(@options.search_search_parameters.search_parameters.attributes)
+        attributes: _.keys(@options.search_search_parameters.search_parameters.attributes).sort()
         subattributes: @subattributes() # TODO: we have to do this ourselves! The OLD should provide it though...
-        relations: (r for r in \
-          _.keys(@options.search_search_parameters.search_parameters.relations) \
-          when r isnt 'regexp' and '_' not in r)
+        relations: @getRelations @options
         snake2regular: @utils.snake2regular
       @$el.html @template(context)
       @bordercolorify()
       $filterExpressionTable = @$('.filter-expression-table').first()
       @selectmenuify $filterExpressionTable
+      if @filterExpression.length is 4
+        @$('select.sub-attribute').hide()
+        @$('.ui-selectmenu-button.sub-attribute').hide()
       $filterExpressionTable
         .find('textarea').autosize().end()
         .find('button').button().end()
@@ -257,6 +445,14 @@ define [
       @actionButtonsVisibility()
       @listenToEvents()
       @
+
+    # We filter out some of the relations exposed by the OLD; this is because
+    # some of them are redundant and have ugly names, e.g., ugly "__ne__" is
+    # co-referential with "!=" and "regexp" is the same as "regex".
+    getRelations: (options) ->
+      (r for r in \
+      _.keys(options.search_search_parameters.search_parameters.relations) \
+      when r isnt 'regexp' and '_' not in r)
 
     # Make <select>s into jQuery selectmenus.
     selectmenuify: ($context) ->
@@ -276,9 +472,24 @@ define [
           $actionWidget.find('button.destroy').hide()
         else
           $actionWidget.find('button.destroy').show()
-        $actionWidget.find('button.add-coordinand').show()
+        $actionWidget.find('button.add-operand').show()
+        $actionWidget.find('button.make-not-not').hide()
+        if myOperator is 'and'
+          $actionWidget.find('button.make-and').hide()
+          $actionWidget.find('button.make-or').show()
+        else
+          $actionWidget.find('button.make-or').hide()
+          $actionWidget.find('button.make-and').show()
       else
-        $actionWidget.find('button.add-coordinand').hide()
+        $actionWidget.find('button.make-or').hide()
+        $actionWidget.find('button.make-and').hide()
+        if myOperator is 'not'
+          $actionWidget.find('button.make-not-not').show()
+          if @filterExpression.length is 1
+            $actionWidget.find('button.add-operand').show()
+        else
+          $actionWidget.find('button.make-not-not').hide()
+          $actionWidget.find('button.add-operand').hide()
 
     # Hide the button for changing to the current state. That is, if this is an
     # 'and' node, we don't want to show the "make me an 'and' node" button.

@@ -1633,7 +1633,7 @@ span.match
 
 div.search table td
 {
-  padding: 0.5em;
+  padding: 0.5em 0 0.5em 0.5em;
 }
 
 td.middle-cell
@@ -1642,14 +1642,14 @@ td.middle-cell
 }
 
 div.scoped-cell,
-div.filter-expression-operand-array
+.filter-expression-operand-array
 {
   border-left: 2px solid black;
   border-radius: 15px;
 }
 
 div.filter-expression-operator,
-div.filter-expression-operand,
+.filter-expression-operand,
 div.filter-expression
 {
   white-space: nowrap;
@@ -1658,8 +1658,8 @@ div.filter-expression
 
 div.operand select,
 div.operand textarea,
-div.filter-expression-operand select,
-div.filter-expression-operand textarea
+.filter-expression-operand select,
+.filter-expression-operand textarea
 {
   vertical-align: middle;
 }
@@ -1681,5 +1681,18 @@ div.filter-expression-action-widget
 table.filter-expression-table
 {
   /*border: 1px solid green;*/
+}
+
+button.make-not-not i
+{
+  text-decoration: line-through;
+}
+
+.dative-field-input-container .search select,
+.dative-field-input-container .search .ui-selectmenu-button,
+.dative-field-input-container .search .ui-selectmenu-menu,
+.dative-field-input-container .search .ui-menu-item
+{
+  font-size: 12pt;
 }
 
