@@ -31,6 +31,9 @@ define [
     # Attributes that may be hidden.
     secondaryAttributes: [
       'search'
+      'enterer'
+      'datetime_modified'
+      'id'
     ]
 
     attribute2displayView:

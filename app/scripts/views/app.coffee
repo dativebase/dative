@@ -68,7 +68,7 @@ define [
       'click': 'bodyClicked'
 
     render: ->
-      if window.location.hostname == 'localhost'
+      if window.location.hostname == 'zlocalhost'
         setTimeout -> 
           console.clear()
         , 2000 
@@ -468,7 +468,6 @@ define [
       if not @homePageView then @homePageView = new HomePageView()
       @visibleView = @homePageView
       @renderVisibleView()
-      console.clear()
 
     showCorporaView: ->
       if not @loggedIn() then return

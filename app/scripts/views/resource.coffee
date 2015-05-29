@@ -121,7 +121,7 @@ define [
       @listenTo @model, 'change', @indicateModelState
       @listenTo @updateView, 'forceModelChanged', @indicateModelState
       @listenTo @model, "update#{@resourceNameCapitalized}Success",
-        @indicateModelIsUnaltered
+        @updateSuccess
       if 'controls' not in @excludedActions
         @listenTo @controlsView, "controlsView:hide",
           @hideControlsViewAnimate
@@ -138,6 +138,9 @@ define [
         fa-exclamation-triangle'></i>Unsaved changes)"
       @$('.dative-widget-header-title').first()
         .html headerTitleHTML
+
+    updateSuccess: ->
+      @indicateModelIsUnaltered()
 
     indicateModelIsUnaltered: ->
       @$('.dative-widget-header').removeClass 'ui-state-error'

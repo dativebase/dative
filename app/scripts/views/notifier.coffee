@@ -23,6 +23,7 @@ define [
         'morphology'
         'languageModel'
         'morphologicalParser'
+        'search'
       ]
       @crudRequests = ['add', 'update', 'destroy']
       @crudOutcomes = ['Success', 'Fail']
@@ -68,6 +69,9 @@ define [
       @listenTo Backbone, 'morphologyGenerateAndCompileFail', @morphologyGenerateAndCompileFail
       @listenTo Backbone, 'morphologyCompileFail', @morphologyCompileFail
       @listenTo Backbone, 'morphologyCompileSuccess', @morphologyCompileSuccess
+
+      @listenTo Backbone, 'formSearchSuccess', @formSearchSuccess
+      @listenTo Backbone, 'formSearchFail', @formSearchFail
 
       @listenTo Backbone, 'cantDeleteFilterExpressionOnlyChild',
         @cantDeleteFilterExpressionOnlyChild
@@ -231,6 +235,19 @@ define [
       @destroyResourceFail error, 'morphological parser'
     destroyMorphologicalParserSuccess: (model) ->
       @destroyResourceSuccess model, 'morphological parser'
+
+    ############################################################################
+    # Searches: add, update, & destroy notifications
+    ############################################################################
+
+    addSearchSuccess: (model) -> @addResourceSuccess model, 'search'
+    addSearchFail: (error) -> @addResourceFail error, 'search'
+    updateSearchSuccess: (model) ->
+      @updateResourceSuccess model, 'search'
+    updateSearchFail: (error) -> @updateResourceFail error, 'search'
+    destroySearchFail: (error) -> @destroyResourceFail error, 'search'
+    destroySearchSuccess: (model) ->
+      @destroyResourceSuccess model, 'search'
 
     ############################################################################
     # Resources: add, update, & destroy notifications
@@ -462,6 +479,21 @@ define [
       notification = new NotificationView
         title: 'Logged out'
         content: 'You have successfully logged out.'
+      @renderNotification notification
+
+    formSearchFail: (error, formSearchId) ->
+      notification = new NotificationView
+        title: 'Form search failed'
+        content: "Your attempt to search through the forms using the saved
+          search with id #{formSearchId} was unsuccessful: #{error}."
+        type: 'error'
+      @renderNotification notification
+
+    formSearchSuccess: (formSearchId) ->
+      notification = new NotificationView
+        title: 'Form search success'
+        content: "You have successfully used the saved search with id
+          #{formSearchId} to search!."
       @renderNotification notification
 
     getAuthenticateFailContent: (errorObj) ->

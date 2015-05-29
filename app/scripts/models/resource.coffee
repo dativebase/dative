@@ -226,6 +226,9 @@ define [
 
     # Perform a "generate and compile" request.
     # PUT `<URL>/morphologicalparsers/{id}/generate_and_compile`
+    # NOTE: this is only relevant to FST-based resources that need to be
+    # generated and compiled, i.e., just morphologies and morphological
+    # parsers, I think.
     generateAndCompile: ->
       @trigger "generateAndCompileStart"
       @constructor.cors.request(
@@ -246,6 +249,50 @@ define [
           @trigger "generateAndCompileEnd"
           error = responseJSON.error or 'No error message provided.'
           @trigger "generateAndCompileFail", error
+          console.log "Error in PUT request to
+            #{@getOLDURL()}/#{@getServerSideResourceName()}/#{@get 'id'}/generate_and_compile
+            (onerror triggered)."
+      )
+
+    # Perform a search request.
+    # SEARCH `<URL>/<resource_name_plural>/` or
+    # POST `<URL>/<resource_name_plural>/search`
+    # Payload guide:
+    #  {
+    #    "query": {
+    #      "filter": [ ... ],
+    #      "order_by": [ ... ]
+    #    },
+    #    "paginator": { ... }
+    #  }
+    getSearchPayload: (query, paginator) ->
+      paginator = paginator or {page: 1, items_per_page: 10}
+      if 'order_by' not of query then query.order_by = ['Form', 'id', 'desc']
+      query: query
+      paginator: paginator
+
+    search: (query, paginator=null) ->
+      @trigger "searchStart"
+      @constructor.cors.request(
+        method: 'SEARCH'
+        url: "#{@getOLDURL()}/#{@getServerSideResourceName()}"
+        payload: @getSearchPayload query, paginator
+        onload: (responseJSON, xhr) =>
+          @trigger "searchEnd"
+          if xhr.status is 200
+            console.log responseJSON
+            @trigger "searchSuccess", responseJSON
+          else
+            error = responseJSON.error or 'No error message provided.'
+            @trigger "searchFail", error
+            console.log "PUT request to
+              #{@getOLDURL()}/#{@getServerSideResourceName()}/#{@get 'id'}/generate_and_compile
+              failed (status not 200)."
+            console.log error
+        onerror: (responseJSON) =>
+          @trigger "searchEnd"
+          error = responseJSON.error or 'No error message provided.'
+          @trigger "searchFail", error
           console.log "Error in PUT request to
             #{@getOLDURL()}/#{@getServerSideResourceName()}/#{@get 'id'}/generate_and_compile
             (onerror triggered)."

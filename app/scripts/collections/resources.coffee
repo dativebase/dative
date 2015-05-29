@@ -146,6 +146,10 @@ define [
     updateResourceOnloadHandler: (resource, responseJSON, xhr, payload) ->
       resource.trigger "update#{@resourceNameCapitalized}End"
       if xhr.status is 200
+        # We remove the `search` value from the response before we set it; we
+        # don't want to assign a new object to this attribute because various
+        # views are tied to these (mutable) objects.
+        if 'search' of responseJSON then delete responseJSON.search
         resource.set responseJSON
         resource.trigger "update#{@resourceNameCapitalized}Success"
       else

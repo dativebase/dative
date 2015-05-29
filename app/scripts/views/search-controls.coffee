@@ -1,7 +1,9 @@
 define [
   './controls'
-  './search-control'
-], (ControlsView, SearchControlView) ->
+  './count-search-results-control'
+  './browse-search-results-control'
+], (ControlsView, CountSearchResultsControlView,
+  BrowseSearchResultsControlView) ->
 
   # Search Controls View
   # ----------------------------
@@ -14,6 +16,7 @@ define [
   class SearchControlsView extends ControlsView
 
     actionViewClasses: [
-      SearchControlView
+      BrowseSearchResultsControlView
+      CountSearchResultsControlView
     ]
 
