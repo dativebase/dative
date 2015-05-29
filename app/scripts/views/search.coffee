@@ -1,13 +1,14 @@
 define [
   './resource'
+  './search-controls'
   './search-add-widget'
   './person-field-display'
   './date-field-display'
   './object-with-name-field-display'
   './array-of-objects-with-name-field-display'
   './query-field-display'
-], (ResourceView, SearchAddWidgetView, PersonFieldDisplayView,
-  DateFieldDisplayView, ObjectWithNameFieldDisplayView,
+], (ResourceView, SearchControlsView, SearchAddWidgetView,
+  PersonFieldDisplayView, DateFieldDisplayView, ObjectWithNameFieldDisplayView,
   ArrayOfObjectsWithNameFieldDisplayView, QueryFieldDisplayView) ->
 
   # Search View
@@ -36,4 +37,8 @@ define [
       enterer: PersonFieldDisplayView
       datetime_modified: DateFieldDisplayView
       search: QueryFieldDisplayView
+
+    excludedActions: ['history']
+
+    controlsViewClass: SearchControlsView
 
