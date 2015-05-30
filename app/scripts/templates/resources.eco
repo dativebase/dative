@@ -10,6 +10,9 @@
           display</div>
       <div class='pagination-info'>
         Browsing
+        <span class='browse-set ui-state-highlight'
+            >all <%= @resourceNamePluralHuman %></span>.
+        Viewing
         <span class='resource-range'></span>
         of
         <span class='resource-count'></span>

@@ -1696,3 +1696,8 @@ button.make-not-not i
   font-size: 12pt;
 }
 
+.pagination-info
+{
+  line-height: 1.25em;
+}
+

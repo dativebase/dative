@@ -648,6 +648,11 @@ define [
       @$('button.toggle-all-labels').button 'enable'
       @setToggleAllLabelsButtonState()
       @setNewResourceViewButtonState()
+      if @search
+        @$('.browse-set').text "the results of a search over
+          #{@resourceNamePlural}"
+      else
+        @$('.browse-set').text "all #{@resourceNamePlural}"
       if @paginator.start is @paginator.end
         @$('.resource-range')
           .text("#{@utils.camel2regular @resourceName}
