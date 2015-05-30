@@ -24,7 +24,7 @@ define [
       @listenToEvents()
 
     events:
-      'click button.search':         'search'
+      'click button.count-search-results':         'countSearchResults'
 
     listenToEvents: ->
       super
@@ -40,7 +40,7 @@ define [
 
     html: ->
       context =
-        buttonClass: 'search'
+        buttonClass: 'count-search-results'
         buttonTitle: "Click this button to perform this search and see how many
           forms it returns."
         buttonText: 'Count search results'
@@ -81,7 +81,7 @@ define [
     # Search
     ############################################################################
 
-    search: ->
+    countSearchResults: ->
       @formModel.search @model.get('search')
 
     searchStart: ->

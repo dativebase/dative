@@ -579,9 +579,12 @@ define [
     # Returns false if we have already fetched these resources; prevents redundant
     # requests.
     weNeedToFetchResourcesAgain: ->
-      toFetch =
-        serverName: @getActiveServerName()
-      if _.isEqual(toFetch, @lastFetched) then false else true
+      if @searchChanged
+        @searchChanged = false
+        true
+      else
+        toFetch = serverName: @getActiveServerName()
+        if _.isEqual(toFetch, @lastFetched) then false else true
 
     # Refresh the page to reflect the current state. This means refreshing the
     # top menu header of the resources browse page, the pagination sub-header
@@ -1035,4 +1038,31 @@ define [
       @exporterDialog.setToBeExported options
       @exporterDialog.generateExport()
       @exporterDialog.dialogOpen()
+
+
+    # Search-relevant stuff
+    ############################################################################
+
+    # By default, we have no search object. If this is set, it is assumed to be
+    # an object of the form `{query: {filter: [], order_by: []}}`.
+    search: null
+
+    # Setting this to `true` will cause `@weNeedToFetchResourcesAgain()` to
+    # return `true`.
+    searchChanged: false
+
+    # Give this resources view a (new) search object. This will affect what
+    # forms we are browsing.
+    setSearch: (@search) ->
+      @searchChanged = true
+      @paginator = new Paginator page=1, items=0, itemsPerPage=@itemsPerPage
+      @collection.search = @search
+
+    # Delete this resource view's a search object. This will also affect what
+    # forms we are browsing.
+    deleteSearch: ->
+      @searchChanged = true
+      @search = null
+      @collection.search = null
+      @paginator = new Paginator page=1, items=0, itemsPerPage=@itemsPerPage
 

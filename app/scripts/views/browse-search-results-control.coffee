@@ -24,7 +24,7 @@ define [
       @listenToEvents()
 
     events:
-      'click button.search':         'search'
+      'click button.browse-search-results':         'browseSearchResults'
 
     listenToEvents: ->
       super
@@ -40,7 +40,7 @@ define [
 
     html: ->
       context =
-        buttonClass: 'search'
+        buttonClass: 'browse-search-results'
         buttonTitle: "Click this button to perform this search and then browse
           through the forms that it captures."
         buttonText: 'Browse search results'
@@ -81,8 +81,10 @@ define [
     # Search
     ############################################################################
 
-    search: ->
-      @formModel.search @model.get('search')
+    browseSearchResults: ->
+      Backbone.trigger(
+        'request:formsBrowseSearchResults',
+        search: @model.get('search'))
 
     searchStart: ->
       @$(".#{@controlSummaryClass}").html ''

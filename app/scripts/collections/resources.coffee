@@ -23,6 +23,11 @@ define [
     resourceName: 'resource'
     model: ResourceModel
 
+    # If this is non-null, it is expected to be an object with a `query`
+    # attribute and a `paginator` attribute. The presence of such an attribute
+    # will change how `fetchResources` behaves.
+    search: null
+
     initialize: (models, options) ->
       @resourceNameCapitalized = utils.capitalize @resourceName
       @resourceNamePlural = utils.pluralize @resourceName
@@ -42,8 +47,9 @@ define [
     fetchResources: (options) ->
       Backbone.trigger "fetch#{@resourceNamePluralCapitalized}Start"
       @model.cors.request(
-        method: 'GET'
+        method: @getResourcesHTTPMethod()
         url: @getResourcesPaginationURL options
+        payload: @getResourcesPayload options
         onload: (responseJSON) =>
           @fetchResourcesOnloadHandler responseJSON
         onerror: (responseJSON) =>
@@ -52,6 +58,25 @@ define [
             "error in fetching #{@getServerSideResourceName()}"
           console.log "Error in GET request to /#{@getServerSideResourceName()}"
       )
+
+    getResourcesHTTPMethod: ->
+      if @search then 'SEARCH' else 'GET'
+
+    # Return a payload for the `fetchResources` request. Note: there is only a
+    # payload if we have a truthy `@search` attribute, which means the fetching
+    # is based on a search and uses a SEARCH (non-standard) HTTP method with a
+    # payload describing the search (and pagination, and ordering).
+    getResourcesPayload: (options) ->
+      if @search
+        if options.page and options.itemsPerPage
+          query: @search
+          paginator:
+            page: options.page
+            items_per_page: options.itemsPerPage
+        else
+          query: @search
+      else
+        null
 
     # Method to handle the `onload` event of a CORS request to fetch a
     # collection of resources from a server. The default behaviour currently
@@ -182,7 +207,9 @@ define [
     # Note: other possible parameters: `order_by_model`, `order_by_attribute`,
     # and `order_by_direction`.
     getResourcesPaginationURL: (options) ->
-      if options.page and options.itemsPerPage
+      if @search
+        "#{@getOLDURL()}/#{@getServerSideResourceName()}"
+      else if options.page and options.itemsPerPage
         "#{@getOLDURL()}/#{@getServerSideResourceName()}?\
           page=#{options.page}&\
           items_per_page=#{options.itemsPerPage}"

@@ -68,11 +68,10 @@ define [
       'click': 'bodyClicked'
 
     render: ->
-      if window.location.hostname == 'zlocalhost'
+      if window.location.hostname == 'localhost'
         setTimeout -> 
           console.clear()
         , 2000 
-      # console.clear()
       @$el.html @template()
       @renderPersistentSubviews()
       # @configureFieldDB() # FieldDB stuff commented out until it can be better incorporated
@@ -90,6 +89,8 @@ define [
       @listenTo @mainMenuView, 'request:corporaBrowse', @showCorporaView
       @listenTo @mainMenuView, 'request:formAdd', @showNewFormView
       @listenTo @mainMenuView, 'request:formsBrowse', @showFormsView
+      @listenTo Backbone, 'request:formsBrowseSearchResults',
+        @showFormsSearchResultsBrowseView
       @listenTo @mainMenuView, 'request:formsSearch', @showFormsSearchView
       @listenTo @mainMenuView, 'request:subcorpusAdd', @showNewSubcorpusView
       @listenTo @mainMenuView, 'request:subcorporaBrowse', @showSubcorporaView
@@ -290,7 +291,14 @@ define [
       if options?.showNewFormView
         @formsView.newFormViewVisible = true
         @formsView.weShouldFocusFirstAddViewInput = true
+      if options?.search
+        @formsView.setSearch options.search
+      else
+        @formsView.deleteSearch()
       @renderVisibleView taskId
+
+    showFormsSearchResultsBrowseView: (options) ->
+      @showFormsView options
 
     showNewFormView: ->
       if not @loggedIn() then return
