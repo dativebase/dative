@@ -1,9 +1,42 @@
 define [
   './resources'
   './form'
+  './search'
+  './search-add-widget'
   './../collections/forms'
   './../models/form'
-], (ResourcesView, FormView, FormsCollection, FormModel) ->
+  './../models/search'
+], (ResourcesView, FormView, SearchView, SearchAddWidgetView, FormsCollection,
+  FormModel, SearchModel) ->
+
+  class SearchAddWidgetSearchEmphasizedView extends SearchAddWidgetView
+
+    primaryAttributes: [
+      'search'
+    ]
+
+    editableSecondaryAttributes: [
+      'name'
+      'description'
+    ]
+
+  class SearchViewSearchEmphasizedView extends SearchView
+
+    resourceAddWidgetView: SearchAddWidgetSearchEmphasizedView
+
+    # Attributes that are always displayed.
+    primaryAttributes: [
+      'search'
+    ]
+
+    # Attributes that may be hidden.
+    secondaryAttributes: [
+      'name'
+      'description'
+      'enterer'
+      'datetime_modified'
+      'id'
+    ]
 
   # Forms View
   # ----------
@@ -25,4 +58,9 @@ define [
       # Put "(1)", "(2)", etc. before form resource representations.
       options.enumerateResources = true
       super options
+
+    searchable: true
+
+    searchView: SearchViewSearchEmphasizedView
+    searchModel: SearchModel
 

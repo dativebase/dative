@@ -42,7 +42,9 @@ define [
     defaults: ->
       name: ''              # required, unique among search names, max 255 chars
       description: ''       # string description
-      search: []            # an OLD form search (an array)
+      search:
+        filter: ['Form', 'transcription', 'like', '%']
+        order_by: ['Form', 'id', 'desc']
 
       # Attributes that the OLD sends to us, but which the OLD will ignore if
       # we try to send them back.

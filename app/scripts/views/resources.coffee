@@ -49,6 +49,7 @@ define [
       @resourceNameCapitalized = @utils.capitalize @resourceName
       @resourceNamePlural = @utils.pluralize @resourceName
       @resourceNameHuman = @utils.camel2regular @resourceName
+      @resourceNamePluralHuman = @utils.camel2regular @resourceNamePlural
       @resourceNamePluralCapitalized = @utils.capitalize @resourceNamePlural
       @enumerateResources = options?.enumerateResources or false
       @getGlobalsResourcesDisplaySettings()
@@ -65,8 +66,10 @@ define [
       @paginationMenuTopView = new PaginationMenuTopView paginator: @paginator # This handles the UI for the items-per-page select, the first, prevous, next buttons, etc.
       @collection = new @resourcesCollection()
       @newResourceView = @getNewResourceView()
+      @resourceSearchView = @getResourceSearchView()
       @exporterDialog = new ExporterDialogView()
       @newResourceViewVisible = false
+      @resourceSearchViewVisible = false
       @listenToEvents()
 
     events:
@@ -77,6 +80,7 @@ define [
       'click .new-resource': 'showNewResourceViewAnimate'
       'click .resources-browse-help': 'openResourcesBrowseHelp'
       'click .toggle-all-labels': 'toggleAllLabels'
+      'click .toggle-search': 'toggleResourceSearchViewAnimate'
       'keydown': 'keyboardShortcuts'
       'keyup': 'keyup'
       # @$el is enclosed in top and bottom invisible divs. These allow us to
@@ -91,8 +95,10 @@ define [
       @refreshHeader()
       @renderPaginationMenuTopView()
       @renderNewResourceView()
+      @renderResourceSearchView()
       @renderExporterDialogView()
       @newResourceViewVisibility()
+      @resourceSearchViewVisibility()
       if @weNeedToFetchResourcesAgain()
         @fetchResourcesLastPage = true
         @fetchResourcesPageToCollection()
@@ -114,9 +120,10 @@ define [
         resourceName: @resourceName
         resourceNameHuman: @utils.camel2regular @resourceName
         resourceNamePlural: @resourceNamePlural
-        resourceNamePluralHuman: @utils.camel2regular @resourceNamePlural
+        resourceNamePluralHuman: @resourceNamePluralHuman
         pluralizeByNum: @utils.pluralizeByNum
         paginator: @paginator
+        searchable: @searchable
 
     listenToEvents: ->
       super
@@ -208,6 +215,17 @@ define [
         model: newResourceModel
         dataLabelsVisible: @dataLabelsVisible
         expanded: @allResourcesExpanded
+
+    getResourceSearchView: ->
+      if @searchable
+        searchModel = new @searchModel({}, collection: @collection)
+        new @searchView
+          headerTitle: "Search #{@resourceNamePluralCapitalized}"
+          model: searchModel
+          dataLabelsVisible: @dataLabelsVisible
+          expanded: @allResourcesExpanded
+      else
+        null
 
     # This is called when the 'addResourceSuccess' has been triggered, i.e.,
     # when a new resource has been successfully created on the server.
@@ -730,11 +748,16 @@ define [
         @resourceViews.push newResourceView
 
     spinnerOptions: ->
-      _.extend BaseView::spinnerOptions(), {top: '25%', left: '85.5%'}
+      # _.extend BaseView::spinnerOptions(), {top: '25%', left: '85.5%'}
+      _.extend BaseView::spinnerOptions(), {top: '50%', left: '-10%'}
 
-    spin: -> @$('#dative-page-header').spin @spinnerOptions()
+    spin: ->
+      # @$('#dative-page-header').spin @spinnerOptions()
+      @$('.spinner-anchor').first().spin @spinnerOptions()
 
-    stopSpin: -> @$('#dative-page-header').spin false
+    stopSpin: ->
+      # @$('#dative-page-header').spin false
+      @$('.spinner-anchor').first().spin false
 
     setFocus: ->
       if @focusedElementIndex?
@@ -788,6 +811,13 @@ define [
         .tooltip
           position:
             my: "left+10 center"
+            at: "right center"
+            collision: "flipfit"
+      @$('button.toggle-search')
+        .button()
+        .tooltip
+          position:
+            my: "left+130 center"
             at: "right center"
             collision: "flipfit"
       @$('button.toggle-all-labels')
@@ -926,7 +956,6 @@ define [
     showThreePagesForward: ->
       @showPage 3, 'incrementPage'
 
-
     ############################################################################
     # Show, hide and toggle the Resource Add widget view
     ############################################################################
@@ -1048,6 +1077,13 @@ define [
     # Search-relevant stuff
     ############################################################################
 
+    # Set `@searchable` to `true` if this resource can be searched.
+    searchable: false
+
+    # If this resource is searchable, then set `@searchView` to a view class
+    # for creating new searches for this resource.
+    searchView: null
+
     # By default, we have no search object. If this is set, it is assumed to be
     # an object of the form `{query: {filter: [], order_by: []}}`.
     search: null
@@ -1070,4 +1106,89 @@ define [
       @search = null
       @collection.search = null
       @paginator = new Paginator page=1, items=0, itemsPerPage=@itemsPerPage
+
+
+    ############################################################################
+    # Show, hide and toggle the resource search widget view
+    ############################################################################
+
+    # Make the ResourceSearchView visible or not, depending on its last
+    # state.
+    resourceSearchViewVisibility: ->
+      console.log 'in resourceSearchViewVisibility'
+      if @resourceSearchViewVisible
+        @showResourceSearchView()
+      else
+        @hideResourceSearchView()
+
+    hideResourceSearchView: ->
+      @setResourceSearchViewButtonShow()
+      @resourceSearchViewVisible = false
+      @$('.resource-search-view').hide()
+
+    showResourceSearchView: ->
+      @setResourceSearchViewButtonHide()
+      @resourceSearchViewVisible = true
+      @$('.resource-search-view').show
+        complete: =>
+          console.log '.resource-search-view shown'
+          # TODO: figure out equivalents for the following:
+          # Backbone.trigger "add#{@resourceNameCapitalized}WidgetVisible"
+
+    hideResourceSearchViewAnimate: ->
+      @setResourceSearchViewButtonShow()
+      @resourceSearchViewVisible = false
+      @$('.resource-search-view').slideUp()
+      # TODO: uncomment this when the view is defined!
+      #@resourceSearchView.closeAllTooltips()
+      @focusLastResource()
+      @scrollToFocusedInput()
+
+    showResourceSearchViewAnimate: ->
+      @setResourceSearchViewButtonHide()
+      @resourceSearchViewVisible = true
+      @$('.resource-search-view').slideDown
+        complete: =>
+          console.log '.resource-search-view slid down'
+          # TODO: figure out equivalents for the following:
+          # Backbone.trigger "add#{@resourceNameCapitalized}WidgetVisible"
+      @focusFirstResourceSearchViewTextarea()
+      @scrollToFocusedInput()
+
+    focusFirstResourceSearchViewTextarea: ->
+      @$('.resource-search-view textarea').first().focus()
+
+    toggleResourceSearchViewAnimate: ->
+      console.log 'in toggleResourceSearchViewAnimate'
+      if @$('.resource-search-view').is ':visible'
+        @hideResourceSearchViewAnimate()
+      else
+        @showResourceSearchViewAnimate()
+
+    setResourceSearchViewButtonState: ->
+      if @resourceSearchViewVisible
+        @setResourceSearchViewButtonHide()
+      else
+        @setResourceSearchViewButtonShow()
+
+    setResourceSearchViewButtonShow: ->
+      @$('button.toggle-search')
+        .tooltip
+          content: "click here to open the interface for searching across
+            #{@resourceNamePluralHuman}"
+
+    # The resource add view show "+" button is disabled when the view is visible; to
+    # hide the view, you click on the ^ button on the view itself.
+    setResourceSearchViewButtonHide: ->
+      @$('button.toggle-search')
+        .tooltip
+          content: "click here to hide the interface for searching across
+            #{@resourceNamePluralHuman}"
+
+    # Render the Resource Search view.
+    renderResourceSearchView: ->
+      if @searchable
+        @resourceSearchView.setElement @$('.resource-search-view').first()
+        @resourceSearchView.render()
+        @rendered @resourceSearchView
 

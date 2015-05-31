@@ -379,7 +379,8 @@ div.dative-page-header-title
 }
 
 .dative-paginated-item,
-.dative-new-item
+.dative-new-item,
+.resource-search-view
 {
   margin-top: 1em;
   margin-bottom: 1em;
@@ -1369,7 +1370,7 @@ p.paragraph-widget
 {
   line-height: 1.5em;
   font-size: 110%;
-  max-width: 20%;
+  max-width: 15%;
 }
 
 .form-add-form ul.fieldset textarea,
@@ -1699,5 +1700,10 @@ button.make-not-not i
 .pagination-info
 {
   line-height: 1.25em;
+}
+
+.browse-set
+{
+  padding: 0 0.25em;
 }
 

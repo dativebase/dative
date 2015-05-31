@@ -1,0 +1,49 @@
+<div class="dative-widget-header ui-widget-header ui-corner-top">
+
+  <div class='dative-widget-header-title container-center'
+    >Search</div>
+
+  <div class='button-container-left'>
+
+    <button class="hide-search-resource-widget dative-tooltip"
+            title="hide this search widget">
+      <i class='fa fa-times fa-fw'></i>
+    </button>
+
+  </div>
+
+  <div class='button-container-right'>
+
+    <span class="spinner-container"></span>
+
+    <button class='resource-add-help dative-tooltip'
+            title='help with searching'
+    ><i class='fa fa-fw fa-question'></i>
+    </button>
+
+  </div>
+
+</div>
+
+<div class="dative-widget-body">
+
+    <div class="search-resource-form linguistic-data-entry-form">
+
+    <ul class="fieldset primary-data"></ul>
+
+    <ul class="fieldset button-only-fieldset">
+
+      <li class="center">
+        <button
+          class="search-button dative-tooltip"
+          title='search'
+          >Search</button>
+
+      </li>
+
+    </ul>
+
+  </div>
+
+</div>
+

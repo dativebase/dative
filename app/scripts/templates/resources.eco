@@ -25,8 +25,8 @@
 
     <div class='button-container-left'>
 
-        <button class='new-resource dative-tooltip' title='create a new
-            <%= @resourceNameHuman %>'>
+      <button class='new-resource dative-tooltip' title='create a new
+        <%= @resourceNameHuman %>'>
         <i class='fa fa-fw fa-plus'></i>
       </button>
 
@@ -43,6 +43,15 @@
     </div>
 
     <div class='button-container-right'>
+
+      <span class='spinner-anchor'></span>
+
+      <% if @searchable: %>
+        <button class="toggle-search dative-tooltip"
+                title="click here to open the interface for searching across
+                    <%= @resourceNamePluralHuman %>"
+            ><i class='fa fa-fw fa-search'></i></button>
+      <% end %>
 
       <button class="toggle-all-labels dative-tooltip"
               title="<%= @resourceNameHuman %> labels are off; click here to
@@ -64,6 +73,12 @@
 </div>
 
 <div id='dative-page-body'>
+
+  <% if @searchable: %>
+      <div class='resource-search-view dative-new-item dative-resource-object
+        dative-widget-center dative-shadowed-widget ui-widget ui-widget-content
+        ui-corner-all'></div>
+  <% end %>
 
   <div class='dative-pagin-items'></div>
 
