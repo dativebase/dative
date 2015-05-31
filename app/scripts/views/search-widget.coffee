@@ -1,57 +1,107 @@
 define [
   './base'
+  './resource'
+  './search-add-widget'
   './search-field'
   './../models/search'
   './../templates/search-widget'
-], (BaseView, SearchFieldView, SearchModel, searchWidgetTemplate) ->
+], (BaseView, ResourceView, SearchAddWidgetView, SearchFieldView, SearchModel,
+  searchWidgetTemplate) ->
 
   # Search Widget
   # -------------
   #
   # A view that contains just a SearchFieldView and a button for performing the
   # search.
-  #
-  # TODO: this is a very ad hoc view and one which overlaps too much with
-  # SearchAddWidgetView. I should probably just modify the search add widget
-  # and use it here instead of this view.
 
-  class SearchWidget extends BaseView
+  class SearchFieldViewNoLabel extends SearchFieldView
 
+    showLabel: false
+
+
+  class SearchWidget extends ResourceView
+
+    resourceName: 'search'
     tagName: 'div'
     className: 'dative-search-widget dative-shadowed-widget
       dative-widget-center ui-widget ui-widget-content ui-corner-all'
     template: searchWidgetTemplate
 
+    events:
+      'click .search-button': 'search'
+      'click .hide-search-widget': 'hideMe'
+      'click .help': 'openHelp'
+      'keydown': 'stopPropagation'
+
+    stopPropagation: (event) ->
+      event.stopPropagation()
+
+    search: ->
+      Backbone.trigger(
+        'request:formsBrowseSearchResults',
+        search: @model.get('search'))
+
+    hideMe: ->
+      @trigger 'hideMe'
+
+    # Tell the Help dialog to open itself and search for "searching forms" and
+    # scroll to the second match. WARN: this is brittle because if the help
+    # HTML changes, then the second match may not be what we want...
+    openHelp: ->
+      Backbone.trigger(
+        'helpDialog:openTo',
+        searchTerm: 'searching forms'
+        scrollToIndex: 1
+      )
+
     initialize: ->
+      @mixinSearchAddWidgetView()
       @model = new SearchModel()
-      @searchFieldView = new SearchFieldView
-        resource: 'forms'
-        attribute: 'search'
-        model: @model
-        options: {}
       @listenToEvents()
+
+    # Appropriate a subset of the methods of `SearchAddWidgetView`.
+    mixinSearchAddWidgetView: ->
+      methodsWeWant = [
+        'storeOptionsDataGlobally'
+        'weHaveNewResourceData'
+        'getNewResourceDataStart'
+        'getNewResourceDataEnd'
+        'getNewResourceDataSuccess'
+        'getNewResourceDataFail'
+        'getOptions'
+      ]
+      for method in methodsWeWant
+        @[method] = SearchAddWidgetView::[method]
 
     render: ->
       if not @weHaveNewResourceData()
         @model.getNewResourceData() # Success in this request will call `@render()`
         return
+      @searchFieldView = @getSearchFieldView()
       @html()
       @guify()
       @renderSearchFieldView()
       @listenToEvents()
       @
 
+    getSearchFieldView: ->
+      new SearchFieldViewNoLabel
+        resource: 'forms'
+        attribute: 'search'
+        model: @model
+        options: @getOptions()
+
     listenToEvents: ->
-      super
-      # Events specific to an OLD backend and the request for the data needed to create a resource.
+      # Events specific to an OLD backend and the request for the data needed
+      # to create a resource.
       @listenTo Backbone, "getNewSearchDataStart",
-        @getNewSearchDataStart
+        @getNewResourceDataStart
       @listenTo Backbone, "getNewSearchDataEnd",
-        @getNewSearchDataEnd
+        @getNewResourceDataEnd
       @listenTo Backbone, "getNewSearchDataSuccess",
-        @getNewSearchDataSuccess
+        @getNewResourceDataSuccess
       @listenTo Backbone, "getNewSearchDataFail",
-        @getNewSearchDataFail
+        @getNewResourceDataFail
 
     renderSearchFieldView: ->
       @$('ul.primary-data').append @searchFieldView.render().el

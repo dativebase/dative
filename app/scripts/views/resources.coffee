@@ -173,6 +173,10 @@ define [
         @showThreePagesForward
 
       @listenToNewResourceView()
+      if @searchable then @listenToResourceSearchView()
+
+    listenToResourceSearchView: ->
+      @listenTo @resourceSearchView, 'hideMe', @hideResourceSearchViewAnimate
 
     listenToNewResourceView: ->
       @listenTo @newResourceView, "new#{@resourceNameCapitalized}View:hide",
@@ -1115,7 +1119,6 @@ define [
     # Make the ResourceSearchView visible or not, depending on its last
     # state.
     resourceSearchViewVisibility: ->
-      console.log 'in resourceSearchViewVisibility'
       if @resourceSearchViewVisible
         @showResourceSearchView()
       else
@@ -1129,37 +1132,29 @@ define [
     showResourceSearchView: ->
       @setResourceSearchViewButtonHide()
       @resourceSearchViewVisible = true
-      @$('.resource-search-view').show
-        complete: =>
-          console.log '.resource-search-view shown'
-          # TODO: figure out equivalents for the following:
-          # Backbone.trigger "add#{@resourceNameCapitalized}WidgetVisible"
+      @$('.resource-search-view').show()
 
     hideResourceSearchViewAnimate: ->
       @setResourceSearchViewButtonShow()
       @resourceSearchViewVisible = false
-      @$('.resource-search-view').slideUp()
-      # TODO: uncomment this when the view is defined!
-      #@resourceSearchView.closeAllTooltips()
-      @focusLastResource()
-      @scrollToFocusedInput()
+      @$('.resource-search-view').slideUp
+        complete: =>
+          @resourceSearchView.closeAllTooltips()
+          @focusLastResource()
+          @scrollToFocusedInput()
 
     showResourceSearchViewAnimate: ->
       @setResourceSearchViewButtonHide()
       @resourceSearchViewVisible = true
       @$('.resource-search-view').slideDown
         complete: =>
-          console.log '.resource-search-view slid down'
-          # TODO: figure out equivalents for the following:
-          # Backbone.trigger "add#{@resourceNameCapitalized}WidgetVisible"
-      @focusFirstResourceSearchViewTextarea()
-      @scrollToFocusedInput()
+          @focusFirstResourceSearchViewTextarea()
+          @scrollToFocusedInput()
 
     focusFirstResourceSearchViewTextarea: ->
       @$('.resource-search-view textarea').first().focus()
 
     toggleResourceSearchViewAnimate: ->
-      console.log 'in toggleResourceSearchViewAnimate'
       if @$('.resource-search-view').is ':visible'
         @hideResourceSearchViewAnimate()
       else

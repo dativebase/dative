@@ -270,6 +270,7 @@ define [
 
     showFormsView: (options) ->
       if not @loggedIn() then return
+      if options?.search then @visibleView = null
       if @formsView and @visibleView is @formsView then return
       @router.navigate 'forms-browse'
       taskId = @guid()

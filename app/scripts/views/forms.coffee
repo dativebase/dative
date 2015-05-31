@@ -3,11 +3,12 @@ define [
   './form'
   './search'
   './search-add-widget'
+  './search-widget'
   './../collections/forms'
   './../models/form'
   './../models/search'
-], (ResourcesView, FormView, SearchView, SearchAddWidgetView, FormsCollection,
-  FormModel, SearchModel) ->
+], (ResourcesView, FormView, SearchView, SearchAddWidgetView, SearchWidgetView,
+  FormsCollection, FormModel, SearchModel) ->
 
   class SearchAddWidgetSearchEmphasizedView extends SearchAddWidgetView
 
@@ -61,6 +62,6 @@ define [
 
     searchable: true
 
-    searchView: SearchViewSearchEmphasizedView
+    searchView: SearchWidgetView
     searchModel: SearchModel
 

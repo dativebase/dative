@@ -77,6 +77,8 @@ define [
 
     guify: ->
 
+    showLabel: true
+
     template: fieldTemplate
     tagName: 'li'
     className: 'dative-form-field'
@@ -105,7 +107,7 @@ define [
     render: ->
       @$el.html @template(@context)
       @$('.dative-field-validation-container').hide()
-      @renderLabelView()
+      if @showLabel then @renderLabelView()
       @renderInputView()
       @guify()
       @listenToEvents()
