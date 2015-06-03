@@ -28,8 +28,18 @@ define [
       @$el.html @template(@context)
       @filterExpressionView.setElement @$(".#{@context.class}").first()
       @filterExpressionView.render()
-      @listenTo @filterExpressionView, 'changed', @rootFilterExpressionViewChanged
+      @listenToEvents()
       @rendered @filterExpressionView
+
+    listenToEvents: ->
+      super
+      @listenTo @filterExpressionView, 'changed',
+        @rootFilterExpressionViewChanged
+      @listenTo @filterExpressionView, 'destroyMe',
+        @filterExpressionWantsToBeDestroyed
+
+    filterExpressionWantsToBeDestroyed: ->
+      Backbone.trigger 'cantDeleteFilterExpressionOnlyChild'
 
     rootFilterExpressionViewChanged: ->
       @context.value.filter = @filterExpressionView.filterExpression

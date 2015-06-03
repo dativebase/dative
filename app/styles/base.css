@@ -897,6 +897,7 @@ div.notifier
 {
     font-size: 110%;
     margin-bottom: 0.25em;
+    line-height: 120%;
 }
 
 .notification-content

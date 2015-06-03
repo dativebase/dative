@@ -430,8 +430,9 @@ define [
     cantDeleteFilterExpressionOnlyChild: ->
       notification = new NotificationView
         title: "Search expression destroy failed"
-        content: "You cannot destroy a search expression if it is an only child
-          of “or” or “and” or if it follows “not”."
+        content: "You cannot destroy a search expression if it is the only one
+          left, if it is the only child of an “or” or an “and”, or if
+          it follows “not”."
         type: 'error'
       @renderNotification notification
 
