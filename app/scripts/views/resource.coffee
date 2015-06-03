@@ -865,6 +865,10 @@ define [
       @controlsViewRendered = true
       @rendered @controlsView
 
+    onClose: ->
+      @updateViewRendered = false
+      @controlsViewRendered = false
+
     showControlsView: ->
       if not @controlsViewRendered then @renderControlsView()
       @controlsViewVisible = true
