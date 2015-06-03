@@ -72,6 +72,10 @@ define [
       @resourceSearchViewVisible = false
       @listenToEvents()
 
+    onClose: ->
+      @newResourceViewVisible = false
+      @resourceSearchViewVisible = false
+
     events:
       'focus input, textarea, .ui-selectmenu-button, button, .ms-container': 'inputFocused'
       'focus .dative-resource-widget': 'resourceFocused'
