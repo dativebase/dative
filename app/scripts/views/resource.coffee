@@ -245,7 +245,12 @@ define [
           resourceName: @resourceName
           resourceNameHumanReadable: @resourceNameHumanReadable
           excludedActions: @excludedActions
+          showControlsWithNew: @showControlsWithNew
         )
+
+    # Set this to `true` if you want the controls button to be visible on a new
+    # resource, i.e., an unsaved resource.
+    showControlsWithNew: false
 
     getHeaderTitle: ->
       if @headerTitle

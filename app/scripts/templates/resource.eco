@@ -76,6 +76,10 @@
         </button>
       <% end %>
 
+    <% end %>
+
+    <% if @addUpdateType is 'update' or @showControlsWithNew: %>
+
       <% if 'controls' not in @excludedActions: %>
         <button class="controls dative-tooltip"
                 title="more controls"
@@ -84,6 +88,7 @@
       <% end %>
 
     <% end %>
+
 
   </div>
 
