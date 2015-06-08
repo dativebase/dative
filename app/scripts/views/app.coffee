@@ -68,10 +68,10 @@ define [
       'click': 'bodyClicked'
 
     render: ->
-      if window.location.hostname == 'localhost'
-        setTimeout -> 
+      if window.location.hostname in ['localhost', '127.0.0.1']
+        setTimeout ->
           console.clear()
-        , 2000 
+        , 2000
       @$el.html @template()
       @renderPersistentSubviews()
       # @configureFieldDB() # FieldDB stuff commented out until it can be better incorporated
@@ -624,9 +624,9 @@ define [
     displayBugReportDialog: (message) ->
       # TODO @jrwdunham: display a Dative-styled dialog explaining the bug and
       # also displaying a bug report form.
-      console.log ["TODO show some visual contact us or open a bug report in",
-        "a seperate window using probably http://jqueryui.com/dialog/#default",
-        message].join ' '
+      console.log "TODO show some visual contact us or open a bug report in a
+        separate window using probably http://jqueryui.com/dialog/#default
+        #{message}"
       run = ->
         window.open(
           "https://docs.google.com/forms/d/18KcT_SO8YxG8QNlHValEztGmFpEc4-ZrjWO76lm0mUQ/viewform")
@@ -636,17 +636,17 @@ define [
       # TODO @jrwdunham: display a Dative-styled dialog with "warning-style
       # visuals" showing the warning messages. This does look like a good
       # possibility: http://www.erichynds.com/examples/jquery-notify/index.htm
-      console.log ["TODO show some visual thing here using the app view using",
-        "something like http://www.erichynds.com/examples/jquery-notify/",
-        message].join ' '
+      console.log "TODO show some visual thing here using the app view using
+        something like http://www.erichynds.com/examples/jquery-notify/
+        #{message}"
 
     displayConfirmDialog: (message, optionalLocale) ->
       # TODO @jrwdunham: use the already-in-place @alertDialog for this
       # TODO @jrwdunham @cesine: figure out how i18n/localization works in
       # FieldDB and begin implementing something similar in Dative.
-      console.log ["TODO show some visual thing here using the app view using",
-        "something like http://jqueryui.com/dialog/#modal-confirmation" ,
-        message].join ' '
+      console.log "TODO show some visual thing here using the app view using
+        something like http://jqueryui.com/dialog/#modal-confirmation
+        #{message}"
 
       # NOTE @jrwdunham: this is cesine's first stab at a jQuery-style dialog
       # for this:

@@ -224,8 +224,8 @@ define [
           .css 'white-space', 'normal'
 
     # A continuation of the `interlinearize` method meant to be called after a
-    # 1 second delay; this seems to be necessary because otherwise all of the
-    # jQuery `.width()` calls will return 0.
+    # 1 millisecond delay; this seems to be necessary because otherwise all of
+    # the jQuery `.width()` calls will return 0.
     # TODO: RESEARCH: isn't there a jQuery `complete:` callback to handle this?
     _interlinearize: (igtMap) ->
       # Remove any information about IGT fields that are hidden.
