@@ -4,9 +4,10 @@ define [
   './search-add-widget'
   './search-field'
   './../models/search'
+  './../models/form'
   './../templates/search-widget'
 ], (BaseView, ResourceView, SearchAddWidgetView, SearchFieldView, SearchModel,
-  searchWidgetTemplate) ->
+  FormModel, searchWidgetTemplate) ->
 
   # Search Widget
   # -------------
@@ -29,6 +30,8 @@ define [
 
     events:
       'click .search-button': 'search'
+      'click .count-button': 'count'
+      'click .save-button': 'save'
       'click .hide-search-widget': 'hideMe'
       'click .help': 'openHelp'
       'keydown': 'stopPropagation'
@@ -40,6 +43,12 @@ define [
       Backbone.trigger(
         'request:formsBrowseSearchResults',
         search: @model.get('search'))
+
+    count: ->
+      console.log 'you want to count the results of this search'
+
+    save: ->
+      console.log 'you want to save this search'
 
     hideMe: ->
       @trigger 'hideMe'
@@ -57,6 +66,7 @@ define [
     initialize: ->
       @mixinSearchAddWidgetView()
       @model = new SearchModel()
+      @formModel = new FormModel()
       @listenToEvents()
 
     # Appropriate a subset of the methods of `SearchAddWidgetView`.
@@ -137,4 +147,5 @@ define [
     tooltipify: ->
       @$('.dative-widget-header .hide-search-resource-widget.dative-tooltip')
           .tooltip position: @tooltipPositionLeft('-20')
+      @$('ul.button-only-fieldset button.dative-tooltip').tooltip()
 

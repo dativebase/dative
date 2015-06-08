@@ -34,10 +34,21 @@
     <ul class="fieldset button-only-fieldset">
 
       <li class="center">
+
         <button
           class="search-button dative-tooltip"
-          title='search'
+          title='browse the results of this search'
           >Search</button>
+
+        <button
+          class="count-button dative-tooltip"
+          title='count how many results this search returns'
+          >Count</button>
+
+        <button
+          class="save-button dative-tooltip"
+          title='save this search'
+          >Save</button>
 
       </li>
 
