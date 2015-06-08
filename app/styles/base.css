@@ -1622,6 +1622,7 @@ span.match
 .dative-field-display div.search
 {
   white-space: pre;
+  overflow-x: scroll;
 }
 
 .dative-field-input-container div.search
