@@ -214,7 +214,7 @@ button.help-button
 
 .dative-field-display-representation-container
 {
-  overflow-x: scroll;
+  /*overflow-x: scroll;*/
 }
 
 .dative-field-display-representation-container,
