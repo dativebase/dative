@@ -676,16 +676,16 @@ define [
       @setToggleAllLabelsButtonState()
       @setNewResourceViewButtonState()
       if @search
-        @$('.browse-set').text "the results of a search over
-          #{@resourceNamePlural}"
+        @$('.browse-set').text "a search over
+          #{@resourceNamePluralHuman}"
       else
-        @$('.browse-set').text "all #{@resourceNamePlural}"
+        @$('.browse-set').text "all #{@resourceNamePluralHuman}"
       if @paginator.start is @paginator.end
         @$('.resource-range')
           .text("#{@utils.camel2regular @resourceName}
             #{@utils.integerWithCommas(@paginator.start + 1)}")
       else
-        @$('.resource-range').text("#{@utils.camel2regular @resourceNamePlural}
+        @$('.resource-range').text("#{@utils.camel2regular @resourceNamePluralHuman}
           #{@utils.integerWithCommas(@paginator.start + 1)}
           to
           #{@utils.integerWithCommas(@paginator.end + 1)}")

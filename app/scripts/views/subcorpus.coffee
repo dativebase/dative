@@ -18,6 +18,8 @@ define [
 
     resourceName: 'subcorpus'
 
+    resourceNameHumanReadable: => 'corpus'
+
     resourceAddWidgetView: SubcorpusAddWidgetView
 
     # Attributes that are always displayed.

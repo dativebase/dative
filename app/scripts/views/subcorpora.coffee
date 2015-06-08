@@ -21,3 +21,8 @@ define [
     resourcesCollection: SubcorporaCollection
     resourceModel: SubcorpusModel
 
+    initialize: (options) ->
+      super options
+      @resourceNameHuman = 'corpus'
+      @resourceNamePluralHuman = 'corpora'
+
