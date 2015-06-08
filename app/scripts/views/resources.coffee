@@ -70,11 +70,12 @@ define [
       @exporterDialog = new ExporterDialogView()
       @newResourceViewVisible = false
       @resourceSearchViewVisible = false
+      @resourceSearchViewRendered = false
       @listenToEvents()
 
     onClose: ->
-      @newResourceViewVisible = false
-      @resourceSearchViewVisible = false
+      @newResourceViewRendered = false
+      @resourceSearchViewRendered = false
 
     events:
       'focus input, textarea, .ui-selectmenu-button, button, .ms-container': 'inputFocused'
@@ -836,9 +837,6 @@ define [
             at: "right center"
             collision: "flipfit"
 
-    onClose: ->
-      clearInterval @paginItemsHeightMonitorId
-
     # Render a page (pagination) of resource views. That is, change which set of
     # `ResourceView` instances are displayed.
     renderPage: (options) ->
@@ -1134,6 +1132,8 @@ define [
       @$('.resource-search-view').hide()
 
     showResourceSearchView: ->
+      if not @resourceSearchViewRendered
+        @renderResourceSearchView()
       @setResourceSearchViewButtonHide()
       @resourceSearchViewVisible = true
       @$('.resource-search-view').show()
@@ -1148,6 +1148,8 @@ define [
           @scrollToFocusedInput()
 
     showResourceSearchViewAnimate: ->
+      if not @resourceSearchViewRendered
+        @renderResourceSearchView()
       @setResourceSearchViewButtonHide()
       @resourceSearchViewVisible = true
       @$('.resource-search-view').slideDown
@@ -1190,4 +1192,5 @@ define [
         @resourceSearchView.setElement @$('.resource-search-view').first()
         @resourceSearchView.render()
         @rendered @resourceSearchView
+        @resourceSearchViewRendered = true
 
