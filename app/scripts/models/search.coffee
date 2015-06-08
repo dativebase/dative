@@ -44,7 +44,7 @@ define [
       description: ''       # string description
       search:
         filter: ['Form', 'transcription', 'like', '%']
-        order_by: ['Form', 'id', 'desc']
+        order_by: ['Form', 'id', 'asc']
 
       # Attributes that the OLD sends to us, but which the OLD will ignore if
       # we try to send them back.

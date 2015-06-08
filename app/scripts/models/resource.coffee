@@ -267,7 +267,7 @@ define [
     #  }
     getSearchPayload: (query, paginator) ->
       paginator = paginator or {page: 1, items_per_page: 10}
-      if 'order_by' not of query then query.order_by = ['Form', 'id', 'desc']
+      if 'order_by' not of query then query.order_by = ['Form', 'id', 'asc']
       query: query
       paginator: paginator
 
@@ -280,21 +280,20 @@ define [
         onload: (responseJSON, xhr) =>
           @trigger "searchEnd"
           if xhr.status is 200
-            console.log responseJSON
             @trigger "searchSuccess", responseJSON
           else
             error = responseJSON.error or 'No error message provided.'
             @trigger "searchFail", error
-            console.log "PUT request to
-              #{@getOLDURL()}/#{@getServerSideResourceName()}/#{@get 'id'}/generate_and_compile
+            console.log "SEARCH request to
+              #{@getOLDURL()}/#{@getServerSideResourceName()}
               failed (status not 200)."
             console.log error
         onerror: (responseJSON) =>
           @trigger "searchEnd"
           error = responseJSON.error or 'No error message provided.'
           @trigger "searchFail", error
-          console.log "Error in PUT request to
-            #{@getOLDURL()}/#{@getServerSideResourceName()}/#{@get 'id'}/generate_and_compile
+          console.log "Error in SEARCH request to
+            #{@getOLDURL()}/#{@getServerSideResourceName()}
             (onerror triggered)."
       )
 
