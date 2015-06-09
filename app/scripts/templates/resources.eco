@@ -10,7 +10,7 @@
           display</div>
       <div class='pagination-info'>
         Browsing
-        <span class='browse-set ui-state-highlight'
+        <span class='browse-set'
             >all <%= @resourceNamePluralHuman %></span>.
         Viewing
         <span class='resource-range'></span>

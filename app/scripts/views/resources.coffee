@@ -16,14 +16,13 @@ define [
   # Resources View
   # ---------------
   #
-  # Displays a collection of resources (e.g., FieldDB datums or OLD forms) for
-  # browsing, with pagination. Also contains a ResourceView instance (with a
-  # model that hasn't been saved on the server) for creating new resources
-  # within the resources browse interface.
+  # Displays a collection of resources (e.g., FieldDB datums or OLD forms,
+  # searches, phonologies, etc.) for browsing, with pagination. Also contains a
+  # ResourceView instance (with a model that hasn't been saved on the server)
+  # for creating new resources within the resources browse interface.
   #
   # This view is intended to be subclassed and parameterized minimally in order
-  # to work with various FieldDB/OLD resources, e.g., corpora, phonologies,
-  # tags, etc.
+  # to provide browsing and a SCRUD interface for various FieldDB/OLD resources.
 
   class ResourcesView extends BaseView
 
@@ -836,6 +835,8 @@ define [
             my: "left+45 center"
             at: "right center"
             collision: "flipfit"
+      @$('.browse-set')
+        .css 'color': @constructor.jQueryUIColors().hovCo
 
     # Render a page (pagination) of resource views. That is, change which set of
     # `ResourceView` instances are displayed.
