@@ -14,7 +14,10 @@ define [
   # Search View
   # --------------
   #
-  # For displaying individual searches.
+  # For displaying individual saved searches. Right now these represent
+  # searches in a way that is compatible with server-stored OLD searches, but
+  # that could change, i.e., be modified to accommodate client-stored searches
+  # with a different model.
 
   class SearchView extends ResourceView
 

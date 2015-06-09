@@ -154,10 +154,22 @@ define [
       $valueTextarea = @$('textarea.value').first()
       value = $valueTextarea.val()
       if @filterExpression.length is 5
-        @filterExpression[4] = value
+        if @filterExpression[3] is 'in'
+          @filterExpression[4] = @jsonParse value
+        else
+          @filterExpression[4] = value
       else
-        @filterExpression[3] = value
+        if @filterExpression[2] is 'in'
+          @filterExpression[3] = @jsonParse value
+        else
+          @filterExpression[3] = value
       @triggerChanged()
+
+    jsonParse: (value) ->
+      try
+        JSON.parse value
+      catch
+        value
 
     relationChanged: (event) ->
       @stopEvent event

@@ -1,12 +1,13 @@
 define [
   './resource'
+  './subcorpus-controls'
   './subcorpus-add-widget'
   './person-field-display'
   './date-field-display'
   './object-with-name-field-display'
   './array-of-objects-with-name-field-display'
-], (ResourceView, SubcorpusAddWidgetView, PersonFieldDisplayView,
-  DateFieldDisplayView, ObjectWithNameFieldDisplayView,
+], (ResourceView, SubcorpusControlsView, SubcorpusAddWidgetView,
+  PersonFieldDisplayView, DateFieldDisplayView, ObjectWithNameFieldDisplayView,
   ArrayOfObjectsWithNameFieldDisplayView) ->
 
   # Subcorpus View
@@ -21,6 +22,10 @@ define [
     resourceNameHumanReadable: => 'corpus'
 
     resourceAddWidgetView: SubcorpusAddWidgetView
+
+    excludedActions: ['history']
+
+    controlsViewClass: SubcorpusControlsView
 
     # Attributes that are always displayed.
     primaryAttributes: [
