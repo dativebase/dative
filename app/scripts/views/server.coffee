@@ -1,8 +1,9 @@
 define [
   'backbone'
   './base'
+  './../utils/globals'
   './../templates/server'
-], (Backbone, BaseView, serverTemplate) ->
+], (Backbone, BaseView, globals, serverTemplate) ->
 
   # Server View
   # ------------
@@ -12,7 +13,7 @@ define [
     template: serverTemplate
 
     initialize: ->
-      @applicationSettingsModel = @model.collection.applicationSettings
+      @applicationSettingsModel = globals.applicationSettings
       @serverTypes = @applicationSettingsModel.get 'serverTypes'
       @serverCodes = @applicationSettingsModel.get 'fieldDBServerCodes'
 
@@ -38,7 +39,8 @@ define [
       @applicationSettingsModel.get 'loggedIn'
 
     changeHeaderName: ->
-      @$('.dative-widget-header-title span.header-title-name').text @model.get('name')
+      @$('.dative-widget-header-title span.header-title-name')
+        .text @model.get('name')
 
     toggleServerCodeSelect: ->
       if @$('select[name=type]').first().val() is 'FieldDB'
@@ -53,7 +55,7 @@ define [
       @guify()
 
     isActive: ->
-      @model is @model.collection.applicationSettings.get 'activeServer'
+      @model is @applicationSettingsModel.get 'activeServer'
 
     setModelFromGUI: ->
       @$('input, select').each (index, element) =>

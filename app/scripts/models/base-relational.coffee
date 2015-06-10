@@ -14,5 +14,5 @@ define [
 
     guid: utils.guid
     @cors: new CORS()
-
+    utils: utils
 

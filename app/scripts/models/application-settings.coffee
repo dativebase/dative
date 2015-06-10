@@ -1,25 +1,21 @@
 define [
   'underscore'
   'backbone'
-  './base-relational'
+  './base'
   './server'
   './../collections/servers'
   './../utils/utils'
-  'backbonelocalstorage'
-], (_, Backbone, BaseRelationalModel, ServerModel, ServersCollection, utils) ->
+], (_, Backbone, BaseModel, ServerModel, ServersCollection, utils) ->
 
   # Application Settings Model
   # --------------------------
   #
   # Holds server configuration and (in the future) other stuff.
-  # Persisted in the browser using localStorage (Backbone.localStorage)
-  #
-  # Uses Backbone-relational to facilitate the auto-generation of sub-models
-  # and sub-collections. See the `relations` attribute.
+  # Persisted in the browser using localStorage.
   #
   # Also contains the authentication logic.
 
-  class ApplicationSettingsModel extends BaseRelationalModel
+  class ApplicationSettingsModel extends BaseModel
 
     initialize: ->
       @listenTo Backbone, 'authenticate:login', @authenticate
@@ -27,7 +23,9 @@ define [
       @listenTo Backbone, 'authenticate:register', @register
       @listenTo @, 'change:activeServer', @activeServerChanged
       if @get('activeServer')
-        @listenTo @get('activeServer'), 'change:url', @activeServerURLChanged
+        activeServer = @get 'activeServer'
+        if activeServer instanceof ServerModel
+          @listenTo activeServer, 'change:url', @activeServerURLChanged
       if not Modernizr.localstorage
         throw new Error 'localStorage unavailable in this browser, please upgrade.'
 
@@ -41,7 +39,8 @@ define [
           type: 'GET'
           dataType: 'json'
           error: (jqXHR, textStatus, errorThrown) =>
-            console.log "Ajax request for package.json threw an error: #{errorThrown}"
+            console.log "Ajax request for package.json threw an error:
+              #{errorThrown}"
           success: (packageDetails, textStatus, jqXHR) =>
             @set 'version', packageDetails.version
 
@@ -80,7 +79,7 @@ define [
       taskId = @guid()
       Backbone.trigger 'longTask:register', 'authenticating', taskId
       Backbone.trigger 'authenticateStart'
-      BaseRelationalModel.cors.request(
+      @constructor.cors.request(
         method: 'POST'
         timeout: 20000
         url: "#{@getURL()}/login/authenticate"
@@ -89,10 +88,11 @@ define [
           @authenticateAttemptDone taskId
           Backbone.trigger 'authenticateEnd'
           if responseJSON.authenticated is true
-            @save
+            @set
               username: credentials.username
               password: credentials.password
               loggedIn: true
+            @save()
             Backbone.trigger 'authenticateSuccess'
           else
             Backbone.trigger 'authenticateFail', responseJSON
@@ -118,7 +118,7 @@ define [
       taskId = @guid()
       Backbone.trigger 'longTask:register', 'authenticating', taskId
       Backbone.trigger 'authenticateStart'
-      BaseRelationalModel.cors.request(
+      @constructor.cors.request(
         method: 'POST'
         timeout: 20000
         url: "#{@getURL()}/login"
@@ -151,7 +151,7 @@ define [
       )
 
     authenticateFieldDBCorpusService: (credentials, taskId) ->
-      BaseRelationalModel.cors.request(
+      @constructor.cors.request(
         method: 'POST'
         timeout: 3000
         url: "#{@get('baseDBURL')}/_session"
@@ -163,9 +163,10 @@ define [
           Backbone.trigger 'authenticateEnd'
           @authenticateAttemptDone taskId
           if responseJSON.ok
-            @save
+            @set
               loggedIn: true
               loggedInUserRoles: responseJSON.roles
+            @save()
             Backbone.trigger 'authenticateSuccess'
           else
             Backbone.trigger 'authenticateFail', responseJSON
@@ -178,6 +179,27 @@ define [
           Backbone.trigger 'authenticateFail', error: 'Request timed out'
           @authenticateAttemptDone taskId
       )
+
+    localStorageKey: 'dativeApplicationSettings'
+
+    # An extremely simple re-implementation of `save`: we just JSON-ify the app
+    # settings and store them in localStorage.
+    save: ->
+      localStorage.setItem @localStorageKey,
+        JSON.stringify(@attributes)
+
+    # Fetching means simply getting the app settings JSON object from
+    # localStorage and setting it to the present model. Certain attributes are
+    # evaluated to other Backbone models; handling this conversion is the job
+    # of `backbonify`.
+    fetch: (options) ->
+      if localStorage.getItem @localStorageKey
+        applicationSettingsObject =
+          JSON.parse(localStorage.getItem(@localStorageKey))
+        applicationSettingsObject = @backbonify applicationSettingsObject
+        @set applicationSettingsObject
+      else
+        @save()
 
     # WARN: DEPRECATED until I can figure out the issue detailed in the comment
     # below.
@@ -209,11 +231,12 @@ define [
       FieldDB.Database::login(credentials).then(
         (user) =>
           try
-            @save
+            @set
               username: credentials.username,
               password: credentials.password,
               loggedIn: true
               loggedInUser: user
+            @save()
             Backbone.trigger 'authenticateSuccess'
           catch
             Backbone.trigger 'authenticateFail',
@@ -245,7 +268,7 @@ define [
       taskId = @guid()
       Backbone.trigger 'longTask:register', 'logout', taskId
       Backbone.trigger 'logoutStart'
-      BaseRelationalModel.cors.request(
+      @constructor.cors.request(
         url: "#{@getURL()}/login/logout"
         method: 'GET'
         timeout: 3000
@@ -253,7 +276,8 @@ define [
           @authenticateAttemptDone taskId
           Backbone.trigger 'logoutEnd'
           if responseJSON.authenticated is false
-            @save 'loggedIn', false
+            @set 'loggedIn', false
+            @save()
             Backbone.trigger 'logoutSuccess'
           else
             Backbone.trigger 'logoutFail'
@@ -276,10 +300,11 @@ define [
       FieldDB.Database::logout().then(
         (responseJSON) =>
           if responseJSON.ok is true
-            @save
+            @set
               loggedIn: false
               activeFieldDBCorpus: null
               activeFieldDBCorpusTitle: null
+            @save()
             Backbone.trigger 'logoutSuccess'
           else
             Backbone.trigger 'logoutFail',
@@ -308,23 +333,27 @@ define [
       taskId = @guid()
       Backbone.trigger('longTask:register', 'checking if already logged in',
         taskId)
-      BaseRelationalModel.cors.request(
+      @constructor.cors.request(
         url: "#{@getURL()}/speakers"
         timeout: 3000
         onload: (responseJSON) =>
           @authenticateAttemptDone(taskId)
           if utils.type(responseJSON) is 'array'
-            @save 'loggedIn', true
+            @set 'loggedIn', true
+            @save()
             Backbone.trigger 'authenticateSuccess'
           else
-            @save 'loggedIn', false
+            @set 'loggedIn', false
+            @save()
             Backbone.trigger 'authenticateFail'
         onerror: (responseJSON) =>
-          @save 'loggedIn', false
+          @set 'loggedIn', false
+          @save()
           Backbone.trigger 'authenticateFail', responseJSON
           @authenticateAttemptDone(taskId)
         ontimeout: =>
-          @save 'loggedIn', false
+          @set 'loggedIn', false
+          @save()
           Backbone.trigger 'authenticateFail', error: 'Request timed out'
           @authenticateAttemptDone(taskId)
       )
@@ -336,14 +365,17 @@ define [
       FieldDB.Database::resumeAuthenticationSession().then(
         (sessionInfo) =>
           if sessionInfo.ok and sessionInfo.userCtx.name
-            @save 'loggedIn', true
+            @set 'loggedIn', true
+            @save()
             Backbone.trigger 'authenticateSuccess'
           else
-            @save 'loggedIn', false
+            @set 'loggedIn', false
+            @save()
             Backbone.trigger 'authenticateFail'
         ,
         (reason) =>
-          @save 'loggedIn', false
+          @set 'loggedIn', false
+          @save()
           Backbone.trigger 'authenticateFail', reason
       ).done(=> @authenticateAttemptDone taskId)
 
@@ -361,7 +393,7 @@ define [
       Backbone.trigger 'longTask:register', 'registering a new user', taskId
       params.authUrl = @getURL()
       params.appVersionWhenCreated = "v#{@get('version')}da"
-      BaseRelationalModel.cors.request(
+      @constructor.cors.request(
         url: "#{@getURL()}/register"
         payload: params
         method: 'POST'
@@ -384,35 +416,16 @@ define [
       )
 
 
-    # Backbone-relational stuff
-    # =========================================================================
-    #
-    # This is useful because it auto-creates a model hierachy; e.g.,
-    # `@get('activeServer')` returns a `ServerModel` instance and
-    # `@get('servers')` returns a `ServerCollection` instance.
-    #
-    # See http://backbonerelational.org/#RelationalModel-relations
-
     idAttribute: 'id'
 
-    relations: [
-        type: Backbone.HasMany
-        key: 'servers'
-        relatedModel: ServerModel
-        collectionType: ServersCollection
-        includeInJSON: ['id', 'name', 'type', 'url', 'serverCode', 'corpusServerURL']
-        reverseRelation:
-          key: 'applicationSettings'
-      ,
-        type: Backbone.HasOne
-        key: 'activeServer'
-        relatedModel: ServerModel
-        includeInJSON: 'id'
-      #,
-      #  type: Backbone.HasMany
-      #  key: 'fieldDBCorpora'
-      #  relatedModel: CorpusModel
-    ]
+    # Transform certain attribute values of the `appSetObj`
+    # object into Backbone collections/models and return the `appSetObj`.
+    backbonify: (appSetObj) ->
+      serverModelsArray = ((new ServerModel(s)) for s in appSetObj.servers)
+      appSetObj.servers = new ServersCollection(serverModelsArray)
+      activeServer = appSetObj.activeServer
+      appSetObj.activeServer = appSetObj.servers.get activeServer.id
+      appSetObj
 
     # Defaults
     #=========================================================================
@@ -420,49 +433,53 @@ define [
     defaults: ->
 
       server1 =
-        id: @guid()
-        name: FieldDB.FieldDBObject.application.brand + ' Localhost'
-        type: 'FieldDB'
-        url: 'https://localhost:3183'
-        serverCode: 'localhost'
-        corpusServerURL: null
+        new ServerModel
+          id: @guid()
+          name: FieldDB.FieldDBObject.application.brand + ' Localhost'
+          type: 'FieldDB'
+          url: 'https://localhost:3183'
+          serverCode: 'localhost'
+          corpusServerURL: null
 
       server2 =
-        id: @guid()
-        name: 'OLD Local Development'
-        type: 'OLD'
-        url: 'http://127.0.0.1:5000'
-        serverCode: null
-        corpusServerURL: null
+        new ServerModel
+          id: @guid()
+          name: 'OLD Local Development'
+          type: 'OLD'
+          url: 'http://127.0.0.1:5000'
+          serverCode: null
+          corpusServerURL: null
 
       server3 =
-        id: @guid()
-        name: FieldDB.FieldDBObject.application.brand
-        type: 'FieldDB'
-        url: FieldDB.Database.prototype.BASE_AUTH_URL
-        serverCode: 'production'
-        corpusServerURL: null
+        new ServerModel
+          id: @guid()
+          name: FieldDB.FieldDBObject.application.brand
+          type: 'FieldDB'
+          url: FieldDB.Database.prototype.BASE_AUTH_URL
+          serverCode: 'production'
+          corpusServerURL: null
 
       server4 =
-        id: @guid()
-        name: 'OLD'
-        type: 'OLD'
-        url: 'http://www.onlinelinguisticdatabase.org'
-        serverCode: null
-        corpusServerURL: null
+        new ServerModel
+          id: @guid()
+          name: 'OLD'
+          type: 'OLD'
+          url: 'http://www.onlinelinguisticdatabase.org'
+          serverCode: null
+          corpusServerURL: null
 
-      servers = [server3, server4]
-      if window.location.hostname == "localhost"
-        servers = [server1, server2, server3, server4]
+      if window.location.hostname in ["localhost", '127.0.0.1']
+        servers = new ServersCollection([server1, server2, server3, server4])
+      else
+        servers = new ServersCollection([server3, server4])
 
       id: @guid()
-      activeServer: servers[0].id
+      activeServer: servers.at 0
       loggedIn: false
       loggedInUser: null
       loggedInUserRoles: []
       baseDBURL: null
       username: ''
-      password: '' # WARN: I don't like storing the password in localStorage, but FieldDB needs to send it on subsequent requests, so I'm persisting it for now ...
       servers: servers
       serverTypes: ['FieldDB', 'OLD']
       fieldDBServerCodes: [
@@ -475,12 +492,17 @@ define [
         'dyslexdisorth'
       ]
 
+      # TODO: remove the activeFieldDBCorpusTitle and related attributes. We
+      # should simply store a real `CorpusModel` as the value of
+      # `activeFieldDBCorpus`. Note that `AppView` adds
+      # `activeFieldDBCorpusModel` and stores a Backbone model there. This all
+      # needs to be cleaned up.
       activeFieldDBCorpus: null
       activeFieldDBCorpusTitle: null
 
       formsDisplaySettings:
-        itemsPerPage: 5
-        dataLabelsVisible: true
+        itemsPerPage: 10
+        dataLabelsVisible: false
         allFormsExpanded: false
 
       subcorporaDisplaySettings:
@@ -489,17 +511,17 @@ define [
         allSubcorporaExpanded: false
 
       phonologiesDisplaySettings:
-        itemsPerPage: 3
+        itemsPerPage: 1
         dataLabelsVisible: true
         allPhonologiesExpanded: false
 
       morphologiesDisplaySettings:
-        itemsPerPage: 3
+        itemsPerPage: 1
         dataLabelsVisible: true
         allMorphologiesExpanded: false
 
-      activeJQueryUITheme: 'cupertino'
-      defaultJQueryUITheme: 'cupertino'
+      activeJQueryUITheme: 'pepper-grinder'
+      defaultJQueryUITheme: 'pepper-grinder'
       jQueryUIThemes: [
         ['ui-lightness', 'UI lightness']
         ['ui-darkness', 'UI darkness']
@@ -537,13 +559,15 @@ define [
       # corpus-specific in the future.
       fieldDBFormCategories:
 
+        # This is the set of form attributes that are considered by Dative to
+        # denote grammaticalities.
         grammaticality: [
           'judgement'
         ]
 
         # IGT FieldDB form attributes.
         # The returned array defines the "IGT" attributes of a FieldDB form (along
-        # with their order). These are those that will be aligned into columns of
+        # with their order). These are those that are aligned into columns of
         # one word each when displayed in an IGT view.
         igt: [
           'utterance'
@@ -551,6 +575,8 @@ define [
           'gloss'
         ]
 
+        # This is the set of form attributes that are considered by Dative to
+        # denote a translation.
         translation: [
           'translation'
         ]
@@ -580,6 +606,8 @@ define [
           'id'
         ]
 
+        # These read-only fields will not be given input fields in add/update
+        # interfaces.
         readonly: [
           'enteredByUser'
           'dateEntered'
@@ -648,8 +676,4 @@ define [
           'UUID'
           'id'
         ]
-
-
-  # Backbone-relational requires this when using CoffeeScript
-  ApplicationSettingsModel.setup()
 

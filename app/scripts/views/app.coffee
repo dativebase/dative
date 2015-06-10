@@ -23,7 +23,6 @@ define [
   './searches'
   './../models/application-settings'
   './../models/form'
-  './../collections/application-settings'
   './../utils/globals'
   './../templates/app'
 ], (Backbone, Workspace, BaseView, MainMenuView, NotifierView, LoginDialogView,
@@ -31,8 +30,7 @@ define [
   PagesView, HomePageView, FormAddView, FormsSearchView, FormsView,
   SubcorporaView, PhonologiesView, MorphologiesView, LanguageModelsView,
   MorphologicalParsersView, CorporaView, SearchesView,
-  ApplicationSettingsModel, FormModel, ApplicationSettingsCollection, globals,
-  appTemplate) ->
+  ApplicationSettingsModel, FormModel, globals, appTemplate) ->
 
   # App View
   # --------
@@ -218,20 +216,14 @@ define [
         when 'OLD' then @showFormsView()
         else console.log 'Error: you logged in to a non-FieldDB/non-OLD server (?).'
 
-    # Set `@applicationSettings` and `@applicationSettingsCollection`
+    # Set `@applicationSettings`
     getApplicationSettings: (options) ->
-      @applicationSettingsCollection = new ApplicationSettingsCollection()
       # Allowing an app settings model in the options facilitates testing.
       if options?.applicationSettings
         @applicationSettings = options.applicationSettings
-        @applicationSettingsCollection.add @applicationSettings
       else
-        @applicationSettingsCollection.fetch()
-        if @applicationSettingsCollection.length
-          @applicationSettings = @applicationSettingsCollection.at 0
-        else
-          @applicationSettings = new ApplicationSettingsModel()
-          @applicationSettingsCollection.add @applicationSettings
+        @applicationSettings = new ApplicationSettingsModel()
+        @applicationSettings.fetch()
 
     # Size the #appview div relative to the window size
     matchWindowDimensions: ->

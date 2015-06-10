@@ -91,9 +91,10 @@ define [
         .selectmenu('refresh')
 
     setModelFromGUI: ->
-      selectedValue = @$('select[name=activeServer]').val()
-      if selectedValue is 'null' then selectedValue is null
-      @model.set 'activeServer', selectedValue
+      selectedServerId = @$('select[name=activeServer]').val()
+      if selectedServerId is 'null' then selectedServerId is null
+      activeServer = @model.get('servers').get selectedServerId
+      @model.set 'activeServer', activeServer
 
     disable: ->
       @$('select.activeServer').selectmenu 'disable'

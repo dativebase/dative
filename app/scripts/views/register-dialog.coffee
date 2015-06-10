@@ -76,7 +76,10 @@ define [
       @rendered @activeServerView
 
     getActiveServerType: ->
-      @model.get('activeServer')?.get 'type'
+      try
+        @model.get('activeServer')?.get 'type'
+      catch
+        null
 
     getActiveServerCode: ->
       @model.get('activeServer')?.get 'serverCode'
@@ -317,7 +320,6 @@ define [
 
     # `attr` must have a value; indicate that and return `null` if no `val`.
     required: (attr, val) ->
-      console.log "in required with #{attr} and value: #{val}"
       if val
         @$(".#{attr}-validation").first().hide()
         val

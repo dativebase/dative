@@ -87,7 +87,9 @@ define [
     setModelFromGUI: ->
       # We don't want to change the active server if we are logged in with it.
       if not @loggedIn()
-        @model.set 'activeServer', @$('select[name=activeServer]').val()
+        selectedActiveServerId = @$('select[name=activeServer]').val()
+        activeServer = @model.get('servers').get selectedActiveServerId
+        @model.set 'activeServer', activeServer
       @serversView.setCollectionFromGUI()
       @model.set 'activeJQueryUITheme', @$('select[name=css-theme]').val()
       @model.save()
