@@ -76,6 +76,8 @@ define [
       @listenTo Backbone, 'cantDeleteFilterExpressionOnlyChild',
         @cantDeleteFilterExpressionOnlyChild
 
+      @listenTo Backbone, 'disabledKeyboardShortcut', @disabledKeyboardShortcut
+
       @listenToCRUDResources()
 
     listenToCRUDResources: ->
@@ -433,6 +435,13 @@ define [
         content: "You cannot destroy a search expression if it is the only one
           left, if it is the only child of an “or” or an “and”, or if
           it follows “not”."
+        type: 'error'
+      @renderNotification notification
+
+    disabledKeyboardShortcut: (keyboardShortcut) ->
+      notification = new NotificationView
+        title: "Keyboard shortcut error"
+        content: "You probably have to be logged in to use the keyboard shortcut #{keyboardShortcut}"
         type: 'error'
       @renderNotification notification
 

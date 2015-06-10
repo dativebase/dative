@@ -166,9 +166,11 @@ define [
       activeServerType = @getActiveServerType()
       $('[data-shortcut][data-event]').each (index, element) =>
         $element = $ element
-        if (not $element.hasClass('disabled'))
-          event = $element.attr 'data-event'
-          shortcut = $element.attr 'data-shortcut'
+        shortcut = $element.attr 'data-shortcut'
+        event = $element.attr 'data-event'
+        if $element.hasClass 'disabled'
+          @bindShortcutToEventTrigger shortcut, event, 'error'
+        else
           @bindShortcutToEventTrigger shortcut, event
           shortcutAbbreviation = @getShortcutAbbreviation(shortcut)
           $element.append $('<span>').addClass('float-right').html(
@@ -178,8 +180,9 @@ define [
       [initial..., last] = shortcut
       "#{initial.join('')}<span class='fixed-width'>#{last}</span>"
 
-    # Bind keyboard shortcut to triggering of event
-    bindShortcutToEventTrigger: (shortcutString, eventName) ->
+    # Bind keyboard shortcut to triggering of event.
+    # If `type` is not `'normal'`, then an Error Notification will be triggered.
+    bindShortcutToEventTrigger: (shortcutString, eventName, type='normal') ->
       # Map for 'ctrl+A' would be {ctrlKey: true, shortcutKey: 65}
       map = @getShortcutMap shortcutString
 
@@ -189,9 +192,12 @@ define [
         event.altKey is map.altKey and
         event.shiftKey is map.shiftKey and
         event.which is map.shortcutKey
-          event.preventDefault()
-          event.stopPropagation()
-          @trigger eventName
+          if type is 'normal'
+            event.preventDefault()
+            event.stopPropagation()
+            @trigger eventName
+          else
+            Backbone.trigger 'disabledKeyboardShortcut', shortcutString
 
     # Return a shortcut object from a shortcut string.
     # Shortcut Map for a shortcut string like 'ctrl+A' would be
