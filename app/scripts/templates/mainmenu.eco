@@ -4,20 +4,20 @@
         <ul class='ui-corner-bottom'>
             <li>
               <a data-event="request:applicationSettings"
-                 data-shortcut="ctrl+,">Application Settings</a>
+                 >Application Settings</a>
             </li>
             <li>
-              <a data-event="request:home" data-shortcut="ctrl+h">Home</a>
+                <a data-event="request:home">Home</a>
             </li>
             <li class="requires-authentication">
-              <a data-event="request:pages" data-shortcut="ctrl+p">Pages</a>
+                <a data-event="request:pages">Pages</a>
             </li>
             <li class='requires-authentication fielddb'>
-              <a data-event="request:corporaBrowse" data-shortcut="ctrl+c">Corpora</a>
+                <a data-event="request:corporaBrowse">Corpora</a>
             </li>
             <li>
-              <a data-event="request:openRegisterDialogBox" data-shortcut="ctrl+r"
-              >Register</a>
+              <a data-event="request:openRegisterDialogBox"
+                >Register</a>
             </li>
         </ul>
     </li>
@@ -25,15 +25,14 @@
     <li class='requires-authentication'><a>Forms</a>
         <ul class='ui-corner-bottom'>
             <li class='requires-authentication'>
-              <a data-event="request:formAdd" data-shortcut="ctrl+a">Add</a>
+                <a data-event="request:formAdd">Add</a>
             </li>
             <li class='requires-authentication'>
-              <a data-event="request:searchesBrowse" data-shortcut="ctrl+s">Saved Searches</a>
+                <a data-event="request:searchesBrowse">Saved Searches</a>
             </li>
             <li class='requires-authentication'>
-              <a data-event="request:formsBrowse" data-shortcut="ctrl+b">Browse</a>
+                <a data-event="request:formsBrowse">Browse</a>
             </li>
-            <!-- <li><a data-event="request:quickSearch">Quicksearch</a></li> -->
         </ul>
     </li>
 
@@ -42,14 +41,8 @@
             <li class='requires-authentication'>
               <a data-event="request:subcorpusAdd">Add</a>
             </li>
-            <!--
             <li class='requires-authentication'>
-              <a data-event="request:subcorporaSearch">Search</a>
-            </li>
-            -->
-            <li class='requires-authentication'>
-                <a data-event="request:subcorporaBrowse"
-                   data-shortcut="ctrl+c">Browse</a>
+              <a data-event="request:subcorporaBrowse">Browse</a>
             </li>
         </ul>
     </li>
@@ -57,20 +50,17 @@
     <li class='requires-authentication old'><a>Analysis</a>
         <ul class='ui-corner-bottom'>
             <li class='requires-authentication'
-              ><a data-event="request:phonologiesBrowse"
-                  data-shortcut="ctrl+f">Phonologies</a>
+              ><a data-event="request:phonologiesBrowse">Phonologies</a>
             </li>
             <li class='requires-authentication'
-              ><a data-event="request:morphologiesBrowse"
-                  data-shortcut="ctrl+m">Morphologies</a>
+              ><a data-event="request:morphologiesBrowse">Morphologies</a>
             </li>
             <li class='requires-authentication'
-              ><a data-event="request:languageModelsBrowse"
-                  data-shortcut="ctrl+z">Language Models</a>
+              ><a data-event="request:languageModelsBrowse">Language Models</a>
             </li>
             <li class='requires-authentication'
               ><a data-event="request:morphologicalParsersBrowse"
-                  data-shortcut="ctrl+y">Morphological Parsers</a>
+                  >Morphological Parsers</a>
             </li>
         </ul>
     </li>
@@ -141,8 +131,7 @@
 
     <li><a>Help</a>
         <ul class='ui-corner-bottom'>
-            <li><a data-event="request:toggleHelpDialogBox"
-              data-shortcut="ctrl+?">Help Page</a></li>
+            <li><a data-event="request:toggleHelpDialogBox">Help Page</a></li>
             <li><a >Version <%= @version %></a></li>
         </ul>
     </li>
@@ -154,8 +143,7 @@
             <li><a>My Settings</a></li>
             <li><a>My Memory</a></li>
             -->
-            <li><a data-event="request:openLoginDialogBox"
-                   data-shortcut="ctrl+l">Login</a></li>
+            <li><a data-event="request:openLoginDialogBox">Login</a></li>
         </ul>
     </li>
 </ul>

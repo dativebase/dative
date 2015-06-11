@@ -3,10 +3,11 @@ define [
   'backbone'
   './base'
   './../utils/globals'
+  './../utils/keyboard-shortcuts'
   './../templates/mainmenu'
   'superclick'
   'supersubs'
-], ($, Backbone, BaseView, globals, mainmenuTemplate) ->
+], ($, Backbone, BaseView, globals, keyboardShortcuts, mainmenuTemplate) ->
 
   # Main Menu View
   # --------------
@@ -30,7 +31,17 @@ define [
       @refreshLoggedInUser()
       @displayActiveCorpusName()
 
+    # When an element with a `data-event` attribute is clicked, the value of
+    # that attribute is the Backbone event that is triggered. This makes the
+    # menu buttons work.
+    triggerMenuAction: (event) ->
+      @$('.sf-menu').superclick 'reset'
+      event.stopPropagation()
+      @trigger $(event.target).attr('data-event')
+
     events:
+
+      'click [data-event]': 'triggerMenuAction'
       'click a.dative-authenticated': 'toggleLoginDialog'
       'click a.dative-help': 'toggleHelpDialog'
 
@@ -122,7 +133,6 @@ define [
       @refreshLoginButton()
       @displayActiveCorpusName()
       @refreshLoggedInUser()
-      @bindClickToEventTrigger() # Vivify menu buttons
       @keyboardShortcuts()
 
     # Superfish jQuery plugin turns mainmenu <ul> into a menubar
@@ -144,30 +154,16 @@ define [
     closeSuperclick: ->
       @$('.sf-menu').superclick 'reset'
 
-    # Menu item clicks and keyboard shortcut behaviours are all defined in the
-    # data-event and data-shortcut attributes of the <li>s specified in the
-    # template. The following functionality creates the appropriate bindings.
-
-    # Bind main menu item clicks to the triggering of the appropriate events.
-    # TODO @jrwdunham: it should be possible to do this in `@events`. It would
-    # be nice to have all DOM event binding in one place.
-    bindClickToEventTrigger: ->
-      @$('[data-event]').each (index, element) =>
-        $(element).click (event) =>
-          @$('.sf-menu').superclick('reset')
-          event.stopPropagation()
-          @trigger $(element).attr('data-event')
-
     # Configure keyboard shortcuts
     # 1. Bind shortcut keystrokes to the appropriate events.
     # 2. Modify the menu items so that shortcut abbreviations are displayed.
     keyboardShortcuts: ->
+      activeServerType = @getActiveServerType().toLowerCase()
       $(document).off 'keydown'
-      activeServerType = @getActiveServerType()
-      $('[data-shortcut][data-event]').each (index, element) =>
-        $element = $ element
-        shortcut = $element.attr 'data-shortcut'
-        event = $element.attr 'data-event'
+      for keyboardShortcut in keyboardShortcuts
+        shortcut = keyboardShortcut.shortcut
+        event = @getShortcutEvent keyboardShortcut, activeServerType
+        $element = @$ "[data-event='#{event}']"
         if $element.hasClass 'disabled'
           @bindShortcutToEventTrigger shortcut, event, 'error'
         else
@@ -175,6 +171,12 @@ define [
           shortcutAbbreviation = @getShortcutAbbreviation(shortcut)
           $element.append $('<span>').addClass('float-right').html(
             @getShortcutInFixedWithSpans(shortcutAbbreviation))
+
+    getShortcutEvent: (keyboardShortcut, activeServerType) ->
+      if 'event' of keyboardShortcut
+        keyboardShortcut.event
+      else
+        keyboardShortcut[activeServerType].event
 
     getShortcutInFixedWithSpans: (shortcut) ->
       [initial..., last] = shortcut
