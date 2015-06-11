@@ -8,8 +8,8 @@ require.config
       exports: '$'
     lodash:
       exports: '_'
-    # FieldDB:
-    #   exports: 'FieldDB'
+    FieldDB:
+      exports: 'FieldDB'
     backbone:
       exports: 'Backbone'
       deps: ['lodash', 'jquery']
@@ -53,7 +53,7 @@ require.config
     #betterelastictextarea: '../bower_components/better-elastic-textarea/dist/better-elastic-textarea'
     spin: '../bower_components/spin.js/spin'
     jqueryspin: '../bower_components/spin.js/jquery.spin'
-    # FieldDB: '../bower_components/fielddb/fielddb'
+    FieldDB: '../bower_components/fielddb/fielddb'
     backbonerelational: '../bower_components/backbone-relational/backbone-relational'
     backbonelocalstorage: '../bower_components/backbone.localStorage/backbone.localStorage'
 
@@ -66,16 +66,6 @@ require [
     'jqueryspin'
   ], (AppView, Workspace) ->
     window.debugMode = false
-
-
-    if FieldDB && FieldDB.Database && FieldDB.Database.prototype
-      FieldDB.Database.prototype.BASE_DB_URL = "https://corpusdev.lingsync.org"
-      FieldDB.Database.prototype.BASE_AUTH_URL = "https://authdev.lingsync.org"
-      FieldDB.AudioVideo.prototype.BASE_SPEECH_URL = "https://speechdev.lingsync.org"
-      FieldDB.FieldDBObject.application = {
-        brand: "LingSync"
-        website: "http://lingsync.org"
-      }
 
     $ ->
       # Backbone.history.start()

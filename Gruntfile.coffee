@@ -460,6 +460,33 @@ module.exports = (grunt) ->
       setContinuousDeploymentVersion:
         cmd: ->
           return 'bash scripts/set_ci_version.sh'
+      symlinkFieldDBIfAvailable:
+        cmd: ->
+          return 'if [ -z ${FIELDDB_HOME} ]; ' +
+          ' then ' +
+          ' echo "Not using the most recent FieldDB, some functions might not work.";' +
+          ' else ' +
+          ' echo "Symlinking FieldDB to your local dev version in $FIELDDB_HOME/FieldDB/fielddb.js";' +
+          ' rm app/bower_components/fielddb/fielddb.js;' +
+          ' ln -s $FIELDDB_HOME/FieldDB/fielddb.js app/bower_components/fielddb/fielddb.js;' +
+          ' fi '
+      updateFieldDB:
+        cmd: ->
+          return 'if [ -z ${FIELDDB_HOME} ]; ' +
+          ' then ' +
+          ' echo "Not using the most recent FieldDB, some functions might not work.";' +
+          ' else ' +
+          ' echo "Updating FieldDB in $FIELDDB_HOME/FieldDB/fielddb.js";' +
+          ' cd $FIELDDB_HOME;' +
+          ' git clone https://github.com/cesine/FieldDB.git;' +
+          ' cd $FIELDDB_HOME/FieldDB;' +
+          ' pwd; '+
+          ' git remote add cesine https://github.com/cesine/FieldDB.git;' +
+          ' git checkout master;' +
+          ' git pull cesine master;' +
+          ' npm install; ' +
+          ' grunt browserify; ' +
+          ' fi '
 
     rev:
       dist:
@@ -564,7 +591,7 @@ module.exports = (grunt) ->
     'eco'
 
     # permits execution of shell scripts
-    'exec'
+    'exec:setContinuousDeploymentVersion'
 
     #'compass:dist' # commented out because not currently using compass
 
@@ -630,5 +657,5 @@ module.exports = (grunt) ->
 
   grunt.registerTask 'docs', ['clean:docs', 'clean:doctmp', 'copy:docco', 'docco', 'clean:doctmp']
 
-  grunt.registerTask 'deploy', ['jshint', 'build', 'exec:setContinuousDeploymentVersion']
+  grunt.registerTask 'deploy', ['exec:updateFieldDB', 'exec:symlinkFieldDBIfAvailable', 'jshint', 'build', 'exec:setContinuousDeploymentVersion']
 

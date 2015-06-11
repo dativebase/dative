@@ -198,6 +198,10 @@ button.help-button
 {
   font-size: 130%;
 }
+.dative-alert-prompt
+{
+ width: 80%;
+}
 
 .update-form-widget .dative-field-label-container,
 .update-widget .dative-field-label-container

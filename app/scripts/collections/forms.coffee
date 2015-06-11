@@ -160,9 +160,8 @@ define [
     # Returns the FieldDB URL for fetching all datums in a corpus, in
     # chronological order.
     getFetchAllFieldDBFormsURL: ->
-      url = globals.applicationSettings.get 'baseDBURL'
-      pouchname = globals.applicationSettings.get 'activeFieldDBCorpus'
-      "#{url}/#{pouchname}/_design/pages/_view/datums_chronological"
+      url = globals.applicationSettings.get('fieldDBApplication').corpus.url
+      "#{url}/_design/pages/_view/datums_chronological"
 
     # Returns a URL for updating a resource on a web service.
     getUpdateResourceURL: (resource) ->

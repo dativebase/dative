@@ -1,5 +1,6 @@
 define [
   'backbone'
+  'FieldDB'
   './../routes/router'
   './base'
   './mainmenu'
@@ -25,7 +26,7 @@ define [
   './../models/form'
   './../utils/globals'
   './../templates/app'
-], (Backbone, Workspace, BaseView, MainMenuView, NotifierView, LoginDialogView,
+], (Backbone, FieldDB, Workspace, BaseView, MainMenuView, NotifierView, LoginDialogView,
   RegisterDialogView, AlertDialogView, HelpDialogView, ApplicationSettingsView,
   PagesView, HomePageView, FormAddView, FormsSearchView, FormsView,
   SubcorporaView, PhonologiesView, MorphologiesView, LanguageModelsView,
@@ -72,7 +73,6 @@ define [
         , 2000
       @$el.html @template()
       @renderPersistentSubviews()
-      # @configureFieldDB() # FieldDB stuff commented out until it can be better incorporated
       @matchWindowDimensions()
       @
 
@@ -120,7 +120,10 @@ define [
         @toggleRegisterDialog
       @listenTo Backbone, 'loginSuggest', @openLoginDialogWithDefaults
       @listenTo Backbone, 'authenticateSuccess', @authenticateSuccess
+      @listenTo Backbone, 'authenticate:success', @authenticateSuccess
+      @listenTo Backbone, 'authenticate:mustconfirmidentity', @authenticateConfirmIdentity
       @listenTo Backbone, 'logoutSuccess', @logoutSuccess
+      @listenTo Backbone, 'logout:success', @logoutSuccess
       @listenTo Backbone, 'useFieldDBCorpus', @useFieldDBCorpus
       @listenTo Backbone, 'applicationSettings:changeTheme', @changeTheme
 
@@ -212,9 +215,42 @@ define [
     authenticateSuccess: ->
       activeServerType = @activeServerType()
       switch activeServerType
-        when 'FieldDB' then @showCorporaView()
+        when 'FieldDB' 
+          if @applicationSettings.get 'fieldDBApplication' != FieldDB.FieldDBObject.application
+            @applicationSettings.set 'fieldDBApplication', FieldDB.FieldDBObject.application
+          @showCorporaView()
         when 'OLD' then @showFormsView()
         else console.log 'Error: you logged in to a non-FieldDB/non-OLD server (?).'
+
+    authenticateConfirmIdentity: (message) =>
+      message = message or 'We need to make sure this is you. Confirm your
+        password to continue.'
+      if not @originalMessage then @originalMessage = message
+      @displayConfirmIdentityDialog(
+          message
+        ,
+          (loginDetails) =>
+            console.log 'no problem.. can keep working'
+            fieldDBApplication = @applicationSettings.get('fieldDBApplication')
+            @set
+              username: fieldDBApplication.authentication.user.username,
+              loggedInUser: fieldDBApplication.authentication.user
+            @save()
+            delete @originalMessage
+        ,
+          (loginDetails) =>
+            if @confirmIdentityErrorCount > 3
+              console.log ' In this case of confirming identity, the user MUST
+                authenticate. If they cant remember their password, after 4
+                attempts, log them out.'
+              delete @originalMessage
+              Backbone.trigger 'authenticate:logout'
+            console.log 'Asking again'
+            @confirmIdentityErrorCount = @confirmIdentityErrorCount or 0
+            @confirmIdentityErrorCount++
+            @authenticateConfirmIdentity "#{@originalMessage}
+              #{loginDetails.userFriendlyErrors.join ' '}"
+      )
 
     # Set `@applicationSettings`
     getApplicationSettings: (options) ->
@@ -241,7 +277,14 @@ define [
         @visibleView.close()
         @closed @visibleView
 
-    loggedIn: -> @applicationSettings.get 'loggedIn'
+    loggedIn: -> 
+      if @applicationSettings.get('fieldDBApplication') and
+      @applicationSettings.get('fieldDBApplication').authentication and 
+      @applicationSettings.get('fieldDBApplication').authentication.user and 
+      @applicationSettings.get('fieldDBApplication').authentication.user.authenticated
+        @applicationSettings.set 'loggedIn', true
+        @applicationSettings.set 'loggedInUserRoles', @applicationSettings.get('fieldDBApplication').authentication.user.roles
+      @applicationSettings.get 'loggedIn'
 
     ############################################################################
     # Methods for showing the main "pages" of Dative                           #
@@ -592,86 +635,113 @@ define [
           clearInterval ti
       ti = setInterval func, 10
 
-    configureFieldDB: ->
-        # FieldDB stuff commented out until it can be better incorporated
-        # FieldDB.FieldDBObject.application.currentFieldDB = new FieldDB.Corpus()
-        # FieldDB.FieldDBObject.application.currentFieldDB.loadOrCreateCorpusByPouchName("testdative-firstcorpus")
-        # FieldDB.FieldDBObject.application.currentFieldDB.url = FieldDB.FieldDBObject.application.currentFieldDB.BASE_DB_URL
-
-
     ############################################################################
     # FieldDB .bug, .warn and .confirm hooks
     ############################################################################
-
-    # Overriding FieldDB's logging hooks to do nothing
-    # FieldDB.FieldDBObject.verbose = () -> {}
-    # FieldDB.FieldDBObject.debug = () -> {}
-    # FieldDB.FieldDBObject.todo = () -> {}
-
+    #
     overrideFieldDBNotificationHooks: ->
+      # Overriding FieldDB's logging hooks to do nothing
+      FieldDB.FieldDBObject.verbose = -> {}
+      FieldDB.FieldDBObject.debug = -> {}
+      FieldDB.FieldDBObject.todo = -> {}
       FieldDB.FieldDBObject.bug = @displayBugReportDialog
       FieldDB.FieldDBObject.warn = @displayWarningMessagesDialog
       FieldDB.FieldDBObject.confirm = @displayConfirmDialog
 
-    displayBugReportDialog: (message) ->
-      # TODO @jrwdunham: display a Dative-styled dialog explaining the bug and
-      # also displaying a bug report form.
-      console.log "TODO show some visual contact us or open a bug report in a
-        separate window using probably http://jqueryui.com/dialog/#default
-        #{message}"
-      run = ->
+    displayBugReportDialog: (message, optionalLocale) =>
+      deferred = FieldDB.Q.defer()
+      messageChannel = "bug:#{message?.replace /[^A-Za-z]/g, ''}"
+      @listenTo Backbone, messageChannel, ->
         window.open(
           "https://docs.google.com/forms/d/18KcT_SO8YxG8QNlHValEztGmFpEc4-ZrjWO76lm0mUQ/viewform")
-      setTimeout run, 1000
+        deferred.resolve
+          message: message
+          optionalLocale: optionalLocale
+          response: true
+
+      options =
+        text: message
+        confirm: false
+        confirmEvent: messageChannel
+        confirmArgument: message
+      Backbone.trigger 'openAlertDialog', options
+
+      return deferred.promise
 
     displayWarningMessagesDialog: (message, message2, message3, message4) ->
-      # TODO @jrwdunham: display a Dative-styled dialog with "warning-style
-      # visuals" showing the warning messages. This does look like a good
-      # possibility: http://www.erichynds.com/examples/jquery-notify/index.htm
-      console.log "TODO show some visual thing here using the app view using
-        something like http://www.erichynds.com/examples/jquery-notify/
-        #{message}"
+      console.log message, message2, message3, message4
 
-    displayConfirmDialog: (message, optionalLocale) ->
-      # TODO @jrwdunham: use the already-in-place @alertDialog for this
+    displayConfirmDialog: (message, optionalLocale) =>
       # TODO @jrwdunham @cesine: figure out how i18n/localization works in
-      # FieldDB and begin implementing something similar in Dative.
-      console.log "TODO show some visual thing here using the app view using
-        something like http://jqueryui.com/dialog/#modal-confirmation
-        #{message}"
+      # Dative.
+      deferred = FieldDB.Q.defer()
+      messageChannel = "confirm:#{message?.replace /[^A-Za-z]/g, ''}"
 
-      # NOTE @jrwdunham: this is cesine's first stab at a jQuery-style dialog
-      # for this:
+      @listenTo Backbone, messageChannel, ->
+        deferred.resolve
+          message: message
+          optionalLocale: optionalLocale
+          response: true
 
-      # deferred = FieldDB.Q.defer(),
-      # self = this;
+      @listenTo Backbone, "cancel#{messageChannel}", ->
+        deferred.reject
+          message: message
+          optionalLocale: optionalLocale
+          response: false
 
-      # $(function() {
-      #   $( "#dialog-confirm" ).dialog({
-      #     resizable: false,
-      #     height:140,
-      #     modal: true,
-      #     buttons: {
-      #       message: function() {
-      #         $( this ).dialog( "close" );
-      #         deferred.resolve({
-      #           message: message,
-      #           optionalLocale: optionalLocale,
-      #           response: true
-      #           });
-      #         },
-      #         Cancel: function() {
-      #           $( this ).dialog( "close" );
-      #           deferred.reject({
-      #             message: message,
-      #             optionalLocale: optionalLocale,
-      #             response: false
-      #             });
-      #         }
-      #       }
-      #       });
-      #   });
+      options =
+        text: message
+        confirm: true
+        confirmEvent: messageChannel
+        cancelEvent: "cancel#{messageChannel}"
+        confirmArgument: message
+        cancelArgument: message
+      Backbone.trigger 'openAlertDialog', options
 
+      deferred.promise
+
+    displayPromptDialog: (message, optionalLocale) ->
+      deferred = FieldDB.Q.defer()
+      messageChannel = "prompt:#{message?.replace /[^A-Za-z]/g, ''}"
+
+      @listenTo Backbone, messageChannel, (userInput) ->
+        deferred.resolve
+          message: message
+          optionalLocale: optionalLocale
+          response: userInput
+
+      @listenTo Backbone, "cancel#{messageChannel}", ->
+        deferred.reject
+          message: message
+          optionalLocale: optionalLocale
+          response: ""
+
+      options =
+        text: message
+        confirm: true
+        prompt: true
+        confirmEvent: messageChannel
+        cancelEvent: 'cancel' + messageChannel
+        confirmArgument: message
+        cancelArgument: message
+      Backbone.trigger 'openAlertDialog', options
+
+      deferred.promise
+
+    displayConfirmIdentityDialog: (message, successCallback, failureCallback, cancelCallback) =>
+      cancelCallback = cancelCallback or failureCallback
+      if @applicationSettings.get 'fieldDBApplication' != FieldDB.FieldDBObject.application
+        @applicationSettings.set 'fieldDBApplication', FieldDB.FieldDBObject.application
+      @displayPromptDialog(message).then(
+        (dialog) =>
+          @applicationSettings
+            .get('fieldDBApplication')
+            .authentication
+            .confirmIdentity(password: dialog.response)
+            .then successCallback, failureCallback 
+      ,
+        cancelCallback
+      )
 
     ############################################################################
     # Persist application settings.
