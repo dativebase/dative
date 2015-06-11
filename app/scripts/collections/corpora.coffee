@@ -19,7 +19,7 @@ define [
       payload =
         authUrl: @applicationSettings.get?('activeServer')?.get?('url')
         username: @applicationSettings.get?('username')
-        password: @applicationSettings.get?('password')
+        password: @applicationSettings.get?('password') # TODO use confirm identity event instead
         serverCode: @applicationSettings.get?('activeServer')?.get?('serverCode')
         newCorpusName: newCorpusName
       CorpusModel.cors.request(

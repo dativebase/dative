@@ -242,7 +242,7 @@ define [
     getDefaultPayload: ->
       authUrl: @applicationSettings.get?('activeServer')?.get?('url')
       username: @applicationSettings.get?('username')
-      password: @applicationSettings.get?('password')
+      password: @applicationSettings.get?('password') # TODO trigger authenticate:mustconfirmidentity
       serverCode: @applicationSettings.get?('activeServer')?.get?('serverCode')
       pouchname: @get 'pouchname'
 

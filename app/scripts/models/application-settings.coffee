@@ -5,7 +5,8 @@ define [
   './server'
   './../collections/servers'
   './../utils/utils'
-], (_, Backbone, BaseModel, ServerModel, ServersCollection, utils) ->
+  'FieldDB'
+], (_, Backbone, BaseModel, ServerModel, ServersCollection, utils, FieldDB) ->
 
   # Application Settings Model
   # --------------------------
@@ -18,6 +19,8 @@ define [
   class ApplicationSettingsModel extends BaseModel
 
     initialize: ->
+      fieldDBTempApp = new (FieldDB.App)(@get('fieldDBApplication'))
+      fieldDBTempApp.authentication.eventDispatcher = Backbone
       @listenTo Backbone, 'authenticate:login', @authenticate
       @listenTo Backbone, 'authenticate:logout', @logout
       @listenTo Backbone, 'authenticate:register', @register
@@ -46,6 +49,13 @@ define [
 
     activeServerChanged: ->
       #console.log 'active server has changed says the app settings model'
+      if @get('fieldDBApplication')
+        @get('fieldDBApplication').website = @get('activeServer').get('website')
+        @get('fieldDBApplication').brand = @get('activeServer').get('brand') or
+          @get('activeServer').get('userFriendlyServerName')
+        @get('fieldDBApplication').brandLowerCase =
+          @get('activeServer').get('brandLowerCase') or
+            @get('activeServer').get('serverCode')
 
     activeServerURLChanged: ->
       #console.log 'active server URL has changed says the app settings model'
@@ -55,7 +65,7 @@ define [
       if url.slice(-1) is '/' then url.slice(0, -1) else url
 
     getCorpusServerURL: ->
-      @get('activeServer')?.get 'corpusServerURL'
+      @get('activeServer')?.get 'corpusUrl'
 
     getServerCode: ->
       @get('activeServer')?.get 'serverCode'
@@ -71,7 +81,7 @@ define [
     # Attempt to authenticate with the passed-in credentials
     authenticate: (username, password) ->
       if @get('activeServer')?.get('type') is 'FieldDB'
-        @authenticateFieldDBAuthService username: username, password: password
+        @authenticateFieldDBAuthService username: username, password: password, authUrl: @get('activeServer')?.get('url')
       else
         @authenticateOLD username: username, password: password
 
@@ -106,15 +116,37 @@ define [
           @authenticateAttemptDone taskId
       )
 
-    getFieldDBBaseDBURL: (user) ->
-      if user.corpora?.length
-        meta = user.corpora[0]
-        protocol = meta.protocol
-        domain = meta.domain
-        port = if meta.port then ":#{meta.port}" else ''
-        "#{protocol}#{domain}#{port}"
+    authenticateFieldDBAuthService: (credentials) =>
+      taskId = @guid()
+      Backbone.trigger 'longTask:register', 'authenticating', taskId
+      Backbone.trigger 'authenticateStart'
+      if not @get 'fieldDBApplication'
+        @set 'fieldDBApplication', FieldDB.FieldDBObject.application
+      @get('fieldDBApplication').authentication =
+        @get('fieldDBApplication').authentication or new FieldDB.Authentication()
+      @get('fieldDBApplication').authentication.login(credentials).then(
+        (promisedResult) =>
+          @set
+            username: credentials.username,
+            password: credentials.password, # TODO dont need this!
+            loggedInUser: @get('fieldDBApplication').authentication.user
+          @save()
+          Backbone.trigger 'authenticateEnd'
+          Backbone.trigger 'authenticateSuccess'
+          @authenticateAttemptDone taskId
+      ,
+        (error) =>
+          @authenticateAttemptDone taskId
+          Backbone.trigger 'authenticateEnd'
+          Backbone.trigger 'authenticateFail', responseJSON.userFriendlyErrors
+      ).fail (error) =>
+        Backbone.trigger 'authenticateEnd'
+        Backbone.trigger 'authenticateFail', error: 'Request timed out'
+        @authenticateAttemptDone taskId
 
-    authenticateFieldDBAuthService: (credentials) ->
+    # This is the to-be-deprecated version that has been made obsolete by
+    # `authenticateFieldDBAuthService` above.
+    authenticateFieldDBAuthService_: (credentials) =>
       taskId = @guid()
       Backbone.trigger 'longTask:register', 'authenticating', taskId
       Backbone.trigger 'authenticateStart'
@@ -201,60 +233,6 @@ define [
       else
         @save()
 
-    # WARN: DEPRECATED until I can figure out the issue detailed in the comment
-    # below.
-    # This is based on the FieldDB AngularJS ("Spreadsheet") source, i.e.,
-    # https://github.com/OpenSourceFieldlinguistics/FieldDB/blob/master/\
-    #   angular_client/modules/core/app/scripts/directives/\
-    #   fielddb-authentication.js
-    authenticateFieldDB: (credentials) ->
-      credentials.serverCode = 'production' # debuggin
-      taskId = @guid()
-      Backbone.trigger 'longTask:register', 'authenticating', taskId
-
-      FieldDB.Database::BASE_AUTH_URL = @getURL()
-
-      # ISSUE @cesine @jrwdunham: Dative can't know the DB_URL without first
-      # receiving the response from calling `FieldDB.Database::login`. (Call
-      # `@getFieldDBBaseDBURL user` on the returned user to get it.) However,
-      # `FieldDB/api/corpus/Database.js` (lines 294-345) logs in to its default
-      # DB_URL (https://localhost:6984) immediately after Auth Service
-      # authentication succeeds. The request to get the metadata of a corpus,
-      # however, uses http://localhost:5984, wich is from the `user.corpuses`
-      # array. I am using the following hack to get around this, but either I'm
-      # missing something about how to use FieldDB correctly or
-      # `FieldDB.Database::login` needs to inspect the response from the Auth
-      # Service when constructing BASE_DB.
-      # if @getServerCode() is 'localhost'
-      #   FieldDB.Database::BASE_DB_URL = 'http://localhost:5984'
-
-      FieldDB.Database::login(credentials).then(
-        (user) =>
-          try
-            @set
-              username: credentials.username,
-              password: credentials.password,
-              loggedIn: true
-              loggedInUser: user
-            @save()
-            Backbone.trigger 'authenticateSuccess'
-          catch
-            Backbone.trigger 'authenticateFail',
-              ['Authentication with the FieldDB server worked, but something',
-                'went wrong with Dative.'].join(' ')
-        ,
-        (reason) ->
-          Backbone.trigger 'authenticateFail', reason
-      ).catch(
-        ->
-          Backbone.trigger 'authenticateFail',
-            'FieldDB.Database::login triggered an error'
-      ).done(
-        =>
-          @authenticateAttemptDone taskId
-      )
-
-
     # Logout
     #=========================================================================
 
@@ -295,29 +273,29 @@ define [
       taskId = @guid()
       Backbone.trigger 'longTask:register', 'logout', taskId
       Backbone.trigger 'logoutStart'
-      FieldDB.Database::BASE_AUTH_URL = @getURL()
-      FieldDB.Database::BASE_DB_URL = @getCorpusServerURL()
-      FieldDB.Database::logout().then(
-        (responseJSON) =>
-          if responseJSON.ok is true
+      if not @get 'fieldDBApplication'
+        @set 'fieldDBApplication', FieldDB.FieldDBObject.application
+      # TODO: @cesine: I'm getting "`authentication.logout` is not a function"
+      # errors here ...
+      @get('fieldDBApplication').authentication
+        .logout({letClientHandleCleanUp: 'dontReloadWeNeedToCleanUpInDativeClient'})
+        .then(
+          (responseJSON) =>
             @set
+              fieldDBApplication: null
               loggedIn: false
               activeFieldDBCorpus: null
               activeFieldDBCorpusTitle: null
             @save()
             Backbone.trigger 'logoutSuccess'
-          else
-            Backbone.trigger 'logoutFail',
-              "server #{@getURL()} did not accept logout request."
         ,
-        (reason) ->
-          Backbone.trigger 'logoutFail', reason
+          (reason) ->
+            Backbone.trigger 'logoutFail', reason.userFriendlyErrors.join ' '
       ).done(
         =>
           Backbone.trigger 'logoutEnd'
           @authenticateAttemptDone taskId
       )
-
 
     # Check if logged in
     #=========================================================================
@@ -432,14 +410,16 @@ define [
 
     defaults: ->
 
+      server1Object = new FieldDB.Connection(FieldDB.Connection.defaultConnection('localhost'))
       server1 =
         new ServerModel
           id: @guid()
-          name: FieldDB.FieldDBObject.application.brand + ' Localhost'
+          name: server1Object.userFriendlyServerName
           type: 'FieldDB'
-          url: 'https://localhost:3183'
-          serverCode: 'localhost'
-          corpusServerURL: null
+          url: server1Object.authUrl
+          serverCode: server1Object.serverLabel # should be "localhost"
+          website: server1Object.website
+          corpusServerURL: server1Object.corpusUrl
 
       server2 =
         new ServerModel
@@ -449,15 +429,18 @@ define [
           url: 'http://127.0.0.1:5000'
           serverCode: null
           corpusServerURL: null
+          website: 'http://www.onlinelinguisticdatabase.org'
 
+      server3Object = new FieldDB.Connection(FieldDB.Connection.defaultConnection('lingsync'))
       server3 =
         new ServerModel
           id: @guid()
-          name: FieldDB.FieldDBObject.application.brand
+          name: server3Object.userFriendlyServerName
           type: 'FieldDB'
-          url: FieldDB.Database.prototype.BASE_AUTH_URL
-          serverCode: 'production'
-          corpusServerURL: null
+          url: server3Object.authUrl
+          serverCode: server3Object.serverLabel
+          corpusServerURL: server3Object.corpusUrl
+          website: server3Object.website
 
       server4 =
         new ServerModel
@@ -467,6 +450,7 @@ define [
           url: 'http://www.onlinelinguisticdatabase.org'
           serverCode: null
           corpusServerURL: null
+          website: 'http://www.onlinelinguisticdatabase.org'
 
       if window.location.hostname in ["localhost", '127.0.0.1']
         servers = new ServersCollection([server1, server2, server3, server4])
@@ -480,6 +464,7 @@ define [
       loggedInUserRoles: []
       baseDBURL: null
       username: ''
+      password: '' # TODO trigger authenticate:mustconfirmidentity instead of storing the password in localStorage
       servers: servers
       serverTypes: ['FieldDB', 'OLD']
       fieldDBServerCodes: [
