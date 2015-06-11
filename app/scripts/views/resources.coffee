@@ -835,8 +835,8 @@ define [
             my: "left+45 center"
             at: "right center"
             collision: "flipfit"
-      @$('.browse-set')
-        .css 'color': @constructor.jQueryUIColors().hovCo
+      # @$('.browse-set')
+      # .css 'color': @constructor.jQueryUIColors().hovCo
 
     # Render a page (pagination) of resource views. That is, change which set of
     # `ResourceView` instances are displayed.
