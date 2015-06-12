@@ -9,6 +9,7 @@ define [
   './register-dialog'
   './alert-dialog'
   './help-dialog'
+  './resource-displayer-dialog'
   './application-settings'
   './pages'
   './home'
@@ -26,10 +27,11 @@ define [
   './../models/form'
   './../utils/globals'
   './../templates/app'
-], (Backbone, FieldDB, Workspace, BaseView, MainMenuView, NotifierView, LoginDialogView,
-  RegisterDialogView, AlertDialogView, HelpDialogView, ApplicationSettingsView,
-  PagesView, HomePageView, FormAddView, FormsSearchView, FormsView,
-  SubcorporaView, PhonologiesView, MorphologiesView, LanguageModelsView,
+], (Backbone, FieldDB, Workspace, BaseView, MainMenuView, NotifierView,
+  LoginDialogView, RegisterDialogView, AlertDialogView, HelpDialogView,
+  ResourceDisplayerDialogView, ApplicationSettingsView, PagesView,
+  HomePageView, FormAddView, FormsSearchView, FormsView, SubcorporaView,
+  PhonologiesView, MorphologiesView, LanguageModelsView,
   MorphologicalParsersView, CorporaView, SearchesView,
   ApplicationSettingsModel, FormModel, globals, appTemplate) ->
 
@@ -134,6 +136,7 @@ define [
         @setFormsPrimaryDataLabelsHidden
       @listenTo Backbone, 'formsView:showAllLabels',
         @setFormsPrimaryDataLabelsVisible
+      @listenTo Backbone, 'showResourceInDialog', @showResourceInDialog
 
       @listenToResources()
 
@@ -163,6 +166,7 @@ define [
       @alertDialog = new AlertDialogView model: @applicationSettings
       @helpDialog = new HelpDialogView()
       @notifier = new NotifierView()
+      @resourceDisplayerDialog = new ResourceDisplayerDialogView()
 
     renderPersistentSubviews: ->
       @mainMenuView.setElement(@$('#mainmenu')).render()
@@ -170,6 +174,9 @@ define [
       @registerDialog.setElement(@$('#register-dialog-container')).render()
       @alertDialog.setElement(@$('#alert-dialog-container')).render()
       @helpDialog.setElement(@$('#help-dialog-container'))
+      @resourceDisplayerDialog
+        .setElement(@$('#resource-displayer-dialog-container'))
+        .render()
       @notifier.setElement(@$('#notifier-container')).render()
 
       @rendered @mainMenuView
@@ -177,6 +184,7 @@ define [
       @rendered @registerDialog
       @rendered @alertDialog
       @rendered @notifier
+      @rendered @resourceDisplayerDialog
 
     renderHelpDialog: ->
       @helpDialog.render()
@@ -853,4 +861,10 @@ define [
     # Set app settings' "primary data labels visible" to true.
     setMorphologiesPrimaryDataLabelsVisible: ->
       @changeDisplaySetting 'morphologies', 'dataLabelsVisible', true
+
+
+    # Render the passed in resource view in the application-wide
+    # `@resourceDisplayerDialog`
+    showResourceInDialog: (resourceView, $target) ->
+      Backbone.trigger 'resourceDisplayerDialog:show', resourceView, $target
 

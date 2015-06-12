@@ -30,6 +30,7 @@ define [
 
     template: resourceTemplate
     tagName: 'div'
+
     className: 'dative-resource-widget dative-shadowed-widget
       dative-paginated-item dative-widget-center ui-widget ui-widget-content
       ui-corner-all'

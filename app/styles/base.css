@@ -391,6 +391,17 @@ div.dative-page-header-title
   width: 90%;
 }
 
+.dative-resource-displayer-dialog .dative-paginated-item
+{
+  width: 96%;
+}
+
+.resource-displayer-content
+{
+  overflow-x: scroll;
+  width: 60em;
+}
+
 .dative-pagin-item-index
 {
     vertical-align: top;
@@ -1712,5 +1723,25 @@ button.make-not-not i
 {
   padding: 0 0.25em;
   font-weight: bold;
+}
+
+.field-display-link
+{
+  cursor: pointer;
+}
+
+.dialog-header-button
+{
+  width: 1.65em;
+  height: 1.65em;
+  float: right;
+  margin-right: 1.2em;
+  /*position: relative;
+  left: 2.75em;*/
+}
+
+.dative-resource-displayer-dialog-widget.ui-dialog .ui-dialog-title
+{
+  width: auto !important;
 }
 
