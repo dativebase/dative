@@ -1,8 +1,8 @@
 define [
   './controls'
-  './count-search-results-control'
+  './count-corpus-control'
   './browse-search-results-control'
-], (ControlsView, CountSearchResultsControlView,
+], (ControlsView, CountCorpusControlView,
   BrowseSearchResultsControlView) ->
 
   # Subcorpus Controls View
@@ -15,6 +15,6 @@ define [
 
     actionViewClasses: [
       BrowseSearchResultsControlView
-      CountSearchResultsControlView
+      CountCorpusControlView
     ]
 

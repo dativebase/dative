@@ -73,6 +73,9 @@ define [
       @listenTo Backbone, 'formSearchSuccess', @formSearchSuccess
       @listenTo Backbone, 'formSearchFail', @formSearchFail
 
+      @listenTo Backbone, 'corpusCountSuccess', @corpusCountSuccess
+      @listenTo Backbone, 'corpusCountFail', @corpusCountFail
+
       @listenTo Backbone, 'cantDeleteFilterExpressionOnlyChild',
         @cantDeleteFilterExpressionOnlyChild
 
@@ -504,6 +507,21 @@ define [
         title: 'Form search success'
         content: "You have successfully used the saved search with id
           #{formSearchId} to search!."
+      @renderNotification notification
+
+    corpusCountFail: (error, corpusId) ->
+      notification = new NotificationView
+        title: 'Corpus count failed'
+        content: "Your attempt to count the number of forms in the corpus with
+          id #{corpusId} was unsuccessful: #{error}."
+        type: 'error'
+      @renderNotification notification
+
+    corpusCountSuccess: (corpusId) ->
+      notification = new NotificationView
+        title: 'Corpus count success'
+        content: "You have successfully counted the number of forms in the
+          corpus with id #{corpusId}."
       @renderNotification notification
 
     getAuthenticateFailContent: (errorObj) ->

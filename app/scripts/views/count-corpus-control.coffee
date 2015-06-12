@@ -5,17 +5,17 @@ define [
   './../templates/button-control'
 ], (BaseView, FormModel, globals, buttonControlTemplate) ->
 
-  # Count Search Results Control View
-  # ---------------------------------
+  # Count Corpus Control View
+  # -------------------------
   #
   # View for a control that is a button that, when clicked, requests that the
-  # forms be searched using this view's form search model and the number of
-  # results of that search be displayed.
+  # number of forms in this view's corpus be displayed.
 
-  class CountSearchResultsControlView extends BaseView
+  class CountCorpusControlView extends BaseView
 
     template: buttonControlTemplate
-    className: 'count-search-results-control-view control-view dative-widget-center'
+    className: 'count-corpus-control-view control-view
+      dative-widget-center'
 
     initialize: (options) ->
       @formModel = new FormModel()
@@ -24,7 +24,7 @@ define [
       @listenToEvents()
 
     events:
-      'click button.count-search-results':         'countSearchResults'
+      'click button.count-corpus':         'countCorpus'
 
     listenToEvents: ->
       super
@@ -33,17 +33,19 @@ define [
       @listenTo @formModel, "searchFail", @searchFail
       @listenTo @formModel, "searchSuccess", @searchSuccess
 
-    controlSummaryClass: 'search-summary'
-    controlResultsClass: 'search-results'
+    controlSummaryClass: 'corpus-count-summary'
+    controlResultsClass: 'corpus-count-results'
     controlResults: ''
     getControlSummary: -> ''
 
+    buttonClass: 'count-corpus'
+
     html: ->
       context =
-        buttonClass: 'count-search-results'
-        buttonTitle: "Click this button to perform this search and see how many
-          forms it returns."
-        buttonText: 'Count search results'
+        buttonClass: @buttonClass
+        buttonTitle: "Click this button to see how many forms are in this
+          corpus."
+        buttonText: 'Count corpus'
         controlResultsClass: @controlResultsClass
         controlSummaryClass: @controlSummaryClass
         controlResults: @controlResults
@@ -81,31 +83,34 @@ define [
     # Search
     ############################################################################
 
-    countSearchResults: ->
-      console.log JSON.stringify(@model.get('search'), undefined, 2)
-      @formModel.search @model.get('search')
+    countCorpus: ->
+      search =
+        filter: ["Form", "corpora", "id", "in", [@model.get('id')]]
+        order_by: ["Form", "id", "desc" ]
+      @formModel.search search
 
     searchStart: ->
       @$(".#{@controlSummaryClass}").html ''
-      @spin 'button.search', '50%', '135%'
-      @disableSearchButton()
+      @spin "button.#{@buttonClass}", '50%', '135%'
+      @disableCountButton()
 
     searchEnd: ->
-      @stopSpin 'button.search'
-      @enableSearchButton()
+      @stopSpin "button.#{@buttonClass}"
+      @enableCountButton()
 
     searchFail: (error) ->
-      Backbone.trigger "formSearchFail", error, @model.get('id')
+      Backbone.trigger "corpusCountFail", error, @model.get('id')
 
     searchSuccess: (responseJSON) ->
       @$(".#{@controlSummaryClass}").html(
-        "#{@utils.integerWithCommas(responseJSON.paginator.count)} forms match
-        this search.")
-      Backbone.trigger "formSearchSuccess", @model.get('id')
+        "#{@utils.integerWithCommas(responseJSON.paginator.count)} forms are in
+        this corpus.")
+      Backbone.trigger "corpusCountSuccess", @model.get('id')
 
-    disableSearchButton: ->
-      @$('button.search').button 'disable'
+    disableCountButton: ->
+      @$("button.#{@buttonClass}").button 'disable'
 
-    enableSearchButton: ->
-      @$('button.search').button 'enable'
+    enableCountButton: ->
+      @$("button.#{@buttonClass}").button 'enable'
+
 
