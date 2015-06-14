@@ -396,6 +396,11 @@ div.dative-page-header-title
   width: 96%;
 }
 
+.ui-dialog.dative-resource-displayer-dialog-widget .ui-dialog-content
+{
+  padding: 0.5em 0.5em;
+}
+
 .resource-displayer-content
 {
   overflow-x: scroll;

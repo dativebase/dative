@@ -28,6 +28,11 @@ define [
     # will change how `fetchResources` behaves.
     search: null
 
+    # If this is non-null, it is expected to be a(n OLD-style) corpus model.
+    # The presence of such an attribute will change how `fetchResources`
+    # behaves.
+    corpus: null
+
     initialize: (models, options) ->
       @resourceNameCapitalized = utils.capitalize @resourceName
       @resourceNamePlural = utils.pluralize @resourceName
@@ -60,21 +65,27 @@ define [
       )
 
     getResourcesHTTPMethod: ->
-      if @search then 'SEARCH' else 'GET'
+      if @search or @corpus then 'SEARCH' else 'GET'
 
     # Return a payload for the `fetchResources` request. Note: there is only a
     # payload if we have a truthy `@search` attribute, which means the fetching
     # is based on a search and uses a SEARCH (non-standard) HTTP method with a
     # payload describing the search (and pagination, and ordering).
     getResourcesPayload: (options) ->
-      if @search
+      if @search or @corpus
+        if @corpus
+          search =
+            filter: ["Form", "corpora", "id", "in", [@corpus.get('id')]]
+            order_by: ["Form", "id", "desc" ]
+        else
+          search = @search
         if options.page and options.itemsPerPage
-          query: @search
+          query: search
           paginator:
             page: options.page
             items_per_page: options.itemsPerPage
         else
-          query: @search
+          query: search
       else
         null
 
@@ -207,7 +218,7 @@ define [
     # Note: other possible parameters: `order_by_model`, `order_by_attribute`,
     # and `order_by_direction`.
     getResourcesPaginationURL: (options) ->
-      if @search
+      if @search or @corpus
         "#{@getOLDURL()}/#{@getServerSideResourceName()}"
       else if options.page and options.itemsPerPage
         "#{@getOLDURL()}/#{@getServerSideResourceName()}?\

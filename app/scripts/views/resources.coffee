@@ -4,14 +4,15 @@ define [
   './exporter-dialog'
   './pagination-menu-top'
   './pagination-item-table'
+  './subcorpus'
   './../collections/resources'
   './../models/resource'
   './../utils/paginator'
   './../utils/globals'
   './../templates/resources'
 ], (BaseView, ResourceView, ExporterDialogView, PaginationMenuTopView,
-  PaginationItemTableView, ResourcesCollection, ResourceModel, Paginator,
-  globals, resourcesTemplate) ->
+  PaginationItemTableView, SubcorpusView, ResourcesCollection, ResourceModel,
+  Paginator, globals, resourcesTemplate) ->
 
   # Resources View
   # ---------------
@@ -85,12 +86,18 @@ define [
       'click .resources-browse-help': 'openResourcesBrowseHelp'
       'click .toggle-all-labels': 'toggleAllLabels'
       'click .toggle-search': 'toggleResourceSearchViewAnimate'
+      'click .corpus-display': 'displayCorpus'
       'keydown': 'keyboardShortcuts'
       'keyup': 'keyup'
       # @$el is enclosed in top and bottom invisible divs. These allow us to
       # close-circuit the tab loop and keep focus in the view.
       'focus .focusable-top':  'focusLastElement'
       'focus .focusable-bottom':  'focusFirstElement'
+
+    displayCorpus: ->
+      console.log 'you want to display this corpus'
+      @corpusView = new SubcorpusView model: @corpus
+      Backbone.trigger 'showResourceInDialog', @corpusView, @$el
 
     render: (taskId) ->
       @html()
@@ -677,6 +684,12 @@ define [
       if @search
         @$('.browse-set').text "a search over
           #{@resourceNamePluralHuman}"
+      else if @corpus
+        @$('.browse-set').html "<a
+          href='javascript:;'
+          class='field-display-link dative-tooltip corpus-display'
+          title='click here to view this corpus in this page'
+          >corpus #{@corpus.get('id')}</a>"
       else
         @$('.browse-set').text "all #{@resourceNamePluralHuman}"
       if @paginator.start is @paginator.end
@@ -1112,6 +1125,33 @@ define [
       @searchChanged = true
       @search = null
       @collection.search = null
+      @paginator = new Paginator page=1, items=0, itemsPerPage=@itemsPerPage
+
+
+    # Corpus-relevant stuff -- NOTE: only relevant for collections of forms.
+    ############################################################################
+
+    # By default, we have no corpus model.
+    corpus: null
+
+    # Setting this to `true` will cause `@weNeedToFetchResourcesAgain()` to
+    # return `true`.
+    corpusChanged: false
+
+    # Give this resources view a (new) corpus model. This will affect what
+    # forms we are browsing.
+    setCorpus: (@corpus) ->
+      @corpusChanged = true
+      @paginator = new Paginator page=1, items=0, itemsPerPage=@itemsPerPage
+      # TODO: make collection sensitive to the corpus attr.
+      @collection.corpus = @corpus
+
+    # Delete this resource view's corpus model. This will also affect what
+    # forms we are browsing.
+    deleteCorpus: ->
+      @corpusChanged = true
+      @corpus = null
+      @collection.corpus = null
       @paginator = new Paginator page=1, items=0, itemsPerPage=@itemsPerPage
 
 

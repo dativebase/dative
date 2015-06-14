@@ -91,6 +91,8 @@ define [
       @listenTo @mainMenuView, 'request:formsBrowse', @showFormsView
       @listenTo Backbone, 'request:formsBrowseSearchResults',
         @showFormsSearchResultsBrowseView
+      @listenTo Backbone, 'request:formsBrowseCorpus',
+        @showFormsCorpusBrowseView
       @listenTo @mainMenuView, 'request:formsSearch', @showFormsSearchView
       @listenTo @mainMenuView, 'request:subcorpusAdd', @showNewSubcorpusView
       @listenTo @mainMenuView, 'request:subcorporaBrowse', @showSubcorporaView
@@ -339,9 +341,16 @@ define [
         @formsView.setSearch options.search
       else
         @formsView.deleteSearch()
+      if options?.corpus
+        @formsView.setCorpus options.corpus
+      else
+        @formsView.deleteCorpus()
       @renderVisibleView taskId
 
     showFormsSearchResultsBrowseView: (options) ->
+      @showFormsView options
+
+    showFormsCorpusBrowseView: (options) ->
       @showFormsView options
 
     showNewFormView: ->

@@ -75,6 +75,8 @@ define [
 
       @listenTo Backbone, 'corpusCountSuccess', @corpusCountSuccess
       @listenTo Backbone, 'corpusCountFail', @corpusCountFail
+      @listenTo Backbone, 'corpusBrowseSuccess', @corpusBrowseSuccess
+      @listenTo Backbone, 'corpusBrowseFail', @corpusBrowseFail
 
       @listenTo Backbone, 'cantDeleteFilterExpressionOnlyChild',
         @cantDeleteFilterExpressionOnlyChild
@@ -521,6 +523,21 @@ define [
       notification = new NotificationView
         title: 'Corpus count success'
         content: "You have successfully counted the number of forms in the
+          corpus with id #{corpusId}."
+      @renderNotification notification
+
+    corpusBrowseFail: (error, corpusId) ->
+      notification = new NotificationView
+        title: 'Corpus browse failed'
+        content: "Your attempt to browse the forms in the corpus with
+          id #{corpusId} was unsuccessful: #{error}."
+        type: 'error'
+      @renderNotification notification
+
+    corpusBrowseSuccess: (corpusId) ->
+      notification = new NotificationView
+        title: 'Corpus browse success'
+        content: "You have made a successful request to browse the forms in the
           corpus with id #{corpusId}."
       @renderNotification notification
 

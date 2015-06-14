@@ -103,8 +103,8 @@ define [
 
     searchSuccess: (responseJSON) ->
       @$(".#{@controlSummaryClass}").html(
-        "#{@utils.integerWithCommas(responseJSON.paginator.count)} forms are in
-        this corpus.")
+        "There are #{@utils.integerWithCommas(responseJSON.paginator.count)}
+          forms in this corpus.")
       Backbone.trigger "corpusCountSuccess", @model.get('id')
 
     disableCountButton: ->
