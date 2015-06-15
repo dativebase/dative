@@ -4,11 +4,22 @@ define [
   './person-field-display'
   './date-field-display'
   './object-with-name-field-display'
+  './related-model-display'
   './boolean-icon-display'
   './morphology-controls'
+  './subcorpus'
+  './../models/subcorpus'
 ], (ResourceView, MorphologyAddWidgetView, PersonFieldDisplayView,
-  DateFieldDisplayView, ObjectWithNameFieldDisplayView,
-  BooleanIconFieldDisplayView, MorphologyControlsView) ->
+  DateFieldDisplayView, ObjectWithNameFieldDisplayView, RelatedModelDisplayView,
+  BooleanIconFieldDisplayView, MorphologyControlsView, SubcorpusView,
+  SubcorpusModel) ->
+
+
+  class RelatedCorpusDisplayView extends RelatedModelDisplayView
+
+    relatedModelClass: SubcorpusModel
+    relatedModelViewClass: SubcorpusView
+
 
   # Morphology View
   # ---------------
@@ -56,8 +67,8 @@ define [
       modifier: PersonFieldDisplayView
       datetime_entered: DateFieldDisplayView
       datetime_modified: DateFieldDisplayView
-      lexicon_corpus: ObjectWithNameFieldDisplayView
-      rules_corpus: ObjectWithNameFieldDisplayView
+      lexicon_corpus: RelatedCorpusDisplayView
+      rules_corpus: RelatedCorpusDisplayView
       compile_succeeded: BooleanIconFieldDisplayView
 
     excludedActions: ['history']
