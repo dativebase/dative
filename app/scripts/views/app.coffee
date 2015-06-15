@@ -168,7 +168,10 @@ define [
       @alertDialog = new AlertDialogView model: @applicationSettings
       @helpDialog = new HelpDialogView()
       @notifier = new NotifierView()
-      @resourceDisplayerDialog = new ResourceDisplayerDialogView()
+      @resourceDisplayerDialog1 = new ResourceDisplayerDialogView index: 1
+      @resourceDisplayerDialog2 = new ResourceDisplayerDialogView index: 2
+      @resourceDisplayerDialog3 = new ResourceDisplayerDialogView index: 3
+      @resourceDisplayerDialog4 = new ResourceDisplayerDialogView index: 4
 
     renderPersistentSubviews: ->
       @mainMenuView.setElement(@$('#mainmenu')).render()
@@ -176,9 +179,7 @@ define [
       @registerDialog.setElement(@$('#register-dialog-container')).render()
       @alertDialog.setElement(@$('#alert-dialog-container')).render()
       @helpDialog.setElement(@$('#help-dialog-container'))
-      @resourceDisplayerDialog
-        .setElement(@$('#resource-displayer-dialog-container'))
-        .render()
+      @renderResourceDisplayerDialogs()
       @notifier.setElement(@$('#notifier-container')).render()
 
       @rendered @mainMenuView
@@ -186,7 +187,13 @@ define [
       @rendered @registerDialog
       @rendered @alertDialog
       @rendered @notifier
-      @rendered @resourceDisplayerDialog
+
+    renderResourceDisplayerDialogs: ->
+      for int in [1, 2, 3, 4]
+        @["resourceDisplayerDialog#{int}"]
+          .setElement(@$("#resource-displayer-dialog-container-#{int}"))
+          .render()
+        @rendered @["resourceDisplayerDialog#{int}"]
 
     renderHelpDialog: ->
       @helpDialog.render()
@@ -874,6 +881,15 @@ define [
 
     # Render the passed in resource view in the application-wide
     # `@resourceDisplayerDialog`
-    showResourceInDialog: (resourceView, $target) ->
-      Backbone.trigger 'resourceDisplayerDialog:show', resourceView, $target
+    showResourceInDialog: (resourceView) ->
+      oldestResourceDisplayer = @getOldestResourceDisplayerDialog()
+      oldestResourceDisplayer.showResourceView resourceView
+
+    getOldestResourceDisplayerDialog: ->
+      oldest = @resourceDisplayerDialog1
+      for int in [2, 3, 4]
+        other = @["resourceDisplayerDialog#{int}"]
+        if other.timestamp < oldest.timestamp
+          oldest = other
+      oldest
 

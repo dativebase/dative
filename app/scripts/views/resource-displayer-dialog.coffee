@@ -13,15 +13,19 @@ define [
   class ResourceDisplayerDialogView extends BaseView
 
     template: resourceDisplayerDialogTemplate
+    timestamp: 0
 
-    initialize: ->
+    initialize: (options) ->
+      @index = options?.index or 1
+      @atTop = false
       @resourceView = null
       @setDimensions()
       @listenTo Backbone, 'resourceDisplayerDialog:toggle', @toggle
       @listenTo Backbone, 'resourceDisplayerDialog:show', @showResourceView
+      @listenTo Backbone, 'resourceDisplayerDialog:moveToBottom', @moveToBottom
 
     setDimensions: ->
-      @lastPosition = @defaultPosition
+      @lastPosition = @defaultPosition()
       @lastWidth = null
       @lastHeight = null
       $window = $ window
@@ -36,6 +40,7 @@ define [
       'click .minimize': 'minimize'
       'click .maximize': 'maximize'
       'dblclick .ui-resizable-se': 'trueMaximize'
+      'mousedown': 'moveToTop'
 
     render: ->
       @$el.append @template()
@@ -50,6 +55,7 @@ define [
     # Show the supplied resource view in this dialog and make the dialog
     # visible. `resourceView` should be a Backbone view with a model.
     showResourceView: (resourceView) ->
+      @timestamp = new Date().getTime()
       if @resourceView
         @resourceView.close()
         @closed @resourceView
@@ -65,6 +71,7 @@ define [
             ##{@resourceView.model.get('id')}"
           height: height
           position: @lastPosition
+      @moveToTop()
       # We wait between dialogifying and rendering the resource in the dialog;
       # this seems to be necessary in order to get the width of the contained
       # resource.
@@ -88,7 +95,8 @@ define [
     # Transform the resource displayer dialog HTML to a jQueryUI dialog box.
     dialogify: ->
       @$('.dative-resource-displayer-dialog').dialog(
-        position: @defaultPosition
+        stack: false
+        position: @defaultPosition()
         hide: {effect: 'fade'}
         show: {effect: 'fade'}
         autoOpen: false
@@ -104,6 +112,9 @@ define [
           @fontAwesomateCloseIcon()
         close: =>
           @closeAllTooltips()
+          @timestamp = 0
+        open: (event, ui) =>
+          @moveToTop()
         resizeStart: =>
           $dialogContent = @$ '.ui-dialog-content'
           if not $dialogContent.is(':visible')
@@ -123,6 +134,18 @@ define [
             of: window
       )
 
+    moveToTop: ->
+      @atTop = true
+      Backbone.trigger 'resourceDisplayerDialog:moveToBottom'
+      @$('.ui-dialog').css 'z-index', 110
+
+    moveToBottom: ->
+      if @atTop
+        @atTop = false
+      else
+        @$('.ui-dialog').css 'z-index', 100
+
+
     # Reduce the dialog to just its title bar and place it in the bottom right
     # corner of the window.
     minimize: ->
@@ -131,7 +154,8 @@ define [
       @$('.dative-resource-displayer-dialog')
         .dialog "option",
           height: 15
-          position: @defaultPosition
+          width: $(window).width() * 0.24
+          position: @minimizedPosition()
 
     # Expand the dialog to its last dimensions and place it in its last
     # location.
@@ -166,9 +190,16 @@ define [
       if width > @maxWidth then width = @maxWidth
       [height, width]
 
-    defaultPosition:
+    defaultPosition: ->
+      offset = (@index - 1) * 30
       my: 'right bottom'
-      at: 'right bottom'
+      at: "right-#{offset} bottom-#{offset}"
+      of: window
+
+    minimizedPosition: ->
+      offset = (@index - 1) * 25
+      my: 'right bottom'
+      at: "right-#{offset}% bottom"
       of: window
 
     guify: ->
@@ -182,7 +213,7 @@ define [
       @$('.dative-resource-displayer-dialog-widget')
         .children(".ui-dialog-titlebar")
         .append("<button class='dialog-header-button minimize dative-tooltip'
-                         title='Minimize and place at bottom left'>
+                         title='Minimize and place at bottom'>
                    <i class='fa fa-fw fa-minus'
                       style='position: relative;
                              right: 0.38em; bottom: 0.25em;'></i>
