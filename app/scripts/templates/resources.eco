@@ -12,14 +12,18 @@
         Browsing
         <span class='browse-set'
             >all <%= @resourceNamePluralHuman %></span>.
+        <span style='whites-pace: nowrap;'>
         Viewing
         <span class='resource-range'></span>
         of
         <span class='resource-count'></span>
+        </span>
+        <span style='white-space: nowrap;'>
         (page
         <span class='current-page'></span>
         of
         <span class='page-count'></span>)
+        </span>
       </div>
     </div>
 
