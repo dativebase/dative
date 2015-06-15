@@ -151,6 +151,8 @@ define [
     # greater than the maxima.
     trueMaximize: ->
       [height, width] = @getResourceDimensions()
+      @lastWidth = width
+      @lastHeight = height
       @$('.dative-resource-displayer-dialog')
         .dialog "option",
           height: height
