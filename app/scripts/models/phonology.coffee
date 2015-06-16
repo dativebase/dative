@@ -1,11 +1,11 @@
-define ['./resource'], (ResourceModel) ->
+define ['./fst-based'], (FSTBasedModel) ->
 
   # Phonology Model
   # ---------------
   #
   # A Backbone model for Dative phonologies.
 
-  class PhonologyModel extends ResourceModel
+  class PhonologyModel extends FSTBasedModel
 
     resourceName: 'phonology'
 
@@ -49,70 +49,6 @@ define ['./resource'], (ResourceModel) ->
       'script'
     ]
 
-    # Perform a "compile" request.
-    # PUT `<URL>/phonologies/{id}/compile`
-    compile: ->
-      @trigger "compileStart"
-      @constructor.cors.request(
-        method: 'PUT'
-        url: "#{@getOLDURL()}/phonologies/#{@get 'id'}/compile"
-        onload: (responseJSON, xhr) =>
-          @trigger "compileEnd"
-          if xhr.status is 200
-            @trigger "compileSuccess", responseJSON
-          else
-            error = responseJSON.error or 'No error message provided.'
-            @trigger "compileFail", error
-            console.log "PUT request to
-              #{@getOLDURL()}/phonologies/#{@get 'id'}/compile
-              failed (status not 200)."
-            console.log error
-        onerror: (responseJSON) =>
-          @trigger "compileEnd"
-          error = responseJSON.error or 'No error message provided.'
-          @trigger "compileFail", error
-          console.log "Error in PUT request to
-            #{@getOLDURL()}/phonologies/#{@get 'id'}/compile
-            (onerror triggered)."
-      )
-
-
-    # Perform an "apply down" request on the phonology, i.e., ask that a
-    # morphological segmentation be phonologized, that is, converted to its
-    # surface form, given the phonology.
-    # PUT `<URL>/phonologies/{id}/applydown` (alias to PUT
-    # /phonologies/{id}/phonologize).
-    applyDown: (words) ->
-      @trigger "applyDownStart"
-      @constructor.cors.request(
-        method: 'PUT'
-        url: "#{@getOLDURL()}/phonologies/#{@get 'id'}/applydown"
-        payload: @getApplyDownPayload words
-        onload: (responseJSON, xhr) =>
-          @trigger "applyDownEnd"
-          if xhr.status is 200
-            @trigger "applyDownSuccess", responseJSON
-          else
-            error = responseJSON.error or 'No error message provided.'
-            @trigger "applyDownFail", error
-            console.log "PUT request to
-              #{@getOLDURL()}/phonologies/#{@get 'id'}/applydown
-              failed (status not 200)."
-            console.log error
-        onerror: (responseJSON) =>
-          @trigger "applyDownEnd"
-          error = responseJSON.error or 'No error message provided.'
-          @trigger "applyDownFail", error
-          console.log "Error in PUT request to
-            #{@getOLDURL()}/phonologies/#{@get 'id'}/applydown
-            (onerror triggered)."
-      )
-
-    # Input in body of HTTP request expected
-    # ``{'transcriptions': [t1, t2, ...]}``.
-    getApplyDownPayload: (words) ->
-      {transcriptions: words.split(/\s+/)}
-
     # Perform a "run tests" request on the phonology.
     # GET `<URL>/phonologies/{id}/runtests`
     runTests: ->
@@ -137,34 +73,6 @@ define ['./resource'], (ResourceModel) ->
           @trigger "runTestsFail", error
           console.log "Error in PUT request to
             #{@getOLDURL()}/phonologies/#{@get 'id'}/runtests
-            (onerror triggered)."
-      )
-
-    # Perform a "serve compiled" request on the phonology.
-    # GET `<URL>/phonologies/{id}/servecompiled`
-    serveCompiled: ->
-      @trigger "serveCompiledStart"
-      @constructor.cors.request(
-        responseType: 'blob'
-        method: 'GET'
-        url: "#{@getOLDURL()}/phonologies/#{@get 'id'}/servecompiled"
-        onload: (responseJSON, xhr) =>
-          @trigger "serveCompiledEnd"
-          if xhr.status is 200
-            @trigger "serveCompiledSuccess", responseJSON
-          else
-            error = responseJSON.error or 'No error message provided.'
-            @trigger "serveCompiledFail", error
-            console.log "GET request to
-              #{@getOLDURL()}/phonologies/#{@get 'id'}/servecompiled
-              failed (status not 200)."
-            console.log error
-        onerror: (responseJSON) =>
-          @trigger "serveCompiledEnd"
-          error = responseJSON.error or 'No error message provided.'
-          @trigger "serveCompiledFail", error
-          console.log "Error in GET request to
-            #{@getOLDURL()}/phonologies/#{@get 'id'}/servecompiled
             (onerror triggered)."
       )
 

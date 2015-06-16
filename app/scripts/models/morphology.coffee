@@ -1,11 +1,11 @@
-define ['./resource'], (ResourceModel) ->
+define ['./fst-based'], (FSTBasedModel) ->
 
   # Morphology Model
   # ---------------
   #
   # A Backbone model for Dative morphologies.
 
-  class MorphologyModel extends ResourceModel
+  class MorphologyModel extends FSTBasedModel
 
     resourceName: 'morphology'
 
