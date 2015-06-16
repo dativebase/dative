@@ -83,6 +83,8 @@ define [
 
       @listenTo Backbone, 'disabledKeyboardShortcut', @disabledKeyboardShortcut
 
+      @listenTo Backbone, 'generateAndCompileStart', @generateAndCompileStart
+
       @listenToCRUDResources()
 
     listenToCRUDResources: ->
@@ -539,6 +541,34 @@ define [
         title: 'Corpus browse success'
         content: "You have made a successful request to browse the forms in the
           corpus with id #{corpusId}."
+      @renderNotification notification
+
+    generateAndCompileStart: (morphologyModel) ->
+      @listenToOnce morphologyModel, 'morphologyGenerateAndCompileFail',
+        @morphologyGenerateAndCompileFail
+      @listenToOnce morphologyModel, 'morphologyGenerateAndCompileSuccess',
+        @morphologyGenerateAndCompileSuccess
+      notification = new NotificationView
+        title: 'Morphology generate and compile request initiated'
+        content: "You have requested that morphology
+          ##{morphologyModel.get('id')} be generated and compiled. This may
+          take a while. Please continue to use the application: we will let
+          you know when the generate and compile request has terminated."
+      @renderNotification notification
+
+    generateAndCompileFail: (error, morphologyModel) ->
+      notification = new NotificationView
+        title: 'Morphology generate and compile request failed'
+        content: "Your generate and compile request on morphology
+          ##{morphologyModel.get('id')} failed."
+        type: 'error'
+      @renderNotification notification
+
+    generateAndCompileSuccess: (morphologyObject, morphologyModel) ->
+      notification = new NotificationView
+        title: 'Morphology generate and compile request succeeded'
+        content: "Your generate and compile request on morphology
+          ##{morphologyModel.get('id')} was successful."
       @renderNotification notification
 
     getAuthenticateFailContent: (errorObj) ->

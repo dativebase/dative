@@ -41,38 +41,55 @@ define ['./resource'], (ResourceModel) ->
     # surface form, given the phonology.
     # Example request: PUT `<URL>/phonologies/{id}/applydown` (which is an
     # alias for PUT # /phonologies/{id}/phonologize).
-    applyDown: (words) ->
-      @trigger "applyDownStart"
+    applyDown: (words) -> @apply words, 'down'
+
+    # Perform an "apply up" request on the FST-based resource.
+    # For example, ask that an impoverished morphological segmentation be
+    # converted to a rich representation for input to a candidate ranker during
+    # parsing.
+    # Example request: PUT `<URL>/morphologies/{id}/applyup`.
+    applyUp: (words) -> @apply words, 'up'
+
+    # Perform an "apply" request on the FST-based resource, where `direction`
+    # is "up" or "down", this determining whether the request is an "apply up"
+    # one or an "apply down" one.
+    apply: (words, direction='down') ->
+      directionCapitalized = @utils.capitalize direction
+      @trigger "apply#{directionCapitalized}Start"
       @constructor.cors.request(
         method: 'PUT'
-        url: "#{@getOLDURL()}/#{@getServerSideResourceName()}/#{@get 'id'}/applydown"
-        payload: @getApplyDownPayload words
+        url: "#{@getOLDURL()}/#{@getServerSideResourceName()}/\
+          #{@get 'id'}/apply#{direction}"
+        payload: @["getApply#{directionCapitalized}Payload"] words
         onload: (responseJSON, xhr) =>
-          @trigger "applyDownEnd"
+          @trigger "apply#{directionCapitalized}End"
           if xhr.status is 200
-            @trigger "applyDownSuccess", responseJSON
+            @trigger "apply#{directionCapitalized}Success", responseJSON
           else
             error = responseJSON.error or 'No error message provided.'
-            @trigger "applyDownFail", error
+            @trigger "apply#{directionCapitalized}Fail", error
             console.log "PUT request to
-              #{@getOLDURL()}/#{@getServerSideResourceName()}/#{@get 'id'}/applydown
-              failed (status not 200)."
+              #{@getOLDURL()}/#{@getServerSideResourceName()}/#{@get 'id'}/\
+              apply#{direction} failed (status not 200)."
             console.log error
         onerror: (responseJSON) =>
-          @trigger "applyDownEnd"
+          @trigger "apply#{directionCapitalized}End"
           error = responseJSON.error or 'No error message provided.'
-          @trigger "applyDownFail", error
+          @trigger "apply#{directionCapitalized}Fail", error
           console.log "Error in PUT request to
-            #{@getOLDURL()}/#{@getServerSideResourceName()}/#{@get 'id'}/applydown
-            (onerror triggered)."
+            #{@getOLDURL()}/#{@getServerSideResourceName()}/#{@get 'id'}/\
+              apply#{direction} (onerror triggered)."
       )
 
-    # Input in body of HTTP request expected
+    # Input in body of HTTP request that phonology resources expect:
     # ``{'transcriptions': [t1, t2, ...]}``.
-    # TODO: is this correct just for phonologies or is this needed for
-    # morphologies too?
     getApplyDownPayload: (words) ->
-      {transcriptions: words.split(/\s+/)}
+      if @resourceName is 'phonology'
+        {transcriptions: words.split(/\s+/)}
+      else
+        {morpheme_sequences: words.split(/\s+/)}
+
+    getApplyUpPayload: (words) -> @getApplyDownPayload words
 
     # Perform a "serve compiled" request on the fst-based resource.
     # Example request: GET `<URL>/phonologies/{id}/servecompiled`

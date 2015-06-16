@@ -229,6 +229,8 @@ define [
     # NOTE: this is only relevant to FST-based resources that need to be
     # generated and compiled, i.e., just morphologies and morphological
     # parsers, I think.
+    # NOTE 2: I purposefully pass `@` here so that events relayed through
+    # `Backbone` can know which morphology failed/succeeded.
     generateAndCompile: ->
       @trigger "generateAndCompileStart"
       @constructor.cors.request(
@@ -237,10 +239,10 @@ define [
         onload: (responseJSON, xhr) =>
           @trigger "generateAndCompileEnd"
           if xhr.status is 200
-            @trigger "generateAndCompileSuccess", responseJSON
+            @trigger "generateAndCompileSuccess", responseJSON, @
           else
             error = responseJSON.error or 'No error message provided.'
-            @trigger "generateAndCompileFail", error
+            @trigger "generateAndCompileFail", error, @
             console.log "PUT request to
               #{@getOLDURL()}/#{@getServerSideResourceName()}/#{@get 'id'}/generate_and_compile
               failed (status not 200)."
@@ -248,7 +250,7 @@ define [
         onerror: (responseJSON) =>
           @trigger "generateAndCompileEnd"
           error = responseJSON.error or 'No error message provided.'
-          @trigger "generateAndCompileFail", error
+          @trigger "generateAndCompileFail", error, @
           console.log "Error in PUT request to
             #{@getOLDURL()}/#{@getServerSideResourceName()}/#{@get 'id'}/generate_and_compile
             (onerror triggered)."

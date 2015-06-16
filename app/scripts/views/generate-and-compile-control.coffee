@@ -99,6 +99,7 @@ define [
     generateAndCompile: -> @model.generateAndCompile()
 
     generateAndCompileStart: ->
+      Backbone.trigger 'generateAndCompileStart', @model
       @$(".#{@controlSummaryClass}").html ''
       @spin "button.#{@buttonClass}", '50%', '135%'
       @disableGenerateAndCompileButton()
