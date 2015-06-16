@@ -31,8 +31,10 @@ define [
       @listenTo @model, "generateAndCompileEnd", @generateAndCompileEnd
       @listenTo @model, "generateAndCompileFail", @generateAndCompileFail
       @listenTo @model, "generateAndCompileSuccess", @generateAndCompileSuccess
-      @listenTo @model, "fetch#{@utils.capitalize @resourceName}Success", @fetchResourceSuccess
-      @listenTo @model, "fetch#{@utils.capitalize @resourceName}Fail", @fetchResourceFail
+      @listenTo @model, "fetch#{@utils.capitalize @resourceName}Success",
+        @fetchResourceSuccess
+      @listenTo @model, "fetch#{@utils.capitalize @resourceName}Fail",
+        @fetchResourceFail
 
     buttonClass: 'generate-and-compile'
     controlSummaryClass: 'generate-and-compile-summary'
