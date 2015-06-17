@@ -33,11 +33,13 @@ define [
 
     addCorpusModelsToCollection: ->
       # WARN: I'm ignoring `public-firstcorpus` and `llinglama-communitycorpus' for now
-      for pouchname in _.without @getCorpusPouchnames(), 'public-firstcorpus', \
-      'lingllama-communitycorpus'
+      if not @applicationSettings.fieldDBApplication or not @applicationSettings.fieldDBApplication.authentication or not @applicationSettings.fieldDBApplication.authentication.user or not @applicationSettings.fieldDBApplication.authentication.user.corpora
+      for corpus in @applicationSettings.fieldDBApplication.authentication.user.corpora.collection
+        if corpus.dbname is 'public-firstcorpus' or corpus.dbname is 'llinglama-communitycorpus'
+          continue
+        corpus.applicationSettings = @applicationSettings
         corpusModel = new CorpusModel
-          applicationSettings: @applicationSettings
-          pouchname: pouchname
+          corpus
         @collection.add corpusModel
 
     getCorpusPouchnames: ->
