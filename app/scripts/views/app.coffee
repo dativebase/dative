@@ -226,8 +226,8 @@ define [
       activeServerType = @activeServerType()
       switch activeServerType
         when 'FieldDB' 
-          if @applicationSettings.get 'fieldDBApplication' != FieldDB.FieldDBObject.application
-            @applicationSettings.set 'fieldDBApplication', FieldDB.FieldDBObject.application
+          # if @applicationSettings.get 'fieldDBApplication' is not FieldDB.FieldDBObject.application # TODO GC: withe the if, the below line never fires.
+          @applicationSettings.set 'fieldDBApplication', FieldDB.FieldDBObject.application 
           @showCorporaView()
         when 'OLD' then @showFormsView()
         else console.log 'Error: you logged in to a non-FieldDB/non-OLD server (?).'

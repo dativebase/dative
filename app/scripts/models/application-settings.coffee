@@ -20,8 +20,9 @@ define [
 
     initialize: ->
       @fetch()
-      fieldDBTempApp = new (FieldDB.App)(@get('fieldDBApplication'))
-      fieldDBTempApp.authentication.eventDispatcher = Backbone
+      if @get('fieldDBApplication')
+        @set 'fieldDBApplication', new (FieldDB.App)(@get('fieldDBApplication'))
+        @get('fieldDBApplication').authentication.eventDispatcher = Backbone
       @listenTo Backbone, 'authenticate:login', @authenticate
       @listenTo Backbone, 'authenticate:logout', @logout
       @listenTo Backbone, 'authenticate:register', @register
