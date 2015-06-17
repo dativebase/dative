@@ -102,7 +102,7 @@ define [
 
     dialogOpen: (options) ->
       @prompt = false
-      @$('.dative-alert-dialog textarea').hide()
+      @$('.dative-alert-dialog input').hide()
 
       if options.text then @setText options.text
       if options.confirm then @showCancelButton()
@@ -123,19 +123,35 @@ define [
 
     showPromptInput: ->
       @prompt = true
-      @$('.dative-alert-dialog textarea').show()
+      guessPromptType = @getPromptText()
+      if not guessPromptType
+       guessPromptType = 'text'
+      else if guessPromptType.indexOf('number') > -1
+       guessPromptType = 'number'
+      else if guessPromptType.indexOf('password') > -1
+       guessPromptType = 'password'
+      else if guessPromptType.indexOf('date') > -1 || if guessPromptType.indexOf('day') > -1 || if guessPromptType.indexOf('when') > -1 
+       guessPromptType = 'date'
+      else 
+        guessPromptType = 'text'
+
+      @$('.dative-alert-dialog input').attr 'type', guessPromptType
+      @$('.dative-alert-dialog input').show()
 
     hideCancelButton: ->
       @$('.dative-alert-dialog-target button.cancel').hide()
 
     setText: (text) ->
       @$('.dative-alert-dialog-target .dative-alert-text').text text
+    
+    getPromptText: (text) ->
+      @$('.dative-alert-dialog-target .dative-alert-text').text() || ""
 
     getPromptInput: () ->
-      @$('.dative-alert-dialog textarea.dative-alert-prompt').val()
+      @$('.dative-alert-dialog input.dative-alert-prompt').val()
 
     setPromptInput: (value) ->
-      @$('.dative-alert-dialog textarea.dative-alert-prompt').val value
+      @$('.dative-alert-dialog input.dative-alert-prompt').val value
 
     dialogClose: (event) ->
       @$('.dative-alert-dialog').first().dialog 'close'

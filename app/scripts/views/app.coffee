@@ -664,6 +664,7 @@ define [
       FieldDB.FieldDBObject.bug = @displayBugReportDialog
       FieldDB.FieldDBObject.warn = @displayWarningMessagesDialog
       FieldDB.FieldDBObject.confirm = @displayConfirmDialog
+      # FieldDB.FieldDBObject.prompt = @displayPromptDialog // TODO there is a problem with scoping 'Uncaught TypeError: this.listenTo is not a function' -GC
 
     displayBugReportDialog: (message, optionalLocale) =>
       deferred = FieldDB.Q.defer()
