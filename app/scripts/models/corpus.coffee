@@ -8,7 +8,7 @@ define [
   # Corpus Model
   # ------------
   #
-  # A model for FieldDB corpora. A `CorpusModel` is instantiated with a pouchname
+  # A model for FieldDB corpora. A `CorpusModel` is instantiated with a dbname
   # for the corpus. This is a unique, spaceless, lowercase name that begins with
   # its creator's username.
   #
@@ -30,7 +30,7 @@ define [
     initialize: (options) ->
       console.log 'Initializing backbone corpus model with a fielddb corpus model inside of it', this.attributes
       # @applicationSettings = options.applicationSettings
-      # @pouchname = options.pouchname
+      # @dbname = options.dbname
 
     ############################################################################
     # CORS methods
@@ -91,7 +91,7 @@ define [
         admin: if role is 'admin' then true else false
         writer: if role is 'reader' then false else true
         reader: true
-        pouchname: payload.pouchname
+        dbname: payload.dbname
         role: @getFieldDBRole role
         usernameToModify: username
       CorpusModel.cors.request(
@@ -119,7 +119,7 @@ define [
       @trigger 'removeUserFromCorpusStart'
       payload = @getDefaultPayload()
       payload.userRoleInfo =
-        pouchname: payload.pouchname
+        dbname: payload.dbname
         removeUser: true
         usernameToModify: username
       CorpusModel.cors.request(
@@ -145,7 +145,7 @@ define [
     # See https://github.com/jrwdunham/dative/issues/78
 
     # Update the details of a corpus
-    # PUT `<CorpusServiceURL>/<pouchname>/<corpusUUID>
+    # PUT `<CorpusServiceURL>/<dbname>/<corpusUUID>
     # QUESTIONS:
     # 1. do I need to manually change `titleAsURL`? What about the other fields?
 
@@ -170,7 +170,7 @@ define [
       @trigger 'updateCorpusStart'
       payload = @getDefaultPayload()
       payload.userRoleInfo =
-        pouchname: payload.pouchname
+        dbname: payload.dbname
         removeUser: true
         usernameToModify: username
       CorpusModel.cors.request(
@@ -193,7 +193,7 @@ define [
       )
 
     ###
-    # This is the object that is sent to PUT `<CorpusServiceURL>/<pouchname>/<corpusUUID>
+    # This is the object that is sent to PUT `<CorpusServiceURL>/<dbname>/<corpusUUID>
     # on an update request. It is
     _id: "63ff8fd7b5be6becbd9e5413b3060dd5"
     _rev: "12-d1e6a51f42377dc3803207bbf6a13baa"
@@ -214,7 +214,7 @@ define [
     license: {title: "Default: Creative Commons Attribution-ShareAlike (CC BY-SA).",…}
     modifiedByUser: {value: "jrwdunham, jrwdunham, jrwdunham, jrwdunham, jrwdunham",…}
     participantFields: [,…]
-    pouchname: "jrwdunham-firstcorpus"
+    dbname: "jrwdunham-firstcorpus"
     publicCorpus: "Private"
     searchKeywords: "Froggo"
     sessionFields: [{fieldDBtype: "DatumField", labelFieldLinguists: "Goal", value: "", mask: "", encryptedValue: "",…},…]
@@ -232,7 +232,7 @@ define [
 
     getCorpusServerURL:  ->
       url = @applicationSettings.get 'baseDBURL'
-      "#{url}/#{@pouchname}"
+      "#{url}/#{@dbname}"
 
     getFieldDBCorpusObject: (responseJSON) ->
       result = {}
@@ -245,7 +245,7 @@ define [
       username: @applicationSettings.get?('username')
       password: @applicationSettings.get?('password') # TODO trigger authenticate:mustconfirmidentity
       serverCode: @applicationSettings.get?('activeServer')?.get?('serverCode')
-      pouchname: @get 'pouchname'
+      dbname: @get 'dbname'
 
     getFieldDBRole: (role) ->
       switch role

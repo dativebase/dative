@@ -263,7 +263,7 @@ define [
       datumTags: []                     # <array>  (of objects, I presume ...)
       images: []                        # <array>  (of objects, I presume ...)
       jsonType: 'Datum'                 # <string>
-      pouchname: ''                     # <string> (<username>-<corpus-name>,
+      dbname: ''                     # <string> (<username>-<corpus-name>,
                                         #           e.g., "jrwdunham-firstcorpus".)
       session: @defaultFieldDBSession() # <object> (representation of a(n
                                         #           elicitation) session; see
@@ -306,7 +306,7 @@ define [
       dateModified: ''       # <string> (timestamp in format
                              #            2015-02-11T15:07:54.803Z.)
       lastModifiedBy: ''     # <string> (a username.)
-      pouchname: ''          # <string> (<username>-<corpusname>, e.g.,
+      dbname: ''          # <string> (<username>-<corpusname>, e.g.,
                              #           "jrwdunham-firstcorpus".)
       sessionFields: []      # <array>  (of objects, all of which have `label` and
                              #           `value` attributes, but others too. See

@@ -195,13 +195,13 @@ define [
     bodyClicked: ->
       Backbone.trigger 'bodyClicked' # Mainmenu superclick listens for this
 
-    useFieldDBCorpus: (corpusId) ->
+    useFieldDBCorpus: (dbname) ->
       currentlyActiveFieldDBCorpus = @activeFieldDBCorpus
       fieldDBCorporaCollection = @corporaView?.collection
       @activeFieldDBCorpus = fieldDBCorporaCollection?.findWhere
-        pouchname: corpusId
+        dbname: dbname
       @applicationSettings.save
-        'activeFieldDBCorpus': corpusId
+        'activeFieldDBCorpus': dbname
         'activeFieldDBCorpusTitle': @activeFieldDBCorpus.get 'title'
         'activeFieldDBCorpusModel': @activeFieldDBCorpus # TODO: FIX THIS ABERRATION!
       globals.activeFieldDBCorpus = @activeFieldDBCorpus

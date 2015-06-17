@@ -241,7 +241,7 @@ define [
         datumTags: []                     # <array>  (of objects, I presume ...)
         images: []                        # <array>  (of objects, I presume ...)
         jsonType: 'Datum'                 # <string>
-        pouchname: ''                     # <string> (<username>-<corpus-name>,
+        dbname: ''                     # <string> (<username>-<corpus-name>,
                                           #           e.g., "jrwdunham-firstcorpus".)
         session: @defaultFieldDBSession() # <object> (representation of a(n
                                           #           elicitation) session; see
@@ -297,7 +297,7 @@ define [
       dateModified: ''       # <string> (timestamp in format
                              #            2015-02-11T15:07:54.803Z.)
       lastModifiedBy: ''     # <string> (a username.)
-      pouchname: ''          # <string> (<username>-<corpusname>, e.g.,
+      dbname: ''          # <string> (<username>-<corpusname>, e.g.,
                              #           "jrwdunham-firstcorpus".)
       sessionFields: []      # <array>  (of objects, all of which have `label` and
                              #           `value` attributes, but others too. See
@@ -465,7 +465,7 @@ define [
       now = new Date()
       resource.dateModified = now.toISOString()
       resource.timestamp = now.valueOf()
-      resource.pouchname = globals.applicationSettings.get 'activeFieldDBCorpus'
+      resource.dbname = globals.applicationSettings.get 'activeFieldDBCorpus'
       resource.comments = (c for c in resource.comments when c.text)
       username = globals.applicationSettings.get 'username'
       gravatar = globals.applicationSettings.get 'gravatar'
@@ -492,7 +492,7 @@ define [
       resource.dateEntered = now.toISOString()
       resource.dateModified = now.toISOString()
       resource.timestamp = now.valueOf()
-      resource.pouchname = globals.applicationSettings.get 'activeFieldDBCorpus'
+      resource.dbname = globals.applicationSettings.get 'activeFieldDBCorpus'
       resource.comments = (c for c in resource.comments when c.text)
       username = globals.applicationSettings.get 'username'
       gravatar = globals.applicationSettings.get 'gravatar'
@@ -750,11 +750,11 @@ define [
     # Returns a URL for deleting a resource on a FieldDB web service.
     # NOTE: you don't really delete FieldDB datums and you don't make a DELETE
     # HTTP request; you just set the `trashed` attribute to "deleted".
-    # PUT <corpus_url>/<pouchname>/<datum_id>?rev=<datum_rev>
+    # PUT <corpus_url>/<dbname>/<datum_id>?rev=<datum_rev>
     getDestroyResourceURLFieldDB: ->
       url = globals.applicationSettings.get 'baseDBURL'
-      pouchname = globals.applicationSettings.get 'activeFieldDBCorpus'
-      "#{url}/#{pouchname}/#{@get '_id'}?rev=#{@get '_rev'}"
+      dbname = globals.applicationSettings.get 'activeFieldDBCorpus'
+      "#{url}/#{dbname}/#{@get '_id'}?rev=#{@get '_rev'}"
 
     getDestroyResourcePayload: ->
       switch globals.applicationSettings.get('activeServer').get('type')
