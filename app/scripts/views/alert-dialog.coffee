@@ -130,11 +130,10 @@ define [
        guessPromptType = 'number'
       else if guessPromptType.indexOf('password') > -1
        guessPromptType = 'password'
-      else if guessPromptType.indexOf('date') > -1 || if guessPromptType.indexOf('day') > -1 || if guessPromptType.indexOf('when') > -1 
+      else if guessPromptType.indexOf('date') > -1 || guessPromptType.indexOf('day') > -1 || guessPromptType.indexOf('when') > -1 
        guessPromptType = 'date'
-      else 
+      else
         guessPromptType = 'text'
-
       @$('.dative-alert-dialog input').attr 'type', guessPromptType
       @$('.dative-alert-dialog input').show()
 
