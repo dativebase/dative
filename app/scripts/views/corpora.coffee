@@ -26,30 +26,27 @@ define [
       @activeFieldDBCorpus = options.activeFieldDBCorpus
       @collection = new CorporaCollection()
       @collection.applicationSettings = @applicationSettings
-      @addCorpusModelsToCollection()
+      # @listenTo @applicationSettings.get('fieldDBApplication').authentication.user.corpora, 'change', @addCorpusModelsToCollection
+      @exponentialBackoffLoadCorpora = 2000
+      setTimeout((=> @addCorpusModelsToCollection()), @exponentialBackoffLoadCorpora)
+
       @corpusViews = []
       @createCorpusView = new CreateCorpusView()
       @getAndFetchCorpusViews()
 
     addCorpusModelsToCollection: ->
       # WARN: I'm ignoring `public-firstcorpus` and `llinglama-communitycorpus' for now
-      if not @applicationSettings.fieldDBApplication or not @applicationSettings.fieldDBApplication.authentication or not @applicationSettings.fieldDBApplication.authentication.user or not @applicationSettings.fieldDBApplication.authentication.user.corpora
-      for corpus in @applicationSettings.fieldDBApplication.authentication.user.corpora.collection
-        if corpus.dbname is 'public-firstcorpus' or corpus.dbname is 'llinglama-communitycorpus'
+      if not @applicationSettings.get('fieldDBApplication') or not @applicationSettings.get('fieldDBApplication').authentication or not @applicationSettings.get('fieldDBApplication').authentication.user or not @applicationSettings.get('fieldDBApplication').authentication.user.corpora or not @applicationSettings.get('fieldDBApplication').authentication.user.corpora.collection
+        @exponentialBackoffLoadCorpora = @exponentialBackoffLoadCorpora * 2
+        console.log 'Waiting another ' + @exponentialBackoffLoadCorpora + ' seconds for the user to become available' 
+        setTimeout((=> @addCorpusModelsToCollection()), @exponentialBackoffLoadCorpora)
+        return
+      for corpus in @applicationSettings.get('fieldDBApplication').authentication.user.corpora.collection
+        if (corpus.dbname == 'public-firstcorpus' || corpus.dbname == 'llinglama-communitycorpus')
           continue
-        corpus.applicationSettings = @applicationSettings
-        corpusModel = new CorpusModel
-          corpus
+        # corpus.applicationSettings = @applicationSettings
+        corpusModel = new CorpusModel(corpus)
         @collection.add corpusModel
-
-    getCorpusPouchnames: ->
-      _.uniq(@getPouchnameFromRole(role) for role in \
-        @applicationSettings.get('loggedInUserRoles') \
-        when role isnt 'fielddbuser')
-
-    getPouchnameFromRole: (role) ->
-      roleArray = (role.split /[-_]/)[0..-2]
-      "#{roleArray[0]}-#{roleArray[1..].join('_')}"
 
     getAndFetchCorpusViews: ->
       @collection.each (corpus) =>

@@ -28,8 +28,9 @@ define [
   class CorpusModel extends BaseModel
 
     initialize: (options) ->
-      @applicationSettings = options.applicationSettings
-      @pouchname = options.pouchname
+      console.log 'Initializing backbone corpus model with a fielddb corpus model inside of it', this.attributes
+      # @applicationSettings = options.applicationSettings
+      # @pouchname = options.pouchname
 
     ############################################################################
     # CORS methods
