@@ -48,5 +48,8 @@ define [], ->
   ,
     shortcut: 'ctrl+l'
     event: 'request:openLoginDialogBox'
+  ,
+    shortcut: 'ctrl+t'
+    event: 'request:toggleTasksDialog'
   ]
 

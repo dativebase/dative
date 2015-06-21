@@ -179,7 +179,19 @@ define (require) ->
     if interval > 1 then return "#{prefix}#{interval} hours#{suffix}"
     interval = Math.floor(seconds / 60)
     if interval > 1 then return "#{prefix}#{interval} minutes#{suffix}"
-    return "#{prefix}#{Math.floor(seconds)} seconds#{suffix}"
+    "#{prefix}#{Math.floor(seconds)} seconds#{suffix}"
+
+  # Convert a number of milliseconds to a string formatted as 00h00m00s.
+  millisecondsToTimeString = (milliseconds) ->
+    hours = Math.floor(milliseconds / 36e5)
+    minutes = Math.floor((milliseconds % 36e5) / 6e4)
+    seconds = Math.floor((milliseconds % 6e4) / 1000)
+    "#{leftPad hours, 2}h#{leftPad minutes, 2}m#{leftPad seconds, 2}s"
+
+  # Add `padding` number of "0"s to the left of `value`.
+  leftPad = (value, padding) ->
+    value = '0' + value while ('' + value).length < padding
+    value
 
   # "snake_case" to "camelCase"
   snake2camel = (string) ->
@@ -301,4 +313,6 @@ define (require) ->
   smallCapsAcronyms: smallCapsAcronyms
   convertDateISO2mdySlash: convertDateISO2mdySlash
   selectText: selectText
+  millisecondsToTimeString: millisecondsToTimeString
+  leftPad: leftPad
 

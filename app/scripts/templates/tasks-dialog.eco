@@ -1,0 +1,20 @@
+<div class='dative-tasks-dialog'>
+
+    <div class='dative-tasks-content'>
+
+        <div class='current-tasks'>
+            <h2>Current Tasks</h2>
+            <div class='tasks-table current-tasks-table'></div>
+        </div>
+
+        <div class='terminated-tasks'>
+            <h2>Terminated Tasks</h2>
+            <div class='tasks-table terminated-tasks-table'></div>
+        </div>
+
+    </div>
+
+</div>
+
+<div class='dative-tasks-dialog-target'><div>
+

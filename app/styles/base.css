@@ -1751,3 +1751,58 @@ button.make-not-not i
   width: auto !important;
 }
 
+.dative-tasks-dialog
+{
+  /*font-size: 12pt;*/
+}
+
+.dative-tasks-dialog h2
+{
+  font-size: 120%;
+}
+
+div.dative-tasks-content
+{
+  overflow-x: scroll;
+}
+
+.dative-tasks-content .current-tasks,
+.dative-tasks-content .terminated-tasks
+{
+  margin-top: 1em;
+}
+
+table.tasks-table
+{
+  min-width: 50em;
+}
+
+div.tasks-table
+{
+  margin-top: 0.5em;
+}
+
+table.tasks-table th
+{
+  white-space: nowrap;
+  font-weight: bold;
+}
+
+table.tasks-table td,
+table.tasks-table th
+{
+  padding: 0.25em 2em 0.25em 0.25em;
+  text-align: left;
+}
+
+.current-tasks .live-task
+{
+  position: relative;
+  /*padding-left: 2em;*/
+}
+
+.current-tasks .live-task-container
+{
+  width: 2em;
+}
+

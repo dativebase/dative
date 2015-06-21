@@ -3,10 +3,13 @@ define [
   'backbone'
   './base'
   './server'
+  './morphology'
   './../collections/servers'
   './../utils/utils'
+  './../utils/globals'
   'FieldDB'
-], (_, Backbone, BaseModel, ServerModel, ServersCollection, utils, FieldDB) ->
+], (_, Backbone, BaseModel, ServerModel, MorphologyModel, ServersCollection,
+  utils, globals, FieldDB) ->
 
   # Application Settings Model
   # --------------------------
@@ -17,6 +20,9 @@ define [
   # Also contains the authentication logic.
 
   class ApplicationSettingsModel extends BaseModel
+
+    modelClassName2model:
+      'MorphologyModel': MorphologyModel
 
     initialize: ->
       fieldDBTempApp = new (FieldDB.App)(@get('fieldDBApplication'))
@@ -403,6 +409,13 @@ define [
       appSetObj.servers = new ServersCollection(serverModelsArray)
       activeServer = appSetObj.activeServer
       appSetObj.activeServer = appSetObj.servers.get activeServer.id
+      longRunningTasks = appSetObj.longRunningTasks
+      for task in appSetObj.longRunningTasks
+        task.resourceModel =
+          new @modelClassName2model[task.modelClassName](task.resourceModel)
+      for task in appSetObj.longRunningTasksTerminated
+        task.resourceModel =
+          new @modelClassName2model[task.modelClassName](task.resourceModel)
       appSetObj
 
     # Defaults
@@ -533,6 +546,24 @@ define [
         ['trontastic', 'Trontastic']
         ['swanky-purse', 'Swanky Purse']
       ]
+
+      # Use this to limit how many "long-running" tasks can be initiated from
+      # within the app. A "long-running task" is a request to the server that
+      # requires polling to know when it has terminated, e.g., phonology
+      # compilation, morphology generation and compilation, etc.
+      # NOTE !IMPORTANT: the OLD has a single foma worker and all requests to
+      # compile FST-based resources appear to enter into a queue. This means
+      # that a 3s request made while a 1h request is ongoing will take 1h1s!
+      # Not good ...
+      longRunningTasksMax: 2
+
+      # An array of objects with keys `resourceName`, `taskName`,
+      # `taskStartTimestamp`, and `taskPreviousUUID`.
+      longRunningTasks: []
+
+      # An array of objects with keys `resourceName`, `taskName`,
+      # `taskStartTimestamp`, and `taskPreviousUUID`.
+      longRunningTasksTerminated: []
 
       version: 'da'
 

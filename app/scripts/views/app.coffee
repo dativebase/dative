@@ -8,6 +8,7 @@ define [
   './login-dialog'
   './register-dialog'
   './alert-dialog'
+  './tasks-dialog'
   './help-dialog'
   './resource-displayer-dialog'
   './application-settings'
@@ -28,10 +29,10 @@ define [
   './../utils/globals'
   './../templates/app'
 ], (Backbone, FieldDB, Workspace, BaseView, MainMenuView, NotifierView,
-  LoginDialogView, RegisterDialogView, AlertDialogView, HelpDialogView,
-  ResourceDisplayerDialogView, ApplicationSettingsView, PagesView,
-  HomePageView, FormAddView, FormsSearchView, FormsView, SubcorporaView,
-  PhonologiesView, MorphologiesView, LanguageModelsView,
+  LoginDialogView, RegisterDialogView, AlertDialogView, TasksDialogView,
+  HelpDialogView, ResourceDisplayerDialogView, ApplicationSettingsView,
+  PagesView, HomePageView, FormAddView, FormsSearchView, FormsView,
+  SubcorporaView, PhonologiesView, MorphologiesView, LanguageModelsView,
   MorphologicalParsersView, CorporaView, SearchesView,
   ApplicationSettingsModel, FormModel, globals, appTemplate) ->
 
@@ -84,6 +85,7 @@ define [
         @showApplicationSettingsView
       @listenTo @mainMenuView, 'request:openLoginDialogBox', @toggleLoginDialog
       @listenTo @mainMenuView, 'request:toggleHelpDialogBox', @toggleHelpDialog
+      @listenTo @mainMenuView, 'request:toggleTasksDialog', @toggleTasksDialog
       @listenTo @mainMenuView, 'request:openRegisterDialogBox',
         @toggleRegisterDialog
       @listenTo @mainMenuView, 'request:corporaBrowse', @showCorporaView
@@ -166,6 +168,7 @@ define [
       @loginDialog = new LoginDialogView model: @applicationSettings
       @registerDialog = new RegisterDialogView model: @applicationSettings
       @alertDialog = new AlertDialogView model: @applicationSettings
+      @tasksDialog = new TasksDialogView model: @applicationSettings
       @helpDialog = new HelpDialogView()
       @notifier = new NotifierView()
       @resourceDisplayerDialog1 = new ResourceDisplayerDialogView index: 1
@@ -178,6 +181,7 @@ define [
       @loginDialog.setElement(@$('#login-dialog-container')).render()
       @registerDialog.setElement(@$('#register-dialog-container')).render()
       @alertDialog.setElement(@$('#alert-dialog-container')).render()
+      @tasksDialog.setElement(@$('#tasks-dialog-container')).render()
       @helpDialog.setElement(@$('#help-dialog-container'))
       @renderResourceDisplayerDialogs()
       @notifier.setElement(@$('#notifier-container')).render()
@@ -186,6 +190,7 @@ define [
       @rendered @loginDialog
       @rendered @registerDialog
       @rendered @alertDialog
+      @rendered @tasksDialog
       @rendered @notifier
 
     renderResourceDisplayerDialogs: ->
@@ -569,6 +574,10 @@ define [
     # Open/close the alert dialog box
     toggleAlertDialog: ->
       Backbone.trigger 'alertDialog:toggle'
+
+    # Open/close the tasks dialog box
+    toggleTasksDialog: ->
+      Backbone.trigger 'tasksDialog:toggle'
 
     # Open/close the help dialog box
     toggleHelpDialog: ->

@@ -84,6 +84,8 @@ define [
       @listenTo Backbone, 'disabledKeyboardShortcut', @disabledKeyboardShortcut
 
       @listenTo Backbone, 'generateAndCompileStart', @generateAndCompileStart
+      @listenTo Backbone, 'tooManyTasks', @tooManyTasks
+      @listenTo Backbone, 'taskAlreadyPending', @taskAlreadyPending
 
       @listenToCRUDResources()
 
@@ -569,6 +571,22 @@ define [
         title: 'Morphology generate and compile request succeeded'
         content: "Your generate and compile request on morphology
           ##{morphologyModel.get('id')} was successful."
+      @renderNotification notification
+
+    tooManyTasks: ->
+      notification = new NotificationView
+        title: 'Too many tasks'
+        content: 'Sorry, you cannot initiate another long-running tasks until
+          one of your currently pending tasks terminates.'
+        type: 'error'
+      @renderNotification notification
+
+    taskAlreadyPending: (taskDescription, resourceName, resourceModel) ->
+      notification = new NotificationView
+        title: 'Task already in-progress'
+        content: "Sorry, there is already an in-progress request to
+          #{taskDescription} #{resourceName} #{resourceModel.get('id')}"
+        type: 'error'
       @renderNotification notification
 
     getAuthenticateFailContent: (errorObj) ->

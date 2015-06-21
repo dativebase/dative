@@ -19,6 +19,9 @@
               <a data-event="request:openRegisterDialogBox"
                 >Register</a>
             </li>
+            <li class="requires-authentication">
+                <a data-event="request:toggleTasksDialog">Tasks</a>
+            </li>
         </ul>
     </li>
 

@@ -38,7 +38,10 @@ define [
     url: 'fakeurl'
 
     getActiveServerType: ->
-      globals.applicationSettings.get('activeServer').get 'type'
+      try
+        globals.applicationSettings.get('activeServer').get 'type'
+      catch
+        'OLD'
 
     # Validate the model. If there are errors, returns an object with errored
     # attributes as keys and error messages as values; otherwise returns
@@ -113,7 +116,7 @@ define [
         onerror: (responseJSON) =>
           @trigger "fetch#{@resourceNameCapitalized}End"
           error = responseJSON.error or 'No error message provided.'
-          @trigger "fetch#{@resourceNameCapitalized}Fail", error
+          @trigger "fetch#{@resourceNameCapitalized}Fail", error, @
           console.log "Error in DELETE request to
             /#{@getServerSideResourceName()}/#{@get 'id'} (onerror triggered)."
       )
@@ -128,7 +131,7 @@ define [
         @trigger "fetch#{@resourceNameCapitalized}Success", responseJSON
       else
         error = responseJSON.error or 'No error message provided.'
-        @trigger "fetch#{@resourceNameCapitalized}Fail", error
+        @trigger "fetch#{@resourceNameCapitalized}Fail", error, @
         console.log "GET request to /#{@getServerSideResourceName()}/#{@get 'id'}
           failed (status not 200)."
         console.log error
