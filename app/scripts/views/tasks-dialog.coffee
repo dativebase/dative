@@ -1,8 +1,71 @@
 define [
   'backbone'
   './base'
+  './related-model-representation'
+  './morphology'
+  './../models/morphology'
   './../templates/tasks-dialog'
-], (Backbone, BaseView, tasksDialogTemplate) ->
+  './../templates/task'
+], (Backbone, BaseView, RelatedModelRepresentationView, MorphologyView,
+  MorphologyModel, tasksDialogTemplate, taskTemplate) ->
+
+  # `LinkView` displays a model as a link that when clicked cases the resource
+  # displayer dialog to display a view of the model in the displayer dialog.
+  class LinkView extends RelatedModelRepresentationView
+
+    getId: -> @context.model.get 'id'
+
+  # `TaskView` is a view for a single task.
+  class TaskView extends BaseView
+
+    tagName: 'tr'
+    template: taskTemplate
+
+    initialize: (options) ->
+      @task = options.task
+      @resourceName = @task.resourceName
+      @taskName = @utils.camel2regular @task.taskName
+      @id = @task.resourceModel.get('id')
+      start = @task.taskStartTimestamp
+      end = @task.taskEndTimestamp
+      @startDate = @utils.humanDatetime(new Date(start))
+      if end
+        @timeElapsed = @utils.millisecondsToTimeString(end - start)
+        @endDate = @utils.humanDatetime(new Date(end))
+        @successful = @task.successful
+      else
+        now = new Date().getTime()
+        @timeElapsed = @utils.millisecondsToTimeString(now - start)
+        @endDate = 'N/A'
+        @successful = 'N/A'
+      @resourceRepresentationView =
+        new LinkView(
+          relatedModelClass: MorphologyModel
+          relatedModelViewClass: MorphologyView
+          attribute: 'morphology'
+          model: @task.resourceModel
+          class: 'morphology'
+          value:
+            name: "#{@task.resourceModel.get('name')}
+              #{@task.resourceModel.get('id')}"
+        )
+
+    render: ->
+      @$el.append @template(
+        resourceName: @resourceName
+        taskName: @taskName
+        successful: @successful
+        id: @id
+        startDate: @startDate
+        endDate: @endDate
+        timeElapsed: @timeElapsed
+      )
+      @resourceRepresentationView
+        .setElement @$('.resource-representation').first()
+      @resourceRepresentationView.render()
+      @rendered @resourceRepresentationView
+      @
+
 
   # TasksDialogView
   # ---------------
@@ -14,6 +77,13 @@ define [
   class TasksDialogView extends BaseView
 
     template: tasksDialogTemplate
+
+    taskViews: []
+
+    closeTaskViews: ->
+      while @taskViews.length
+        taskView = @taskViews.pop()
+        taskView.close()
 
     initialize: ->
       @listenTo Backbone, 'tasksDialog:toggle', @toggle
@@ -35,32 +105,52 @@ define [
       @
 
     displayTasks: ->
+      @closeTaskViews()
       @displayCurrentTasks()
       @displayTerminatedTasks()
 
     displayCurrentTasks: ->
       longRunningTasks = @model.get 'longRunningTasks'
-      $tasksContentDiv = @$ 'div.dative-tasks-content .current-tasks-table'
+      $tasksTable = @$('div.dative-tasks-content .current-tasks-table
+        table.tasks-table')
       if longRunningTasks.length is 0
-          $tasksContentDiv.html '<div>There are no tasks pending.</div>'
+        $tasksTable.hide()
+        @$('.no-current-tasks').show()
       else
+        @$('.no-current-tasks').hide()
         tasksTable = @getTasksTable longRunningTasks
-        $tasksContentDiv.html tasksTable
-        $tasksContentDiv.find('.live-task').spin @spinnerOptions()
+        $tasksTable.show().find('tbody').html tasksTable
+        $tasksTable.find('.live-task').spin @spinnerOptions()
 
     spinnerOptions: ->
-      _.extend BaseView::spinnerOptions(), {top: '50%', left: '100%'}
+      _.extend BaseView::spinnerOptions(), {top: '75%', left: '100%'}
 
     displayTerminatedTasks: ->
       longRunningTasksTerminated = @model.get 'longRunningTasksTerminated'
-      $tasksContentDiv = @$ 'div.dative-tasks-content .terminated-tasks-table'
+      $tasksTable = @$('div.dative-tasks-content .terminated-tasks-table
+        table.tasks-table')
       if longRunningTasksTerminated.length is 0
-          $tasksContentDiv.html '<div>There are no completed tasks.</div>'
+        $tasksTable.hide()
+        @$('.no-terminated-tasks').show()
       else
+        @$('.no-terminated-tasks').hide()
         tasksTable = @getTasksTable longRunningTasksTerminated, true, false
-        $tasksContentDiv.html tasksTable
+        $tasksTable.show().find('tbody').html tasksTable
 
-    getTasksTable: (longRunningTasks, reverse=false, live=true) =>
+    getTasksTable: (longRunningTasks, reverse=false) ->
+      container = document.createDocumentFragment()
+      if reverse
+        iterator = longRunningTasks[...].reverse()
+      else
+        iterator = longRunningTasks
+      for task in iterator
+        taskView = new TaskView(task: task)
+        container.appendChild taskView.render().el
+        @rendered taskView
+        @taskViews.push taskView
+      container
+
+    getTasksTable_bk: (longRunningTasks, reverse=false, live=true) =>
       if live
         liveTH = '<th></th>'
         liveTD = '<td class="live-task-container"><div
@@ -113,7 +203,7 @@ define [
         appendTo: @$target
         dialogClass: 'dative-tasks-dialog-widget dative-shadowed-widget'
         title: 'Tasks'
-        width: '50em'
+        width: '60em'
         height: $(window).height() * 0.333
         position:
           my: 'left bottom'
@@ -122,6 +212,9 @@ define [
         create: =>
           @$target.first().find('button').attr('tabindex', 0)
           @fontAwesomateCloseIcon()
+        open: =>
+          console.log 'in open'
+          setTimeout (=> @closeAllTooltips()), 500
 
     dialogOpen: (options) ->
       @$('.dative-tasks-dialog').first().dialog 'open'
@@ -206,10 +299,12 @@ define [
           Backbone.trigger("#{taskObject.resourceName}CompileSuccess",
             taskModel.get('compile_message'), taskModel.get('id'))
           taskModel.trigger 'trueGenerateAndCompileSuccess'
+          taskObject.successful = true
         else
           Backbone.trigger("#{taskObject.resourceName}CompileFail",
             taskModel.get('compile_message'), taskModel.get('id'))
           taskModel.trigger 'trueGenerateAndCompileFail'
+          taskObject.successful = false
         @removeTask taskObject
 
     addTask: (taskObject) ->
@@ -228,6 +323,7 @@ define [
       longRunningTasks = _.without longRunningTasks, taskObject
       taskObject.taskEndTimestamp = new Date().getTime()
       longRunningTasksTerminated.push taskObject
+      # FOX
       @model.set
         'longRunningTasks': longRunningTasks
         'longRunningTasksTerminated': longRunningTasksTerminated

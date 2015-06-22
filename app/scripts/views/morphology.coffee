@@ -4,21 +4,23 @@ define [
   './person-field-display'
   './date-field-display'
   './object-with-name-field-display'
-  './related-model-display'
+  './field-display'
   './boolean-icon-display'
   './morphology-controls'
   './subcorpus'
+  './related-model-representation'
   './../models/subcorpus'
 ], (ResourceView, MorphologyAddWidgetView, PersonFieldDisplayView,
-  DateFieldDisplayView, ObjectWithNameFieldDisplayView, RelatedModelDisplayView,
+  DateFieldDisplayView, ObjectWithNameFieldDisplayView, FieldDisplayView,
   BooleanIconFieldDisplayView, MorphologyControlsView, SubcorpusView,
-  SubcorpusModel) ->
+  RelatedModelRepresentationView, SubcorpusModel) ->
 
+  class RelatedCorpusDisplayView extends FieldDisplayView
 
-  class RelatedCorpusDisplayView extends RelatedModelDisplayView
-
-    relatedModelClass: SubcorpusModel
-    relatedModelViewClass: SubcorpusView
+    getRepresentationView: ->
+      @context.relatedModelClass = SubcorpusModel
+      @context.relatedModelViewClass = SubcorpusView
+      new RelatedModelRepresentationView @context
 
 
   # Morphology View

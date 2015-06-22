@@ -1,0 +1,10 @@
+<td class="live-task-container">
+    <div class="live-task"></div>
+</td>
+<td class='resource-representation'></td>
+<td><%= @taskName %></td>
+<td><%= @successful %></td>
+<td class='time-elapsed'><%= @timeElapsed %></td>
+<td><%= @startDate %></td>
+<td><%= @endDate %></td>
+

@@ -1799,6 +1799,8 @@ table.tasks-table th
 {
   position: relative;
   /*padding-left: 2em;*/
+  width: 1em;
+  height: 2em;
 }
 
 .current-tasks .live-task-container
