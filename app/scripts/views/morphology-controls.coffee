@@ -116,6 +116,11 @@ define [
       options?.resourceName = 'morphology'
       super options
 
+  class MorphologyServeCompiledControlView extends ServeCompiledControlView
+
+    initialize: (options) ->
+      options.resourceName = 'morphology'
+      super options
 
   class MorphologyControlsView extends ControlsView
 
@@ -123,7 +128,7 @@ define [
       MorphologyGenerateAndCompileControlView
       MorphologyApplyDownControlView
       MorphologyApplyUpControlView
-      ServeCompiledControlView
+      MorphologyServeCompiledControlView
     ]
 
     initialize: (options) ->

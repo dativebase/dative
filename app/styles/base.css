@@ -1635,6 +1635,17 @@ ul.fieldset .script-textarea,
   margin-top: 0.25em;
 }
 
+.button-control-results
+{
+  display: inline-block;
+}
+
+.serve-compiled-anchor
+{
+  position: relative;
+  top: 0.75em;
+}
+
 span.match
 {
   font-weight: bold;

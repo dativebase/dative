@@ -7,7 +7,7 @@ define [
   # Serve Compiled Control View
   # ---------------------------
   #
-  # View for a control for requesting that a phonology resource return its
+  # View for a control for requesting that an FST-based resource return its
   # compiled file representation.
 
   class ServeCompiledControlView extends BaseView
@@ -94,24 +94,36 @@ define [
       Backbone.trigger "#{@resourceName}ServeCompiledFail", error, @model.get('id')
 
     serveCompiledSuccess: (binaryFomaFile) ->
+      console.log 'in serveCompiledSuccess'
       Backbone.trigger "#{@resourceName}ServeCompiledSuccess", @model.get('id')
       @displayLinkToFomaFile binaryFomaFile
 
     displayLinkToFomaFile: (binaryFomaFile) ->
+      console.log 'in displayLinkToFomaFile'
       blob = new Blob([binaryFomaFile], {type: 'application/octet-stream'})
+      console.log 'a'
       url = URL.createObjectURL(blob)
+      console.log 'b'
       filename =
         "#{@resourceName}-#{@model.get('id')}-#{(new Date()).getTime()}.foma"
+      console.log 'c'
       title = "Click here to download this compiled #{@resourceName} file; the
         “foma” program can read this file."
+      console.log 'd'
       $anchor = $('<a>')
         .attr
           href: url
           download: filename
           title: title
+          class: 'serve-compiled-anchor'
         .html "#{filename}<i class='fa fa-fw fa-download'></i>"
         .tooltip()
-      @$(".#{@conrolSummaryClass}").html $anchor
+      console.log $anchor
+      console.log 'e'
+      console.log @$(".#{@conrolSummaryClass}")
+      @$(".#{@controlResultsClass}").html $anchor
+      @$(".#{@conrolSummaryClass}").html 'DAVe'
+      console.log 'f'
 
     disableServeCompiledButton: ->
       @$('button.serve-compiled').button 'disable'
