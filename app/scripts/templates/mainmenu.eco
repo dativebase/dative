@@ -50,6 +50,14 @@
         </ul>
     </li>
 
+    <li class='requires-authentication old'><a>Objects</a>
+        <ul class='ui-corner-bottom'>
+            <li class='requires-authentication'>
+              <a data-event="request:usersBrowse">Users</a>
+            </li>
+        </ul>
+    </li>
+
     <li class='requires-authentication old'><a>Analysis</a>
         <ul class='ui-corner-bottom'>
             <li class='requires-authentication'

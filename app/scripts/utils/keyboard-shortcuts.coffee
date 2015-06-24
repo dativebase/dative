@@ -51,5 +51,8 @@ define [], ->
   ,
     shortcut: 'ctrl+t'
     event: 'request:toggleTasksDialog'
+  ,
+    shortcut: 'ctrl+u'
+    event: 'request:usersBrowse'
   ]
 

@@ -844,8 +844,14 @@ button.ui-multiselect {
 
 /* reStructuredText-generated HTML styles */
 div.document {
-    margin: 0 100px;
+  /*margin: 0 100px;*/
 }
+
+div.html-snippet div.html div.document a
+{
+  text-decoration: underline;
+}
+
 div.document a {
     text-decoration: none;
 }
@@ -1265,56 +1271,72 @@ div.dative-display
 .dative-help-dialog .help-content h3,
 .dative-help-dialog .help-content h4,
 .dative-help-dialog .help-content h5,
-.dative-help-dialog .help-content p
+.dative-help-dialog .help-content p,
+.html-snippet h1,
+.html-snippet h2,
+.html-snippet h3,
+.html-snippet h4,
+.html-snippet h5,
+.html-snippet p
 {
   margin-top: 0.75em;
 }
 
-.dative-help-dialog .help-content h1
+.dative-help-dialog .help-content h1,
+.html-snippet h1
 {
   font-size: 150%;
 }
 
-.dative-help-dialog .help-content h2
+.dative-help-dialog .help-content h2,
+.html-snippet h2
 {
   font-size: 140%;
 }
 
-.dative-help-dialog .help-content h3
+.dative-help-dialog .help-content h3,
+.html-snippet h3
 {
   font-size: 130%;
 }
 
-.dative-help-dialog .help-content h4
+.dative-help-dialog .help-content h4,
+.html-snippet h4
 {
   font-size: 120%;
 }
 
-.dative-help-dialog .help-content h5
+.dative-help-dialog .help-content h5,
+.html-snippet h5
 {
   font-size: 110%;
 }
 
 .dative-help-dialog .help-content ul,
-.dative-help-dialog .help-content ol
+.html-snippet ul,
+.dative-help-dialog .help-content ol,
+.html-snippet ol
 {
   margin-top: 1em;
   margin-bottom: 1em;
 }
 
-.dative-help-dialog .help-content ul > li
+.dative-help-dialog .help-content ul > li,
+.html-snippet ul > li
 {
   list-style: disc outside none;
   margin-left: 2em;
 }
 
-.dative-help-dialog .help-content ol > li
+.dative-help-dialog .help-content ol > li,
+.html-snippet ol > li
 {
   list-style: decimal outside none;
   margin-left: 2em;
 }
 
-.dative-help-dialog .help-content strong
+.dative-help-dialog .help-content strong,
+.html-snippet strong
 {
   font-weight: bold;
 }

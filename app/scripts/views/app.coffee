@@ -18,6 +18,7 @@ define [
   './forms-search'
   './forms'
   './subcorpora'
+  './users'
   './phonologies'
   './morphologies'
   './language-models'
@@ -32,8 +33,8 @@ define [
   LoginDialogView, RegisterDialogView, AlertDialogView, TasksDialogView,
   HelpDialogView, ResourceDisplayerDialogView, ApplicationSettingsView,
   PagesView, HomePageView, FormAddView, FormsSearchView, FormsView,
-  SubcorporaView, PhonologiesView, MorphologiesView, LanguageModelsView,
-  MorphologicalParsersView, CorporaView, SearchesView,
+  SubcorporaView, UsersView, PhonologiesView, MorphologiesView,
+  LanguageModelsView, MorphologicalParsersView, CorporaView, SearchesView,
   ApplicationSettingsModel, FormModel, globals, appTemplate) ->
 
   # App View
@@ -70,7 +71,7 @@ define [
       'click': 'bodyClicked'
 
     render: ->
-      if window.location.hostname is ['localhost', '127.0.0.1']
+      if window.location.hostname in ['localhost', '127.0.0.1']
         setTimeout ->
           console.clear()
         , 2000
@@ -89,6 +90,7 @@ define [
       @listenTo @mainMenuView, 'request:openRegisterDialogBox',
         @toggleRegisterDialog
       @listenTo @mainMenuView, 'request:corporaBrowse', @showCorporaView
+      @listenTo @mainMenuView, 'request:usersBrowse', @showUsersView
       @listenTo @mainMenuView, 'request:formAdd', @showNewFormView
       @listenTo @mainMenuView, 'request:formsBrowse', @showFormsView
       @listenTo Backbone, 'request:formsBrowseSearchResults',
@@ -396,6 +398,19 @@ define [
       if options?.showNewSubcorpusView
         @subcorporaView.newSubcorpusViewVisible = true
         @subcorporaView.weShouldFocusFirstAddViewInput = true
+      @renderVisibleView taskId
+
+    # Show the page for browsing the users of an OLD.
+    showUsersView: (options) ->
+      if not @loggedIn() then return
+      if @usersView and @visibleView is @usersView then return
+      @router.navigate 'users-browse'
+      taskId = @guid()
+      Backbone.trigger 'longTask:register', 'Opening users browse view', taskId
+      @closeVisibleView()
+      if not @usersView
+        @usersView = new UsersView()
+      @visibleView = @usersView
       @renderVisibleView taskId
 
     # Show the page for browsing phonologies AND open up the interface for

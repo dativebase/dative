@@ -25,7 +25,10 @@ define [
       @context.valueFormatter = @valueFormatter
       @$el.html @template(@context)
       @tooltipify()
+      @postRender()
       @
+
+    postRender: ->
 
     refresh: (@context) ->
 

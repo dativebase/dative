@@ -213,7 +213,6 @@ define [
           @$target.first().find('button').attr('tabindex', 0)
           @fontAwesomateCloseIcon()
         open: =>
-          console.log 'in open'
           setTimeout (=> @closeAllTooltips()), 500
 
     dialogOpen: (options) ->
