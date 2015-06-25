@@ -60,13 +60,16 @@ define (require) ->
   endsWith = (s, suffix) -> suffix is '' or s[-suffix.length..] is suffix
 
   integerWithCommas = (integer) ->
-    integer.toString().replace /\B(?=(\d{3})+(?!\d))/g, ','
+    try
+      integer.toString().replace /\B(?=(\d{3})+(?!\d))/g, ','
+    catch
+      integer
 
   singularize = (noun) ->
     try
       if endsWith(noun, 'ies')
         "#{noun[0..-4]}y"
-      else if endsWith(noun, 'es')
+      else if endsWith(noun, 'hes')
         noun[...-2]
       else
         noun[...-1]

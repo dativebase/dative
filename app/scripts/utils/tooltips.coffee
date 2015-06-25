@@ -162,6 +162,70 @@ define ['./utils'], (utils) ->
 
     old:
 
+      files:
+        id: id
+        description: description
+        datetime_entered: datetimeEntered
+        datetime_modified: datetimeModified
+        enterer: enterer
+        modifier: modifier
+
+        filename:
+          eng: 'The name of the file.'
+
+        name:
+          eng: 'The name of the file.'
+
+        lossy_filename:
+          eng: 'The name given to the reduced-size copy that was made of this
+            file.'
+
+        size:
+          eng: (options) ->
+            "The size of the file (#{utils.integerWithCommas options.value}
+              bytes)"
+
+        MIME_type:
+          eng: "The type of the file; technically, this is the MIME
+            (Multipurpose Internet Mail Extensions) type or Internet media
+            type."
+
+        utterance_type:
+          eng: 'If this file represents an utterance, then this value indicates
+            whether that utterance is in the object language, the metalanguage,
+            or both.'
+
+        speaker:
+          eng: 'The speaker of the content encoded in this file, if relevant.'
+
+
+        elicitor:
+          eng: 'The person who elicited/recorded this file, if appropriate.'
+
+        date_elicited:
+          eng: (options) ->
+            if options.value
+              "This file was elicited on #{utils.humanDate options.value}"
+            else
+              'The date this file was elicited'
+
+        url:
+          eng: "The URL where this file's data are stored."
+
+        password:
+          eng: "The password needed to access this file's data on the external
+            server, if needed."
+
+        parent_file:
+          eng: "The audio or video file that this (subinterval-referencing)
+            file refers to for its file data."
+
+        start:
+          eng: "The time in the parent file where this file's data begins."
+
+        end:
+          eng: "The time in the parent file where this file's data ends."
+
       morphologicalParsers:
         id: id
         UUID: uuid

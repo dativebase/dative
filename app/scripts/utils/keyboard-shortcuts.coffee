@@ -31,7 +31,7 @@ define [], ->
     shortcut: 'ctrl+b'
     event: 'request:formsBrowse'
   ,
-    shortcut: 'ctrl+f'
+    shortcut: 'ctrl+x'
     event: 'request:phonologiesBrowse'
   ,
     shortcut: 'ctrl+m'
@@ -54,5 +54,8 @@ define [], ->
   ,
     shortcut: 'ctrl+u'
     event: 'request:usersBrowse'
+  ,
+    shortcut: 'ctrl+f'
+    event: 'request:filesBrowse'
   ]
 

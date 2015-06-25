@@ -19,6 +19,7 @@ define [
   './forms'
   './subcorpora'
   './users'
+  './files'
   './phonologies'
   './morphologies'
   './language-models'
@@ -33,7 +34,7 @@ define [
   LoginDialogView, RegisterDialogView, AlertDialogView, TasksDialogView,
   HelpDialogView, ResourceDisplayerDialogView, ApplicationSettingsView,
   PagesView, HomePageView, FormAddView, FormsSearchView, FormsView,
-  SubcorporaView, UsersView, PhonologiesView, MorphologiesView,
+  SubcorporaView, UsersView, FilesView, PhonologiesView, MorphologiesView,
   LanguageModelsView, MorphologicalParsersView, CorporaView, SearchesView,
   ApplicationSettingsModel, FormModel, globals, appTemplate) ->
 
@@ -71,7 +72,7 @@ define [
       'click': 'bodyClicked'
 
     render: ->
-      if window.location.hostname in ['localhost', '127.0.0.1']
+      if window.location.hostname is ['localhost', '127.0.0.1']
         setTimeout ->
           console.clear()
         , 2000
@@ -91,6 +92,7 @@ define [
         @toggleRegisterDialog
       @listenTo @mainMenuView, 'request:corporaBrowse', @showCorporaView
       @listenTo @mainMenuView, 'request:usersBrowse', @showUsersView
+      @listenTo @mainMenuView, 'request:filesBrowse', @showFilesView
       @listenTo @mainMenuView, 'request:formAdd', @showNewFormView
       @listenTo @mainMenuView, 'request:formsBrowse', @showFormsView
       @listenTo Backbone, 'request:formsBrowseSearchResults',
@@ -411,6 +413,19 @@ define [
       if not @usersView
         @usersView = new UsersView()
       @visibleView = @usersView
+      @renderVisibleView taskId
+
+    # Show the page for browsing the files of an OLD.
+    showFilesView: (options) ->
+      if not @loggedIn() then return
+      if @filesView and @visibleView is @filesView then return
+      @router.navigate 'files-browse'
+      taskId = @guid()
+      Backbone.trigger 'longTask:register', 'Opening files browse view', taskId
+      @closeVisibleView()
+      if not @filesView
+        @filesView = new FilesView()
+      @visibleView = @filesView
       @renderVisibleView taskId
 
     # Show the page for browsing phonologies AND open up the interface for

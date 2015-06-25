@@ -29,7 +29,7 @@
   </div>
 
   <div class='dative-widget-header-title container-center'
-    ><%= @headerTitle or '' %></div>
+    ><%- @headerTitle or '' %></div>
 
   <div class='button-container-right'>
 
