@@ -68,7 +68,7 @@ define [
 
     resourceAddWidgetView: SubcorpusAddWidgetView
 
-    excludedActions: ['history']
+    excludedActions: ['history', 'data']
 
     controlsViewClass: SubcorpusControlsView
 

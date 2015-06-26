@@ -1,0 +1,69 @@
+<div class="dative-widget-header ui-widget-header ui-corner-top">
+
+  <div class='dative-widget-header-title container-center'
+    ><%= @headerTitle %></div>
+
+  <div class='button-container-left'>
+
+    <button class="hide-file-data-widget dative-tooltip"
+            title="hide the file data widget of this <%= @resourceName %>">
+      <i class='fa fa-times fa-fw'></i>
+    </button>
+
+  </div>
+
+  <div class='button-container-right'>
+
+    <span class="spinner-container"></span>
+
+    <button class='file-data-help dative-tooltip'
+            title='help with viewing the file data of this
+              <%= @resourceName %>'
+    ><i class='fa fa-fw fa-question'></i>
+    </button>
+
+  </div>
+
+</div>
+
+<div <%= @containerStyle %> class="dative-widget-body ui-corner-bottom">
+
+        <% if @MIMEType is 'application/pdf': %>
+            <object class="file-data-pdf"
+                    data="<%= @URL %>"
+                    type="<%= @MIMEType %>"
+                    name="<%= @name %>"
+                    ><%= @name %></object>
+        <% else if @type is 'audio': %>
+            <audio class="file-data-audio" controls>
+                <!-- We try to load the reduced .ogg copy here -->
+                <% if @MIMEType is 'audio/x-wav': %>
+                    <source
+                        src="<%= @reducedURL %>"
+                        type="audio/ogg">
+                <% end %>
+                <source
+                    src="<%= @URL %>"
+                    type="<%= @MIMEType %>">
+                Your browser does not support the audio tag.
+            </audio>
+        <% else if @type is 'video' and @canPlayVideo: %>
+            <video class="file-data-video ui-corner-bottom" controls>
+                <source
+                    src="<%= @URL %>"
+                    type="<%= @MIMEType %>">
+                Your browser does not support the video tag.
+            </video>
+        <% else if @type is 'image': %>
+            <img class="file-data-image ui-corner-bottom"
+                 src="<%= @URL %>"></img>
+        <% else: %>
+            <% verb = if @type in ['audio', 'video'] then 'play' else 'display' %>
+            <div class='file-data-no-display'>Sorry, your browser cannot
+                <%= verb %> the file <%= @name %></div>
+        <% end %>
+
+</div>
+
+
+

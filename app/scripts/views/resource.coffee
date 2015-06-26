@@ -52,20 +52,36 @@ define [
         model: @model,
         addUpdateType: @addUpdateType
       @updateViewRendered = false
+      @getControlsView()
+      @getFileDataView()
+
+    getFileDataView: ->
+      if 'data' not in @excludedActions
+        @fileDataView = new @fileDataViewClass
+          model: @model
+          resourceName: @resourceName
+        @fileDataViewRendered = false
+
+    getControlsView: ->
       if 'controls' not in @excludedActions
-        @controlsView = new @controlsViewClass(model: @model)
+        @controlsView = new @controlsViewClass
+          model: @model
+          resourceName: @resourceName
         @controlsViewRendered = false
 
     # An array of actions that are not relevant to this resource, e.g.,
     # 'history', and 'controls'.
     # WARN: if you remove 'controls' from this array, then you MUST assign
-    # a working "controls" view to `@controlsViewClass`.
+    # a working "controls" view to `@controlsViewClass`. Same thing with 'data'
+    # and `@fileDataViewClass`.
     excludedActions: [
       'history'
       'controls'
+      'data'
     ]
 
     controlsViewClass: null
+    fileDataViewClass: null
 
     getUpdateViewType: -> if @model.get('id') then 'update' else 'add'
 
@@ -86,6 +102,7 @@ define [
         secondaryDataVisible: false # comments, tags, etc.
         updateViewVisible: false
         controlsViewVisible: false
+        fileDataViewVisible: false
       _.extend defaults, options
       for key, value of defaults
         @[key] = value
@@ -126,6 +143,9 @@ define [
       if 'controls' not in @excludedActions
         @listenTo @controlsView, "controlsView:hide",
           @hideControlsViewAnimate
+      if 'data' not in @excludedActions
+        @listenTo @fileDataView, "fileDataView:hide",
+          @hideFileDataViewAnimate
 
     indicateModelState: ->
       if @updateView.modelAltered()
@@ -163,6 +183,7 @@ define [
       'click .delete-resource': 'deleteConfirm'
       'click .export-resource': 'exportResource'
       'click .controls': 'toggleControlsViewAnimate'
+      'click .file-data': 'toggleFileDataViewAnimate'
 
     exportResource: (event) ->
       if event then @stopEvent event
@@ -238,16 +259,17 @@ define [
     html: ->
       @$el
         .attr 'tabindex', 0
-        .html @template(
-          activeServerType: @activeServerType
-          headerTitle: @getHeaderTitle()
-          addUpdateType: @addUpdateType
-          headerAlwaysVisible: @headerAlwaysVisible
-          resourceName: @resourceName
-          resourceNameHumanReadable: @resourceNameHumanReadable
-          excludedActions: @excludedActions
-          showControlsWithNew: @showControlsWithNew
-        )
+        .html @template(@getContext())
+
+    getContext: ->
+      activeServerType: @activeServerType
+      headerTitle: @getHeaderTitle()
+      addUpdateType: @addUpdateType
+      headerAlwaysVisible: @headerAlwaysVisible
+      resourceName: @resourceName
+      resourceNameHumanReadable: @resourceNameHumanReadable
+      excludedActions: @excludedActions
+      showControlsWithNew: @showControlsWithNew
 
     # Set this to `true` if you want the controls button to be visible on a new
     # resource, i.e., an unsaved resource.
@@ -305,6 +327,8 @@ define [
       @updateViewVisibility()
       if 'controls' not in @excludedActions
         @controlsViewVisibility()
+      if 'data' not in @excludedActions
+        @fileDataViewVisibility()
 
     # Make the header visible, or not, depending on state.
     headerVisibility: ->
@@ -874,6 +898,7 @@ define [
     onClose: ->
       @updateViewRendered = false
       @controlsViewRendered = false
+      @fileDataViewRendered = true
 
     showControlsView: ->
       if not @controlsViewRendered then @renderControlsView()
@@ -920,4 +945,67 @@ define [
         @hideControlsViewAnimate()
       else
         @showControlsViewAnimate()
+
+
+    # File Data View
+    ############################################################################
+
+    # Make the file data view visible, or not, depending on state.
+    fileDataViewVisibility: ->
+      if @fileDataViewVisible
+        @showFileDataView()
+      else
+        @hideFileDataView()
+
+    setFileDataButtonStateOpen: -> @$('.file-data').button 'disable'
+
+    setFileDataButtonStateClosed: -> @$('.file-data').button 'enable'
+
+    # Render the file data view.
+    renderFileDataView: ->
+      @fileDataView.setElement @$('.file-data-widget').first()
+      @fileDataView.render()
+      @fileDataViewRendered = true
+      @rendered @fileDataView
+
+    showFileDataView: ->
+      if not @fileDataViewRendered then @renderFileDataView()
+      @fileDataViewVisible = true
+      @setFileDataButtonStateOpen()
+      @$('.file-data-widget').first().show
+        complete: =>
+          @showFull()
+          Backbone.trigger "add#{@resourceNameCapitalized}WidgetVisible"
+
+    hideFileDataView: ->
+      @fileDataViewVisible = false
+      @setFileDataButtonStateClosed()
+      @$('.file-data-widget').first().hide()
+
+    toggleFileDataView: ->
+      if @fileDataViewVisible
+        @hideFileDataView()
+      else
+        @showFileDataView()
+
+    showFileDataViewAnimate: ->
+      if not @fileDataViewRendered then @renderFileDataView()
+      @fileDataViewVisible = true
+      @setFileDataButtonStateOpen()
+      @$('.file-data-widget').first().slideDown
+        complete: =>
+          @showFullAnimate()
+          Backbone.trigger "showFileDataViewVisible"
+
+    hideFileDataViewAnimate: ->
+      @fileDataViewVisible = false
+      @setFileDataButtonStateClosed()
+      @$('.file-data-widget').first().slideUp
+        complete: => @$el.focus()
+
+    toggleFileDataViewAnimate: ->
+      if @fileDataViewVisible
+        @hideFileDataViewAnimate()
+      else
+        @showFileDataViewAnimate()
 

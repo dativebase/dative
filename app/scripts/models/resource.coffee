@@ -117,7 +117,7 @@ define [
           @trigger "fetch#{@resourceNameCapitalized}End"
           error = responseJSON.error or 'No error message provided.'
           @trigger "fetch#{@resourceNameCapitalized}Fail", error, @
-          console.log "Error in DELETE request to
+          console.log "Error in GET request to
             /#{@getServerSideResourceName()}/#{@get 'id'} (onerror triggered)."
       )
 

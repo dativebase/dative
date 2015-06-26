@@ -22,6 +22,7 @@ define [
     actionViewClasses: []
 
     initialize: (options) ->
+      @resourceName = options?.resourceName or ''
       @activeServerType = @getActiveServerType()
       @getActionViews()
       @listenToEvents()
@@ -45,6 +46,7 @@ define [
 
     html: ->
       context =
+        resourceName: @resourceName
         headerTitle: 'Controls'
         activeServerType: @activeServerType
       @$el.html @template(context)

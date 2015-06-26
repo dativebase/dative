@@ -1841,3 +1841,28 @@ table.tasks-table th
   width: 2em;
 }
 
+img.file-data-image,
+video.file-data-video
+{
+  max-width: 100%;
+  width: 100%;
+  margin-bottom: -2px;
+}
+
+object.file-data-pdf
+{
+  width: 100%;
+  height: 100%;
+}
+
+audio.file-data-audio
+{
+  width: 100%;
+}
+
+.file-data-no-display
+{
+  padding: 1em;
+  font-size: 12pt;
+}
+

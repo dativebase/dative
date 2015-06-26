@@ -44,7 +44,7 @@ define [
       datetime_modified: DateFieldDisplayView
       search: QueryFieldDisplayView
 
-    excludedActions: ['history']
+    excludedActions: ['history', 'data']
 
     controlsViewClass: SearchControlsView
 

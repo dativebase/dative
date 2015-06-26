@@ -73,7 +73,7 @@ define [
       rules_corpus: RelatedCorpusDisplayView
       compile_succeeded: BooleanIconFieldDisplayView
 
-    excludedActions: ['history']
+    excludedActions: ['history', 'data']
 
     controlsViewClass: MorphologyControlsView
 

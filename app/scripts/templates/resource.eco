@@ -35,6 +35,13 @@
 
     <span class="spinner-container"></span>
 
+    <% if ('data' not in @excludedActions) and @dataTypeIcon: %>
+      <button class="file-data dative-tooltip"
+              title="view the data of this <%= @resourceNameHumanReadable() %>"
+              ><%- @dataTypeIcon %>
+      </button>
+    <% end %>
+
     <% if 'update' not in @excludedActions: %>
       <button class="update-resource dative-tooltip"
         <% if @addUpdateType is 'add': %>
@@ -96,6 +103,11 @@
 
 
 <div class='dative-widget-body'>
+
+  <% if 'data' not in @excludedActions: %>
+    <div class='file-data-widget dative-widget-center
+      dative-shadowed-widget ui-widget ui-widget-content ui-corner-all'></div>
+  <% end %>
 
   <% if 'controls' not in @excludedActions: %>
     <div class='controls-widget dative-widget-center

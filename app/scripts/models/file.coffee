@@ -120,3 +120,39 @@ define ['./resource'], (ResourceModel) ->
                               # 100MB .wav file named "elicitation.wav", then the
                               # lossy filename may be a 25MB "elicitation.ogg".
 
+
+    # Fetch the file data of this file resource.
+    # GET `<URL>/<resource_name_plural>/<resource.id>/serve_reduced` or
+    # GET `<URL>/<resource_name_plural>/<resource.id>/serve` if the full-size
+    # file is needed.
+    fetchFileData: (reduced=true) ->
+      url = @getFetchFileDataURL reduced
+      @trigger "fetchFileDataStart"
+      @constructor.cors.request(
+        method: 'GET'
+        url: url
+        onload: (response, xhr) =>
+          @trigger "fetchFileDataEnd"
+          if xhr.status is 200
+            @trigger "fetchFileDataSuccess", response
+          else
+            error = response.error or 'No error message provided.'
+            if xhr.status is 404 and
+            @utils.startsWith error, "There is no size-reduced copy"
+              @trigger "fetchFileDataFailNoReduced", error, @
+            else
+              @trigger "fetchFileDataFail", error, @
+              console.log "GET request to /#{url} failed (status not 200)."
+              console.log error
+        onerror: (response) =>
+          @trigger "fetchFileDataEnd"
+          error = response.error or 'No error message provided.'
+          @trigger "fetchFileDataFail", error, @
+          console.log "Error in GET request to #{url} (onerror triggered)."
+      )
+
+    # The type of URL used to fetch a resource on an OLD backend.
+    getFetchFileDataURL: (reduced=false) ->
+      base = "#{@getOLDURL()}/#{@getServerSideResourceName()}/#{@get 'id'}"
+      if reduced then "#{base}/serve_reduced" else "#{base}/serve"
+

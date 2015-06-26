@@ -7,9 +7,11 @@ define [
   './object-with-name-field-display'
   './array-of-objects-with-name-field-display'
   './bytes-field-display'
+  './file-data'
 ], (ResourceView, FileAddWidgetView, FieldDisplayView, PersonFieldDisplayView,
   DateFieldDisplayView, ObjectWithNameFieldDisplayView,
-  ArrayOfObjectsWithNameFieldDisplayView, BytesFieldDisplayView) ->
+  ArrayOfObjectsWithNameFieldDisplayView, BytesFieldDisplayView,
+  FileDataView) ->
 
   # File View
   # --------------
@@ -79,11 +81,28 @@ define [
       'video/x-ms-wmv': 'video'
 
     getHeaderTitle: ->
+      "File #{@model.get 'id'}"
+
+    # Return an <i> tag with the correct Font Awesome icon for the file type.
+    getIconI: ->
       MIMEType = @model.get 'MIME_type'
       if MIMEType and MIMEType of @MIMEType2type
         type = @MIMEType2type[MIMEType]
-        iconI = "<i class='fa fa-fw fa-file-#{type}-o'></i>"
+        "<i class='fa fa-fw fa-file-#{type}-o'></i>"
       else
-        iconI = ''
-      "File #{@model.get 'id'}#{iconI}"
+        null
+
+    getContext: ->
+      context = super
+      iconI = @getIconI()
+      if iconI
+        context.dataTypeIcon = iconI
+      context
+
+    excludedActions: [
+      'history'
+      'controls'
+    ]
+
+    fileDataViewClass: FileDataView
 
