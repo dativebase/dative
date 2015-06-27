@@ -37,6 +37,7 @@ define [
 
     events:
       'click button.hide-file-data-widget': 'hideSelf'
+      #'click button.file-data-download':    ''
       'keydown':                            'keydown'
 
     render: ->
@@ -77,13 +78,15 @@ define [
       @$('div.file-data-container').html audioHTML
 
     html: ->
-      # TODO: put some representation of the file in here: <div
-      # class="file-data-container"></div> #
+      # TODO: make sure that the lossy file does get embedded if it exists,
+      # i.e., create tests and mocks where the backend OLD has made reduced
+      # file copies.
       context =
         name: @model.get 'filename'
         containerStyle: @getContainerStyle()
         URL: @model.getFetchFileDataURL()
         reducedURL: @model.getFetchFileDataURL true
+        lossyFilename: @model.get 'lossy_filename'
         canPlayVideo: @canPlayVideo
         MIMEType: @MIMEType
         type: @type

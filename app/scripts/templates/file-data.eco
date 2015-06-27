@@ -16,6 +16,12 @@
 
     <span class="spinner-container"></span>
 
+    <a href="<%= @URL %>" type="<%= @MIMEType %>" download="<%= @name %>">
+        <button class='file-data-download dative-tooltip'
+                title='download the file data of this <%= @resourceName %>'
+            ><i class='fa fa-fw fa-download'></i></button>
+    </a>
+
     <button class='file-data-help dative-tooltip'
             title='help with viewing the file data of this
               <%= @resourceName %>'
@@ -37,7 +43,7 @@
         <% else if @type is 'audio': %>
             <audio class="file-data-audio" controls>
                 <!-- We try to load the reduced .ogg copy here -->
-                <% if @MIMEType is 'audio/x-wav': %>
+                <% if @lossyFilename and @MIMEType is 'audio/x-wav': %>
                     <source
                         src="<%= @reducedURL %>"
                         type="audio/ogg">

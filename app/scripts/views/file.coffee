@@ -13,10 +13,39 @@ define [
   ArrayOfObjectsWithNameFieldDisplayView, BytesFieldDisplayView,
   FileDataView) ->
 
+  class NameFieldDisplayView extends FieldDisplayView
+
+    render: ->
+      super
+      @$('.dative-field-display-representation-container')
+        .css 'overflow-x', 'scroll'
+      @
+
+  # We only want to display the `filename` field if its value is different from
+  # `name`. The following describes how `filename` and `name` are valuated by
+  # the OLD.
+  # 1. base64 JSON creation:            name is identical to filename
+  # 2. multipart/form-data creation:    name is identical to filename
+  # 3. externally hosted:               name is provided by creator; there is
+  #                                       no filename
+  # 4. subinterval-referencing:         name is provided by creator, or
+  #                                       defaults to `parent_file.filename`
+  class FilenameFieldDisplayView extends NameFieldDisplayView
+
+    shouldBeHidden: ->
+      shouldBeHidden_ = super
+      if not shouldBeHidden_
+        if @context.value is @model.get 'name'
+          shouldBeHidden_ = true
+      shouldBeHidden_
+
+
   # File View
   # --------------
   #
   # For displaying individual files.
+  #
+  # On file.name and file.filename:
 
   class FileView extends ResourceView
 
@@ -26,15 +55,15 @@ define [
 
     # Attributes that are always displayed.
     primaryAttributes: [
+      'name'
       'filename'
     ]
 
     # Attributes that may be hidden.
     secondaryAttributes: [
+      'lossy_filename'
       'size'
       'MIME_type'
-      'name'
-      'lossy_filename'
       'description'
       'utterance_type'
       'speaker'
@@ -65,6 +94,8 @@ define [
       datetime_modified: DateFieldDisplayView
       size: BytesFieldDisplayView
       tags: ArrayOfObjectsWithNameFieldDisplayView
+      name: NameFieldDisplayView
+      filename: FilenameFieldDisplayView
 
     MIMEType2type:
       'application/pdf': 'pdf'
