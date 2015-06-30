@@ -256,10 +256,13 @@ define [
         url: "#{@getURL()}/login/logout"
         method: 'GET'
         timeout: 3000
-        onload: (responseJSON) =>
+        onload: (responseJSON, xhr) =>
           @authenticateAttemptDone taskId
           Backbone.trigger 'logoutEnd'
-          if responseJSON.authenticated is false
+          if responseJSON.authenticated is false or
+          (xhr.status is 401 and
+          responseJSON.error is "Authentication is required to access this
+          resource.")
             @set 'loggedIn', false
             @save()
             Backbone.trigger 'logoutSuccess'
