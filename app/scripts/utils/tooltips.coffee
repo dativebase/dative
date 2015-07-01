@@ -210,10 +210,10 @@ define ['./utils'], (utils) ->
               'The date this file was elicited'
 
         url:
-          eng: "The URL where this file's data are stored."
+          eng: "The URL where this file’s data are stored."
 
         password:
-          eng: "The password needed to access this file's data on the external
+          eng: "The password needed to access this file’s data on the external
             server, if needed."
 
         parent_file:
@@ -221,10 +221,10 @@ define ['./utils'], (utils) ->
             file refers to for its file data."
 
         start:
-          eng: "The time in the parent file where this file's data begins."
+          eng: "The time in the parent file where this file’s data begins."
 
         end:
-          eng: "The time in the parent file where this file's data ends."
+          eng: "The time in the parent file where this file’s data ends."
 
       morphologicalParsers:
         id: id

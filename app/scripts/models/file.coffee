@@ -6,22 +6,32 @@ define ['./resource'], (ResourceModel) ->
   # A Backbone model for Dative files. Note: currently assumes OLD files as the
   # server-side counterpart.
   #
-  # NOTE/WARNING: OLD files are more complicated than typical resources becuase
+  # NOTE/WARNING: OLD files are more complicated than typical resources because
   # there are various types of file resource with different attributes. The
   # differences are based on whether the file data are stored elsewhere and on
-  # whether the file data are sent to the OLD as a Base64-encoded string or as
-  # binary data using the multipart/form-data content type. See
+  # whether the file data are sent (during the creation request) to the OLD as
+  # a Base64-encoded string or as binary data using the multipart/form-data
+  # content type. See
   # https://github.com/jrwdunham/old/blob/master/onlinelinguisticdatabase/controllers/files.py#L128-L193.
 
   class FileModel extends ResourceModel
+
+    initialize: (attributes, options) ->
+      super attributes, options
+      if @get 'url'
+        @set 'dative_file_type', 'storedOnAnotherServer'
+      else if @get 'parent_file'
+        @set 'dative_file_type', 'referencesASubintervalOfAnotherFile'
+      else
+        @set 'dative_file_type', 'storedOnTheServer'
 
     resourceName: 'file'
 
     editableAttributes: []
 
-    manyToOneAttributes: []
+    manyToOneAttributes: ['elicitor', 'speaker', 'parent_file']
 
-    manyToManyAttributes: []
+    manyToManyAttributes: ['forms', 'tags']
 
     getValidator: (attribute) ->
       null
@@ -66,8 +76,11 @@ define ['./resource'], (ResourceModel) ->
                               # if the MIMEtype guessed on the basis of the
                               # filename is different from that guessed on the
                               # basis of the file data.
-      name: ''                # the name of the file, max 255 chars; QUESTION:
-                              # how is this different from `filename` above?
+      name: ''                # the name of the file, max 255 chars; This value
+                              # is only valid when the file is created as a
+                              # subinterval-referencing file or as a file whose
+                              # file data are stored elsewhere, i.e., at the
+                              # provided URL.
       MIME_type: ''           # a string representing the MIME type.
 
       # Externally hosted file attributes. These attributes relevant only to
@@ -119,6 +132,12 @@ define ['./resource'], (ResourceModel) ->
                               # the file, if applicable. E.g., if you upload a
                               # 100MB .wav file named "elicitation.wav", then the
                               # lossy filename may be a 25MB "elicitation.ogg".
+
+      # Dative-only attribute that indicates what kind of file this is. Note
+      # that the OLD does not persist this attribute/value. Possible values
+      # here are `'storedOnTheServer'`, `'storedOnAnotherServer'`, and
+      # `'referencesASubintervalOfAnotherFile'`.
+      dative_file_type: 'storedOnTheServer'
 
 
     # Fetch the file data of this file resource.

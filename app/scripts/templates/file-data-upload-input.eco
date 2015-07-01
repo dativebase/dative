@@ -1,0 +1,19 @@
+<button
+    class='<%= @class %>
+        ui-corner-all
+        form-add-input
+        dative-tooltip
+        dative-input-field'
+    title='<%= @title %>'
+    ><i
+        class='fa fa-fw fa-upload'></i></button>
+
+<!-- this is the hidden input tag -->
+<div
+    style='height: 0px;width:0px; overflow:hidden;'
+    ><input
+        type="file"
+        name='file-upload-input'
+        tabindex='999'
+        /></div>
+

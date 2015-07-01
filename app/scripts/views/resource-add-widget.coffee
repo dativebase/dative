@@ -62,7 +62,9 @@ define [
       newModel
 
     render: ->
+      console.log 'resource add widget being rendered here'
       if @activeServerTypeIsOLD() and not @weHaveNewResourceData()
+        console.log 'we need to get new resource data before rendering a resource add widget'
         @model.getNewResourceData() # Success in this request will call `@render()`
         return
       @getFieldViews()
