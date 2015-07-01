@@ -140,22 +140,22 @@ define [
     # server. In the OLD API, this type of request returns a JSON object
     # containing the data necessary to create a new OLD resource.
     getNewResourceData: ->
-      Backbone.trigger "getNew#{@resourceNameCapitalized}DataStart"
+      @trigger "getNew#{@resourceNameCapitalized}DataStart"
       @constructor.cors.request(
         method: 'GET'
         url: "#{@getOLDURL()}/#{@getServerSideResourceName()}/new"
         onload: (responseJSON, xhr) =>
-          Backbone.trigger "getNew#{@resourceNameCapitalized}DataEnd"
+          @trigger "getNew#{@resourceNameCapitalized}DataEnd"
           if xhr.status is 200
-            Backbone.trigger "getNew#{@resourceNameCapitalized}DataSuccess",
+            @trigger "getNew#{@resourceNameCapitalized}DataSuccess",
               responseJSON
           else
-            Backbone.trigger "getNew#{@resourceNameCapitalized}DataSuccess",
+            @trigger "getNew#{@resourceNameCapitalized}DataSuccess",
               "Failed in fetching the data required to create new
                 #{@getServerSideResourceName()}."
         onerror: (responseJSON) =>
-          Backbone.trigger "getNew#{@resourceNameCapitalized}DataEnd"
-          Backbone.trigger "getNew#{@resourceNameCapitalized}DataFail",
+          @trigger "getNew#{@resourceNameCapitalized}DataEnd"
+          @trigger "getNew#{@resourceNameCapitalized}DataFail",
             "Error in GET request to OLD server for /#{@getServerSideResourceName()}/new"
           console.log "Error in GET request to OLD server for
             /#{@getServerSideResourceName()}/new"
@@ -165,22 +165,22 @@ define [
     # server. In the OLD API, this type of request returns a JSON object
     # containing the data necessary to create a new OLD search over that resource.
     getNewSearchData: ->
-      Backbone.trigger "getNew#{@resourceNameCapitalized}SearchDataStart"
+      @trigger "getNew#{@resourceNameCapitalized}SearchDataStart"
       @constructor.cors.request(
         method: 'GET'
         url: "#{@getOLDURL()}/#{@getServerSideResourceName()}/new_search"
         onload: (responseJSON, xhr) =>
-          Backbone.trigger "getNew#{@resourceNameCapitalized}SearchDataEnd"
+          @trigger "getNew#{@resourceNameCapitalized}SearchDataEnd"
           if xhr.status is 200
-            Backbone.trigger "getNew#{@resourceNameCapitalized}SearchDataSuccess",
+            @trigger "getNew#{@resourceNameCapitalized}SearchDataSuccess",
               responseJSON
           else
-            Backbone.trigger "getNew#{@resourceNameCapitalized}SearchDataSuccess",
+            @trigger "getNew#{@resourceNameCapitalized}SearchDataSuccess",
               "Failed in fetching the data required to create a new search over
                 #{@resourceNamePlural}."
         onerror: (responseJSON) =>
-          Backbone.trigger "getNew#{@resourceNameCapitalized}SearchDataEnd"
-          Backbone.trigger "getNew#{@resourceNameCapitalized}SearchDataFail",
+          @trigger "getNew#{@resourceNameCapitalized}SearchDataEnd"
+          @trigger "getNew#{@resourceNameCapitalized}SearchDataFail",
             "Error in GET request to OLD server for /#{@getServerSideResourceName()}/new_search"
           console.log "Error in GET request to OLD server for
             /#{@getServerSideResourceName()}/new_search"

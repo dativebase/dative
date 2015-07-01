@@ -62,9 +62,7 @@ define [
       newModel
 
     render: ->
-      console.log 'resource add widget being rendered here'
       if @activeServerTypeIsOLD() and not @weHaveNewResourceData()
-        console.log 'we need to get new resource data before rendering a resource add widget'
         @model.getNewResourceData() # Success in this request will call `@render()`
         return
       @getFieldViews()
@@ -88,13 +86,13 @@ define [
     listenToEvents: ->
       super
       # Events specific to an OLD backend and the request for the data needed to create a resource.
-      @listenTo Backbone, "getNew#{@resourceNameCapitalized}DataStart",
+      @listenTo @model, "getNew#{@resourceNameCapitalized}DataStart",
         @getNewResourceDataStart
-      @listenTo Backbone, "getNew#{@resourceNameCapitalized}DataEnd",
+      @listenTo @model, "getNew#{@resourceNameCapitalized}DataEnd",
         @getNewResourceDataEnd
-      @listenTo Backbone, "getNew#{@resourceNameCapitalized}DataSuccess",
+      @listenTo @model, "getNew#{@resourceNameCapitalized}DataSuccess",
         @getNewResourceDataSuccess
-      @listenTo Backbone, "getNew#{@resourceNameCapitalized}DataFail",
+      @listenTo @model, "getNew#{@resourceNameCapitalized}DataFail",
         @getNewResourceDataFail
 
       @listenTo @model, "add#{@resourceNameCapitalized}Start", @addResourceStart

@@ -59,12 +59,12 @@ define [
     # /forms/new_search to the result of calling GET /formsearches/new.
     getNewFormSearchDataSuccess: (newSearchData) ->
       @searchNewData.search_search_parameters = newSearchData
-      Backbone.trigger "getNew#{@resourceNameCapitalized}DataSuccess", @searchNewData
+      @trigger "getNew#{@resourceNameCapitalized}DataSuccess", @searchNewData
 
     # We listen to this once so that we can tell the user that the request to
     # GET /forms/new_search failed.
     getNewFormSearchDataFail: ->
-      Backbone.trigger "getNew#{@resourceNameCapitalized}DataFail",
+      @trigger "getNew#{@resourceNameCapitalized}DataFail",
           "Error in GET request to OLD server for /forms/new_search"
 
     # Get the data necessary to create a new search over form objects.
@@ -75,24 +75,25 @@ define [
     # trigger the standard Backbone-wide success event for this method, passing
     # in an integrated object.
     getNewResourceData: ->
-      Backbone.trigger "getNew#{@resourceNameCapitalized}DataStart"
+      @trigger "getNew#{@resourceNameCapitalized}DataStart"
       @constructor.cors.request(
         method: 'GET'
         url: "#{@getOLDURL()}/#{@getServerSideResourceName()}/new"
         onload: (responseJSON, xhr) =>
-          Backbone.trigger "getNew#{@resourceNameCapitalized}DataEnd"
+          @trigger "getNew#{@resourceNameCapitalized}DataEnd"
           if xhr.status is 200
             @searchNewData = responseJSON
-            @listenToOnce Backbone, 'getNewFormSearchDataSuccess', @getNewFormSearchDataSuccess
-            @listenToOnce Backbone, 'getNewFormSearchDataFail', @getNewFormSearchDataFail
-            (new FormModel()).getNewSearchData()
+            ourFormModel = new FormModel()
+            @listenToOnce ourFormModel, 'getNewFormSearchDataSuccess', @getNewFormSearchDataSuccess
+            @listenToOnce ourFormModel, 'getNewFormSearchDataFail', @getNewFormSearchDataFail
+            ourFormModel.getNewSearchData()
           else
-            Backbone.trigger "getNew#{@resourceNameCapitalized}DataFail",
+            @trigger "getNew#{@resourceNameCapitalized}DataFail",
               "Failed in fetching the data required to create new
                 #{@getServerSideResourceName()}."
         onerror: (responseJSON) =>
-          Backbone.trigger "getNew#{@resourceNameCapitalized}DataEnd"
-          Backbone.trigger "getNew#{@resourceNameCapitalized}DataFail",
+          @trigger "getNew#{@resourceNameCapitalized}DataEnd"
+          @trigger "getNew#{@resourceNameCapitalized}DataFail",
             "Error in GET request to OLD server for /#{@getServerSideResourceName()}/new"
           console.log "Error in GET request to OLD server for
             /#{@getServerSideResourceName()}/new"

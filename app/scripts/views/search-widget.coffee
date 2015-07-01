@@ -104,13 +104,13 @@ define [
     listenToEvents: ->
       # Events specific to an OLD backend and the request for the data needed
       # to create a resource.
-      @listenTo Backbone, "getNewSearchDataStart",
+      @listenTo @model, "getNewSearchDataStart",
         @getNewResourceDataStart
-      @listenTo Backbone, "getNewSearchDataEnd",
+      @listenTo @model, "getNewSearchDataEnd",
         @getNewResourceDataEnd
-      @listenTo Backbone, "getNewSearchDataSuccess",
+      @listenTo @model, "getNewSearchDataSuccess",
         @getNewResourceDataSuccess
-      @listenTo Backbone, "getNewSearchDataFail",
+      @listenTo @model, "getNewSearchDataFail",
         @getNewResourceDataFail
 
     renderSearchFieldView: ->
