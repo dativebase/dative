@@ -14,22 +14,6 @@ define [
   DateFieldView, FileDataUploadFieldView, SelectFieldView, FileModel) ->
 
 
-  class DativeFileTypeFieldView extends SelectFieldView
-
-    initialize: (options) ->
-      options.required = true
-      options.selectValueGetter = (o) -> o
-      options.selectTextGetter = (o) =>
-        @utils.camel2regular o
-      super options
-
-
-  class UtteranceTypeSelectFieldView extends SelectFieldView
-
-    initialize: (options) ->
-      options.selectValueGetter = (o) -> o
-      options.selectTextGetter = (o) -> o
-      super options
 
 
   class TextareaFieldView255 extends TextareaFieldView
@@ -44,18 +28,15 @@ define [
 
     listenToEvents: ->
       super
-      @listenTo @model, 'change:dative_file_type', @dativeFileTypeChanged
+      @listenTo @model, 'change:dative_file_type', @crucialAttributeChanged
 
     render: ->
       super
       if not @visibilityCondition() then @$el.hide()
       @
 
-    dativeFileTypeChanged: ->
-      if @visibilityCondition()
-        @showAnimate()
-      else
-        @hideAnimate()
+    crucialAttributeChanged: ->
+      if @visibilityCondition() then @showAnimate() else @hideAnimate()
 
     visibilityCondition: ->
       @model.get('dative_file_type') is 'storedOnTheServer'
@@ -67,6 +48,109 @@ define [
     showAnimate: ->
       if not @$el.is(':visible')
         @$el.slideDown()
+
+    isAudioVideo: ->
+      MIME_type = @model.get 'MIME_type'
+      @utils.startsWith MIME_type, 'audio' or
+      @utils.startsWith MIME_type, 'video'
+
+
+  class UtteranceTypeSelectFieldView extends SelectFieldView
+
+    initialize: (options) ->
+      @mixin()
+      options.selectValueGetter = (o) -> o
+      options.selectTextGetter = (o) -> o
+      super options
+
+    listenToEvents: ->
+      super
+      @listenTo @model, 'change:MIME_type', @crucialAttributeChanged
+
+    mixin: ->
+      methodsWeWant = [
+        'hideAnimate'
+        'showAnimate'
+        'render'
+        'crucialAttributeChanged'
+        'isAudioVideo'
+      ]
+      for method in methodsWeWant
+        @[method] = TypedTextareaFieldView::[method]
+
+    visibilityCondition: -> @isAudioVideo()
+
+
+  class ElicitorSelectFieldView extends UserSelectFieldView
+
+    initialize: (options) ->
+      @mixin()
+      super options
+
+    listenToEvents: ->
+      super
+      @listenTo @model, 'change:MIME_type', @crucialAttributeChanged
+
+    mixin: ->
+      methodsWeWant = [
+        'hideAnimate'
+        'showAnimate'
+        'render'
+        'crucialAttributeChanged'
+        'isAudioVideo'
+      ]
+      for method in methodsWeWant
+        @[method] = TypedTextareaFieldView::[method]
+
+    visibilityCondition: -> @isAudioVideo()
+
+
+  class SpeakerSelectFieldView extends PersonSelectFieldView
+
+    initialize: (options) ->
+      @mixin()
+      super options
+
+    listenToEvents: ->
+      super
+      @listenTo @model, 'change:MIME_type', @crucialAttributeChanged
+
+    mixin: ->
+      methodsWeWant = [
+        'hideAnimate'
+        'showAnimate'
+        'render'
+        'crucialAttributeChanged'
+        'isAudioVideo'
+      ]
+      for method in methodsWeWant
+        @[method] = TypedTextareaFieldView::[method]
+
+    visibilityCondition: -> @isAudioVideo()
+
+
+  class DativeFileTypeFieldView extends SelectFieldView
+
+    initialize: (options) ->
+      @mixin()
+      options.required = true
+      options.selectValueGetter = (o) -> o
+      options.selectTextGetter = (o) =>
+        @utils.camel2regular o
+      super options
+
+    mixin: ->
+      methodsWeWant = [
+        'listenToEvents'
+        'crucialAttributeChanged'
+        'hideAnimate'
+        'showAnimate'
+        'render'
+      ]
+      for method in methodsWeWant
+        @[method] = TypedTextareaFieldView::[method]
+
+    visibilityCondition: -> @addUpdateType is 'add'
 
 
   class FilenameFieldView extends TypedTextareaFieldView
@@ -100,13 +184,17 @@ define [
     mixin: ->
       methodsWeWant = [
         'listenToEvents'
-        'dativeFileTypeChanged'
-        'visibilityCondition'
+        'crucialAttributeChanged'
         'hideAnimate'
         'showAnimate'
+        'render'
       ]
       for method in methodsWeWant
         @[method] = TypedTextareaFieldView::[method]
+
+    visibilityCondition: ->
+      @addUpdateType is 'add' and
+      @model.get('dative_file_type') is 'storedOnTheServer'
 
 
   # File Add Widget View
@@ -123,7 +211,6 @@ define [
 
     render: ->
       super
-      console.log @addUpdateType
       @
 
     resourceName: 'file'
@@ -132,8 +219,8 @@ define [
     # Maps attributes to their appropriate FieldView subclasses.
     # This is where field-specific configuration should go.
     attribute2fieldView:
-      elicitor:                      UserSelectFieldView
-      speaker:                       PersonSelectFieldView
+      elicitor:                      ElicitorSelectFieldView
+      speaker:                       SpeakerSelectFieldView
       date_elicited:                 DateFieldView
       tags:                          MultiselectFieldView
       file_data:                     TypedFileDataUploadFieldView
@@ -149,23 +236,21 @@ define [
     primaryAttributes: [
       'dative_file_type'
       'file_data'
-      'filename' # TODO: should we always/ever allow users to specify this
-                 # value explicitly?
       'url'
       'password'
       'parent_file'
       'start'
       'end'
+      'description'
     ]
 
     editableSecondaryAttributes: [
-      'description'
+      'tags'
       'utterance_type'
       'speaker'
       'elicitor'
-      'tags'
-      #'forms'
       'date_elicited'
+      #'forms'
     ]
 
     getOptions: ->

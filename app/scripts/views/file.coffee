@@ -112,7 +112,8 @@ define [
       'video/x-ms-wmv': 'video'
 
     getHeaderTitle: ->
-      "File #{@model.get 'id'}"
+      id = @model.get 'id'
+      if id then "File #{id}" else "New File"
 
     # Return an <i> tag with the correct Font Awesome icon for the file type.
     getIconI: ->
@@ -136,4 +137,9 @@ define [
     ]
 
     fileDataViewClass: FileDataView
+
+    focusFirstUpdateViewField: ->
+      @$('.update-resource-widget')
+        .find('textarea, span.ui-selectmenu-button')
+        .filter(':visible').first().focus()
 

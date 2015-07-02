@@ -84,6 +84,7 @@ define [
     className: 'dative-form-field'
 
     initialize: (options) ->
+      @addUpdateType = options.addUpdateType or 'add'
       @resource = options.resource or 'forms'
       @submitAttempted = false
       @attribute = options.attribute

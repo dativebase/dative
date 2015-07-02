@@ -14,11 +14,18 @@ define [
 
     getContext: ->
       context = super
+      context.initialValue = context.value
       try
         context.value = @humanFileSize context.value, true
       catch
         context.value = ''
       context
+
+    shouldBeHidden: ->
+      response = super
+      if response is false and @context.initialValue is null
+        response = true
+      response
 
     # From http://stackoverflow.com/questions/10420352/converting-file-size-in-bytes-to-human-readable
     humanFileSize: (bytes, si) ->

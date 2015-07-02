@@ -5,7 +5,7 @@
         dative-tooltip
         dative-input-field'
     title='<%= @title %>'
-    ><i
+    >Choose file<i
         class='fa fa-fw fa-upload'></i></button>
 
 <!-- this is the hidden input tag -->

@@ -293,6 +293,7 @@ define [
         attribute: attribute # e.g., "name"
         model: @model
         options: @getOptions() # These are the OLD-specific <select> options relevant to the resource, cf. GET requests to <resource_name_plural>/new
+        addUpdateType: @addUpdateType
       if attribute of @attribute2fieldView
         MyFieldView = @attribute2fieldView[attribute]
         new MyFieldView params

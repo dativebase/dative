@@ -728,7 +728,7 @@ define [
         complete: =>
           @showFull()
           Backbone.trigger "add#{@resourceNameCapitalized}WidgetVisible"
-          @focusFirstUpdateViewTextarea()
+          @focusFirstUpdateViewField()
 
     hideUpdateView: ->
       @updateViewVisible = false
@@ -750,13 +750,13 @@ define [
         complete: =>
           tmp = =>
             @stopSpin()
-            @focusFirstUpdateViewTextarea()
+            @focusFirstUpdateViewField()
           @showSecondaryDataEvent = @getShowSecondaryDataEvent()
           @listenToOnce Backbone, @getShowSecondaryDataEvent(), tmp
           @showFullAnimate()
           Backbone.trigger "add#{@resourceNameCapitalized}WidgetVisible"
 
-    focusFirstUpdateViewTextarea: ->
+    focusFirstUpdateViewField: ->
       @$('.update-resource-widget textarea').first().focus()
 
     hideUpdateViewAnimate: ->

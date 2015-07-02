@@ -174,7 +174,8 @@ define ['./utils'], (utils) ->
           eng: 'The name of the file.'
 
         name:
-          eng: 'The name of the file.'
+          eng: 'The name of the file; relevant for externally hosted files or
+            subinterval files.'
 
         lossy_filename:
           eng: 'The name given to the reduced-size copy that was made of this
@@ -225,6 +226,14 @@ define ['./utils'], (utils) ->
 
         end:
           eng: "The time in the parent file where this file’s data ends."
+
+        dative_file_type:
+          eng: "Indicates whether the file’s data are stored on the server,
+            are hosted elsewhere, or are a subinterval of another “parent”
+            file."
+
+        file_data:
+          eng: "Click this button to choose a file for upload."
 
       morphologicalParsers:
         id: id
