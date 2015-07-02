@@ -17,11 +17,14 @@ define [
 
     initialize: (options) ->
       @resourceName = options?.resourceName or ''
+      @activeServerType = @getActiveServerType()
+      @setState()
+      @listenToEvents()
+
+    setState: ->
       @MIMEType = @model.get 'MIME_type'
       @type = @getType()
       @canPlayVideo = @getCanPlayVideo()
-      @activeServerType = @getActiveServerType()
-      @listenToEvents()
 
     getType: ->
       try
@@ -34,6 +37,16 @@ define [
       @listenTo @model, 'fetchFileDataEnd', @fetchFileDataEnd
       @listenTo @model, 'fetchFileDataFail', @fetchFileDataFail
       @listenTo @model, 'fetchFileDataSuccess', @fetchFileDataSuccess
+      @listenTo @model, 'change', @checkIfFileDataChanged
+
+    checkIfFileDataChanged: ->
+      if @model.hasChanged 'filename' or @model.hasChanged 'size'
+        @fileDataChanged()
+
+    fileDataChanged: ->
+      @setState()
+      @render()
+      if not @$el.is(':visible') then @trigger 'fileDataView:show'
 
     events:
       'click button.hide-file-data-widget': 'hideSelf'
@@ -81,10 +94,18 @@ define [
       # TODO: make sure that the lossy file does get embedded if it exists,
       # i.e., create tests and mocks where the backend OLD has made reduced
       # file copies.
+      fileURL = @model.getFetchFileDataURL()
+      if (not @model.get('id'))
+        if @model.get 'base64_encoded_file'
+          fileURL = "data:#{@model.get('MIME_type')};base64,\
+            #{@model.get('base64_encoded_file')}"
+        else if @model.get 'blobURL'
+          fileURL = @model.get 'blobURL'
+
       context =
         name: @model.get 'filename'
         containerStyle: @getContainerStyle()
-        URL: @model.getFetchFileDataURL()
+        URL: fileURL
         reducedURL: @model.getFetchFileDataURL true
         lossyFilename: @model.get 'lossy_filename'
         canPlayVideo: @canPlayVideo

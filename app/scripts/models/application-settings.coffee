@@ -568,6 +568,25 @@ define [
       # `taskStartTimestamp`, and `taskPreviousUUID`.
       longRunningTasksTerminated: []
 
+      # IME types that can be uploaded (to an OLD server, at least).
+      # TODO: this should be expanded and/or made backend-specific.
+      allowedFileTypes: [
+        'application/pdf'
+        'image/gif'
+        'image/jpeg'
+        'image/png'
+        'audio/mpeg'
+        'audio/mp3'
+        'audio/ogg'
+        'audio/x-wav'
+        'audio/wav'
+        'video/mpeg'
+        'video/mp4'
+        'video/ogg'
+        'video/quicktime'
+        'video/x-ms-wmv'
+      ]
+
       version: 'da'
 
       # These objects control how particular FieldDB form (i.e., datum) fields

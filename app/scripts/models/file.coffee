@@ -65,9 +65,10 @@ define ['./resource'], (ResourceModel) ->
       forms: []               # An array of forms associated to this file.
       date_elicited: ''       # When this file was elicited, if appropriate.
 
-      # `base64_encoded_file`: When creating a file, this attribute may contain
-      # a base-64 encoded string representation of the file data, so long as
-      # the file size does not exceed 20MB.
+      base64_encoded_file: '' # `base64_encoded_file`: When creating a file,
+                              # this attribute may contain a base-64 encoded
+                              # string representation of the file data, so long
+                              # as the file size does not exceed 20MB.
 
       filename: ''            # the filename, cannot be empty, max 255 chars.
                               # Note: the OLD will remove quotation marks and
@@ -138,6 +139,11 @@ define ['./resource'], (ResourceModel) ->
       # here are `'storedOnTheServer'`, `'storedOnAnotherServer'`, and
       # `'referencesASubintervalOfAnotherFile'`.
       dative_file_type: 'storedOnTheServer'
+
+      blobURL: ''             # Dative-only use: a JavaScript/HTML5 BLOB URL so
+                              # that we can (dis)play large selected files
+                              # prior to upload.
+
 
 
     # Fetch the file data of this file resource.

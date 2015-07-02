@@ -1,7 +1,8 @@
 define [
   './input'
+  './../utils/globals'
   './../templates/file-data-upload-input'
-], (InputView, fileDataUploadInputTemplate) ->
+], (InputView, globals, fileDataUploadInputTemplate) ->
 
   # File Data Upload Input View
   # ---------------------------
@@ -15,7 +16,12 @@ define [
 
   class FileDataUploadInputView extends InputView
 
+    initialize: (@context) ->
+      @allowedFileTypes = globals.applicationSettings.get 'allowedFileTypes'
+
     template: fileDataUploadInputTemplate
+
+    validFilename: ''
 
     events:
       'click .file-upload-button': 'clickFileUploadInput'
@@ -33,13 +39,54 @@ define [
         .replace(/['"\0/\\]/g, '')
         .replace(/( )/g, '_')[0...255]
 
-    getFileDataBase64: (event) ->
+    fileDataLoadSuccess: (event) ->
       @fileDataBase64 = event.target.result.match(/,(.*)$/)[1]
+      filename = @validFilename or @fileMetadata.name
       @model.set
         base64_encoded_file: @fileDataBase64
-        filename: @file.name
-        MIME_type: @file.type
-        size: @file.size
+        blobURL: ''
+        filename: filename
+        MIME_type: @fileMetadata.type
+        size: @fileMetadata.size
+
+    refreshFileDataView: (fileURL) ->
+      filename = @validFilename or @fileMetadata.name
+      @model.set
+        base64_encoded_file: ''
+        blobURL: fileURL
+        filename: filename
+        MIME_type: @fileMetadata.type
+        size: @fileMetadata.size
+
+    resetFileDataMetadata: ->
+      @model.set
+        base64_encoded_file: ''
+        blobURL: ''
+        filename: ''
+        MIME_type: ''
+        size: null
+
+    fileDataLoadStart: (event) ->
+      @spin()
+
+    fileDataLoadEnd: (event) ->
+      @stopSpin()
+
+    fileDataLoadError: (event) ->
+      Backbone.trigger 'fileDataLoadError', @fileMetadata
+
+    spinnerOptions: ->
+      options = super
+      options.top = '50%'
+      options.left = '100%'
+      options.color = @constructor.jQueryUIColors().defCo
+      options
+
+    spin: ->
+      @$('button.file-upload-button').spin @spinnerOptions()
+
+    stopSpin: ->
+      @$('button.file-upload-button').spin false
 
       # description = UnicodeString()
       # utterance_type = OneOf(h.utterance_types)
@@ -49,45 +96,48 @@ define [
       # forms = ForEach(ValidOLDModelObject(model_name='Form'))
       # date_elicited = DateConverter(month_style='mm/dd/yyyy')
 
-    # TODO: this should be expanded and/or made backend-specific.
-    allowedFileTypes: [
-      'application/pdf'
-      'image/gif'
-      'image/jpeg'
-      'image/png'
-      'audio/mpeg'
-      'audio/mp3'
-      'audio/ogg'
-      'audio/x-wav'
-      'audio/wav'
-      'video/mpeg'
-      'video/mp4'
-      'video/ogg'
-      'video/quicktime'
-      'video/x-ms-wmv'
-    ]
-
+    # This is called when the user chooses a file from their local file system.
+    # The attributes of the `fileMetadata` object are `name`, `type`, `size`,
+    # `lastModified` (timestamp), and `lastModifiedDate` (`Date` instance).
     handleFileSelect: (event) ->
-      file = event.target.files[0]
-      if file
-        @file = file
-        validFilename = @getValidFilename @file.name
-        reader = new FileReader()
-        # attrs of `file`: `name`, `type`, `size` (and `lastModifiedDate`)
-        if file.type not in @allowedFileTypes
-          console.log "Sorry, files of type #{file.type} cannot be uploaded."
-        else if not validFilename
-          console.log "Sorry, the filename #{@file.name} is not valid."
-        else if file.size < 20971520
-          @file.name = validFilename
-          reader.onload = (event) => @getFileDataBase64 event
-          reader.readAsDataURL file
+      fileMetadata = event.target.files[0]
+      if fileMetadata
+        @fileMetadata = fileMetadata
+        @validFilename = @getValidFilename @fileMetadata.name
+        if fileMetadata.type not in @allowedFileTypes
+          @forbiddenFile @fileMetadata
+        else if not @validFilename.split('.').shift()
+          @invalidFilename @fileMetadata
         else
-          console.log 'Wow! That is a big file'
+          if @fileMetadata.size < 20971520
+            reader = new FileReader()
+            reader.onloadstart = (event) => @fileDataLoadStart event
+            reader.onloadend = (event) => @fileDataLoadEnd event
+            reader.onerror = (event) => @fileDataLoadError event
+            reader.onload = (event) => @fileDataLoadSuccess event
+            reader.readAsDataURL @fileMetadata
+          else
+            fileURL = URL.createObjectURL @fileMetadata
+            @refreshFileDataView fileURL
       else
-        console.log 'we should trigger an error here indicating that something
-          went wrong during file upload'
+        Backbone.trigger 'fileSelectError'
+        @resetFileDataMetadata()
 
+    forbiddenFile: (fileMetadata) ->
+      if fileMetadata.type
+        errorMessage = "Sorry, files of type #{fileMetadata.type} cannot be
+          uploaded."
+      else
+        errorMessage = "The file you have selected has no recognizable
+          type."
+      Backbone.trigger 'fileSelectForbiddenType', errorMessage
+      @resetFileDataMetadata()
+
+    invalidFilename: (fileMetadata) ->
+      errorMessage = "Sorry, the filename #{@fileMetadata.name} is not
+        valid."
+      Backbone.trigger 'fileSelectInvalidName', errorMessage
+      @resetFileDataMetadata()
 
     render: ->
       @context.class = 'file-upload-button'

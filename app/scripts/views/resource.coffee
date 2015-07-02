@@ -146,6 +146,8 @@ define [
       if 'data' not in @excludedActions
         @listenTo @fileDataView, "fileDataView:hide",
           @hideFileDataViewAnimate
+        @listenTo @fileDataView, "fileDataView:show",
+          @showFileDataViewAnimate
 
     indicateModelState: ->
       if @updateView.modelAltered()

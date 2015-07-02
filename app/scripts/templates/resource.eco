@@ -35,7 +35,7 @@
 
     <span class="spinner-container"></span>
 
-    <% if ('data' not in @excludedActions) and @dataTypeIcon: %>
+    <% if 'data' not in @excludedActions: %>
       <button class="file-data dative-tooltip"
               title="view the data of this <%= @resourceNameHumanReadable() %>"
               ><%- @dataTypeIcon %>

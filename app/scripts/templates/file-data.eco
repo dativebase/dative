@@ -16,7 +16,8 @@
 
     <span class="spinner-container"></span>
 
-    <a href="<%= @URL %>" type="<%= @MIMEType %>" download="<%= @name %>">
+    <a href="<%= @URL %>" type="<%= @MIMEType %>" download="<%= @name %>"
+        target="_blank">
         <button class='file-data-download dative-tooltip'
                 title='download the file data of this <%= @resourceName %>'
             ><i class='fa fa-fw fa-download'></i></button>

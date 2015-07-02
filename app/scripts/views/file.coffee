@@ -8,10 +8,11 @@ define [
   './array-of-objects-with-name-field-display'
   './bytes-field-display'
   './file-data'
+  './../utils/globals'
 ], (ResourceView, FileAddWidgetView, FieldDisplayView, PersonFieldDisplayView,
   DateFieldDisplayView, ObjectWithNameFieldDisplayView,
   ArrayOfObjectsWithNameFieldDisplayView, BytesFieldDisplayView,
-  FileDataView) ->
+  FileDataView, globals) ->
 
   class NameFieldDisplayView extends FieldDisplayView
 
@@ -48,6 +49,10 @@ define [
   # On file.name and file.filename:
 
   class FileView extends ResourceView
+
+    initialize: (options) ->
+      super options
+      @allowedFileTypes = globals.applicationSettings.get 'allowedFileTypes'
 
     resourceName: 'file'
 
@@ -97,32 +102,40 @@ define [
       name: NameFieldDisplayView
       filename: FilenameFieldDisplayView
 
-    MIMEType2type:
-      'application/pdf': 'pdf'
-      'image/gif': 'image'
-      'image/jpeg': 'image'
-      'image/png': 'image'
-      'audio/mpeg': 'audio'
-      'audio/ogg': 'audio'
-      'audio/x-wav': 'audio'
-      'video/mpeg': 'video'
-      'video/mp4': 'video'
-      'video/ogg': 'video'
-      'video/quicktime': 'video'
-      'video/x-ms-wmv': 'video'
+    MIMEType2type: (MIMEType) ->
+      if MIMEType in @allowedFileTypes
+        [type, subtype] = MIMEType.split '/'
+        if type is 'application' then subtype else type
+      else
+        null
 
     getHeaderTitle: ->
       id = @model.get 'id'
       if id then "File #{id}" else "New File"
 
+    listenToEvents: ->
+      super
+      @listenTo @model, 'change:MIME_type', @refreshFileDataViewButton
+
+    refreshFileDataViewButton: ->
+      MIMEType = @model.get 'MIME_type'
+      if MIMEType and @MIMEType2type MIMEType
+        type = @MIMEType2type MIMEType
+        class_ = "fa-file-#{type}-o"
+      else
+        class_ = "fa-file-o"
+      $('button.file-data i')
+        .removeClass()
+        .addClass "fa fa-fw #{class_}"
+
     # Return an <i> tag with the correct Font Awesome icon for the file type.
     getIconI: ->
       MIMEType = @model.get 'MIME_type'
-      if MIMEType and MIMEType of @MIMEType2type
-        type = @MIMEType2type[MIMEType]
+      if MIMEType and @MIMEType2type MIMEType
+        type = @MIMEType2type MIMEType
         "<i class='fa fa-fw fa-file-#{type}-o'></i>"
       else
-        null
+        "<i class='fa fa-fw fa-file-o'></i>"
 
     getContext: ->
       context = super
@@ -140,6 +153,6 @@ define [
 
     focusFirstUpdateViewField: ->
       @$('.update-resource-widget')
-        .find('textarea, span.ui-selectmenu-button')
+        .find('textarea, button.file-upload-button')
         .filter(':visible').first().focus()
 

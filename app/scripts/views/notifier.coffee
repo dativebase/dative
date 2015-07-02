@@ -87,6 +87,10 @@ define [
       @listenTo Backbone, 'tooManyTasks', @tooManyTasks
       @listenTo Backbone, 'taskAlreadyPending', @taskAlreadyPending
 
+      @listenTo Backbone, 'fileSelectForbiddenType', @fileSelectForbiddenType
+      @listenTo Backbone, 'fileSelectInvalidName', @fileSelectInvalidName
+      @listenTo Backbone, 'fileSelectError', @fileSelectError
+
       @listenToCRUDResources()
 
     listenToCRUDResources: ->
@@ -586,6 +590,28 @@ define [
         title: 'Task already in-progress'
         content: "Sorry, there is already an in-progress request to
           #{taskDescription} #{resourceName} #{resourceModel.get('id')}"
+        type: 'error'
+      @renderNotification notification
+
+    fileSelectForbiddenType: (errorMessage) ->
+      notification = new NotificationView
+        title: 'Forbidden file type'
+        content: errorMessage
+        type: 'error'
+      @renderNotification notification
+
+    fileSelectInvalidName: (errorMessage) ->
+      notification = new NotificationView
+        title: 'Invalid filename'
+        content: errorMessage
+        type: 'error'
+      @renderNotification notification
+
+    fileSelectError: ->
+      notification = new NotificationView
+        title: 'Error selecting a file'
+        content: 'For some reason an error occurred while trying to select your
+          file'
         type: 'error'
       @renderNotification notification
 
