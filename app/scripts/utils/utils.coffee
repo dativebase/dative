@@ -19,6 +19,12 @@ define (require) ->
       flags += 'y' if obj.sticky?
       return new RegExp(obj.source, flags)
 
+    # You can't really copy a Blob instance, so let's not try.
+    # TODO: check whether this cause issues with an add view being able to tell
+    # whether it's model has been altered.
+    if obj instanceof Blob
+      return null
+
     newInstance = new obj.constructor()
 
     for key of obj

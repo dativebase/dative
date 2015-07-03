@@ -25,9 +25,8 @@ define [], ->
       url = options.url or throw new Error 'A URL is required for CORS requests'
       method = options.method or 'GET'
       timeout = options.timeout or undefined
-      # console.log 'payload prior to serialization:'
-      # console.log options.payload
-      payload = JSON.stringify(options.payload) or "{}"
+
+      contentType = options.contentType or 'application/json;charset=UTF-8'
 
       [onload, onerror, onloadstart, onabort, onprogress, ontimeout,
       onloadend] =  @_getHandlers options, method, url
@@ -38,12 +37,20 @@ define [], ->
       if options.responseType
         xhr.responseType = options.responseType
 
-      # Set content-type
-      # Note: apparently "You cannot add custom headers to an XDR object", cf.
-      # http://stackoverflow.com/questions/2657180/setting-headers-in-xdomainrequest-or-activexobjectmicrosoft-xmlhttp #
-      xhr.setRequestHeader 'Content-Type', 'application/json;charset=UTF-8'
-
       xhr.withCredentials = true
+
+      if contentType[...9] is 'multipart'
+        # This is a multipart/form-data request so we let the browser set the
+        # content-type header on its own.
+        payload = options.payload
+      else
+        # This is a JSON request (the default) so we set the content-type
+        # header ourselves and JSON-ify the payload.
+        # Note: apparently "You cannot add custom headers to an XDR object", cf.
+        # http://stackoverflow.com/questions/2657180/setting-headers-in-xdomainrequest-or-activexobjectmicrosoft-xmlhttp
+        xhr.setRequestHeader 'Content-Type', contentType
+        payload = JSON.stringify(options.payload) or "{}"
+
       xhr.send(payload)
 
       xhr.onload = onload

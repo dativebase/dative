@@ -143,6 +143,7 @@ define ['./resource'], (ResourceModel) ->
       blobURL: ''             # Dative-only use: a JavaScript/HTML5 BLOB URL so
                               # that we can (dis)play large selected files
                               # prior to upload.
+      filedata: null
 
 
 

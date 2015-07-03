@@ -18,6 +18,7 @@ define [
 
       @crudResources = [
         'form'
+        'file'
         'subcorpus'
         'phonology'
         'morphology'
@@ -179,6 +180,17 @@ define [
           #{@getFormId formModel}."
       @renderNotification notification
 
+
+    ############################################################################
+    # Files: add, update, & destroy notifications
+    ############################################################################
+
+    addFileSuccess: (model) -> @addResourceSuccess model, 'file'
+    addFileFail: (error) -> @addResourceFail error, 'file'
+    updateFileSuccess: (model) -> @updateResourceSuccess model, 'file'
+    updateFileFail: (error) -> @updateResourceFail error, 'file'
+    destroyFileFail: (error) -> @destroyResourceFail error, 'file'
+    destroyFileSuccess: (model) -> @destroyResourceSuccess model, 'file'
 
     ############################################################################
     # Subcorpora: add, update, & destroy notifications
