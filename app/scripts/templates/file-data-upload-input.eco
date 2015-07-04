@@ -8,6 +8,12 @@
     >Choose file<i
         class='fa fa-fw fa-upload'></i></button>
 
+<div class='file-upload-container'>
+    <div class='file-upload-status'>Uploading file data ...</div>
+    <div class='file-upload-progress-bar'></div>
+</div>
+
+
 <!-- this is the hidden input tag -->
 <div
     style='height: 0px;width:0px; overflow:hidden;'

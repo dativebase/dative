@@ -23,6 +23,27 @@ define [
 
     validFilename: ''
 
+    listenToEvents: ->
+      super
+      @listenTo @model, 'uploadProgress', @refreshProgressBar
+
+    refreshProgressBar: (percentComplete) ->
+      $fileUploadContainer = @$ '.file-upload-container'
+      $fileUploadProgressBar = @$('.file-upload-progress-bar').first()
+      if $fileUploadContainer.is ':hidden'
+        @$('.file-upload-container').show()
+      if percentComplete >= 100
+        text = 'Upload complete. Waiting for server to respond.'
+        if $fileUploadProgressBar.is ':visible'
+          $fileUploadProgressBar.hide()
+      else
+        text = 'Uploading file data ...'
+        if $fileUploadProgressBar.is ':hidden'
+          $fileUploadProgressBar.show()
+        $fileUploadProgressBar.show()
+          .progressbar 'value', percentComplete
+      @$('.file-upload-status').text text
+
     events:
       'click .file-upload-button': 'clickFileUploadInput'
       'change [name=file-upload-input]': 'handleFileSelect'
@@ -159,7 +180,12 @@ define [
       super
       @tooltipify()
       @buttonify()
+      @progressBarify()
       @
+
+    progressBarify: ->
+      @$('.file-upload-container').hide()
+      @$('.file-upload-progress-bar').first().progressbar()
 
     # Make title attrs into jQueryUI tooltips.
     tooltipify: ->

@@ -18,6 +18,10 @@ define [], ->
         else
           console.log error
 
+    updateProgress: (event) ->
+      percentComplete = (event.loaded / event.total * 100)
+      @progressModel.trigger 'uploadProgress', percentComplete
+
     # Perform a CORS request, sending JSON to and receiving JSON from a RESTful
     # web service
     _request: (options={}) ->
@@ -25,8 +29,9 @@ define [], ->
       url = options.url or throw new Error 'A URL is required for CORS requests'
       method = options.method or 'GET'
       timeout = options.timeout or undefined
-
       contentType = options.contentType or 'application/json;charset=UTF-8'
+      monitorProgress = options.monitorProgress or false
+      @progressModel = options.progressModel or null
 
       [onload, onerror, onloadstart, onabort, onprogress, ontimeout,
       onloadend] =  @_getHandlers options, method, url
@@ -38,6 +43,9 @@ define [], ->
         xhr.responseType = options.responseType
 
       xhr.withCredentials = true
+
+      if monitorProgress and xhr.upload
+        xhr.upload.onprogress = (event) => @updateProgress event
 
       if contentType[...9] is 'multipart'
         # This is a multipart/form-data request so we let the browser set the

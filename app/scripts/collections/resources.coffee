@@ -119,13 +119,17 @@ define [
 
     # Add (create) a resource.
     # POST `<URL>/<resource_name_plural>`
-    addResource: (resource, options) ->
+    addResource: (resource, options={}) ->
       resource.trigger "add#{@resourceNameCapitalized}Start"
       payload = @getResourceForServerCreate resource
+      monitorProgress = options.monitorProgress or false
+      progressModel = options.progressModel or null
       @model.cors.request(
         method: 'POST'
         url: @getAddResourceURL resource
         payload: payload
+        monitorProgress: monitorProgress
+        progressModel: progressModel
         onload: (responseJSON, xhr) =>
           @addResourceOnloadHandler resource, responseJSON, xhr, payload
         onerror: (responseJSON) =>

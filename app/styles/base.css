@@ -1866,3 +1866,25 @@ audio.file-data-audio
   font-size: 12pt;
 }
 
+.file-upload-container
+{
+  display: inline-block;
+  width: 79.7%;
+}
+
+.file-upload-progress-bar
+{
+  display: inline-block;
+  width: 60%;
+  position: relative;
+  top: 0.75em;
+}
+
+.file-upload-status
+{
+  display: inline-block;
+  font-size: 12pt;
+  position: relative;
+  top: 0.15em;
+}
+

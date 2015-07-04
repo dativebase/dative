@@ -15,7 +15,9 @@ define [
     resourceName: 'file'
     model: FileModel
 
-    addResource: (resource, options) ->
+    addResource: (resource, options={}) ->
+      options.monitorProgress = true
+      options.progressModel = resource
       if resource.get('dative_file_type') is 'storedOnTheServer' and
       resource.get('base64_encoded_file') is ''
         @addFileAsMultipartFormData resource, options
@@ -34,7 +36,11 @@ define [
     addFileAsMultipartFormData: (resource, options) ->
       resource.trigger "add#{@resourceNameCapitalized}Start"
       payload = @getResourceForServerCreateMultipartFormData resource
+      monitorProgress = options.monitorProgress or false
+      progressModel = options.progressModel or null
       @model.cors.request(
+        monitorProgress: monitorProgress
+        progressModel: progressModel
         contentType: "multipart/form-data;" # This isn't actually used, it's just a signal to `CORS` that this is multipart/form-data...
         method: 'POST'
         url: @getAddResourceURL resource
