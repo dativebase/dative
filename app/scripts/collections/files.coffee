@@ -54,3 +54,15 @@ define [
           console.log "Error in POST request to /#{@getServerSideResourceName()}"
       )
 
+    # Files (OLD ones, at least) are different. If the `base64_encoded_file`
+    # attribute is an empty string, then we need to remove that attribute from
+    # the payload altogether; this is because if the OLD sees that attribute it
+    # will error when it finds no value (i.e., '').
+    getResourceForServerCreate: (resource) ->
+      if not resource.get 'base64_encoded_file'
+        result = super resource
+        delete result.base64_encoded_file
+        result
+      else
+        super resource
+

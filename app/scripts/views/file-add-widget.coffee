@@ -24,6 +24,9 @@ define [
       super options
 
 
+  # The typed textarea field view is a textarea field that is visible only when
+  # the file is of a certain type, i.e., stored on the web service, hosted
+  # elsewhere, or subinterval-referencing.
   class TypedTextareaFieldView extends TextareaFieldView
 
     listenToEvents: ->
@@ -41,20 +44,23 @@ define [
     visibilityCondition: ->
       @model.get('dative_file_type') is 'storedOnTheServer'
 
-    hideAnimate: ->
-      if @$el.is ':visible'
-        @$el.slideUp()
+    hideAnimate: -> if @$el.is ':visible' then @$el.slideUp()
 
-    showAnimate: ->
-      if not @$el.is(':visible')
-        @$el.slideDown()
+    showAnimate: -> if not @$el.is(':visible') then @$el.slideDown()
 
     isAudioVideo: ->
       MIME_type = @model.get 'MIME_type'
-      @utils.startsWith MIME_type, 'audio' or
-      @utils.startsWith MIME_type, 'video'
+      if MIME_type
+        @utils.startsWith MIME_type, 'audio' or
+        @utils.startsWith MIME_type, 'video'
+      else
+        # Assuming for now (incorrectly) that anything without a MIME_type is
+        # externally hosted audio/video
+        true
 
-
+  # A <select>-based field view for the file's utterance type. We mixin methods
+  # from `TypedTextareaFieldView` so that this field will only be visible when
+  # the file is audio or video.
   class UtteranceTypeSelectFieldView extends SelectFieldView
 
     initialize: (options) ->
@@ -81,6 +87,8 @@ define [
     visibilityCondition: -> @isAudioVideo()
 
 
+  # A <select>-based field view for the file's elicitor. This is only displayed
+  # when the file is audio or video.
   class ElicitorSelectFieldView extends UserSelectFieldView
 
     initialize: (options) ->
@@ -105,6 +113,8 @@ define [
     visibilityCondition: -> @isAudioVideo()
 
 
+  # A <select>-based field view for the file's speaker. This is only displayed
+  # when the file is audio or video.
   class SpeakerSelectFieldView extends PersonSelectFieldView
 
     initialize: (options) ->
@@ -128,7 +138,11 @@ define [
 
     visibilityCondition: -> @isAudioVideo()
 
-
+  # A <select>-based field view for the Dative file type, i.e.,
+  # `storedOnTheServer`, `storedOnAnotherServer`, or
+  # `referencesASubintervalOfAnotherFile`. Note: this field view is only
+  # visible when we are adding/creating a new file; it is not visible on
+  # update.
   class DativeFileTypeFieldView extends SelectFieldView
 
     initialize: (options) ->
@@ -225,18 +239,19 @@ define [
       tags:                          MultiselectFieldView
       file_data:                     TypedFileDataUploadFieldView
       dative_file_type:              DativeFileTypeFieldView
-      filename:                      FilenameFieldView
       parent_file:                   SubintervalReferencingFileAttributeFieldView
       start:                         SubintervalReferencingFileAttributeFieldView
       end:                           SubintervalReferencingFileAttributeFieldView
       url:                           NonLocalFileAttributeFieldView
       password:                      NonLocalFileAttributeFieldView
+      name:                          NonLocalFileAttributeFieldView
       utterance_type:                UtteranceTypeSelectFieldView
 
     primaryAttributes: [
       'dative_file_type'
       'file_data'
       'url'
+      'name'
       'password'
       'parent_file'
       'start'

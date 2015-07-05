@@ -42,6 +42,10 @@ define [
     checkIfFileDataChanged: ->
       if @model.hasChanged 'filename' or @model.hasChanged 'size'
         @fileDataChanged()
+      else if @model.hasChanged 'url'
+        url = @model.get 'url'
+        if url and @utils.isValidURL url
+          @fileDataChanged()
 
     fileDataChanged: ->
       @setState()
@@ -90,22 +94,129 @@ define [
       </audio>"
       @$('div.file-data-container').html audioHTML
 
+    # Try to get <HTML> for embedding an externally-hosted resource. 
+    getEmbedCode: ->
+      url = @model.get 'url'      # If there is no URL, there is no embed code.
+      if not url then return null
+      result = null
+      dataURL = youTubeId = vimeoId = null
+      dataURL = @getDataURL url
+      if dataURL
+        result = @getEmbedCodeData dataURL
+      else
+        youTubeId = @getYouTubeId url
+        if youTubeId
+          result = @getEmbedCodeYouTube youTubeId
+        else
+          vimeoId = @getVimeoId url
+          if vimeoId
+            result = @getEmbedCodeVimeo vimeoId
+      result
+
+    # If `url` is a video we like to play, then return it; otherwise return
+    # `null`. TODO: allow for audio files being served like this too...
+    getDataURL: (url) ->
+      extension = @utils.getExtension url
+      if extension of @utils.extensions then url else null
+
+    getEmbedCodeData: (dataURL) ->
+      MIMEType = @utils.getMIMEType dataURL
+      "<video class='file-data-video ui-corner-bottom' controls>
+          <source
+              src='#{dataURL}'
+              type='#{MIMEType}'>
+          Your browser does not support the video tag.
+      </video>"
+
+    # See http://stackoverflow.com/questions/3452546/javascript-regex-how-to-get-youtube-video-id-from-url
+    getYouTubeId: (url) ->
+      regex = /// ^ .* (
+          youtu.be\/
+        | youtube(-nocookie)?.com\/ (
+              v\/
+            | .*u\/\w\/
+            | embed\/
+            | .*v=
+          )
+        ) (
+          [\w-]{11}
+        ) .* ///
+      match = url.match regex
+      if match and match[4] and match[4].length is 11
+        match[4]
+      else
+        null
+
+    # See http://stackoverflow.com/a/11660798/992730
+    getVimeoId: (url) ->
+      regex = /// ^ .*
+        (vimeo\.com\/)
+        (
+            (channels\/[A-z]+\/)
+          | (groups\/[A-z]+\/videos\/)
+        ) ?
+        ([0-9]+) ///
+      match = url.match regex
+      if match and match[5]
+        match[5]
+      else
+        null
+
+    getIframeDimensions: ->
+      if @model.get 'id'
+        ['700px', '393.75px']
+      else
+        ['770.266px', '433.275px']
+
+    getEmbedCodeYouTube: (youTubeId) ->
+      [width, height] = @getIframeDimensions()
+      "<iframe
+        class='embed-code'
+        src='http://www.youtube.com/embed/#{youTubeId}'
+        type='text/html'
+        width='#{width}'
+        height='#{height}'
+        frameborder='0'
+        seamless
+        webkitallowfullscreen
+        mozallowfullscreen
+        allowFullScreen></iframe>"
+
+    getEmbedCodeVimeo: (vimeoId) ->
+      [width, height] = @getIframeDimensions()
+      "<iframe
+        class='embed-code'
+        src='https://player.vimeo.com/video/#{vimeoId}?badge=0'
+        width='#{width}'
+        height='#{height}'
+        frameborder='0'
+        seamless
+        webkitallowfullscreen
+        mozallowfullscreen
+        allowfullscreen></iframe>"
+
     html: ->
       # TODO: make sure that the lossy file does get embedded if it exists,
       # i.e., create tests and mocks where the backend OLD has made reduced
       # file copies.
+      undownloadable = false
       fileURL = @model.getFetchFileDataURL()
-      if (not @model.get('id'))
+      if @model.get 'url'
+        fileURL = @model.get 'url'
+        if not @utils.getMIMEType(@model.get('url')) then undownloadable = true
+      else if (not @model.get('id'))
         if @model.get 'base64_encoded_file'
           fileURL = "data:#{@model.get('MIME_type')};base64,\
             #{@model.get('base64_encoded_file')}"
         else if @model.get 'blobURL'
           fileURL = @model.get 'blobURL'
-
+      @embedCode = @getEmbedCode()
       context =
         name: @model.get 'filename'
         containerStyle: @getContainerStyle()
-        URL: fileURL
+        embedCode: @embedCode
+        fileURL: fileURL
+        undownloadable: undownloadable
         reducedURL: @model.getFetchFileDataURL true
         lossyFilename: @model.get 'lossy_filename'
         canPlayVideo: @canPlayVideo

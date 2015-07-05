@@ -16,12 +16,21 @@
 
     <span class="spinner-container"></span>
 
-    <a href="<%= @URL %>" type="<%= @MIMEType %>" download="<%= @name %>"
-        target="_blank">
-        <button class='file-data-download dative-tooltip'
-                title='download the file data of this <%= @resourceName %>'
+    <% if @undownloadable: %>
+        <a href="<%= @fileURL %>" type="<%= @MIMEType %>" target="_blank">
+            <button class='file-data-download dative-tooltip'
+                    title='visit the page where this <%= @resourceName %>’s data
+                        are stored'
+            ><i class='fa fa-fw fa-external-link'></i></button>
+        </a>
+    <% else: %>
+        <a href="<%= @fileURL %>" type="<%= @MIMEType %>"
+           download="<%= @name %>" target="_blank">
+            <button class='file-data-download dative-tooltip'
+                    title='download the file data of this <%= @resourceName %>'
             ><i class='fa fa-fw fa-download'></i></button>
     </a>
+    <% end %>
 
     <button class='file-data-help dative-tooltip'
             title='help with viewing the file data of this
@@ -37,7 +46,7 @@
 
         <% if @MIMEType is 'application/pdf': %>
             <object class="file-data-pdf"
-                    data="<%= @URL %>"
+                    data="<%= @fileURL %>"
                     type="<%= @MIMEType %>"
                     name="<%= @name %>"
                     ><%= @name %></object>
@@ -50,20 +59,22 @@
                         type="audio/ogg">
                 <% end %>
                 <source
-                    src="<%= @URL %>"
+                    src="<%= @fileURL %>"
                     type="<%= @MIMEType %>">
                 Your browser does not support the audio tag.
             </audio>
         <% else if @type is 'video' and @canPlayVideo: %>
             <video class="file-data-video ui-corner-bottom" controls>
                 <source
-                    src="<%= @URL %>"
+                    src="<%= @fileURL %>"
                     type="<%= @MIMEType %>">
                 Your browser does not support the video tag.
             </video>
         <% else if @type is 'image': %>
             <img class="file-data-image ui-corner-bottom"
-                 src="<%= @URL %>"></img>
+                 src="<%= @fileURL %>"></img>
+        <% else if @embedCode: %>
+            <%- @embedCode %>
         <% else: %>
             <% verb = if @type in ['audio', 'video'] then 'play' else 'display' %>
             <div class='file-data-no-display'>Sorry, your browser cannot
@@ -71,6 +82,4 @@
         <% end %>
 
 </div>
-
-
 

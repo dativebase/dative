@@ -36,6 +36,24 @@ define ['./resource'], (ResourceModel) ->
     getValidator: (attribute) ->
       null
 
+    getValidator: (attribute) ->
+      switch attribute
+        when 'name' then @validName
+        when 'url' then @validURL
+        else null
+
+    validName: (value) ->
+      if @get 'url'
+        @requiredString value
+      else
+        null
+
+    validURL: (value) ->
+      if @utils.isValidURL value
+        null
+      else
+        'This does not appear to be a valid URL.'
+
     ############################################################################
     # File Schema
     ############################################################################

@@ -115,13 +115,19 @@ define [
 
     listenToEvents: ->
       super
-      @listenTo @model, 'change:MIME_type', @refreshFileDataViewButton
+      @listenTo @model, 'change', @checkIfRefreshFileDataViewButton
+
+    checkIfRefreshFileDataViewButton: ->
+      if @model.hasChanged('MIME_type') or @model.hasChanged('url')
+        @refreshFileDataViewButton()
 
     refreshFileDataViewButton: ->
       MIMEType = @model.get 'MIME_type'
       if MIMEType and @MIMEType2type MIMEType
         type = @MIMEType2type MIMEType
         class_ = "fa-file-#{type}-o"
+      else if @model.get('url')
+        class_ = "fa-file-video-o"
       else
         class_ = "fa-file-o"
       $('button.file-data i')
@@ -129,11 +135,15 @@ define [
         .addClass "fa fa-fw #{class_}"
 
     # Return an <i> tag with the correct Font Awesome icon for the file type.
+    # Note: we assume that all externally hosted files are videos (which may be
+    # false).
     getIconI: ->
       MIMEType = @model.get 'MIME_type'
       if MIMEType and @MIMEType2type MIMEType
         type = @MIMEType2type MIMEType
         "<i class='fa fa-fw fa-file-#{type}-o'></i>"
+      else if @model.get('url')
+        "<i class='fa fa-fw fa-file-video-o'></i>"
       else
         "<i class='fa fa-fw fa-file-o'></i>"
 
