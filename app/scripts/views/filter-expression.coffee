@@ -59,6 +59,10 @@ define [
 
       @filterExpression = options.filterExpression
 
+      # The name of the resource that this filter expression targets.
+      @targetResourceName = options.targetResourceName or 'form'
+      @targetResourceNameCapitalized = @utils.capitalize @targetResourceName
+
       # We remember the correlations between attributes and subattributes so if
       # we reselect a previously selected attribute we can restore its previous
       # subattribute value.
@@ -66,11 +70,15 @@ define [
         @subattributeMemoryMap[@filterExpression[1]] = @filterExpression[2]
 
       # `@options` is an object of options for building filter expressions,
-      # i.e., the attributes of forms and the attributes of their relational
-      # attributes and the possible relations.
+      # i.e., the attributes of the resources being searched and the attributes
+      # of their relational attributes and the possible relations.
       @options = options.options
 
       @initializeFilterExpressionSubviews()
+
+    # This is the primary or typical attribute of the resource being searched.
+    # This is simply used to create the default filter expression values.
+    primaryAttribute: 'transcription'
 
     # Instantiate a new `FilterExpressionView` for each sub-filter-expression
     # that we may have. These are stored in `@filterExpressionSubviews`.
@@ -248,7 +256,7 @@ define [
             @subattributeMemoryMap[attribute]
         else if attribute of @subattributeDefaults
           valueThatShouldBeSelected = @subattributeDefaults[attribute]
-        for subattribute in subattributes[attribute]
+        for subattribute in subattributes[attribute].sort()
           if valueThatShouldBeSelected and
           valueThatShouldBeSelected is subattribute
             $subAttributeSelect.append "<option value='#{subattribute}'
@@ -298,7 +306,7 @@ define [
         @triggerChanged()
 
     getDefaultFilterExpression: ->
-      ['Form', 'transcription', 'like', '%']
+      [@targetResourceNameCapitalized , @primaryAttribute, 'like', '%']
 
     # Change the operator to a boolean, i.e., 'and' or 'or'.
     makeOperatorBoolean: (boolean) ->
@@ -448,6 +456,7 @@ define [
     getNewFilterExpressionView: (subFilterExpression) ->
       new @constructor(
         model: @model
+        targetResourceName: @targetResourceName
         filterExpression: subFilterExpression
         options: @options
         rootNode: false
@@ -478,7 +487,7 @@ define [
           .tooltip position: @tooltipPositionLeft('-20')
           .end()
         .find('.dative-tooltip').not('.operator')
-          .tooltip position: @tooltipPositionRight()
+          .tooltip()
       @renderFilterExpressionSubviews()
       @hideActionWidget()
       @actionButtonsVisibility()
@@ -542,31 +551,49 @@ define [
             .find("button.make-#{operator}").hide().end()
             .find('button').not(".make-#{operator}").show()
 
+    renderFilterExpressionSubviews: ->
+      for filterExpressionSubview in @filterExpressionSubviews
+        @renderFilterExpressionSubview filterExpressionSubview
+
+    renderFilterExpressionSubview: (filterExpressionSubview, animate=false) ->
+      @$('.filter-expression-operand').first()
+        .append filterExpressionSubview.render().el
+      if animate
+        filterExpressionSubview.$el
+          .hide()
+          .fadeIn
+            complete: =>
+              filterExpressionSubview
+                .$('button, .ui-selectmenu-button, .textarea').first().focus()
+      @rendered filterExpressionSubview
+
+    # Make the border colors match the jQueryUI theme.
+    bordercolorify: ->
+      @$('.filter-expression-table').first().find('textarea, input')
+        .css "border-color", @constructor.jQueryUIColors().defBo
+      @$('.filter-expression-action-widget').first()
+        .css
+          "border-color": @constructor.jQueryUIColors().defBo
+          "background-color": @constructor.jQueryUIColors().defCo
+
     # TODO: the OLD should be supplying all of this information. We should
     # not have to specify it here.
     subattributes: ->
-      collections: [
-        'id'
-        'UUID'
-        'title'
-        'type'
-        'url'
-        'description'
-        'markup_language'
-        'contents'
-        'contents_unpacked'
-        'html'
-        'date_elicited'
-        'datetime_entered'
-        'datetime_modified'
-        'speaker'
-        'source'
-        'elicitor'
-        'enterer'
-        'modifier'
-        'tags'
-        'files'
-      ]
+      switch @targetResourceName
+        when 'form' then @formSubattributes()
+        when 'file' then @fileSubattributes()
+
+    fileSubattributes: ->
+      elicitor: @userAttributes
+      enterer: @userAttributes
+      speaker: @speakerAttributes
+      parent_file: @fileAttributes
+      tags: @tagAttributes
+      forms: @formAttributes
+      collections: @collectionAttributes
+
+    formSubattributes: ->
+      collections: @collectionAttributes
       corpora: [
         'id'
         'UUID'
@@ -589,29 +616,7 @@ define [
       ]
       elicitor: @userAttributes
       enterer: @userAttributes
-      files: [
-        'id'
-        'date_elicited'
-        'datetime_entered'
-        'datetime_modified'
-        'filename'
-        'name'
-        'lossy_filename'
-        'MIME_type'
-        'size'
-        'description'
-        'utterance_type'
-        'url'
-        'password'
-        'enterer'
-        'elicitor'
-        'speaker'
-        'tags'
-        'forms'
-        'parent_file'
-        'start'
-        'end'
-      ]
+      files: @fileAttributes
       memorizers: @userAttributes
       source: [
         'id'
@@ -661,16 +666,7 @@ define [
         'price'
         'size'
       ]
-      speaker: [
-        'id'
-        'first_name'
-        'last_name'
-        'dialect'
-        'markup_language'
-        'page_content'
-        'html'
-        'datetime_modified'
-      ]
+      speaker: @speakerAttributes
       syntactic_category: [
         'id'
         'name'
@@ -678,12 +674,7 @@ define [
         'description'
         'datetime_modified'
       ]
-      tags: [
-        'id'
-        'name'
-        'description'
-        'datetime_modified'
-      ]
+      tags: @tagAttributes
       translations: [
         'id'
         'transcription'
@@ -708,6 +699,106 @@ define [
       'datetime_modified'
     ]
 
+    speakerAttributes: [
+      'id'
+      'first_name'
+      'last_name'
+      'dialect'
+      'markup_language'
+      'page_content'
+      'html'
+      'datetime_modified'
+    ]
+
+    fileAttributes: [
+      'id'
+      'date_elicited'
+      'datetime_entered'
+      'datetime_modified'
+      'filename'
+      'name'
+      'lossy_filename'
+      'MIME_type'
+      'size'
+      'description'
+      'utterance_type'
+      'url'
+      'password'
+      'enterer'
+      'elicitor'
+      'speaker'
+      'tags'
+      'forms'
+      'parent_file'
+      'start'
+      'end'
+    ]
+
+    tagAttributes: [
+      'id'
+      'name'
+      'description'
+      'datetime_modified'
+    ]
+
+    formAttributes: [
+      'files',
+      'elicitor'
+      'break_gloss_category'
+      'tags'
+      'elicitation_method'
+      'translations'
+      'syntax'
+      'morpheme_break_ids'
+      'memorizers'
+      'syntactic_category'
+      'grammaticality'
+      'syntactic_category_string'
+      'datetime_modified'
+      'morpheme_gloss_ids'
+      'date_elicited'
+      'phonetic_transcription'
+      'morpheme_gloss'
+      'id'
+      'semantics'
+      'datetime_entered'
+      'UUID'
+      'narrow_phonetic_transcription'
+      'transcription'
+      'corpora'
+      'enterer'
+      'comments'
+      'source'
+      'verifier'
+      'speaker'
+      'morpheme_break'
+      'collections'
+      'speaker_comments'
+    ]
+
+    collectionAttributes: [
+      'id'
+      'UUID'
+      'title'
+      'type'
+      'url'
+      'description'
+      'markup_language'
+      'contents'
+      'contents_unpacked'
+      'html'
+      'date_elicited'
+      'datetime_entered'
+      'datetime_modified'
+      'speaker'
+      'source'
+      'elicitor'
+      'enterer'
+      'modifier'
+      'tags'
+      'files'
+    ]
+
     # Maps attributes to the default subattribute that should be displayed when
     # the attribute is selected.
     subattributeDefaults:
@@ -717,36 +808,13 @@ define [
       elicitor: 'last_name'
       enterer: 'last_name'
       files: 'filename'
+      forms: 'transcription'
       memorizers: 'last_name'
+      parent_file: 'filename'
       source: 'author'
       speaker: 'last_name'
       syntactic_category: 'name'
       tags: 'name'
       translations: 'transcription'
       verifier: 'last_name'
-
-    renderFilterExpressionSubviews: ->
-      for filterExpressionSubview in @filterExpressionSubviews
-        @renderFilterExpressionSubview filterExpressionSubview
-
-    renderFilterExpressionSubview: (filterExpressionSubview, animate=false) ->
-      @$('.filter-expression-operand').first()
-        .append filterExpressionSubview.render().el
-      if animate
-        filterExpressionSubview.$el
-          .hide()
-          .fadeIn
-            complete: =>
-              filterExpressionSubview
-                .$('button, .ui-selectmenu-button, .textarea').first().focus()
-      @rendered filterExpressionSubview
-
-    # Make the border colors match the jQueryUI theme.
-    bordercolorify: ->
-      @$('.filter-expression-table').first().find('textarea, input')
-        .css "border-color", @constructor.jQueryUIColors().defBo
-      @$('.filter-expression-action-widget').first()
-        .css
-          "border-color": @constructor.jQueryUIColors().defBo
-          "background-color": @constructor.jQueryUIColors().defCo
 

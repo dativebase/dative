@@ -1,7 +1,7 @@
 <div class="dative-widget-header ui-widget-header ui-corner-top">
 
   <div class='dative-widget-header-title container-center'
-    >Search Forms</div>
+     >Search <%= @targetResourceNamePluralCapitalized %></div>
 
   <div class='button-container-left'>
 
@@ -17,7 +17,7 @@
     <span class="spinner-container"></span>
 
     <button class='help dative-tooltip'
-            title='help with searching'
+          title='help with searching <%= @targetResourceNamePlural %>'
     ><i class='fa fa-fw fa-question'></i>
     </button>
 

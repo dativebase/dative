@@ -348,17 +348,18 @@ define [
     # Returns true of `globals` has a key for `resourceData`. The value of
     # this key is an object containing a subset of the following keys:
     # `form_searches`, `users`, `tags`, and `corpus_formats`.
-    weHaveNewResourceData: -> globals["#{@resourceName}Data"]?
+    weHaveNewResourceData: -> globals[@getGlobalDataAttribute()]?
 
     # Return an object representing the options for forced-choice inputs.
     # Currently only relevant for the OLD.
     getOptions: ->
-      if globals["#{@resourceName}Data"]
-        globals["#{@resourceName}Data"]
+      if globals[@getGlobalDataAttribute()]
+        globals[@getGlobalDataAttribute()]
       else
         {}
 
-    getNewResourceDataStart: -> @spin()
+    getNewResourceDataStart: ->
+      @spin()
 
     getNewResourceDataEnd: -> @stopSpin()
 
@@ -367,7 +368,9 @@ define [
       @render()
 
     storeOptionsDataGlobally: (data) ->
-      globals["#{@resourceName}Data"] = data
+      globals[@getGlobalDataAttribute()] = data
+
+    getGlobalDataAttribute: -> "#{@resourceName}Data"
 
     getNewResourceDataFail: ->
       console.log "Failed to retrieve the data from the OLD server which is

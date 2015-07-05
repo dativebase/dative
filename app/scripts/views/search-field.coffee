@@ -11,6 +11,8 @@ define [
 
   class SearchFieldView extends FieldView
 
+    targetResourceName: 'form'
+
     getFieldLabelContainerClass: ->
       "#{super} top"
 
@@ -18,6 +20,7 @@ define [
       "#{super} full-width"
 
     getInputView: ->
+      @context.targetResourceName = @targetResourceName
       new SearchInputView @context
 
     setToModel: ->

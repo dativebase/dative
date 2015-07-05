@@ -1,9 +1,37 @@
 define [
   './resources'
   './file'
+  './search-widget'
+  './search-field'
   './../collections/files'
   './../models/file'
-], (ResourcesView, FileView, FilesCollection, FileModel) ->
+  './../models/search'
+], (ResourcesView, FileView, SearchWidgetView, SearchFieldView,
+  FilesCollection, FileModel, SearchModel) ->
+
+
+  class FileSearchFieldViewNoLabel extends SearchFieldView
+
+    showLabel: false
+    targetResourceName: 'file'
+
+
+  class FileSearchModel extends SearchModel
+
+    # Change the following three attributes if this search model is being used
+    # to search over a resource other than forms, e.g., over file resources.
+    targetResourceName: 'file'
+    targetResourcePrimaryAttribute: 'filename'
+    targetModelClass: FileModel
+
+
+  class FileSearchWidgetView extends SearchWidgetView
+
+    targetResourceName: 'file'
+    targetModelClass: FileModel
+    searchModelClass: FileSearchModel
+    searchFieldViewClass: FileSearchFieldViewNoLabel
+
 
   # Files View
   # -----------------
@@ -20,4 +48,7 @@ define [
     resourceView: FileView
     resourcesCollection: FilesCollection
     resourceModel: FileModel
+    searchable: true
+    searchView: FileSearchWidgetView
+    searchModel: FileSearchModel
 

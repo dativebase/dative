@@ -12,17 +12,27 @@ define [
   # Search Widget
   # -------------
   #
-  # A view that contains just a SearchFieldView and a button for performing the
-  # search.
+  # A view that contains a SearchFieldView and buttons for
+  # - performing the search (i.e., browsing the results),
+  # - counting the search results, and
+  # - saving the search.
 
   class SearchFieldViewNoLabel extends SearchFieldView
 
     showLabel: false
 
 
-  class SearchWidget extends ResourceView
+  class SearchWidgetView extends ResourceView
+
+    # Change the following  attributes in sub-classes. These indicate which
+    # resource is being searched.
+    targetResourceName: 'form'
+    targetModelClass: FormModel
+    searchModelClass: SearchModel
+    searchFieldViewClass: SearchFieldViewNoLabel
 
     resourceName: 'search'
+
     tagName: 'div'
     className: 'dative-search-widget dative-shadowed-widget
       dative-widget-center ui-widget ui-widget-content ui-corner-all'
@@ -41,7 +51,7 @@ define [
 
     search: ->
       Backbone.trigger(
-        'request:formsBrowseSearchResults',
+        "request:#{@targetResourceNamePlural}BrowseSearchResults",
         search: @model.get('search'))
 
     count: ->
@@ -53,20 +63,23 @@ define [
     hideMe: ->
       @trigger 'hideMe'
 
-    # Tell the Help dialog to open itself and search for "searching forms" and
+    # Tell the Help dialog to open itself and search for "searching `@targetResourceNamePlural`" and
     # scroll to the second match. WARN: this is brittle because if the help
     # HTML changes, then the second match may not be what we want...
     openHelp: ->
       Backbone.trigger(
         'helpDialog:openTo',
-        searchTerm: 'searching forms'
+        searchTerm: "searching #{@targetResourceNamePlural}"
         scrollToIndex: 1
       )
 
     initialize: ->
+      @targetResourceNamePlural = @utils.pluralize @targetResourceName
+      @targetResourceNamePluralCapitalized =
+        @utils.capitalize @targetResourceNamePlural
       @mixinSearchAddWidgetView()
-      @model = new SearchModel()
-      @formModel = new FormModel()
+      @model = new @searchModelClass()
+      @targetModel = new @targetModelClass()
       @listenToEvents()
 
     # Appropriate a subset of the methods of `SearchAddWidgetView`.
@@ -83,6 +96,14 @@ define [
       for method in methodsWeWant
         @[method] = SearchAddWidgetView::[method]
 
+    # We may have `SearchWidgetView`s over various resources (e.g., forms,
+    # files, etc.). Therefore, we need a different global attribute for each
+    # type of search widget so that we can know which attributes to search over
+    # for forms and wich for files and not get them mixed up. This overwrites a
+    # method in `ResourceAddWidgetView`.
+    getGlobalDataAttribute: ->
+      "#{@resourceName}Over#{@targetResourceNamePluralCapitalized}Data"
+
     render: ->
       if not @weHaveNewResourceData()
         @model.getNewResourceData() # Success in this request will call `@render()`
@@ -95,8 +116,8 @@ define [
       @
 
     getSearchFieldView: ->
-      new SearchFieldViewNoLabel
-        resource: 'forms'
+      new @searchFieldViewClass
+        resource: @targetResourceNamePlural
         attribute: 'search'
         model: @model
         options: @getOptions()
@@ -118,7 +139,11 @@ define [
       @rendered @searchFieldView
 
     html: ->
-      @$el.html @template()
+      context =
+        targetResourceNamePlural: @targetResourceNamePlural
+        targetResourceNamePluralCapitalized:
+          @targetResourceNamePluralCapitalized
+      @$el.html @template(context)
 
     guify: ->
       @buttonify()
@@ -145,7 +170,7 @@ define [
 
     # Make the `title` attributes of the inputs/controls into jQueryUI tooltips.
     tooltipify: ->
-      @$('.dative-widget-header .hide-search-resource-widget.dative-tooltip')
+      @$('.dative-widget-header .hide-search-widget.dative-tooltip')
           .tooltip position: @tooltipPositionLeft('-20')
       @$('ul.button-only-fieldset button.dative-tooltip').tooltip()
 

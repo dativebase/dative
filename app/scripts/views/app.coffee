@@ -97,6 +97,8 @@ define [
       @listenTo @mainMenuView, 'request:formsBrowse', @showFormsView
       @listenTo Backbone, 'request:formsBrowseSearchResults',
         @showFormsSearchResultsBrowseView
+      @listenTo Backbone, 'request:filesBrowseSearchResults',
+        @showFilesSearchResultsBrowseView
       @listenTo Backbone, 'request:formsBrowseCorpus',
         @showFormsCorpusBrowseView
       @listenTo @mainMenuView, 'request:formsSearch', @showFormsSearchView
@@ -366,6 +368,9 @@ define [
     showFormsSearchResultsBrowseView: (options) ->
       @showFormsView options
 
+    showFilesSearchResultsBrowseView: (options) ->
+      @showFilesView options
+
     showFormsCorpusBrowseView: (options) ->
       @showFormsView options
 
@@ -418,6 +423,7 @@ define [
     # Show the page for browsing the files of an OLD.
     showFilesView: (options) ->
       if not @loggedIn() then return
+      if options?.search then @visibleView = null
       if @filesView and @visibleView is @filesView then return
       @router.navigate 'files-browse'
       taskId = @guid()
@@ -426,6 +432,11 @@ define [
       if not @filesView
         @filesView = new FilesView()
       @visibleView = @filesView
+      @renderVisibleView taskId
+      if options?.search
+        @filesView.setSearch options.search
+      else
+        @filesView.deleteSearch()
       @renderVisibleView taskId
 
     # Show the page for browsing phonologies AND open up the interface for

@@ -1100,9 +1100,11 @@ define [
     # Set `@searchable` to `true` if this resource can be searched.
     searchable: false
 
-    # If this resource is searchable, then set `@searchView` to a view class
-    # for creating new searches for this resource.
+    # If this resource is searchable, then set `@searchView` and `@searchModel`
+    # to a view and a model class, respectively, for creating new searches for
+    # this resource.
     searchView: null
+    searchModel: null
 
     # By default, we have no search object. If this is set, it is assumed to be
     # an object of the form `{query: {filter: [], order_by: []}}`.

@@ -12,8 +12,23 @@ define [
 
     resourceName: 'search'
 
+    # Change the following three attributes if this search model is being used
+    # to search over a resource other than forms, e.g., over file resources.
+    targetResourceName: 'form'
+    targetResourcePrimaryAttribute: 'transcription'
+    targetModelClass: FormModel
+
+    getTargetResourceNameCapitalized: ->
+      @utils.capitalize @targetResourceName
+
     serverSideResourceName: 'formsearches'
 
+    initialize: (attributes, options) ->
+      super attributes, options
+      @targetResourceNameCapitalized = @getTargetResourceNameCapitalized()
+      @targetResourceNamePlural = @utils.pluralize @targetResourceName
+      @targetResourceNamePluralCapitalized =
+        @utils.capitalize @targetResourceNamePlural
 
     editableAttributes: [
       'name'
@@ -43,8 +58,13 @@ define [
       name: ''              # required, unique among search names, max 255 chars
       description: ''       # string description
       search:
-        filter: ['Form', 'transcription', 'like', '%']
-        order_by: ['Form', 'id', 'asc']
+        filter: [
+          @getTargetResourceNameCapitalized()
+          @targetResourcePrimaryAttribute
+          'like'
+          '%'
+        ]
+        order_by: [@getTargetResourceNameCapitalized(), 'id', 'asc']
 
       # Attributes that the OLD sends to us, but which the OLD will ignore if
       # we try to send them back.
@@ -56,24 +76,27 @@ define [
                             # `datetime_entered`.)
 
     # We listen to this once so that we can add the result of calling GET
-    # /forms/new_search to the result of calling GET /formsearches/new.
-    getNewFormSearchDataSuccess: (newSearchData) ->
+    # /<target_resource_plural>/new_search to the result of calling GET
+    # /formsearches/new.
+    getNewTargetResourceSearchDataSuccess: (newSearchData) ->
       @searchNewData.search_search_parameters = newSearchData
       @trigger "getNew#{@resourceNameCapitalized}DataSuccess", @searchNewData
 
     # We listen to this once so that we can tell the user that the request to
-    # GET /forms/new_search failed.
-    getNewFormSearchDataFail: ->
+    # GET /<target_resource_plural>/new_search failed.
+    getNewTargetResourceSearchDataFail: ->
       @trigger "getNew#{@resourceNameCapitalized}DataFail",
-          "Error in GET request to OLD server for /forms/new_search"
+          "Error in GET request to OLD server for
+            /#{@targetResourceNamePlural}/new_search"
 
-    # Get the data necessary to create a new search over form objects.
-    # Note: this is an override of the base `ResourceModel`'s implementation of
-    # this method since here we need to also request GET /forms/new_search.
-    # We do this by first requesting GET /formsearches/new and then, if that's
-    # successful, requesting GET /forms/new_search. If that's successful, we
-    # trigger the standard Backbone-wide success event for this method, passing
-    # in an integrated object.
+    # Get the data necessary to create a new search over <target_resource>
+    # objects. Note: this is an override of the base `ResourceModel`'s
+    # implementation of this method since here we need to also request GET
+    # /<target_resource_plural>/new_search. We do this by first requesting GET
+    # /formsearches/new and then, if that's successful, requesting GET
+    # /<target_resource_plural>/new_search. If that's successful, we trigger
+    # the standard Backbone-wide success event for this method, passing in an
+    # integrated/extended object.
     getNewResourceData: ->
       @trigger "getNew#{@resourceNameCapitalized}DataStart"
       @constructor.cors.request(
@@ -83,10 +106,14 @@ define [
           @trigger "getNew#{@resourceNameCapitalized}DataEnd"
           if xhr.status is 200
             @searchNewData = responseJSON
-            ourFormModel = new FormModel()
-            @listenToOnce ourFormModel, 'getNewFormSearchDataSuccess', @getNewFormSearchDataSuccess
-            @listenToOnce ourFormModel, 'getNewFormSearchDataFail', @getNewFormSearchDataFail
-            ourFormModel.getNewSearchData()
+            ourTargetModel = new @targetModelClass()
+            @listenToOnce(ourTargetModel,
+              "getNew#{@targetResourceNameCapitalized}SearchDataSuccess",
+              @getNewTargetResourceSearchDataSuccess)
+            @listenToOnce(ourTargetModel,
+              "getNew#{@targetResourceNameCapitalized}SearchDataFail",
+              @getNewTargetResourceSearchDataFail)
+            ourTargetModel.getNewSearchData()
           else
             @trigger "getNew#{@resourceNameCapitalized}DataFail",
               "Failed in fetching the data required to create new
