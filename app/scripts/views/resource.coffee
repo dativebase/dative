@@ -156,7 +156,7 @@ define [
         @indicateModelIsUnaltered()
 
     indicateModelIsAltered: ->
-      @$('.dative-widget-header').addClass 'ui-state-error'
+      @$('.dative-widget-header').first().addClass 'ui-state-error'
       headerTitleHTML = "#{@getHeaderTitle()} (<i class='fa fa-fw
         fa-exclamation-triangle'></i>Unsaved changes)"
       @$('.dative-widget-header-title').first()
@@ -166,7 +166,7 @@ define [
       @indicateModelIsUnaltered()
 
     indicateModelIsUnaltered: ->
-      @$('.dative-widget-header').removeClass 'ui-state-error'
+      @$('.dative-widget-header').first().removeClass 'ui-state-error'
       @$('.dative-widget-header-title').first().html @getHeaderTitle()
 
     events:
