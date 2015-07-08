@@ -301,7 +301,6 @@ define [
     # Valuate the (assumedly) textarea input with `name=attr` to `val`. Useful
     # for letting one field view set the values of another.
     setAttribute: (attr, val) ->
-      console.log "in setAttribute with #{attr} and #{val}"
       @$("textarea[name=#{attr}]")
         .val val
         .trigger 'input'

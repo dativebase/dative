@@ -434,7 +434,6 @@ define [
       if not @filesView
         @filesView = new FilesView()
       @visibleView = @filesView
-      @renderVisibleView taskId
       if options?.search
         @filesView.setSearch options.search
       else
