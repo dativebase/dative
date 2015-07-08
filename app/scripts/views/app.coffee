@@ -20,6 +20,7 @@ define [
   './subcorpora'
   './users'
   './files'
+  './file'
   './phonologies'
   './morphologies'
   './language-models'
@@ -34,9 +35,9 @@ define [
   LoginDialogView, RegisterDialogView, AlertDialogView, TasksDialogView,
   HelpDialogView, ResourceDisplayerDialogView, ApplicationSettingsView,
   PagesView, HomePageView, FormAddView, FormsSearchView, FormsView,
-  SubcorporaView, UsersView, FilesView, PhonologiesView, MorphologiesView,
-  LanguageModelsView, MorphologicalParsersView, CorporaView, SearchesView,
-  ApplicationSettingsModel, FormModel, globals, appTemplate) ->
+  SubcorporaView, UsersView, FilesView, FileView, PhonologiesView,
+  MorphologiesView, LanguageModelsView, MorphologicalParsersView, CorporaView,
+  SearchesView, ApplicationSettingsModel, FormModel, globals, appTemplate) ->
 
   # App View
   # --------
@@ -72,7 +73,7 @@ define [
       'click': 'bodyClicked'
 
     render: ->
-      if window.location.hostname is ['localhost', '127.0.0.1']
+      if window.location.hostname in ['localhost', '127.0.0.1']
         setTimeout ->
           console.clear()
         , 2000
@@ -147,6 +148,7 @@ define [
       @listenTo Backbone, 'formsView:showAllLabels',
         @setFormsPrimaryDataLabelsVisible
       @listenTo Backbone, 'showResourceInDialog', @showResourceInDialog
+      @listenTo Backbone, 'showResourceModelInDialog', @showResourceModelInDialog
 
       @listenToResources()
 
@@ -928,12 +930,23 @@ define [
     setMorphologiesPrimaryDataLabelsVisible: ->
       @changeDisplaySetting 'morphologies', 'dataLabelsVisible', true
 
-
     # Render the passed in resource view in the application-wide
     # `@resourceDisplayerDialog`
     showResourceInDialog: (resourceView) ->
       oldestResourceDisplayer = @getOldestResourceDisplayerDialog()
       oldestResourceDisplayer.showResourceView resourceView
+
+    # Map the names of `ResourceView`-subclassing classes to the classes
+    # themselves; useful for `showResourceModelInDialog` below.
+    resourceViewClasses:
+      FileView: FileView
+
+    # Create a view for the passed in `resourceModel` and render it in the
+    # application-wide `@resourceDisplayerDialog`.
+    showResourceModelInDialog: (resourceModel, resourceViewClassName) ->
+      resourceView = new @resourceViewClasses[resourceViewClassName](
+        model: resourceModel)
+      @showResourceInDialog resourceView
 
     getOldestResourceDisplayerDialog: ->
       oldest = @resourceDisplayerDialog1

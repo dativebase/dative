@@ -54,15 +54,21 @@ define [
           console.log "Error in POST request to /#{@getServerSideResourceName()}"
       )
 
-    # Files (OLD ones, at least) are different. If the `base64_encoded_file`
-    # attribute is an empty string, then we need to remove that attribute from
-    # the payload altogether; this is because if the OLD sees that attribute it
-    # will error when it finds no value (i.e., '').
+    # The OLD processes the file create request conditionally based on the
+    # *presence* of either of the attributes `base64_encoded_file` and `url`.
+    # Since Dative encodes this file "type" explicitly, we delete these
+    # attributes from the payload, as appropriate, based on the type.
     getResourceForServerCreate: (resource) ->
-      if not resource.get 'base64_encoded_file'
-        result = super resource
+      result = super resource
+      # referencesASubintervalOfAnotherFile
+      if resource.get('dative_file_type') is 'storedOnTheServer'
+        delete result.url
+        if not resource.get 'base64_encoded_file'
+          delete result.base64_encoded_file
+      else if resource.get('dative_file_type') is 'storedOnAnotherServer'
         delete result.base64_encoded_file
-        result
-      else
-        super resource
+      else if resource.get('dative_file_type') is 'referencesASubintervalOfAnotherFile'
+        delete result.base64_encoded_file
+        delete result.url
+      result
 

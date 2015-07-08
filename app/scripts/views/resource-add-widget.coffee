@@ -165,7 +165,6 @@ define [
         @submitAttempted = true
         @propagateSubmitAttempted()
         @stopEvent event
-        # Here is the problem
         @setToModel()
         @disableForm()
         clientSideValidationErrors = @model.validate()

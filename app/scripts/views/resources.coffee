@@ -95,7 +95,6 @@ define [
       'focus .focusable-bottom':  'focusFirstElement'
 
     displayCorpus: ->
-      console.log 'you want to display this corpus'
       @corpusView = new SubcorpusView model: @corpus
       Backbone.trigger 'showResourceInDialog', @corpusView, @$el
 

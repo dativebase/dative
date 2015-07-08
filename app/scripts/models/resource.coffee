@@ -46,6 +46,8 @@ define [
     # Validate the model. If there are errors, returns an object with errored
     # attributes as keys and error messages as values; otherwise returns
     # `undefined`.
+    # TODO: I think a "form submit" action results in this method being called
+    # many times too many (i.e., redundantly).
     validate: (attributes, options) ->
       attributes = attributes or @attributes
       errors = {}
@@ -270,6 +272,7 @@ define [
     #    },
     #    "paginator": { ... }
     #  }
+    # TODO: the default `order_by` should not reference the Form model ...
     getSearchPayload: (query, paginator) ->
       paginator = paginator or {page: 1, items_per_page: 10}
       if 'order_by' not of query then query.order_by = ['Form', 'id', 'asc']

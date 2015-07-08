@@ -7,14 +7,17 @@ define [
   './user-select-field'
   './date-field'
   './file-data-upload-field'
+  './file-data'
   './select-field'
+  './resource-select-via-search-field'
+  './resource-select-via-search-input'
+  './resource-as-row'
   './../models/file'
-], (ResourceAddWidgetView, TextareaFieldView, RelationalSelectFieldView,
-  MultiselectFieldView, PersonSelectFieldView, UserSelectFieldView,
-  DateFieldView, FileDataUploadFieldView, SelectFieldView, FileModel) ->
-
-
-
+], (ResourceAddWidgetView, TextareaFieldView,
+  RelationalSelectFieldView, MultiselectFieldView, PersonSelectFieldView,
+  UserSelectFieldView, DateFieldView, FileDataUploadFieldView, FileData,
+  SelectFieldView, ResourceSelectViaSearchFieldView,
+  ResourceSelectViaSearchInputView, ResourceAsRowView, FileModel) ->
 
   class TextareaFieldView255 extends TextareaFieldView
 
@@ -189,6 +192,51 @@ define [
       @model.get('dative_file_type') is 'referencesASubintervalOfAnotherFile'
 
 
+  class FileAsRowView extends ResourceAsRowView
+
+    resourceName: 'file'
+
+    orderedAttributes: [
+      'id'
+      'filename'
+      'MIME_type'
+      'size'
+      'enterer'
+    ]
+
+  class ParentFileSearchInputView extends ResourceSelectViaSearchInputView
+
+    # Change these attributes in subclasses.
+    resourceName: 'file'
+    resourceModelClass: FileModel
+    resourceAsRowViewClass: FileAsRowView
+    resourceMediaViewClass: FileData
+
+
+  class ParentFileSearchFieldView extends ResourceSelectViaSearchFieldView
+
+    getInputView: ->
+      new ParentFileSearchInputView @context
+
+    initialize: (options) ->
+      @mixin()
+      super options
+
+    mixin: ->
+      methodsWeWant = [
+        'listenToEvents'
+        'crucialAttributeChanged'
+        'hideAnimate'
+        'showAnimate'
+        'render'
+      ]
+      for method in methodsWeWant
+        @[method] = TypedTextareaFieldView::[method]
+
+    visibilityCondition: ->
+      @model.get('dative_file_type') is 'referencesASubintervalOfAnotherFile'
+
+
   class TypedFileDataUploadFieldView extends FileDataUploadFieldView
 
     initialize: (options) ->
@@ -223,10 +271,6 @@ define [
 
   class FileAddWidgetView extends ResourceAddWidgetView
 
-    render: ->
-      super
-      @
-
     resourceName: 'file'
     resourceModel: FileModel
 
@@ -239,13 +283,28 @@ define [
       tags:                          MultiselectFieldView
       file_data:                     TypedFileDataUploadFieldView
       dative_file_type:              DativeFileTypeFieldView
-      parent_file:                   SubintervalReferencingFileAttributeFieldView
       start:                         SubintervalReferencingFileAttributeFieldView
       end:                           SubintervalReferencingFileAttributeFieldView
       url:                           NonLocalFileAttributeFieldView
       password:                      NonLocalFileAttributeFieldView
       name:                          NonLocalFileAttributeFieldView
       utterance_type:                UtteranceTypeSelectFieldView
+      parent_file:                   ParentFileSearchFieldView
+
+    # We listen to a `setAttribute` event triggered on our `@model`. We do this
+    # because the `ParentFileSearchFieldView` will trigger this when it wants
+    # us to set `start` and/or `end` values.
+    listenToEvents: ->
+      super
+      @listenTo @model, 'setAttribute', @setAttribute
+
+    # Valuate the (assumedly) textarea input with `name=attr` to `val`. Useful
+    # for letting one field view set the values of another.
+    setAttribute: (attr, val) ->
+      console.log "in setAttribute with #{attr} and #{val}"
+      @$("textarea[name=#{attr}]")
+        .val val
+        .trigger 'input'
 
     primaryAttributes: [
       'dative_file_type'

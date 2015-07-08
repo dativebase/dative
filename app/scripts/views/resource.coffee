@@ -900,7 +900,7 @@ define [
     onClose: ->
       @updateViewRendered = false
       @controlsViewRendered = false
-      @fileDataViewRendered = true
+      @fileDataViewRendered = false
 
     showControlsView: ->
       if not @controlsViewRendered then @renderControlsView()

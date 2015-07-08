@@ -73,6 +73,7 @@ define [
 
       @listenTo Backbone, 'formSearchSuccess', @formSearchSuccess
       @listenTo Backbone, 'formSearchFail', @formSearchFail
+      @listenTo Backbone, 'fileSearchFail', @fileSearchFail
 
       @listenTo Backbone, 'corpusCountSuccess', @corpusCountSuccess
       @listenTo Backbone, 'corpusCountFail', @corpusCountFail
@@ -529,6 +530,14 @@ define [
         title: 'Form search success'
         content: "You have successfully used the saved search with id
           #{formSearchId} to search!."
+      @renderNotification notification
+
+    fileSearchFail: (errorMessage) ->
+      notification = new NotificationView
+        title: 'File search failed'
+        content: "Your attempt to search through the files was unsuccessful:
+          #{errorMessage}"
+        type: 'error'
       @renderNotification notification
 
     corpusCountFail: (error, corpusId) ->

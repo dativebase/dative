@@ -1888,3 +1888,92 @@ audio.file-data-audio
   top: 0.15em;
 }
 
+.resource-select-via-search-input-input
+{
+  width: 83.7%;
+}
+
+.resource-select-via-search-input-button
+{
+  position: relative;
+  bottom: 0.4em;
+}
+
+div.resource-results-via-search-table-wrapper,
+div.selected-resource-display-container
+{
+  border-width: 1px;
+  border-style: solid;
+  width: 98%;
+  max-width: 98%;
+  min-width: 98%;
+  margin-top: 0.5em;
+}
+
+div.resource-results-via-search-table
+{
+  max-height: 10em;
+  /*font-size: 12pt;*/
+  overflow-x: scroll;
+  margin: 0.5em 0 0.5em 0.5em;
+  width: 95%;
+  max-width: 95%;
+  min-width: 95%;
+}
+
+div.resource-as-row-row,
+div.resource-as-row-header-row
+{
+  display: inline-block;
+  white-space: nowrap;
+}
+
+div.resource-as-row-cell,
+div.resource-as-row-header-cell
+{
+  display: inline-block;
+  width: 7em;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  line-height: 1.5em;
+  padding-right: 0.25em;
+  padding-top: 0.5em;
+  vertical-align: middle;
+}
+
+div.resource-as-row-cell.resource-as-row-attr-size,
+div.resource-as-row-header-cell.resource-as-row-attr-size
+{
+  width: 5em;
+}
+
+div.resource-as-row-cell.resource-as-row-attr-filename,
+div.resource-as-row-header-cell.resource-as-row-attr-filename
+{
+  width: 12em;
+  text-overflow: clip;
+  overflow-x: scroll;
+}
+
+div.resource-as-row-cell.resource-as-row-attr-id,
+div.resource-as-row-header-cell.resource-as-row-attr-id
+{
+  width: 3.5em;
+}
+
+div.resource-as-row-cell.controls
+{
+  width: 100px;
+}
+
+div.resource-as-row-cell.text
+{
+  font-size: 12pt;
+}
+
+div.resource-as-row-cell.header
+{
+  font-weight: bold;
+}
+

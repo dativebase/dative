@@ -339,6 +339,23 @@ define (require) ->
     catch
       null
 
+  # From http://stackoverflow.com/questions/10420352/converting-file-size-in-bytes-to-human-readable
+  humanFileSize = (bytes, si) ->
+    thresh = if si then 1000 else 1024
+    if Math.abs(bytes) < thresh then return "#{bytes} B"
+    if si
+      units = ['kB','MB','GB','TB','PB','EB','ZB','YB']
+    else
+      units = ['KiB','MiB','GiB','TiB','PiB','EiB','ZiB','YiB']
+    u = -1
+    loop
+      bytes /= thresh
+      ++u
+      if not ((Math.abs(bytes) >= thresh) and (u < (units.length - 1)))
+        break
+    "#{bytes.toFixed(1)} #{units[u]}"
+
+  humanFileSize: humanFileSize
   isValidURL: isValidURL
   clone: clone
   type: type

@@ -1,0 +1,31 @@
+<% class_ = if @isHeaderRow then 'header' else 'field' %>
+
+<% if not @isHeaderRow: %>
+<div class='resource-as-row-cell controls'>
+
+    <button class="select dative-tooltip"
+            title="select this <%= @resourceNameHumanReadable() %>"
+            >select</i>
+    </button>
+
+    <button class="view dative-tooltip"
+            title="view this <%= @resourceNameHumanReadable() %> in more detail"
+            >view</i>
+    </button>
+
+</div>
+<% else: %>
+<div class='resource-as-row-cell
+            text
+            controls
+            <%= class_ %>'
+    >Controls</div>
+<% end %>
+
+<% for attribute, value of @model: %>
+<div class='resource-as-row-cell
+            text
+            <%= class_ %>
+            resource-as-row-attr-<%= attribute %>'
+    ><%= value %></div>
+<% end %>

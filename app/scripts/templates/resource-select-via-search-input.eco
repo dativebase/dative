@@ -1,0 +1,22 @@
+<input
+    type='text'
+    name='search-term'
+    class='dative-tooltip ui-corner-all resource-select-via-search-input-input'
+    title='Enter a pattern to search for a <%= @resourceNameHuman %>.'
+    />
+
+<button
+    class='perform-search dative-tooltip
+        resource-select-via-search-input-button'
+    title='Click here to perform the search; results will be returned in the
+        page.'
+    >Search</button>
+
+<div class='resource-results-via-search-table-wrapper ui-corner-all
+    dative-shadowed-widget'>
+    <div class='resource-results-via-search-table'></div>
+</div>
+
+<div class='selected-resource-display-container dative-shadowed-widget
+    ui-widget ui-widget-content ui-corner-all'></div>
+

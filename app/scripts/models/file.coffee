@@ -34,25 +34,25 @@ define ['./resource'], (ResourceModel) ->
     manyToManyAttributes: ['forms', 'tags']
 
     getValidator: (attribute) ->
-      null
-
-    getValidator: (attribute) ->
       switch attribute
         when 'name' then @validName
         when 'url' then @validURL
         else null
 
     validName: (value) ->
-      if @get 'url'
+      if @get('dative_file_type') is 'storedOnAnotherServer'
         @requiredString value
       else
         null
 
     validURL: (value) ->
-      if @utils.isValidURL value
-        null
+      if @get('dative_file_type') is 'storedOnAnotherServer'
+        if @utils.isValidURL value
+          null
+        else
+          'This does not appear to be a valid URL.'
       else
-        'This does not appear to be a valid URL.'
+        null
 
     ############################################################################
     # File Schema

@@ -14,6 +14,21 @@ define [
   ArrayOfObjectsWithNameFieldDisplayView, BytesFieldDisplayView,
   FileDataView, globals) ->
 
+  class FileFieldDisplayView extends FieldDisplayView
+
+    getContext: ->
+      context = super
+      try
+        if context.value.name
+          context.value = context.value.name
+        else if context.value.filename
+          context.value = context.value.filename
+        else
+          context.value = "File #{context.value.id}"
+      catch
+        context.value = ''
+      context
+
   class NameFieldDisplayView extends FieldDisplayView
 
     render: ->
@@ -45,8 +60,6 @@ define [
   # --------------
   #
   # For displaying individual files.
-  #
-  # On file.name and file.filename:
 
   class FileView extends ResourceView
 
@@ -101,6 +114,7 @@ define [
       tags: ArrayOfObjectsWithNameFieldDisplayView
       name: NameFieldDisplayView
       filename: FilenameFieldDisplayView
+      parent_file: FileFieldDisplayView
 
     MIMEType2type: (MIMEType) ->
       if MIMEType in @allowedFileTypes
