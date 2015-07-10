@@ -191,6 +191,14 @@ define [
     visibilityCondition: ->
       @model.get('dative_file_type') is 'referencesASubintervalOfAnotherFile'
 
+    # This class is used for start and end values. These should be floats, so
+    # we parse them to floats here.
+    getValueFromDOM: ->
+      result = super
+      try
+        result[@attribute] = parseFloat result[@attribute]
+      result
+
 
   class FileAsRowView extends ResourceAsRowView
 

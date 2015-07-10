@@ -990,6 +990,10 @@ define [
       else
         @showFileDataView()
 
+    showFileDataViewAnimateCheck: ->
+      if not @$('.file-data-widget').first().is(':visible')
+        @showFileDataViewAnimate()
+
     showFileDataViewAnimate: ->
       if not @fileDataViewRendered then @renderFileDataView()
       @fileDataViewVisible = true

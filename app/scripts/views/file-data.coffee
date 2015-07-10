@@ -1,7 +1,8 @@
 define [
   './base'
+  './../models/file'
   './../templates/file-data'
-], (BaseView, fileDataTemplate) ->
+], (BaseView, FileModel, fileDataTemplate) ->
 
   # File Data View
   # ------------------
@@ -16,6 +17,9 @@ define [
       dative-shadowed-widget ui-widget ui-widget-content ui-corner-all'
 
     initialize: (options) ->
+      # If `@parentFile` is `true`, this view will have a different interface,
+      # one that accords with the display of a subinterval-referencing file's
+      # parent file data.
       @parentFile = options.parentFile or false
       @headerTitle = if @parentFile then 'Parent File Data' else 'File Data'
       @resourceName = options?.resourceName or ''
@@ -24,9 +28,15 @@ define [
       @listenToEvents()
 
     setState: ->
-      @MIMEType = @model.get 'MIME_type'
+      @MIMEType = @getMIMEType()
       @type = @getType()
       @canPlayVideo = @getCanPlayVideo()
+
+    getMIMEType: ->
+      if @model.get 'parent_file'
+        @model.get('parent_file').MIME_type
+      else
+        @model.get 'MIME_type'
 
     getType: ->
       try
@@ -40,13 +50,51 @@ define [
       @listenTo @model, 'fetchFileDataFail', @fetchFileDataFail
       @listenTo @model, 'fetchFileDataSuccess', @fetchFileDataSuccess
       @listenTo @model, 'change', @checkIfFileDataChanged
+      # If we are displaying the data of a subinterval-referencing file, we
+      # have to control the cursor start and end positions.
+      if @model.get('parent_file')
+        @listenTo @model, 'change:start', @fixIfOutOfInterval
+        @listenTo @model, 'change:end', @fixIfOutOfInterval
+        @$(@type)
+          .bind 'loadedmetadata', ((event) => @getDuration event)
+          .bind 'timeupdate', ((event) => @fixIfOutOfInterval event)
+      # If we are displaying a parent file's data, we want to show the position
+      # of the cursor in real seconds as the cursor moves.
       if @parentFile
-        @$('audio, video')
-          .bind 'timeupdate', ((event) => @onTimeUpdate event)
+        @$(@type)
+          .bind 'timeupdate', ((event) => @showTimeInSeconds event)
 
-    onTimeUpdate: (event) ->
+    showTimeInSeconds: (event) ->
       @$('span.current-time-seconds')
         .text "#{event.currentTarget.currentTime.toFixed(2)}s"
+
+    getDuration: (event) ->
+      @duration = event.currentTarget.duration
+
+    getStart: ->
+      modelStart = @model.get 'start'
+      if (@utils.type(modelStart) is 'number') and
+      modelStart >= 0
+        modelStart
+      else
+        0
+
+    getEnd: ->
+      modelEnd = @model.get 'end'
+      if (@utils.type(modelEnd) is 'number') and
+      modelEnd <= @duration
+        modelEnd
+      else
+        @duration
+
+    fixIfOutOfInterval: ->
+      end = @getEnd()
+      start = @getStart()
+      mediaElement = @$(@type).first().get(0)
+      if mediaElement.currentTime >= end or
+      mediaElement.currentTime < start
+        mediaElement.currentTime = start
+        mediaElement.pause()
 
     checkIfFileDataChanged: ->
       if @model.hasChanged 'filename' or @model.hasChanged 'size'
@@ -64,7 +112,6 @@ define [
     events:
       'click button.hide-file-data-widget':         'hideSelf'
       'click button.deselect-parent-file':          'deselectAsParentFile'
-      #'click button.file-data-download':    ''
       'click button.set-current-position-to-start': 'setCurrentPositionToStart'
       'click button.set-current-position-to-end':   'setCurrentPositionToEnd'
       'keydown':                                    'keydown'
@@ -72,18 +119,21 @@ define [
     setCurrentPositionToStart: ->
       try
         @trigger 'setAttribute', 'start',
-          @$('audio, video').first().get(0).currentTime
+          @$(@type).first().get(0).currentTime
 
     setCurrentPositionToEnd: ->
       try
         @trigger 'setAttribute', 'end',
-          @$('audio, video').first().get(0).currentTime
+          @$(@type).first().get(0).currentTime
 
     onClose: ->
       try
         super
-      if @parentFile
-        @$('audio, video').unbind 'timeupdate'
+      if @model.get('parent_file')
+        @$(@type).unbind 'timeupdate'
+        @$(@type).unbind 'loadedmetadata'
+      else if @parentFile
+        @$(@type).unbind 'timeupdate'
 
     deselectAsParentFile: ->
       @trigger 'deselectAsParentFile'
@@ -232,9 +282,21 @@ define [
       # file copies.
       undownloadable = false
       fileURL = @model.getFetchFileDataURL()
+      name = @model.get 'filename'
+      MIMEType = @MIMEType
+      reducedURL = @model.getFetchFileDataURL true
+      lossyFilename = @model.get 'lossy_filename'
       if @model.get 'url'
+        name = @model.get 'name'
         fileURL = @model.get 'url'
         if not @utils.getMIMEType(@model.get('url')) then undownloadable = true
+      else if @model.get 'parent_file'
+        parentFileModel = new FileModel(@model.get('parent_file'))
+        fileURL = parentFileModel.getFetchFileDataURL()
+        reducedURL = parentFileModel.getFetchFileDataURL true
+        MIMEType = parentFileModel.get 'MIME_type'
+        lossyFilename = parentFileModel.get 'lossy_filename'
+        name = @model.get 'name'
       else if (not @model.get('id'))
         if @model.get 'base64_encoded_file'
           fileURL = "data:#{@model.get('MIME_type')};base64,\
@@ -244,15 +306,15 @@ define [
       @embedCode = @getEmbedCode()
       context =
         parentFile: @parentFile
-        name: @model.get 'filename'
+        name: name
         containerStyle: @getContainerStyle()
         embedCode: @embedCode
         fileURL: fileURL
         undownloadable: undownloadable
-        reducedURL: @model.getFetchFileDataURL true
-        lossyFilename: @model.get 'lossy_filename'
+        reducedURL: reducedURL
+        lossyFilename: lossyFilename
         canPlayVideo: @canPlayVideo
-        MIMEType: @MIMEType
+        MIMEType: MIMEType
         type: @type
         resourceName: @resourceName
         headerTitle: @headerTitle

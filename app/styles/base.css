@@ -1949,7 +1949,7 @@ div.resource-as-row-header-cell
   overflow: hidden;
   text-overflow: ellipsis;
   line-height: 1.5em;
-  padding-right: 0.25em;
+  margin-right: 0.75em;
   padding-top: 0.5em;
   vertical-align: middle;
 }
@@ -2002,5 +2002,15 @@ span.current-time-seconds
   width: 7em;
   display: inline-block;
   text-align: right;
+}
+
+.resource-results-via-search-table-wrapper .results-count
+{
+  padding-left: 1em;
+}
+
+.resource-results-via-search-table-wrapper .results-showing-count
+{
+  padding-right: 1em;
 }
 

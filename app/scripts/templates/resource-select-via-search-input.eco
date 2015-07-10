@@ -1,6 +1,6 @@
 <div class='resource-select-via-search-input-container'>
 
-<i class="fa fa-search search-term-icon"></i>
+<i class="fa fa-search search-term-icon black-fa"></i>
 
 <input
     type='text'
@@ -21,8 +21,16 @@
 
     <div class='dative-widget-header ui-widget-header ui-corner-top'>
 
+        <div class='button-container-left'>
+            <span class='results-count'></span>
+        </div>
+
         <div class='dative-widget-header-title container-center'
             ><%= @resourceNameHumanCapitalized %> Search Results</div>
+
+        <div class='button-container-right'>
+            <span class='results-showing-count'></span>
+        </div>
 
     </div>
 

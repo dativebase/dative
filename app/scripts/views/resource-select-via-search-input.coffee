@@ -13,6 +13,10 @@ define [
   # A view for selecting a particular resource (say, for a many-to-one
   # relation) by searching for it in a search input. This input should do some
   # "smart" search, i.e., try to understand what the user may be searching for.
+  #
+  # TODO/NOTE: this view assumes that the resource being searched/selected is
+  # the file resource, specifically when looking for a parent file for a
+  # subinterval-referencing file. This class should be generalized.
 
   class ResourceSelectViaSearchInputView extends InputView
 
@@ -98,7 +102,8 @@ define [
         .on 'loadedmetadata', ((event) => @metadataLoaded event)
 
     tooltipify: ->
-      @$('.dative-tooltip').tooltip()
+      @$('.dative-tooltip')
+        .tooltip position: @tooltipPositionLeft('-200')
 
     events:
       'click .perform-search': 'performSearch'
@@ -136,9 +141,19 @@ define [
     searchSuccess: (responseJSON) ->
       @showSearchResultsTableAnimateCheck()
       @closeResourceAsRowViews()
-      @$('div.resource-results-via-search-table')
-        .html @getSearchResultsRows(responseJSON)
-        .scrollLeft 0
+      count = @reportMatchesFound responseJSON
+      if count > 0
+        @$('div.resource-results-via-search-table')
+          .html @getSearchResultsRows(responseJSON)
+          .scrollLeft 0
+
+    reportMatchesFound: (responseJSON) ->
+      count = responseJSON.paginator.count
+      itemsPerPage = responseJSON.paginator.items_per_page
+      @$('span.results-count').text "#{count} matches"
+      if count > 0
+        @$('span.results-showing-count').text "showing #{itemsPerPage}"
+      count
 
     renderHeaderView: ->
       headerObject = {}

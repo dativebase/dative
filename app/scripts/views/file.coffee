@@ -129,11 +129,18 @@ define [
 
     listenToEvents: ->
       super
-      @listenTo @model, 'change', @checkIfRefreshFileDataViewButton
+      @listenTo @model, 'change:MIME_type', @refreshFileDataViewButton
+      @listenTo @model, 'change:url', @refreshFileDataViewButton
+      @listenTo @model, 'change:parent_file', @parentFileChanged
 
-    checkIfRefreshFileDataViewButton: ->
-      if @model.hasChanged('MIME_type') or @model.hasChanged('url')
-        @refreshFileDataViewButton()
+    # TODO: this can be better (more uniformly) handled in FileDataView.
+    parentFileChanged: ->
+      @refreshFileDataViewButton()
+      @fileDataView.close()
+      @closed @fileDataView
+      @getFileDataView()
+      @renderFileDataView()
+      @showFileDataViewAnimateCheck()
 
     refreshFileDataViewButton: ->
       MIMEType = @model.get 'MIME_type'
@@ -142,6 +149,12 @@ define [
         class_ = "fa-file-#{type}-o"
       else if @model.get('url')
         class_ = "fa-file-video-o"
+      else if @model.get('parent_file')
+        try
+          type = @MIMEType2type @model.get('parent_file').MIME_type
+          class_ = "fa-file-#{type}-o"
+        catch
+          class_ = "fa-file-audio-o"
       else
         class_ = "fa-file-o"
       $('button.file-data i')
