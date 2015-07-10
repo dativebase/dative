@@ -328,10 +328,10 @@ define [
     ]
 
     editableSecondaryAttributes: [
-      'tags'
       'utterance_type'
       'speaker'
       'elicitor'
+      'tags'
       'date_elicited'
       #'forms'
     ]

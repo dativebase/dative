@@ -39,6 +39,11 @@ define [
       ui-widget ui-widget-content ui-corner-all'
 
     initialize: (options) ->
+      @primaryFieldViews = []
+      @secondaryFieldViews = []
+      # Maps attributes to the FieldView instance that have been constructed for
+      # them. Useful for saving state.
+      @attribute2fieldViewInstance = {}
       @resourceNameCapitalized = @utils.capitalize @resourceName
       @resourceNamePlural = @utils.pluralize @resourceName
       @resourceNamePluralCapitalized = @utils.capitalize @resourceNamePlural
@@ -282,10 +287,6 @@ define [
     # Maps attributes to their appropriate FieldView subclasses.
     # This is where field-specific configuration should go.
     attribute2fieldView: {}
-
-    # Maps attributes to the FieldView instance that have been constructed for
-    # them. Useful for saving state.
-    attribute2fieldViewInstance: {}
 
     # Return the appropriate FieldView (subclass) instance for a given
     # attribute, as specified in `@attribute2fieldView`. The default field view
