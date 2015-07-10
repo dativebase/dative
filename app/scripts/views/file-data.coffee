@@ -97,7 +97,9 @@ define [
         mediaElement.pause()
 
     checkIfFileDataChanged: ->
-      if @model.hasChanged 'filename' or @model.hasChanged 'size'
+      if @model.hasChanged 'filename' or
+      @model.hasChanged 'size' or
+      @model.hasChanged 'parent_file'
         @fileDataChanged()
       else if @model.hasChanged 'url'
         url = @model.get 'url'

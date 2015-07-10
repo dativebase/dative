@@ -131,16 +131,7 @@ define [
       super
       @listenTo @model, 'change:MIME_type', @refreshFileDataViewButton
       @listenTo @model, 'change:url', @refreshFileDataViewButton
-      @listenTo @model, 'change:parent_file', @parentFileChanged
-
-    # TODO: this can be better (more uniformly) handled in FileDataView.
-    parentFileChanged: ->
-      @refreshFileDataViewButton()
-      @fileDataView.close()
-      @closed @fileDataView
-      @getFileDataView()
-      @renderFileDataView()
-      @showFileDataViewAnimateCheck()
+      @listenTo @model, 'change:parent_file', @refreshFileDataViewButton
 
     refreshFileDataViewButton: ->
       MIMEType = @model.get 'MIME_type'
