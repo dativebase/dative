@@ -283,6 +283,10 @@ define [
     # This is where field-specific configuration should go.
     attribute2fieldView: {}
 
+    # Maps attributes to the FieldView instance that have been constructed for
+    # them. Useful for saving state.
+    attribute2fieldViewInstance: {}
+
     # Return the appropriate FieldView (subclass) instance for a given
     # attribute, as specified in `@attribute2fieldView`. The default field view
     # is `TextareaFieldView`.
@@ -293,11 +297,15 @@ define [
         model: @model
         options: @getOptions() # These are the OLD-specific <select> options relevant to the resource, cf. GET requests to <resource_name_plural>/new
         addUpdateType: @addUpdateType
-      if attribute of @attribute2fieldView
+      if attribute of @attribute2fieldViewInstance
+        result = @attribute2fieldViewInstance[attribute]
+      else if attribute of @attribute2fieldView
         MyFieldView = @attribute2fieldView[attribute]
-        new MyFieldView params
+        result = new MyFieldView params
       else # the default field view is a(n expandable) textarea.
-        new TextareaFieldView params
+        result = new TextareaFieldView params
+      @attribute2fieldViewInstance[attribute] = result
+      result
 
     # Put the appropriate FieldView instances in `@primaryFieldViews` and.
     # `@secondaryFieldViews`

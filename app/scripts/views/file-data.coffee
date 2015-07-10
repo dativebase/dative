@@ -16,6 +16,8 @@ define [
       dative-shadowed-widget ui-widget ui-widget-content ui-corner-all'
 
     initialize: (options) ->
+      @parentFile = options.parentFile or false
+      @headerTitle = if @parentFile then 'Parent File Data' else 'File Data'
       @resourceName = options?.resourceName or ''
       @activeServerType = @getActiveServerType()
       @setState()
@@ -38,6 +40,13 @@ define [
       @listenTo @model, 'fetchFileDataFail', @fetchFileDataFail
       @listenTo @model, 'fetchFileDataSuccess', @fetchFileDataSuccess
       @listenTo @model, 'change', @checkIfFileDataChanged
+      if @parentFile
+        @$('audio, video')
+          .bind 'timeupdate', ((event) => @onTimeUpdate event)
+
+    onTimeUpdate: (event) ->
+      @$('span.current-time-seconds')
+        .text "#{event.currentTarget.currentTime.toFixed(2)}s"
 
     checkIfFileDataChanged: ->
       if @model.hasChanged 'filename' or @model.hasChanged 'size'
@@ -53,9 +62,31 @@ define [
       if not @$el.is(':visible') then @trigger 'fileDataView:show'
 
     events:
-      'click button.hide-file-data-widget': 'hideSelf'
+      'click button.hide-file-data-widget':         'hideSelf'
+      'click button.deselect-parent-file':          'deselectAsParentFile'
       #'click button.file-data-download':    ''
-      'keydown':                            'keydown'
+      'click button.set-current-position-to-start': 'setCurrentPositionToStart'
+      'click button.set-current-position-to-end':   'setCurrentPositionToEnd'
+      'keydown':                                    'keydown'
+
+    setCurrentPositionToStart: ->
+      try
+        @trigger 'setAttribute', 'start',
+          @$('audio, video').first().get(0).currentTime
+
+    setCurrentPositionToEnd: ->
+      try
+        @trigger 'setAttribute', 'end',
+          @$('audio, video').first().get(0).currentTime
+
+    onClose: ->
+      try
+        super
+      if @parentFile
+        @$('audio, video').unbind 'timeupdate'
+
+    deselectAsParentFile: ->
+      @trigger 'deselectAsParentFile'
 
     render: ->
       @html()
@@ -212,6 +243,7 @@ define [
           fileURL = @model.get 'blobURL'
       @embedCode = @getEmbedCode()
       context =
+        parentFile: @parentFile
         name: @model.get 'filename'
         containerStyle: @getContainerStyle()
         embedCode: @embedCode
@@ -223,7 +255,7 @@ define [
         MIMEType: @MIMEType
         type: @type
         resourceName: @resourceName
-        headerTitle: 'File Data'
+        headerTitle: @headerTitle
         activeServerType: @activeServerType
       @$el.html @template(context)
 

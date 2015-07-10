@@ -202,7 +202,17 @@ define [
       'MIME_type'
       'size'
       'enterer'
+      'tags'
+      'forms'
     ]
+
+
+  class ParentFileData extends FileData
+
+    initialize: (options) ->
+      options.parentFile = true
+      super options
+
 
   class ParentFileSearchInputView extends ResourceSelectViaSearchInputView
 
@@ -210,7 +220,7 @@ define [
     resourceName: 'file'
     resourceModelClass: FileModel
     resourceAsRowViewClass: FileAsRowView
-    resourceMediaViewClass: FileData
+    resourceMediaViewClass: ParentFileData
 
 
   class ParentFileSearchFieldView extends ResourceSelectViaSearchFieldView

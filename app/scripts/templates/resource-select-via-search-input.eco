@@ -1,3 +1,7 @@
+<div class='resource-select-via-search-input-container'>
+
+<i class="fa fa-search search-term-icon"></i>
+
 <input
     type='text'
     name='search-term'
@@ -13,10 +17,21 @@
     >Search</button>
 
 <div class='resource-results-via-search-table-wrapper ui-corner-all
-    dative-shadowed-widget'>
-    <div class='resource-results-via-search-table'></div>
+    dative-shadowed-widget ui-widget ui-widget-content'>
+
+    <div class='dative-widget-header ui-widget-header ui-corner-top'>
+
+        <div class='dative-widget-header-title container-center'
+            ><%= @resourceNameHumanCapitalized %> Search Results</div>
+
+    </div>
+
+    <div class='dative-widget-body ui-corner-bottom
+        resource-results-via-search-table'></div>
+
 </div>
 
 <div class='selected-resource-display-container dative-shadowed-widget
     ui-widget ui-widget-content ui-corner-all'></div>
 
+</div>

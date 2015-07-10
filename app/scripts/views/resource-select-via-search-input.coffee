@@ -31,12 +31,20 @@ define [
 
     render: ->
       @context.resourceNameHuman = @utils.snake2regular @context.attribute
+      @context.resourceNameHumanCapitalized =
+        (@utils.capitalize(w) for w in @context.resourceNameHuman.split(' ')).join ' '
       super
       @buttonify()
       @tooltipify()
       @renderHeaderView()
       @searchResultsTable()
-      #@prepResourceMediaView()
+      if @selectedResourceModel
+        if @resourceMediaViewRendered
+          @showResourceMediaView()
+        else
+          @renderResourceMediaView()
+      else
+        @resourceMediaViewVisibility()
       @
 
     searchResultsTable: ->
@@ -47,31 +55,47 @@ define [
 
     resourceMediaView: null
     resourceMediaViewClass: null
+    resourceMediaViewRendered: false
+    selectedResourceModel: null
 
-    prepResourceMediaView: ->
+    closeCurrentResourceMediaView: ->
+      if @resourceMediaView
+        @resourceMediaView.close()
+        @closed @resourceMediaView
+
+    renderResourceMediaView: ->
       if @resourceMediaViewClass
-        @resourceMediaView = new @resourceMediaViewClass(model: @model)
+        @closeCurrentResourceMediaView()
+        @resourceMediaView = new @resourceMediaViewClass
+          model: @selectedResourceModel
         $container = @$('.selected-resource-display-container').first()
         @resourceMediaView.setElement $container
         @resourceMediaView.render()
         @rendered @resourceMediaView
-        @resourceMediaViewVisible = false
-        $container.css 'border-color': @constructor.jQueryUIColors().defBo
-        @resourceMediaViewVisibility()
-
-    renderResourceMediaView: (model) ->
-      if @resourceMediaViewClass
-        if @resourceMediaView
-          @resourceMediaView.close()
-          @closed @resourceMediaView
-        @resourceMediaView = new @resourceMediaViewClass(model: model)
-        $container = @$('.selected-resource-display-container').first()
-        @resourceMediaView.setElement $container
-        @resourceMediaView.render()
-        @rendered @resourceMediaView
+        @listenToResourceMediaView()
         @resourceMediaViewVisible = true
+        @resourceMediaViewRendered = true
         $container.css 'border-color': @constructor.jQueryUIColors().defBo
         @resourceMediaViewVisibility()
+
+    listenToResourceMediaView: ->
+      @listenTo @resourceMediaView, 'deselectAsParentFile', @deselectCurrentlySelectedResourceModel
+      @listenTo @resourceMediaView, 'setAttribute', @setAttribute
+
+    setAttribute: (attr, val) ->
+      @model.trigger 'setAttribute', attr, val
+
+    deselectCurrentlySelectedResourceModel: ->
+      @model.set 'parent_file', null
+      @hideResourceMediaViewAnimateCheck(=> @closeCurrentResourceMediaView())
+
+    selectResourceAsRowView: (resourceAsRowView) ->
+      @model.set 'parent_file', resourceAsRowView.model.attributes
+      @model.trigger 'setAttribute', 'start', 0
+      @selectedResourceModel = resourceAsRowView.model
+      @renderResourceMediaView()
+      @$('audio, video')
+        .on 'loadedmetadata', ((event) => @metadataLoaded event)
 
     tooltipify: ->
       @$('.dative-tooltip').tooltip()
@@ -86,7 +110,7 @@ define [
       @listenTo @model, 'searchEnd', @searchEnd
       @listenTo @model, 'searchFail', @searchFail
 
-    itemsPerPage: 30
+    itemsPerPage: 100
 
     resourceAsRowViews: []
 
@@ -132,7 +156,9 @@ define [
       fragment.appendChild @headerView.el
       for modelObject in responseJSON.items
         resourceModel = new @resourceModelClass modelObject
-        resourceAsRowView = new @resourceAsRowViewClass model: resourceModel
+        resourceAsRowView = new @resourceAsRowViewClass
+          model: resourceModel
+          query: @query
         @resourceAsRowViews.push resourceAsRowView
         resourceAsRowView.render()
         @rendered resourceAsRowView
@@ -146,11 +172,14 @@ define [
     selectResourceAsRowView: (resourceAsRowView) ->
       @model.set 'parent_file', resourceAsRowView.model.attributes
       @model.trigger 'setAttribute', 'start', 0
-      @renderResourceMediaView resourceAsRowView.model
-      @$('audio, video').on 'loadedmetadata', ((event) => @metadataLoaded event)
+      @selectedResourceModel = resourceAsRowView.model
+      @renderResourceMediaView()
+      @$('audio, video')
+        .on 'loadedmetadata', ((event) => @metadataLoaded event)
 
     onClose: ->
       @$('audio, video').off 'loadedmetadata'
+      @resourceMediaViewRendered = false
 
     metadataLoaded: (event) ->
       @model.trigger 'setAttribute', 'end', event.currentTarget.duration
@@ -193,8 +222,8 @@ define [
         paginator =
           page: 1
           items_per_page: @itemsPerPage
-        query = @getSmartQuery searchTerm
-        @model.search query, paginator
+        @query = @getSmartQuery searchTerm
+        @model.search @query, paginator
       else
         @listenToOnce @model,
           "getNew#{@resourceNameCapitalized}SearchDataSuccess",
@@ -203,7 +232,8 @@ define [
           @getNewResourceSearchDataFail
         @model.getNewSearchData()
 
-    # These are the `[<attribute]`s or `[<attribute>, <subattribute>]`s that
+    # These are the `[<attribute]`s or `[<attribute>, <subattribute>]`s that we
+    # "smartly" search over.
     # TODO: consider fixing the following. You can't search files based on the
     # translations of the forms that they are associated to. This is a failing
     # of the OLD web service search interface. Adding this extra level of depth
@@ -211,9 +241,9 @@ define [
     smartStringSearchableFileAttributes: [
       ['id']
       ['filename']
+      ['MIME_type']
       ['name']
       ['url']
-      ['MIME_type']
       ['description']
       ['forms', 'transcription']
       ['tags', 'name']
@@ -236,6 +266,14 @@ define [
         @getAudioVideoMIMETypes()
       ]
 
+    hasAFilenameFilterExpression: ->
+      [
+        @resourceNameCapitalized
+        'filename'
+        '!='
+        null
+      ]
+
     # Return a query object for intelligently searching over (OLD) file
     # resources, given the string `searchTerm`. Here we try to guess what the
     # user probably wants their search expression to do.
@@ -245,6 +283,7 @@ define [
       if @isIdSearch searchTerms
         filter = ['and', [
           @isAudioVideoFilterExpression(),
+          @hasAFilenameFilterExpression(),
           [@resourceNameCapitalized, 'id', '=', parseInt(searchTerms[0])]]]
       else
         filter = @getGeneralFileSearch searchTerms
@@ -257,7 +296,10 @@ define [
     # `@smartStringSearchableFileAttributes`.
     getGeneralFileSearch: (searchTerms) ->
       filter = ['and']
-      complement = [@isAudioVideoFilterExpression()]
+      complement = [
+        @isAudioVideoFilterExpression()
+        @hasAFilenameFilterExpression()
+      ]
       for searchTerm in searchTerms
         conjunct = ['or']
         subcomplement = []
@@ -357,9 +399,14 @@ define [
       @resourceMediaViewVisible = true
       @$('.selected-resource-display-container').first().slideDown()
 
-    hideResourceMediaViewAnimate: ->
+    hideResourceMediaViewAnimate: (complete=->) ->
       @resourceMediaViewVisible = false
-      @$('.selected-resource-display-container').first().slideUp()
+      @$('.selected-resource-display-container').first().slideUp
+        complete: complete
+
+    hideResourceMediaViewAnimateCheck: (complete=->) ->
+      if @$('.selected-resource-display-container').is ':visible'
+        @hideResourceMediaViewAnimate complete
 
     toggleResourceMediaViewAnimate: ->
       if @resourceMediaViewVisible

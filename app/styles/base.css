@@ -186,7 +186,8 @@ button.help-button
 .dative-field-input-container,
 .dative-field-display-representation-container,
 .dative-field-display-label-container,
-.dative-pagin-item-index-cell
+.dative-pagin-item-index-cell,
+div.resource-as-row-cell.text
 {
   font-family: 'GentiumPlus', serif;
 }
@@ -1890,7 +1891,18 @@ audio.file-data-audio
 
 .resource-select-via-search-input-input
 {
-  width: 83.7%;
+  /*width: 83.7%;*/
+  width: 79.9%;
+  padding-left: 1.75em !important;
+}
+
+i.search-term-icon
+{
+  position: absolute;
+  display: block;
+  top: 0.75em;
+  left: 0.6em;
+  font-size: 12pt;
 }
 
 .resource-select-via-search-input-button
@@ -1949,7 +1961,9 @@ div.resource-as-row-header-cell.resource-as-row-attr-size
 }
 
 div.resource-as-row-cell.resource-as-row-attr-filename,
-div.resource-as-row-header-cell.resource-as-row-attr-filename
+div.resource-as-row-header-cell.resource-as-row-attr-filename,
+div.resource-as-row-cell.resource-as-row-attr-forms,
+div.resource-as-row-cell.resource-as-row-attr-tags
 {
   width: 12em;
   text-overflow: clip;
@@ -1962,7 +1976,7 @@ div.resource-as-row-header-cell.resource-as-row-attr-id
   width: 3.5em;
 }
 
-div.resource-as-row-cell.controls
+div.resource-as-row-cell.controls-header
 {
   width: 100px;
 }
@@ -1970,10 +1984,23 @@ div.resource-as-row-cell.controls
 div.resource-as-row-cell.text
 {
   font-size: 12pt;
+  line-height: 1.75em;
 }
 
 div.resource-as-row-cell.header
 {
   font-weight: bold;
+}
+
+div.resource-select-via-search-input-container
+{
+  position: relative;
+}
+
+span.current-time-seconds
+{
+  width: 7em;
+  display: inline-block;
+  text-align: right;
 }
 

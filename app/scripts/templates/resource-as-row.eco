@@ -1,7 +1,7 @@
 <% class_ = if @isHeaderRow then 'header' else 'field' %>
 
 <% if not @isHeaderRow: %>
-<div class='resource-as-row-cell controls'>
+<div class='resource-as-row-cell controls-header'>
 
     <button class="select dative-tooltip"
             title="select this <%= @resourceNameHumanReadable() %>"
@@ -17,7 +17,7 @@
 <% else: %>
 <div class='resource-as-row-cell
             text
-            controls
+            controls-header
             <%= class_ %>'
     >Controls</div>
 <% end %>
@@ -27,5 +27,5 @@
             text
             <%= class_ %>
             resource-as-row-attr-<%= attribute %>'
-    ><%= value %></div>
+    ><%- value %></div>
 <% end %>
