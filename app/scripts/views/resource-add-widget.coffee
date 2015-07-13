@@ -127,6 +127,7 @@ define [
       @$el
         .attr 'id', @model.cid
         .html @template(context)
+        .addClass @addUpdateType
 
     getHeaderTitle: ->
       if @addUpdateType is 'add'

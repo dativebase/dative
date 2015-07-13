@@ -148,6 +148,7 @@ define [
         @$('div.resource-results-via-search-table')
           .html @getSearchResultsRows(responseJSON)
           .scrollLeft 0
+        @$('button.select').first().focus()
 
     reportMatchesFound: (responseJSON) ->
       count = responseJSON.paginator.count

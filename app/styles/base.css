@@ -1889,6 +1889,11 @@ audio.file-data-audio
   top: 0.15em;
 }
 
+.update .resource-select-via-search-input-input
+{
+  width: 78%;
+}
+
 .resource-select-via-search-input-input
 {
   /*width: 83.7%;*/
