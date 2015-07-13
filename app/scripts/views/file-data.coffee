@@ -50,6 +50,7 @@ define [
       @listenTo @model, 'fetchFileDataFail', @fetchFileDataFail
       @listenTo @model, 'fetchFileDataSuccess', @fetchFileDataSuccess
       @listenTo @model, 'change', @checkIfFileDataChanged
+      @listenTo @model, 'fileDataChanged', @fileDataChanged
       # If we are displaying the data of a subinterval-referencing file, we
       # have to control the cursor start and end positions.
       if @model.get('parent_file')

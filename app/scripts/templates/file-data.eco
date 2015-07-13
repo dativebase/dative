@@ -97,9 +97,10 @@
         <% else if @embedCode: %>
             <%- @embedCode %>
         <% else: %>
+            <% object = if @name then "the file #{@name}" else "this file" %>
             <% verb = if @type in ['audio', 'video'] then 'play' else 'display' %>
-            <div class='file-data-no-display'>Sorry, your browser cannot
-                <%= verb %> the file <%= @name %></div>
+            <div class='file-data-no-display'>Sorry, <%= object %> cannot be
+                <%= verb %>ed.</div>
         <% end %>
 
 </div>

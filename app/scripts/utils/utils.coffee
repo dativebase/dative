@@ -333,6 +333,19 @@ define (require) ->
     catch
       null
 
+  getFilenameAndExtension = (path) ->
+    try
+      parts = path.split('.')
+      if parts.length is 1
+        [path, null]
+      else
+        [parts[...-1].join('.'), parts[-1..][0]]
+    catch
+      [path, null]
+
+  getFilenameWithoutExtension = (path) ->
+    getFilenameAndExtension(path)[0]
+
   getMIMEType = (path) ->
     try
       extensions[getExtension(path)]
@@ -388,6 +401,8 @@ define (require) ->
   millisecondsToTimeString: millisecondsToTimeString
   leftPad: leftPad
   getExtension: getExtension
+  getFilenameWithoutExtension: getFilenameWithoutExtension
+  getFilenameAndExtension: getFilenameAndExtension
   getMIMEType: getMIMEType
   extensions: extensions
 

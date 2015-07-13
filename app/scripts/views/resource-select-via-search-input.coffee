@@ -93,6 +93,8 @@ define [
       @model.set 'parent_file', null
       @hideResourceMediaViewAnimateCheck(=> @closeCurrentResourceMediaView())
 
+    # Set the `parent_file` attribute of our model to the model of the
+    # passed-in `resourceAsRowView`
     selectResourceAsRowView: (resourceAsRowView) ->
       @model.set 'parent_file', resourceAsRowView.model.attributes
       @model.trigger 'setAttribute', 'start', 0
@@ -183,14 +185,6 @@ define [
 
     listenToResourceAsRow: (resourceAsRowView) ->
       @listenTo resourceAsRowView, 'selectMe', @selectResourceAsRowView
-
-    selectResourceAsRowView: (resourceAsRowView) ->
-      @model.set 'parent_file', resourceAsRowView.model.attributes
-      @model.trigger 'setAttribute', 'start', 0
-      @selectedResourceModel = resourceAsRowView.model
-      @renderResourceMediaView()
-      @$('audio, video')
-        .on 'loadedmetadata', ((event) => @metadataLoaded event)
 
     onClose: ->
       @$('audio, video').off 'loadedmetadata'
