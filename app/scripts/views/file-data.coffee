@@ -21,7 +21,7 @@ define [
       # one that accords with the display of a subinterval-referencing file's
       # parent file data.
       @parentFile = options.parentFile or false
-      @headerTitle = if @parentFile then 'Parent File Data' else 'File Data'
+      @headerTitle = if @parentFile then @model.get('filename') else 'File Data'
       @resourceName = options?.resourceName or ''
       @activeServerType = @getActiveServerType()
       @setState()
@@ -35,6 +35,8 @@ define [
     getMIMEType: ->
       if @model.get 'parent_file'
         @model.get('parent_file').MIME_type
+      else if @model.get 'url'
+        @utils.getMIMEType @model.get('url')
       else
         @model.get 'MIME_type'
 
@@ -110,7 +112,14 @@ define [
     fileDataChanged: ->
       @setState()
       @render()
-      if not @$el.is(':visible') then @trigger 'fileDataView:show'
+      if (@MIMEType is 'application/pdf') or
+      (@type is 'audio') or
+      (@type is 'video' and @canPlayVideo) or
+      (@type is 'image') or
+      @embedCode
+        if not @$el.is(':visible') then @trigger 'fileDataView:show'
+      else
+        if @$el.is(':visible') then @trigger 'fileDataView:hide'
 
     events:
       'click button.hide-file-data-widget':         'hideSelf'
@@ -204,13 +213,26 @@ define [
       if extension of @utils.extensions then url else null
 
     getEmbedCodeData: (dataURL) ->
+      try
+        @_getEmbedCodeData dataURL
+      catch
+        'Sorry, this file cannot be displayed.'
+
+    _getEmbedCodeData: (dataURL) ->
       MIMEType = @utils.getMIMEType dataURL
-      "<video class='file-data-video ui-corner-bottom' controls>
-          <source
-              src='#{dataURL}'
-              type='#{MIMEType}'>
-          Your browser does not support the video tag.
-      </video>"
+      if MIMEType is 'application/pdf'
+        "<object class='file-data-pdf'
+          data='#{dataURL}'
+          type='#{MIMEType}'
+          name='#{@model.get('name')}'
+          >#{@model.get('name')}</object>"
+      else
+        "<video class='file-data-video ui-corner-bottom' controls>
+            <source
+                src='#{dataURL}'
+                type='#{MIMEType}'>
+            Your browser does not support the video tag.
+        </video>"
 
     # See http://stackoverflow.com/questions/3452546/javascript-regex-how-to-get-youtube-video-id-from-url
     getYouTubeId: (url) ->

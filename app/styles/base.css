@@ -1138,6 +1138,19 @@ div.button-container-center
   -webkit-transform: translate(-50%, -50%);
 }
 
+div.container-center-left
+{
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-80%, -50%);
+  -webkit-transform: translate(-80%, -50%);
+  width: 40%;
+  max-width: 40%;
+  overflow-x: scroll;
+  white-space: nowrap;
+}
+
 div.button-container-center
 {
   width: 700px;
@@ -2017,5 +2030,15 @@ span.current-time-seconds
 .resource-results-via-search-table-wrapper .results-showing-count
 {
   padding-right: 1em;
+}
+
+.resource-icon i
+{
+  margin-right: 0.25em;
+}
+
+.resource-sub-icon-
+{
+  margin-left: 0.25em;
 }
 

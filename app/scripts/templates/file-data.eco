@@ -1,7 +1,13 @@
 <div class="dative-widget-header ui-widget-header ui-corner-top">
 
-  <div class='dative-widget-header-title container-center'
-    ><%= @headerTitle %></div>
+  <% if @parentFile: %>
+      <div class='dative-widget-header-title container-center-left
+        parent-file-header-title'
+        ><%= @headerTitle %></div>
+  <% else: %>
+    <div class='dative-widget-header-title container-center'
+        ><%= @headerTitle %></div>
+  <% end %>
 
   <div class='button-container-left'>
 
@@ -9,7 +15,6 @@
         <button class="deselect-parent-file dative-tooltip"
                 title="Deselect this file as the parent file"
             >deselect</button>
-        <span class='current-time-seconds'>0s</span>
     <% else: %>
         <button class="hide-file-data-widget dative-tooltip"
                 title="hide the file data widget of this <%= @resourceName %>">
@@ -24,6 +29,8 @@
     <span class="spinner-container"></span>
 
     <% if @parentFile: %>
+
+        <span class='current-time-seconds'>0s</span>
 
         <button class='set-current-position-to-start dative-tooltip'
                 title='set current position as the “start” value'

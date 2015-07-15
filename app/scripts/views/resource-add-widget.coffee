@@ -498,7 +498,8 @@ define [
       @setSecondaryDataToggleButtonState()
       @$(@secondaryDataSelector).slideDown
         complete: =>
-          @$(@secondaryDataSelector).find('textarea').first().focus()
+          @$(@secondaryDataSelector)
+            .find('textarea, .ui-selectmenu-button').first().focus()
 
     toggleSecondaryData: ->
       if @secondaryDataVisible

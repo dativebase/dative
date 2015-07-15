@@ -27,11 +27,28 @@ define [
 
     template: resourceSelectViaSearchInputTemplate
 
+    refresh: (@context) ->
+      @selectedValue()
+      @resourceMediaViewRendered = false
+      @render()
+
     initialize: (context) ->
       super context
       @resourceNamePlural = @utils.pluralize @resourceName
       @resourceNameCapitalized = @utils.capitalize @resourceName
       @resourceNamePluralCapitalized = @utils.capitalize @resourceNamePlural
+      @searchResultsTableVisible = false
+      @searchResultsCount = 0
+      @selectedValue()
+
+    selectedValue: ->
+      if @context.value
+        @selectedResourceModel = new @resourceModelClass(@context.value)
+        @searchInterfaceVisible = false
+        @resourceMediaViewVisible = true
+      else
+        @searchInterfaceVisible = true
+        @resourceMediaViewVisible = false
 
     render: ->
       @context.resourceNameHuman = @utils.snake2regular @context.attribute
@@ -42,6 +59,7 @@ define [
       @tooltipify()
       @renderHeaderView()
       @searchResultsTable()
+      @searchInterfaceVisibility()
       if @selectedResourceModel
         if @resourceMediaViewRendered
           @showResourceMediaView()
@@ -52,7 +70,6 @@ define [
       @
 
     searchResultsTable: ->
-      @searchResultsTableVisible = false
       @$('.resource-results-via-search-table-wrapper')
         .css 'border-color': @constructor.jQueryUIColors().defBo
       @searchResultsTableVisibility()
@@ -90,16 +107,29 @@ define [
       @model.trigger 'setAttribute', attr, val
 
     deselectCurrentlySelectedResourceModel: ->
+      @model.set 'MIME_type', ''
       @model.set 'parent_file', null
+      @selectedResourceModel = null
+      @trigger 'validateMe'
+      if @searchResultsCount > 0 then @showSearchResultsTableAnimate()
+      @showSearchInterfaceAnimate (=> @focusAndSelectSearchTerm())
       @hideResourceMediaViewAnimateCheck(=> @closeCurrentResourceMediaView())
+
+    focusAndSelectSearchTerm: ->
+      @$('[name=search-term]').first().focus().select()
 
     # Set the `parent_file` attribute of our model to the model of the
     # passed-in `resourceAsRowView`
     selectResourceAsRowView: (resourceAsRowView) ->
+      @model.set 'MIME_type', resourceAsRowView.model.get('MIME_type')
       @model.set 'parent_file', resourceAsRowView.model.attributes
-      @model.trigger 'setAttribute', 'start', 0
       @selectedResourceModel = resourceAsRowView.model
+      @model.trigger 'setAttribute', 'start', 0
+      @trigger 'validateMe'
+      @hideSearchResultsTableAnimate()
+      @hideSearchInterfaceAnimate()
       @renderResourceMediaView()
+      @$('button.deselect-parent-file').first().focus().select()
       @$('audio, video')
         .on 'loadedmetadata', ((event) => @metadataLoaded event)
 
@@ -143,8 +173,8 @@ define [
     searchSuccess: (responseJSON) ->
       @showSearchResultsTableAnimateCheck()
       @closeResourceAsRowViews()
-      count = @reportMatchesFound responseJSON
-      if count > 0
+      @searchResultsCount = @reportMatchesFound responseJSON
+      if @searchResultsCount > 0
         @$('div.resource-results-via-search-table')
           .html @getSearchResultsRows(responseJSON)
           .scrollLeft 0
@@ -153,9 +183,11 @@ define [
     reportMatchesFound: (responseJSON) ->
       count = responseJSON.paginator.count
       itemsPerPage = responseJSON.paginator.items_per_page
-      @$('span.results-count').text "#{count} matches"
+      noun = if count is 1 then 'match' else 'matches'
+      @$('span.results-count').text "#{count} #{noun}"
       if count > 0
-        @$('span.results-showing-count').text "showing #{itemsPerPage}"
+        showing = if (count < itemsPerPage) then count else itemsPerPage
+        @$('span.results-showing-count').text "showing #{showing}"
       count
 
     renderHeaderView: ->
@@ -374,6 +406,47 @@ define [
         @hideSearchResultsTableAnimate()
       else
         @showSearchResultsTableAnimate()
+
+
+    # Search Interface
+    ############################################################################
+
+    # Make the search interface visible, or not, depending on state.
+    searchInterfaceVisibility: ->
+      if @searchInterfaceVisible
+        @showSearchInterface()
+      else
+        @hideSearchInterface()
+
+    toggleSearchInterface: ->
+      if @searchInterfaceVisible
+        @hideSearchInterface()
+      else
+        @showSearchInterface()
+
+    toggleSearchInterfaceAnimate: ->
+      if @searchInterfaceVisible
+        @hideSearchInterfaceAnimate()
+      else
+        @showSearchInterfaceAnimate()
+
+    hideSearchInterfaceAnimate: ->
+      @searchInterfaceVisible = false
+      @$('.resource-select-via-search-interface').first().slideUp()
+
+    showSearchInterfaceAnimate: (complete=->) ->
+      @searchInterfaceVisible = true
+      @$('.resource-select-via-search-interface').first().slideDown
+        complete: complete
+
+    hideSearchInterface: (complete=->) ->
+      @searchInterfaceVisible = false
+      @$('.resource-select-via-search-interface').first().hide
+        complete: complete
+
+    showSearchInterface: ->
+      @searchInterfaceVisible = true
+      @$('.resource-select-via-search-interface').first().show()
 
 
     # Resource Media View

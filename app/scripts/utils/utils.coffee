@@ -319,6 +319,8 @@ define (require) ->
     else
       false
 
+  # Maps file extensions to MIME types. Potentially problematic parts include
+  # the audio/mp3 type for .mp3 files ...
   extensions =
     mpeg: 'video/mpeg'
     mp4:  'video/mp4'
@@ -326,6 +328,16 @@ define (require) ->
     qt:   'video/quicktime'
     mov:  'video/quicktime'
     wmv:  'video/x-ms-wmv'
+    pdf:  'application/pdf'
+    gif:  'image/gif'
+    jpeg: 'image/jpeg'
+    jpg:  'image/jpeg'
+    png:  'image/png'
+    mpga: 'audio/mpeg'
+    mp3:  'audio/mp3'
+    ogg:  'audio/ogg'
+    oga:  'audio/ogg'
+    wav:  'audio/x-wav'
 
   getExtension = (path) ->
     try

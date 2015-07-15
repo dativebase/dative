@@ -159,7 +159,7 @@ define [
       @$('.dative-widget-header').first().addClass 'ui-state-error'
       headerTitleHTML = "#{@getHeaderTitle()} (<i class='fa fa-fw
         fa-exclamation-triangle'></i>Unsaved changes)"
-      @$('.dative-widget-header-title').first()
+      @$('.dative-widget-header-title .header-title-content').first()
         .html headerTitleHTML
 
     updateSuccess: ->
@@ -167,7 +167,8 @@ define [
 
     indicateModelIsUnaltered: ->
       @$('.dative-widget-header').first().removeClass 'ui-state-error'
-      @$('.dative-widget-header-title').first().html @getHeaderTitle()
+      @$('.dative-widget-header-title .header-title-content').first()
+        .html @getHeaderTitle()
 
     events:
       'click .resource-primary-data': 'showAndHighlightOnlyMe'
@@ -266,12 +267,15 @@ define [
     getContext: ->
       activeServerType: @activeServerType
       headerTitle: @getHeaderTitle()
+      resourceIcon: @getResourceIcon()
       addUpdateType: @addUpdateType
       headerAlwaysVisible: @headerAlwaysVisible
       resourceName: @resourceName
       resourceNameHumanReadable: @resourceNameHumanReadable
       excludedActions: @excludedActions
       showControlsWithNew: @showControlsWithNew
+
+    getResourceIcon: -> ''
 
     # Set this to `true` if you want the controls button to be visible on a new
     # resource, i.e., an unsaved resource.

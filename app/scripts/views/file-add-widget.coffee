@@ -28,6 +28,7 @@ define [
     listenToEvents: ->
       super
       @listenTo @model, 'change:dative_file_type', @crucialAttributeChanged
+      @listenTo @model, 'change:MIME_type', @crucialAttributeChanged
 
     render: ->
       super
@@ -47,13 +48,18 @@ define [
     isAudioVideo: ->
       MIME_type = @model.get 'MIME_type'
       if MIME_type
-        @utils.startsWith MIME_type, 'audio' or
-        @utils.startsWith MIME_type, 'video'
+        @utils.startsWith(MIME_type, 'audio') or
+        @utils.startsWith(MIME_type, 'video')
       else
-        # Assuming for now (incorrectly) that anything without a MIME_type is
-        # externally hosted audio/video
-        true
-
+        try
+          if @model.get('url')
+            MIME_type = @utils.getMIMEType @model.get('url')
+            @utils.startsWith(MIME_type, 'audio') or
+            @utils.startsWith(MIME_type, 'video')
+          else
+            false
+        catch
+          false
 
   # A <select>-based field view for the file's utterance type. We mixin methods
   # from `TypedTextareaFieldView` so that this field will only be visible when
@@ -180,12 +186,22 @@ define [
     visibilityCondition: ->
       @model.get('dative_file_type') is 'storedOnAnotherServer'
 
+    initialize: (options) ->
+      options.domAttributes =
+        maxlength: 255
+      super options
+
 
   class NonLocalOrSubintervalFileAttributeFieldView extends TypedTextareaFieldView
 
     visibilityCondition: ->
       @model.get('dative_file_type') in ['storedOnAnotherServer',
         'referencesASubintervalOfAnotherFile']
+
+    initialize: (options) ->
+      options.domAttributes =
+        maxlength: 255
+      super options
 
 
   class SubintervalReferencingFileAttributeFieldView extends TypedTextareaFieldView
@@ -198,7 +214,9 @@ define [
     getValueFromDOM: ->
       result = super
       try
-        result[@attribute] = parseFloat result[@attribute]
+        value = parseFloat result[@attribute]
+        if isNaN(value) then value = ''
+        result[@attribute] = value
       result
 
 
@@ -242,9 +260,17 @@ define [
       @mixin()
       super options
 
+    listenToEvents: ->
+      super
+      @listenTo @model, 'change:dative_file_type', @crucialAttributeChanged
+      if @inputView
+        @listenTo @inputView, 'validateMe', @myValidate
+
+    myValidate: ->
+      if @submitAttempted then @validate()
+
     mixin: ->
       methodsWeWant = [
-        'listenToEvents'
         'crucialAttributeChanged'
         'hideAnimate'
         'showAnimate'

@@ -77,7 +77,10 @@ define [
 
     guify: ->
       @$('button').button()
-      @$('.dative-tooltip').tooltip()
+      @$('.select.dative-tooltip').tooltip
+        position: @tooltipPositionLeft('-20')
+      @$('.view.dative-tooltip').tooltip
+        position: @tooltipPositionLeft('-70')
 
     # Return the model scalarized and with its matches (relqtive to the
     # query/search) highlighted.

@@ -29,7 +29,8 @@
   </div>
 
   <div class='dative-widget-header-title container-center'
-    ><%- @headerTitle or '' %></div>
+      ><span class='resource-icon'><%- @resourceIcon %></span
+      ><span class='header-title-content'><%- @headerTitle or '' %></span></div>
 
   <div class='button-container-right'>
 

@@ -37,10 +37,80 @@ define ['./resource'], (ResourceModel) ->
       switch attribute
         when 'name' then @validName
         when 'url' then @validURL
+        when 'start' then @validStart
+        when 'end' then @validEnd
+        when 'parent_file' then @validParentFile
+        when 'base64_encoded_file' then @hasFileData
+        when 'blobURL' then @hasFileData
         else null
 
+    hasFileData: (value) ->
+      if (not @get('id')) and @get('dative_file_type') is 'storedOnTheServer'
+        if @get('base64_encoded_file') or @get('blobURL')
+          null
+        else
+          'Please select a file for upload.'
+      else
+        null
+
+    validParentFile: (value) ->
+      if @get('dative_file_type') is 'referencesASubintervalOfAnotherFile'
+        if value
+          null
+        else
+          'Please choose a parent file.'
+      else
+        null
+
+    validStart: (value) ->
+      if @get('dative_file_type') is 'referencesASubintervalOfAnotherFile'
+        validNumberError = @validNumber value
+        if validNumberError
+          validNumberError
+        else
+          validEndNumberError = @validNumber @get('end')
+          if validEndNumberError
+            null
+          else
+            if value < @get('end')
+              null
+            else
+              'The start value must be less than the end value.'
+      else
+        null
+
+    validEnd: (value) ->
+      if @get('dative_file_type') is 'referencesASubintervalOfAnotherFile'
+        validNumberError = @validNumber value
+        if validNumberError
+          validNumberError
+        else
+          validStartNumberError = @validNumber @get('start')
+          if validStartNumberError
+            null
+          else
+            if value > @get('start')
+              null
+            else
+              'The end value must be greater than the start value.'
+      else
+        null
+
+    validNumber: (value) ->
+      if @get('dative_file_type') is 'referencesASubintervalOfAnotherFile'
+        try
+          if value.match /^\d+(\.\d+)?$/
+            null
+          else
+            'Please enter a number.'
+        catch
+          null
+      else
+        null
+
     validName: (value) ->
-      if @get('dative_file_type') is 'storedOnAnotherServer'
+      if @get('dative_file_type') in ['storedOnAnotherServer',
+        'referencesASubintervalOfAnotherFile']
         @requiredString value
       else
         null

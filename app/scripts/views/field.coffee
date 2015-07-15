@@ -125,9 +125,14 @@ define [
     listenToEvents: ->
       super
       if @inputView
-        @listenTo @inputView, 'setToModel', @setToModel
-      # We listen to validation error events that are relevant to our attribute(s).
-      @listenTo @context.model, "validationError:#{@attribute}", @validationError
+        @listenTo @inputView, 'setToModel', @inputViewSetToModel
+      @listenForValidationErrors()
+
+    # We listen to validation error events that are relevant to our
+    # attribute(s). Note: this may need to be over-ridden in sub-classes.
+    listenForValidationErrors: ->
+      @listenTo @context.model, "validationError:#{@attribute}",
+        @validationError
 
     renderLabelView: ->
       @labelView.setElement @$('.dative-field-label-container')
@@ -172,13 +177,18 @@ define [
         when 'OLD' then @model.set domValue
       if @submitAttempted then @validate()
 
+    inputViewSetToModel: -> @setToModel()
+
     validate: (errors) ->
       clientSideValidationErrors = errors or @model.validate()
       if clientSideValidationErrors
-        ourError = clientSideValidationErrors[@attribute]
-        if ourError then @validationError(ourError) else @validationError()
+        myError = @getMyError clientSideValidationErrors
+        if myError then @validationError(myError) else @validationError()
       else
         @validationError()
+
+    # This may need to be overridden in sub-classes.
+    getMyError: (errorObject) -> errorObject[@attribute]
 
     # Display the validation error display, or remove it if there isn't an error.
     validationError: (error) ->

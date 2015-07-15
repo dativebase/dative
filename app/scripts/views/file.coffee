@@ -127,30 +127,47 @@ define [
       id = @model.get 'id'
       if id then "File #{id}" else "New File"
 
+    getResourceIcon: (fileTypeIconClass=null) ->
+      fileTypeIconClass = fileTypeIconClass or @getFileTypeIconClass()
+      fileTypeIcon = "<i class='fa fa-lg #{fileTypeIconClass}'></i>"
+      if @model.get('url')
+        externalLinkIcon = "<i class='fa fa-lg fa-external-link'></i>"
+      else
+        externalLinkIcon = ''
+      if @model.get('parent_file')
+        subintervalIcon = "<i class='fa fa-lg fa-crop'></i>"
+      else
+        subintervalIcon = ''
+      "#{fileTypeIcon}#{externalLinkIcon}#{subintervalIcon}"
+
     listenToEvents: ->
       super
       @listenTo @model, 'change:MIME_type', @refreshFileDataViewButton
       @listenTo @model, 'change:url', @refreshFileDataViewButton
       @listenTo @model, 'change:parent_file', @refreshFileDataViewButton
 
-    refreshFileDataViewButton: ->
+    getFileTypeIconClass: ->
       MIMEType = @model.get 'MIME_type'
       if MIMEType and @MIMEType2type MIMEType
         type = @MIMEType2type MIMEType
-        class_ = "fa-file-#{type}-o"
+        "fa-file-#{type}-o"
       else if @model.get('url')
-        class_ = "fa-file-video-o"
+        "fa-file-video-o"
       else if @model.get('parent_file')
         try
           type = @MIMEType2type @model.get('parent_file').MIME_type
-          class_ = "fa-file-#{type}-o"
+          "fa-file-#{type}-o"
         catch
-          class_ = "fa-file-audio-o"
+          "fa-file-audio-o"
       else
-        class_ = "fa-file-o"
+        "fa-file-o"
+
+    refreshFileDataViewButton: ->
+      fileTypeIconClass = @getFileTypeIconClass()
       $('button.file-data i')
         .removeClass()
-        .addClass "fa fa-fw #{class_}"
+        .addClass "fa fa-fw #{fileTypeIconClass}"
+      $('span.resource-icon').html @getResourceIcon(fileTypeIconClass)
 
     # Return an <i> tag with the correct Font Awesome icon for the file type.
     # Note: we assume that all externally hosted files are videos (which may be

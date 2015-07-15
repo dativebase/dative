@@ -14,3 +14,20 @@ define [
     getInputView: ->
       new FileDataUploadInputView @context
 
+    # This field needs to listen for a number of filedata-related errors.
+    listenForValidationErrors: ->
+      @listenTo @context.model, "validationError:#{@attribute}",
+        @validationError
+      @listenTo @context.model, "validationError:base64_encoded_file",
+        @validationError
+      @listenTo @context.model, "validationError:fileBLOB",
+        @validationError
+
+    # "My error" may be any of a number of filedata-related errors.
+    getMyError: (errorObject) ->
+      result = null
+      for attribute in [@attribute, 'base64_encoded_file', 'fileBLOB']
+        if attribute of errorObject
+          result = errorObject[attribute]
+      result
+

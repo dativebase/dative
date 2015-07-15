@@ -29,8 +29,18 @@ define [
       for attribute of resource.attributes
         value = resource.get attribute
         if attribute in ['elicitor', 'speaker']
-          if value is undefined then value = ''
-        formData.append attribute, value
+          if value is undefined
+            value = ''
+          else
+            value = value.id
+        if attribute in ['base64_encoded_file', 'parent_file']
+          value = ''
+        if attribute isnt 'search-term' # `search-term` isn't a file attribute; also, the OLD will choke on it because it'll expect "term" to be a numeric index.
+          if attribute in ['tags', 'forms']
+            for element, index in value
+              formData.append "#{attribute}-#{index}", element.id
+          else
+            formData.append attribute, value
       formData
 
     addFileAsMultipartFormData: (resource, options) ->
@@ -60,11 +70,11 @@ define [
     # attributes from the payload, as appropriate, based on the type.
     getResourceForServerCreate: (resource) ->
       result = super resource
-      # referencesASubintervalOfAnotherFile
       if resource.get('dative_file_type') is 'storedOnTheServer'
         delete result.url
         if not resource.get 'base64_encoded_file'
           delete result.base64_encoded_file
+          delete result.parent_file
       else if resource.get('dative_file_type') is 'storedOnAnotherServer'
         delete result.base64_encoded_file
       else if resource.get('dative_file_type') is 'referencesASubintervalOfAnotherFile'
