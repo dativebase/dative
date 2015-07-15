@@ -135,7 +135,7 @@ define [
       else
         externalLinkIcon = ''
       if @model.get('parent_file')
-        subintervalIcon = "<i class='fa fa-lg fa-crop'></i>"
+        subintervalIcon = "<i class='fa fa-lg fa-scissors'></i>"
       else
         subintervalIcon = ''
       "#{fileTypeIcon}#{externalLinkIcon}#{subintervalIcon}"
@@ -192,6 +192,7 @@ define [
     excludedActions: [
       'history'
       'controls'
+      'duplicate'
     ]
 
     fileDataViewClass: FileDataView
