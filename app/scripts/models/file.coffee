@@ -270,3 +270,20 @@ define ['./resource'], (ResourceModel) ->
       base = "#{@getOLDURL()}/#{@getServerSideResourceName()}/#{@get 'id'}"
       if reduced then "#{base}/serve_reduced" else "#{base}/serve"
 
+    # Returns `true` if the file is audio or video.
+    isAudioVideo: ->
+      MIME_type = @get 'MIME_type'
+      if MIME_type
+        @utils.startsWith(MIME_type, 'audio') or
+        @utils.startsWith(MIME_type, 'video')
+      else
+        try
+          if @get('url')
+            MIME_type = @utils.getMIMEType @get('url')
+            @utils.startsWith(MIME_type, 'audio') or
+            @utils.startsWith(MIME_type, 'video')
+          else
+            false
+        catch
+          false
+

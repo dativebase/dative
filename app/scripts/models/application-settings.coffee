@@ -108,6 +108,7 @@ define [
               username: credentials.username
               password: credentials.password
               loggedIn: true
+              loggedInUser: responseJSON.user
             @save()
             Backbone.trigger 'authenticateSuccess'
           else

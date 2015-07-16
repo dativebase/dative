@@ -684,7 +684,8 @@ div.dative-display
 }
 
 ul.fieldset textarea.textarea-only,
-textarea.textarea-only
+textarea.textarea-only,
+input.input-only
 {
   width: 94.1%;
   max-width: 94.1%;

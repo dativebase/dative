@@ -25,6 +25,7 @@ define [
         'languageModel'
         'morphologicalParser'
         'search'
+        'user'
       ]
       @crudRequests = ['add', 'update', 'destroy']
       @crudOutcomes = ['Success', 'Fail']
@@ -276,6 +277,23 @@ define [
     destroySearchFail: (error) -> @destroyResourceFail error, 'search'
     destroySearchSuccess: (model) ->
       @destroyResourceSuccess model, 'search'
+
+    ############################################################################
+    # Users: add, update, & destroy notifications
+    ############################################################################
+
+    addUserSuccess: (model) ->
+      @addResourceSuccess model, 'user'
+    addUserFail: (error) ->
+      @addResourceFail error, 'user'
+    updateUserSuccess: (model) ->
+      @updateResourceSuccess model, 'user'
+    updateUserFail: (error) ->
+      @updateResourceFail error, 'user'
+    destroyUserFail: (error) ->
+      @destroyResourceFail error, 'user'
+    destroyUserSuccess: (model) ->
+      @destroyResourceSuccess model, 'user'
 
     ############################################################################
     # Resources: add, update, & destroy notifications

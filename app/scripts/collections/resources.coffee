@@ -149,13 +149,24 @@ define [
         resource.trigger "add#{@resourceNameCapitalized}Success", resource
       else
         errors = responseJSON.errors or {}
-        error = errors.error
-        resource.trigger "add#{@resourceNameCapitalized}Fail", error
-        for attribute, error of errors
-          resource.trigger "validationError:#{attribute}", error
-        console.log "POST request to /#{@getServerSideResourceName()} failed (status
-          not 200) ..."
+        if utils.type(errors) is 'object'
+          resource.trigger "add#{@resourceNameCapitalized}Fail", errors.error
+          for attribute, error of errors
+            resource.trigger "validationError:#{attribute}", error
+        else
+          resource.trigger "add#{@resourceNameCapitalized}Fail", errors
+          attribute = @getAttributeForError errors
+          if attribute
+            resource.trigger "validationError:#{attribute}", errors
+          else
+            resource.trigger "validationError:general", errors
+        console.log "POST request to /#{@getServerSideResourceName()} failed
+          (status not 200) ..."
         console.log errors
+
+    # Attempt to match an error string to the resource attribute that caused
+    # the error. Return a `null` if not possible. Override this in sub-classes.
+    getAttributeForError: (error) -> null
 
 
     ############################################################################
@@ -221,7 +232,7 @@ define [
     # `collections/forms.coffee` for a FieldDB-specific override.
     # Note: other possible parameters: `order_by_model`, `order_by_attribute`,
     # and `order_by_direction`.
-    getResourcesPaginationURL: (options) ->
+    getResourcesPaginationURL: (options={}) ->
       if @search or @corpus
         "#{@getOLDURL()}/#{@getServerSideResourceName()}"
       else if options.page and options.itemsPerPage

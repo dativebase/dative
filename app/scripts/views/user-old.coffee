@@ -33,7 +33,7 @@ define [
       if @headerTitle
         @headerTitle
       else
-        "User #{@model.get 'id'}"
+        "#{@model.get 'username'} (user #{@model.get 'id'})"
 
     # Attributes that are always displayed.
     primaryAttributes: [
@@ -43,6 +43,7 @@ define [
 
     # Attributes that may be hidden.
     secondaryAttributes: [
+      'username'
       'role'
       'email'
       'affiliation'
@@ -56,6 +57,32 @@ define [
 
     render: ->
       super
+
+    initialize: (options) ->
+      if @imAdmin()
+        @excludedActions = [
+          'history'
+          'controls'
+          'data'
+        ]
+      else if @imAdminOrImResource()
+        @excludedActions = [
+          'history'
+          'controls'
+          'data'
+          'delete'
+          'duplicate'
+        ]
+      else
+        @excludedActions = [
+          'history'
+          'controls'
+          'data'
+          'update'
+          'delete'
+          'duplicate'
+        ]
+      super options
 
     # Map attribute names to display view class names.
     # TODO: create a class to display orthographies.

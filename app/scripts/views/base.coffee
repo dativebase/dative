@@ -405,3 +405,18 @@ define [
     # Can be overridden in sub-classes with more sophisticated button behaviour.
     buttonify: -> @$('button').button()
 
+    # I am an admin or I am (i.e., my logged-in user is) this resource.
+    # Useful for the user resource visibility condition.
+    imAdminOrImResource: ->
+      try
+        myId = globals.applicationSettings.get('loggedInUser').id
+        @imAdmin() or (@model.get('id') is myId)
+      catch
+        false
+
+    imAdmin: ->
+      try
+        globals.applicationSettings.get('loggedInUser').role is 'administrator'
+      catch
+        false
+

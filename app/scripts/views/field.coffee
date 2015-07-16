@@ -112,7 +112,12 @@ define [
       @renderInputView()
       @guify()
       @listenToEvents()
+      if not @visibilityCondition() then @$el.hide()
       @
+
+    # Make this method evaluate to false under those conditions when this view
+    # should be hidden.
+    visibilityCondition: -> true
 
     # Refresh re-renders all of the input views. This is called by the form add
     # widget when the “clear form” button is clicked.
@@ -127,6 +132,20 @@ define [
       if @inputView
         @listenTo @inputView, 'setToModel', @inputViewSetToModel
       @listenForValidationErrors()
+      for crucialAttribute in @getCrucialAttributes()
+        @listenTo @model, "change:#{crucialAttribute}", @crucialAttributeChanged
+
+    # Override this to return an array of model attributes. This will cause this
+    # field view's visibility to vary depending on characteristics of the
+    # values of those attributes.
+    getCrucialAttributes: -> []
+
+    crucialAttributeChanged: ->
+      if @visibilityCondition() then @showAnimate() else @hideAnimate()
+
+    hideAnimate: -> if @$el.is ':visible' then @$el.slideUp()
+
+    showAnimate: -> if not @$el.is(':visible') then @$el.slideDown()
 
     # We listen to validation error events that are relevant to our
     # attribute(s). Note: this may need to be over-ridden in sub-classes.

@@ -68,7 +68,7 @@ define [
 
     render: ->
       if @activeServerTypeIsOLD() and not @weHaveNewResourceData()
-        @model.getNewResourceData() # Success in this request will call `@render()`
+        @getNewResourceData() # Success in this request will call `@render()`
         return
       @getFieldViews()
       @html()
@@ -78,6 +78,12 @@ define [
       @fixRoundedBorders() # defined in BaseView
       @listenToEvents()
       @
+
+    getNewResourceData: ->
+      if @model.get('id')
+        @model.getEditResourceData()
+      else
+        @model.getNewResourceData()
 
     events:
       'click button.add-resource-button':          'submitForm'
@@ -90,7 +96,9 @@ define [
 
     listenToEvents: ->
       super
-      # Events specific to an OLD backend and the request for the data needed to create a resource.
+
+      # Events specific to an OLD backend and the request for the data needed
+      # to create a resource.
       @listenTo @model, "getNew#{@resourceNameCapitalized}DataStart",
         @getNewResourceDataStart
       @listenTo @model, "getNew#{@resourceNameCapitalized}DataEnd",
@@ -98,6 +106,17 @@ define [
       @listenTo @model, "getNew#{@resourceNameCapitalized}DataSuccess",
         @getNewResourceDataSuccess
       @listenTo @model, "getNew#{@resourceNameCapitalized}DataFail",
+        @getNewResourceDataFail
+
+      # Events specific to an OLD backend and the request for the data needed
+      # to update this resource.
+      @listenTo @model, "getEdit#{@resourceNameCapitalized}DataStart",
+        @getNewResourceDataStart
+      @listenTo @model, "getEdit#{@resourceNameCapitalized}DataEnd",
+        @getNewResourceDataEnd
+      @listenTo @model, "getEdit#{@resourceNameCapitalized}DataSuccess",
+        @getNewResourceDataSuccess
+      @listenTo @model, "getEdit#{@resourceNameCapitalized}DataFail",
         @getNewResourceDataFail
 
       @listenTo @model, "add#{@resourceNameCapitalized}Start", @addResourceStart
@@ -178,7 +197,8 @@ define [
           for attribute, error of clientSideValidationErrors
             @model.trigger "validationError:#{attribute}", error
           msg = 'See the error message(s) beneath the input fields.'
-          Backbone.trigger "#{@addUpdateType}#{@resourceNameCapitalized}Fail", msg, @model
+          Backbone.trigger "#{@addUpdateType}#{@resourceNameCapitalized}Fail",
+            msg, @model
           @enableForm()
         else
           if @addUpdateType is 'add'
@@ -377,13 +397,20 @@ define [
       @render()
 
     storeOptionsDataGlobally: (data) ->
-      globals[@getGlobalDataAttribute()] = data
+      if @model.get('id') # The GET /<resources>/<id>/edit case
+        globals[@getGlobalDataAttribute()] = data.data
+      else
+        globals[@getGlobalDataAttribute()] = data
 
     getGlobalDataAttribute: -> "#{@resourceName}Data"
 
     getNewResourceDataFail: ->
-      console.log "Failed to retrieve the data from the OLD server which is
-        necessary for creating a new #{@resourceName}"
+      if @model.get('id') # The GET /<resources>/<id>/edit case
+        console.log "Failed to retrieve the data from the OLD server which is
+          necessary for updating #{@resourceName} #{@model.get('id')}"
+      else
+        console.log "Failed to retrieve the data from the OLD server which is
+          necessary for creating a new #{@resourceName}"
 
 
     ############################################################################

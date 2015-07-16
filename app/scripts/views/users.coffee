@@ -3,7 +3,8 @@ define [
   './user-old'
   './../collections/users'
   './../models/user-old'
-], (ResourcesView, UserView, UsersCollection, UserModel) ->
+  './../utils/globals'
+], (ResourcesView, UserView, UsersCollection, UserModel, globals) ->
 
   # Users View
   # -----------------
@@ -21,4 +22,9 @@ define [
     resourcesCollection: UsersCollection
     resourceModel: UserModel
 
+    getCanCreateNew: ->
+      try
+        globals.applicationSettings.get('loggedInUser').role is 'administrator'
+      catch
+        false
 

@@ -23,123 +23,44 @@ define [
   # The typed textarea field view is a textarea field that is visible only when
   # the file is of a certain type, i.e., stored on the web service, hosted
   # elsewhere, or subinterval-referencing.
-  class TypedTextareaFieldView extends TextareaFieldView
+  class StoredOnServerTextareaFieldView extends TextareaFieldView
 
-    listenToEvents: ->
-      super
-      @listenTo @model, 'change:dative_file_type', @crucialAttributeChanged
-      @listenTo @model, 'change:MIME_type', @crucialAttributeChanged
-
-    render: ->
-      super
-      if not @visibilityCondition() then @$el.hide()
-      @
-
-    crucialAttributeChanged: ->
-      if @visibilityCondition() then @showAnimate() else @hideAnimate()
+    getCrucialAttributes: -> ['dative_file_type', 'MIME_type']
 
     visibilityCondition: ->
       @model.get('dative_file_type') is 'storedOnTheServer'
 
-    hideAnimate: -> if @$el.is ':visible' then @$el.slideUp()
 
-    showAnimate: -> if not @$el.is(':visible') then @$el.slideDown()
-
-    isAudioVideo: ->
-      MIME_type = @model.get 'MIME_type'
-      if MIME_type
-        @utils.startsWith(MIME_type, 'audio') or
-        @utils.startsWith(MIME_type, 'video')
-      else
-        try
-          if @model.get('url')
-            MIME_type = @utils.getMIMEType @model.get('url')
-            @utils.startsWith(MIME_type, 'audio') or
-            @utils.startsWith(MIME_type, 'video')
-          else
-            false
-        catch
-          false
-
-  # A <select>-based field view for the file's utterance type. We mixin methods
-  # from `TypedTextareaFieldView` so that this field will only be visible when
-  # the file is audio or video.
+  # A <select>-based field view for the file's utterance type. This field will
+  # only be visible when the file is audio or video.
   class UtteranceTypeSelectFieldView extends SelectFieldView
 
     initialize: (options) ->
-      @mixin()
       options.selectValueGetter = (o) -> o
       options.selectTextGetter = (o) -> o
       super options
 
-    listenToEvents: ->
-      super
-      @listenTo @model, 'change:MIME_type', @crucialAttributeChanged
+    getCrucialAttributes: -> ['MIME_type']
 
-    mixin: ->
-      methodsWeWant = [
-        'hideAnimate'
-        'showAnimate'
-        'render'
-        'crucialAttributeChanged'
-        'isAudioVideo'
-      ]
-      for method in methodsWeWant
-        @[method] = TypedTextareaFieldView::[method]
-
-    visibilityCondition: -> @isAudioVideo()
+    visibilityCondition: -> @model.isAudioVideo()
 
 
   # A <select>-based field view for the file's elicitor. This is only displayed
   # when the file is audio or video.
   class ElicitorSelectFieldView extends UserSelectFieldView
 
-    initialize: (options) ->
-      @mixin()
-      super options
+    getCrucialAttributes: -> ['MIME_type']
 
-    listenToEvents: ->
-      super
-      @listenTo @model, 'change:MIME_type', @crucialAttributeChanged
-
-    mixin: ->
-      methodsWeWant = [
-        'hideAnimate'
-        'showAnimate'
-        'render'
-        'crucialAttributeChanged'
-        'isAudioVideo'
-      ]
-      for method in methodsWeWant
-        @[method] = TypedTextareaFieldView::[method]
-
-    visibilityCondition: -> @isAudioVideo()
+    visibilityCondition: -> @model.isAudioVideo()
 
 
   # A <select>-based field view for the file's speaker. This is only displayed
   # when the file is audio or video.
   class SpeakerSelectFieldView extends PersonSelectFieldView
 
-    initialize: (options) ->
-      @mixin()
-      super options
+    getCrucialAttributes: -> ['MIME_type']
 
-    listenToEvents: ->
-      super
-      @listenTo @model, 'change:MIME_type', @crucialAttributeChanged
-
-    mixin: ->
-      methodsWeWant = [
-        'hideAnimate'
-        'showAnimate'
-        'render'
-        'crucialAttributeChanged'
-        'isAudioVideo'
-      ]
-      for method in methodsWeWant
-        @[method] = TypedTextareaFieldView::[method]
-
-    visibilityCondition: -> @isAudioVideo()
+    visibilityCondition: -> @model.isAudioVideo()
 
 
   # A <select>-based field view for the Dative file type, i.e.,
@@ -149,29 +70,18 @@ define [
   # update.
   class DativeFileTypeFieldView extends SelectFieldView
 
+    getCrucialAttributes: -> ['dative_file_type', 'MIME_type']
+
     initialize: (options) ->
-      @mixin()
       options.required = true
       options.selectValueGetter = (o) -> o
-      options.selectTextGetter = (o) =>
-        @utils.camel2regular o
+      options.selectTextGetter = (o) => @utils.camel2regular o
       super options
-
-    mixin: ->
-      methodsWeWant = [
-        'listenToEvents'
-        'crucialAttributeChanged'
-        'hideAnimate'
-        'showAnimate'
-        'render'
-      ]
-      for method in methodsWeWant
-        @[method] = TypedTextareaFieldView::[method]
 
     visibilityCondition: -> @addUpdateType is 'add'
 
 
-  class FilenameFieldView extends TypedTextareaFieldView
+  class FilenameFieldView extends StoredOnServerTextareaFieldView
 
     listenToEvents: ->
       super
@@ -181,7 +91,7 @@ define [
       @$("textarea.#{@context.class}").val @model.get('filename')
 
 
-  class NonLocalFileAttributeFieldView extends TypedTextareaFieldView
+  class NonLocalFileAttributeFieldView extends StoredOnServerTextareaFieldView
 
     visibilityCondition: ->
       @model.get('dative_file_type') is 'storedOnAnotherServer'
@@ -192,7 +102,7 @@ define [
       super options
 
 
-  class NonLocalOrSubintervalFileAttributeFieldView extends TypedTextareaFieldView
+  class NonLocalOrSubintervalFileAttributeFieldView extends StoredOnServerTextareaFieldView
 
     visibilityCondition: ->
       @model.get('dative_file_type') in ['storedOnAnotherServer',
@@ -204,7 +114,7 @@ define [
       super options
 
 
-  class SubintervalReferencingFileAttributeFieldView extends TypedTextareaFieldView
+  class SubintervalReferencingFileAttributeFieldView extends StoredOnServerTextareaFieldView
 
     visibilityCondition: ->
       @model.get('dative_file_type') is 'referencesASubintervalOfAnotherFile'
@@ -256,28 +166,15 @@ define [
     getInputView: ->
       new ParentFileSearchInputView @context
 
-    initialize: (options) ->
-      @mixin()
-      super options
-
     listenToEvents: ->
       super
-      @listenTo @model, 'change:dative_file_type', @crucialAttributeChanged
       if @inputView
         @listenTo @inputView, 'validateMe', @myValidate
 
     myValidate: ->
       if @submitAttempted then @validate()
 
-    mixin: ->
-      methodsWeWant = [
-        'crucialAttributeChanged'
-        'hideAnimate'
-        'showAnimate'
-        'render'
-      ]
-      for method in methodsWeWant
-        @[method] = TypedTextareaFieldView::[method]
+    getCrucialAttributes: -> ['dative_file_type']
 
     visibilityCondition: ->
       @model.get('dative_file_type') is 'referencesASubintervalOfAnotherFile'
@@ -285,20 +182,7 @@ define [
 
   class TypedFileDataUploadFieldView extends FileDataUploadFieldView
 
-    initialize: (options) ->
-      @mixin()
-      super options
-
-    mixin: ->
-      methodsWeWant = [
-        'listenToEvents'
-        'crucialAttributeChanged'
-        'hideAnimate'
-        'showAnimate'
-        'render'
-      ]
-      for method in methodsWeWant
-        @[method] = TypedTextareaFieldView::[method]
+    getCrucialAttributes: -> ['dative_file_type', 'MIME_type']
 
     visibilityCondition: ->
       @addUpdateType is 'add' and

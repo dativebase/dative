@@ -134,6 +134,7 @@ define [
         pluralizeByNum: @utils.pluralizeByNum
         paginator: @paginator
         searchable: @searchable
+        canCreateNew: @getCanCreateNew()
 
     listenToEvents: ->
       super
@@ -321,7 +322,8 @@ define [
             when 38 # up arrow
               if not @itemsPerPageSelectHasFocus()
                 @$('.collapse-all').click()
-            when 65 then @toggleNewResourceViewAnimate() # a
+            when 65
+              if @getCanCreateNew() then @toggleNewResourceViewAnimate() # a
             when 32 # spacebar goes to next resource view, shift+spacebar goes to previous.
               if event.shiftKey
                 @focusPreviousResourceView event
@@ -537,9 +539,10 @@ define [
 
     # Render the New Resource view.
     renderNewResourceView: ->
-      @newResourceView.setElement @$('.new-resource-view').first()
-      @newResourceView.render()
-      @rendered @newResourceView
+      if @getCanCreateNew()
+        @newResourceView.setElement @$('.new-resource-view').first()
+        @newResourceView.render()
+        @rendered @newResourceView
 
     # Close the New Resource view.
     closeNewResourceView: ->
@@ -1098,6 +1101,10 @@ define [
 
     # Set `@searchable` to `true` if this resource can be searched.
     searchable: false
+
+    # Override this to return `false` in those cases where a user should not be
+    # able to create a new resource.
+    getCanCreateNew: -> true
 
     # If this resource is searchable, then set `@searchView` and `@searchModel`
     # to a view and a model class, respectively, for creating new searches for

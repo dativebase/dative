@@ -13,4 +13,12 @@ define [
     resourceName: 'user'
     model: UserModel
 
+    # This recognizes an OLD "username-already-taken" error message and returns
+    # 'username'.
+    getAttributeForError: (error) ->
+      regex = /^The (\w+) \w+ is already taken\.$/
+      if regex.test error
+        'username'
+      else
+        null
 

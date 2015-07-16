@@ -29,10 +29,12 @@
 
     <div class='button-container-left'>
 
+      <% if @canCreateNew: %>
       <button class='new-resource dative-tooltip' title='create a new
         <%= @resourceNameHuman %>'>
         <i class='fa fa-fw fa-plus'></i>
       </button>
+      <% end %>
 
       <button class='expand-all dative-tooltip' title='expand all
           <%= @resourceNamePluralHuman %>'>

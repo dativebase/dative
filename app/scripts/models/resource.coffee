@@ -163,6 +163,35 @@ define [
             /#{@getServerSideResourceName()}/new"
       )
 
+    # Issue a GET request to /<resource_name_plural>/<id>/edit on the active OLD
+    # server. In the OLD API, this type of request returns a JSON object
+    # containing both the resource with id <id> as well as the data necessary
+    # to update that resource. Example returned object:
+    # `{form: {...}, data: {...}}`.
+    getEditResourceData: ->
+      @trigger "getEdit#{@resourceNameCapitalized}DataStart"
+      @constructor.cors.request(
+        method: 'GET'
+        url: "#{@getOLDURL()}/#{@getServerSideResourceName()}/\
+          #{@get('id')}/edit"
+        onload: (responseJSON, xhr) =>
+          @trigger "getEdit#{@resourceNameCapitalized}DataEnd"
+          if xhr.status is 200
+            @trigger "getEdit#{@resourceNameCapitalized}DataSuccess",
+              responseJSON
+          else
+            @trigger "getEdit#{@resourceNameCapitalized}DataSuccess",
+              "Failed in fetching the data required to create edit
+                #{@getServerSideResourceName()} #{@get('id')}."
+        onerror: (responseJSON) =>
+          @trigger "getEdit#{@resourceNameCapitalized}DataEnd"
+          @trigger "getEdit#{@resourceNameCapitalized}DataFail",
+            "Error in GET request to OLD server for
+            /#{@getServerSideResourceName()}/#{@get('id')}/edit"
+          console.log "Error in GET request to OLD server for
+            /#{@getServerSideResourceName()}/#{@get('id')}/edit"
+      )
+
     # Issue a GET request to /<resource_name_plural>/new_search on the active OLD
     # server. In the OLD API, this type of request returns a JSON object
     # containing the data necessary to create a new OLD search over that resource.
