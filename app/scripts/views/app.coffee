@@ -63,6 +63,8 @@ define [
       Backbone.history.start()
       @showHomePageView()
 
+    # TODO: make this work with all of our "resources" so we can do things like
+    # DRY-ly cleaning them up on logout ...
     resources: [
       'subcorpus'
       'phonology'
@@ -234,6 +236,7 @@ define [
     logoutSuccess: ->
       @closeVisibleView()
       @corporaView = null
+      @usersView = null # TODO: all of these collection views should be DRY-ly emptied upon logout ...
       @showHomePageView()
 
     activeServerType: ->
