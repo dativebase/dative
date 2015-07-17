@@ -15,7 +15,6 @@ define [
   './pages'
   './home'
   './form-add'
-  './forms-search'
   './forms'
   './subcorpora'
   './users'
@@ -34,7 +33,7 @@ define [
 ], (Backbone, FieldDB, Workspace, BaseView, MainMenuView, NotifierView,
   LoginDialogView, RegisterDialogView, AlertDialogView, TasksDialogView,
   HelpDialogView, ResourceDisplayerDialogView, ApplicationSettingsView,
-  PagesView, HomePageView, FormAddView, FormsSearchView, FormsView,
+  PagesView, HomePageView, FormAddView, FormsView,
   SubcorporaView, UsersView, FilesView, FileView, PhonologiesView,
   MorphologiesView, LanguageModelsView, MorphologicalParsersView, CorporaView,
   SearchesView, ApplicationSettingsModel, FormModel, globals, appTemplate) ->
@@ -63,19 +62,11 @@ define [
       Backbone.history.start()
       @showHomePageView()
 
-    # TODO: make this work with all of our "resources" so we can do things like
-    # DRY-ly cleaning them up on logout ...
-    resources: [
-      'subcorpus'
-      'phonology'
-      'morphology'
-    ]
-
     events:
       'click': 'bodyClicked'
 
     render: ->
-      if window.location.hostname in ['localhost', '127.0.0.1']
+      if window.location.hostname is ['localhost', '127.0.0.1']
         setTimeout ->
           console.clear()
         , 2000
@@ -99,11 +90,9 @@ define [
       @listenTo @mainMenuView, 'request:formAdd', @showNewFormView
       @listenTo @mainMenuView, 'request:formsBrowse', @showFormsView
       @listenTo Backbone, 'request:formsBrowseSearchResults',
-        @showFormsSearchResultsBrowseView
-      @listenTo Backbone, 'request:filesBrowseSearchResults',
-        @showFilesSearchResultsBrowseView
-      @listenTo Backbone, 'request:formsBrowseCorpus',
-        @showFormsCorpusBrowseView
+        @showFormsView
+      @listenTo Backbone, 'request:filesBrowseSearchResults', @showFilesView
+      @listenTo Backbone, 'request:formsBrowseCorpus', @showFormsView
       @listenTo @mainMenuView, 'request:formsSearch', @showFormsSearchView
       @listenTo @mainMenuView, 'request:subcorpusAdd', @showNewSubcorpusView
       @listenTo @mainMenuView, 'request:subcorporaBrowse', @showSubcorporaView
@@ -181,10 +170,7 @@ define [
       @tasksDialog = new TasksDialogView model: @applicationSettings
       @helpDialog = new HelpDialogView()
       @notifier = new NotifierView()
-      @resourceDisplayerDialog1 = new ResourceDisplayerDialogView index: 1
-      @resourceDisplayerDialog2 = new ResourceDisplayerDialogView index: 2
-      @resourceDisplayerDialog3 = new ResourceDisplayerDialogView index: 3
-      @resourceDisplayerDialog4 = new ResourceDisplayerDialogView index: 4
+      @getResourceDisplayerDialogs()
 
     renderPersistentSubviews: ->
       @mainMenuView.setElement(@$('#mainmenu')).render()
@@ -202,13 +188,6 @@ define [
       @rendered @alertDialog
       @rendered @tasksDialog
       @rendered @notifier
-
-    renderResourceDisplayerDialogs: ->
-      for int in [1, 2, 3, 4]
-        @["resourceDisplayerDialog#{int}"]
-          .setElement(@$("#resource-displayer-dialog-container-#{int}"))
-          .render()
-        @rendered @["resourceDisplayerDialog#{int}"]
 
     renderHelpDialog: ->
       @helpDialog.render()
@@ -248,12 +227,15 @@ define [
     authenticateSuccess: ->
       activeServerType = @activeServerType()
       switch activeServerType
-        when 'FieldDB' 
-          if @applicationSettings.get 'fieldDBApplication' != FieldDB.FieldDBObject.application
-            @applicationSettings.set 'fieldDBApplication', FieldDB.FieldDBObject.application
+        when 'FieldDB'
+          if @applicationSettings.get('fieldDBApplication') isnt
+          FieldDB.FieldDBObject.application
+            @applicationSettings.set 'fieldDBApplication',
+              FieldDB.FieldDBObject.application
           @showCorporaView()
         when 'OLD' then @showFormsView()
-        else console.log 'Error: you logged in to a non-FieldDB/non-OLD server (?).'
+        else console.log 'Error: you logged in to a non-FieldDB/non-OLD server
+          (?).'
 
     authenticateConfirmIdentity: (message) =>
       message = message or 'We need to make sure this is you. Confirm your
@@ -305,279 +287,17 @@ define [
       @visibleView.render taskId
       @rendered @visibleView
 
-    closeVisibleView: ->
-      if @visibleView
-        @visibleView.close()
-        @closed @visibleView
+    closeVisibleView: -> if @visibleView then @closeView @visibleView
 
-    loggedIn: -> 
-      if @applicationSettings.get('fieldDBApplication') and
-      @applicationSettings.get('fieldDBApplication').authentication and 
-      @applicationSettings.get('fieldDBApplication').authentication.user and 
-      @applicationSettings.get('fieldDBApplication').authentication.user.authenticated
-        @applicationSettings.set 'loggedIn', true
-        @applicationSettings.set 'loggedInUserRoles', @applicationSettings.get('fieldDBApplication').authentication.user.roles
+    loggedIn: ->
+      if @applicationSettings.get('fieldDBApplication')
+        fieldDBApp = @applicationSettings.get 'fieldDBApplication'
+        if fieldDBApp.authentication and fieldDBApp.authentication.user and
+        fieldDBApp.authentication.user.authenticated
+          @applicationSettings.set 'loggedIn', true
+          @applicationSettings.set 'loggedInUserRoles',
+            fieldDBApp.authentication.user.roles
       @applicationSettings.get 'loggedIn'
-
-    ############################################################################
-    # Methods for showing the main "pages" of Dative                           #
-    ############################################################################
-
-    showApplicationSettingsView: ->
-      if @applicationSettingsView and
-      @visibleView is @applicationSettingsView then return
-      @router.navigate 'application-settings'
-      taskId = @guid()
-      Backbone.trigger 'longTask:register', 'Opening application settings', taskId
-      @closeVisibleView()
-      if not @applicationSettingsView
-        @applicationSettingsView = new ApplicationSettingsView(
-          model: @applicationSettings)
-      @visibleView = @applicationSettingsView
-      @renderVisibleView taskId
-
-    showFormsView: (options) ->
-      if not @loggedIn() then return
-      if options?.search then @visibleView = null
-      if @formsView and @visibleView is @formsView then return
-      @router.navigate 'forms-browse'
-      taskId = @guid()
-      Backbone.trigger 'longTask:register', 'Opening form browse view', taskId
-      @closeVisibleView()
-      if @formsView
-        if @activeServerType() is 'FieldDB' and options?.fieldDBCorpusHasChanged
-          @formsView.close()
-          @closed @formsView
-          @formsView = new FormsView
-            applicationSettings: @applicationSettings
-            activeFieldDBCorpus: @activeFieldDBCorpus
-      else
-        @formsView = new FormsView
-          applicationSettings: @applicationSettings
-          activeFieldDBCorpus: @activeFieldDBCorpus
-      @visibleView = @formsView
-      # This is relevant if the user is trying to add a new form.
-      if options?.showNewFormView
-        @formsView.newFormViewVisible = true
-        @formsView.weShouldFocusFirstAddViewInput = true
-      if options?.search
-        @formsView.setSearch options.search
-      else
-        @formsView.deleteSearch()
-      if options?.corpus
-        @formsView.setCorpus options.corpus
-      else
-        @formsView.deleteCorpus()
-      @renderVisibleView taskId
-
-    showFormsSearchResultsBrowseView: (options) ->
-      @showFormsView options
-
-    showFilesSearchResultsBrowseView: (options) ->
-      @showFilesView options
-
-    showFormsCorpusBrowseView: (options) ->
-      @showFormsView options
-
-    showNewFormView: ->
-      if not @loggedIn() then return
-      if @formsView and @visibleView is @formsView
-        @visibleView.toggleNewResourceViewAnimate()
-      else
-        @showFormsView showNewFormView: true
-
-    # Show the page for browsing subcorpora (i.e., OLD corpora) AND open upt
-    # the interface for creating a new subcorpus.
-    showNewSubcorpusView: ->
-      if not @loggedIn() then return
-      if @subcorporaView and @visibleView is @subcorporaView
-        @visibleView.toggleNewSubcorpusViewAnimate()
-      else
-        @showSubcorporaView showNewSubcorpusView: true
-
-    # Show the page for browsing subcorpora (i.e., OLD corpora).
-    showSubcorporaView: (options) ->
-      if not @loggedIn() then return
-      if @subcorporaView and @visibleView is @subcorporaView then return
-      @router.navigate 'subcorpora-browse'
-      taskId = @guid()
-      Backbone.trigger 'longTask:register', 'Opening corpora browse view', taskId
-      @closeVisibleView()
-      if not @subcorporaView
-        @subcorporaView = new SubcorporaView()
-      @visibleView = @subcorporaView
-      # This is relevant if the user is trying to add a new corpus.
-      if options?.showNewSubcorpusView
-        @subcorporaView.newSubcorpusViewVisible = true
-        @subcorporaView.weShouldFocusFirstAddViewInput = true
-      @renderVisibleView taskId
-
-    # Show the page for browsing the users of an OLD.
-    showUsersView: (options) ->
-      if not @loggedIn() then return
-      if @usersView and @visibleView is @usersView then return
-      @router.navigate 'users-browse'
-      taskId = @guid()
-      Backbone.trigger 'longTask:register', 'Opening users browse view', taskId
-      @closeVisibleView()
-      if not @usersView
-        @usersView = new UsersView()
-      @visibleView = @usersView
-      @renderVisibleView taskId
-
-    # Show the page for browsing the files of an OLD.
-    showFilesView: (options) ->
-      if not @loggedIn() then return
-      if options?.search then @visibleView = null
-      if @filesView and @visibleView is @filesView then return
-      @router.navigate 'files-browse'
-      taskId = @guid()
-      Backbone.trigger 'longTask:register', 'Opening files browse view', taskId
-      @closeVisibleView()
-      if not @filesView
-        @filesView = new FilesView()
-      @visibleView = @filesView
-      if options?.search
-        @filesView.setSearch options.search
-      else
-        @filesView.deleteSearch()
-      @renderVisibleView taskId
-
-    # Show the page for browsing phonologies AND open up the interface for
-    # creating a new phonology.
-    showNewPhonologyView: ->
-      if not @loggedIn() then return
-      if @phonologiesView and @visibleView is @phonologiesView
-        @visibleView.toggleNewResourceViewAnimate()
-      else
-        @showPhonologiesView showNewPhonologyView: true
-
-    # Show the page for browsing phonologies.
-    showPhonologiesView: (options) ->
-      if not @loggedIn() then return
-      if @phonologiesView and @visibleView is @phonologiesView then return
-      @router.navigate 'phonologies-browse'
-      taskId = @guid()
-      Backbone.trigger 'longTask:register', 'Opening phonologies browse view', taskId
-      @closeVisibleView()
-      if not @phonologiesView
-        @phonologiesView = new PhonologiesView()
-      @visibleView = @phonologiesView
-      # This is relevant if the user is trying to add a new corpus.
-      if options?.showNewPhonologyView
-        @phonologiesView.newResourceViewVisible = true
-        @phonologiesView.weShouldFocusFirstAddViewInput = true
-      @renderVisibleView taskId
-
-    # Show the page for browsing morphologies AND open up the interface for
-    # creating a new morphology.
-    showNewMorphologyView: ->
-      if not @loggedIn() then return
-      if @morphologiesView and @visibleView is @morphologiesView
-        @visibleView.toggleNewResourceViewAnimate()
-      else
-        @showMorphologiesView showNewMorphologyView: true
-
-    # Show the page for browsing morphologies.
-    showMorphologiesView: (options) ->
-      if not @loggedIn() then return
-      if @morphologiesView and @visibleView is @morphologiesView then return
-      @router.navigate 'morphologies-browse'
-      taskId = @guid()
-      Backbone.trigger 'longTask:register', 'Opening morphologies browse view', taskId
-      @closeVisibleView()
-      if not @morphologiesView
-        @morphologiesView = new MorphologiesView()
-      @visibleView = @morphologiesView
-      # This is relevant if the user is trying to add a new morphology.
-      if options?.showNewMorphologyView
-        @morphologiesView.newResourceViewVisible = true
-        @morphologiesView.weShouldFocusFirstAddViewInput = true
-      @renderVisibleView taskId
-
-    # Show the page for browsing morpheme language models.
-    showLanguageModelsView: (options) ->
-      if not @loggedIn() then return
-      if @languageModelsView and
-      @visibleView is @languageModelsView
-        return
-      @router.navigate 'language-models-browse'
-      taskId = @guid()
-      Backbone.trigger(
-        'longTask:register', 'Opening language models browse view', taskId)
-      @closeVisibleView()
-      if not @languageModelsView
-        @languageModelsView = new LanguageModelsView()
-      @visibleView = @languageModelsView
-      @renderVisibleView taskId
-
-    # Show the page for browsing morphological parsers.
-    showMorphologicalParsersView: (options) ->
-      if not @loggedIn() then return
-      if @morphologicalParsersView and
-      @visibleView is @morphologicalParsersView
-        return
-      @router.navigate 'morphological-parsers-browse'
-      taskId = @guid()
-      Backbone.trigger('longTask:register', 'Opening morphological parsers
-        browse view', taskId)
-      @closeVisibleView()
-      if not @morphologicalParsersView
-        @morphologicalParsersView = new MorphologicalParsersView()
-      @visibleView = @morphologicalParsersView
-      @renderVisibleView taskId
-
-    # Show the page for browsing searches.
-    showSearchesView: (options) ->
-      if not @loggedIn() then return
-      if @searchesView and
-      @visibleView is @searchesView
-        return
-      @router.navigate 'searches-browse'
-      taskId = @guid()
-      Backbone.trigger('longTask:register', 'Opening searches browse view',
-        taskId)
-      @closeVisibleView()
-      if not @searchesView
-        @searchesView = new SearchesView()
-      @visibleView = @searchesView
-      @renderVisibleView taskId
-
-    # Put out of use for now. Now adding a form is done via the browse
-    # interface. See `showFormAddView`.
-    showFormAddView_OLD: ->
-      if not @loggedIn() then return
-      if @formAddView and @visibleView is @formAddView then return
-      @router.navigate 'form-add'
-      taskId = @guid()
-      Backbone.trigger 'longTask:register', 'Opening form add view', taskId
-      @closeVisibleView()
-      if not @formAddView
-        @formAddView = new FormAddView(model: new FormModel())
-      @visibleView = @formAddView
-      @renderVisibleView taskId
-
-    showFormsSearchView: ->
-      if not @loggedIn() then return
-      if @formsSearchView and @visibleView is @formsSearchView then return
-      @router.navigate 'forms-search'
-      taskId = @guid()
-      Backbone.trigger 'longTask:register', 'Opening form search view', taskId
-      @closeVisibleView()
-      if not @formsSearchView then @formsSearchView = new FormsSearchView()
-      @visibleView = @formsSearchView
-      @renderVisibleView taskId
-
-    showPagesView: ->
-      if not @loggedIn() then return
-      if @pagesView and @visibleView is @pagesView then return
-      @router.navigate 'pages'
-      taskId = @guid()
-      Backbone.trigger 'longTask:register', 'Opening pages view', taskId
-      @closeVisibleView()
-      if not @pagesView then @pagesView = new PagesView()
-      @visibleView = @pagesView
-      @renderVisibleView taskId
 
     showHomePageView: ->
       if @homePageView and @visibleView is @homePageView then return
@@ -587,25 +307,230 @@ define [
       @visibleView = @homePageView
       @renderVisibleView()
 
-    showCorporaView: ->
-      if not @loggedIn() then return
-      if @corporaView and @visibleView is @corporaView then return
-      if @visibleView then @visibleView.spin()
-      @router.navigate 'corpora'
+    ############################################################################
+    # Show resources view machinery
+    ############################################################################
+
+    # Render (and perhaps instantiate) a view over a collection of resources.
+    # This method works in conjunction with the metadata in the `@myResources`
+    # object; CRUCIALLY, only resources with an attribute in that object can be
+    # shown using this method. The simplest case is to call this method with
+    # the singular camelCase name of a resource as its first argument; e.g.,
+    # `@showResourcesView 'elicitationMethod'`.
+    showResourcesView: (resourceName, options={}) ->
+      o = @showResourcesViewSetDefaultOptions resourceName, options
+      names = @getResourceNames resourceName
+      myViewAttr = "#{names.plural}View"
+      if o.authenticationRequired and not @loggedIn() then return
+      if o.searchable and o.search
+        @closeVisibleView()
+        @visibleView = null
+      if @[myViewAttr] and @visibleView is @[myViewAttr] then return
+      @router.navigate names.hypPlur
       taskId = @guid()
-      Backbone.trigger 'longTask:register', 'Opening corpora view', taskId
+      Backbone.trigger 'longTask:register', "Opening #{names.regPlur} view",
+        taskId
       @closeVisibleView()
-      if not @corporaView
-        @corporaView = new CorporaView
-          applicationSettings: @applicationSettings
-          activeFieldDBCorpus: @activeFieldDBCorpus
-      if @visibleView then @visibleView.stopSpin()
-      @visibleView = @corporaView
+      if @[myViewAttr]
+        if @fieldDBCorpusHasChanged(myViewAttr, o)
+          @closeView @[myViewAttr]
+          @[myViewAttr] = @instantiateResourcesView resourceName, myViewAttr, o
+      else
+        @[myViewAttr] = @instantiateResourcesView resourceName, myViewAttr, o
+      @visibleView = @[myViewAttr]
+      @showNewResourceViewOption o
+      @searchableOption o
+      @corpusElementOption o
       @renderVisibleView taskId
 
+    # The information in this object controls how `@showResourcesView` behaves.
+    # The `resourceName` param of that method must be an attribute of this
+    # object. NOTE: default params not supplied here are filled in by
+    # `@showResourcesViewSetDefaultOptions`.
+    myResources:
+      applicationSetting:
+        class: ApplicationSettingsView
+        params:
+          authenticationRequired: false
+          needsAppSettings: true
+      corpus:
+        class: CorporaView
+        params:
+          needsAppSettings: true
+          needsActiveFieldDBCorpus: true
+      file:
+        class: FilesView
+        params:
+          searchable: true
+      form:
+        class: FormsView
+        params:
+          needsAppSettings: true
+          searchable: true
+          corpusElement: true
+          needsActiveFieldDBCorpus: true
+      languageModel:
+        class: LanguageModelsView
+      morphologicalParser:
+        class: MorphologicalParsersView
+      morphology:
+        class: MorphologiesView
+      page:
+        class: PagesView
+      phonology:
+        class: PhonologiesView
+      search:
+        class: SearchesView
+      subcorpus:
+        class: SubcorporaView
+      user:
+        class: UsersView
+
+    # Show the ResourcesView subclass for `resourceName` but also make sure
+    # that the "Add a new resource" subview is rendered too.
+    showNewResourceView: (resourceName) ->
+      if not @loggedIn() then return
+      resourcePlural = @utils.pluralize resourceName
+      myViewAttr = "#{resourcePlural}View"
+      if @[myViewAttr] and @visibleView is @[myViewAttr]
+        @visibleView.toggleNewResourceViewAnimate()
+      else
+        @["show#{@utils.capitalize resourcePlural}View"]
+          showNewResourceView: true
+
+    # This array is used by `@listenToResources()`.
+    # TODO: make this work with all of our "resources" so we can do things like
+    # DRY-ly cleaning them up on logout ... That is, delete this array and use
+    # the `myResources` object below instead.
+    resources: [
+      'subcorpus'
+      'phonology'
+      'morphology'
+    ]
+
+    # Return camelCase `resourceName` in a bunch of other forms that are useful
+    # for dynamically displaying/manipulating that resource.
+    getResourceNames: (resourceName) ->
+      plural = @utils.pluralize resourceName
+      regular = @utils.camel2regular resourceName
+      hyphen = @utils.camel2hyphen resourceName
+      regular: regular
+      regPlur: @utils.pluralize regular
+      hyphen: hyphen
+      hypPlur: @utils.pluralize hyphen
+      plural: plural
+      capitalized: @utils.capitalize resourceName
+      capPlur: @utils.capitalize plural
+
+    # Get `obj[attr]`, returning `default` if `attr` is not a key of `obj`.
+    get: (obj, attr, default_=null) ->
+      if attr of obj then obj[attr] else default_
+
+    # Return `options` with resource-specific values (from `@myResources`) and
+    # defaults.
+    showResourcesViewSetDefaultOptions: (resourceName, options={}) ->
+      params = @myResources[resourceName].params or {}
+      _.extend options, params
+      # Authentication is required to view most resources views.
+      options.authenticationRequired =
+        @get options, 'authenticationRequired', true
+      # Most resources views do not need to be passed app settings on init.
+      options.needsAppSettings = @get options, 'needsAppSettings', false
+      # When using FieldDB backend, the forms view needs the active FieldDB corpus.
+      options.needsActiveFieldDBCorpus =
+        @get options, 'needsActiveFieldDBCorpus', false
+      # Most resources views are not searchable.
+      options.searchable = @get options, 'searchable', false
+      # Most resources views are not elements of a corpus (only forms).
+      options.corpusElement = @get options, 'corpusElement', false
+      options
+
+    # Return `true` if the FieldDB corpus has changed.
+    fieldDBCorpusHasChanged: (myViewAttr, options={}) ->
+      myViewAttr is 'formsView' and
+      @activeServerType() is 'FieldDB' and
+      options.fieldDBCorpusHasChanged
+
+    closeView: (view) ->
+      view.close()
+      @closed view
+
+    # Instantiate a new `ResourcesView` subclass for `resourceName`.
+    instantiateResourcesView: (resourceName, myViewAttr, options={}) ->
+      myParams = {}
+      if options.needsAppSettings
+        myParams.model = @applicationSettings
+        myParams.applicationSettings = @applicationSettings
+      if options.needsActiveFieldDBCorpus
+        myParams.activeFieldDBCorpus = @activeFieldDBCorpus
+      @[myViewAttr] = new @myResources[resourceName].class myParams
+
+    # Alter the visible resources view so that it displays the "create a new
+    # resource" view when rendered.
+    showNewResourceViewOption: (o) ->
+      if o.showNewResourceView
+        @visibleView.newResourceViewVisible = true
+        @visibleView.weShouldFocusFirstAddViewInput = true
+
+    # Alter a searchable resources view so that it has (or lacks) a search
+    # object when rendered.
+    searchableOption: (o) ->
+      if o.searchable
+        if o.search
+          @visibleView.setSearch o.search
+        else
+          @visibleView.deleteSearch()
+
+    # Alter a view of resources that can be members of corpora so that the
+    # resources view has (or lacks) a corpus that it should be displaying.
+    corpusElementOption: (o) ->
+      if o.corpusElement
+        if o.corpus
+          @visibleView.setCorpus o.corpus
+        else
+          @visibleView.deleteCorpus()
+
+
+    ############################################################################
+    # Show X-type resources view methods.
+    # TODO: maybe these can all be dynamically defined too.
+    ############################################################################
+
+    showApplicationSettingsView: (options={}) ->
+      @showResourcesView 'applicationSetting', options
+    showCorporaView: (options={}) -> @showResourcesView 'corpus', options
+    showFilesView: (options={}) -> @showResourcesView 'file', options
+    showFormsView: (options={}) -> @showResourcesView 'form', options
+    showLanguageModelsView: (options) ->
+      @showResourcesView 'languageModel', options
+    showMorphologicalParsersView: (options) ->
+      @showResourcesView 'morphologicalParser', options
+    showMorphologiesView: (options={}) ->
+      @showResourcesView 'morphology', options
+    showPagesView: (options={}) -> @showResourcesView 'page', options
+    showPhonologiesView: (options={}) -> @showResourcesView 'phonology', options
+    showSearchesView: (options) -> @showResourcesView 'search', options
+    showSubcorporaView: (options={}) -> @showResourcesView 'subcorpus', options
+    showUsersView: (options={}) -> @showResourcesView 'user', options
+
+
+    ############################################################################
+    # Show X-type "add a new" resource view methods (within the resources view)
+    # TODO: maybe these can all be dynamically defined too.
+    ############################################################################
+
+    showNewFormView: -> @showNewResourceView 'form'
+    showNewSubcorpusView: -> @showNewResourceView 'subcorpus'
+    showNewPhonologyView: -> @showNewResourceView 'phonology'
+    showNewMorphologyView: -> @showNewResourceView 'morphology'
+
+
+    ############################################################################
+    # Dialog-base view toggling.
+    ############################################################################
+
     # Open/close the login dialog box
-    toggleLoginDialog: ->
-      Backbone.trigger 'loginDialog:toggle'
+    toggleLoginDialog: -> Backbone.trigger 'loginDialog:toggle'
 
     openLoginDialogWithDefaults: (username, password) ->
       @loginDialog.dialogOpenWithDefaults
@@ -613,22 +538,20 @@ define [
         password: password
 
     # Open/close the register dialog box
-    toggleRegisterDialog: ->
-      Backbone.trigger 'registerDialog:toggle'
+    toggleRegisterDialog: -> Backbone.trigger 'registerDialog:toggle'
 
     # Open/close the alert dialog box
-    toggleAlertDialog: ->
-      Backbone.trigger 'alertDialog:toggle'
+    toggleAlertDialog: -> Backbone.trigger 'alertDialog:toggle'
 
     # Open/close the tasks dialog box
-    toggleTasksDialog: ->
-      Backbone.trigger 'tasksDialog:toggle'
+    toggleTasksDialog: -> Backbone.trigger 'tasksDialog:toggle'
 
     # Open/close the help dialog box
     toggleHelpDialog: ->
       if not @helpDialog.hasBeenRendered
         @renderHelpDialog()
       Backbone.trigger 'helpDialog:toggle'
+
 
     ############################################################################
     # Change the jQuery UI CSS Theme
@@ -638,8 +561,7 @@ define [
     setTheme: ->
       activeTheme = @applicationSettings.get 'activeJQueryUITheme'
       defaultTheme = @applicationSettings.get 'defaultJQueryUITheme'
-      if activeTheme isnt defaultTheme
-        @changeTheme()
+      if activeTheme isnt defaultTheme then @changeTheme()
 
     changeTheme: (event) ->
 
@@ -713,10 +635,11 @@ define [
           clearInterval ti
       ti = setInterval func, 10
 
+
     ############################################################################
     # FieldDB .bug, .warn and .confirm hooks
     ############################################################################
-    #
+
     overrideFieldDBNotificationHooks: ->
       # Overriding FieldDB's logging hooks to do nothing
       FieldDB.FieldDBObject.verbose = -> {}
@@ -806,10 +729,13 @@ define [
 
       deferred.promise
 
-    displayConfirmIdentityDialog: (message, successCallback, failureCallback, cancelCallback) =>
+    displayConfirmIdentityDialog: (message, successCallback, failureCallback,
+    cancelCallback) =>
       cancelCallback = cancelCallback or failureCallback
-      if @applicationSettings.get 'fieldDBApplication' != FieldDB.FieldDBObject.application
-        @applicationSettings.set 'fieldDBApplication', FieldDB.FieldDBObject.application
+      if @applicationSettings.get 'fieldDBApplication' isnt
+      FieldDB.FieldDBObject.application
+        @applicationSettings.set 'fieldDBApplication',
+          FieldDB.FieldDBObject.application
       @displayPromptDialog(message).then(
         (dialog) =>
           @applicationSettings
@@ -821,8 +747,21 @@ define [
         cancelCallback
       )
 
+
     ############################################################################
     # Persist application settings.
+    # TODO: all of these methods should be dynamically definable.
+    ############################################################################
+
+    # Change `attribute` to `value` in
+    # applicationSettings.`resource`DisplaySettings.
+    changeDisplaySetting: (resource, attribute, value) ->
+      try
+        displaySettings = @applicationSettings.get "#{resource}DisplaySettings"
+        displaySettings[attribute] = value
+        @applicationSettings.save "#{resource}DisplaySettings", displaySettings
+
+    # Forms Settings
     ############################################################################
 
     # Change `attribute` to `value` in applicationSettings.formsDisplaySettings.
@@ -852,15 +791,6 @@ define [
     setFormsPrimaryDataLabelsVisible: ->
       @changeFormsDisplaySetting 'dataLabelsVisible', true
 
-
-    # Change `attribute` to `value` in
-    # applicationSettings.`resource`DisplaySettings.
-    changeDisplaySetting: (resource, attribute, value) ->
-      try
-        displaySettings = @applicationSettings.get "#{resource}DisplaySettings"
-        displaySettings[attribute] = value
-        @applicationSettings.save "#{resource}DisplaySettings", displaySettings
-
     # Phonologies Settings
     ############################################################################
 
@@ -883,7 +813,6 @@ define [
     # Set app settings' "primary data labels visible" to true.
     setPhonologiesPrimaryDataLabelsVisible: ->
       @changeDisplaySetting 'phonologies', 'dataLabelsVisible', true
-
 
     # Subcorpora Settings
     ############################################################################
@@ -908,7 +837,6 @@ define [
     setSubcorporaPrimaryDataLabelsVisible: ->
       @changeDisplaySetting 'subcorpora', 'dataLabelsVisible', true
 
-
     # Morphologies Settings
     ############################################################################
 
@@ -932,6 +860,25 @@ define [
     setMorphologiesPrimaryDataLabelsVisible: ->
       @changeDisplaySetting 'morphologies', 'dataLabelsVisible', true
 
+
+    ############################################################################
+    # Resource Displayer Dialog logic
+    ############################################################################
+
+    maxNoResourceDisplayerDialogs: 4
+
+    getResourceDisplayerDialogs: ->
+      for int in [1..@maxNoResourceDisplayerDialogs]
+        @["resourceDisplayerDialog#{int}"] =
+          new ResourceDisplayerDialogView index: int
+
+    renderResourceDisplayerDialogs: ->
+      for int in [1..@maxNoResourceDisplayerDialogs]
+        @["resourceDisplayerDialog#{int}"]
+          .setElement(@$("#resource-displayer-dialog-container-#{int}"))
+          .render()
+        @rendered @["resourceDisplayerDialog#{int}"]
+
     # Render the passed in resource view in the application-wide
     # `@resourceDisplayerDialog`
     showResourceInDialog: (resourceView) ->
@@ -952,9 +899,8 @@ define [
 
     getOldestResourceDisplayerDialog: ->
       oldest = @resourceDisplayerDialog1
-      for int in [2, 3, 4]
+      for int in [2..@maxNoResourceDisplayerDialogs]
         other = @["resourceDisplayerDialog#{int}"]
-        if other.timestamp < oldest.timestamp
-          oldest = other
+        if other.timestamp < oldest.timestamp then oldest = other
       oldest
 
