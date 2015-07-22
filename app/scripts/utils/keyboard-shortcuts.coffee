@@ -5,13 +5,13 @@ define [], ->
 
   [
     shortcut: 'ctrl+,'
-    event: 'request:applicationSettings'
+    event: 'request:applicationSettingsBrowse'
   ,
     shortcut: 'ctrl+h'
     event: 'request:home'
   ,
     shortcut: 'ctrl+p'
-    event: 'request:pages'
+    event: 'request:pagesBrowse'
   ,
     shortcut: 'ctrl+c'
     old:

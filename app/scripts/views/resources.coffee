@@ -313,7 +313,7 @@ define [
         if not event.ctrlKey and not event.metaKey and not event.altKey
           switch event.which
             when 70 then @$('.first-page').click() # f
-            when 80 then @$('.previous-page').click() # p
+            when 80 then @$('.previous-page').first().click() # p
             when 78 then @$('.next-page').click() # n
             when 76 then @$('.last-page').click() # l
             when 40 # down arrow
@@ -803,7 +803,8 @@ define [
         @renderedResourceViews[@renderedResourceViews.length - 1].$el.focus()
 
     focusFirstNewResourceViewTextarea: ->
-      @$('.new-resource-view .add-resource-widget textarea').first().focus()
+      @$('.new-resource-view .add-resource-widget textarea')
+        .filter(':visible').first().focus()
 
     # GUI-fy: make nice buttons and nice titles/tooltips
     guify: ->

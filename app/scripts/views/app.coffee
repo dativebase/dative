@@ -51,11 +51,13 @@ define [
     el: '#dative-client-app'
 
     initialize: (options) ->
-      @router = new Workspace()
       @getApplicationSettings options
       globals.applicationSettings = @applicationSettings
       @overrideFieldDBNotificationHooks()
       @initializePersistentSubviews()
+      @router = new Workspace
+        resources: @myResources
+        mainMenuView: @mainMenuView
       @listenToEvents()
       @render()
       @setTheme()
@@ -77,90 +79,69 @@ define [
 
     listenToEvents: ->
       @listenTo @mainMenuView, 'request:home', @showHomePageView
-      @listenTo @mainMenuView, 'request:applicationSettings',
-        @showApplicationSettingsView
       @listenTo @mainMenuView, 'request:openLoginDialogBox', @toggleLoginDialog
       @listenTo @mainMenuView, 'request:toggleHelpDialogBox', @toggleHelpDialog
       @listenTo @mainMenuView, 'request:toggleTasksDialog', @toggleTasksDialog
       @listenTo @mainMenuView, 'request:openRegisterDialogBox',
         @toggleRegisterDialog
-      @listenTo @mainMenuView, 'request:corporaBrowse', @showCorporaView
-      @listenTo @mainMenuView, 'request:usersBrowse', @showUsersView
-      @listenTo @mainMenuView, 'request:filesBrowse', @showFilesView
-      @listenTo @mainMenuView, 'request:formAdd', @showNewFormView
-      @listenTo @mainMenuView, 'request:formsBrowse', @showFormsView
-      @listenTo Backbone, 'request:formsBrowseSearchResults',
-        @showFormsView
-      @listenTo Backbone, 'request:filesBrowseSearchResults', @showFilesView
-      @listenTo Backbone, 'request:formsBrowseCorpus', @showFormsView
-      @listenTo @mainMenuView, 'request:formsSearch', @showFormsSearchView
-      @listenTo @mainMenuView, 'request:subcorpusAdd', @showNewSubcorpusView
-      @listenTo @mainMenuView, 'request:subcorporaBrowse', @showSubcorporaView
-      @listenTo @mainMenuView, 'request:phonologyAdd', @showNewPhonologyView
-      @listenTo @mainMenuView, 'request:phonologiesBrowse', @showPhonologiesView
-      @listenTo @mainMenuView, 'request:morphologyAdd', @showNewMorphologyView
-      @listenTo @mainMenuView, 'request:morphologiesBrowse',
-        @showMorphologiesView
-      @listenTo @mainMenuView, 'request:languageModelsBrowse',
-        @showLanguageModelsView
-      @listenTo @mainMenuView, 'request:morphologicalParsersBrowse',
-        @showMorphologicalParsersView
-      @listenTo @mainMenuView, 'request:searchesBrowse',
-        @showSearchesView
-      @listenTo @mainMenuView, 'request:pages', @showPagesView
 
       @listenTo @router, 'route:home', @showHomePageView
-      @listenTo @router, 'route:applicationSettings',
-        @showApplicationSettingsView
       @listenTo @router, 'route:openLoginDialogBox', @toggleLoginDialog
       @listenTo @router, 'route:openRegisterDialogBox', @toggleRegisterDialog
-      @listenTo @router, 'route:corporaBrowse', @showCorporaView
-      @listenTo @router, 'route:formAdd', @showNewFormView
-      @listenTo @router, 'route:formsBrowse', @showFormsView
-      @listenTo @router, 'route:formsSearch', @showFormsSearchView
-      @listenTo @router, 'route:pages', @showPagesView
 
       @listenTo @loginDialog, 'request:openRegisterDialogBox',
         @toggleRegisterDialog
       @listenTo Backbone, 'loginSuggest', @openLoginDialogWithDefaults
       @listenTo Backbone, 'authenticateSuccess', @authenticateSuccess
-      @listenTo Backbone, 'authenticate:success', @authenticateSuccess
       @listenTo Backbone, 'authenticate:mustconfirmidentity', @authenticateConfirmIdentity
       @listenTo Backbone, 'logoutSuccess', @logoutSuccess
-      @listenTo Backbone, 'logout:success', @logoutSuccess
       @listenTo Backbone, 'useFieldDBCorpus', @useFieldDBCorpus
       @listenTo Backbone, 'applicationSettings:changeTheme', @changeTheme
-
-      @listenTo Backbone, 'formsView:expandAllForms', @setAllFormsExpanded
-      @listenTo Backbone, 'formsView:collapseAllForms', @setAllFormsCollapsed
-      @listenTo Backbone, 'formsView:itemsPerPageChange', @setFormsItemsPerPage
-      @listenTo Backbone, 'formsView:hideAllLabels',
-        @setFormsPrimaryDataLabelsHidden
-      @listenTo Backbone, 'formsView:showAllLabels',
-        @setFormsPrimaryDataLabelsVisible
       @listenTo Backbone, 'showResourceInDialog', @showResourceInDialog
       @listenTo Backbone, 'showResourceModelInDialog', @showResourceModelInDialog
-
       @listenToResources()
 
+    # Listen for events that trigger the behaviour of views over collections of
+    # resources. These behaviours are configured by the resources (and their
+    # default params), as specified in `@myResources`.
     # TODO/QUESTION: why not just listen on the resources subclass instead of
     # on Backbone with all of this complex naming stuff?
     listenToResources: ->
-      for resource in @resources
-        resourcePlural = @utils.pluralize resource
-        resourcePluralCapitalized = @utils.capitalize resourcePlural
-        @listenTo Backbone,
-          "#{resourcePlural}View:expandAll#{resourcePluralCapitalized}",
-          @["setAll#{resourcePluralCapitalized}Expanded"]
-        @listenTo Backbone,
-          "#{resourcePlural}View:collapseAll#{resourcePluralCapitalized}",
-          @["setAll#{resourcePluralCapitalized}Collapsed"]
-        @listenTo Backbone, "#{resourcePlural}View:itemsPerPageChange",
-          @["set#{resourcePluralCapitalized}ItemsPerPage"]
-        @listenTo Backbone, "#{resourcePlural}View:hideAllLabels",
-          @["set#{resourcePluralCapitalized}PrimaryDataLabelsHidden"]
-        @listenTo Backbone, "#{resourcePlural}View:showAllLabels",
-          @["set#{resourcePluralCapitalized}PrimaryDataLabelsVisible"]
+      for resource, config of @myResources
+        do =>
+          resourceName = resource
+          resourcePlural = @utils.pluralize resourceName
+          resourceCapitalized = @utils.capitalize resourceName
+          resourcePluralCapitalized = @utils.capitalize resourcePlural
+          @listenTo Backbone, "#{resourcePlural}View:showAllLabels",
+            => @changeDisplaySetting resourcePlural, 'dataLabelsVisible', true
+          @listenTo Backbone, "#{resourcePlural}View:hideAllLabels",
+            =>
+              @changeDisplaySetting resourcePlural, 'dataLabelsVisible', false
+          @listenTo Backbone,
+            "#{resourcePlural}View:expandAll#{resourcePluralCapitalized}",
+            =>
+              @changeDisplaySetting resourcePlural,
+                "all#{resourcePluralCapitalized}Expanded", true
+          @listenTo Backbone,
+            "#{resourcePlural}View:collapseAll#{resourcePluralCapitalized}",
+            =>
+              @changeDisplaySetting resourcePlural,
+                "all#{resourcePluralCapitalized}Expanded", false
+          @listenTo Backbone, "#{resourcePlural}View:itemsPerPageChange",
+            (newItemsPerPage) =>
+              @changeDisplaySetting resourcePlural, 'itemsPerPage',
+                newItemsPerPage
+          @listenTo @mainMenuView, "request:#{resourcePlural}Browse",
+            (options={}) => @showResourcesView resourceName, options
+          @listenTo @mainMenuView, "request:#{resourceName}Add",
+            => @showNewResourceView resourceName
+          if config.params?.searchable is true
+            @listenTo Backbone, "request:#{resourcePlural}BrowseSearchResults",
+              (options={}) => @showResourcesView resourceName, options
+          if config.params?.corpusElement is true
+            @listenTo Backbone, "request:#{resourcePlural}BrowseCorpus",
+              (options={}) => @showResourcesView resourceName, options
 
     initializePersistentSubviews: ->
       @mainMenuView = new MainMenuView model: @applicationSettings
@@ -747,123 +728,21 @@ define [
         cancelCallback
       )
 
-
-    ############################################################################
-    # Persist application settings.
-    # TODO: all of these methods should be dynamically definable.
-    ############################################################################
-
     # Change `attribute` to `value` in
-    # applicationSettings.`resource`DisplaySettings.
+    # `applicationSettings.get('<resource_name_plural>DisplaySettings').`
     changeDisplaySetting: (resource, attribute, value) ->
       try
         displaySettings = @applicationSettings.get "#{resource}DisplaySettings"
         displaySettings[attribute] = value
         @applicationSettings.save "#{resource}DisplaySettings", displaySettings
 
-    # Forms Settings
-    ############################################################################
-
-    # Change `attribute` to `value` in applicationSettings.formsDisplaySettings.
-    changeFormsDisplaySetting: (attribute, value) ->
-      try
-        formsDisplaySettings = @applicationSettings.get 'formsDisplaySettings'
-        formsDisplaySettings[attribute] = value
-        @applicationSettings.save 'formsDisplaySettings', formsDisplaySettings
-
-    # Set app settings' "all forms expanded" to true.
-    setAllFormsExpanded: ->
-      @changeFormsDisplaySetting 'allFormsExpanded', true
-
-    # Set app settings' "all forms expanded" to false.
-    setAllFormsCollapsed: ->
-      @changeFormsDisplaySetting 'allFormsExpanded', false
-
-    # Persist the new "items per page" to app settings.
-    setFormsItemsPerPage: (newItemsPerPage) ->
-      @changeFormsDisplaySetting 'itemsPerPage', newItemsPerPage
-
-    # Set app settings' "primary data labels visible" to false.
-    setFormsPrimaryDataLabelsHidden: ->
-      @changeFormsDisplaySetting 'dataLabelsVisible', false
-
-    # Set app settings' "primary data labels visible" to true.
-    setFormsPrimaryDataLabelsVisible: ->
-      @changeFormsDisplaySetting 'dataLabelsVisible', true
-
-    # Phonologies Settings
-    ############################################################################
-
-    # Set app settings' "all phonologies expanded" to true.
-    setAllPhonologiesExpanded: ->
-      @changeDisplaySetting 'phonologies', 'allPhonologiesExpanded', true
-
-    # Set app settings' "all phonologies expanded" to false.
-    setAllPhonologiesCollapsed: ->
-      @changeDisplaySetting 'phonologies', 'allPhonologiesExpanded', false
-
-    # Persist the new "items per page" to app settings.
-    setPhonologiesItemsPerPage: (newItemsPerPage) ->
-      @changeDisplaySetting 'phonologies', 'itemsPerPage', newItemsPerPage
-
-    # Set app settings' "primary data labels visible" to false.
-    setPhonologiesPrimaryDataLabelsHidden: ->
-      @changeDisplaySetting 'phonologies', 'dataLabelsVisible', false
-
-    # Set app settings' "primary data labels visible" to true.
-    setPhonologiesPrimaryDataLabelsVisible: ->
-      @changeDisplaySetting 'phonologies', 'dataLabelsVisible', true
-
-    # Subcorpora Settings
-    ############################################################################
-
-    # Set app settings' "all subcorpora expanded" to true.
-    setAllSubcorporaExpanded: ->
-      @changeDisplaySetting 'subcorpora', 'allSubcorporaExpanded', true
-
-    # Set app settings' "all subcorpora expanded" to false.
-    setAllSubcorporaCollapsed: ->
-      @changeDisplaySetting 'subcorpora', 'allSubcorporaExpanded', false
-
-    # Persist the new "items per page" to app settings.
-    setSubcorporaItemsPerPage: (newItemsPerPage) ->
-      @changeDisplaySetting 'subcorpora', 'itemsPerPage', newItemsPerPage
-
-    # Set app settings' "primary data labels visible" to false.
-    setSubcorporaPrimaryDataLabelsHidden: ->
-      @changeDisplaySetting 'subcorpora', 'dataLabelsVisible', false
-
-    # Set app settings' "primary data labels visible" to true.
-    setSubcorporaPrimaryDataLabelsVisible: ->
-      @changeDisplaySetting 'subcorpora', 'dataLabelsVisible', true
-
-    # Morphologies Settings
-    ############################################################################
-
-    # Set app settings' "all morphologies expanded" to true.
-    setAllMorphologiesExpanded: ->
-      @changeDisplaySetting 'morphologies', 'allMorphologiesExpanded', true
-
-    # Set app settings' "all morphologies expanded" to false.
-    setAllMorphologiesCollapsed: ->
-      @changeDisplaySetting 'morphologies', 'allMorphologiesExpanded', false
-
-    # Persist the new "items per page" to app settings.
-    setMorphologiesItemsPerPage: (newItemsPerPage) ->
-      @changeDisplaySetting 'morphologies', 'itemsPerPage', newItemsPerPage
-
-    # Set app settings' "primary data labels visible" to false.
-    setMorphologiesPrimaryDataLabelsHidden: ->
-      @changeDisplaySetting 'morphologies', 'dataLabelsVisible', false
-
-    # Set app settings' "primary data labels visible" to true.
-    setMorphologiesPrimaryDataLabelsVisible: ->
-      @changeDisplaySetting 'morphologies', 'dataLabelsVisible', true
-
 
     ############################################################################
     # Resource Displayer Dialog logic
     ############################################################################
+    #
+    # These are the jQuery Dialog Boxes that are used to display a single
+    # resource view.
 
     maxNoResourceDisplayerDialogs: 4
 

@@ -10,7 +10,7 @@
                 <a data-event="request:home">Home</a>
             </li>
             <li class="requires-authentication">
-                <a data-event="request:pages">Pages</a>
+                <a data-event="request:pagesBrowse">Pages</a>
             </li>
             <li class='requires-authentication fielddb'>
                 <a data-event="request:corporaBrowse">Corpora</a>
