@@ -74,12 +74,12 @@ define [
 
     # Attributes that are always displayed.
     primaryAttributes: [
-      'description'
+      'name'
     ]
 
     # Attributes that may be hidden.
     secondaryAttributes: [
-      'name'
+      'description'
       'content'
       'tags'
       'form_search'
@@ -100,4 +100,7 @@ define [
       datetime_entered: DateFieldDisplayView
       datetime_modified: DateFieldDisplayView
       files: ArrayOfObjectsWithNameFieldDisplayView
+
+    getHeaderTitle: ->
+      if @model.get('id') then "Corpus #{@model.get 'id'}" else "New Corpus"
 

@@ -547,7 +547,7 @@ define [
       notification = new NotificationView
         title: 'Form search success'
         content: "You have successfully used the saved search with id
-          #{formSearchId} to search!."
+          #{formSearchId} to search."
       @renderNotification notification
 
     fileSearchFail: (errorMessage) ->
