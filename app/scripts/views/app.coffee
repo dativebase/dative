@@ -101,9 +101,8 @@ define [
       @listenTo Backbone, 'showResourceModelInDialog', @showResourceModelInDialog
       @listenToResources()
 
-    # Listen for events that trigger the behaviour of views over collections of
-    # resources. These behaviours are configured by the resources (and their
-    # default params), as specified in `@myResources`.
+    # Listen for resource-related events. The resources and relevant events
+    # are configured by the `@myResources` object.
     # TODO/QUESTION: why not just listen on the resources subclass instead of
     # on Backbone with all of this complex naming stuff?
     listenToResources: ->
@@ -150,7 +149,7 @@ define [
       @alertDialog = new AlertDialogView model: @applicationSettings
       @tasksDialog = new TasksDialogView model: @applicationSettings
       @helpDialog = new HelpDialogView()
-      @notifier = new NotifierView()
+      @notifier = new NotifierView(@myResources)
       @getResourceDisplayerDialogs()
 
     renderPersistentSubviews: ->

@@ -14,24 +14,25 @@ define [
 
     template: notifierTemplate
 
-    initialize: ->
+    initialize: (@resourcesObject) ->
 
-      @crudResources = [
-        'form'
-        'file'
-        'subcorpus'
-        'phonology'
-        'morphology'
-        'languageModel'
-        'morphologicalParser'
-        'search'
-        'user'
-      ]
       @crudRequests = ['add', 'update', 'destroy']
       @crudOutcomes = ['Success', 'Fail']
       @notifications = []
       @maxNotifications = 3
       @listenToEvents()
+
+    listenToCRUDResources: ->
+      for resource of @resourcesObject
+        for request in @crudRequests
+          for outcome in @crudOutcomes
+            do =>
+              resourceName = resource
+              event = "#{request}#{@utils.capitalize resource}#{outcome}"
+              methodName = "#{request}Resource#{outcome}"
+              @listenTo Backbone, event,
+                (arg) =>
+                  @[methodName] arg, resourceName
 
     listenToEvents: ->
 
@@ -96,14 +97,6 @@ define [
 
       @listenToCRUDResources()
 
-    listenToCRUDResources: ->
-
-      for resource in @crudResources
-        for request in @crudRequests
-          for outcome in @crudOutcomes
-            event = "#{request}#{@utils.capitalize resource}#{outcome}"
-            @listenTo Backbone, event, @[event]
-
     render: ->
       @$el.html @template()
       @
@@ -130,186 +123,33 @@ define [
     # Forms
     ############################################################################
 
-    getFormId: (formModel) ->
-      id = formModel.get 'id'
-      activeServerType = globals
-        .applicationSettings.get('activeServer').get 'type'
-      if activeServerType is 'FieldDB' then id = id[-7..]
-      id
-
-    addFormSuccess: (formModel) ->
-      notification = new NotificationView
-        title: 'Form created'
-        content: "You have successfully created a new form. Its id is
-          #{@getFormId formModel}."
-      @renderNotification notification
-
-    updateFormSuccess: (formModel) ->
-      notification = new NotificationView
-        title: 'Form updated'
-        content: "You have successfully updated form #{@getFormId formModel}."
-      @renderNotification notification
-
-    addUpdateFormFail: (error, type) ->
-      if error
-        content = "Your form #{type} request was unsuccessful. #{error}"
-      else
-        content = "Your form #{type} request was unsuccessful. See the error
-          message(s) beneath the input fields."
-      notification = new NotificationView
-        title: "Form #{type} failed"
-        content: content
-        type: 'error'
-      @renderNotification notification
-
-    addFormFail: (error) ->
-      @addUpdateFormFail error, 'creation'
-
-    updateFormFail: (error) ->
-      @addUpdateFormFail error, 'update'
-
-    destroyFormFail: (error) ->
-      notification = new NotificationView
-        title: 'Form deletion failed'
-        content: "Your form creation request was unsuccessful. #{error}"
-        type: 'error'
-      @renderNotification notification
-
-    destroyFormSuccess: (formModel) ->
-      notification = new NotificationView
-        title: 'Form deleted'
-        content: "You have successfully deleted the form with id
-          #{@getFormId formModel}."
-      @renderNotification notification
-
-
-    ############################################################################
-    # Files: add, update, & destroy notifications
-    ############################################################################
-
-    addFileSuccess: (model) -> @addResourceSuccess model, 'file'
-    addFileFail: (error) -> @addResourceFail error, 'file'
-    updateFileSuccess: (model) -> @updateResourceSuccess model, 'file'
-    updateFileFail: (error) -> @updateResourceFail error, 'file'
-    destroyFileFail: (error) -> @destroyResourceFail error, 'file'
-    destroyFileSuccess: (model) -> @destroyResourceSuccess model, 'file'
-
-    ############################################################################
-    # Subcorpora: add, update, & destroy notifications
-    ############################################################################
-
-    addSubcorpusSuccess: (model) -> @addResourceSuccess model, 'subcorpus'
-    addSubcorpusFail: (error) -> @addResourceFail error, 'subcorpus'
-    updateSubcorpusSuccess: (model) -> @updateResourceSuccess model, 'subcorpus'
-    updateSubcorpusFail: (error) -> @updateResourceFail error, 'subcorpus'
-    destroySubcorpusFail: (error) -> @destroyResourceFail error, 'subcorpus'
-    destroySubcorpusSuccess: (model) ->
-      @destroyResourceSuccess model, 'subcorpus'
-
-    ############################################################################
-    # Phonologies: add, update, & destroy notifications
-    ############################################################################
-
-    addPhonologySuccess: (model) -> @addResourceSuccess model, 'phonology'
-    addPhonologyFail: (error) -> @addResourceFail error, 'phonology'
-    updatePhonologySuccess: (model) -> @updateResourceSuccess model, 'phonology'
-    updatePhonologyFail: (error) -> @updateResourceFail error, 'phonology'
-    destroyPhonologyFail: (error) -> @destroyResourceFail error, 'phonology'
-    destroyPhonologySuccess: (model) ->
-      @destroyResourceSuccess model, 'phonology'
-
-    ############################################################################
-    # Morphologies: add, update, & destroy notifications
-    ############################################################################
-
-    addMorphologySuccess: (model) -> @addResourceSuccess model, 'morphology'
-    addMorphologyFail: (error) -> @addResourceFail error, 'morphology'
-    updateMorphologySuccess: (model) ->
-      @updateResourceSuccess model, 'morphology'
-    updateMorphologyFail: (error) -> @updateResourceFail error, 'morphology'
-    destroyMorphologyFail: (error) -> @destroyResourceFail error, 'morphology'
-    destroyMorphologySuccess: (model) ->
-      @destroyResourceSuccess model, 'morphology'
-
-    ############################################################################
-    # Language models: add, update, & destroy notifications
-    ############################################################################
-
-    addLanguageModelSuccess: (model) ->
-      @addResourceSuccess model, 'language model'
-    addLanguageModelFail: (error) ->
-      @addResourceFail error, 'language model'
-    updateLanguageModelSuccess: (model) ->
-      @updateResourceSuccess model, 'language model'
-    updateLanguageModelFail: (error) ->
-      @updateResourceFail error, 'language model'
-    destroyLanguageModelFail: (error) ->
-      @destroyResourceFail error, 'language model'
-    destroyLanguageModelSuccess: (model) ->
-      @destroyResourceSuccess model, 'language model'
-
-    ############################################################################
-    # Morphological parsers: add, update, & destroy notifications
-    ############################################################################
-
-    addMorphologicalParserSuccess: (model) ->
-      @addResourceSuccess model, 'morphological parser'
-    addMorphologicalParserFail: (error) ->
-      @addResourceFail error, 'morphological parser'
-    updateMorphologicalParserSuccess: (model) ->
-      @updateResourceSuccess model, 'morphological parser'
-    updateMorphologicalParserFail: (error) ->
-      @updateResourceFail error, 'morphological parser'
-    destroyMorphologicalParserFail: (error) ->
-      @destroyResourceFail error, 'morphological parser'
-    destroyMorphologicalParserSuccess: (model) ->
-      @destroyResourceSuccess model, 'morphological parser'
-
-    ############################################################################
-    # Searches: add, update, & destroy notifications
-    ############################################################################
-
-    addSearchSuccess: (model) -> @addResourceSuccess model, 'search'
-    addSearchFail: (error) -> @addResourceFail error, 'search'
-    updateSearchSuccess: (model) ->
-      @updateResourceSuccess model, 'search'
-    updateSearchFail: (error) -> @updateResourceFail error, 'search'
-    destroySearchFail: (error) -> @destroyResourceFail error, 'search'
-    destroySearchSuccess: (model) ->
-      @destroyResourceSuccess model, 'search'
-
-    ############################################################################
-    # Users: add, update, & destroy notifications
-    ############################################################################
-
-    addUserSuccess: (model) ->
-      @addResourceSuccess model, 'user'
-    addUserFail: (error) ->
-      @addResourceFail error, 'user'
-    updateUserSuccess: (model) ->
-      @updateResourceSuccess model, 'user'
-    updateUserFail: (error) ->
-      @updateResourceFail error, 'user'
-    destroyUserFail: (error) ->
-      @destroyResourceFail error, 'user'
-    destroyUserSuccess: (model) ->
-      @destroyResourceSuccess model, 'user'
 
     ############################################################################
     # Resources: add, update, & destroy notifications
     ############################################################################
 
+    # Get the id of the resource. If we're using FieldDB and this is a form,
+    # return a truncated UUID.
+    getResourceId: (resourceModel, resourceName) ->
+      id = resourceModel.get 'id'
+      if resourceName is 'form'
+        activeServerType = globals
+          .applicationSettings.get('activeServer').get 'type'
+        if activeServerType is 'FieldDB' then id = id[-7..]
+      id
+
     addResourceSuccess: (model, resource) ->
       notification = new NotificationView
         title: "#{@utils.capitalize resource} created"
         content: "You have successfully created a new #{resource}. Its id is
-          #{model.get 'id'}."
+          #{@getResourceId model, resource}."
       @renderNotification notification
 
     updateResourceSuccess: (model, resource) ->
       notification = new NotificationView
         title: "#{@utils.capitalize resource} updated"
-        content: "You have successfully updated #{resource} #{model.get 'id'}."
+        content: "You have successfully updated #{resource}
+          #{@getResourceId model, resource}."
       @renderNotification notification
 
     addUpdateResourceFail: (error, type, resource) ->
@@ -341,8 +181,9 @@ define [
       notification = new NotificationView
         title: "#{@utils.capitalize resource} deleted"
         content: "You have successfully deleted the #{resource} with id
-          #{model.get 'id'}."
+          #{@getResourceId model, resource}."
       @renderNotification notification
+
 
     fetchHistoryFormFail: (formModel) ->
       notification = new NotificationView
