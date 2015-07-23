@@ -21,6 +21,7 @@ define [
       'delete'
       'history'
       'data'
+      'controls'
     ]
 
     resourceNameHumanReadable: ->
