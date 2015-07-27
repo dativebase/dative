@@ -162,6 +162,51 @@ define ['./utils'], (utils) ->
 
     old:
 
+      users:
+        id: id
+        first_name:
+          eng: 'The first (given) name of this user.'
+
+        last_name:
+          eng: 'The last name (surname) of this user.'
+
+        email:
+          eng: 'The user’s email address.'
+
+        role:
+          eng: 'The user’s role, which determines their level of access: one
+            of “administrator”, “contributor”, or “viewer”.'
+
+        username:
+          eng: 'The user’s username, a unique identifier.'
+
+        password:
+          eng: 'The user’s password. Leave this field blank when updating a
+            user and their password will be left unchanged.'
+
+        password_confirm:
+          eng: 'Retype the user’s password here.'
+
+        affiliation:
+          eng: 'The academic institution, First Nation, museum, etc. that the
+            user is affiliated with.'
+
+        markup_language:
+          eng: 'The markup language—Markdown or
+            reStructuredText—that will be used to generate HTML from the
+            user’s “page content”.'
+
+        page_content:
+          eng: 'This is text that defines the user’s page in Dative; users
+            may use markup conventions from the selected “markup language”
+            in this field and the output will be rendered as HTML.'
+
+        html:
+          eng: 'The HTML of the user’s page; this is generated from the
+            “page content” using the specified “markup language”.'
+
+        datetime_modified: datetimeModified
+
       files:
         id: id
         description: description
