@@ -8,11 +8,12 @@ define [
   './array-of-objects-with-name-field-display'
   './bytes-field-display'
   './file-data'
+  './enterer-field-display'
   './../utils/globals'
 ], (ResourceView, FileAddWidgetView, FieldDisplayView, PersonFieldDisplayView,
   DateFieldDisplayView, ObjectWithNameFieldDisplayView,
   ArrayOfObjectsWithNameFieldDisplayView, BytesFieldDisplayView,
-  FileDataView, globals) ->
+  FileDataView, EntererFieldDisplayView, globals) ->
 
   class FileFieldDisplayView extends FieldDisplayView
 
@@ -105,8 +106,8 @@ define [
     attribute2displayView:
       speaker: PersonFieldDisplayView
       elicitor: PersonFieldDisplayView
-      enterer: PersonFieldDisplayView
-      modifier: PersonFieldDisplayView
+      enterer: EntererFieldDisplayView
+      modifier: PersonFieldDisplayView # TODO: is there a modifier?
       date_elicited: DateFieldDisplayView
       datetime_entered: DateFieldDisplayView
       datetime_modified: DateFieldDisplayView

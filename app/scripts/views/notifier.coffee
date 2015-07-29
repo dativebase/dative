@@ -95,6 +95,9 @@ define [
       @listenTo Backbone, 'fileSelectInvalidName', @fileSelectInvalidName
       @listenTo Backbone, 'fileSelectError', @fileSelectError
 
+      @listenTo Backbone, 'resourceAlreadyDisplayedInDialog',
+        @resourceAlreadyDisplayedInDialog
+
       @listenToCRUDResources()
 
     render: ->
@@ -513,4 +516,13 @@ define [
             "#{contentPrefix} #{errorObj}"
       else
         contentPrefix
+
+    resourceAlreadyDisplayedInDialog: (resourceView) ->
+      name = @utils.capitalize(@utils.camel2regular(resourceView.resourceName))
+      notification = new NotificationView
+        title: 'Already displayed'
+        content: "#{name} #{resourceView.model.get 'id'}
+          is already being displayed in a dialog box."
+        type: 'warning'
+      @renderNotification notification
 

@@ -6,9 +6,11 @@ define [
   './date-field-display'
   './boolean-icon-display'
   './script-display'
+  './enterer-field-display'
+  './modifier-field-display'
 ], (ResourceView, PhonologyControlsView, PhonologyAddWidgetView,
   PersonFieldDisplayView, DateFieldDisplayView, BooleanIconFieldDisplayView,
-  ScriptFieldDisplayView) ->
+  ScriptFieldDisplayView, EntererFieldDisplayView, ModifierFieldDisplayView) ->
 
   # Phonology View
   # --------------
@@ -60,8 +62,8 @@ define [
 
     # Map attribute names to display view class names.
     attribute2displayView:
-      enterer: PersonFieldDisplayView
-      modifier: PersonFieldDisplayView
+      enterer: EntererFieldDisplayView
+      modifier: ModifierFieldDisplayView
       datetime_entered: DateFieldDisplayView
       datetime_modified: DateFieldDisplayView
       compile_succeeded: BooleanIconFieldDisplayView

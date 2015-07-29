@@ -760,8 +760,19 @@ define [
     # Render the passed in resource view in the application-wide
     # `@resourceDisplayerDialog`
     showResourceInDialog: (resourceView) ->
-      oldestResourceDisplayer = @getOldestResourceDisplayerDialog()
-      oldestResourceDisplayer.showResourceView resourceView
+      if @resourceViewAlreadyDisplayed resourceView
+        Backbone.trigger 'resourceAlreadyDisplayedInDialog', resourceView
+      else
+        oldestResourceDisplayer = @getOldestResourceDisplayerDialog()
+        oldestResourceDisplayer.showResourceView resourceView
+
+    resourceViewAlreadyDisplayed: (resourceView) ->
+      isit = false
+      for int in [1..@maxNoResourceDisplayerDialogs]
+        if @["resourceDisplayerDialog#{int}"].resourceView?.cid is
+        resourceView.cid
+          isit = true
+      isit
 
     # Map the names of `ResourceView`-subclassing classes to the classes
     # themselves; useful for `showResourceModelInDialog` below.

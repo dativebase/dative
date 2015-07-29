@@ -1,10 +1,10 @@
 define [
   './resources'
-  './user-old'
+  './user-old-circular'
   './../collections/users'
   './../models/user-old'
   './../utils/globals'
-], (ResourcesView, UserView, UsersCollection, UserModel, globals) ->
+], (ResourcesView, UserViewCircular, UsersCollection, UserModel, globals) ->
 
   # Users View
   # -----------------
@@ -14,11 +14,16 @@ define [
   # within the browse interface.
   #
   # Note: most functionality is coded in the `ResourcesView` base class.
+  #
+  # Note: we use `UserViewCircular`: this is the one that can embed forms and
+  # files in the HTML representations of the users. Since it imports FormView
+  # and FileView, it is not used to represent the relational attributes of the
+  # models of those views.
 
   class UsersView extends ResourcesView
 
     resourceName: 'user'
-    resourceView: UserView
+    resourceView: UserViewCircular
     resourcesCollection: UsersCollection
     resourceModel: UserModel
 

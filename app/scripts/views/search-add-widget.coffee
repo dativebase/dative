@@ -3,7 +3,9 @@ define [
   './textarea-field'
   './search-field'
   './../models/search'
-], (ResourceAddWidgetView, TextareaFieldView, SearchFieldView, SearchModel) ->
+  './../utils/globals'
+], (ResourceAddWidgetView, TextareaFieldView, SearchFieldView, SearchModel,
+  globals) ->
 
 
   class TextareaFieldView255 extends TextareaFieldView
@@ -42,4 +44,16 @@ define [
     ]
 
     editableSecondaryAttributes: []
+
+    # NOTE: we override these three methods because we don't need the added
+    # complication of requesting /formsearches/edit; we just request
+    # /formsearches/new every time.
+    getNewResourceDataFail: ->
+      console.log "Failed to retrieve the data from the OLD server which is
+        necessary for creating a new #{@resourceName}"
+
+    storeOptionsDataGlobally: (data) ->
+      globals[@getGlobalDataAttribute()] = data
+
+    getNewResourceData: -> @model.getNewResourceData()
 

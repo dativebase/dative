@@ -111,6 +111,10 @@ define [
         create: =>
           @fontAwesomateCloseIcon()
         close: =>
+          if @resourceView
+            @resourceView.close()
+            @closed @resourceView
+            @resourceView = null
           @closeAllTooltips()
           @timestamp = 0
         open: (event, ui) =>

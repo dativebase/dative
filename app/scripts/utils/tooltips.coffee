@@ -442,6 +442,9 @@ define ['./utils'], (utils) ->
       searches:
         name: name
         description: description
+        datetime_modified: datetimeModified
+        enterer: enterer
+        id: id
 
         search:
           eng: 'The search expression that defines what forms are to be

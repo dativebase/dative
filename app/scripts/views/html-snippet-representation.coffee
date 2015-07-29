@@ -1,11 +1,9 @@
 define [
   './representation'
   './../templates/html-snippet-representation'
-  './related-model-representation'
-  './form'
-  './../models/form'
-], (RepresentationView, HTMLSnippetRepresentationTemplate,
-  RelatedModelRepresentationView, FormView, FormModel) ->
+], (RepresentationView, HTMLSnippetRepresentationTemplate) ->
+
+  # FormView, FormModel) ->
 
 
   # HTML Snippet Representation View
@@ -25,13 +23,14 @@ define [
   class HTMLSnippetRepresentationView extends RepresentationView
 
     events:
-      'click .link-to-resource': 'requestResourceFromServer'
+      'click .link-to-resource': 'signalInabilityToLink'
 
-    resourceName2viewAndModel:
-      form: [FormView, FormModel]
+    # In the "circular" subclass, this maps the name of a resource, e.g.,
+    # 'form', to a tuple containing both a view and a model class for that
+    # resource.
+    resourceName2viewAndModel: {}
 
     postRender: ->
-      @$('.link-to-resource.dative-tooltip').tooltip()
 
     template: HTMLSnippetRepresentationTemplate
 
@@ -53,29 +52,7 @@ define [
               here</div>"
         )
 
-    requestResourceFromServer: (event) ->
-      $target = $ event.currentTarget
-      resourceName = $target.attr 'data-resource-name'
-      resourceId = $target.attr 'data-resource-id'
-      uniqueIdentifier = "#{resourceName}-#{resourceId}"
-      anchorName = $target.text()
-      [viewClass, modelClass] = @getLinkedToViewAndModel resourceName
-      if viewClass
-        model = new modelClass()
-        view = new viewClass(model: model)
-        view.displayResourceInDialog = (modelObject) ->
-          view.model.set modelObject
-          Backbone.trigger 'showResourceInDialog', @, @$el
-        event = "fetch#{@utils.capitalize resourceName}Success"
-        view.listenToOnce model, event, view.displayResourceInDialog
-        model.fetchResource resourceId
-      else
-        console.log "Sorry, we don't have views and models for #{resourceName}
-          resources yet."
-
-    getLinkedToViewAndModel: (resourceName) ->
-      if resourceName of @resourceName2viewAndModel
-        @resourceName2viewAndModel[resourceName]
-      else
-        [null, null]
+    signalInabilityToLink: ->
+      console.log 'Non-circular HTML snippet representation does not embed
+        resources. Use `HTMLSnippetRepresentationViewCircular` instead.'
 

@@ -4,8 +4,11 @@ define [
   './person-field-display'
   './date-field-display'
   './object-with-name-field-display'
+  './enterer-field-display'
+  './modifier-field-display'
 ], (ResourceView, LanguageModelAddWidgetView, PersonFieldDisplayView,
-  DateFieldDisplayView, ObjectWithNameFieldDisplayView) ->
+  DateFieldDisplayView, ObjectWithNameFieldDisplayView,
+  EntererFieldDisplayView, ModifierFieldDisplayView) ->
 
   # Language Model View
   # -------------------
@@ -50,8 +53,8 @@ define [
 
     # Map attribute names to display view class names.
     attribute2displayView:
-      enterer: PersonFieldDisplayView
-      modifier: PersonFieldDisplayView
+      enterer: EntererFieldDisplayView
+      modifier: ModifierFieldDisplayView
       datetime_entered: DateFieldDisplayView
       datetime_modified: DateFieldDisplayView
       corpus: ObjectWithNameFieldDisplayView

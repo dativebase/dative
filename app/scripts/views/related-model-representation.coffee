@@ -15,14 +15,17 @@ define [
 
   class RelatedModelRepresentationView extends RepresentationView
 
-    # This two attributes should be overridden in subclasses.
+    # These two attributes should be overridden in subclasses.
     relatedModelClass: BaseModel
     relatedModelViewClass: BaseView
 
     template: relatedModelRepresentationTemplate
 
     valueFormatter: (value) ->
-      value.name
+      try
+        value.name
+      catch
+        'Unable to get a name'
 
     initialize: (@context) ->
       if @context.relatedModelClass

@@ -143,6 +143,7 @@ define [
         activeServerType: @getActiveServerType()
         resourceName: @resourceName
         resourceNameHuman: @utils.camel2regular @resourceName
+        editableSecondaryAttributes: @editableSecondaryAttributes
       @$el
         .attr 'id', @model.cid
         .html @template(context)

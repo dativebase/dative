@@ -15,6 +15,10 @@ define [
   './array-of-objects-with-title-field-display'
   './comments-field-display'
   './modified-by-user-field-display'
+  './field-display'
+  './related-user-field-display'
+  './enterer-field-display'
+  './modifier-field-display'
   './../models/form'
   './../utils/globals'
 ], (ResourceView, FormAddWidgetView, PersonFieldDisplayView,
@@ -24,7 +28,19 @@ define [
   PhoneticTranscriptionFieldDisplayView, GrammaticalityValueFieldDisplayView,
   TranslationsFieldDisplayView, SourceFieldDisplayView,
   ArrayOfObjectsWithTitleFieldDisplayView, CommentsFieldDisplayView,
-  ModifiedByUserFieldDisplayView, FormModel, globals) ->
+  ModifiedByUserFieldDisplayView, FieldDisplayView, RelatedUserFieldDisplayView,
+  EntererFieldDisplayView, ModifierFieldDisplayView, FormModel, globals) ->
+
+
+  class VerifierFieldDisplayView extends RelatedUserFieldDisplayView
+
+    attributeName: 'verifier'
+
+
+  class ElicitorFieldDisplayView extends RelatedUserFieldDisplayView
+
+    attributeName: 'elicitor'
+
 
   # Form Base View
   # --------------
@@ -105,10 +121,10 @@ define [
       datetime_entered: DateFieldDisplayView
       datetime_modified: DateFieldDisplayView
       speaker: PersonFieldDisplayView
-      elicitor: PersonFieldDisplayView
-      enterer: PersonFieldDisplayView
-      modifier: PersonFieldDisplayView
-      verifier: PersonFieldDisplayView
+      elicitor: ElicitorFieldDisplayView
+      enterer: EntererFieldDisplayView
+      modifier: ModifierFieldDisplayView
+      verifier: VerifierFieldDisplayView
       collections: ArrayOfObjectsWithTitleFieldDisplayView
       tags: ArrayOfObjectsWithNameFieldDisplayView
       files: ArrayOfObjectsWithNameFieldDisplayView

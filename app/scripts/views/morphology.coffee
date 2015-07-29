@@ -10,10 +10,13 @@ define [
   './subcorpus'
   './related-model-representation'
   './../models/subcorpus'
+  './enterer-field-display'
+  './modifier-field-display'
 ], (ResourceView, MorphologyAddWidgetView, PersonFieldDisplayView,
   DateFieldDisplayView, ObjectWithNameFieldDisplayView, FieldDisplayView,
   BooleanIconFieldDisplayView, MorphologyControlsView, SubcorpusView,
-  RelatedModelRepresentationView, SubcorpusModel) ->
+  RelatedModelRepresentationView, SubcorpusModel, EntererFieldDisplayView,
+  ModifierFieldDisplayView) ->
 
   class RelatedCorpusDisplayView extends FieldDisplayView
 
@@ -65,8 +68,8 @@ define [
 
     # Map attribute names to display view class names.
     attribute2displayView:
-      enterer: PersonFieldDisplayView
-      modifier: PersonFieldDisplayView
+      enterer: EntererFieldDisplayView
+      modifier: ModifierFieldDisplayView
       datetime_entered: DateFieldDisplayView
       datetime_modified: DateFieldDisplayView
       lexicon_corpus: RelatedCorpusDisplayView

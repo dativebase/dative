@@ -7,9 +7,11 @@ define [
   './object-with-name-field-display'
   './array-of-objects-with-name-field-display'
   './query-field-display'
+  './enterer-field-display'
 ], (ResourceView, SearchControlsView, SearchAddWidgetView,
   PersonFieldDisplayView, DateFieldDisplayView, ObjectWithNameFieldDisplayView,
-  ArrayOfObjectsWithNameFieldDisplayView, QueryFieldDisplayView) ->
+  ArrayOfObjectsWithNameFieldDisplayView, QueryFieldDisplayView,
+  EntererFieldDisplayView) ->
 
   # Search View
   # --------------
@@ -40,7 +42,7 @@ define [
     ]
 
     attribute2displayView:
-      enterer: PersonFieldDisplayView
+      enterer: EntererFieldDisplayView
       datetime_modified: DateFieldDisplayView
       search: QueryFieldDisplayView
 
