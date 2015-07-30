@@ -18,6 +18,7 @@ define [
   './forms'
   './subcorpora'
   './users'
+  './elicitation-methods'
   './files'
   './file'
   './phonologies'
@@ -34,9 +35,10 @@ define [
   LoginDialogView, RegisterDialogView, AlertDialogView, TasksDialogView,
   HelpDialogView, ResourceDisplayerDialogView, ApplicationSettingsView,
   PagesView, HomePageView, FormAddView, FormsView,
-  SubcorporaView, UsersView, FilesView, FileView, PhonologiesView,
-  MorphologiesView, LanguageModelsView, MorphologicalParsersView, CorporaView,
-  SearchesView, ApplicationSettingsModel, FormModel, globals, appTemplate) ->
+  SubcorporaView, UsersView, ElicitationMethodsView, FilesView, FileView,
+  PhonologiesView, MorphologiesView, LanguageModelsView,
+  MorphologicalParsersView, CorporaView, SearchesView,
+  ApplicationSettingsModel, FormModel, globals, appTemplate) ->
 
   # App View
   # --------
@@ -338,6 +340,8 @@ define [
         params:
           needsAppSettings: true
           needsActiveFieldDBCorpus: true
+      elicitationMethod:
+        class: ElicitationMethodsView
       file:
         class: FilesView
         params:

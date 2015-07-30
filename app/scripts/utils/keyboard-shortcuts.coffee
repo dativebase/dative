@@ -55,6 +55,9 @@ define [], ->
     shortcut: 'ctrl+u'
     event: 'request:usersBrowse'
   ,
+    shortcut: 'ctrl+e'
+    event: 'request:elicitationMethodsBrowse'
+  ,
     shortcut: 'ctrl+f'
     event: 'request:filesBrowse'
   ]

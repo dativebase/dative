@@ -58,6 +58,10 @@
             <li class='requires-authentication'>
               <a data-event="request:usersBrowse">Users</a>
             </li>
+            <li class='requires-authentication'>
+                <a data-event="request:elicitationMethodsBrowse"
+                    >Elicitation Methods</a>
+            </li>
         </ul>
     </li>
 
