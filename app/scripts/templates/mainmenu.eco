@@ -66,6 +66,10 @@
                 <a data-event="request:tagsBrowse"
                     >Tags</a>
             </li>
+            <li class='requires-authentication'>
+                <a data-event="request:syntacticCategoriesBrowse"
+                    >Categories</a>
+            </li>
         </ul>
     </li>
 

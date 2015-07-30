@@ -143,26 +143,29 @@ define [
 
     addResourceSuccess: (model, resource) ->
       notification = new NotificationView
-        title: "#{@utils.capitalize resource} created"
+        title: "#{@utils.capitalize(@utils.camel2regular(resource))} created"
         content: "You have successfully created a new #{resource}. Its id is
           #{@getResourceId model, resource}."
       @renderNotification notification
 
     updateResourceSuccess: (model, resource) ->
       notification = new NotificationView
-        title: "#{@utils.capitalize resource} updated"
+        title: "#{@utils.capitalize(@utils.camel2regular(resource))} updated"
         content: "You have successfully updated #{resource}
           #{@getResourceId model, resource}."
       @renderNotification notification
 
     addUpdateResourceFail: (error, type, resource) ->
       if error
-        content = "Your #{resource} #{type} request was unsuccessful. #{error}"
+        content = "Your #{@utils.camel2regular resource} #{type} request was
+          unsuccessful. #{error}"
+
       else
-        content = "Your #{resource} #{type} request was unsuccessful. See the
-          error message(s) beneath the input fields."
+        content = "Your #{@utils.camel2regular resource} #{type} request was
+          unsuccessful. See the error message(s) beneath the input fields."
       notification = new NotificationView
-        title: "#{@utils.capitalize resource} #{type} failed"
+        title: "#{@utils.capitalize(@utils.camel2regular(resource))} #{type}
+          failed"
         content: content
         type: 'error'
       @renderNotification notification
@@ -175,15 +178,17 @@ define [
 
     destroyResourceFail: (error, resource) ->
       notification = new NotificationView
-        title: "#{@utils.capitalize resource} deletion failed"
-        content: "Your #{resource} deletion request was unsuccessful. #{error}"
+        title: "#{@utils.capitalize(@utils.camel2regular(resource))} deletion failed"
+        content: "Your #{@utils.camel2regular(resource)} deletion request was
+          unsuccessful. #{error}"
         type: 'error'
       @renderNotification notification
 
     destroyResourceSuccess: (model, resource) ->
       notification = new NotificationView
-        title: "#{@utils.capitalize resource} deleted"
-        content: "You have successfully deleted the #{resource} with id
+        title: "#{@utils.capitalize(@utils.camel2regular(resource))} deleted"
+        content: "You have successfully deleted the
+          #{@utils.camel2regular(resource)} with id
           #{@getResourceId model, resource}."
       @renderNotification notification
 

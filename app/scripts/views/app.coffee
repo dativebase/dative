@@ -19,6 +19,7 @@ define [
   './subcorpora'
   './users'
   './elicitation-methods'
+  './syntactic-categories'
   './files'
   './file'
   './phonologies'
@@ -36,8 +37,8 @@ define [
   LoginDialogView, RegisterDialogView, AlertDialogView, TasksDialogView,
   HelpDialogView, ResourceDisplayerDialogView, ApplicationSettingsView,
   PagesView, HomePageView, FormAddView, FormsView,
-  SubcorporaView, UsersView, ElicitationMethodsView, FilesView, FileView,
-  PhonologiesView, MorphologiesView, LanguageModelsView,
+  SubcorporaView, UsersView, ElicitationMethodsView, SyntacticCategoriesView,
+  FilesView, FileView, PhonologiesView, MorphologiesView, LanguageModelsView,
   MorphologicalParsersView, CorporaView, SearchesView, TagsView,
   ApplicationSettingsModel, FormModel, globals, appTemplate) ->
 
@@ -368,6 +369,8 @@ define [
         class: SearchesView
       subcorpus:
         class: SubcorporaView
+      syntacticCategory:
+        class: SyntacticCategoriesView
       tag:
         class: TagsView
       user:

@@ -61,6 +61,9 @@ define [], ->
     shortcut: 'ctrl+g'
     event: 'request:tagsBrowse'
   ,
+    shortcut: 'ctrl+v'
+    event: 'request:syntacticCategoriesBrowse'
+  ,
     shortcut: 'ctrl+f'
     event: 'request:filesBrowse'
   ]

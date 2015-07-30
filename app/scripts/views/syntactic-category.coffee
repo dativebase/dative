@@ -1,23 +1,23 @@
 define [
   './resource'
-  './elicitation-method-add-widget'
+  './syntactic-category-add-widget'
   './date-field-display'
   './field-display'
   './enterer-field-display'
   './modifier-field-display'
-], (ResourceView, ElicitationMethodAddWidgetView, DateFieldDisplayView,
+], (ResourceView, SyntacticCategoryAddWidgetView, DateFieldDisplayView,
   EntererFieldDisplayView, ModifierFieldDisplayView) ->
 
-  # Elicitation Method View
+  # Syntactic Category View
   # -----------------------
   #
-  # For displaying individual elicitation methods.
+  # For displaying individual syntactic categories.
 
-  class ElicitationMethodView extends ResourceView
+  class SyntacticCategoryView extends ResourceView
 
-    resourceName: 'elicitationMethod'
+    resourceName: 'syntacticCategory'
 
-    resourceAddWidgetView: ElicitationMethodAddWidgetView
+    resourceAddWidgetView: SyntacticCategoryAddWidgetView
 
     # Attributes that are always displayed.
     primaryAttributes: []
@@ -25,6 +25,7 @@ define [
     # Attributes that may be hidden.
     secondaryAttributes: [
       'name'
+      'type'
       'description'
       'datetime_modified'
       'id'

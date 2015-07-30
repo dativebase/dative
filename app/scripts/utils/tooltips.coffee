@@ -162,6 +162,16 @@ define ['./utils'], (utils) ->
 
     old:
 
+      syntacticCategories:
+        name: name
+        description: description
+        id: id
+        datetime_modified: datetimeModified
+
+        type:
+          eng: "The type of syntactic category; one of “lexical”,
+            “phrasal” or “sentential”."
+
       tags:
         name: name
         description: description
