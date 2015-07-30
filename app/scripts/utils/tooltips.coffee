@@ -162,6 +162,36 @@ define ['./utils'], (utils) ->
 
     old:
 
+      languages:
+        datetime_modified: datetimeModified
+
+        Id:
+          eng: 'The three-letter 639-3 identifier.'
+
+        Part2B:
+          eng: 'Equivalent 639-2 identifier of the bibliographic applications
+            code set, if there is one.'
+
+        Part2T:
+          eng: 'Equivalent 639-2 identifier of the terminology applications
+            code set, if there is one.'
+
+        Part1:
+          eng: 'Equivalent 639-1 identifier, if there is one.'
+
+        Scope:
+          eng: 'I(ndividual), M(acrolanguage), or S(pecial).'
+
+        Type:
+          eng: 'A(ncient), C(onstructed), E(xtinct), H(istorical), L(iving), or
+            S(pecial).'
+
+        Ref_Name:
+          eng: 'Reference language name.'
+
+        Comment:
+          eng: 'Comment relating to one or more of the columns.'
+
       syntacticCategories:
         name: name
         description: description

@@ -48,12 +48,18 @@ define [
       @activeServerType = @getActiveServerType()
       @setState options
       @addUpdateType = @getUpdateViewType()
-      @updateView = new @resourceAddWidgetView
-        model: @model,
-        addUpdateType: @addUpdateType
+      @getUpdateView()
       @updateViewRendered = false
       @getControlsView()
       @getFileDataView()
+
+    getUpdateView: ->
+      if 'update' not in @excludedActions
+        @updateView = new @resourceAddWidgetView
+          model: @model,
+          addUpdateType: @addUpdateType
+      else
+        @updateView = null
 
     getFileDataView: ->
       if 'data' not in @excludedActions
@@ -75,9 +81,9 @@ define [
     # a working "controls" view to `@controlsViewClass`. Same thing with 'data'
     # and `@fileDataViewClass`.
     excludedActions: [
-      'history'
-      'controls'
-      'data'
+      'history'  # forms have this, since everything is version controlled.
+      'controls' # phonologies have this, for, e.g., phonologizing.
+      'data'     # file resources have this, for accessing their file data.
     ]
 
     controlsViewClass: null
@@ -87,10 +93,11 @@ define [
 
     # Render the Add a Resource view.
     renderUpdateView: ->
-      @updateView.setElement @$('.update-resource-widget').first()
-      @updateView.render()
-      @updateViewRendered = true
-      @rendered @updateView
+      if 'update' not in @excludedActions
+        @updateView.setElement @$('.update-resource-widget').first()
+        @updateView.render()
+        @updateViewRendered = true
+        @rendered @updateView
 
     # Set the state of the resource display: what is visible.
     setState: (options) ->
@@ -134,12 +141,13 @@ define [
       @listenTo Backbone, "#{@resourceNamePlural}View:hideAllLabels",
         @hideContentAndLabelsThenShowContent
       @listenTo Backbone, "delete#{@resourceNameCapitalized}", @delete
-      @listenTo @updateView, "#{@resourceName}AddView:hide",
-        @hideUpdateViewAnimate
-      @listenTo @model, 'change', @indicateModelState
-      @listenTo @updateView, 'forceModelChanged', @indicateModelState
       @listenTo @model, "update#{@resourceNameCapitalized}Success",
         @updateSuccess
+      @listenTo @model, 'change', @indicateModelState
+      if 'update' not in @excludedActions
+        @listenTo @updateView, "#{@resourceName}AddView:hide",
+          @hideUpdateViewAnimate
+        @listenTo @updateView, 'forceModelChanged', @indicateModelState
       if 'controls' not in @excludedActions
         @listenTo @controlsView, "controlsView:hide",
           @hideControlsViewAnimate
@@ -150,10 +158,11 @@ define [
           @showFileDataViewAnimate
 
     indicateModelState: ->
-      if @updateView.modelAltered()
-        @indicateModelIsAltered()
-      else
-        @indicateModelIsUnaltered()
+      if 'update' not in @excludedActions
+        if @updateView.modelAltered()
+          @indicateModelIsAltered()
+        else
+          @indicateModelIsUnaltered()
 
     indicateModelIsAltered: ->
       @$('.dative-widget-header').first().addClass 'ui-state-error'

@@ -12,11 +12,17 @@ define [
 
     resourceName: 'search'
 
-    # Change the following three attributes if this search model is being used
-    # to search over a resource other than forms, e.g., over file resources.
+    # Change some or all of the following four attributes if this search model
+    # is being used to search over a resource other than forms, e.g., over file
+    # resources.
     targetResourceName: 'form'
     targetResourcePrimaryAttribute: 'transcription'
     targetModelClass: FormModel
+
+    # This may need to be overridden when this SearchModel is used to search
+    # over models that don't have "id" as their primary key, e.g., OLD
+    # languages which have the ISO 639-3 "Id" as their primary key.
+    targetResourcePrimaryKey: 'id'
 
     getTargetResourceNameCapitalized: ->
       @utils.capitalize @targetResourceName
@@ -64,7 +70,11 @@ define [
           'like'
           '%'
         ]
-        order_by: [@getTargetResourceNameCapitalized(), 'id', 'asc']
+        order_by: [
+          @getTargetResourceNameCapitalized()
+          @targetResourcePrimaryKey
+          'asc'
+        ]
 
       # Attributes that the OLD sends to us, but which the OLD will ignore if
       # we try to send them back.

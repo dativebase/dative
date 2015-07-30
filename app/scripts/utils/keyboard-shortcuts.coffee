@@ -64,6 +64,9 @@ define [], ->
     shortcut: 'ctrl+v'
     event: 'request:syntacticCategoriesBrowse'
   ,
+    shortcut: 'ctrl+n'
+    event: 'request:languagesBrowse'
+  ,
     shortcut: 'ctrl+f'
     event: 'request:filesBrowse'
   ]

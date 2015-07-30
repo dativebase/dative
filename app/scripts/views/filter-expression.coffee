@@ -582,6 +582,9 @@ define [
       switch @targetResourceName
         when 'form' then @formSubattributes()
         when 'file' then @fileSubattributes()
+        when 'language' then @languageSubattributes()
+
+    languageSubattributes: -> {}
 
     fileSubattributes: ->
       elicitor: @userAttributes

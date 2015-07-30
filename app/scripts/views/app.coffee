@@ -20,6 +20,7 @@ define [
   './users'
   './elicitation-methods'
   './syntactic-categories'
+  './languages'
   './files'
   './file'
   './phonologies'
@@ -38,9 +39,9 @@ define [
   HelpDialogView, ResourceDisplayerDialogView, ApplicationSettingsView,
   PagesView, HomePageView, FormAddView, FormsView,
   SubcorporaView, UsersView, ElicitationMethodsView, SyntacticCategoriesView,
-  FilesView, FileView, PhonologiesView, MorphologiesView, LanguageModelsView,
-  MorphologicalParsersView, CorporaView, SearchesView, TagsView,
-  ApplicationSettingsModel, FormModel, globals, appTemplate) ->
+  LanguagesView, FilesView, FileView, PhonologiesView, MorphologiesView,
+  LanguageModelsView, MorphologicalParsersView, CorporaView, SearchesView,
+  TagsView, ApplicationSettingsModel, FormModel, globals, appTemplate) ->
 
   # App View
   # --------
@@ -357,6 +358,10 @@ define [
           needsActiveFieldDBCorpus: true
       languageModel:
         class: LanguageModelsView
+      language:
+        class: LanguagesView
+        params:
+          searchable: true
       morphologicalParser:
         class: MorphologicalParsersView
       morphology:

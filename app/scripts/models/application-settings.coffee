@@ -502,6 +502,11 @@ define [
       activeFieldDBCorpus: null
       activeFieldDBCorpusTitle: null
 
+      languagesDisplaySettings:
+        itemsPerPage: 100
+        dataLabelsVisible: true
+        allFormsExpanded: false
+
       formsDisplaySettings:
         itemsPerPage: 10
         dataLabelsVisible: false
