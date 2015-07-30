@@ -71,6 +71,7 @@ define [
 
     initialize: (options) ->
       @resource = options.resource or 'forms'
+      @tooltipIsRefreshable = options.tooltipIsRefreshable or false
       @attribute = options.attribute
       @activeServerType = @getActiveServerType()
       @context = @getContext()

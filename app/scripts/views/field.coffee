@@ -85,6 +85,7 @@ define [
 
     initialize: (options) ->
       @addUpdateType = options.addUpdateType or 'add'
+      @tooltipIsRefreshable = options.tooltipIsRefreshable or false
       @resource = options.resource or 'forms'
       @submitAttempted = false
       @attribute = options.attribute
@@ -284,6 +285,9 @@ define [
         when 'FieldDB' then @utils.camel2regular attribute
         when 'OLD' then @utils.snake2regular attribute
         else 'default'
+
+    refreshTooltip: ->
+      if @tooltipIsRefreshable then @labelView.refreshTooltip @getTooltip()
 
     # The tooltip (the HTML title attribute) for both the label and the input.
     getTooltip: (attribute=@attribute) ->

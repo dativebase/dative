@@ -164,6 +164,14 @@ define [
 
     updateSuccess: ->
       @indicateModelIsUnaltered()
+      @refreshTooltips()
+
+    # Since the content of some tooltips (e.g., datetime modified tooltips)
+    # depends on the value of a particular resource attribute, we need to
+    # refresh the tooltips when an update is successful.
+    refreshTooltips: ->
+      for displayView in @primaryDisplayViews.concat @secondaryDisplayViews
+        displayView.refreshTooltip()
 
     indicateModelIsUnaltered: ->
       @$('.dative-widget-header').first().removeClass 'ui-state-error'
