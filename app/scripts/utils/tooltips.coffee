@@ -162,6 +162,18 @@ define ['./utils'], (utils) ->
 
     old:
 
+      tags:
+        name: name
+        description: description
+        id: id
+        datetime_modified: datetimeModified
+
+      elicitationMethods:
+        name: name
+        description: description
+        id: id
+        datetime_modified: datetimeModified
+
       users:
         id: id
         first_name:

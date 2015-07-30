@@ -62,6 +62,10 @@
                 <a data-event="request:elicitationMethodsBrowse"
                     >Elicitation Methods</a>
             </li>
+            <li class='requires-authentication'>
+                <a data-event="request:tagsBrowse"
+                    >Tags</a>
+            </li>
         </ul>
     </li>
 

@@ -58,6 +58,9 @@ define [], ->
     shortcut: 'ctrl+e'
     event: 'request:elicitationMethodsBrowse'
   ,
+    shortcut: 'ctrl+g'
+    event: 'request:tagsBrowse'
+  ,
     shortcut: 'ctrl+f'
     event: 'request:filesBrowse'
   ]

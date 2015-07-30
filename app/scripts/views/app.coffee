@@ -27,6 +27,7 @@ define [
   './morphological-parsers'
   './corpora'
   './searches'
+  './tags'
   './../models/application-settings'
   './../models/form'
   './../utils/globals'
@@ -37,7 +38,7 @@ define [
   PagesView, HomePageView, FormAddView, FormsView,
   SubcorporaView, UsersView, ElicitationMethodsView, FilesView, FileView,
   PhonologiesView, MorphologiesView, LanguageModelsView,
-  MorphologicalParsersView, CorporaView, SearchesView,
+  MorphologicalParsersView, CorporaView, SearchesView, TagsView,
   ApplicationSettingsModel, FormModel, globals, appTemplate) ->
 
   # App View
@@ -367,6 +368,8 @@ define [
         class: SearchesView
       subcorpus:
         class: SubcorporaView
+      tag:
+        class: TagsView
       user:
         class: UsersView
 
