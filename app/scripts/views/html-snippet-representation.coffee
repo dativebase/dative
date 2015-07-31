@@ -35,22 +35,25 @@ define [
     template: HTMLSnippetRepresentationTemplate
 
     valueFormatter: (value) ->
-      value
-        .replace(/(form|file)\((\d+)\)\(([^\(]+)\)/g,
-          ($0, resourceName, resourceId, anchorName) ->
-            "<a href='javascript:;'
-              title='click here to view this #{resourceName} in the page'
-              class='link-to-resource dative-tooltip'
-              data-resource-name='#{resourceName}'
-              data-resource-id='#{resourceId}'
-              >#{anchorName}</a>"
-        )
-        .replace(/file\[(\d+)\]/g,
-          ($0, fileId) ->
-            console.log "you want to embed the file #{fileId}"
-            "<div class='file-#{fileId}'>File #{fileId} will be embedded
-              here</div>"
-        )
+      try
+        value
+          .replace(/(form|file)\((\d+)\)\(([^\(]+)\)/g,
+            ($0, resourceName, resourceId, anchorName) ->
+              "<a href='javascript:;'
+                title='click here to view this #{resourceName} in the page'
+                class='link-to-resource dative-tooltip'
+                data-resource-name='#{resourceName}'
+                data-resource-id='#{resourceId}'
+                >#{anchorName}</a>"
+          )
+          .replace(/file\[(\d+)\]/g,
+            ($0, fileId) ->
+              console.log "you want to embed the file #{fileId}"
+              "<div class='file-#{fileId}'>File #{fileId} will be embedded
+                here</div>"
+          )
+      catch
+        ''
 
     signalInabilityToLink: ->
       console.log 'Non-circular HTML snippet representation does not embed

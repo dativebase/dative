@@ -2,11 +2,7 @@ define [
   './resource'
   './tag-add-widget'
   './date-field-display'
-  './field-display'
-  './enterer-field-display'
-  './modifier-field-display'
-], (ResourceView, TagAddWidgetView, DateFieldDisplayView,
-  EntererFieldDisplayView, ModifierFieldDisplayView) ->
+], (ResourceView, TagAddWidgetView, DateFieldDisplayView) ->
 
   # Tag View
   # --------
@@ -32,10 +28,5 @@ define [
 
     # Map attribute names to display view class names.
     attribute2displayView:
-      enterer: EntererFieldDisplayView
-      modifier: ModifierFieldDisplayView
-      datetime_entered: DateFieldDisplayView
       datetime_modified: DateFieldDisplayView
-
-
 

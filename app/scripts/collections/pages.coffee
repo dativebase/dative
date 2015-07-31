@@ -1,12 +1,15 @@
 define [
-    'lodash',
-    'backbone',
-    './../models/page'
-  ], (_, Backbone, PageModel) ->
+  './resources'
+  './../models/page'
+], (ResourcesCollection, PageModel) ->
 
-    class PagesCollection extends Backbone.Collection
-      # Reference to this collection's model.
-      model: PageModel
-      url: '/pages'
-    return new PagesCollection()
+  # Pages Collection
+  # ----------------
+  #
+  # Holds models for pages.
+
+  class PagesCollection extends ResourcesCollection
+
+    resourceName: 'page'
+    model: PageModel
 

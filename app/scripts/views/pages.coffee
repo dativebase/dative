@@ -1,41 +1,25 @@
 define [
-  'backbone',
-  './base',
+  './resources'
   './page'
-  './../collections/pages',
-  './../templates/basepage'
-], (Backbone, BaseView, PageView, PagesCollection, basepageTemplate) ->
+  './../collections/pages'
+  './../models/page'
+  './../utils/globals'
+], (ResourcesView, PageView, PagesCollection,
+  PageModel, globals) ->
 
   # Pages View
-  # --------------
+  # ---------
+  #
+  # Displays a collection of pages for browsing, with pagination. Also contains
+  # a model-less `PageView` instance for creating new pages within
+  # the browse interface.
+  #
+  # Note: most functionality is coded in the `ResourcesView` base class.
 
-  # The DOM element for summarizing the pages of a Dative app
-  class PagesView extends BaseView
+  class PagesView extends ResourcesView
 
-    template: basepageTemplate
-
-    pagesCollection: PagesCollection
-
-    initialize: ->
-      @initialized = true
-      @pagesCollection.on 'reset', @render, @
-      #@pagesCollection.fetch()
-
-    render: (taskId) ->
-      @$el.html @template(headerTitle: 'Pages')
-      @matchHeights()
-      @addAll()
-      @fixRoundedBorders()
-      Backbone.trigger 'longTask:deregister', taskId
-      @
-
-    # Append a single page item to the #dative-page-body div of the pages view.
-    addOne: (pageModel) ->
-      pageView = new PageView(model: pageModel)
-      @$('#dative-page-body').append pageView.render().el
-
-    # Add all items in **pagesCollection** at once.
-    addAll: ->
-      @$('#dative-page-body').empty()
-      @pagesCollection.each @addOne, @
+    resourceName: 'page'
+    resourceView: PageView
+    resourcesCollection: PagesCollection
+    resourceModel: PageModel
 
