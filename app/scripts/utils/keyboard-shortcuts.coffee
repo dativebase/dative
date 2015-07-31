@@ -2,6 +2,10 @@ define [], ->
 
   # Application-wide keyboard shortcuts are defined here. `MainMenuView` uses
   # this array of objects in its `keyboardShortcuts` method.
+  #
+  # Note: many of these are arbitrary and are just a convenience during
+  # development. It may be a good idea to remove some of these shortcuts and/or
+  # make the shortcuts completely user-configurable.
 
   [
     shortcut: 'ctrl+,'
@@ -72,6 +76,9 @@ define [], ->
   ,
     shortcut: 'ctrl+k'
     event: 'request:speakersBrowse'
+  ,
+    shortcut: 'ctrl+j'
+    event: 'request:sourcesBrowse'
   ,
     shortcut: 'ctrl+f'
     event: 'request:filesBrowse'

@@ -162,6 +162,180 @@ define ['./utils'], (utils) ->
 
     old:
 
+      sources:
+
+        file:
+          eng: 'A file resource (e.g., a PDF) containing a digital
+            representation of this source.'
+
+        crossref_source:
+          eng: 'Another source model for cross-referencing.'
+
+        crossref:
+          eng: 'The “key” value of another source to be cross-referenced. Any
+            attribute values that are missing from the source model are
+            inherited from the source cross-referenced via this attribute.'
+
+        type:
+          eng: 'The BibTeX entry type, e.g., “article”, “book”, etc. A
+            valid type value is obligatory for all source models. The chosen
+            type value will determine which other attributes must also possess
+            non-empty values.'
+
+        key:
+          eng: 'The BibTeX key, i.e., the unique string used to unambiguously
+            identify a source. E.g., “chomsky57”.'
+
+        address:
+          eng: 'Usually the address of the publisher or other type of
+            institution.'
+
+        annote:
+          eng: 'An annotation. It is not used by the standard bibliography
+            styles, but may be used by others that produce an annotated
+            bibliography.'
+
+        author:
+          eng: 'The name(s) of the author(s), in the format described in Kopka
+            and Daly (2004), i.e., either Given Names Surname or Surname, Given
+            Names. For multiple authors, use the formats just specified and
+            separate each such formatted name by the word “and”.'
+
+        booktitle:
+          eng: 'Title of a book, part of which is being cited.  See Kopka and
+            Daly (2004) for details on how to type titles. For book entries,
+            use the title field instead.'
+
+        chapter:
+          eng: 'A chapter (or section or whatever) number.'
+
+        edition:
+          eng: 'The edition of a book—for example, “Second”. This should
+            be an ordinal, and should have the first letter capitalized, as
+            shown here; the standard styles convert to lower case when
+            necessary.'
+
+        editor:
+          eng: 'Name(s) of editor(s), typed as indicated in Kopka and Daly
+            (2004). At its most basic, this means either as Given Names Surname
+            or Surname, Given Names and using “and” to separate multiple
+            editor names. If there is also a value for the author attribute,
+            then the editor attribute gives the editor of the book or
+            collection in which the reference appears.'
+
+        howpublished:
+          eng: 'How something has been published. The first word should be
+            capitalized.'
+
+        institution:
+          eng: 'The sponsoring institution of a technical report.'
+
+        journal:
+          eng: 'A journal name. Abbreviations are provided for many journals.'
+
+        key_field:
+          eng: 'Used for alphabetizing, cross referencing, and creating a label
+            when the author information is missing. This field should not be
+            confused with the source’s key attribute.'
+
+        month:
+          eng: 'The month in which the work was published or, for an
+            unpublished work, in which it was written.'
+
+        note:
+          eng: 'Any additional information that can help the reader. The first
+            word should be capitalized.'
+
+        number:
+          eng: 'The number of a journal, magazine, technical report, or of a
+            work in a series. An issue of a journal or magazine is usually
+            identified by its volume and number; the organization that issues a
+            technical report usually gives it a number; and sometimes books are
+            given numbers in a named series.'
+
+        organization:
+          eng: 'The organization that sponsors a conference or that publishes a
+            manual.'
+
+        pages:
+          eng: 'One or more page numbers or range of numbers, such as 42–111
+            or 7,41,73–97 or 43+ (the “+” in this last example indicates
+            pages following that don’t form a simple range).'
+
+        publisher:
+          eng: 'The publisher’s name.'
+
+        school:
+          eng: 'The name of the school where a thesis was written.'
+
+        series:
+          eng: 'The name of a series or set of books. When citing an entire
+            book, the title attribute gives its title and an optional series
+            attribute gives the name of a series or multi-volume set in which
+            the book is published.'
+
+        title:
+          eng: 'The work’s title, typed as explained in Kopka and Daly (2004).'
+
+        type_field:
+          eng: 'The type of a technical report—for example, “Research Note”.'
+
+        url:
+          eng: 'The universal resource locator for online documents; this is
+            not standard but supplied by more modern bibliography styles.'
+
+        volume:
+          eng: 'The volume of a journal or multi-volume book.'
+
+        year:
+          eng: 'The year of publication or, for an unpublished work, the year
+            it was written. Generally it should consist of four numerals, such
+            as 1984.'
+
+        affiliation:
+          eng: 'The author’s affiliation.'
+
+        abstract:
+          eng: 'An abstract of the work.'
+
+        contents:
+          eng: 'A table of contents.'
+
+        copyright:
+          eng: 'Copyright information.'
+
+        ISBN:
+          eng: 'The International Standard Book Number.'
+
+        ISSN:
+          eng: 'The International Standard Serial Number. Used to identify a
+            journal.'
+
+        keywords:
+          eng: 'Key words used for searching or possibly for annotation.'
+
+        language:
+          eng: 'The language the document is in.'
+
+        location:
+          eng: 'A location associated with the entry, such as the city in which
+            a conference took place.'
+
+        LCCN:
+          eng: 'The Library of Congress Call Number.'
+
+        mrnumber:
+          eng: 'The Mathematical Reviews number.'
+
+        price:
+          eng: 'The price of the document.'
+
+        size:
+          eng: 'The physical dimensions of a work.'
+
+        id: id
+        datetime_modified: datetimeModified
+
       orthographies:
         name: name
         datetime_modified: datetimeModified

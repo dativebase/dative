@@ -78,6 +78,9 @@
             <li class='requires-authentication'>
                 <a data-event="request:speakersBrowse">Speakers</a>
             </li>
+            <li class='requires-authentication'>
+                <a data-event="request:sourcesBrowse">Sources</a>
+            </li>
         </ul>
     </li>
 
