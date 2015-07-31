@@ -67,6 +67,9 @@ define [], ->
     shortcut: 'ctrl+n'
     event: 'request:languagesBrowse'
   ,
+    shortcut: 'ctrl+o'
+    event: 'request:orthographiesBrowse'
+  ,
     shortcut: 'ctrl+f'
     event: 'request:filesBrowse'
   ]

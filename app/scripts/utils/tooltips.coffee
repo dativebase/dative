@@ -162,6 +162,28 @@ define ['./utils'], (utils) ->
 
     old:
 
+      orthographies:
+        name: name
+        datetime_modified: datetimeModified
+        id: id
+
+        orthography:
+          eng: 'A comma-delimited sequence of characters that defines the
+            graphemes/polygraphs of this orthography.'
+
+        lowercase:
+          eng: 'When set to “true” (the default), the system assumes that only
+            lowercase graphemes are used in this orthography. When set to
+            “false”, the system tries to guess uppercase alternants for the
+            graphemes in this orthography.'
+
+        initial_glottal_stops:
+          eng: 'When set to “true” (the default), the system assumes that
+            glottal stops are written (overtly) at the beginning of a word in
+            this orthography. When set to “false”, the system removes
+            initial glottal stops when translating strings into this
+            orthography.'
+
       languages:
         datetime_modified: datetimeModified
 

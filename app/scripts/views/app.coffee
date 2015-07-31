@@ -30,6 +30,7 @@ define [
   './corpora'
   './searches'
   './tags'
+  './orthographies'
   './../models/application-settings'
   './../models/form'
   './../utils/globals'
@@ -41,7 +42,8 @@ define [
   SubcorporaView, UsersView, ElicitationMethodsView, SyntacticCategoriesView,
   LanguagesView, FilesView, FileView, PhonologiesView, MorphologiesView,
   LanguageModelsView, MorphologicalParsersView, CorporaView, SearchesView,
-  TagsView, ApplicationSettingsModel, FormModel, globals, appTemplate) ->
+  TagsView, OrthographiesView, ApplicationSettingsModel, FormModel, globals,
+  appTemplate) ->
 
   # App View
   # --------
@@ -366,6 +368,8 @@ define [
         class: MorphologicalParsersView
       morphology:
         class: MorphologiesView
+      orthography:
+        class: OrthographiesView
       page:
         class: PagesView
       phonology:
