@@ -30,6 +30,7 @@ define [
   './corpora'
   './searches'
   './tags'
+  './speakers'
   './orthographies'
   './../models/application-settings'
   './../models/form'
@@ -42,8 +43,8 @@ define [
   SubcorporaView, UsersView, ElicitationMethodsView, SyntacticCategoriesView,
   LanguagesView, FilesView, FileView, PhonologiesView, MorphologiesView,
   LanguageModelsView, MorphologicalParsersView, CorporaView, SearchesView,
-  TagsView, OrthographiesView, ApplicationSettingsModel, FormModel, globals,
-  appTemplate) ->
+  TagsView, SpeakersView, OrthographiesView, ApplicationSettingsModel,
+  FormModel, globals, appTemplate) ->
 
   # App View
   # --------
@@ -376,6 +377,8 @@ define [
         class: PhonologiesView
       search:
         class: SearchesView
+      speaker:
+        class: SpeakersView
       subcorpus:
         class: SubcorporaView
       syntacticCategory:

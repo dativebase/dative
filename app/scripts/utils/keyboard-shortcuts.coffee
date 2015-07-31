@@ -70,6 +70,9 @@ define [], ->
     shortcut: 'ctrl+o'
     event: 'request:orthographiesBrowse'
   ,
+    shortcut: 'ctrl+k'
+    event: 'request:speakersBrowse'
+  ,
     shortcut: 'ctrl+f'
     event: 'request:filesBrowse'
   ]

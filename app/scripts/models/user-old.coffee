@@ -35,7 +35,7 @@ define ['./resource'], (ResourceModel) ->
                                #     letter
                                # - must match `passwordConfirm` value.
                                #
-      password_confirm: ''      # Max 255 chars.
+      password_confirm: ''     # Max 255 chars.
       first_name: ''           # Max 255 chars, can't be empty.
       last_name: ''            # Max 255 chars, can't be empty.
       email: ''                # Valid email, max 255 chars, can't be empty.
