@@ -22,6 +22,7 @@ define [
   './syntactic-categories'
   './languages'
   './files'
+  './collections'
   './file'
   './phonologies'
   './morphologies'
@@ -42,9 +43,9 @@ define [
   HelpDialogView, ResourceDisplayerDialogView, ApplicationSettingsView,
   PagesView, HomePageView, FormAddView, FormsView,
   SubcorporaView, UsersView, ElicitationMethodsView, SyntacticCategoriesView,
-  LanguagesView, FilesView, FileView, PhonologiesView, MorphologiesView,
-  LanguageModelsView, MorphologicalParsersView, CorporaView, SearchesView,
-  TagsView, SpeakersView, SourcesView, OrthographiesView,
+  LanguagesView, FilesView, CollectionsView, FileView, PhonologiesView,
+  MorphologiesView, LanguageModelsView, MorphologicalParsersView, CorporaView,
+  SearchesView, TagsView, SpeakersView, SourcesView, OrthographiesView,
   ApplicationSettingsModel, FormModel, globals, appTemplate) ->
 
   # App View
@@ -342,6 +343,8 @@ define [
         params:
           authenticationRequired: false
           needsAppSettings: true
+      collection:
+        class: CollectionsView
       corpus:
         class: CorporaView
         params:

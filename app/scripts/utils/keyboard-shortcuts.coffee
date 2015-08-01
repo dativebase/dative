@@ -80,6 +80,9 @@ define [], ->
     shortcut: 'ctrl+j'
     event: 'request:sourcesBrowse'
   ,
+    shortcut: 'ctrl+i'
+    event: 'request:collectionsBrowse'
+  ,
     shortcut: 'ctrl+f'
     event: 'request:filesBrowse'
   ]

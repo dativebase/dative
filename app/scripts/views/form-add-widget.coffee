@@ -18,8 +18,7 @@ define [
   MultiselectFieldView, UtteranceJudgementFieldView, CommentsFieldView,
   TranscriptionGrammaticalityFieldView, TranslationsFieldView,
   PersonSelectFieldView, UserSelectFieldView, SourceSelectFieldView,
-  RequiredSelectFieldView, DateFieldView, 
-  FormModel, globals) ->
+  RequiredSelectFieldView, DateFieldView, FormModel, globals) ->
 
   ##############################################################################
   # Field sub-classes with max lengths

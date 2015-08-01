@@ -56,6 +56,9 @@
               <a data-event="request:filesBrowse">Files</a>
             </li>
             <li class='requires-authentication'>
+              <a data-event="request:collectionsBrowse">Collections</a>
+            </li>
+            <li class='requires-authentication'>
               <a data-event="request:usersBrowse">Users</a>
             </li>
             <li class='requires-authentication'>

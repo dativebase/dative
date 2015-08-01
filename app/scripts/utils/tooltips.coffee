@@ -162,6 +162,68 @@ define ['./utils'], (utils) ->
 
     old:
 
+      collections:
+
+        title:
+          eng: 'A title for the collection.'
+
+        description: description
+
+        type:
+          eng: 'The type of this collection, one of “story”,
+            “elicitation”, “paper”, “discourse”, or “other”.'
+
+        url:
+          eng: 'The URL fragment that can be used to navigate to this collection.'
+
+        markup_language:
+          eng: 'The markup language (“Markdown” or
+            “reStructuredText”) that is used to generate HTML from the
+            “contents” value.'
+
+        html:
+          eng: "The HTML generated from the “contents” value using the
+            specified “markup language”."
+
+        contents:
+          eng: "The string of lightweight markup and references to forms that
+            defines the contents of this collection."
+
+        source:
+          eng: "The textual source (e.g., research paper, text collection, book
+            of learning materials) from which the collection was drawn, if
+            applicable. Note that the OLD uses the BibTeX reference format for
+            storing source information."
+
+        speaker:
+          eng: "The speaker (consultant) with whom this collection was
+            elicited, if appropriate."
+
+        elicitor:
+          eng: 'The person who elicited this collection, if appropriate.'
+
+        date_elicited:
+          eng: (options) ->
+            if options.value
+              "This collection was elicited on #{utils.humanDate options.value}"
+            else
+              'The date this collection was elicited'
+
+        tags:
+          eng: "Tags for categorizing collections. (These are the same tags that
+            are used throughout an OLD application; i.e., the same tag can be
+            used to categorize a form and a collection.)"
+
+        files:
+          eng: "File resources that are associated to this collection."
+
+        enterer: enterer
+        modifier: modifier
+        datetime_entered: datetimeEntered
+        datetime_modified: datetimeModified
+        UUID: uuid
+        id: id
+
       sources:
 
         file:
@@ -491,7 +553,6 @@ define ['./utils'], (utils) ->
 
         speaker:
           eng: 'The speaker of the content encoded in this file, if relevant.'
-
 
         elicitor:
           eng: 'The person who elicited/recorded this file, if appropriate.'
