@@ -23,6 +23,22 @@ define [
       super options
 
 
+  class TextareaFieldView1000 extends TextareaFieldView
+
+    initialize: (options) ->
+      options.domAttributes =
+        maxlength: 1000
+      super options
+
+
+  class TextareaFieldView100 extends TextareaFieldView
+
+    initialize: (options) ->
+      options.domAttributes =
+        maxlength: 100
+      super options
+
+
   # A <select>-based field view for the source's (BibTeX) type.
   class TypeSelectFieldView extends SelectFieldView
 
@@ -100,6 +116,32 @@ define [
     resourceModel: SourceModel
 
     attribute2fieldView:
+      key: TextareaFieldView1000
+      address: TextareaFieldView1000
+      note: TextareaFieldView1000
+      url: TextareaFieldView1000
+
+      author: TextareaFieldView255
+      booktitle: TextareaFieldView255
+      chapter: TextareaFieldView255
+      edition: TextareaFieldView255
+      editor: TextareaFieldView255
+      howpublished: TextareaFieldView255
+      institution: TextareaFieldView255
+      journal: TextareaFieldView255
+      key_field: TextareaFieldView255
+      organization: TextareaFieldView255
+      publisher: TextareaFieldView255
+      school: TextareaFieldView255
+      series: TextareaFieldView255
+      title: TextareaFieldView255
+      type_field: TextareaFieldView255
+
+      month: TextareaFieldView100
+      number: TextareaFieldView100
+      pages: TextareaFieldView100
+      volume: TextareaFieldView100
+
       type: TypeSelectFieldView
       file: FileSearchFieldView # Note: does not work yet; see TODO above.
 
@@ -107,8 +149,7 @@ define [
       'key'
       'type'
       'file'
-      'crossref_source'
-      'crossref'
+      'crossref' # TODO: this should have a field view that is a search UI (over sources), just like that for `file`
       'author'
       'editor'
       'year'
