@@ -30,11 +30,15 @@ define [
     getInputView: ->
       new SelectInputView @context
 
+    getSelectOptions: -> @options[@optionsAttribute] or []
+
     getContext: ->
+      @selectOptions = @getSelectOptions()
       _.extend(super,
         required: @required
         width: @width
         optionsAttribute: @optionsAttribute
+        selectOptions: @selectOptions
         selectValueGetter: @selectValueGetter
         selectTextGetter: @selectTextGetter
       )
