@@ -8,11 +8,12 @@ define [
   './person-select-field'
   './user-select-field'
   './source-select-field'
+  './multiselect-field'
   './../models/collection'
 ], (ResourceAddWidgetView, TextareaFieldView, SelectFieldView,
   RelationalSelectFieldView, ScriptFieldView, DateFieldView,
   PersonSelectFieldView, UserSelectFieldView, SourceSelectFieldView,
-  CollectionModel) ->
+  MultiselectFieldView, CollectionModel) ->
 
 
   class TextareaFieldView255 extends TextareaFieldView
@@ -68,6 +69,7 @@ define [
       speaker: PersonSelectFieldView
       elicitor: UserSelectFieldView
       source: SourceSelectFieldView
+      tags: MultiselectFieldView
 
     primaryAttributes: [
       'title'
@@ -83,7 +85,7 @@ define [
       'speaker'
       'elicitor'
       'date_elicited'
-      # 'tags' Need a better search/autocomplete interface
+      'tags' # Need a better search/autocomplete interface
       # 'files' Need a better search/autocomplete interface
     ]
 

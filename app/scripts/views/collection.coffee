@@ -3,6 +3,7 @@ define [
   './collection-add-widget'
   './date-field-display'
   './related-user-field-display'
+  './speaker-field-display'
   './enterer-field-display'
   './modifier-field-display'
   './source-field-display'
@@ -10,7 +11,7 @@ define [
   './person-field-display'
   './array-of-objects-with-name-field-display'
 ], (ResourceView, CollectionAddWidgetView, DateFieldDisplayView,
-  RelatedUserFieldDisplayView, EntererFieldDisplayView,
+  RelatedUserFieldDisplayView, SpeakerFieldDisplayView, EntererFieldDisplayView,
   ModifierFieldDisplayView, SourceFieldDisplayView,
   HTMLSnippetFieldDisplayView, PersonFieldDisplayView,
   ArrayOfObjectsWithNameFieldDisplayView) ->
@@ -32,28 +33,43 @@ define [
 
     resourceAddWidgetView: CollectionAddWidgetView
 
+    getHeaderTitle: -> @getTruncatedTitleAndId()
+
+    # Return a string consisting of the value of the model's `title` attribute
+    # truncated to 40 chars, and the model's id. Note: this is probably not
+    # general enough a method to be in this base class.
+    getTruncatedTitleAndId: ->
+      title = @model.get 'title'
+      id = @model.get 'id'
+      if title
+        truncatedTitle = title[0..35]
+        if truncatedTitle isnt title then title = "#{truncatedTitle}..."
+      else
+        title = ''
+      if id then "#{title} (id #{id})" else title
+
     # Attributes that are always displayed.
     primaryAttributes: [
       'title'
       'description'
       'type'
       'url'
-      'markup_language'
-      'html'
-      'source' #
-      'speaker' #
-      'elicitor' #
-      'date_elicited' #
-      'tags' #
-      'files' #
     ]
 
     # Attributes that may be hidden.
     secondaryAttributes: [
-      'enterer' #
-      'modifier' #
-      'datetime_entered' #
-      'datetime_modified' #
+      'markup_language'
+      'html'
+      'source'
+      'speaker'
+      'elicitor'
+      'date_elicited'
+      'tags'
+      'files'
+      'enterer'
+      'modifier'
+      'datetime_entered'
+      'datetime_modified'
       'UUID'
       'id'
     ]
@@ -63,7 +79,7 @@ define [
       datetime_modified: DateFieldDisplayView
       datetime_entered: DateFieldDisplayView
       date_elicited: DateFieldDisplayView
-      speaker: PersonFieldDisplayView
+      speaker: SpeakerFieldDisplayView
       elicitor: ElicitorFieldDisplayView
       enterer: EntererFieldDisplayView
       modifier: ModifierFieldDisplayView

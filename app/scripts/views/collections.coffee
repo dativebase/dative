@@ -1,11 +1,39 @@
 define [
   './resources'
   './collection'
+  './search-widget'
+  './search-field'
   './../collections/collections'
   './../models/collection'
+  './../models/search'
   './../utils/globals'
-], (ResourcesView, CollectionView, CollectionsCollection,
-  CollectionModel, globals) ->
+], (ResourcesView, CollectionView, SearchWidgetView, SearchFieldView,
+  CollectionsCollection, CollectionModel, SearchModel, globals) ->
+
+
+  class CollectionSearchFieldViewNoLabel extends SearchFieldView
+
+    showLabel: false
+    targetResourceName: 'collection'
+
+
+  class CollectionSearchModel extends SearchModel
+
+    # Change the following three attributes if this search model is being used
+    # to search over a resource other than forms, e.g., over collection
+    # resources.
+    targetResourceName: 'collection'
+    targetResourcePrimaryAttribute: 'title'
+    targetModelClass: CollectionModel
+
+
+  class CollectionSearchWidgetView extends SearchWidgetView
+
+    targetResourceName: 'collection'
+    targetModelClass: CollectionModel
+    searchModelClass: CollectionSearchModel
+    searchFieldViewClass: CollectionSearchFieldViewNoLabel
+
 
   # Collections View
   # ----------------
@@ -22,6 +50,7 @@ define [
     resourceView: CollectionView
     resourcesCollection: CollectionsCollection
     resourceModel: CollectionModel
-
-
+    searchable: true
+    searchView: CollectionSearchWidgetView
+    searchModel: CollectionSearchModel
 

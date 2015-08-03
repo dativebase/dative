@@ -107,3 +107,19 @@ define [], ->
         output.push authorOutput
       output
 
+    # Return an "author" for supplied source object. We return the author in
+    # citation form if there is an author; otherwise we return the editor in
+    # citation form or the title or 'no author'.
+    @getAuthor: (sourceObject) ->
+      if sourceObject.author
+        BibTeXUtils.getNameInCitationForm sourceObject.author
+      else if sourceObject.editor
+        BibTeXUtils.getNameInCitationForm sourceObject.editor
+      else if sourceObject.title
+        sourceObject.title
+      else
+        'no author'
+
+    @getYear: (sourceObject) ->
+      if sourceObject.year then sourceObject.year else 'no year'
+

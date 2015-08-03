@@ -25,6 +25,8 @@ define [
 
     # Attributes that are always displayed.
     primaryAttributes: [
+      'first_name'
+      'last_name'
       'dialect'
     ]
 

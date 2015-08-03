@@ -1,5 +1,7 @@
 define [
   './resource'
+  './elicitation-method'
+  './syntactic-category'
   './form-add-widget'
   './person-field-display'
   './date-field-display'
@@ -12,24 +14,31 @@ define [
   './grammaticality-value-field-display'
   './translations-field-display'
   './source-field-display'
+  './speaker-field-display'
   './array-of-objects-with-title-field-display'
   './comments-field-display'
   './modified-by-user-field-display'
   './field-display'
+  './related-resource-field-display'
   './related-user-field-display'
   './enterer-field-display'
   './modifier-field-display'
   './../models/form'
+  './../models/elicitation-method'
+  './../models/syntactic-category'
   './../utils/globals'
-], (ResourceView, FormAddWidgetView, PersonFieldDisplayView,
-  DateFieldDisplayView, ObjectWithNameFieldDisplayView,
-  ArrayOfObjectsWithNameFieldDisplayView, JudgementValueFieldDisplayView,
-  MorphemeBreakFieldDisplayView, MorphemeGlossFieldDisplayView,
-  PhoneticTranscriptionFieldDisplayView, GrammaticalityValueFieldDisplayView,
-  TranslationsFieldDisplayView, SourceFieldDisplayView,
+], (ResourceView, ElicitationMethodView, SyntacticCategoryView,
+  FormAddWidgetView, PersonFieldDisplayView, DateFieldDisplayView,
+  ObjectWithNameFieldDisplayView, ArrayOfObjectsWithNameFieldDisplayView,
+  JudgementValueFieldDisplayView, MorphemeBreakFieldDisplayView,
+  MorphemeGlossFieldDisplayView, PhoneticTranscriptionFieldDisplayView,
+  GrammaticalityValueFieldDisplayView, TranslationsFieldDisplayView,
+  SourceFieldDisplayView, SpeakerFieldDisplayView,
   ArrayOfObjectsWithTitleFieldDisplayView, CommentsFieldDisplayView,
-  ModifiedByUserFieldDisplayView, FieldDisplayView, RelatedUserFieldDisplayView,
-  EntererFieldDisplayView, ModifierFieldDisplayView, FormModel, globals) ->
+  ModifiedByUserFieldDisplayView, FieldDisplayView,
+  RelatedResourceFieldDisplayView, RelatedUserFieldDisplayView,
+  EntererFieldDisplayView, ModifierFieldDisplayView, FormModel,
+  ElicitationMethodModel, SyntacticCategoryModel, globals) ->
 
 
   class VerifierFieldDisplayView extends RelatedUserFieldDisplayView
@@ -40,6 +49,34 @@ define [
   class ElicitorFieldDisplayView extends RelatedUserFieldDisplayView
 
     attributeName: 'elicitor'
+
+
+  class SyntacticCategoryFieldDisplayView extends RelatedResourceFieldDisplayView
+
+    resourceName: 'syntacticCategory'
+    attributeName: 'syntactic_category'
+    resourceModelClass: SyntacticCategoryModel
+    resourceViewClass: SyntacticCategoryView
+
+    resourceAsString: (resource) ->
+      try
+        resource.name
+      catch
+        ''
+
+
+  class ElicitationMethodFieldDisplayView extends RelatedResourceFieldDisplayView
+
+    resourceName: 'elicitationMethod'
+    attributeName: 'elicitation_method'
+    resourceModelClass: ElicitationMethodModel
+    resourceViewClass: ElicitationMethodView
+
+    resourceAsString: (resource) ->
+      try
+        resource.name
+      catch
+        ''
 
 
   # Form Base View
@@ -114,13 +151,13 @@ define [
       translations: TranslationsFieldDisplayView
       morpheme_break: MorphemeBreakFieldDisplayView
       morpheme_gloss: MorphemeGlossFieldDisplayView
-      syntactic_category: ObjectWithNameFieldDisplayView
-      elicitation_method: ObjectWithNameFieldDisplayView
-      source: SourceFieldDisplayView
+      syntactic_category: SyntacticCategoryFieldDisplayView
+      elicitation_method: ElicitationMethodFieldDisplayView
       date_elicited: DateFieldDisplayView
       datetime_entered: DateFieldDisplayView
       datetime_modified: DateFieldDisplayView
-      speaker: PersonFieldDisplayView
+      speaker: SpeakerFieldDisplayView
+      source: SourceFieldDisplayView
       elicitor: ElicitorFieldDisplayView
       enterer: EntererFieldDisplayView
       modifier: ModifierFieldDisplayView

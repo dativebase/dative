@@ -13,6 +13,11 @@ define ['./resource'], (ResourceModel) ->
     ############################################################################
     # Collection Schema
     ############################################################################
+    #
+    # Note: the OLD also returns `contents_unpacked`. This is a version of the
+    # `contents` value where all collection-embedding directives are replaced
+    # by the `contents` value of the referenced collection. Dative may at some
+    # point need to make use of this `contents_unpacked` value.
 
     defaults: ->
       title: ''               # <string> Required, unique among collection
@@ -31,7 +36,7 @@ define ['./resource'], (ResourceModel) ->
                               # etc.) of the collection, if applicable;
                               # received as an object, returned as an integer
                               # id.)
-      speaker: null           # A reference to the OLD speaker with whome this
+      speaker: null           # A reference to the OLD speaker with whom this
                               # collection was elicited, if appropriate.
       elicitor: null          # A reference to the OLD user who elicited this
                               # collection, if appropriate.
@@ -66,6 +71,10 @@ define ['./resource'], (ResourceModel) ->
       'tags'
       'files'
     ]
+
+    manyToOneAttributes: ['source', 'elicitor', 'speaker']
+
+    manyToManyAttributes: ['files', 'tags']
 
     getValidator: (attribute) ->
       switch attribute

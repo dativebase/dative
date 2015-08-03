@@ -3,17 +3,28 @@ define [
   './file-add-widget'
   './field-display'
   './person-field-display'
+  './speaker-field-display'
   './date-field-display'
   './object-with-name-field-display'
   './array-of-objects-with-name-field-display'
   './bytes-field-display'
   './file-data'
+  './related-resource-field-display'
+  './related-user-field-display'
   './enterer-field-display'
+  './modifier-field-display'
   './../utils/globals'
 ], (ResourceView, FileAddWidgetView, FieldDisplayView, PersonFieldDisplayView,
-  DateFieldDisplayView, ObjectWithNameFieldDisplayView,
+  SpeakerFieldDisplayView, DateFieldDisplayView, ObjectWithNameFieldDisplayView,
   ArrayOfObjectsWithNameFieldDisplayView, BytesFieldDisplayView,
-  FileDataView, EntererFieldDisplayView, globals) ->
+  FileDataView, RelatedResourceFieldDisplayView, RelatedUserFieldDisplayView,
+  EntererFieldDisplayView, ModifierFieldDisplayView, globals) ->
+
+
+  class ElicitorFieldDisplayView extends RelatedUserFieldDisplayView
+
+    attributeName: 'elicitor'
+
 
   class FileFieldDisplayView extends FieldDisplayView
 
@@ -104,10 +115,10 @@ define [
     ]
 
     attribute2displayView:
-      speaker: PersonFieldDisplayView
-      elicitor: PersonFieldDisplayView
+      speaker: SpeakerFieldDisplayView
+      elicitor: ElicitorFieldDisplayView
       enterer: EntererFieldDisplayView
-      modifier: PersonFieldDisplayView # TODO: is there a modifier?
+      modifier: ModifierFieldDisplayView
       date_elicited: DateFieldDisplayView
       datetime_entered: DateFieldDisplayView
       datetime_modified: DateFieldDisplayView

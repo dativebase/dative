@@ -345,6 +345,8 @@ define [
           needsAppSettings: true
       collection:
         class: CollectionsView
+        params:
+          searchable: true
       corpus:
         class: CorporaView
         params:

@@ -582,9 +582,19 @@ define [
       switch @targetResourceName
         when 'form' then @formSubattributes()
         when 'file' then @fileSubattributes()
+        when 'collection' then @collectionSubattributes()
         when 'language' then @languageSubattributes()
 
     languageSubattributes: -> {}
+
+    collectionSubattributes: ->
+      elicitor: @userAttributes
+      enterer: @userAttributes
+      modifier: @userAttributes
+      speaker: @speakerAttributes
+      tags: @tagAttributes
+      files: @fileAttributes
+      source: @sourceAttributes
 
     fileSubattributes: ->
       elicitor: @userAttributes
@@ -621,54 +631,7 @@ define [
       enterer: @userAttributes
       files: @fileAttributes
       memorizers: @userAttributes
-      source: [
-        'id'
-        'file_id'
-        'file'
-        'crossref_source_id'
-        'crossref_source'
-        'datetime_modified'
-        'type'
-        'key'
-        'address'
-        'annote'
-        'author'
-        'booktitle'
-        'chapter'
-        'crossref'
-        'edition'
-        'editor'
-        'howpublished'
-        'institution'
-        'journal'
-        'key_field'
-        'month'
-        'note'
-        'number'
-        'organization'
-        'pages'
-        'publisher'
-        'school'
-        'series'
-        'title'
-        'type_field'
-        'url'
-        'volume'
-        'year'
-        'affiliation'
-        'abstract'
-        'contents'
-        'copyright'
-        'ISBN'
-        'ISSN'
-        'keywords'
-        'language'
-        'location'
-        'LCCN'
-        'mrnumber'
-        'price'
-        'size'
-      ]
+      source: @sourceAttributes
       speaker: @speakerAttributes
       syntactic_category: [
         'id'
@@ -686,6 +649,55 @@ define [
         'datetime_modified'
       ]
       verifier: @userAttributes
+
+    sourceAttributes: [
+      'id'
+      'file_id'
+      'file'
+      'crossref_source_id'
+      'crossref_source'
+      'datetime_modified'
+      'type'
+      'key'
+      'address'
+      'annote'
+      'author'
+      'booktitle'
+      'chapter'
+      'crossref'
+      'edition'
+      'editor'
+      'howpublished'
+      'institution'
+      'journal'
+      'key_field'
+      'month'
+      'note'
+      'number'
+      'organization'
+      'pages'
+      'publisher'
+      'school'
+      'series'
+      'title'
+      'type_field'
+      'url'
+      'volume'
+      'year'
+      'affiliation'
+      'abstract'
+      'contents'
+      'copyright'
+      'ISBN'
+      'ISSN'
+      'keywords'
+      'language'
+      'location'
+      'LCCN'
+      'mrnumber'
+      'price'
+      'size'
+    ]
 
     userAttributes: [
       'id'

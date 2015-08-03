@@ -1,13 +1,13 @@
 define [
   './resources'
-  './file'
+  './file-with-parent-file-link'
   './search-widget'
   './search-field'
   './../collections/files'
   './../models/file'
   './../models/search'
-], (ResourcesView, FileView, SearchWidgetView, SearchFieldView,
-  FilesCollection, FileModel, SearchModel) ->
+], (ResourcesView, FileWithParentFileLinkView, SearchWidgetView,
+  SearchFieldView, FilesCollection, FileModel, SearchModel) ->
 
 
   class FileSearchFieldViewNoLabel extends SearchFieldView
@@ -37,15 +37,15 @@ define [
   # -----------------
   #
   # Displays a collection of files for browsing, with pagination. Also
-  # contains a model-less FileView instance for creating new files
-  # within the browse interface.
+  # contains a model-less `FileWithParentFileLinkView` instance for creating new
+  # files within the browse interface.
   #
   # Note: most functionality is coded in the `ResourcesView` base class.
 
   class FilesView extends ResourcesView
 
     resourceName: 'file'
-    resourceView: FileView
+    resourceView: FileWithParentFileLinkView
     resourcesCollection: FilesCollection
     resourceModel: FileModel
     searchable: true

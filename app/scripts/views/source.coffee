@@ -125,5 +125,7 @@ define [
       'mrnumber'
       'price'
       'size'
+      'datetime_modified'
+      'id'
     ]
 

@@ -1,21 +1,27 @@
 define [
-  './field-display'
-  './value-representation'
-], (FieldDisplayView, ValueRepresentationView) ->
+  './related-resource-field-display'
+  './source'
+  './../models/source'
+  './../utils/bibtex'
+], (RelatedResourceFieldDisplayView, SourceView, SourceModel, BibTeXUtils) ->
 
-  # Source Field Display View
-  # -------------------------
+  # Related Source Field Display View
+  # ----------------------------------
   #
-  # A view for displaying a source field, i.e., a textual source such as a
-  # dictionary or a linguistics paper.
+  # For displaying a source as a field/attribute of another resource, such that
+  # the source is displayed as a link that, when clicked, causes the resource to
+  # be displayed in a dialog box.
 
-  class SourceFieldDisplayView extends FieldDisplayView
+  class SourceFieldDisplayView extends RelatedResourceFieldDisplayView
 
-    getContext: ->
-      context = super
+    resourceName: 'source'
+    attributeName: 'source'
+    resourceModelClass: SourceModel
+    resourceViewClass: SourceView
+
+    resourceAsString: (resource) ->
       try
-        context.value = "#{context.value.author} (#{context.value.year})"
+        "#{BibTeXUtils.getAuthor resource} (#{BibTeXUtils.getYear resource})"
       catch
-        context.value = ''
-      context
+        ''
 

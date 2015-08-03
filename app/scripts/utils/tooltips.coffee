@@ -162,6 +162,57 @@ define ['./utils'], (utils) ->
 
     old:
 
+      pages:
+
+        heading:
+          eng: 'The text of the primary heading of this page.'
+
+        markup_language:
+          eng: 'The markup language (“Markdown” or
+            “reStructuredText”) that is used to generate HTML from the
+            “content” value of this page.'
+
+        content:
+          eng: 'This is text that defines the page in Dative;
+            use markup conventions from the selected “markup language”
+            in this field and the output will be rendered as HTML.'
+
+        html:
+          eng: 'The HTML of the page; this is generated from the
+            “content” value using the specified “markup language”.'
+
+        name: name
+        id: id
+        datetime_modified: datetimeModified
+
+
+      speakers:
+        first_name:
+          eng: 'The first (given) name of this speaker.'
+
+        last_name:
+          eng: 'The last name (surname) of this speaker.'
+
+        dialect:
+          eng: 'This speaker’s dialect.'
+
+        markup_language:
+          eng: 'The markup language (“Markdown” or
+            “reStructuredText”) that is used to generate HTML from the
+            speaker’s “page content” value.'
+
+        page_content:
+          eng: 'This is text that defines the speaker’s page in Dative;
+            use markup conventions from the selected “markup language”
+            in this field and the output will be rendered as HTML.'
+
+        html:
+          eng: 'The HTML of the speaker’s page; this is generated from the
+            “page content” using the specified “markup language”.'
+
+        id: id
+        datetime_modified: datetimeModified
+
       collections:
 
         title:
@@ -174,7 +225,7 @@ define ['./utils'], (utils) ->
             “elicitation”, “paper”, “discourse”, or “other”.'
 
         url:
-          eng: 'The URL fragment that can be used to navigate to this collection.'
+          eng: 'The URL path that can be used to navigate to this collection.'
 
         markup_language:
           eng: 'The markup language (“Markdown” or
