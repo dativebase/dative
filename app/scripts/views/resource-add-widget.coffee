@@ -526,8 +526,13 @@ define [
       @setSecondaryDataToggleButtonState()
       @$(@secondaryDataSelector).slideDown
         complete: =>
-          @$(@secondaryDataSelector)
-            .find('textarea, .ui-selectmenu-button').first().focus()
+          @focusFirstSecondaryAttributesField()
+
+    # Focus the first visible field view in the secondary attributes section.
+    focusFirstSecondaryAttributesField: ->
+      @$(@secondaryDataSelector)
+        .find('textarea, .ui-selectmenu-button')
+        .filter(':visible').first().focus()
 
     toggleSecondaryData: ->
       if @secondaryDataVisible

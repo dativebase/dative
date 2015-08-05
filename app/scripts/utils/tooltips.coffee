@@ -576,6 +576,11 @@ define ['./utils'], (utils) ->
         enterer: enterer
         modifier: modifier
 
+        tags:
+          eng: "Tags for categorizing files. (These are the same tags that
+            are used throughout an OLD application; i.e., the same tag can be
+            used to categorize a form and a file.)"
+
         filename:
           eng: 'The name of the file.'
 

@@ -8,12 +8,12 @@ define [
   './person-select-field'
   './user-select-field'
   './source-select-field'
-  './multiselect-field'
+  './multi-element-tag-field'
   './../models/collection'
 ], (ResourceAddWidgetView, TextareaFieldView, SelectFieldView,
   RelationalSelectFieldView, ScriptFieldView, DateFieldView,
   PersonSelectFieldView, UserSelectFieldView, SourceSelectFieldView,
-  MultiselectFieldView, CollectionModel) ->
+  MultiElementTagFieldView, CollectionModel) ->
 
 
   class TextareaFieldView255 extends TextareaFieldView
@@ -61,15 +61,16 @@ define [
     resourceModel: CollectionModel
 
     attribute2fieldView:
-      name: TextareaFieldView255
-      content: ScriptFieldView
+      name:            TextareaFieldView255
+      content:         ScriptFieldView
       markup_language: MarkupLanguageFieldView
-      type: CollectionTypeFieldView
-      date_elicited: DateFieldView
-      speaker: PersonSelectFieldView
-      elicitor: UserSelectFieldView
-      source: SourceSelectFieldView
-      tags: MultiselectFieldView
+      type:            CollectionTypeFieldView
+      date_elicited:   DateFieldView
+      speaker:         PersonSelectFieldView
+      elicitor:        UserSelectFieldView
+      source:          SourceSelectFieldView
+      tags:            MultiElementTagFieldView
+      #tags:            MultiselectFieldView
 
     primaryAttributes: [
       'title'

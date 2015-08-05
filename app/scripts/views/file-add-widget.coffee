@@ -2,7 +2,7 @@ define [
   './resource-add-widget'
   './textarea-field'
   './relational-select-field'
-  './multiselect-field'
+  './multi-element-tag-field'
   './person-select-field'
   './user-select-field'
   './date-field'
@@ -14,7 +14,7 @@ define [
   './resource-as-row'
   './../models/file'
 ], (ResourceAddWidgetView, TextareaFieldView,
-  RelationalSelectFieldView, MultiselectFieldView, PersonSelectFieldView,
+  RelationalSelectFieldView, MultiElementTagFieldView, PersonSelectFieldView,
   UserSelectFieldView, DateFieldView, FileDataUploadFieldView, FileData,
   SelectFieldView, ResourceSelectViaSearchFieldView,
   ResourceSelectViaSearchInputView, ResourceAsRowView, FileModel) ->
@@ -216,7 +216,7 @@ define [
       elicitor:                      ElicitorSelectFieldView
       speaker:                       SpeakerSelectFieldView
       date_elicited:                 DateFieldView
-      tags:                          MultiselectFieldView
+      tags:                          MultiElementTagFieldView
       file_data:                     TypedFileDataUploadFieldView
       dative_file_type:              DativeFileTypeFieldView
       start:                         SubintervalReferencingFileAttributeFieldView
@@ -348,4 +348,19 @@ define [
         'Mixed Utterance'
       ]
       options
+
+    # Since the first visible field view in the secondary field views may be a
+    # tag-it-based view, we need to trigger a click event on its <ul> in order
+    # to focus it.
+    focusFirstSecondaryAttributesField: ->
+      firstFieldIsTagit =
+        @$(@secondaryDataSelector)
+          .find('.dative-form-field')
+          .filter(':visible')
+          .first()
+          .find('ul.tagit').length > 0
+      if firstFieldIsTagit
+        @$(@secondaryDataSelector).find('ul.tagit').first().click()
+      else
+        super
 
