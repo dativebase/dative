@@ -2,7 +2,7 @@ define [
   './resource-add-widget'
   './textarea-field'
   './relational-select-field'
-  './multiselect-field'
+  './multi-element-tag-field'
   './utterance-judgement-field'
   './comments-field'
   './transcription-grammaticality-field'
@@ -15,7 +15,7 @@ define [
   './../models/form'
   './../utils/globals'
 ], (ResourceAddWidgetView, TextareaFieldView, RelationalSelectFieldView,
-  MultiselectFieldView, UtteranceJudgementFieldView, CommentsFieldView,
+  MultiElementTagFieldView, UtteranceJudgementFieldView, CommentsFieldView,
   TranscriptionGrammaticalityFieldView, TranslationsFieldView,
   PersonSelectFieldView, UserSelectFieldView, SourceSelectFieldView,
   RequiredSelectFieldView, DateFieldView, FormModel, globals) ->
@@ -118,7 +118,7 @@ define [
       source:                        SourceSelectFieldView
       status:                        RequiredSelectFieldView
       date_elicited:                 DateFieldView
-      tags:                          MultiselectFieldView
+      tags:                          MultiElementTagFieldView
 
     primaryAttributes: []
     editableSecondaryAttributes: []

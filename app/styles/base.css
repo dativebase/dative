@@ -649,7 +649,7 @@ div.linguistic-data-entry-form ul.fieldset label,
 .ui-selectmenu-button:focus,
 .ui-button:focus,
 .ms-list:focus,
-input:focus,
+input:not(.ui-autocomplete-input):focus,
 textarea:focus {
     outline: none !important;
     box-shadow: 0 0 10px orange !important;
@@ -2041,5 +2041,25 @@ span.current-time-seconds
 .resource-sub-icon-
 {
   margin-left: 0.25em;
+}
+
+.dative-form-field .tagit-choice
+{
+  padding: 0.5em 18px 0.5em 0.5em !important;
+  font-size: 120%;
+}
+
+.dative-form-field ul.tagit
+{
+  max-width: 94.4%;
+  padding-left: 10px;
+  padding-right: 10px;
+  background: white;
+}
+
+.dative-form-field ul.tagit input.ui-autocomplete-input
+{
+  background: white;
+  color: initial;
 }
 

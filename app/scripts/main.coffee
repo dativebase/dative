@@ -41,6 +41,7 @@ require.config
     #superfish: 'jquery-extensions/superfish/dist/js/superfish'
     igt: 'jquery-extensions/igt'
     jqueryuicolors: 'jquery-extensions/jqueryui-colors'
+    tagit: 'jquery-extensions/tag-it'
     sfjquimatch: 'jquery-extensions/superfish-jqueryui-match'
     # Supersubs plugin removed in v1.6 of superfish. See
     # https://github.com/joeldbirch/superfish.
@@ -63,6 +64,7 @@ require [
     'multiselect'
     'jqueryelastic'
     'jqueryuicolors'
+    'tagit'
     'jqueryspin'
   ], (AppView, Workspace) ->
     window.debugMode = false
