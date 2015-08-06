@@ -6,7 +6,7 @@ define [
   './speaker-field-display'
   './date-field-display'
   './object-with-name-field-display'
-  './array-of-objects-with-name-field-display'
+  './array-of-related-resources-field-display'
   './bytes-field-display'
   './file-data'
   './related-resource-field-display'
@@ -16,8 +16,8 @@ define [
   './../utils/globals'
 ], (ResourceView, FileAddWidgetView, FieldDisplayView, PersonFieldDisplayView,
   SpeakerFieldDisplayView, DateFieldDisplayView, ObjectWithNameFieldDisplayView,
-  ArrayOfObjectsWithNameFieldDisplayView, BytesFieldDisplayView,
-  FileDataView, RelatedResourceFieldDisplayView, RelatedUserFieldDisplayView,
+  ArrayOfRelatedResourcesFieldDisplayView, BytesFieldDisplayView, FileDataView,
+  RelatedResourceFieldDisplayView, RelatedUserFieldDisplayView,
   EntererFieldDisplayView, ModifierFieldDisplayView, globals) ->
 
 
@@ -123,7 +123,7 @@ define [
       datetime_entered: DateFieldDisplayView
       datetime_modified: DateFieldDisplayView
       size: BytesFieldDisplayView
-      tags: ArrayOfObjectsWithNameFieldDisplayView
+      tags: ArrayOfRelatedResourcesFieldDisplayView
       name: NameFieldDisplayView
       filename: FilenameFieldDisplayView
       parent_file: FileFieldDisplayView

@@ -9,13 +9,15 @@ define [
   './date-field-display'
   './object-with-name-field-display'
   './array-of-objects-with-name-field-display'
+  './array-of-related-resources-field-display'
   './enterer-field-display'
   './modifier-field-display'
   './../models/search'
 ], (ResourceView, SubcorpusControlsView, SubcorpusAddWidgetView, SearchView,
   FieldDisplayView, RelatedResourceFieldDisplayView,
   PersonFieldDisplayView, DateFieldDisplayView, ObjectWithNameFieldDisplayView,
-  ArrayOfObjectsWithNameFieldDisplayView, EntererFieldDisplayView,
+  ArrayOfObjectsWithNameFieldDisplayView,
+  ArrayOfRelatedResourcesFieldDisplayView, EntererFieldDisplayView,
   ModifierFieldDisplayView, SearchModel) ->
 
   class FormSearchDisplayView extends RelatedResourceFieldDisplayView
@@ -64,7 +66,7 @@ define [
     ]
 
     attribute2displayView:
-      tags: ArrayOfObjectsWithNameFieldDisplayView
+      tags: ArrayOfRelatedResourcesFieldDisplayView
       form_search: FormSearchDisplayView
       enterer: EntererFieldDisplayView
       modifier: ModifierFieldDisplayView
