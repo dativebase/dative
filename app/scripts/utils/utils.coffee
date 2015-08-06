@@ -82,9 +82,13 @@ define (require) ->
     catch
       noun
 
+  # A very ad hoc pluralize function; patch it up as needed but beware: it is
+  # used extensively in the core logic.
   pluralize = (noun) ->
     if endsWith noun, 'y'
       "#{noun[...-1]}ies"
+    else if endsWith noun, 'tatus' # status
+      "#{noun}es"
     else if endsWith noun, 'us' # "corpus/corpora"
       "#{noun[...-2]}ora"
     else if endsWith(noun, 'z') or

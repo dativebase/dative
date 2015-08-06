@@ -34,7 +34,7 @@ define [
 
     # Make title attrs into jQueryUI tooltips.
     tooltipify: ->
-      @$('div.dative-tooltip')
+      @$('.dative-tooltip')
         .tooltip
           position: @tooltipPositionLeft '-200'
 

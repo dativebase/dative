@@ -7,6 +7,7 @@ define [
   './date-field-display'
   './object-with-name-field-display'
   './array-of-objects-with-name-field-display'
+  './array-of-related-resources-field-display'
   './judgement-value-field-display'
   './morpheme-break-field-display'
   './morpheme-gloss-field-display'
@@ -30,10 +31,10 @@ define [
 ], (ResourceView, ElicitationMethodView, SyntacticCategoryView,
   FormAddWidgetView, PersonFieldDisplayView, DateFieldDisplayView,
   ObjectWithNameFieldDisplayView, ArrayOfObjectsWithNameFieldDisplayView,
-  JudgementValueFieldDisplayView, MorphemeBreakFieldDisplayView,
-  MorphemeGlossFieldDisplayView, PhoneticTranscriptionFieldDisplayView,
-  GrammaticalityValueFieldDisplayView, TranslationsFieldDisplayView,
-  SourceFieldDisplayView, SpeakerFieldDisplayView,
+  ArrayOfRelatedResourcesFieldDisplayView, JudgementValueFieldDisplayView,
+  MorphemeBreakFieldDisplayView, MorphemeGlossFieldDisplayView,
+  PhoneticTranscriptionFieldDisplayView, GrammaticalityValueFieldDisplayView,
+  TranslationsFieldDisplayView, SourceFieldDisplayView, SpeakerFieldDisplayView,
   ArrayOfObjectsWithTitleFieldDisplayView, CommentsFieldDisplayView,
   ModifiedByUserFieldDisplayView, FieldDisplayView,
   RelatedResourceFieldDisplayView, RelatedUserFieldDisplayView,
@@ -163,7 +164,8 @@ define [
       modifier: ModifierFieldDisplayView
       verifier: VerifierFieldDisplayView
       collections: ArrayOfObjectsWithTitleFieldDisplayView
-      tags: ArrayOfObjectsWithNameFieldDisplayView
+      #tags: ArrayOfObjectsWithNameFieldDisplayView
+      tags: ArrayOfRelatedResourcesFieldDisplayView
       files: ArrayOfObjectsWithNameFieldDisplayView
 
     # Get an array of form attributes (form app settings model) for the

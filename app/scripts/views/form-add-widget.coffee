@@ -20,6 +20,15 @@ define [
   PersonSelectFieldView, UserSelectFieldView, SourceSelectFieldView,
   RequiredSelectFieldView, DateFieldView, FormModel, globals) ->
 
+
+  class StatusSelectFieldView extends RequiredSelectFieldView
+
+    initialize: (options) ->
+      options.selectValueGetter = (o) -> o
+      options.selectTextGetter = (o) -> o
+      super options
+
+
   ##############################################################################
   # Field sub-classes with max lengths
   ##############################################################################
@@ -116,7 +125,7 @@ define [
       elicitor:                      UserSelectFieldView
       verifier:                      UserSelectFieldView
       source:                        SourceSelectFieldView
-      status:                        RequiredSelectFieldView
+      status:                        StatusSelectFieldView
       date_elicited:                 DateFieldView
       tags:                          MultiElementTagFieldView
 
@@ -205,4 +214,14 @@ define [
               emptyModelObject[attribute] = modelDefaults[attribute]
           emptyModelObject.datumFields = modelDefaults.datumFields
           emptyModelObject
+
+    # This returns the options for our forced-choice field views. we add
+    # options for the `status` attribute.
+    getOptions: ->
+      options = super
+      options.statuses = [
+        'tested'
+        'requires testing'
+      ]
+      options
 
