@@ -1,7 +1,6 @@
 define [
   './base'
   './resource'
-  './exporter-dialog'
   './pagination-menu-top'
   './pagination-item-table'
   './subcorpus'
@@ -10,9 +9,9 @@ define [
   './../utils/paginator'
   './../utils/globals'
   './../templates/resources'
-], (BaseView, ResourceView, ExporterDialogView, PaginationMenuTopView,
-  PaginationItemTableView, SubcorpusView, ResourcesCollection, ResourceModel,
-  Paginator, globals, resourcesTemplate) ->
+], (BaseView, ResourceView, PaginationMenuTopView, PaginationItemTableView,
+  SubcorpusView, ResourcesCollection, ResourceModel, Paginator, globals,
+  resourcesTemplate) ->
 
   # Resources View
   # ---------------
@@ -67,7 +66,6 @@ define [
       @collection = new @resourcesCollection()
       @newResourceView = @getNewResourceView()
       @resourceSearchView = @getResourceSearchView()
-      @exporterDialog = new ExporterDialogView()
       @newResourceViewVisible = false
       @resourceSearchViewVisible = false
       @resourceSearchViewRendered = false
@@ -106,7 +104,6 @@ define [
       @renderPaginationMenuTopView()
       @renderNewResourceView()
       @renderResourceSearchView()
-      @renderExporterDialogView()
       @newResourceViewVisibility()
       @resourceSearchViewVisibility()
       if @weNeedToFetchResourcesAgain()
@@ -119,11 +116,6 @@ define [
       @$('#dative-page-body').scroll => @closeAllTooltips()
       Backbone.trigger 'longTask:deregister', taskId
       @
-
-    renderExporterDialogView: ->
-      @exporterDialog.setElement(@$('#exporter-dialog-container'))
-      @exporterDialog.render()
-      @rendered @exporterDialog
 
     html: ->
       @$el.html @template
@@ -878,7 +870,6 @@ define [
     # it.
     renderResourceView: (resourceView, index) ->
       if resourceView # resourceView may be undefined.
-        @listenTo resourceView, 'openExporterDialog', @openExporterDialog
         if @enumerateResources # i.e., add example numbers, e.g.,  "(1)"
           resourceId = resourceView.model.get 'id'
           viewToReturn = new PaginationItemTableView
@@ -1090,11 +1081,6 @@ define [
       @renderNewResourceView()
       @listenToNewResourceView()
       @showNewResourceViewAnimate()
-
-    openExporterDialog: (options) ->
-      @exporterDialog.setToBeExported options
-      @exporterDialog.generateExport()
-      @exporterDialog.dialogOpen()
 
 
     # Search-relevant stuff

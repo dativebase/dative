@@ -12,6 +12,7 @@ define [
   './tasks-dialog'
   './help-dialog'
   './resource-displayer-dialog'
+  './exporter-dialog'
   './home'
 
   './application-settings'
@@ -97,7 +98,8 @@ define [
   './../templates/app'
 ], (Backbone, FieldDB, Workspace, BaseView, ResourceView, MainMenuView,
   NotifierView, LoginDialogView, RegisterDialogView, AlertDialogView,
-  TasksDialogView, HelpDialogView, ResourceDisplayerDialogView, HomePageView,
+  TasksDialogView, HelpDialogView, ResourceDisplayerDialogView,
+  ExporterDialogView, HomePageView,
 
   ApplicationSettingsView, CollectionsView, CorporaView,
   ElicitationMethodsView, FilesView, FormsView, LanguageModelsView,
@@ -190,6 +192,7 @@ define [
       @listenTo Backbone, 'applicationSettings:changeTheme', @changeTheme
       @listenTo Backbone, 'showResourceInDialog', @showResourceInDialog
       @listenTo Backbone, 'showResourceModelInDialog', @showResourceModelInDialog
+      @listenTo Backbone, 'openExporterDialog', @openExporterDialog
       @listenToResources()
 
     # Listen for resource-related events. The resources and relevant events
@@ -245,6 +248,7 @@ define [
       @tasksDialog = new TasksDialogView model: @applicationSettings
       @helpDialog = new HelpDialogView()
       @notifier = new NotifierView(@myResources)
+      @exporterDialog = new ExporterDialogView()
       @getResourceDisplayerDialogs()
 
     renderPersistentSubviews: ->
@@ -256,6 +260,7 @@ define [
       @helpDialog.setElement(@$('#help-dialog-container'))
       @renderResourceDisplayerDialogs()
       @notifier.setElement(@$('#notifier-container')).render()
+      @exporterDialog.setElement(@$('#exporter-dialog-container')).render()
 
       @rendered @mainMenuView
       @rendered @loginDialog
@@ -263,6 +268,7 @@ define [
       @rendered @alertDialog
       @rendered @tasksDialog
       @rendered @notifier
+      @rendered @exporterDialog
 
     renderHelpDialog: ->
       @helpDialog.render()
@@ -1029,4 +1035,9 @@ define [
         other = @["resourceDisplayerDialog#{int}"]
         if other.timestamp < oldest.timestamp then oldest = other
       oldest
+
+    openExporterDialog: (options) ->
+      @exporterDialog.setToBeExported options
+      @exporterDialog.generateExport()
+      @exporterDialog.dialogOpen()
 

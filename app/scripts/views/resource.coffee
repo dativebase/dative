@@ -212,7 +212,8 @@ define [
 
     exportResource: (event) ->
       if event then @stopEvent event
-      @trigger 'openExporterDialog', model: @model
+      # @trigger 'openExporterDialog', model: @model
+      Backbone.trigger 'openExporterDialog', model: @model
 
     update: ->
       @showUpdateViewAnimate()

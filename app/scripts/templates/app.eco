@@ -7,6 +7,7 @@
 <div id='alert-dialog-container'></div>
 <div id='tasks-dialog-container'></div>
 <div id='help-dialog-container'></div>
+<div id='exporter-dialog-container'></div>
 <div id='resource-displayer-dialog-container-1'></div>
 <div id='resource-displayer-dialog-container-2'></div>
 <div id='resource-displayer-dialog-container-3'></div>
