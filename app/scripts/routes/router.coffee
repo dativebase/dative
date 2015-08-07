@@ -14,13 +14,23 @@ define [
     createResourceRoutes: ->
       for resourceName of @resources
         do =>
+
           resourcePlural = utils.pluralize resourceName
           resourcePluCap = utils.capitalize resourcePlural
-          route = utils.camel2hyphen resourcePlural
-          methodName = "request#{resourcePluCap}Browse"
-          eventName = "request:#{resourcePlural}Browse"
-          @[methodName] = => @mainMenuView.trigger eventName
-          @route route, methodName
+          resourceCapitalized = utils.capitalize resourceName
+
+          route1 = utils.camel2hyphen resourcePlural
+          methodName1 = "request#{resourcePluCap}Browse"
+          eventName1 = "request:#{resourcePlural}Browse"
+          @[methodName1] = => @mainMenuView.trigger eventName1
+          @route route1, methodName1
+
+          route2 = "#{utils.camel2hyphen resourceName}/:resourceId"
+          methodName2 = "request#{resourceCapitalized}View"
+          eventName2 = "request:#{resourceCapitalized}View"
+          @[methodName2] = (resourceId) =>
+            Backbone.trigger eventName2, resourceId
+          @route route2, methodName2
 
     routes:
       'home': 'home'

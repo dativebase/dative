@@ -160,8 +160,6 @@ define [
       @listenTo Backbone, "add#{@resourceNameCapitalized}Fail",
         @scrollToFirstValidationError
 
-      @listenTo Backbone, 'openExporterDialog', @openExporterDialog
-
       @listenTo @paginationMenuTopView, 'paginator:changeItemsPerPage',
         @changeItemsPerPage
       @listenTo @paginationMenuTopView, 'paginator:showFirstPage',
@@ -745,6 +743,7 @@ define [
       while @resourceViews.length
         resourceView = @resourceViews.pop()
         resourceView.close()
+        @stopListening resourceView
         @closed resourceView
 
     # Close all rendered pagination item table views, i.e., the mini-tables that
@@ -879,6 +878,7 @@ define [
     # it.
     renderResourceView: (resourceView, index) ->
       if resourceView # resourceView may be undefined.
+        @listenTo resourceView, 'openExporterDialog', @openExporterDialog
         if @enumerateResources # i.e., add example numbers, e.g.,  "(1)"
           resourceId = resourceView.model.get 'id'
           viewToReturn = new PaginationItemTableView

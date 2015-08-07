@@ -30,7 +30,10 @@
 
   <div class='dative-widget-header-title container-center'
       ><span class='resource-icon'><%- @resourceIcon %></span
-      ><span class='header-title-content'><%- @headerTitle or '' %></span></div>
+      ><span
+        class='header-title-content dative-tooltip'
+        title='view this <%= @resourceNameHumanReadable() %> in the main page'
+      ><%- @headerTitle or '' %></span></div>
 
   <div class='button-container-right'>
 

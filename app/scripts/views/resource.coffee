@@ -204,10 +204,15 @@ define [
       'click .export-resource': 'exportResource'
       'click .controls': 'toggleControlsViewAnimate'
       'click .file-data': 'toggleFileDataViewAnimate'
+      'click .header-title-content': 'viewResourceInPage'
+
+    viewResourceInPage: ->
+      Backbone.trigger "request:#{@resourceNameCapitalized}View",
+        @model.get('id')
 
     exportResource: (event) ->
       if event then @stopEvent event
-      Backbone.trigger 'openExporterDialog', model: @model
+      @trigger 'openExporterDialog', model: @model
 
     update: ->
       @showUpdateViewAnimate()
@@ -519,6 +524,8 @@ define [
                 my: "left+#{leftOffset} center"
                 at: "right center"
                 collision: "flipfit"
+
+      @$('.header-title-content.dative-tooltip').tooltip()
 
     # Button for toggling secondary data: when secondary data are hidden.
     setSecondaryDataButtonStateClosed: ->

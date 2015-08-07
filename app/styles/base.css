@@ -150,7 +150,8 @@ button.help-button
 .form-igt-data span.dative-tooltip,
 .form-translations-data div.dative-tooltip,
 .form-translations-data span.dative-tooltip,
-.dative-field-label.dative-tooltip
+.dative-field-label.dative-tooltip,
+.header-title-content
 {
     cursor: pointer;
 }
@@ -245,7 +246,7 @@ div.resource-as-row-cell.text
 }
 
 .update-widget .dative-field-input-container.full-width textarea,
-.dative-field-input-container.full-widt textarea
+.dative-field-input-container.full-width textarea
 {
   overflow: scroll;
 }

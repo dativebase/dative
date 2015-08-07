@@ -3,6 +3,7 @@ define [
   'FieldDB'
   './../routes/router'
   './base'
+  './resource'
   './mainmenu'
   './notifier'
   './login-dialog'
@@ -11,42 +12,120 @@ define [
   './tasks-dialog'
   './help-dialog'
   './resource-displayer-dialog'
-  './application-settings'
-  './pages'
   './home'
-  './form-add'
-  './forms'
-  './subcorpora'
-  './users'
-  './elicitation-methods'
-  './syntactic-categories'
-  './languages'
-  './files'
+
+  './application-settings'
   './collections'
-  './file'
-  './phonologies'
-  './morphologies'
-  './language-models'
-  './morphological-parsers'
   './corpora'
-  './searches'
-  './tags'
-  './speakers'
-  './sources'
+  './elicitation-methods'
+  './files'
+  './forms'
+  './language-models'
+  './languages'
+  './morphological-parsers'
+  './morphologies'
   './orthographies'
+  './pages'
+  './phonologies'
+  './searches'
+  './sources'
+  './speakers'
+  './subcorpora'
+  './syntactic-categories'
+  './tags'
+  './users'
+
+  './collection'
+  './elicitation-method'
+  './file'
+  './form'
+  './language-model'
+  './language'
+  './morphological-parser'
+  './morphology'
+  './orthography'
+  './page'
+  './phonology'
+  './search'
+  './source'
+  './speaker'
+  './subcorpus'
+  './syntactic-category'
+  './tag'
+  './user-old-circular'
+
   './../models/application-settings'
+  './../models/collection'
+  './../models/elicitation-method'
+  './../models/file'
   './../models/form'
+  './../models/language-model'
+  './../models/language'
+  './../models/morphological-parser'
+  './../models/morphology'
+  './../models/orthography'
+  './../models/page'
+  './../models/phonology'
+  './../models/search'
+  './../models/source'
+  './../models/speaker'
+  './../models/subcorpus'
+  './../models/syntactic-category'
+  './../models/tag'
+  './../models/user-old'
+
+  './../collections/collections'
+  './../collections/elicitation-methods'
+  './../collections/files'
+  './../collections/forms'
+  './../collections/language-models'
+  './../collections/languages'
+  './../collections/morphological-parsers'
+  './../collections/morphologies'
+  './../collections/orthographies'
+  './../collections/pages'
+  './../collections/phonologies'
+  './../collections/searches'
+  './../collections/sources'
+  './../collections/speakers'
+  './../collections/subcorpora'
+  './../collections/syntactic-categories'
+  './../collections/tags'
+  './../collections/users'
+
   './../utils/globals'
   './../templates/app'
-], (Backbone, FieldDB, Workspace, BaseView, MainMenuView, NotifierView,
-  LoginDialogView, RegisterDialogView, AlertDialogView, TasksDialogView,
-  HelpDialogView, ResourceDisplayerDialogView, ApplicationSettingsView,
-  PagesView, HomePageView, FormAddView, FormsView,
-  SubcorporaView, UsersView, ElicitationMethodsView, SyntacticCategoriesView,
-  LanguagesView, FilesView, CollectionsView, FileView, PhonologiesView,
-  MorphologiesView, LanguageModelsView, MorphologicalParsersView, CorporaView,
-  SearchesView, TagsView, SpeakersView, SourcesView, OrthographiesView,
-  ApplicationSettingsModel, FormModel, globals, appTemplate) ->
+], (Backbone, FieldDB, Workspace, BaseView, ResourceView, MainMenuView,
+  NotifierView, LoginDialogView, RegisterDialogView, AlertDialogView,
+  TasksDialogView, HelpDialogView, ResourceDisplayerDialogView, HomePageView,
+
+  ApplicationSettingsView, CollectionsView, CorporaView,
+  ElicitationMethodsView, FilesView, FormsView, LanguageModelsView,
+  LanguagesView, MorphologicalParsersView, MorphologiesView, OrthographiesView,
+  PagesView, PhonologiesView, SearchesView, SourcesView, SpeakersView,
+  SubcorporaView, SyntacticCategoriesView, TagsView, UsersView,
+
+  CollectionView, ElicitationMethodView, FileView, FormView, LanguageModelView,
+  LanguageView, MorphologicalParserView, MorphologyView, OrthographyView,
+  PageView, PhonologyView, SearchView, SourceView, SpeakerView, SubcorpusView,
+  SyntacticCategoryView, TagView, UserView,
+
+  ApplicationSettingsModel, CollectionModel, ElicitationMethodModel, FileModel,
+  FormModel, LanguageModelModel, LanguageModel, MorphologicalParserModel,
+  MorphologyModel, OrthographyModel, PageModel, PhonologyModel, SearchModel,
+  SourceModel, SpeakerModel, SubcorpusModel, SyntacticCategoryModel, TagModel,
+  UserModel,
+
+  CollectionsCollection, ElicitationMethodsCollection, FilesCollection,
+  FormsCollection, LanguageModelsCollection, LanguagesCollection,
+  MorphologicalParsersCollection, MorphologiesCollection,
+  OrthographiesCollection, PagesCollection, PhonologiesCollection,
+  SearchesCollection, SourcesCollection, SpeakersCollection,
+  SubcorporaCollection, SyntacticCategoriesCollection, TagsCollection,
+  UsersCollection,
+
+  globals, appTemplate) ->
+
 
   # App View
   # --------
@@ -65,6 +144,8 @@ define [
       globals.applicationSettings = @applicationSettings
       @overrideFieldDBNotificationHooks()
       @initializePersistentSubviews()
+      @resourceModel = null # this and the next attribute are for displaying a single resource in the main page.
+      @resourcesCollection = null
       @router = new Workspace
         resources: @myResources
         mainMenuView: @mainMenuView
@@ -122,6 +203,8 @@ define [
           resourcePlural = @utils.pluralize resourceName
           resourceCapitalized = @utils.capitalize resourceName
           resourcePluralCapitalized = @utils.capitalize resourcePlural
+          @listenTo Backbone, "destroy#{resourceCapitalized}Success",
+            (resourceModel) => @destroyResourceSuccess resourceModel
           @listenTo Backbone, "#{resourcePlural}View:showAllLabels",
             => @changeDisplaySetting resourcePlural, 'dataLabelsVisible', true
           @listenTo Backbone, "#{resourcePlural}View:hideAllLabels",
@@ -151,6 +234,8 @@ define [
           if config.params?.corpusElement is true
             @listenTo Backbone, "request:#{resourcePlural}BrowseCorpus",
               (options={}) => @showResourcesView resourceName, options
+          @listenTo Backbone, "request:#{resourceCapitalized}View",
+            (id) => @showResourceView(resourceName, id)
 
     initializePersistentSubviews: ->
       @mainMenuView = new MainMenuView model: @applicationSettings
@@ -273,8 +358,15 @@ define [
         @$('#appview').css height: $(window).height() - 50
 
     renderVisibleView: (taskId=null) ->
-      @visibleView.setElement @$('#appview')
-      @visibleView.render taskId
+      if (@visibleView instanceof ResourceView)
+        @$('#appview')
+          .css 'overflow-y', 'scroll'
+          .html @visibleView.render().el
+      else
+        $appView = @$ '#appview'
+        $appView.css 'overflow-y', 'initial'
+        @visibleView.setElement $appView
+        @visibleView.render taskId
       @rendered @visibleView
 
     closeVisibleView: -> if @visibleView then @closeView @visibleView
@@ -324,14 +416,69 @@ define [
       if @[myViewAttr]
         if @fieldDBCorpusHasChanged(myViewAttr, o)
           @closeView @[myViewAttr]
-          @[myViewAttr] = @instantiateResourcesView resourceName, myViewAttr, o
+          @[myViewAttr] = @instantiateResourcesView resourceName, o
       else
-        @[myViewAttr] = @instantiateResourcesView resourceName, myViewAttr, o
+        @[myViewAttr] = @instantiateResourcesView resourceName, o
       @visibleView = @[myViewAttr]
       @showNewResourceViewOption o
       @searchableOption o
       @corpusElementOption o
       @renderVisibleView taskId
+
+    # Show the resource of type `resourceName` with id `id` in the main page of
+    # the application. This is what happens when you navigate to, e.g.,
+    # /#form/123.
+    showResourceView: (resourceName, resourceId, options={}) ->
+      o = @showResourceViewSetDefaultOptions resourceName, options
+      names = @getResourceNames resourceName
+      myViewAttr = "#{resourceName}View"
+      if o.authenticationRequired and not @loggedIn() then return
+      if @[myViewAttr] and @visibleView is @[myViewAttr] then return
+      @router.navigate "#{names.hyphen}/#{resourceId}"
+      @closeVisibleView()
+      @resourcesCollection =
+        new @myResources[resourceName].resourcesCollectionClass()
+      if @resourceModel then @stopListening @resourceModel
+      @resourceModel = new @myResources[resourceName].resourceModelClass(
+        {}, {collection: @resourcesCollection})
+      # We have to listen and fetch here, which is different from
+      # `ResourcesView` sub-classes, which fetch their collections post-render.
+      @listenToOnce @resourceModel, "fetch#{names.capitalized}Fail",
+        @fetchResourceFail
+      @listenToOnce @resourceModel, "fetch#{names.capitalized}Success",
+        (resourceObject) =>
+          @fetchResourceSuccess resourceName, myViewAttr, resourceObject
+      @resourceModel.fetchResource resourceId
+
+    # We failed to fetch the resource model data from the server.
+    fetchResourceFail: (error, resourceModel) ->
+      console.log "Failed to fetch the following resource ..."
+      console.log error
+      console.log resourceModel
+
+    # We succeeded in fetching the resource model data from the server,
+    # so we render a `ResourceView` subclass for it.
+    fetchResourceSuccess: (resourceName, myViewAttr, resourceObject) ->
+      @resourceModel.set resourceObject
+      @[myViewAttr] = new @myResources[resourceName].resourceViewClass
+        model: @resourceModel
+        dataLabelsVisible: true
+        expanded: true
+      @visibleView = @[myViewAttr]
+      @renderVisibleView()
+
+    # We heard that a resource was destroyed. If the destroyed resource is the
+    # one that we are currently displaying, then we hide it, close it, and
+    # navigate to the home page.
+    destroyResourceSuccess: (resourceModel) ->
+      if @visibleView and
+      @visibleView.model is @resourceModel and
+      resourceModel.get('id') is @resourceModel.get('id') and
+      resourceModel instanceof @resourceModel.constructor
+        @visibleView.$el.slideUp
+          complete: =>
+            @closeVisibleView()
+            @showHomePageView()
 
     # The information in this object controls how `@showResourcesView` behaves.
     # The `resourceName` param of that method must be an attribute of this
@@ -339,62 +486,122 @@ define [
     # `@showResourcesViewSetDefaultOptions`.
     myResources:
       applicationSetting:
-        class: ApplicationSettingsView
+        resourcesViewClass: ApplicationSettingsView
+        resourceViewClass: null
+        resourceModelClass: null
+        resourcesCollectionClass: null
         params:
           authenticationRequired: false
           needsAppSettings: true
       collection:
-        class: CollectionsView
+        resourcesViewClass: CollectionsView
+        resourceViewClass: CollectionView
+        resourceModelClass: CollectionModel
+        resourcesCollectionClass: CollectionsCollection
         params:
           searchable: true
       corpus:
-        class: CorporaView
+        resourcesViewClass: CorporaView
+        resourceViewClass: null
+        resourceModelClass: null
+        resourcesCollectionClass: null
         params:
           needsAppSettings: true
           needsActiveFieldDBCorpus: true
       elicitationMethod:
-        class: ElicitationMethodsView
+        resourcesViewClass: ElicitationMethodsView
+        resourceViewClass: ElicitationMethodView
+        resourceModelClass: ElicitationMethodModel
+        resourcesCollectionClass: ElicitationMethodsCollection
       file:
-        class: FilesView
+        resourcesViewClass: FilesView
+        resourceViewClass: FileView
+        resourceModelClass: FileModel
+        resourcesCollectionClass: FilesCollection
         params:
           searchable: true
       form:
-        class: FormsView
+        resourcesViewClass: FormsView
+        resourceViewClass: FormView
+        resourceModelClass: FormModel
+        resourcesCollectionClass: FormsCollection
         params:
           needsAppSettings: true
           searchable: true
           corpusElement: true
           needsActiveFieldDBCorpus: true
       languageModel:
-        class: LanguageModelsView
+        resourcesViewClass: LanguageModelsView
+        resourceViewClass: LanguageModelView
+        resourceModelClass: LanguageModelModel
+        resourcesCollectionClass: LanguageModelsCollection
       language:
-        class: LanguagesView
+        resourcesViewClass: LanguagesView
+        resourceViewClass: LanguageView
+        resourceModelClass: LanguageModel
+        resourcesCollectionClass: LanguagesCollection
         params:
           searchable: true
       morphologicalParser:
-        class: MorphologicalParsersView
+        resourcesViewClass: MorphologicalParsersView
+        resourceViewClass: MorphologicalParserView
+        resourceModelClass: MorphologicalParserModel
+        resourcesCollectionClass: MorphologicalParsersCollection
       morphology:
-        class: MorphologiesView
+        resourcesViewClass: MorphologiesView
+        resourceViewClass: MorphologyView
+        resourceModelClass: MorphologyModel
+        resourcesCollectionClass: MorphologiesCollection
       orthography:
-        class: OrthographiesView
+        resourcesViewClass: OrthographiesView
+        resourceViewClass: OrthographyView
+        resourceModelClass: OrthographyModel
+        resourcesCollectionClass: OrthographiesCollection
       page:
-        class: PagesView
+        resourcesViewClass: PagesView
+        resourceViewClass: PageView
+        resourceModelClass: PageModel
+        resourcesCollectionClass: PagesCollection
       phonology:
-        class: PhonologiesView
+        resourcesViewClass: PhonologiesView
+        resourceViewClass: PhonologyView
+        resourceModelClass: PhonologyModel
+        resourcesCollectionClass: PhonologiesCollection
       search:
-        class: SearchesView
+        resourcesViewClass: SearchesView
+        resourceViewClass: SearchView
+        resourceModelClass: SearchModel
+        resourcesCollectionClass: SearchesCollection
       source:
-        class: SourcesView
+        resourcesViewClass: SourcesView
+        resourceViewClass: SourceView
+        resourceModelClass: SourceModel
+        resourcesCollectionClass: SourcesCollection
       speaker:
-        class: SpeakersView
+        resourcesViewClass: SpeakersView
+        resourceViewClass: SpeakerView
+        resourceModelClass: SpeakerModel
+        resourcesCollectionClass: SpeakersCollection
       subcorpus:
-        class: SubcorporaView
+        resourcesViewClass: SubcorporaView
+        resourceViewClass: SubcorpusView
+        resourceModelClass: SubcorpusModel
+        resourcesCollectionClass: SubcorporaCollection
       syntacticCategory:
-        class: SyntacticCategoriesView
+        resourcesViewClass: SyntacticCategoriesView
+        resourceViewClass: SyntacticCategoryView
+        resourceModelClass: SyntacticCategoryModel
+        resourcesCollectionClass: SyntacticCategoriesCollection
       tag:
-        class: TagsView
+        resourcesViewClass: TagsView
+        resourceViewClass: TagView
+        resourceModelClass: TagModel
+        resourcesCollectionClass: TagsCollection
       user:
-        class: UsersView
+        resourcesViewClass: UsersView
+        resourceViewClass: UserView
+        resourceModelClass: UserModel
+        resourcesCollectionClass: UsersCollection
 
     # Show the ResourcesView subclass for `resourceName` but also make sure
     # that the "Add a new resource" subview is rendered too.
@@ -407,16 +614,6 @@ define [
       else
         @["show#{@utils.capitalize resourcePlural}View"]
           showNewResourceView: true
-
-    # This array is used by `@listenToResources()`.
-    # TODO: make this work with all of our "resources" so we can do things like
-    # DRY-ly cleaning them up on logout ... That is, delete this array and use
-    # the `myResources` object below instead.
-    resources: [
-      'subcorpus'
-      'phonology'
-      'morphology'
-    ]
 
     # Return camelCase `resourceName` in a bunch of other forms that are useful
     # for dynamically displaying/manipulating that resource.
@@ -455,6 +652,16 @@ define [
       options.corpusElement = @get options, 'corpusElement', false
       options
 
+    # Return `options` with resource-specific values (from `@myResources`) and
+    # defaults.
+    showResourceViewSetDefaultOptions: (resourceName, options={}) ->
+      params = @myResources[resourceName].params or {}
+      _.extend options, params
+      # Authentication is required to view most resources views.
+      options.authenticationRequired =
+        @get options, 'authenticationRequired', true
+      options
+
     # Return `true` if the FieldDB corpus has changed.
     fieldDBCorpusHasChanged: (myViewAttr, options={}) ->
       myViewAttr is 'formsView' and
@@ -466,14 +673,14 @@ define [
       @closed view
 
     # Instantiate a new `ResourcesView` subclass for `resourceName`.
-    instantiateResourcesView: (resourceName, myViewAttr, options={}) ->
+    instantiateResourcesView: (resourceName, options={}) ->
       myParams = {}
       if options.needsAppSettings
         myParams.model = @applicationSettings
         myParams.applicationSettings = @applicationSettings
       if options.needsActiveFieldDBCorpus
         myParams.activeFieldDBCorpus = @activeFieldDBCorpus
-      @[myViewAttr] = new @myResources[resourceName].class myParams
+      new @myResources[resourceName].resourcesViewClass myParams
 
     # Alter the visible resources view so that it displays the "create a new
     # resource" view when rendered.
