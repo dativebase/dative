@@ -7,7 +7,7 @@ define [
 ], (FieldDisplayView, TagView, ArrayOfRelatedResourcesRepresentationSetView,
   RelatedResourceRepresentationView, TagModel) ->
 
-  # Array of Related Resource Fields Display View
+  # Array of Related Resources Field Display View
   # ---------------------------------------------
   #
   # A view for displaying an array of `RelatedResourceFieldDisplayView`

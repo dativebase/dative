@@ -701,8 +701,8 @@ define [
           'datetime_modified'
           'verifier'
           'source'
-          #'files'
-          #'collections'
+          'files'
+          #'collections' # Does the OLD provide the collections when the forms resource is fetched?
           'syntax'
           'semantics'
           'status'

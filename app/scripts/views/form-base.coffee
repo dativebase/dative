@@ -1,5 +1,6 @@
 define [
   './resource'
+  './file'
   './elicitation-method'
   './syntactic-category'
   './form-add-widget'
@@ -8,6 +9,7 @@ define [
   './object-with-name-field-display'
   './array-of-objects-with-name-field-display'
   './array-of-related-resources-field-display'
+  './array-of-related-files-field-display'
   './judgement-value-field-display'
   './morpheme-break-field-display'
   './morpheme-gloss-field-display'
@@ -25,20 +27,22 @@ define [
   './enterer-field-display'
   './modifier-field-display'
   './../models/form'
+  './../models/file'
   './../models/elicitation-method'
   './../models/syntactic-category'
   './../utils/globals'
-], (ResourceView, ElicitationMethodView, SyntacticCategoryView,
+], (ResourceView, FileView, ElicitationMethodView, SyntacticCategoryView,
   FormAddWidgetView, PersonFieldDisplayView, DateFieldDisplayView,
   ObjectWithNameFieldDisplayView, ArrayOfObjectsWithNameFieldDisplayView,
-  ArrayOfRelatedResourcesFieldDisplayView, JudgementValueFieldDisplayView,
-  MorphemeBreakFieldDisplayView, MorphemeGlossFieldDisplayView,
-  PhoneticTranscriptionFieldDisplayView, GrammaticalityValueFieldDisplayView,
-  TranslationsFieldDisplayView, SourceFieldDisplayView, SpeakerFieldDisplayView,
+  ArrayOfRelatedResourcesFieldDisplayView, ArrayOfRelatedFilesFieldDisplayView,
+  JudgementValueFieldDisplayView, MorphemeBreakFieldDisplayView,
+  MorphemeGlossFieldDisplayView, PhoneticTranscriptionFieldDisplayView,
+  GrammaticalityValueFieldDisplayView, TranslationsFieldDisplayView,
+  SourceFieldDisplayView, SpeakerFieldDisplayView,
   ArrayOfObjectsWithTitleFieldDisplayView, CommentsFieldDisplayView,
   ModifiedByUserFieldDisplayView, FieldDisplayView,
   RelatedResourceFieldDisplayView, RelatedUserFieldDisplayView,
-  EntererFieldDisplayView, ModifierFieldDisplayView, FormModel,
+  EntererFieldDisplayView, ModifierFieldDisplayView, FormModel, FileModel,
   ElicitationMethodModel, SyntacticCategoryModel, globals) ->
 
 
@@ -164,9 +168,8 @@ define [
       modifier: ModifierFieldDisplayView
       verifier: VerifierFieldDisplayView
       collections: ArrayOfObjectsWithTitleFieldDisplayView
-      #tags: ArrayOfObjectsWithNameFieldDisplayView
       tags: ArrayOfRelatedResourcesFieldDisplayView
-      files: ArrayOfObjectsWithNameFieldDisplayView
+      files: ArrayOfRelatedFilesFieldDisplayView
 
     # Get an array of form attributes (form app settings model) for the
     # specified server type and category (e.g., 'igt' or 'secondary').

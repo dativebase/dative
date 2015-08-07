@@ -66,6 +66,7 @@ define [
 
     manyToManyAttributesOLD: [
       'tags'
+      'files'
     ]
 
     getValidator: (attribute) ->
