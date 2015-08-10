@@ -12,7 +12,7 @@
   <div class='button-container-left'>
 
     <% if @parentFile: %>
-        <button class="deselect-parent-file dative-tooltip"
+        <button class="deselect dative-tooltip"
                 title="Deselect this file as the parent file"
             >deselect</button>
     <% else: %>

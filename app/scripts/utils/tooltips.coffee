@@ -243,8 +243,7 @@ define ['./utils'], (utils) ->
         source:
           eng: "The textual source (e.g., research paper, text collection, book
             of learning materials) from which the collection was drawn, if
-            applicable. Note that the OLD uses the BibTeX reference format for
-            storing source information."
+            applicable."
 
         speaker:
           eng: "The speaker (consultant) with whom this collection was

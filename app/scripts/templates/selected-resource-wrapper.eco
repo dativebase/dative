@@ -1,0 +1,8 @@
+<div class='selected-resource-wrapper'>
+    <div class='selected-resource-container large-unicode-font'></div>
+    <button class="deselect dative-tooltip"
+            title="deselect this <%= @resourceName %> and expose the search
+            interface"
+            >deselect</button>
+</div>
+

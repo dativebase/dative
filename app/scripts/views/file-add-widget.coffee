@@ -10,14 +10,13 @@ define [
   './file-data'
   './select-field'
   './resource-select-via-search-field'
-  './resource-select-via-search-input'
-  './resource-as-row'
+  './file-select-via-search-input'
   './../models/file'
 ], (ResourceAddWidgetView, TextareaFieldView,
   RelationalSelectFieldView, MultiElementTagFieldView, PersonSelectFieldView,
   UserSelectFieldView, DateFieldView, FileDataUploadFieldView, FileData,
   SelectFieldView, ResourceSelectViaSearchFieldView,
-  ResourceSelectViaSearchInputView, ResourceAsRowView, FileModel) ->
+  FileSelectViaSearchInputView, FileModel) ->
 
 
   # The typed textarea field view is a textarea field that is visible only when
@@ -130,21 +129,6 @@ define [
       result
 
 
-  class FileAsRowView extends ResourceAsRowView
-
-    resourceName: 'file'
-
-    orderedAttributes: [
-      'id'
-      'filename'
-      'MIME_type'
-      'size'
-      'enterer'
-      'tags'
-      'forms'
-    ]
-
-
   class ParentFileData extends FileData
 
     initialize: (options) ->
@@ -152,13 +136,55 @@ define [
       super options
 
 
-  class ParentFileSearchInputView extends ResourceSelectViaSearchInputView
+  class ParentFileSearchInputView extends FileSelectViaSearchInputView
 
     # Change these attributes in subclasses.
     resourceName: 'file'
     resourceModelClass: FileModel
-    resourceAsRowViewClass: FileAsRowView
-    resourceMediaViewClass: ParentFileData
+
+    # Instead of using the (default) `RelatedResourceRepresentationView` to
+    # display the selected parent file, we use `ParentFileData` defined above.
+    resourceSelectedViewClass: ParentFileData
+
+    # We don't want a wrapper class because the `ParentFileData` view provides
+    # that functionality for us; e.g., the "deselect" button.
+    selectedResourceWrapperViewClass: null
+
+    # Make the container for the `ParentFileData` instance have a nice border.
+    containerAppearance: ($container) ->
+      $container
+        .addClass 'dative-shadowed-widget ui-widget ui-widget-content
+          ui-corner-all'
+        .css 'border-color': @constructor.jQueryUIColors().defBo
+
+    # With `ParentFileData` view being used to display the selected file, the
+    # model we pass has to be the model of the selected file, not the model of
+    # the child file, which would be the default.
+    getModelForSelectedResourceView: -> @selectedResourceModel
+
+    # When the user selects a parent file, we want to give the child file the
+    # same MIME type as the parent. We also set the child's start value to 0.
+    setSelectedToModel: (resourceAsRowView) ->
+      @model.set 'MIME_type', resourceAsRowView.model.get('MIME_type')
+      @model.trigger 'setAttribute', 'start', 0
+      super resourceAsRowView
+
+    unsetSelectedFromModel: ->
+      @model.set 'MIME_type', ''
+      super
+
+    # Do something special after the view for the selected resource has been
+    # rendered.
+    renderSelectedResourceViewPost: ->
+      @$('audio, video')
+        .on 'loadedmetadata', ((event) => @metadataLoaded event)
+
+    metadataLoaded: (event) ->
+      @model.trigger 'setAttribute', 'end', event.currentTarget.duration
+
+    onClose: ->
+      @$('audio, video').off 'loadedmetadata'
+      super
 
 
   class ParentFileSearchFieldView extends ResourceSelectViaSearchFieldView

@@ -70,15 +70,26 @@ define [
         id = @getRelatedResourceId()
         @resourceModel.fetchResource id
 
-    getRelatedResourceId: -> @context.model.get("#{@attributeName}").id
+    getRelatedResourceId: ->
+      @context.model.get("#{@attributeName}").id
 
     fetchResourceSuccess: (resourceObject) ->
       @resourceModel.set resourceObject
-      @resourceView = new @resourceViewClass(model: @resourceModel)
+      if @resourceViewClass
+        @resourceView = new @resourceViewClass(model: @resourceModel)
+      else
+        @resourceView = true
       @requestDialogView()
 
+    # Sometimes circular dependencies arise if we try to import a particular
+    # ResourceView sub-class. If `@resourceViewClass` is undefined, then we let
+    # the event listener supply the appropriate view class for the model.
     requestDialogView: ->
-      Backbone.trigger 'showResourceInDialog', @resourceView, @$el
+      if @resourceViewClass
+        Backbone.trigger 'showResourceInDialog', @resourceView, @$el
+      else
+        Backbone.trigger 'showResourceModelInDialog', @resourceModel,
+          "#{@utils.capitalize @resourceName}View"
 
     guify: ->
       @$('.dative-tooltip').tooltip()

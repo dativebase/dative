@@ -23,8 +23,12 @@ define [
       @listenToEvents()
 
     listenToCRUDResources: ->
-      for resource of @resourcesObject
-        for request in @crudRequests
+      for resource, config of @resourcesObject
+        if config.params?.searchable
+          requests = @crudRequests.concat ['search']
+        else
+          requests = @crudRequests
+        for request in requests
           for outcome in @crudOutcomes
             do =>
               resourceName = resource
@@ -146,6 +150,24 @@ define [
         title: "#{@utils.capitalize(@utils.camel2regular(resource))} created"
         content: "You have successfully created a new #{resource}. Its id is
           #{@getResourceId model, resource}."
+      @renderNotification notification
+
+    searchResourceSuccess: (model, resource) ->
+      notification = new NotificationView
+        title: "#{@utils.capitalize(@utils.camel2regular(resource))} search
+          succeeded"
+        content: "You have successfully performed a search over the
+          #{@utils.camel2regular(@utils.capitalize(resource))}."
+      @renderNotification notification
+
+    searchResourceFail: (errorMessage, resource) ->
+      notification = new NotificationView
+        title: "#{@utils.capitalize(@utils.camel2regular(resource))} search
+          failed"
+        content: "Your attempt to perform a search across
+          #{@utils.capitalize(@utils.camel2regular(resource))} was unsuccessful:
+          #{errorMessage}"
+        type: 'error'
       @renderNotification notification
 
     updateResourceSuccess: (model, resource) ->

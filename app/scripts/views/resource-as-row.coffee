@@ -18,10 +18,6 @@ define [
     # Override these in sub-classes.
     resourceName: 'resource'
 
-    # This is the regular resource view class; it is used when the "view"
-    # button is clicked.
-    resourceViewClass: ResourceView
-
     # Override this in sub-classes in order to control the left-to-right order
     # of attributes in the view display, and which attributes are displayed.
     orderedAttributes: []
@@ -73,7 +69,8 @@ define [
 
     viewResource: (event) ->
       @stopEvent event
-      Backbone.trigger 'showResourceModelInDialog', @model, 'FileView'
+      Backbone.trigger 'showResourceModelInDialog', @model,
+        "#{@utils.capitalize @resourceName}View"
 
     guify: ->
       @$('button').button()
@@ -180,13 +177,16 @@ define [
           term = term[1...]
         if term.length > 1 and term[term.length - 1] is '%'
           term = term[...-1]
-        term.replace(/_/g, '.').replace(/%/g, '.*')
+        @escapeRegexChars(term).replace(/_/g, '.').replace(/%/g, '.*')
       else if relation is '='
         "^#{term}$"
       else if relation is 'in'
         "(?:^#{term.join ')$|(?:^'})$"
       else
         null
+
+    # Cf. http://stackoverflow.com/a/9310752/992730
+    escapeRegexChars: (input) -> input.replace /[-[\]{}()*+?.,\\^$|#]/g, "\\$&"
 
     # Return an object representing the model such that all attribute values
     # are scalars, i.e., strings or numbers.
@@ -197,35 +197,31 @@ define [
       else
         iterator = _.keys @model.attributes
       for attribute in iterator
-        value = @model.attributes[attribute]
+        value = @getModelValue attribute
         output[attribute] = @scalarTransform attribute, value
       output
 
-    # Return `value` as a string (or number).
-    # Override this in sub-classes with something better/resource-specific.
-    # (Note: this method assumes a File model currently.)
+    getModelValue: (attribute) ->
+      # @model.attributes[attribute]
+      @model.get attribute
+
+    # Return `value` as a string (or number). Override this in sub-classes for
+    # more complex behaviour.
     scalarTransform: (attribute, value) ->
       if @isHeaderRow
-        value
+        @scalarTransformHeaderRow attribute, value
       else if value
-        if attribute in ['elicitor', 'enterer', 'modifier', 'verifier', 'speaker']
-          "#{value.first_name} #{value.last_name}"
-        else if attribute is 'size'
-          @utils.humanFileSize value, true
-        else if attribute is 'forms'
-          if value.length
-            (f.transcription for f in value).join '; '
-          else
-            ''
-        else if attribute is 'tags'
-          if value.length
-            (t.name for t in value).join ', '
-          else
-            ''
-        else if @utils.type(value) in ['string', 'number']
+        if @utils.type(value) in ['string', 'number']
           value
         else
-          JSON.stringify value
+          console.log "could not give a scalar tranform to #{value}"
+          console.log (typeof value)
+          ''
       else
-        JSON.stringify value
+        ''
+
+    # Return `value` as a string, with the understanding that this is for a
+    # header row, sow the value is probably going to be the attribute.
+    scalarTransformHeaderRow: (attribute, value) ->
+      value
 

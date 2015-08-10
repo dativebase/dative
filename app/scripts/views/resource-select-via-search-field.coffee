@@ -7,8 +7,10 @@ define [
   # -------------------------------------
   #
   # A view for selecting a particular resource (say, for a many-to-one
-  # relation) by searching for it in a search input. This input should do some
-  # "smart" search, i.e., try to understand what the user may be searching for.
+  # relation) by searching for it in a search input. This input does some
+  # "smart" search: it interprets a string of digits as an id and anything else
+  # as a space-delimited set of conjunctive search terms over a specified set
+  # of attribute values. See `ResourceSelectViaSearchInputView`.
 
   class ResourceSelectViaSearchFieldView extends FieldView
 

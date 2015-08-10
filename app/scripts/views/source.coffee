@@ -2,8 +2,7 @@ define [
   './resource'
   './source-add-widget'
   './date-field-display'
-  './../utils/bibtex'
-], (ResourceView, SourceAddWidgetView, DateFieldDisplayView, BibTeXUtils) ->
+], (ResourceView, SourceAddWidgetView, DateFieldDisplayView) ->
 
   # Source View
   # -----------
@@ -18,60 +17,32 @@ define [
 
     getHeaderTitle: ->
       switch @model.get('type')
-        when 'article' then @authorYear()
-        when 'book' then @authorEditorYear()
+        when 'article' then @model.getAuthorYear()
+        when 'book' then @model.getAuthorEditorYear()
         when 'booklet' then @titleRequired()
-        when 'conference' then @authorYear()
-        when 'inbook' then @authorEditorYear()
-        when 'incollection' then @authorYear()
-        when 'inproceedings' then @authorYear()
+        when 'conference' then @model.getAuthorYear()
+        when 'inbook' then @model.getAuthorEditorYear()
+        when 'incollection' then @model.getAuthorYear()
+        when 'inproceedings' then @model.getAuthorYear()
         when 'manual' then @titleRequired()
-        when 'mastersthesis' then @authorYear()
-        when 'misc' then @misc()
-        when 'phdthesis' then @authorYear()
+        when 'mastersthesis' then @model.getAuthorYear()
+        when 'misc' then @model.getAuthorEditorYearDefaults()
+        when 'phdthesis' then @model.getAuthorYear()
         when 'proceedings' then @titleYear()
-        when 'techreport' then @authorYear()
+        when 'techreport' then @model.getAuthorYear()
         when 'unpublished' then @titleRequired()
-        else @authorYear()
-
-    # Return a string like "Chomsky and Halle (1968)"
-    authorYear: ->
-      author = @model.get 'author'
-      authorCitation = BibTeXUtils.getNameInCitationForm author
-      "#{authorCitation} (#{@model.get 'year'})"
-
-    # Return a string like "Chomsky and Halle (1968)", using editor names if
-    # authors are unavailable.
-    authorEditorYear: ->
-      if @model.get 'author'
-        name = @model.get 'author'
-      else
-        name = @model.get 'editor'
-      nameCitation = BibTeXUtils.getNameInCitationForm name
-      "#{nameCitation} (#{@model.get 'year'})"
+        else @model.getAuthorYear()
 
     # Try to return a string like "Chomsky and Halle (1968)", but just return
     # the title if author or year are missing.
     titleRequired: ->
       if @model.get('author') and @model.get('year')
-        @authorYear()
+        @model.getAuthorYear()
       else
         @model.get 'title'
 
     # Return a string like "The Sound Pattern of English (1968)".
     titleYear: -> "#{@model.get 'title'} (#{@model.get 'year'})"
-
-    # Try to return a string like "Chomsky and Halle (1968)", but replace
-    # either the author or the year with filler text, if needed.
-    misc: ->
-      author = @model.get 'author'
-      if author
-        auth = BibTeXUtils.getNameInCitationForm author
-      else
-        auth = 'no author'
-      year = @model.get 'year'
-      yr = if year then year else 'no year'
-      "#{auth} (#{yr})"
 
     # Map attribute names to display view class names.
     attribute2displayView:

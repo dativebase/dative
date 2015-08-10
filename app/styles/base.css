@@ -1934,8 +1934,8 @@ i.search-term-icon
 div.resource-results-via-search-table-wrapper,
 div.selected-resource-display-container
 {
-  border-width: 1px;
-  border-style: solid;
+  /* border-width: 1px;
+  border-style: solid; */
   width: 98%;
   max-width: 98%;
   min-width: 98%;
@@ -1966,11 +1966,14 @@ div.resource-as-row-header-cell
   display: inline-block;
   width: 7em;
   white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+  overflow-x: scroll;
+  /* overflow: hidden;
+  text-overflow: ellipsis; */
   line-height: 1.5em;
   margin-right: 0.75em;
   padding-top: 0.5em;
+  padding-bottom: 0.5em;
+  padding-left: 0.5em;
   vertical-align: middle;
 }
 
@@ -2062,5 +2065,16 @@ span.current-time-seconds
 {
   background: white;
   color: initial;
+}
+
+.selected-resource-container
+{
+  display: inline-block;
+}
+
+.selected-resource-container .field-display-link
+{
+  position: relative;
+  top: 0.1em;
 }
 

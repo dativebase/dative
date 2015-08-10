@@ -1,4 +1,7 @@
-define ['./resource'], (ResourceModel) ->
+define [
+  './resource'
+  './../utils/bibtex'
+], (ResourceModel, BibTeXUtils) ->
 
   # Source Model
   # ------------
@@ -389,4 +392,47 @@ define ['./resource'], (ResourceModel) ->
       unpublished:
         required: ['author', 'title', 'note']
         optional: ['month', 'year']
+
+
+    ############################################################################
+    # String Conveniences
+    ############################################################################
+    #
+    # Call these methods to get string-like representations of the source;
+    # needed because BibTeX ain't simple.
+
+    getAuthor: -> BibTeXUtils.getAuthor @attributes
+
+    getYear: -> BibTeXUtils.getYear @attributes
+
+    # Return a string like "Chomsky and Halle (1968)"
+    getAuthorYear: ->
+      author = @get 'author'
+      authorCitation = BibTeXUtils.getNameInCitationForm author
+      "#{authorCitation} (#{@get 'year'})"
+
+    # Return a string like "Chomsky and Halle (1968)", using editor names if
+    # authors are unavailable.
+    getAuthorEditorYear: ->
+      if @get 'author'
+        name = @get 'author'
+      else
+        name = @get 'editor'
+      nameCitation = BibTeXUtils.getNameInCitationForm name
+      "#{nameCitation} (#{@get 'year'})"
+
+    # Try to return a string like "Chomsky and Halle (1968)", but replace
+    # either the author/editor or the year with filler text, if needed.
+    getAuthorEditorYearDefaults: ->
+      if @get 'author'
+        auth = @get 'author'
+      else
+        auth = @get 'editor'
+      if auth
+        auth = BibTeXUtils.getNameInCitationForm auth
+      else
+        auth = 'no author'
+      year = @get 'year'
+      yr = if year then year else 'no year'
+      "#{auth} (#{yr})"
 

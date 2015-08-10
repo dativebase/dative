@@ -43,7 +43,8 @@
 
 </div>
 
-<div class='selected-resource-display-container dative-shadowed-widget
-    ui-widget ui-widget-content ui-corner-all'></div>
+<div class='selected-resource-display-container'></div>
+<!-- <div class='selected-resource-display-container dative-shadowed-widget
+    ui-widget ui-widget-content ui-corner-all'></div> -->
 
 </div>

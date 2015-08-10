@@ -491,6 +491,7 @@ define [
     # object. NOTE: default params not supplied here are filled in by
     # `@showResourcesViewSetDefaultOptions`.
     myResources:
+
       applicationSetting:
         resourcesViewClass: ApplicationSettingsView
         resourceViewClass: null
@@ -499,6 +500,7 @@ define [
         params:
           authenticationRequired: false
           needsAppSettings: true
+
       collection:
         resourcesViewClass: CollectionsView
         resourceViewClass: CollectionView
@@ -506,6 +508,7 @@ define [
         resourcesCollectionClass: CollectionsCollection
         params:
           searchable: true
+
       corpus:
         resourcesViewClass: CorporaView
         resourceViewClass: null
@@ -514,11 +517,13 @@ define [
         params:
           needsAppSettings: true
           needsActiveFieldDBCorpus: true
+
       elicitationMethod:
         resourcesViewClass: ElicitationMethodsView
         resourceViewClass: ElicitationMethodView
         resourceModelClass: ElicitationMethodModel
         resourcesCollectionClass: ElicitationMethodsCollection
+
       file:
         resourcesViewClass: FilesView
         resourceViewClass: FileView
@@ -526,6 +531,7 @@ define [
         resourcesCollectionClass: FilesCollection
         params:
           searchable: true
+
       form:
         resourcesViewClass: FormsView
         resourceViewClass: FormView
@@ -536,11 +542,13 @@ define [
           searchable: true
           corpusElement: true
           needsActiveFieldDBCorpus: true
+
       languageModel:
         resourcesViewClass: LanguageModelsView
         resourceViewClass: LanguageModelView
         resourceModelClass: LanguageModelModel
         resourcesCollectionClass: LanguageModelsCollection
+
       language:
         resourcesViewClass: LanguagesView
         resourceViewClass: LanguageView
@@ -548,61 +556,77 @@ define [
         resourcesCollectionClass: LanguagesCollection
         params:
           searchable: true
+
       morphologicalParser:
         resourcesViewClass: MorphologicalParsersView
         resourceViewClass: MorphologicalParserView
         resourceModelClass: MorphologicalParserModel
         resourcesCollectionClass: MorphologicalParsersCollection
+
       morphology:
         resourcesViewClass: MorphologiesView
         resourceViewClass: MorphologyView
         resourceModelClass: MorphologyModel
         resourcesCollectionClass: MorphologiesCollection
+
       orthography:
         resourcesViewClass: OrthographiesView
         resourceViewClass: OrthographyView
         resourceModelClass: OrthographyModel
         resourcesCollectionClass: OrthographiesCollection
+
       page:
         resourcesViewClass: PagesView
         resourceViewClass: PageView
         resourceModelClass: PageModel
         resourcesCollectionClass: PagesCollection
+
       phonology:
         resourcesViewClass: PhonologiesView
         resourceViewClass: PhonologyView
         resourceModelClass: PhonologyModel
         resourcesCollectionClass: PhonologiesCollection
+
       search:
         resourcesViewClass: SearchesView
         resourceViewClass: SearchView
         resourceModelClass: SearchModel
         resourcesCollectionClass: SearchesCollection
+        params:
+          searchable: true
+
       source:
         resourcesViewClass: SourcesView
         resourceViewClass: SourceView
         resourceModelClass: SourceModel
         resourcesCollectionClass: SourcesCollection
+        params:
+          searchable: true
+
       speaker:
         resourcesViewClass: SpeakersView
         resourceViewClass: SpeakerView
         resourceModelClass: SpeakerModel
         resourcesCollectionClass: SpeakersCollection
+
       subcorpus:
         resourcesViewClass: SubcorporaView
         resourceViewClass: SubcorpusView
         resourceModelClass: SubcorpusModel
         resourcesCollectionClass: SubcorporaCollection
+
       syntacticCategory:
         resourcesViewClass: SyntacticCategoriesView
         resourceViewClass: SyntacticCategoryView
         resourceModelClass: SyntacticCategoryModel
         resourcesCollectionClass: SyntacticCategoriesCollection
+
       tag:
         resourcesViewClass: TagsView
         resourceViewClass: TagView
         resourceModelClass: TagModel
         resourcesCollectionClass: TagsCollection
+
       user:
         resourcesViewClass: UsersView
         resourceViewClass: UserView
@@ -1021,6 +1045,7 @@ define [
     # themselves; useful for `showResourceModelInDialog` below.
     resourceViewClasses:
       FileView: FileView
+      SourceView: SourceView
 
     # Create a view for the passed in `resourceModel` and render it in the
     # application-wide `@resourceDisplayerDialog`.

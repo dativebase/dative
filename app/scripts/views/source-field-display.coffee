@@ -2,8 +2,7 @@ define [
   './related-resource-field-display'
   './source'
   './../models/source'
-  './../utils/bibtex'
-], (RelatedResourceFieldDisplayView, SourceView, SourceModel, BibTeXUtils) ->
+], (RelatedResourceFieldDisplayView, SourceView, SourceModel) ->
 
   # Related Source Field Display View
   # ----------------------------------
@@ -20,8 +19,9 @@ define [
     resourceViewClass: SourceView
 
     resourceAsString: (resource) ->
+      tmp = new @resourceModelClass resource
       try
-        "#{BibTeXUtils.getAuthor resource} (#{BibTeXUtils.getYear resource})"
+        "#{tmp.getAuthor()} (#{tmp.getYear()})"
       catch
         ''
 

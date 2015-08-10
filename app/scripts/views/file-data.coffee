@@ -123,7 +123,7 @@ define [
 
     events:
       'click button.hide-file-data-widget':         'hideSelf'
-      'click button.deselect-parent-file':          'deselectAsParentFile'
+      'click button.deselect':                      'deselect'
       'click button.set-current-position-to-start': 'setCurrentPositionToStart'
       'click button.set-current-position-to-end':   'setCurrentPositionToEnd'
       'keydown':                                    'keydown'
@@ -147,8 +147,7 @@ define [
       else if @parentFile
         @$(@type).unbind 'timeupdate'
 
-    deselectAsParentFile: ->
-      @trigger 'deselectAsParentFile'
+    deselect: -> @trigger 'deselect'
 
     render: ->
       @html()
