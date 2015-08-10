@@ -39,6 +39,7 @@ define [
       super
       @tagitify()
       @tooltipify()
+      @$('ul.tagit').css "border-color", @constructor.jQueryUIColors().defBo
       @
 
     listenToEvents: ->
