@@ -230,6 +230,12 @@ div.resource-as-row-cell.text
   width: 70%;
 }
 
+.dative-pagin-item .dative-form-object .dative-field-input-container 
+{
+    max-width: 394.7px;
+}
+
+
 .update-widget .dative-field-input-container.full-width,
 .dative-field-input-container.full-width,
 .dative-field-display-representation-container.full-width
@@ -1906,7 +1912,9 @@ audio.file-data-audio
 
 .update .resource-select-via-search-input-input
 {
-  width: 78%;
+  /* width: 78%; */
+  max-width: 75%;
+  width: 75%;
 }
 
 .resource-select-via-search-input-input
@@ -2018,6 +2026,7 @@ div.resource-as-row-cell.header
 div.resource-select-via-search-input-container
 {
   position: relative;
+  max-width: 100%;
 }
 
 span.current-time-seconds
