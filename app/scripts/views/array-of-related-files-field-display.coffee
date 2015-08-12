@@ -2,7 +2,9 @@ define [
   './array-of-related-resources-field-display'
   './file'
   './../models/file'
-], (ArrayOfRelatedResourcesFieldDisplayView, FileView, FileModel) ->
+  './../collections/files'
+], (ArrayOfRelatedResourcesFieldDisplayView, FileView, FileModel,
+  FilesCollection) ->
 
   # Array of Related Files Field Display View
   # -----------------------------------------
@@ -19,6 +21,7 @@ define [
         resourceName: 'file'
         attributeName: 'files'
         resourceModelClass: FileModel
+        resourcesCollectionClass: FilesCollection
         resourceViewClass: FileView
         resourceAsString: @resourceAsString
         #resourceAsString: (r) -> r

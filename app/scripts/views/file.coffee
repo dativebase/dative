@@ -9,7 +9,6 @@ define [
   './array-of-related-resources-field-display'
   './bytes-field-display'
   './file-data'
-  './related-resource-field-display'
   './related-user-field-display'
   './enterer-field-display'
   './modifier-field-display'
@@ -17,8 +16,8 @@ define [
 ], (ResourceView, FileAddWidgetView, FieldDisplayView, PersonFieldDisplayView,
   SpeakerFieldDisplayView, DateFieldDisplayView, ObjectWithNameFieldDisplayView,
   ArrayOfRelatedResourcesFieldDisplayView, BytesFieldDisplayView, FileDataView,
-  RelatedResourceFieldDisplayView, RelatedUserFieldDisplayView,
-  EntererFieldDisplayView, ModifierFieldDisplayView, globals) ->
+  RelatedUserFieldDisplayView, EntererFieldDisplayView,
+  ModifierFieldDisplayView, globals) ->
 
 
   class ElicitorFieldDisplayView extends RelatedUserFieldDisplayView

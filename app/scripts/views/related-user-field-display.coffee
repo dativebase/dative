@@ -2,7 +2,8 @@ define [
   './related-resource-field-display'
   './user-old'
   './../models/user-old'
-], (RelatedResourceFieldDisplayView, UserView, UserModel) ->
+  './../collections/users'
+], (RelatedResourceFieldDisplayView, UserView, UserModel, UsersCollection) ->
 
   # Related User Field Display View
   # -------------------------------
@@ -15,6 +16,7 @@ define [
 
     resourceName: 'user'
     resourceModelClass: UserModel
+    resourcesCollectionClass: UsersCollection
     resourceViewClass: UserView
 
     resourceAsString: (resource) ->

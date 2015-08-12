@@ -13,18 +13,20 @@ define [
   './enterer-field-display'
   './modifier-field-display'
   './../models/search'
+  './../collections/searches'
 ], (ResourceView, SubcorpusControlsView, SubcorpusAddWidgetView, SearchView,
   FieldDisplayView, RelatedResourceFieldDisplayView,
   PersonFieldDisplayView, DateFieldDisplayView, ObjectWithNameFieldDisplayView,
   ArrayOfObjectsWithNameFieldDisplayView,
   ArrayOfRelatedResourcesFieldDisplayView, EntererFieldDisplayView,
-  ModifierFieldDisplayView, SearchModel) ->
+  ModifierFieldDisplayView, SearchModel, SearchesCollection) ->
 
   class FormSearchDisplayView extends RelatedResourceFieldDisplayView
 
     resourceName: 'search'
     attributeName: 'form_search'
     resourceModelClass: SearchModel
+    resourcesCollectionClass: SearchesCollection
     resourceViewClass: SearchView
 
 

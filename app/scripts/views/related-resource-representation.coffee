@@ -5,7 +5,7 @@ define [
   # Related Resource Representation View
   # ------------------------------------
   #
-  # ...
+  # 
 
   class RelatedResourceRepresentationView extends RepresentationView
 
@@ -24,6 +24,7 @@ define [
         'subattribute'
         'resourceName'
         'attributeName'
+        'resourcesCollectionClass'
         'resourceModelClass'
         'resourceViewClass'
         'resourceAsString'
@@ -33,8 +34,6 @@ define [
         @getRelatedResourceId = -> @context.getRelatedResourceId.call @
 
     setContextValue: ->
-      #console.log '@context.value ...'
-      #console.log @context.value
       try
         if @context.value
           @context.value = "<a
@@ -67,7 +66,9 @@ define [
       if @resourceView
         @requestDialogView()
       else
-        @resourceModel = new @resourceModelClass()
+        @resourcesCollection = new @resourcesCollectionClass()
+        @resourceModel =
+          new @resourceModelClass({}, {collection: @resourcesCollection})
         @listenToModel()
         id = @getRelatedResourceId()
         @resourceModel.fetchResource id

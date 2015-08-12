@@ -3,15 +3,16 @@ define [
   './field-display'
   './related-resource-representation'
   './../models/resource'
+  './../collections/resources'
 ], (ResourceView, FieldDisplayView, RelatedResourceRepresentationView,
-  ResourceModel) ->
+  ResourceModel, ResourcesCollection) ->
 
   # Related Resource Field Display View
   # -----------------------------------
   #
-  # This is a field display that displays a related resource as a descriptive
-  # link that, when clicked retrieves the resource data from the server and
-  # causes it to be displayed in a dialog box.
+  # This is a field display that displays a related resource (e.g., a form's
+  # enterer) as a descriptive link that, when clicked retrieves the resource
+  # data from the server and causes it to be displayed in a dialog box.
 
   class RelatedResourceFieldDisplayView extends FieldDisplayView
 
@@ -19,6 +20,7 @@ define [
     resourceName: 'resource'
     attributeName: 'resource'
     resourceModelClass: ResourceModel
+    resourcesCollectionClass: ResourcesCollection
     resourceViewClass: ResourceView
     relatedResourceRepresentationViewClass: RelatedResourceRepresentationView
 
@@ -35,6 +37,7 @@ define [
       context.resourceName = @resourceName
       context.attributeName = @attributeName
       context.resourceModelClass = @resourceModelClass
+      context.resourcesCollectionClass = @resourcesCollectionClass
       context.resourceViewClass = @resourceViewClass
       context.relatedResourceRepresentationViewClass =
         @relatedResourceRepresentationViewClass

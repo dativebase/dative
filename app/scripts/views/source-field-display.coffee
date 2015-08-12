@@ -2,7 +2,9 @@ define [
   './related-resource-field-display'
   './source'
   './../models/source'
-], (RelatedResourceFieldDisplayView, SourceView, SourceModel) ->
+  './../collections/sources'
+], (RelatedResourceFieldDisplayView, SourceView, SourceModel,
+  SourcesCollection) ->
 
   # Related Source Field Display View
   # ----------------------------------
@@ -16,6 +18,7 @@ define [
     resourceName: 'source'
     attributeName: 'source'
     resourceModelClass: SourceModel
+    resourcesCollectionClass: SourcesCollection
     resourceViewClass: SourceView
 
     resourceAsString: (resource) ->

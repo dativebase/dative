@@ -2,7 +2,9 @@ define [
   './related-resource-field-display'
   './speaker'
   './../models/speaker'
-], (RelatedResourceFieldDisplayView, SpeakerView, SpeakerModel) ->
+  './../collections/speakers'
+], (RelatedResourceFieldDisplayView, SpeakerView, SpeakerModel,
+  SpeakersCollection) ->
 
   # Related Speaker Field Display View
   # ----------------------------------
@@ -16,6 +18,7 @@ define [
     resourceName: 'speaker'
     attributeName: 'speaker'
     resourceModelClass: SpeakerModel
+    resourcesCollectionClass: SpeakersCollection
     resourceViewClass: SpeakerView
 
     resourceAsString: (resource) ->

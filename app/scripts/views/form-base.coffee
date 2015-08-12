@@ -30,6 +30,8 @@ define [
   './../models/file'
   './../models/elicitation-method'
   './../models/syntactic-category'
+  './../collections/syntactic-categories'
+  './../collections/elicitation-methods'
   './../utils/globals'
 ], (ResourceView, FileView, ElicitationMethodView, SyntacticCategoryView,
   FormAddWidgetView, PersonFieldDisplayView, DateFieldDisplayView,
@@ -43,7 +45,8 @@ define [
   ModifiedByUserFieldDisplayView, FieldDisplayView,
   RelatedResourceFieldDisplayView, RelatedUserFieldDisplayView,
   EntererFieldDisplayView, ModifierFieldDisplayView, FormModel, FileModel,
-  ElicitationMethodModel, SyntacticCategoryModel, globals) ->
+  ElicitationMethodModel, SyntacticCategoryModel,
+  SyntacticCategoriesCollection, ElicitationMethodsCollection, globals) ->
 
 
   class VerifierFieldDisplayView extends RelatedUserFieldDisplayView
@@ -61,6 +64,7 @@ define [
     resourceName: 'syntacticCategory'
     attributeName: 'syntactic_category'
     resourceModelClass: SyntacticCategoryModel
+    resourcesCollectionClass: SyntacticCategoriesCollection
     resourceViewClass: SyntacticCategoryView
 
     resourceAsString: (resource) ->
@@ -75,6 +79,7 @@ define [
     resourceName: 'elicitationMethod'
     attributeName: 'elicitation_method'
     resourceModelClass: ElicitationMethodModel
+    resourcesCollectionClass: ElicitationMethodsCollection
     resourceViewClass: ElicitationMethodView
 
     resourceAsString: (resource) ->
@@ -169,7 +174,6 @@ define [
       verifier: VerifierFieldDisplayView
       collections: ArrayOfObjectsWithTitleFieldDisplayView
       tags: ArrayOfRelatedResourcesFieldDisplayView
-      #files: ArrayOfRelatedResourcesFieldDisplayView
       files: ArrayOfRelatedFilesFieldDisplayView
 
     # Get an array of form attributes (form app settings model) for the

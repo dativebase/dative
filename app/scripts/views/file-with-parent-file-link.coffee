@@ -2,7 +2,8 @@ define [
   './file'
   './related-resource-field-display'
   './../models/file'
-], (FileView, RelatedResourceFieldDisplayView, FileModel) ->
+  './../collections/files'
+], (FileView, RelatedResourceFieldDisplayView, FileModel, FilesCollection) ->
 
 
   class MyFileFieldDisplayView extends RelatedResourceFieldDisplayView
@@ -10,6 +11,7 @@ define [
     resourceName: 'file'
     attributeName: 'parent_file'
     resourceModelClass: FileModel
+    resourcesCollectionClass: FilesCollection
     resourceViewClass: FileView
 
     resourceAsString: (resource) ->

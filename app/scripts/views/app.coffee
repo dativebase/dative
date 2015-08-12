@@ -1030,6 +1030,11 @@ define [
       if @resourceViewAlreadyDisplayed resourceView
         Backbone.trigger 'resourceAlreadyDisplayedInDialog', resourceView
       else
+        if not resourceView.model.collection
+          collectionClass =
+            @myResources[resourceView.resourceName].resourcesCollectionClass
+          try
+            resourceView.model.collection = new collectionClass()
         oldestResourceDisplayer = @getOldestResourceDisplayerDialog()
         oldestResourceDisplayer.showResourceView resourceView
 
@@ -1050,6 +1055,7 @@ define [
     # Create a view for the passed in `resourceModel` and render it in the
     # application-wide `@resourceDisplayerDialog`.
     showResourceModelInDialog: (resourceModel, resourceViewClassName) ->
+      console.log 'in showResourceModelInDialog'
       resourceView = new @resourceViewClasses[resourceViewClassName](
         model: resourceModel)
       @showResourceInDialog resourceView
