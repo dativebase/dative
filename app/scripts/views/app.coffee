@@ -161,7 +161,7 @@ define [
       'click': 'bodyClicked'
 
     render: ->
-      if window.location.hostname is ['localhost', '127.0.0.1']
+      if window.location.hostname in ['localhost', '127.0.0.1']
         setTimeout ->
           console.clear()
         , 2000
@@ -1051,11 +1051,11 @@ define [
     resourceViewClasses:
       FileView: FileView
       SourceView: SourceView
+      SearchView: SearchView
 
     # Create a view for the passed in `resourceModel` and render it in the
     # application-wide `@resourceDisplayerDialog`.
     showResourceModelInDialog: (resourceModel, resourceViewClassName) ->
-      console.log 'in showResourceModelInDialog'
       resourceView = new @resourceViewClasses[resourceViewClassName](
         model: resourceModel)
       @showResourceInDialog resourceView

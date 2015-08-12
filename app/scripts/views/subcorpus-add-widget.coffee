@@ -3,9 +3,10 @@ define [
   './textarea-field'
   './relational-select-field'
   './multi-element-tag-field'
+  './search-select-via-search-field'
   './../models/subcorpus'
 ], (ResourceAddWidgetView, TextareaFieldView, RelationalSelectFieldView,
-  MultiElementTagFieldView, SubcorpusModel) ->
+  MultiElementTagFieldView, SearchSelectViaSearchFieldView, SubcorpusModel) ->
 
 
   class TextareaFieldView255 extends TextareaFieldView
@@ -36,16 +37,16 @@ define [
     attribute2fieldView:
       name:        TextareaFieldView255
       tags:        MultiElementTagFieldView
-      form_search: RelationalSelectFieldView
+      form_search: SearchSelectViaSearchFieldView
+      #form_search: RelationalSelectFieldView
 
     primaryAttributes: [
       'name'
       'description'
+      'content'
+      'form_search'
+      'tags'
     ]
 
-    editableSecondaryAttributes: [
-      'content'
-      'tags'
-      'form_search'
-    ]
+    editableSecondaryAttributes: [ ]
 

@@ -5,11 +5,13 @@ define [
   './related-resource-representation'
   './selected-resource-wrapper'
   './../models/resource'
+  './../collections/resources'
   './../templates/resource-select-via-search-input'
   './../utils/globals'
 ], (InputView, ResourceView, ResourceAsRowView,
   RelatedResourceRepresentationView, SelectedResourceWrapperView,
-  ResourceModel, resourceSelectViaSearchInputTemplate, globals) ->
+  ResourceModel, ResourcesCollection, resourceSelectViaSearchInputTemplate,
+  globals) ->
 
   # Resource Select Via Search Input View
   # -------------------------------------
@@ -40,6 +42,10 @@ define [
     # The class for generating Backbone models for the resources returned by
     # the search request.
     resourceModelClass: ResourceModel
+
+    # The class for generating a Backbone collection to be given to the models
+    # generated using the class above.
+    resourcesCollectionClass: ResourcesCollection
 
     # This is the class that is used to display the resources that match the
     # search. It should be a subclass of `ResourceAsRowView` since the search
@@ -89,7 +95,14 @@ define [
     getNames: ->
       @resourceNamePlural = @utils.pluralize @resourceName
       @resourceNameCapitalized = @utils.capitalize @resourceName
+      @serverSideResourceNameCapitalized =
+        @getServerSideResourceNameCapitalized @resourceNameCapitalized
       @resourceNamePluralCapitalized = @utils.capitalize @resourceNamePlural
+
+    # Override this in sub-classes as necessary, e.g., in a search interface
+    # for form searches where 'Search' is wrong and 'FormSearch' is correct.
+    getServerSideResourceNameCapitalized: (resourceNameCapitalized) ->
+      resourceNameCapitalized
 
     # If we have a selected value, cause it to be displayed and the search
     # interface to not be displayed; if not, do the opposite.
@@ -160,6 +173,7 @@ define [
         resourceName: @resourceName
         attributeName: @context.attribute
         resourceModelClass: @resourceModelClass
+        resourcesCollectionClass: @resourcesCollectionClass
         resourceViewClass: null
         model: @getModelForSelectedResourceView()
       if @selectedResourceWrapperViewClass
@@ -396,7 +410,7 @@ define [
     # user probably wants their search expression to do.
     getSmartQuery: (searchTerm) ->
       searchTerms = searchTerm.split /\s+/
-      order_by = [@resourceNameCapitalized, 'id', 'desc']
+      order_by = [@serverSideResourceNameCapitalized, 'id', 'desc']
       if @isIdSearch searchTerms
         filter = @getIdSearchFilter searchTerms
       else
@@ -405,7 +419,7 @@ define [
       filter: filter
 
     getIdSearchFilter: (searchTerms) ->
-      [@resourceNameCapitalized, 'id', '=', parseInt(searchTerms[0])]
+      [@serverSideResourceNameCapitalized, 'id', '=', parseInt(searchTerms[0])]
 
     # Return a search filter over the relevant resource such that what is
     # returned is all resources such that all of the search terms in
@@ -418,7 +432,7 @@ define [
         conjunct = ['or']
         subcomplement = []
         for attributeSet in @smartStringSearchableFileAttributes
-          subfilter = [@resourceNameCapitalized]
+          subfilter = [@serverSideResourceNameCapitalized]
           for attribute in attributeSet
             subfilter.push attribute
           subfilter.push 'like'

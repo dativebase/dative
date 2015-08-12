@@ -2,8 +2,9 @@ define [
   './resource-select-via-search-input'
   './file-as-row'
   './../models/file'
+  './../collections/files'
   './../utils/globals'
-], (ResourceSelectViaSearchInputView, FileAsRowView, FileModel,
+], (ResourceSelectViaSearchInputView, FileAsRowView, FileModel, FilesCollection,
   globals) ->
 
   # File Select Via Search Input View
@@ -16,6 +17,7 @@ define [
     # Change these attributes in subclasses.
     resourceName: 'file'
     resourceModelClass: FileModel
+    resourcesCollectionClass: FilesCollection
     resourceAsRowViewClass: FileAsRowView
 
     # Return a filter expression for searching over file resources that are

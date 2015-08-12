@@ -2,13 +2,16 @@ define [
   './resource-select-via-search-input'
   './source-as-row'
   './../models/source'
-], (ResourceSelectViaSearchInputView, SourceAsRowView, SourceModel) ->
+  './../collections/sources'
+], (ResourceSelectViaSearchInputView, SourceAsRowView, SourceModel,
+  SourcesCollection) ->
 
   class SourceSelectViaSearchInputView extends ResourceSelectViaSearchInputView
 
     # Change these attributes in subclasses.
     resourceName: 'source'
     resourceModelClass: SourceModel
+    resourcesCollectionClass: SourcesCollection
     resourceAsRowViewClass: SourceAsRowView
 
     resourceAsString: (resource) ->

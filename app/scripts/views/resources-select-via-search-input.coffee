@@ -113,6 +113,7 @@ define [
           resourceName: @resourceName
           attributeName: @context.attribute
           resourceModelClass: @resourceModelClass
+          resourcesCollectionClass: @resourcesCollectionClass
           resourceViewClass: null
           model: @getModelForSelectedResourceView()
         if @selectedResourceWrapperViewClass

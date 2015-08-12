@@ -2,7 +2,9 @@ define [
   './resources-select-via-search-input'
   './file-as-row'
   './../models/file'
-], (ResourcesSelectViaSearchInputView, FileAsRowView, FileModel) ->
+  './../collections/files'
+], (ResourcesSelectViaSearchInputView, FileAsRowView, FileModel,
+  FilesCollection) ->
 
 
   # Files Select Via Search Input View
@@ -27,6 +29,7 @@ define [
     # Change these attributes in subclasses.
     resourceName: 'file'
     resourceModelClass: FileModel
+    resourcesCollectionClass: FilesCollection
     resourceAsRowViewClass: FileAsRowView
 
     # These are the `[<attribute]`s or `[<attribute>, <subattribute>]`s that we
