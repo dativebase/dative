@@ -11,7 +11,7 @@ define [
   './user-select-field'
   './source-select-field'
   './source-select-via-search-field'
-  './file-select-via-search-field'
+  './files-select-via-search-field'
   './required-select-field'
   './date-field'
   './../models/form'
@@ -20,7 +20,7 @@ define [
   MultiElementTagFieldView, UtteranceJudgementFieldView, CommentsFieldView,
   TranscriptionGrammaticalityFieldView, TranslationsFieldView,
   PersonSelectFieldView, UserSelectFieldView, SourceSelectFieldView,
-  SourceSelectViaSearchFieldView, FileSelectViaSearchFieldView,
+  SourceSelectViaSearchFieldView, FilesSelectViaSearchFieldView,
   RequiredSelectFieldView, DateFieldView, FormModel, globals) ->
 
 
@@ -131,6 +131,7 @@ define [
       status:                        StatusSelectFieldView
       date_elicited:                 DateFieldView
       tags:                          MultiElementTagFieldView
+      files:                         FilesSelectViaSearchFieldView
 
     primaryAttributes: []
     editableSecondaryAttributes: []

@@ -3,16 +3,9 @@ define [
   './textarea-field'
   './select-field'
   './relational-select-field'
-  './resource-select-via-search-field'
-  './resource-select-via-search-input'
-  './resource-as-row'
-  './file-data'
   './../models/source'
-  './../models/file'
 ], (ResourceAddWidgetView, TextareaFieldView, SelectFieldView,
-  RelationalSelectFieldView, ResourceSelectViaSearchFieldView,
-  ResourceSelectViaSearchInputView, ResourceAsRowView, FileData, SourceModel,
-  FileModel) ->
+  RelationalSelectFieldView, SourceModel) ->
 
 
   class TextareaFieldView255 extends TextareaFieldView
@@ -47,57 +40,6 @@ define [
       options.selectTextGetter = (o) -> o
       options.required = true
       super options
-
-
-  ##############################################################################
-  # These classes are used to build the field view for searching files for a
-  # source's file.
-  ##############################################################################
-
-  class FileAsRowView extends ResourceAsRowView
-
-    resourceName: 'file'
-
-    orderedAttributes: [
-      'id'
-      'filename'
-      'MIME_type'
-      'size'
-      'enterer'
-      'tags'
-      'forms'
-    ]
-
-
-  class FileSearchInputView extends ResourceSelectViaSearchInputView
-
-    # Change these attributes in subclasses.
-    resourceName: 'file'
-    resourceModelClass: FileModel
-    resourceAsRowViewClass: FileAsRowView
-    resourceMediaViewClass: FileData
-
-
-  # TODO: this will not work as a field (search) view for the `file` attribute
-  # of sources. This is because the `ResourceSelectViaSearchInput` class
-  # assumes at a fundamental level that the resource being searched over as
-  # well as the "root" resource are both files, whereas in this case the "root"
-  # resource is a source resource. That class must be rewritten; in particular,
-  # its `performSearch` method should not be triggering methods on `@model` but
-  # on some instance of `@resourceModelClass`.
-  class FileSearchFieldView extends ResourceSelectViaSearchFieldView
-
-    getInputView: ->
-      new FileSearchInputView @context
-
-    listenToEvents: ->
-      super
-      if @inputView
-        @listenTo @inputView, 'validateMe', @myValidate
-
-    myValidate: ->
-      if @submitAttempted then @validate()
-
 
 
   # Source Add Widget View
@@ -143,7 +85,7 @@ define [
       volume: TextareaFieldView100
 
       type: TypeSelectFieldView
-      file: FileSearchFieldView # Note: does not work yet; see TODO above.
+      # file: FileSearchFieldView # Note: does not work yet; see TODO above.
 
     primaryAttributes: [
       'key'

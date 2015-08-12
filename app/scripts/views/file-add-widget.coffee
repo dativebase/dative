@@ -144,7 +144,7 @@ define [
 
     # Instead of using the (default) `RelatedResourceRepresentationView` to
     # display the selected parent file, we use `ParentFileData` defined above.
-    resourceSelectedViewClass: ParentFileData
+    selectedResourceViewClass: ParentFileData
 
     # We don't want a wrapper class because the `ParentFileData` view provides
     # that functionality for us; e.g., the "deselect" button.
@@ -191,14 +191,6 @@ define [
 
     getInputView: ->
       new ParentFileSearchInputView @context
-
-    listenToEvents: ->
-      super
-      if @inputView
-        @listenTo @inputView, 'validateMe', @myValidate
-
-    myValidate: ->
-      if @submitAttempted then @validate()
 
     getCrucialAttributes: -> ['dative_file_type']
 

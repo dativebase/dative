@@ -13,17 +13,31 @@ define [
 
     getContext: ->
       _.extend(super,
-        subattribute: 'filename'
+        subattribute: 'id'
         relatedResourceRepresentationViewClass:
           @relatedResourceRepresentationViewClass
         resourceName: 'file'
         attributeName: 'files'
         resourceModelClass: FileModel
         resourceViewClass: FileView
-        resourceAsString: (r) -> r
+        resourceAsString: @resourceAsString
+        #resourceAsString: (r) -> r
         getRelatedResourceId: ->
           finder = {}
           finder[@subattribute] = @context.originalValue
           _.findWhere(@context.model.get(@attributeName), finder).id
       )
+
+    # The string returned by this method will be the text of link that
+    # represents each selected file.
+    resourceAsString: (resourceId) ->
+      resource = _.findWhere(@model.get(@attributeName), {id: resourceId})
+      if resource.filename
+        resource.filename
+      else if resource.name
+        resource.name
+      else if resource.parent_file
+        resource.parent_file.filename
+      else
+        "File #{resource.id}"
 

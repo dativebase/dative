@@ -1,44 +1,15 @@
 define [
-  './base'
   './input'
   './resource'
   './resource-as-row'
   './related-resource-representation'
+  './selected-resource-wrapper'
   './../models/resource'
   './../templates/resource-select-via-search-input'
-  './../templates/selected-resource-wrapper'
   './../utils/globals'
-], (BaseView, InputView, ResourceView, ResourceAsRowView,
-  RelatedResourceRepresentationView, ResourceModel,
-  resourceSelectViaSearchInputTemplate, selectedResourceWrapperTemplate,
-  globals) ->
-
-
-  class SelectedResourceWrapperView extends BaseView
-
-    initialize: (@selectedResourceViewClass, @selectedResourceViewParams) ->
-      @resourceSelectedView =
-        new @selectedResourceViewClass @selectedResourceViewParams
-
-    template: selectedResourceWrapperTemplate
-
-    render: ->
-      @$el.html @template(@selectedResourceViewParams)
-      @buttonify()
-      @renderResourceSelectedView()
-      @$('.dative-tooltip').tooltip position: @tooltipPositionLeft('-200')
-      @listenToEvents()
-      @
-
-    renderResourceSelectedView: ->
-      @$('.selected-resource-container').html @resourceSelectedView.render().el
-      @rendered @resourceSelectedView
-
-    events:
-      'click .deselect': 'deselect'
-
-    deselect: -> @trigger 'deselect'
-
+], (InputView, ResourceView, ResourceAsRowView,
+  RelatedResourceRepresentationView, SelectedResourceWrapperView,
+  ResourceModel, resourceSelectViaSearchInputTemplate, globals) ->
 
   # Resource Select Via Search Input View
   # -------------------------------------
@@ -76,26 +47,21 @@ define [
     resourceAsRowViewClass: ResourceAsRowView
 
     # This is the class that is used to display the *selected* resource.
-    resourceSelectedViewClass: RelatedResourceRepresentationView
+    selectedResourceViewClass: RelatedResourceRepresentationView
 
     # This class, if valuated, will be used to wrap the
-    # `@resourceSelectedViewClass` instance; this class provides the "deselect"
+    # `@selectedResourceViewClass` instance; this class provides the "deselect"
     # button.
     selectedResourceWrapperViewClass: SelectedResourceWrapperView
 
     # This class is the one that is used to display a *selected* resource in a
     # dialog box. This class is needed for the default
-    # `@resourceSelectedViewClass`, i.e., for the
+    # `@selectedResourceViewClass`, i.e., for the
     # `RelatedResourceRepresentationView`. This should be a subclass of
     # `ResourceView`.
     resourceViewClass: ResourceView
 
     template: resourceSelectViaSearchInputTemplate
-
-    refresh: (@context) ->
-      @setStateBasedOnSelectedValue()
-      @selectedResourceViewRendered = false
-      @render()
 
     initialize: (context) ->
       super context
@@ -114,6 +80,11 @@ define [
       @searchResultsCount = 0
       @setStateBasedOnSelectedValue()
 
+    refresh: (@context) ->
+      @setStateBasedOnSelectedValue()
+      @selectedResourceViewRendered = false
+      @render()
+
     # Get `@resourceName` in various forms.
     getNames: ->
       @resourceNamePlural = @utils.pluralize @resourceName
@@ -131,7 +102,11 @@ define [
         @searchInterfaceVisible = true
         @selectedResourceViewVisible = false
 
+    getMultiSelect: -> false
+
     render: ->
+      @context.multiSelect = @getMultiSelect()
+
       @context.resourceNameHuman = @utils.snake2regular @context.attribute
       @context.resourceNameHumanCapitalized =
         (@utils.capitalize(w) for w in @context.resourceNameHuman.split(' ')).join ' '
@@ -141,14 +116,22 @@ define [
       @renderHeaderView()
       @searchResultsTable()
       @searchInterfaceVisibility()
-      if @selectedResourceModel
+      @selectedVisibility()
+      @
+
+    # Render/display any selected resource(s).
+    selectedVisibility: ->
+      if @weHaveSelected()
         if @selectedResourceViewRendered
           @showSelectedResourceView()
         else
           @renderSelectedResourceView()
       else
         @selectedResourceViewVisibility()
-      @
+
+    # Return `true` if we have something selected. This is its own function
+    # because in a subclass we may want to check for a non-empty array.
+    weHaveSelected: -> @selectedResourceModel?
 
     searchResultsTable: ->
       @$('.resource-results-via-search-table-wrapper')
@@ -164,7 +147,7 @@ define [
     # itself in string form. Override it for resource-specific behaviour.
     resourceAsString: (resource) -> resource.id
 
-    # Return an instance of `@resourceSelectedViewClass` for the selected
+    # Return an instance of `@selectedResourceViewClass` for the selected
     # resource. Note that this method assumes that this view class is a
     # sub-class of `RelatedResourceRepresentationView`, hence the particular
     # params passed on initialization. Override this method on sub-classes.
@@ -180,9 +163,9 @@ define [
         resourceViewClass: null
         model: @getModelForSelectedResourceView()
       if @selectedResourceWrapperViewClass
-        new @selectedResourceWrapperViewClass @resourceSelectedViewClass, params
+        new @selectedResourceWrapperViewClass @selectedResourceViewClass, params
       else
-        new @resourceSelectedViewClass params
+        new @selectedResourceViewClass params
 
     getModelForSelectedResourceView: -> @model
 

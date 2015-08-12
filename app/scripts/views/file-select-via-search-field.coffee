@@ -10,12 +10,3 @@ define [
     getInputView: ->
       new FileSelectViaSearchInputView @context
 
-    listenToEvents: ->
-      super
-      if @inputView
-        @listenTo @inputView, 'validateMe', @myValidate
-
-    myValidate: ->
-      if @submitAttempted then @validate()
-
-

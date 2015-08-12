@@ -169,6 +169,7 @@ define [
       verifier: VerifierFieldDisplayView
       collections: ArrayOfObjectsWithTitleFieldDisplayView
       tags: ArrayOfRelatedResourcesFieldDisplayView
+      #files: ArrayOfRelatedResourcesFieldDisplayView
       files: ArrayOfRelatedFilesFieldDisplayView
 
     # Get an array of form attributes (form app settings model) for the

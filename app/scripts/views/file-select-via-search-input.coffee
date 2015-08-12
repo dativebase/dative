@@ -1,58 +1,10 @@
 define [
   './resource-select-via-search-input'
-  './resource-as-row'
+  './file-as-row'
   './../models/file'
   './../utils/globals'
-], (ResourceSelectViaSearchInputView, ResourceAsRowView, FileModel,
+], (ResourceSelectViaSearchInputView, FileAsRowView, FileModel,
   globals) ->
-
-
-  # File as Row View
-  # ----------------
-  #
-  # A view for displaying a file model as a row of cells, one cell per attribute.
-#
-  class FileAsRowView extends ResourceAsRowView
-
-    resourceName: 'file'
-
-    orderedAttributes: [
-      'id'
-      'filename'
-      'MIME_type'
-      'size'
-      'enterer'
-      'tags'
-      'forms'
-    ]
-
-    # Return a string representation for a given `attribute`/`value` pair of
-    # this file.
-    scalarTransform: (attribute, value) ->
-      if @isHeaderRow
-        @scalarTransformHeaderRow attribute, value
-      else if value
-        if attribute in ['elicitor', 'enterer', 'modifier', 'verifier', 'speaker']
-          "#{value.first_name} #{value.last_name}"
-        else if attribute is 'size'
-          @utils.humanFileSize value, true
-        else if attribute is 'forms'
-          if value.length
-            (f.transcription for f in value).join '; '
-          else
-            ''
-        else if attribute is 'tags'
-          if value.length
-            (t.name for t in value).join ', '
-          else
-            ''
-        else if @utils.type(value) in ['string', 'number']
-          value
-        else
-          JSON.stringify value
-      else
-        JSON.stringify value
-
 
   # File Select Via Search Input View
   # ---------------------------------
@@ -68,6 +20,9 @@ define [
 
     # Return a filter expression for searching over file resources that are
     # audio/video and have non-null filename value.
+    # TODO: this should not be built-in to the file select via search input
+    # because these audio/video restrictions presume that this file is a parent
+    # file of another file.
     getIdSearchFilter: (searchTerms) ->
       filter = ['and', [
         @isAudioVideoFilterExpression(),

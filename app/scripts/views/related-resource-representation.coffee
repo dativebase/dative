@@ -33,6 +33,8 @@ define [
         @getRelatedResourceId = -> @context.getRelatedResourceId.call @
 
     setContextValue: ->
+      #console.log '@context.value ...'
+      #console.log @context.value
       try
         if @context.value
           @context.value = "<a

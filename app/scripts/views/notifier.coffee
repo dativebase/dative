@@ -101,6 +101,7 @@ define [
 
       @listenTo Backbone, 'resourceAlreadyDisplayedInDialog',
         @resourceAlreadyDisplayedInDialog
+      @listenTo Backbone, 'resourceAlreadySelected', @resourceAlreadySelected
 
       @listenToCRUDResources()
 
@@ -550,6 +551,15 @@ define [
         title: 'Already displayed'
         content: "#{name} #{resourceView.model.get 'id'}
           is already being displayed in a dialog box."
+        type: 'warning'
+      @renderNotification notification
+
+    resourceAlreadySelected: (resourceName, resourceId) ->
+      name = @utils.capitalize(@utils.camel2regular(resourceName))
+      notification = new NotificationView
+        title: 'Already selected'
+        content: "#{name} #{resourceId} has already being selected and cannot
+          be selected more than once."
         type: 'warning'
       @renderNotification notification
 
