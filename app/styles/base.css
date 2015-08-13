@@ -164,6 +164,9 @@ button.help-button
   vertical-align: top;
   text-align: right;
   margin-right: 0.75em;
+
+  white-space: nowrap;
+  overflow-x: scroll;
 }
 
 .dative-field-label-container.top,
@@ -2079,11 +2082,23 @@ span.current-time-seconds
 .selected-resource-container
 {
   display: inline-block;
+  width: 86%;
+  max-width: 86%;
+  min-width: 86%;
 }
 
 .selected-resource-container .field-display-link
 {
   position: relative;
   top: 0.1em;
+}
+
+.selected-resource-controls
+{
+  display: inline-block;
+  width: 12%;
+  max-width: 12%;
+  min-width: 12%;
+  vertical-align: top;
 }
 

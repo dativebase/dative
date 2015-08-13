@@ -200,6 +200,12 @@ define [
             /#{@getServerSideResourceName()}/#{@get('id')}/edit"
       )
 
+      url: "#{@getOLDURL()}/#{@getServerSideResourceName()}/new_search"
+
+    # This may need to be overridden in sub-classes.
+    getNewSearchDataURL: ->
+      "#{@getOLDURL()}/#{@getServerSideResourceName()}/new_search"
+
     # Issue a GET request to /<resource_name_plural>/new_search on the active OLD
     # server. In the OLD API, this type of request returns a JSON object
     # containing the data necessary to create a new OLD search over that resource.
@@ -207,7 +213,7 @@ define [
       @trigger "getNew#{@resourceNameCapitalized}SearchDataStart"
       @constructor.cors.request(
         method: 'GET'
-        url: "#{@getOLDURL()}/#{@getServerSideResourceName()}/new_search"
+        url: @getNewSearchDataURL()
         onload: (responseJSON, xhr) =>
           @trigger "getNew#{@resourceNameCapitalized}SearchDataEnd"
           if xhr.status is 200
@@ -316,11 +322,16 @@ define [
       query: query
       paginator: paginator
 
+    # This may need to be overridden in sub-classes, cf. the complication of
+    # searching across corpora in the OLD.
+    getSearchURL: ->
+      "#{@getOLDURL()}/#{@getServerSideResourceName()}"
+
     search: (query, paginator=null) ->
       @trigger "searchStart"
       @constructor.cors.request(
         method: 'SEARCH'
-        url: "#{@getOLDURL()}/#{@getServerSideResourceName()}"
+        url: @getSearchURL()
         payload: @getSearchPayload query, paginator
         onload: (responseJSON, xhr) =>
           @trigger "searchEnd"

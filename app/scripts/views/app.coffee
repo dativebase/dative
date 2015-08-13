@@ -1052,6 +1052,7 @@ define [
       FileView: FileView
       SourceView: SourceView
       SearchView: SearchView
+      SubcorpusView: SubcorpusView
 
     # Create a view for the passed in `resourceModel` and render it in the
     # application-wide `@resourceDisplayerDialog`.
