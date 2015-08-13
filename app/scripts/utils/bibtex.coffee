@@ -52,7 +52,11 @@ define [], ->
           part
       output = []
       names = input.split ' and '
-      r = /\{[^\}\{]+\}|[^ ,]+|,/g
+      r = ///
+        \{[^\{\}]+\} | # sequence of non-braces between braces
+        [^\x20,]+ |    # any non-space or non-comma (\x20 is space char)
+        ,              # comma
+      ///g
       for name in names
         authorOutput = [[], [], [], []]
         parts = name.match r

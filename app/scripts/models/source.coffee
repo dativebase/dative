@@ -435,34 +435,47 @@ define [
 
     getYear: -> BibTeXUtils.getYear @attributes
 
+    # Get `attr` from this source's `crossref_source` value.
+    getCrossrefAttr: (attr) ->
+      crossref = @get 'crossref_source'
+      if crossref then crossref[attr] else null
+
     # Return a string like "Chomsky and Halle (1968)"
-    getAuthorYear: ->
+    # Setting `crossref` to `false` will result in `crossref` not being used
+    # for empty value.
+    getAuthorYear: (crossref=true) ->
       author = @get 'author'
+      if (not author) and crossref then author = @getCrossrefAttr 'author'
       authorCitation = BibTeXUtils.getNameInCitationForm author
-      "#{authorCitation} (#{@get 'year'})"
+      year = @get 'year'
+      if (not year) and crossref then year = @getCrossrefAttr 'year'
+      "#{authorCitation} (#{year})"
 
     # Return a string like "Chomsky and Halle (1968)", using editor names if
     # authors are unavailable.
-    getAuthorEditorYear: ->
-      if @get 'author'
-        name = @get 'author'
-      else
-        name = @get 'editor'
+    getAuthorEditorYear: (crossref=true) ->
+      name = @getAuthorEditor crossref
       nameCitation = BibTeXUtils.getNameInCitationForm name
       "#{nameCitation} (#{@get 'year'})"
 
+    # Get author, else crossref.author, else editor, else crossref.editor
+    getAuthorEditor: (crossref=true) ->
+      name = @get 'author'
+      if (not name) and crossref then name = @getCrossrefAttr 'author'
+      if not name then name = @get 'editor'
+      if (not name) and crossref then name = @getCrossrefAttr 'editor'
+      name
+
     # Try to return a string like "Chomsky and Halle (1968)", but replace
     # either the author/editor or the year with filler text, if needed.
-    getAuthorEditorYearDefaults: ->
-      if @get 'author'
-        auth = @get 'author'
-      else
-        auth = @get 'editor'
+    getAuthorEditorYearDefaults: (crossref=true) ->
+      auth = @getAuthorEditor crossref
       if auth
         auth = BibTeXUtils.getNameInCitationForm auth
       else
         auth = 'no author'
       year = @get 'year'
+      if (not year) and crossref then year = @getCrossrefAttr 'year'
       yr = if year then year else 'no year'
       "#{auth} (#{yr})"
 
