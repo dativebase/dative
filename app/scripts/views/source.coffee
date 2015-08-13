@@ -1,5 +1,7 @@
 define [
   './resource'
+  './field-display'
+  './value-representation'
   './related-resource-field-display'
   './related-resource-representation'
   './source-add-widget'
@@ -7,9 +9,10 @@ define [
   './file-field-display'
   './../models/source'
   './../collections/sources'
-], (ResourceView, RelatedResourceFieldDisplayView,
-  RelatedResourceRepresentationView, SourceAddWidgetView, DateFieldDisplayView,
-  FileFieldDisplayView, SourceModel, SourcesCollection) ->
+], (ResourceView, FieldDisplayView, ValueRepresentationView,
+  RelatedResourceFieldDisplayView, RelatedResourceRepresentationView,
+  SourceAddWidgetView, DateFieldDisplayView, FileFieldDisplayView, SourceModel,
+  SourcesCollection) ->
 
   # Non-circular Related Source Field Display View
   # ----------------------------------------------
@@ -45,6 +48,40 @@ define [
 
     getRelatedResourceId: ->
       @context.model.get('crossref_source').id
+
+
+  getValueOrCrossrefValue = (value) ->
+    if not value
+      try
+        value = @model.get('crossref_source')[@attribute]
+    value
+
+  class CrossrefAwareValueRepresentationView extends ValueRepresentationView
+
+      valueFormatter: (value) ->
+        getValueOrCrossrefValue.call @, value
+
+
+  # Crossreference-aware generic display view for file attributes.
+  # What makes this different is that it supplies a `crossref_source`'s value
+  # for any non-present attributes.
+  class CrossrefAwareFileAttributeDisplayView extends FieldDisplayView
+
+    # Override this in a subclass to swap in a new representation view.
+    getRepresentationView: ->
+      new CrossrefAwareValueRepresentationView @context
+
+    # We have to change when a Source's attribute field display should be
+    # hidden because of the crossref complication.
+    shouldBeHidden: ->
+      value = @context.value
+      value = getValueOrCrossrefValue.call @, value
+      if _.isDate(value) or _.isNumber(value) or _.isBoolean(value)
+        false
+      else if _.isEmpty(value) or @isValueless(value)
+        true
+      else
+        false
 
 
   # Source View
@@ -148,4 +185,13 @@ define [
       'datetime_modified'
       'id'
     ]
+
+    # Change the default display view for file fields to one that fills in the
+    # blanks from a cross-referenced file, if need be.
+    getDisplayView: (attribute) ->
+      if attribute of @attribute2displayView
+        MyDisplayView = @attribute2displayView[attribute]
+        new MyDisplayView(@getDisplayViewParams(attribute))
+      else # the default display view is FieldDisplayView
+        new CrossrefAwareFileAttributeDisplayView(@getDisplayViewParams(attribute))
 
