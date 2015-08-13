@@ -8,4 +8,3 @@ define [
     getInputView: ->
       new SubcorpusSelectViaSearchInputView @context
 
-

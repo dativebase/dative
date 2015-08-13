@@ -3,9 +3,12 @@ define [
   './textarea-field'
   './select-field'
   './relational-select-field'
+  './subcorpus-select-via-search-field'
+  './morphology-select-via-search-field'
   './../models/language-model'
 ], (ResourceAddWidgetView, TextareaFieldView, SelectFieldView,
-  RelationalSelectFieldView, LanguageModelModel) ->
+  RelationalSelectFieldView, SubcorpusSelectViaSearchFieldView,
+  MorphologySelectViaSearchFieldView, LanguageModelModel) ->
 
   # Language Model Add Widget View
   # -------------------------
@@ -92,8 +95,8 @@ define [
     attribute2fieldView:
       name: TextareaFieldView255
       toolkit: ToolkitSelectFieldView
-      corpus: CorpusSelectFieldView
-      vocabulary_morphology: MorphologySelectFieldView
+      corpus: SubcorpusSelectViaSearchFieldView
+      vocabulary_morphology: MorphologySelectViaSearchFieldView
       smoothing: SmoothingSelectFieldView
       order: OrderSelectFieldView
       categorial: BooleanSelectFieldView
@@ -101,16 +104,15 @@ define [
     primaryAttributes: [
       'name'
       'description'
-    ]
-
-    editableSecondaryAttributes: [
       'corpus'
-      'vocabulary_morphology'
       'toolkit'
       'order'
       'smoothing'
       'categorial'
+      'vocabulary_morphology'
     ]
+
+    editableSecondaryAttributes: []
 
     getNewResourceDataSuccess: (data) ->
       data = @fixToolkits data

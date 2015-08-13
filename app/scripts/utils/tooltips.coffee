@@ -692,6 +692,18 @@ define ['./utils'], (utils) ->
         enterer: enterer
         modifier: modifier
 
+        restricted:
+          eng: 'The system will set this to true if any of this corpus’ forms
+            are tagged as restricted.'
+
+        generate_succeeded:
+          eng: 'Will be set to true if this language model has been
+            successfully generated, i.e., estimated.'
+
+        perplexity_computed:
+          eng: 'Will be set to true if there has been an attempt to compute the
+            perplexity of this language model.'
+
         corpus:
           eng: 'A corpus that will be used to estimate the language model.'
 

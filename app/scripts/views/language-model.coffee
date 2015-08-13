@@ -1,14 +1,43 @@
 define [
   './resource'
+  './subcorpus'
+  './morphology'
   './language-model-add-widget'
   './person-field-display'
   './date-field-display'
   './object-with-name-field-display'
   './enterer-field-display'
   './modifier-field-display'
-], (ResourceView, LanguageModelAddWidgetView, PersonFieldDisplayView,
-  DateFieldDisplayView, ObjectWithNameFieldDisplayView,
-  EntererFieldDisplayView, ModifierFieldDisplayView) ->
+  './related-resource-field-display'
+  './boolean-icon-display'
+  './../models/subcorpus'
+  './../models/morphology'
+  './../collections/subcorpora'
+  './../collections/morphologies'
+], (ResourceView, SubcorpusView, MorphologyView, LanguageModelAddWidgetView,
+  PersonFieldDisplayView, DateFieldDisplayView, ObjectWithNameFieldDisplayView,
+  EntererFieldDisplayView, ModifierFieldDisplayView,
+  RelatedResourceFieldDisplayView, BooleanIconFieldDisplayView, SubcorpusModel,
+  MorphologyModel, SubcorporaCollection, MorphologiesCollection) ->
+
+
+  class CorpusFieldDisplayView extends RelatedResourceFieldDisplayView
+
+    resourceName: 'subcorpus'
+    attributeName: 'corpus'
+    resourceModelClass: SubcorpusModel
+    resourcesCollectionClass: SubcorporaCollection
+    resourceViewClass: SubcorpusView
+
+
+  class MorphologyFieldDisplayView extends RelatedResourceFieldDisplayView
+
+    resourceName: 'morphology'
+    attributeName: 'vocabulary_morphology'
+    resourceModelClass: MorphologyModel
+    resourcesCollectionClass: MorphologiesCollection
+    resourceViewClass: MorphologyView
+
 
   # Language Model View
   # -------------------
@@ -57,6 +86,7 @@ define [
       modifier: ModifierFieldDisplayView
       datetime_entered: DateFieldDisplayView
       datetime_modified: DateFieldDisplayView
-      corpus: ObjectWithNameFieldDisplayView
-      vocabulary_morphology: ObjectWithNameFieldDisplayView
+      corpus: CorpusFieldDisplayView
+      vocabulary_morphology: MorphologyFieldDisplayView
+      generate_succeeded: BooleanIconFieldDisplayView
 
