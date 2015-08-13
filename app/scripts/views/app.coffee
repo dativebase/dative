@@ -1054,6 +1054,8 @@ define [
       SearchView: SearchView
       SubcorpusView: SubcorpusView
       MorphologyView: MorphologyView
+      PhonologyView: PhonologyView
+      LanguageModelView: LanguageModelView
 
     # Create a view for the passed in `resourceModel` and render it in the
     # application-wide `@resourceDisplayerDialog`.

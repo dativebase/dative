@@ -1,15 +1,58 @@
 define [
   './resource'
+  './phonology'
+  './morphology'
+  './language-model'
   './morphological-parser-controls'
   './morphological-parser-add-widget'
   './person-field-display'
   './date-field-display'
   './object-with-name-field-display'
+  './enterer-field-display'
+  './modifier-field-display'
+  './related-resource-field-display'
   './boolean-icon-display'
-], (ResourceView, MorphologicalParserControlsView,
-  MorphologicalParserAddWidgetView, PersonFieldDisplayView,
-  DateFieldDisplayView, ObjectWithNameFieldDisplayView,
-  BooleanIconFieldDisplayView) ->
+  './../models/phonology'
+  './../models/morphology'
+  './../models/language-model'
+  './../collections/phonologies'
+  './../collections/morphologies'
+  './../collections/language-models'
+], (ResourceView, PhonologyView, MorphologyView, LanguageModelView,
+  MorphologicalParserControlsView, MorphologicalParserAddWidgetView,
+  PersonFieldDisplayView, DateFieldDisplayView, ObjectWithNameFieldDisplayView,
+  EntererFieldDisplayView, ModifierFieldDisplayView,
+  RelatedResourceFieldDisplayView, BooleanIconFieldDisplayView, PhonologyModel,
+  MorphologyModel, LanguageModelModel, PhonologiesCollection,
+  MorphologiesCollection, LanguageModelsCollection) ->
+
+
+  class PhonologyFieldDisplayView extends RelatedResourceFieldDisplayView
+
+    resourceName: 'phonology'
+    attributeName: 'phonology'
+    resourceModelClass: PhonologyModel
+    resourcesCollectionClass: PhonologiesCollection
+    resourceViewClass: PhonologyView
+
+
+  class MorphologyFieldDisplayView extends RelatedResourceFieldDisplayView
+
+    resourceName: 'morphology'
+    attributeName: 'morphology'
+    resourceModelClass: MorphologyModel
+    resourcesCollectionClass: MorphologiesCollection
+    resourceViewClass: MorphologyView
+
+
+  class LanguageModelFieldDisplayView extends RelatedResourceFieldDisplayView
+
+    resourceName: 'languageModel'
+    attributeName: 'language_model'
+    resourceModelClass: LanguageModelModel
+    resourcesCollectionClass: LanguageModelsCollection
+    resourceViewClass: LanguageModelView
+
 
   # Morphological Parser View
   # -------------------------
@@ -54,13 +97,13 @@ define [
 
     # Map attribute names to display view class names.
     attribute2displayView:
-      enterer: PersonFieldDisplayView
-      modifier: PersonFieldDisplayView
+      enterer: EntererFieldDisplayView
+      modifier: ModifierFieldDisplayView
       datetime_entered: DateFieldDisplayView
       datetime_modified: DateFieldDisplayView
-      phonology: ObjectWithNameFieldDisplayView
-      morphology: ObjectWithNameFieldDisplayView
-      language_model: ObjectWithNameFieldDisplayView
+      phonology: PhonologyFieldDisplayView
+      morphology: MorphologyFieldDisplayView
+      language_model: LanguageModelFieldDisplayView
       generate_succeeded: BooleanIconFieldDisplayView
       compile_succeeded: BooleanIconFieldDisplayView
 
