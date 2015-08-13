@@ -12,11 +12,12 @@ define [
   './resource-select-via-search-field'
   './file-select-via-search-input'
   './../models/file'
+  './../utils/globals'
 ], (ResourceAddWidgetView, TextareaFieldView,
   RelationalSelectFieldView, MultiElementTagFieldView, PersonSelectFieldView,
   UserSelectFieldView, DateFieldView, FileDataUploadFieldView, FileData,
   SelectFieldView, ResourceSelectViaSearchFieldView,
-  FileSelectViaSearchInputView, FileModel) ->
+  FileSelectViaSearchInputView, FileModel, globals) ->
 
 
   # The typed textarea field view is a textarea field that is visible only when
@@ -185,6 +186,43 @@ define [
     onClose: ->
       @$('audio, video').off 'loadedmetadata'
       super
+
+    # Return a filter expression for searching over file resources that are
+    # audio/video and have non-null filename value.
+    # TODO: this should not be built-in to the file select via search input
+    # because these audio/video restrictions presume that this file is a parent
+    # file of another file.
+    getIdSearchFilter: (searchTerms) ->
+      filter = ['and', [
+        @isAudioVideoFilterExpression(),
+        @hasAFilenameFilterExpression(),
+        [@resourceNameCapitalized, 'id', '=', parseInt(searchTerms[0])]]]
+
+    getAudioVideoMIMETypes: ->
+      a = globals.applicationSettings.get 'allowedFileTypes'
+      (t for t in a when t[...5] in ['audio', 'video'])
+
+    isAudioVideoFilterExpression: ->
+      [
+        @resourceNameCapitalized
+        'MIME_type'
+        'in'
+        @getAudioVideoMIMETypes()
+      ]
+
+    hasAFilenameFilterExpression: ->
+      [
+        @resourceNameCapitalized
+        'filename'
+        '!='
+        null
+      ]
+
+    getGeneralSearchFilterComplement: ->
+      [
+        @isAudioVideoFilterExpression()
+        @hasAFilenameFilterExpression()
+      ]
 
 
   class ParentFileSearchFieldView extends ResourceSelectViaSearchFieldView

@@ -55,8 +55,16 @@ define [
         attributeValidator = @getValidator attribute
         if attributeValidator
           error = attributeValidator.apply @, [value]
-          if error then errors[attribute] = error
-      if _.isEmpty errors then undefined else errors
+          if error
+            if @utils.type(error) is 'object'
+              for errorAttr, errorMsg of error
+                errors[errorAttr] = errorMsg
+            else
+              errors[attribute] = error
+      if _.isEmpty errors
+        undefined
+      else
+        errors
 
     # Override this in subclasses for validation: return a `@validator` method
     # for the input `attribute`, or `null` if it shouldn't be validated.

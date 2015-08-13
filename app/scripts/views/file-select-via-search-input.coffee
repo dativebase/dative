@@ -3,9 +3,8 @@ define [
   './file-as-row'
   './../models/file'
   './../collections/files'
-  './../utils/globals'
-], (ResourceSelectViaSearchInputView, FileAsRowView, FileModel, FilesCollection,
-  globals) ->
+], (ResourceSelectViaSearchInputView, FileAsRowView, FileModel,
+  FilesCollection) ->
 
   # File Select Via Search Input View
   # ---------------------------------
@@ -14,48 +13,27 @@ define [
 
   class FileSelectViaSearchInputView extends ResourceSelectViaSearchInputView
 
+    # The string returned by this method will be the text of link that
+    # represents the selected file.
+    resourceAsString: (resource) ->
+      if resource.filename
+        resource.filename
+      else if resource.name
+        resource.name
+      else if resource.parent_file
+        resource.parent_file.filename
+      else
+        "File #{resource.id}"
+
     # Change these attributes in subclasses.
     resourceName: 'file'
     resourceModelClass: FileModel
     resourcesCollectionClass: FilesCollection
     resourceAsRowViewClass: FileAsRowView
 
-    # Return a filter expression for searching over file resources that are
-    # audio/video and have non-null filename value.
-    # TODO: this should not be built-in to the file select via search input
-    # because these audio/video restrictions presume that this file is a parent
-    # file of another file.
-    getIdSearchFilter: (searchTerms) ->
-      filter = ['and', [
-        @isAudioVideoFilterExpression(),
-        @hasAFilenameFilterExpression(),
-        [@resourceNameCapitalized, 'id', '=', parseInt(searchTerms[0])]]]
 
-    getAudioVideoMIMETypes: ->
-      a = globals.applicationSettings.get 'allowedFileTypes'
-      (t for t in a when t[...5] in ['audio', 'video'])
-
-    isAudioVideoFilterExpression: ->
-      [
-        @resourceNameCapitalized
-        'MIME_type'
-        'in'
-        @getAudioVideoMIMETypes()
-      ]
-
-    hasAFilenameFilterExpression: ->
-      [
-        @resourceNameCapitalized
-        'filename'
-        '!='
-        null
-      ]
-
-    getGeneralSearchFilterComplement: ->
-      [
-        @isAudioVideoFilterExpression()
-        @hasAFilenameFilterExpression()
-      ]
+    setSelectedToModel: (resourceAsRowView) ->
+      @model.set @context.attribute, resourceAsRowView.model.attributes
 
     # These are the `[<attribute]`s or `[<attribute>, <subattribute>]`s that we
     # "smartly" search over.

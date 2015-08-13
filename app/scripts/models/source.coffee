@@ -12,6 +12,13 @@ define [
 
     resourceName: 'source'
 
+    # Note that `crossref_source` is not in here because the user does not
+    # specify it directly. It is by selecting a `crossref` value that the
+    # `crossref_source` relational value gets specified server-side.
+    manyToOneAttributes: [
+      'file'
+    ]
+
     ############################################################################
     # Source Schema
     ############################################################################
@@ -271,43 +278,66 @@ define [
     validBibTeXType: (value) ->
       if not value then return 'You must select a type for this source'
       invalid = false
+
+      # BibTeX type determines required fields. Get them here.
       [requiredFields, disjunctivelyRequiredFields, msg] =
         @parseRequirements value
+
+      # Here we set error messages on zero or more attributes, given the typed
+      # requirements of BibTeX.
       requiredFieldsValues =
-        (@getRequiredValue(rf) for rf in requiredFields when @getRequiredValue(rf))
+        (@getRequiredValue(rf) for rf in requiredFields)
+      requiredFieldsValues = (rf for rf in requiredFieldsValues when rf)
       if requiredFieldsValues.length isnt requiredFields.length
         invalid = true
       else
         for dr in disjunctivelyRequiredFields
-          drValues = (@getRequiredValue(rf) for rf in dr when @getRequiredValue(rf))
-          if not drValues then invalid = true
-      if invalid then msg else null
+          drValues = (@getRequiredValue(rf) for rf in dr)
+          drValues = (rf for rf in drValues when rf)
+          if drValues.length is 0 then invalid = true
+      if invalid
+        errorObject = type: msg
+        for field in requiredFields
+          if not @getRequiredValue(field)
+            errorObject[field] = "Please enter a value"
+        for fieldsArray in disjunctivelyRequiredFields
+          values = (@getRequiredValue(f) for f in fieldsArray)
+          values = (v for v in values when v)
+          if values.length is 0
+            for field in fieldsArray
+              errorObject[field] = "Please enter a value for
+                #{@coordinate fieldsArray, 'or'}"
+        errorObject
+      else
+        null
 
     getRequiredValue: (requiredField) ->
         """Try to get a value for the required field `requiredField`; if it's
         not there, try the cross-referenced source model.
         """
-        if @get(requiredField)
-          @get requiredField
+        val = @get requiredField
+        if val
+          val
         else
           crossReferencedSource = @get 'crossref_source'
           if crossReferencedSource
-            crossReferencedSource.requiredField
+            val = crossReferencedSource[requiredField]
+            if val then val else null
           else
             null
+
+    coordinate: (array, coordinator='and') ->
+      if array.length > 1
+        "#{array[...-1].join ', '} #{coordinator} #{array[array.length - 1]}"
+      else if array.length is 1
+        array[0]
+      else
+        ''
 
     # Given a BibTeX `type` value, return a 3-tuple array consisting of the
     # required fields, the disjunctively required fields, and a text message
     # declaring those requirements.
     parseRequirements: (typeValue) ->
-
-      coordinate = (array) ->
-        if array.length > 1
-          "#{array[...-1].join ', '} and #{array[array.length - 1]}"
-        else if array.length is 1
-          array[0]
-        else
-          ''
 
       conjugateValues = (requiredFields) ->
         if requiredFields.length > 1 then 'values' else 'a value'
@@ -318,10 +348,10 @@ define [
         (r for r in required when @utils.type(r) is 'array')
 
       msg = "Sources of type #{typeValue} require #{conjugateValues requiredFields}
-        for #{coordinate requiredFields}"
+        for #{@coordinate requiredFields}"
       if disjunctivelyRequiredFields.length > 0
-        tmp = ("at least one of #{coordinate dr}" for dr in disjunctivelyRequiredFields)
-        msg = "#{msg} as well as a value for #{coordinate tmp}"
+        tmp = ("at least one of #{@coordinate dr}" for dr in disjunctivelyRequiredFields)
+        msg = "#{msg} as well as a value for #{@coordinate tmp}"
 
       [requiredFields, disjunctivelyRequiredFields, "#{msg}."]
 

@@ -12,9 +12,10 @@ define [
     resourceName: 'file'
 
     orderedAttributes: [
-      'id'
       'filename'
+      'name'
       'MIME_type'
+      'id'
       'size'
       'enterer'
       'tags'

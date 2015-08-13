@@ -19,7 +19,7 @@ define [
       try
         "#{tmp.getAuthor()} (#{tmp.getYear()})"
       catch
-        ''
+        'error caught is your resource-as-string'
 
     # These are the `[<attribute]`s or `[<attribute>, <subattribute>]`s that we
     # "smartly" search over.

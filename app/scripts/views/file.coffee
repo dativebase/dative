@@ -68,7 +68,7 @@ define [
 
 
   # File View
-  # --------------
+  # ---------
   #
   # For displaying individual files.
 

@@ -3,9 +3,83 @@ define [
   './textarea-field'
   './select-field'
   './relational-select-field'
+  './related-resource-representation'
+  './file-select-via-search-field'
+  './source-select-via-search-field'
+  './source-select-via-search-input'
   './../models/source'
 ], (ResourceAddWidgetView, TextareaFieldView, SelectFieldView,
-  RelationalSelectFieldView, SourceModel) ->
+  RelationalSelectFieldView, RelatedResourceRepresentationView,
+  FileSelectViaSearchFieldView, SourceSelectViaSearchFieldView,
+  SourceSelectViaSearchInputView, SourceModel, ResourceAsRowView) ->
+
+
+  # The `crossref` and `crossref_source` attributes are interlinked in Source
+  # models in a complex way. To choose a `crossref` value, the user must select
+  # from the existing sources. This valuates two things:
+  #
+  # 1. `crossref` as the selected source's `key` value
+  # 2. `crossref_source` as the selected source (an object)
+  #
+  # This fact is what requires us to define
+  # `CrossrefSourceSelectViaSearchFieldView` and its dependent classes with
+  # some rather ad hoc methods below.
+
+  class MyRelatedResourceRepresentationView extends RelatedResourceRepresentationView
+
+    getRelatedResourceId: ->
+      @context.model.get('crossref_source').id
+
+
+  class CrossrefSourceSelectViaSearchInputView extends SourceSelectViaSearchInputView
+
+    # This is the class that is used to display the *selected* resource.
+    selectedResourceViewClass: MyRelatedResourceRepresentationView
+
+    resourceAsString: (resource) -> resource.key
+
+    setSelectedToModel: (resourceAsRowView) ->
+      @model.set 'crossref', resourceAsRowView.model.get('key')
+      @model.set 'crossref_source', resourceAsRowView.model.attributes
+
+    unsetSelectedFromModel: ->
+      @model.set 'crossref_source', null
+      @model.set 'crossref', ''
+
+    getSelectedResourceView: ->
+      params =
+        value: @selectedResourceModel.attributes
+        class: 'field-display-link dative-tooltip'
+        resourceAsString: @resourceAsString
+        valueFormatter: (v) -> v
+        resourceName: @resourceName
+        attributeName: @context.attribute
+        resourceModelClass: @resourceModelClass
+        resourcesCollectionClass: @resourcesCollectionClass
+        resourceViewClass: null
+        model: @getModelForSelectedResourceView()
+      if @selectedResourceWrapperViewClass
+        new @selectedResourceWrapperViewClass @selectedResourceViewClass, params
+      else
+        new @selectedResourceViewClass params
+
+    # If we have a selected value, cause it to be displayed and the search
+    # interface to not be displayed; if not, do the opposite.
+    setStateBasedOnSelectedValue: ->
+      if @context.value
+        attributes = @context.model.get('crossref_source')
+        @selectedResourceModel = new @resourceModelClass(attributes)
+        @searchInterfaceVisible = false
+        @selectedResourceViewVisible = true
+      else
+        @searchInterfaceVisible = true
+        @selectedResourceViewVisible = false
+
+
+  class CrossrefSourceSelectViaSearchFieldView extends SourceSelectViaSearchFieldView
+
+    getInputView: ->
+      new CrossrefSourceSelectViaSearchInputView @context
 
 
   class TextareaFieldView255 extends TextareaFieldView
@@ -85,13 +159,14 @@ define [
       volume: TextareaFieldView100
 
       type: TypeSelectFieldView
-      # file: FileSearchFieldView # Note: does not work yet; see TODO above.
+      file: FileSelectViaSearchFieldView
+      crossref: CrossrefSourceSelectViaSearchFieldView
 
     primaryAttributes: [
       'key'
       'type'
       'file'
-      'crossref' # TODO: this should have a field view that is a search UI (over sources), just like that for `file`
+      'crossref'
       'author'
       'editor'
       'year'

@@ -28,12 +28,20 @@
 
   </div>
 
-  <div class='dative-widget-header-title container-center'
-      ><span class='resource-icon'><%- @resourceIcon %></span
-      ><span
-        class='header-title-content dative-tooltip'
-        title='view this <%= @resourceNameHumanReadable() %> in the main page'
-      ><%- @headerTitle or '' %></span></div>
+  <% if @addUpdateType is 'add': %>
+    <div class='dative-widget-header-title container-center'
+        ><span class='resource-icon'><%- @resourceIcon %></span
+        ><span
+            class='header-title-content'
+        ><%- @headerTitle or '' %></span></div>
+  <% else: %>
+    <div class='dative-widget-header-title container-center'
+        ><span class='resource-icon'><%- @resourceIcon %></span
+        ><span
+            class='header-title-content dative-tooltip'
+            title='view this <%= @resourceNameHumanReadable() %> in the main page'
+        ><%- @headerTitle or '' %></span></div>
+  <% end %>
 
   <div class='button-container-right'>
 

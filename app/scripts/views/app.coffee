@@ -161,7 +161,7 @@ define [
       'click': 'bodyClicked'
 
     render: ->
-      if window.location.hostname in ['localhost', '127.0.0.1']
+      if window.location.hostname is ['localhost', '127.0.0.1']
         setTimeout ->
           console.clear()
         , 2000
