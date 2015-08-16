@@ -92,7 +92,7 @@ define [
         Backbone.trigger 'showResourceInDialog', @resourceView, @$el
       else
         Backbone.trigger 'showResourceModelInDialog', @resourceModel,
-          "#{@utils.capitalize @resourceName}View"
+          @resourceName
 
     guify: ->
       @$('.dative-tooltip').tooltip()

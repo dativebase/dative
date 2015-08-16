@@ -1046,22 +1046,14 @@ define [
           isit = true
       isit
 
-    # Map the names of `ResourceView`-subclassing classes to the classes
-    # themselves; useful for `showResourceModelInDialog` below.
-    resourceViewClasses:
-      FileView: FileView
-      SourceView: SourceView
-      SearchView: SearchView
-      SubcorpusView: SubcorpusView
-      MorphologyView: MorphologyView
-      PhonologyView: PhonologyView
-      LanguageModelView: LanguageModelView
+    getResourceViewClassFromResourceName: (resourceName) ->
+      @myResources[resourceName].resourceViewClass
 
     # Create a view for the passed in `resourceModel` and render it in the
     # application-wide `@resourceDisplayerDialog`.
-    showResourceModelInDialog: (resourceModel, resourceViewClassName) ->
-      resourceView = new @resourceViewClasses[resourceViewClassName](
-        model: resourceModel)
+    showResourceModelInDialog: (resourceModel, resourceName) ->
+      resourceViewClass = @getResourceViewClassFromResourceName resourceName
+      resourceView = new resourceViewClass(model: resourceModel)
       @showResourceInDialog resourceView
 
     getOldestResourceDisplayerDialog: ->

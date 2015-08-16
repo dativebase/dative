@@ -151,7 +151,8 @@ define [
 
     getHeaderTitle: ->
       if @addUpdateType is 'add'
-        "Add a #{@resourceNameCapitalized}"
+        "Add #{@utils.indefiniteDeterminer @resourceNameCapitalized}
+          #{@utils.camel2regular @resourceNameCapitalized}"
       else
         "Update this #{@resourceName}"
 

@@ -1,0 +1,26 @@
+<select
+  name='<%= @name %>'
+  class='<%= @class %>
+         select-with-button
+         dative-tooltip'
+  title='<%= @title %>'>
+  <% if not @required: %>
+    <option></option>
+  <% end %>
+  <% for selectOption in @selectOptions: %>
+    <% if @selectValueGetter(selectOption) is @selectValueGetter(@value): %>
+      <option value="<%= @selectValueGetter selectOption %>" selected
+        ><%= @selectTextGetter selectOption %></option>
+    <% else: %>
+      <option value="<%= @selectValueGetter selectOption %>"
+        ><%= @selectTextGetter selectOption %></option>
+    <% end %>
+  <% end %>
+</select>
+
+<button
+    class='<%= @buttonClass %>
+           dative-tooltip'
+    title='<%= @buttonTooltip %>'
+    ><i class='fa fa-fw <%= @buttonIconClass %>'></i></button>
+

@@ -52,6 +52,13 @@ define [
         .first().scroll => @closeAllTooltips()
       @
 
+    getResourceViewTitle: ->
+      if @resourceView.model.get('id')
+        "#{@utils.capitalize @resourceView.resourceNameHumanReadable()}
+          ##{@resourceView.model.get('id')}"
+      else
+        "New #{@resourceView.resourceNameHumanReadable()}"
+
     # Show the supplied resource view in this dialog and make the dialog
     # visible. `resourceView` should be a Backbone view with a model.
     showResourceView: (resourceView) ->
@@ -65,10 +72,10 @@ define [
       @resourceView.dataLabelsVisible = true
       @resourceView.effectuateExpanded()
       height = if @lastHeight then @lastHeight else @height
+      title = @getResourceViewTitle()
       @$('.dative-resource-displayer-dialog')
         .dialog 'option',
-          title: "#{@utils.capitalize @resourceView.resourceNameHumanReadable()}
-            ##{@resourceView.model.get('id')}"
+          title: @getResourceViewTitle()
           height: height
           position: @lastPosition
       @moveToTop()
@@ -83,6 +90,8 @@ define [
         if @lastWidth then width = @lastWidth
         @$('.dative-resource-displayer-dialog')
           .dialog 'option', 'width', width
+        if not @resourceView.model.get('id')
+          @resourceView.$('.update-resource').click()
       setTimeout x, 500
 
     spinnerOptions: ->

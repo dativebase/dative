@@ -104,6 +104,12 @@ define (require) ->
       when 1 then noun
       else pluralize noun
 
+  indefiniteDeterminer = (complement) ->
+    if complement[0].toLowerCase() in ['a', 'e', 'i', 'o', 'u']
+      'an'
+    else
+      'a'
+
   # Parses a date(time) string to a Date instance
   dateString2object = (dateString) ->
     try # Some FieldDB dates are enclosed in double quotation marks
@@ -421,4 +427,5 @@ define (require) ->
   getFilenameAndExtension: getFilenameAndExtension
   getMIMEType: getMIMEType
   extensions: extensions
+  indefiniteDeterminer: indefiniteDeterminer
 

@@ -2,6 +2,8 @@ define [
   './resource-add-widget'
   './textarea-field'
   './relational-select-field'
+  './relational-select-field-with-add-button'
+  './elicitation-method-select-field-with-add-button'
   './multi-element-tag-field'
   './utterance-judgement-field'
   './comments-field'
@@ -17,7 +19,9 @@ define [
   './../models/form'
   './../utils/globals'
 ], (ResourceAddWidgetView, TextareaFieldView, RelationalSelectFieldView,
-  MultiElementTagFieldView, UtteranceJudgementFieldView, CommentsFieldView,
+  RelationalSelectFieldWithAddButtonView,
+  ElicitationMethodSelectFieldWithAddButtonView, MultiElementTagFieldView,
+  UtteranceJudgementFieldView, CommentsFieldView,
   TranscriptionGrammaticalityFieldView, TranslationsFieldView,
   PersonSelectFieldView, UserSelectFieldView, SourceSelectFieldView,
   SourceSelectViaSearchFieldView, FilesSelectViaSearchFieldView,
@@ -122,7 +126,7 @@ define [
       syntax:                        TextareaFieldView1023
       semantics:                     TextareaFieldView1023
       translations:                  TranslationsFieldView
-      elicitation_method:            RelationalSelectFieldView
+      elicitation_method:            ElicitationMethodSelectFieldWithAddButtonView
       syntactic_category:            RelationalSelectFieldView
       speaker:                       PersonSelectFieldView
       elicitor:                      UserSelectFieldView

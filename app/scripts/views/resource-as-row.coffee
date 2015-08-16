@@ -69,8 +69,7 @@ define [
 
     viewResource: (event) ->
       @stopEvent event
-      Backbone.trigger 'showResourceModelInDialog', @model,
-        "#{@utils.capitalize @resourceName}View"
+      Backbone.trigger 'showResourceModelInDialog', @model, @resourceName
 
     guify: ->
       @$('button').button()
