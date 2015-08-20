@@ -62,6 +62,16 @@ define [
     resourceName: 'collection'
     resourceModel: CollectionModel
 
+    resourcesNeededForAdd: ->
+      [
+        'speakers'
+        'users'
+        'tags'
+        'source'
+        'collection_types'
+        'markup_languages'
+      ]
+
     attribute2fieldView:
       name:            TextareaFieldView255
       content:         ScriptFieldView

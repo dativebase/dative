@@ -42,6 +42,11 @@ define [
     resourceName: 'speaker'
     resourceModel: SpeakerModel
 
+    resourcesNeededForAdd: ->
+      [
+        'markup_languages'
+      ]
+
     attribute2fieldView:
       name: TextareaFieldView255
       page_content: ScriptFieldView

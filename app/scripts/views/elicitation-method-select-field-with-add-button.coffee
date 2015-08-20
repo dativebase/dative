@@ -2,8 +2,9 @@ define [
   './relational-select-field-with-add-button'
   './../models/elicitation-method'
   './../collections/elicitation-methods'
+  './../utils/globals'
 ], (RelationalSelectFieldWithAddButtonView, ElicitationMethodModel,
-  ElicitationMethodsCollection) ->
+  ElicitationMethodsCollection, globals) ->
 
   # Relational Select(menu) Field, with Add Button, View
   # ----------------------------------------------------

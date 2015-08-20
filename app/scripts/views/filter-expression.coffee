@@ -464,11 +464,19 @@ define [
 
     template: filterExpressionTemplate
 
+    getAttributes: ->
+      try
+        attrs = @options.search_search_parameters.search_parameters.attributes
+        _.keys(attrs).sort()
+      catch
+        []
+
     render: ->
       context =
         filterExpression: @filterExpression
         options: @options
-        attributes: _.keys(@options.search_search_parameters.search_parameters.attributes).sort()
+        #attributes: _.keys(@options.search_search_parameters.search_parameters.attributes).sort()
+        attributes: @getAttributes()
         subattributes: @subattributes() # TODO: we have to do this ourselves! The OLD should provide it though...
         relations: @getRelations @options
         snake2regular: @utils.snake2regular
@@ -498,9 +506,12 @@ define [
     # some of them are redundant and have ugly names, e.g., ugly "__ne__" is
     # co-referential with "!=" and "regexp" is the same as "regex".
     getRelations: (options) ->
-      (r for r in \
-      _.keys(options.search_search_parameters.search_parameters.relations) \
-      when r isnt 'regexp' and '_' not in r)
+      try
+        relations =
+          _.keys options.search_search_parameters.search_parameters.relations
+        (r for r in relations when r isnt 'regexp' and '_' not in r)
+      catch
+        []
 
     # Make <select>s into jQuery selectmenus.
     selectmenuify: ($context) ->

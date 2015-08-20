@@ -101,6 +101,8 @@ define [
 
       @listenTo Backbone, 'resourceAlreadyDisplayedInDialog',
         @resourceAlreadyDisplayedInDialog
+      @listenTo Backbone, 'resourceModelAlreadyDisplayedInDialog',
+        @resourceModelAlreadyDisplayedInDialog
       @listenTo Backbone, 'resourceAlreadySelected', @resourceAlreadySelected
 
       @listenToCRUDResources()
@@ -174,8 +176,8 @@ define [
     updateResourceSuccess: (model, resource) ->
       notification = new NotificationView
         title: "#{@utils.capitalize(@utils.camel2regular(resource))} updated"
-        content: "You have successfully updated #{resource}
-          #{@getResourceId model, resource}."
+        content: "You have successfully updated
+          #{@utils.camel2regular(resource)} #{@getResourceId model, resource}."
       @renderNotification notification
 
     addUpdateResourceFail: (error, type, resource) ->
@@ -550,6 +552,15 @@ define [
       notification = new NotificationView
         title: 'Already displayed'
         content: "#{name} #{resourceView.model.get 'id'}
+          is already being displayed in a dialog box."
+        type: 'warning'
+      @renderNotification notification
+
+    resourceModelAlreadyDisplayedInDialog: (resourceName, resourceModel) ->
+      name = @utils.capitalize @utils.camel2regular(resourceName)
+      notification = new NotificationView
+        title: 'Already displayed'
+        content: "#{name} #{resourceModel.get 'id'}
           is already being displayed in a dialog box."
         type: 'warning'
       @renderNotification notification

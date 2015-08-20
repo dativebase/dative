@@ -34,11 +34,18 @@ define [
     # input fields" button is clicked.
     editableSecondaryAttributes: []
 
+    # Enter here a list of the resources that we need for creating a new
+    # resource of the current type. E.g., for a sub-class which is for creating
+    # new form objects, we might need to have resources for
+    # `"elicitationMethods"`, `"tags"`, etc.
+    resourcesNeededForAdd: -> []
+
     template: resourceAddTemplate
     className: 'add-resource-widget dative-widget-center dative-shadowed-widget
       ui-widget ui-widget-content ui-corner-all'
 
     initialize: (options) ->
+      @rerenderAfterGetNewResourceData = false
       @primaryFieldViews = []
       @secondaryFieldViews = []
       # Maps attributes to the FieldView instance that have been constructed for
@@ -67,9 +74,15 @@ define [
       newModel
 
     render: ->
-      if @activeServerTypeIsOLD() and not @weHaveNewResourceData()
-        @getNewResourceData() # Success in this request will call `@render()`
-        return
+      if @activeServerTypeIsOLD()
+        if @weHaveNewResourceData()
+          @getNewResourceData()
+        else
+          # Setting this to true will cause `render` to be called again after
+          # we successfully retrieve the data needed for adding a resource.
+          @rerenderAfterGetNewResourceData = true
+          @getNewResourceData()
+          return
       @getFieldViews()
       @html()
       @secondaryDataVisibility()
@@ -122,11 +135,16 @@ define [
       @listenTo @model, "add#{@resourceNameCapitalized}Start", @addResourceStart
       @listenTo @model, "add#{@resourceNameCapitalized}End", @addResourceEnd
       @listenTo @model, "add#{@resourceNameCapitalized}Fail", @addResourceFail
+      @listenTo @model, "add#{@resourceNameCapitalized}Success",
+        @addResourceSuccess
 
-      @listenTo @model, "update#{@resourceNameCapitalized}Start", @addResourceStart
+      @listenTo @model, "update#{@resourceNameCapitalized}Start",
+        @addResourceStart
       @listenTo @model, "update#{@resourceNameCapitalized}End", @addResourceEnd
-      @listenTo @model, "update#{@resourceNameCapitalized}Fail", @updateResourceFail
-      @listenTo @model, "update#{@resourceNameCapitalized}Success", @updateResourceSuccess
+      @listenTo @model, "update#{@resourceNameCapitalized}Fail",
+        @updateResourceFail
+      @listenTo @model, "update#{@resourceNameCapitalized}Success",
+        @updateResourceSuccess
 
       @listenToFieldViews()
 
@@ -254,6 +272,9 @@ define [
     updateResourceFail: (error) ->
       Backbone.trigger "update#{@resourceNameCapitalized}Fail", error, @model
 
+    addResourceSuccess: ->
+      Backbone.trigger "add#{@resourceNameCapitalized}Success", @model
+
     updateResourceSuccess: ->
       @originalModelCopy = @copyModel @model
       Backbone.trigger "update#{@resourceNameCapitalized}Success", @model
@@ -376,34 +397,50 @@ define [
     # OLD input options (i.e., possible speakers, users, categories, etc.)
     ############################################################################
 
-    # Returns true of `globals` has a key for `resourceData`. The value of
-    # this key is an object containing a subset of the following keys:
-    # `form_searches`, `users`, `tags`, and `corpus_formats`.
-    weHaveNewResourceData: -> globals[@getGlobalDataAttribute()]?
+    # Return `true` if we have the resource data needed to add a new resource
+    # of the relevant type.
+    __weHaveNewResourceData__: ->
+      response = true
+      for attr in @resourcesNeededForAdd()
+        if not globals.has(attr)
+          response = false
+      response
 
     # Return an object representing the options for forced-choice inputs.
     # Currently only relevant for the OLD.
     getOptions: ->
-      if globals[@getGlobalDataAttribute()]
-        globals[@getGlobalDataAttribute()]
-      else
-        {}
+      options = {}
+      for attr in @resourcesNeededForAdd()
+        options[attr] = globals.get(attr).data
+      options
 
     getNewResourceDataStart: ->
       @spin()
 
     getNewResourceDataEnd: -> @stopSpin()
 
+    # We have successfully retrieved from the server the data needed to create
+    # a new resource or update an existing one. If these data are different
+    # from what we already had stored, we may need to re-render the entire
+    # `ResourceAddWidgetView` or just ask certain field views to refresh
+    # themselves.
     getNewResourceDataSuccess: (data) ->
-      @storeOptionsDataGlobally data
-      @render()
+      changed = @storeOptionsDataGlobally data
+      if changed.length > 0
+        if @rerenderAfterGetNewResourceData
+          @rerenderAfterGetNewResourceData = false
+          @render()
+        else
+          options = @getOptions()
+          fieldViews = @fieldViews()
+          for resourceName in changed
+            affectedFieldViews = (f for f in fieldViews \
+              when f.context.optionsAttribute is resourceName)
+            for fieldView in affectedFieldViews
+              fieldView.options = options
+              fieldView.refresh()
 
-    storeOptionsDataGlobally: (data) ->
-      if @model.get('id') # The GET /<resources>/<id>/edit case
-        globals[@getGlobalDataAttribute()] = data.data
-      else
-        globals[@getGlobalDataAttribute()] = data
-
+    # Deprecated
     getGlobalDataAttribute: -> "#{@resourceName}Data"
 
     getNewResourceDataFail: ->

@@ -42,6 +42,11 @@ define [
     resourceName: 'page'
     resourceModel: PageModel
 
+    resourcesNeededForAdd: ->
+      [
+        'markup_languages'
+      ]
+
     attribute2fieldView:
       name: TextareaFieldView255
       heading: TextareaFieldView255

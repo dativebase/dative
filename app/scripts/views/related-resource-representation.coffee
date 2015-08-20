@@ -11,6 +11,7 @@ define [
 
     initialize: (@context) ->
       @contextualize()
+      @listenToEvents()
 
     refresh: (@context) ->
       @contextualize()
@@ -53,11 +54,15 @@ define [
 
     listenToEvents: ->
       super
-      if @resourceModel then @listenToModel()
+      @listenTo @model, "change:#{@attributeName}", @valueChanged
+      # if @resourceModel then @listenToModel()
 
     listenToModel: ->
-      @listenTo @resourceModel, "fetch#{@utils.capitalize @resourceName}Success",
+      @listenToOnce @resourceModel,
+        "fetch#{@utils.capitalize @resourceName}Success",
         @fetchResourceSuccess
+
+    valueChanged: -> @resourceView = null
 
     # Cause this resource to be displayed in a dialog box.
     # TODO: check for an id on the model (or similar) prior to this so that we
@@ -90,6 +95,7 @@ define [
     requestDialogView: ->
       if @resourceViewClass
         Backbone.trigger 'showResourceInDialog', @resourceView, @$el
+        @resourceView = null
       else
         Backbone.trigger 'showResourceModelInDialog', @resourceModel,
           @resourceName

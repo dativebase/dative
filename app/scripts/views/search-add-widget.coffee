@@ -3,9 +3,7 @@ define [
   './textarea-field'
   './search-field'
   './../models/search'
-  './../utils/globals'
-], (ResourceAddWidgetView, TextareaFieldView, SearchFieldView, SearchModel,
-  globals) ->
+], (ResourceAddWidgetView, TextareaFieldView, SearchFieldView, SearchModel) ->
 
 
   class TextareaFieldView255 extends TextareaFieldView
@@ -51,9 +49,6 @@ define [
     getNewResourceDataFail: ->
       console.log "Failed to retrieve the data from the OLD server which is
         necessary for creating a new #{@resourceName}"
-
-    storeOptionsDataGlobally: (data) ->
-      globals[@getGlobalDataAttribute()] = data
 
     getNewResourceData: -> @model.getNewResourceData()
 

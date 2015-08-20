@@ -420,3 +420,43 @@ define [
       catch
         false
 
+    # The following methods are needed by a variety of resource-related classes
+    # that share no superclass but this one.
+
+    # Store the options for adding a resource in the global `globals` object.
+    # Note that we store each set of options in their own attribute; in this
+    # way, the array of tags in `globals.tags.data` can be used by multiple
+    # different add/update widgets for different resources and an update in
+    # this array can affect multiple interfaces. We also return an array
+    # containing all of the resource names that have changed.
+    storeOptionsDataGlobally: (data) ->
+      changed = []
+      if @model.get('id') # The OLD's GET /<resources>/<id>/edit case
+        data = data.data
+      for attr, val of data
+        if globals.has attr
+          if not _.isEqual(globals.get(attr).data, val)
+            changed.push attr
+            globals.get(attr).data = val
+            globals.get(attr).timestamp = new Date()
+        else
+          changed.push attr
+          attrVal =
+            data: val
+            timestamp: new Date()
+          globals.set attr, attrVal
+      changed
+
+    # Return `true` if we have the resource data needed to add a new resource
+    # of the relevant type.
+    weHaveNewResourceData: ->
+      response = true
+      for attr in @resourcesNeededForAdd()
+        if not globals.has(attr)
+          response = false
+      response
+
+    # An array of resource names that a certain resource needs some information
+    # about in order to be created/updated.
+    resourcesNeededForAdd: -> []
+

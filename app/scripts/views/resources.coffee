@@ -248,7 +248,6 @@ define [
 
       # 3. If the new resource should be displayed on the current page, then
       # do that; otherwise notify the user that it's on the last page.
-      Backbone.trigger "add#{@resourceNameCapitalized}Success", resourceModel
       if newResourceShouldBeOnCurrentPage
         @addNewResourceViewToPage()
         @closeNewResourceView()

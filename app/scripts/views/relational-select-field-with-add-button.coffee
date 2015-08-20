@@ -13,9 +13,6 @@ define [
   # A specialized SelectFieldView for OLD relational fields where there is also
   # a "+" button at the righthand side that results in a view for creating a
   # new resource being displayed in a dialog box.
-  #
-  # TODO: listen for create success and update the select options in response
-  # ...
 
   class RelationalSelectFieldWithAddButtonView extends RelationalSelectFieldView
 
@@ -28,6 +25,7 @@ define [
       options.width = '90%'
       super options
       @newResourceModel = null
+      @events['click .create-new-resource'] = 'createNewResource'
 
     getInputView: ->
       new SelectInputWithAddButtonView @context
@@ -43,19 +41,34 @@ define [
         #{@utils.camel2regular(@utils.capitalize(@resourceName))} in the page"
       context
 
-    events:
-      'click .create-new-resource': 'createNewResource'
-
     # Cause an "Add New Resource" view to be displayed in a dialog box.
     createNewResource: ->
-      console.log 'create new resource'
-      if @newResourceModel
-        @requestDialogView()
-      else
-        @resourcesCollection = new @resourcesCollectionClass()
-        @newResourceModel =
-          new @resourceModelClass({}, {collection: @resourcesCollection})
-        @requestDialogView()
+      @resourcesCollection = new @resourcesCollectionClass()
+      @newResourceModel =
+        new @resourceModelClass({}, {collection: @resourcesCollection})
+      @listenTo @newResourceModel,
+        "add#{@utils.capitalize @resourceName}Success",
+        @newResourceCreated
+      @requestDialogView()
+
+    # Respond to the event signaling that our new resource was created. We add
+    # this new resource to `globals` and we select it in the select field.
+    # TODO: sort options in a consistent way ...
+    newResourceCreated: (resourceModel) ->
+      resourceOptionAttrName = @utils.pluralize @attributeName
+      currentResourceOptions = globals.get resourceOptionAttrName
+      currentResourceOptions.data.push resourceModel.attributes
+      currentResourceOptions.timestamp = new Date()
+      @model.set 'elicitation_method', resourceModel.attributes
+
+      # We save the newly minted model for later, but anticipate not using it.
+      @lastNewResourceModel = @newResourceModel
+      @stopListening @newResourceModel
+      @newResourceModel = null
+
+      @refresh()
+      x = => @$('.ui-selectmenu-button').first().focus()
+      setTimeout x, 500
 
     # Sometimes circular dependencies arise if we try to import a particular
     # ResourceView sub-class. If `@resourceViewClass` is undefined, then we let
@@ -63,10 +76,4 @@ define [
     requestDialogView: ->
       Backbone.trigger 'showResourceModelInDialog', @newResourceModel,
         @resourceName
-
-      # We save the newly minted model for later, but anticipate not using it.
-      @lastNewResourceModel = @newResourceModel
-      @newResourceModel = null
-
-      console.log globals
 

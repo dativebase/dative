@@ -82,6 +82,13 @@ define [
     resourceName: 'user'
     resourceModel: UserModel
 
+    resourcesNeededForAdd: ->
+      [
+        'orthographies'
+        'roles'
+        'markup_languages'
+      ]
+
     attribute2fieldView:
       name: TextareaFieldView255
       page_content: ScriptFieldView
@@ -106,4 +113,8 @@ define [
       'markup_language'
       'page_content'
     ]
+
+    getNewResourceData: ->
+      console.log 'in getNewResourceData'
+      super
 

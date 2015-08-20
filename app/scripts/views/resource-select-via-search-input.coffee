@@ -7,11 +7,9 @@ define [
   './../models/resource'
   './../collections/resources'
   './../templates/resource-select-via-search-input'
-  './../utils/globals'
 ], (InputView, ResourceView, ResourceAsRowView,
   RelatedResourceRepresentationView, SelectedResourceWrapperView,
-  ResourceModel, ResourcesCollection, resourceSelectViaSearchInputTemplate,
-  globals) ->
+  ResourceModel, ResourcesCollection, resourceSelectViaSearchInputTemplate) ->
 
   # Resource Select Via Search Input View
   # -------------------------------------
@@ -378,7 +376,7 @@ define [
 
     performSearch: ->
       searchTerm = @$('[name=search-term]').val()
-      if globals[@getGlobalDataAttribute()]
+      if @weHaveNewResourceData()
         paginator =
           page: 1
           items_per_page: @itemsPerPage
@@ -451,7 +449,7 @@ define [
     getGeneralSearchFilterComplement: -> []
 
     getNewResourceSearchDataSuccess: (data) ->
-      globals[@getGlobalDataAttribute()] = data
+      @storeOptionsDataGlobally data
       @performSearch()
 
     getNewResourceSearchDataFail: (error) ->

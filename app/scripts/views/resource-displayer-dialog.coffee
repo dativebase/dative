@@ -48,7 +48,7 @@ define [
       @dialogify()
       @addTitleButtons()
       @guify()
-      @$('div.resource-displayer-content-container')
+      @$('.dative-resource-displayer-dialog')
         .first().scroll => @closeAllTooltips()
       @
 
@@ -78,6 +78,7 @@ define [
           title: @getResourceViewTitle()
           height: height
           position: @lastPosition
+      @listenForModification()
       @moveToTop()
       # We wait between dialogifying and rendering the resource in the dialog;
       # this seems to be necessary in order to get the width of the contained
@@ -93,6 +94,24 @@ define [
         if not @resourceView.model.get('id')
           @resourceView.$('.update-resource').click()
       setTimeout x, 500
+
+    listenForModification: ->
+
+      @listenTo @resourceView.model,
+        "add#{@resourceView.resourceNameCapitalized}Success",
+        @closeFully
+
+      @listenTo @resourceView.model,
+        "update#{@resourceView.resourceNameCapitalized}Success",
+        @closeFully
+
+      @listenTo @resourceView.model,
+        "destroy#{@resourceView.resourceNameCapitalized}Success",
+        @closeFully
+
+    closeFully: ->
+      @closeInner()
+      @dialogClose()
 
     spinnerOptions: ->
       _.extend BaseView::spinnerOptions(), {top: '5%', left: '5%'}
@@ -119,13 +138,7 @@ define [
         maxHeight: @maxHeight
         create: =>
           @fontAwesomateCloseIcon()
-        close: =>
-          if @resourceView
-            @resourceView.close()
-            @closed @resourceView
-            @resourceView = null
-          @closeAllTooltips()
-          @timestamp = 0
+        close: => @closeInner()
         open: (event, ui) =>
           @moveToTop()
         resizeStart: =>
@@ -146,6 +159,15 @@ define [
             at: "left top"
             of: window
       )
+
+    closeInner: ->
+      if @resourceView
+        @stopListening @resourceView.model
+        @resourceView.close()
+        @closed @resourceView
+        @resourceView = null
+      @closeAllTooltips()
+      @timestamp = 0
 
     moveToTop: ->
       @atTop = true

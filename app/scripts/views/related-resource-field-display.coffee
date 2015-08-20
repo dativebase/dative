@@ -4,8 +4,9 @@ define [
   './related-resource-representation'
   './../models/resource'
   './../collections/resources'
+  './../utils/globals'
 ], (ResourceView, FieldDisplayView, RelatedResourceRepresentationView,
-  ResourceModel, ResourcesCollection) ->
+  ResourceModel, ResourcesCollection, globals) ->
 
   # Related Resource Field Display View
   # -----------------------------------
@@ -54,4 +55,46 @@ define [
         true
       else
         false
+
+
+    # Relational Synchronization stuff
+    ############################################################################
+
+    listenToEvents: ->
+      super
+
+      # We listen on the global model to see whether our collection has
+      # changed. If so, our related resource may have been deleted or modified.
+      @listenTo globals,
+        "change:#{@utils.pluralize(@utils.camel2snake(@resourceName))}",
+        @checkIfResourceChanged
+
+    # Determine wether the related resource that we are displaying has changed
+    # and trigger the appropriate method for the delete case or the update
+    # case.
+    checkIfResourceChanged: ->
+      if @context.value
+        try
+          id = @context.model.get(@attributeName).id
+          attr = @utils.pluralize @utils.camel2snake(@resourceName)
+          collectionArray = globals.get(attr).data
+          myResourceObject = _.findWhere collectionArray, {id: id}
+
+          # Note that we refresh this field display if its collection has been
+          # updated. This means that a lot of displays will needlessly refresh.
+          # I'm fine with this for now.
+          if myResourceObject
+            @resourceUpdated myResourceObject
+          else
+            @resourceDeleted()
+
+    resourceDeleted: ->
+      @context.model.set @attributeName,
+        @context.model.defaults()[@attributeName]
+
+    resourceUpdated: (myResourceObject) ->
+      if _.isEqual myResourceObject, @context.model.get(@attributeName)
+        @refresh()
+      else
+        @context.model.set @attributeName, myResourceObject
 

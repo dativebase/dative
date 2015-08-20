@@ -92,6 +92,17 @@ define [
     resourceName: 'languageModel'
     resourceModel: LanguageModelModel
 
+    resourcesNeededForAdd: ->
+      [
+        'corpora'
+        'morphologies'
+        'toolkits'
+        # We add these "resources" client-side, cf. `fixToolkits`
+        'smoothingAlgorithms'
+        'orders'
+        'booleans'
+      ]
+
     attribute2fieldView:
       name: TextareaFieldView255
       toolkit: ToolkitSelectFieldView
@@ -127,7 +138,8 @@ define [
         smoothingAlgorithms: []
         orders: [2, 3, 4, 5]
         booleans: [true, false]
-      for attr, val of data
+      iterator = if @model.get('id') then data.data else data
+      for attr, val of iterator
         if attr is 'toolkits'
           newToolkits = []
           for toolkitName, toolkitObject of val
@@ -137,5 +149,6 @@ define [
           newData[attr] = newToolkits
         else
           newData[attr] = val
-      newData
+      if @model.get('id') then data.data = newData else data = newData
+      data
 

@@ -50,6 +50,13 @@ define [
     resourceName: 'morphology'
     resourceModel: MorphologyModel
 
+    resourcesNeededForAdd: ->
+      [
+        'corpora'
+        'script_types'
+        'booleans'
+      ]
+
     storeOptionsDataGlobally: (data) ->
       if @model.get('id') # The GET /<resources>/<id>/edit case
         data.data.script_types = ['regex', 'lexc']

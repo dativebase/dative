@@ -252,6 +252,7 @@ define [
     destroyResourceOnloadHandler: (responseJSON, xhr) ->
       Backbone.trigger "destroy#{@resourceNameCapitalized}End"
       if xhr.status is 200
+        console.log "triggering destroy#{@resourceNameCapitalized}Success"
         Backbone.trigger "destroy#{@resourceNameCapitalized}Success", @
       else
         error = responseJSON.error or 'No error message provided.'

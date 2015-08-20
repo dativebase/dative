@@ -99,10 +99,14 @@ define [
     # We may have `SearchWidgetView`s over various resources (e.g., forms,
     # files, etc.). Therefore, we need a different global attribute for each
     # type of search widget so that we can know which attributes to search over
-    # for forms and wich for files and not get them mixed up. This overwrites a
+    # for forms and which for files and not get them mixed up. This overwrites a
     # method in `ResourceAddWidgetView`.
     getGlobalDataAttribute: ->
       "#{@resourceName}Over#{@targetResourceNamePluralCapitalized}Data"
+
+    # The list of resource names (plural, snake_case, for OLD) that we need in
+    # order to create a new search.
+    resourcesNeededForAdd: -> []
 
     render: ->
       if not @weHaveNewResourceData()

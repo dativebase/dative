@@ -186,12 +186,14 @@ define [
         @toggleRegisterDialog
       @listenTo Backbone, 'loginSuggest', @openLoginDialogWithDefaults
       @listenTo Backbone, 'authenticateSuccess', @authenticateSuccess
-      @listenTo Backbone, 'authenticate:mustconfirmidentity', @authenticateConfirmIdentity
+      @listenTo Backbone, 'authenticate:mustconfirmidentity',
+        @authenticateConfirmIdentity
       @listenTo Backbone, 'logoutSuccess', @logoutSuccess
       @listenTo Backbone, 'useFieldDBCorpus', @useFieldDBCorpus
       @listenTo Backbone, 'applicationSettings:changeTheme', @changeTheme
       @listenTo Backbone, 'showResourceInDialog', @showResourceInDialog
-      @listenTo Backbone, 'showResourceModelInDialog', @showResourceModelInDialog
+      @listenTo Backbone, 'showResourceModelInDialog',
+        @showResourceModelInDialog
       @listenTo Backbone, 'openExporterDialog', @openExporterDialog
       @listenToResources()
 
@@ -1039,11 +1041,16 @@ define [
         oldestResourceDisplayer.showResourceView resourceView
 
     resourceViewAlreadyDisplayed: (resourceView) ->
+      @resourceAlreadyDisplayed resourceView.model
+
+    resourceAlreadyDisplayed: (resourceModel) ->
       isit = false
       for int in [1..@maxNoResourceDisplayerDialogs]
-        if @["resourceDisplayerDialog#{int}"].resourceView?.cid is
-        resourceView.cid
-          isit = true
+        try
+          displayedModel = @["resourceDisplayerDialog#{int}"].resourceView.model
+          if displayedModel.get('id') is resourceModel.get('id') and
+          displayedModel.constructor.name is resourceModel.constructor.name
+            isit = true
       isit
 
     getResourceViewClassFromResourceName: (resourceName) ->
@@ -1052,9 +1059,13 @@ define [
     # Create a view for the passed in `resourceModel` and render it in the
     # application-wide `@resourceDisplayerDialog`.
     showResourceModelInDialog: (resourceModel, resourceName) ->
-      resourceViewClass = @getResourceViewClassFromResourceName resourceName
-      resourceView = new resourceViewClass(model: resourceModel)
-      @showResourceInDialog resourceView
+      if @resourceAlreadyDisplayed resourceModel
+        Backbone.trigger 'resourceAlreadyDisplayedInDialog', resourceName,
+          resourceModel
+      else
+        resourceViewClass = @getResourceViewClassFromResourceName resourceName
+        resourceView = new resourceViewClass(model: resourceModel)
+        @showResourceInDialog resourceView
 
     getOldestResourceDisplayerDialog: ->
       oldest = @resourceDisplayerDialog1
