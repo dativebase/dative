@@ -94,10 +94,11 @@ define [
       end = @getEnd()
       start = @getStart()
       mediaElement = @$(@type).first().get(0)
-      if mediaElement.currentTime >= end or
-      mediaElement.currentTime < start
-        mediaElement.currentTime = start
-        mediaElement.pause()
+      if mediaElement
+        if mediaElement.currentTime >= end or
+        mediaElement.currentTime < start
+          mediaElement.currentTime = start
+          mediaElement.pause()
 
     checkIfFileDataChanged: ->
       if @model.hasChanged 'filename' or

@@ -131,11 +131,6 @@ define [
     resourceName: 'source'
     resourceModel: SourceModel
 
-    resourcesNeededForAdd: ->
-      [
-        'types'
-      ]
-
     attribute2fieldView:
       key: TextareaFieldView1000
       address: TextareaFieldView1000

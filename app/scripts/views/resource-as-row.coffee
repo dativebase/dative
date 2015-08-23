@@ -78,7 +78,7 @@ define [
       @$('.view.dative-tooltip').tooltip
         position: @tooltipPositionLeft('-70')
 
-    # Return the model scalarized and with its matches (relqtive to the
+    # Return the model scalarized and with its matches (relative to the
     # query/search) highlighted.
     getModelAsScalarHighlighted: ->
       modelAsScalar = @getModelAsScalar()

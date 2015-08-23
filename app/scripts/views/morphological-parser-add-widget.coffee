@@ -60,13 +60,6 @@ define [
     resourceName: 'morphologicalParser'
     resourceModel: MorphologicalParserModel
 
-    resourcesNeededForAdd: ->
-      [
-        'morpheme_language_models'
-        'phonologies'
-        'morphologies'
-      ]
-
     attribute2fieldView:
       name: TextareaFieldView255
       phonology: PhonologySelectViaSearchFieldView

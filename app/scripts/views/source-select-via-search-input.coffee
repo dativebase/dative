@@ -15,11 +15,10 @@ define [
     resourceAsRowViewClass: SourceAsRowView
 
     resourceAsString: (resource) ->
-      tmp = new @resourceModelClass resource
       try
-        "#{tmp.getAuthor()} (#{tmp.getYear()})"
+        (new @resourceModelClass(resource)).getAuthorEditorYearDefaults()
       catch
-        'error caught is your resource-as-string'
+        ''
 
     # These are the `[<attribute]`s or `[<attribute>, <subattribute>]`s that we
     # "smartly" search over.

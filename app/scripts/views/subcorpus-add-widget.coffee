@@ -32,14 +32,6 @@ define [
     resourceName: 'subcorpus'
     resourceModel: SubcorpusModel
 
-    resourcesNeededForAdd: ->
-      [
-        'form_searches'
-        'users'
-        'tags'
-        'corpus_formats'
-      ]
-
     # Maps attributes to their appropriate FieldView subclasses.
     # This is where field-specific configuration should go.
     attribute2fieldView:

@@ -104,10 +104,6 @@ define [
     getGlobalDataAttribute: ->
       "#{@resourceName}Over#{@targetResourceNamePluralCapitalized}Data"
 
-    # The list of resource names (plural, snake_case, for OLD) that we need in
-    # order to create a new search.
-    resourcesNeededForAdd: -> []
-
     render: ->
       if not @weHaveNewResourceData()
         @model.getNewResourceData() # Success in this request will call `@render()`

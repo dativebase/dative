@@ -61,6 +61,14 @@ define [
     ############################################################################
 
     listenToEvents: ->
+      @stopAndRelisten()
+      @listenTo @model, "change:#{@attributeName}", @refresh
+
+    # TODO: delete all this stuff. It has all now been moved to `ResourceView`,
+    # which is where it belongs ...
+
+
+    __listenToEvents__: ->
       super
 
       # We listen on the global model to see whether our collection has

@@ -156,6 +156,7 @@ define [
           @hideFileDataViewAnimate
         @listenTo @fileDataView, "fileDataView:show",
           @showFileDataViewAnimate
+      @listenToRelatedResourceEvents()
 
     indicateModelState: ->
       if 'update' not in @excludedActions
@@ -241,13 +242,39 @@ define [
         @model.destroyResource @model
 
     render: ->
+      @checkForRelatedResourceData()
       @getDisplayViews()
       @html()
       @renderDisplayViews()
       @guify()
       @listenToEvents()
-      #@renderUpdateView()
       @
+
+    # If we are working with an OLD backend, then we request data on our
+    # related resources, if our globally held copies of those data haven't been
+    # refreshed in a while.
+    checkForRelatedResourceData: ->
+      if @activeServerTypeIsOLD()
+        [weHaveNewResourceData, lastRetrieved] = @weHaveNewResourceData()
+        if weHaveNewResourceData
+          if lastRetrieved and
+          ((new Date()) - lastRetrieved) > @relatedResourceDataExpires
+            @getNewResourceData()
+        else
+          @callRenderAfterNewResourceDataSuccess = true
+          @getNewResourceData()
+
+    getNewResourceData: ->
+      if @model.get('id')
+        @model.getEditResourceData()
+      else
+        @model.getNewResourceData()
+
+    # We have successfully retrieved from the server the data on the resources
+    # that can be associated to this one. Here we simply store it in the
+    # `globals` model. Our `RelatedResourceFieldDisplays` will hear changes
+    # that are relevant to them and will auto-refresh as needed.
+    getNewResourceDataSuccess: (data) -> @storeOptionsDataGlobally data
 
     getDisplayViews: ->
       @getPrimaryDisplayViews()
@@ -1042,4 +1069,66 @@ define [
         @hideFileDataViewAnimate()
       else
         @showFileDataViewAnimate()
+
+
+    # Relational Synchronization stuff
+    ############################################################################
+    #
+    # Since a resource may be valuated by references to other resources, a
+    # `ResourceView` needs to be notified when those resources are deleted or
+    # updated since that may affect the state of the `ResourceView`.
+
+    # This is a resource-specific object that maps CamelCase names of resources
+    # that the parent resource has relations to to arrays of attribute names on
+    # the parent resource that are affected by changes to the resources.
+    relatedResources: {}
+
+    listenToRelatedResourceEvents: ->
+      for resourceName, attributeNames of @relatedResources
+        for request in ['update', 'destroy']
+          do (resourceName, attributeNames, request) =>
+            @listenTo Backbone, "#{request}#{resourceName}Success",
+              (resourceModel) =>
+                @resourceCollectionChanged request, resourceModel,
+                  resourceName, attributeNames
+
+    valueNonEmpty: (value) ->
+      if @utils.type(value) is 'array'
+        value.length > 0
+      else
+        value?
+
+    resourceCollectionChanged: (request, resourceModel, resourceName,
+    attributeNames) ->
+
+      # If the change in the resource collection is relevant to us, then we may
+      # need to update our model. This should automatically update the display
+      # state of our subviews.
+
+      for myAttribute in attributeNames
+        myValue = @model.get myAttribute
+        if @utils.type(myValue) is 'array'
+          if myValue.length > 0
+            try
+              ids = (o.id for o in myValue)
+              if resourceModel.get('id') in ids
+                if request is 'destroy'
+                  @model.set myAttribute,
+                    (o for o in myValue when o.id isnt resourceModel.get('id'))
+                else
+                  for o in myValue
+                    if o.id is resourceModel.get('id')
+                      for attr of o
+                        o[attr] = resourceModel.get(attr)
+                  @model.trigger "change:#{myAttribute}"
+        else
+          if myValue
+            try
+              if resourceModel.get('id') is myValue.id
+                if request is 'destroy'
+                  @model.set myAttribute, @model.defaults()[myAttribute]
+                else
+                  for attr of myValue
+                    myValue[attr] = resourceModel.get(attr)
+                  @model.trigger "change:#{myAttribute}"
 

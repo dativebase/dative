@@ -22,9 +22,8 @@ define [
     resourceViewClass: SourceView
 
     resourceAsString: (resource) ->
-      tmp = new @resourceModelClass resource
       try
-        "#{tmp.getAuthor()} (#{tmp.getYear()})"
+        (new @resourceModelClass(resource)).getAuthorEditorYearDefaults()
       catch
         ''
 

@@ -409,3 +409,16 @@ define [
         $element = @$ element
         if $element.has(igtClasses).length then $element.hide()
 
+
+    # Keys are the CamelCase names of resources that forms have relations to
+    # and the values are the attributes of forms that are valuated as
+    # references to a resource or set of resources in that resource collection.
+    relatedResources:
+      'ElicitationMethod': ['elicitation_method']
+      'User': ['elicitor', 'enterer', 'modifier', 'verifier']
+      'Source': ['source']
+      'Speaker': ['speaker']
+      'SyntacticCategory': ['syntactic_category']
+      'Tag': ['tags']
+      'File': ['files']
+

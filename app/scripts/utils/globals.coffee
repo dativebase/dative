@@ -67,8 +67,6 @@ define [
     addResource: (resourceName, resourceModel) ->
       resourceObject = @getResourceObjectFromModel resourceName, resourceModel
       @get(resourceName).data.push resourceObject
-      console.log "added this #{resourceName} globally: ..."
-      console.log resourceObject
       @trigger "change:#{resourceName}"
 
     # An existing resource has been updated.
@@ -82,20 +80,11 @@ define [
 
     # An existing resource has been deleted.
     deleteResource: (resourceName, resourceModel) ->
-      console.log "globals knows that this model, from the #{resourceName}
-        collection, was deleted ..."
-      console.log resourceModel
       resourcesArray = @get(resourceName).data
-      console.log resourcesArray
-      console.log resourcesArray.length
       for resourceObject, index in resourcesArray
-        console.log resourceObject
-        console.log index
         try
           if resourceObject.id is resourceModel.get('id')
             resourcesArray.splice index, 1
-      console.log resourcesArray
-      console.log resourcesArray.length
       @trigger "change:#{resourceName}"
 
     # Return an object based on the BB model `resourceModel` that only has the
@@ -109,6 +98,74 @@ define [
       for attribute in attributes
         resourceObject[attribute] = resourceModel.get attribute
       resourceObject
+
+    relatedResources:
+      collection: [
+        'speakers'
+        'users'
+        'tags'
+        'sources'
+        'collection_types'
+        'markup_languages'
+      ]
+      file: [
+        'tags'
+        'speakers'
+        'users'
+        'utterance_types'
+        'allowed_file_types'
+      ]
+      form: [
+        'elicitation_methods'
+        'grammaticalities'
+        'sources'
+        'speakers'
+        'syntactic_categories'
+        'tags'
+        'users'
+      ]
+      languageModel: [
+        'corpora'
+        'morphologies'
+        'toolkits'
+        # We add these "resources" client-side, cf. `fixToolkits`
+        'smoothingAlgorithms'
+        'orders'
+        'booleans'
+      ]
+      morphologicalParser: [
+        'morpheme_language_models'
+        'phonologies'
+        'morphologies'
+      ]
+      morphology: [
+        'corpora'
+        'script_types'
+        'booleans'
+      ]
+      page: [
+        'markup_languages'
+      ]
+      source: [
+        'types'
+      ]
+      speaker: [
+        'markup_languages'
+      ]
+      subcorpus: [
+        'form_searches'
+        'users'
+        'tags'
+        'corpus_formats'
+      ]
+      syntacticCategory: [
+        'syntactic_category_types'
+      ]
+      user: [
+        'orthographies'
+        'roles'
+        'markup_languages'
+      ]
 
   new Globals()
 

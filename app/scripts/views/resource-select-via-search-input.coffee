@@ -79,6 +79,8 @@ define [
       # and to perform searches.
       @resourceModel = new @resourceModelClass()
 
+      @searchTerm = null
+
       @getNames()
       @searchResultsTableVisible = false
       @searchResultsCount = 0
@@ -110,6 +112,7 @@ define [
         @searchInterfaceVisible = false
         @selectedResourceViewVisible = true
       else
+        @selectedResourceModel = null
         @searchInterfaceVisible = true
         @selectedResourceViewVisible = false
 
@@ -117,7 +120,6 @@ define [
 
     render: ->
       @context.multiSelect = @getMultiSelect()
-
       @context.resourceNameHuman = @utils.snake2regular @context.attribute
       @context.resourceNameHumanCapitalized =
         (@utils.capitalize(w) for w in @context.resourceNameHuman.split(' ')).join ' '
@@ -325,11 +327,13 @@ define [
     getSearchResultsRows: (responseJSON) ->
       fragment = document.createDocumentFragment()
       fragment.appendChild @headerView.el
+      # We don't want anything to be highlighted if the search term was ''
+      query = if @searchTerm is '' then null else @query
       for modelObject in responseJSON.items
         resourceModel = new @resourceModelClass modelObject
         resourceAsRowView = new @resourceAsRowViewClass
           model: resourceModel
-          query: @query
+          query: query
         @resourceAsRowViews.push resourceAsRowView
         resourceAsRowView.render()
         @rendered resourceAsRowView
@@ -374,13 +378,16 @@ define [
 
     getGlobalDataAttribute: -> "search#{@resourceNamePluralCapitalized}Data"
 
-    performSearch: ->
-      searchTerm = @$('[name=search-term]').val()
+    performSearch: (searchTerm=null) ->
+      if @utils.type(searchTerm) is 'string' # could be an event object ...
+        @searchTerm = searchTerm
+      else
+        @searchTerm = @$('[name=search-term]').val()
       if @weHaveNewResourceData()
         paginator =
           page: 1
           items_per_page: @itemsPerPage
-        @query = @getSmartQuery searchTerm
+        @query = @getSmartQuery @searchTerm
         @resourceModel.search @query, paginator
       else
         @listenToOnce @resourceModel,

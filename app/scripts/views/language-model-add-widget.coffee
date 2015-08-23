@@ -92,17 +92,6 @@ define [
     resourceName: 'languageModel'
     resourceModel: LanguageModelModel
 
-    resourcesNeededForAdd: ->
-      [
-        'corpora'
-        'morphologies'
-        'toolkits'
-        # We add these "resources" client-side, cf. `fixToolkits`
-        'smoothingAlgorithms'
-        'orders'
-        'booleans'
-      ]
-
     attribute2fieldView:
       name: TextareaFieldView255
       toolkit: ToolkitSelectFieldView

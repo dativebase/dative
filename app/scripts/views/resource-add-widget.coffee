@@ -34,18 +34,12 @@ define [
     # input fields" button is clicked.
     editableSecondaryAttributes: []
 
-    # Enter here a list of the resources that we need for creating a new
-    # resource of the current type. E.g., for a sub-class which is for creating
-    # new form objects, we might need to have resources for
-    # `"elicitationMethods"`, `"tags"`, etc.
-    resourcesNeededForAdd: -> []
-
     template: resourceAddTemplate
     className: 'add-resource-widget dative-widget-center dative-shadowed-widget
       ui-widget ui-widget-content ui-corner-all'
 
     initialize: (options) ->
-      @rerenderAfterGetNewResourceData = false
+      @callRenderAfterNewResourceDataSuccess = false
       @primaryFieldViews = []
       @secondaryFieldViews = []
       # Maps attributes to the FieldView instance that have been constructed for
@@ -74,15 +68,7 @@ define [
       newModel
 
     render: ->
-      if @activeServerTypeIsOLD()
-        if @weHaveNewResourceData()
-          @getNewResourceData()
-        else
-          # Setting this to true will cause `render` to be called again after
-          # we successfully retrieve the data needed for adding a resource.
-          @rerenderAfterGetNewResourceData = true
-          @getNewResourceData()
-          return
+      if @checkForRelatedResourceData() is 'exit' then return
       @getFieldViews()
       @html()
       @secondaryDataVisibility()
@@ -91,6 +77,23 @@ define [
       @fixRoundedBorders() # defined in BaseView
       @listenToEvents()
       @
+
+    # If we are working with an OLD backend and if we need to first get some
+    # data on our related resources before we can render, then we return the
+    # string 'exit'. We also re-request the related resource data if we haven't
+    # updated it in a while.
+    checkForRelatedResourceData: ->
+      if @activeServerTypeIsOLD()
+        [weHaveNewResourceData, lastRetrieved] = @weHaveNewResourceData()
+        if weHaveNewResourceData
+          if ((new Date()) - lastRetrieved) > @relatedResourceDataExpires
+            @getNewResourceData()
+        else
+          # Setting this to true will cause `render` to be called again after
+          # we successfully retrieve the data needed for adding a resource.
+          @callRenderAfterNewResourceDataSuccess = true
+          @getNewResourceData()
+          'exit'
 
     getNewResourceData: ->
       if @model.get('id')
@@ -317,8 +320,6 @@ define [
           @stopEvent event
           @hideSelf()
 
-    activeServerTypeIsOLD: -> @getActiveServerType() is 'OLD'
-
     primaryDataSelector: 'ul.primary-data'
 
     secondaryDataSelector: 'ul.secondary-data'
@@ -397,20 +398,11 @@ define [
     # OLD input options (i.e., possible speakers, users, categories, etc.)
     ############################################################################
 
-    # Return `true` if we have the resource data needed to add a new resource
-    # of the relevant type.
-    __weHaveNewResourceData__: ->
-      response = true
-      for attr in @resourcesNeededForAdd()
-        if not globals.has(attr)
-          response = false
-      response
-
     # Return an object representing the options for forced-choice inputs.
     # Currently only relevant for the OLD.
     getOptions: ->
       options = {}
-      for attr in @resourcesNeededForAdd()
+      for attr in @relatedResourcesNeeded()
         options[attr] = globals.get(attr).data
       options
 
@@ -427,8 +419,8 @@ define [
     getNewResourceDataSuccess: (data) ->
       changed = @storeOptionsDataGlobally data
       if changed.length > 0
-        if @rerenderAfterGetNewResourceData
-          @rerenderAfterGetNewResourceData = false
+        if @callRenderAfterNewResourceDataSuccess
+          @callRenderAfterNewResourceDataSuccess = false
           @render()
         else
           options = @getOptions()

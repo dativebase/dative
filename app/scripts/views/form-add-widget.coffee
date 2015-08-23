@@ -83,17 +83,6 @@ define [
       @setPrimaryAttributes()
       @setEditableSecondaryAttributes()
 
-    resourcesNeededForAdd: ->
-      [
-        'elicitation_methods'
-        'grammaticalities'
-        'sources'
-        'speakers'
-        'syntactic_categories'
-        'tags'
-        'users'
-      ]
-
     setAttribute2fieldView: ->
       switch @activeServerType
         when 'FieldDB'

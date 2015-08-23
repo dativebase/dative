@@ -263,15 +263,6 @@ define [
         referencesASubintervalOfAnotherFile: {}
       @defaults = @model.defaults()
 
-    resourcesNeededForAdd: ->
-      [
-        'tags'
-        'speakers'
-        'users'
-        'utterance_types'
-        'allowed_file_types'
-      ]
-
     resourceName: 'file'
     resourceModel: FileModel
 

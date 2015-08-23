@@ -5,7 +5,8 @@ define [
   # Related Resource Representation View
   # ------------------------------------
   #
-  # 
+  # This view is for the link that represents a related resource. Clicking this
+  # link should cause the related resource to be displayed in a dialog box.
 
   class RelatedResourceRepresentationView extends RepresentationView
 

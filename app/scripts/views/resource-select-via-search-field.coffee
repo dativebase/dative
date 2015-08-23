@@ -21,6 +21,7 @@ define [
       super
       if @inputView
         @listenTo @inputView, 'validateMe', @myValidate
+      @listenTo @model, "change:#{@attribute}", @refresh
 
     myValidate: ->
       if @submitAttempted then @validate()

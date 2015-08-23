@@ -13,7 +13,7 @@ define [
 
     orderedAttributes: [
       'filename'
-      'name'
+      # 'name'
       'MIME_type'
       'id'
       'size'
@@ -46,6 +46,8 @@ define [
           value
         else
           JSON.stringify value
+      else if attribute is 'filename'
+        @model.get 'name'
       else
         JSON.stringify value
 

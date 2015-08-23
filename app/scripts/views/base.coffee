@@ -354,6 +354,8 @@ define [
       catch
         null
 
+    activeServerTypeIsOLD: -> @getActiveServerType() is 'OLD'
+
     getLoggedInUsername: ->
       try
         globals.applicationSettings.get 'username'
@@ -435,10 +437,10 @@ define [
         data = data.data
       for attr, val of data
         if globals.has attr
+          globals.get(attr).timestamp = new Date()
           if not _.isEqual(globals.get(attr).data, val)
             changed.push attr
             globals.get(attr).data = val
-            globals.get(attr).timestamp = new Date()
         else
           changed.push attr
           attrVal =
@@ -447,16 +449,36 @@ define [
           globals.set attr, attrVal
       changed
 
-    # Return `true` if we have the resource data needed to add a new resource
-    # of the relevant type.
+    # Respond with a 2-ary array where the first element is a boolean
+    # indicating whether we have all of the needed related resource data and,
+    # if we do, element 2 is a `Date` instance indicating when those data were
+    # last updated.
     weHaveNewResourceData: ->
       response = true
-      for attr in @resourcesNeededForAdd()
-        if not globals.has(attr)
+      lastRetrieved = null
+      for attr in @relatedResourcesNeeded()
+        if globals.has(attr)
+          if lastRetrieved and (globals.get(attr).timestamp < lastRetrieved)
+            lastRetrieved = globals.get(attr).timestamp
+          else
+            lastRetrieved = globals.get(attr).timestamp
+        else
           response = false
-      response
+      if not response then lastRetrieved = null
+      [response, lastRetrieved]
 
     # An array of resource names that a certain resource needs some information
-    # about in order to be created/updated.
-    resourcesNeededForAdd: -> []
+    # about in order to be created/updated. Note that these resources may also
+    # be needed simply for displaying the resource. This is because a field
+    # display may need to be updated when a related resource is
+    # add/update/delete-ed.
+    relatedResourcesNeeded: ->
+      if @resourceName of globals.relatedResources
+        globals.relatedResources[@resourceName]
+      else
+        []
+
+    # We re-request the related resource data if the last time that we
+    # retrieved it was over a minute ago.
+    relatedResourceDataExpires: 60000
 

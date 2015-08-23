@@ -82,13 +82,6 @@ define [
     resourceName: 'user'
     resourceModel: UserModel
 
-    resourcesNeededForAdd: ->
-      [
-        'orthographies'
-        'roles'
-        'markup_languages'
-      ]
-
     attribute2fieldView:
       name: TextareaFieldView255
       page_content: ScriptFieldView

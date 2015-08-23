@@ -59,17 +59,27 @@ define [
       @selectedResourceViews = []
 
       @selectedResourceViewsRendered = false
+      @selfSet = false
+
       super context
 
     refresh: (@context) ->
-      @setStateBasedOnSelectedValue()
-      @selectedResourceViewsRendered = false
-      @render()
+      # `@selfSet` will be `true` when we have set our own value.
+      if @selfSet
+        @selfSet = false
+      else
+        @setStateBasedOnSelectedValue()
+        @selectedResourceViewsRendered = false
+        @render()
+        # If we have an existing search term, then we perform the search again
+        # to refresh the search results display.
+        if @searchTerm isnt null then @performSearch @searchTerm
 
     # If we have one or more selected values, cause them to be displayed.
     # NOTE: we keep the search interface visible even when resources are
     # selected because the user may want to search for more.
     setStateBasedOnSelectedValue: ->
+      @selectedResourceModels = []
       if @context.value.length > 0
         for resourceObject in @context.value
           @selectedResourceModels.push(new @resourceModelClass(resourceObject))
@@ -154,6 +164,7 @@ define [
 
     setSelectedToModel: ->
       value = (m.attributes for m in @selectedResourceModels)
+      @selfSet = true
       @model.set @context.attribute, value
 
     # Return the model of the selected resource view, given that view as input.

@@ -134,6 +134,7 @@ define [
         @listenTo @inputView, 'setToModel', @inputViewSetToModel
       @listenForValidationErrors()
       for crucialAttribute in @getCrucialAttributes()
+        console.log "listening for change:#{crucialAttribute}"
         @listenTo @model, "change:#{crucialAttribute}", @crucialAttributeChanged
 
     # Override this to return an array of model attributes. This will cause this

@@ -41,8 +41,6 @@ define [
     resourceName: 'syntacticCategory'
     resourceModel: SyntacticCategoryModel
 
-    resourcesNeededForAdd: -> ['syntactic_category_types']
-
     attribute2fieldView:
       name: TextareaFieldView255
       type: TypeSelectFieldView
