@@ -4,6 +4,9 @@ define [
   './relational-select-field'
   './relational-select-field-with-add-button'
   './elicitation-method-select-field-with-add-button'
+  './speaker-select-field-with-add-button'
+  './syntactic-category-select-field-with-add-button'
+  './user-select-field-with-add-button'
   './multi-element-tag-field'
   './utterance-judgement-field'
   './comments-field'
@@ -20,7 +23,10 @@ define [
   './../utils/globals'
 ], (ResourceAddWidgetView, TextareaFieldView, RelationalSelectFieldView,
   RelationalSelectFieldWithAddButtonView,
-  ElicitationMethodSelectFieldWithAddButtonView, MultiElementTagFieldView,
+  ElicitationMethodSelectFieldWithAddButtonView,
+  SpeakerSelectFieldWithAddButtonView,
+  SyntacticCategorySelectFieldWithAddButtonView,
+  UserSelectFieldWithAddButtonView, MultiElementTagFieldView,
   UtteranceJudgementFieldView, CommentsFieldView,
   TranscriptionGrammaticalityFieldView, TranslationsFieldView,
   PersonSelectFieldView, UserSelectFieldView, SourceSelectFieldView,
@@ -60,6 +66,16 @@ define [
       options.domAttributes =
         maxlength: 255
       super options
+
+
+  class ElicitorSelectFieldWithAddButtonView extends UserSelectFieldWithAddButtonView
+
+    attributeName: 'elicitor'
+
+
+  class VerifierSelectFieldWithAddButtonView extends UserSelectFieldWithAddButtonView
+
+    attributeName: 'verifier'
 
 
   # Form Add Widget View
@@ -127,10 +143,10 @@ define [
       semantics:                     TextareaFieldView1023
       translations:                  TranslationsFieldView
       elicitation_method:            ElicitationMethodSelectFieldWithAddButtonView
-      syntactic_category:            RelationalSelectFieldView
-      speaker:                       PersonSelectFieldView
-      elicitor:                      UserSelectFieldView
-      verifier:                      UserSelectFieldView
+      syntactic_category:            SyntacticCategorySelectFieldWithAddButtonView
+      speaker:                       SpeakerSelectFieldWithAddButtonView
+      elicitor:                      ElicitorSelectFieldWithAddButtonView
+      verifier:                      VerifierSelectFieldWithAddButtonView
       source:                        SourceSelectViaSearchFieldView
       status:                        StatusSelectFieldView
       date_elicited:                 DateFieldView
