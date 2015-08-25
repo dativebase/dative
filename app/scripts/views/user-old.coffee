@@ -33,7 +33,10 @@ define [
       if @headerTitle
         @headerTitle
       else
-        "#{@model.get 'username'} (user #{@model.get 'id'})"
+        if @model.get('id')
+          "#{@model.get 'username'} (user #{@model.get 'id'})"
+        else
+          'New User'
 
     # Attributes that are always displayed.
     primaryAttributes: [

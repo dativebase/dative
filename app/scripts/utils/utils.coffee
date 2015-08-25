@@ -106,7 +106,10 @@ define (require) ->
 
   indefiniteDeterminer = (complement) ->
     if complement[0].toLowerCase() in ['a', 'e', 'i', 'o', 'u']
-      'an'
+      if startsWith complement.toLowerCase(), 'user'
+        'a'
+      else
+        'an'
     else
       'a'
 

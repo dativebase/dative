@@ -565,7 +565,6 @@ define [
       @saveFetchedMetadata()
       @getResourceViews()
       if paginator
-        console.log "setItems with #{paginator.count}"
         @paginator.setItems paginator.count
       if @paginator.items is 0 then @fetchResourcesLastPage = false
       if @fetchResourcesLastPage
