@@ -10,11 +10,14 @@ define [
   './source-select-field'
   './multi-element-tag-field'
   './source-select-via-search-field'
+  './speaker-select-field-with-add-button'
+  './user-select-field-with-add-button'
   './../models/collection'
 ], (ResourceAddWidgetView, TextareaFieldView, SelectFieldView,
   RelationalSelectFieldView, ScriptFieldView, DateFieldView,
   PersonSelectFieldView, UserSelectFieldView, SourceSelectFieldView,
   MultiElementTagFieldView, SourceSelectViaSearchFieldView,
+  SpeakerSelectFieldWithAddButtonView, UserSelectFieldWithAddButtonView
   CollectionModel) ->
 
 
@@ -47,6 +50,10 @@ define [
       super options
 
 
+  class ElicitorSelectFieldWithAddButtonView extends UserSelectFieldWithAddButtonView
+
+    attributeName: 'elicitor'
+
   # Collection Add Widget View
   # --------------------------
   #
@@ -68,8 +75,8 @@ define [
       markup_language: MarkupLanguageFieldView
       type:            CollectionTypeFieldView
       date_elicited:   DateFieldView
-      speaker:         PersonSelectFieldView
-      elicitor:        UserSelectFieldView
+      speaker:         SpeakerSelectFieldWithAddButtonView
+      elicitor:        ElicitorSelectFieldWithAddButtonView
       source:          SourceSelectViaSearchFieldView
       tags:            MultiElementTagFieldView
 
