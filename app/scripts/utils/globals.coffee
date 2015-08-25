@@ -7,6 +7,13 @@ define [
   # around in order to store global data. Special-purpose logic allows for
   # arrays of resource objects to be stored and to react to alterations by
   # issuing events that views can listen for.
+  #
+  # TODOs:
+  #
+  # - sort options (here or in views?)
+  # - add timestamps when modifying `globals`
+  # - centralize control of `globals` modification in this module
+
   class Globals extends Backbone.Model
 
     # This object will have the names of resources that we are tracking as its
@@ -108,6 +115,11 @@ define [
         'collection_types'
         'markup_languages'
       ]
+
+      collection_search: [
+        'collection_search_parameters'
+      ]
+
       file: [
         'tags'
         'speakers'
@@ -115,6 +127,11 @@ define [
         'utterance_types'
         'allowed_file_types'
       ]
+
+      file_search: [
+        'file_search_parameters'
+      ]
+
       form: [
         'elicitation_methods'
         'grammaticalities'
@@ -124,6 +141,15 @@ define [
         'tags'
         'users'
       ]
+
+      form_search: [
+        'form_search_parameters'
+      ]
+
+      language_search: [
+        'language_search_parameters'
+      ]
+
       languageModel: [
         'corpora'
         'morphologies'
@@ -133,34 +159,47 @@ define [
         'orders'
         'booleans'
       ]
+
       morphologicalParser: [
         'morpheme_language_models'
         'phonologies'
         'morphologies'
       ]
+
       morphology: [
         'corpora'
         'script_types'
         'booleans'
       ]
+
       page: [
         'markup_languages'
       ]
+
+      search: [
+        'search_parameters'
+        'form_search_parameters'
+      ]
+
       source: [
         'types'
       ]
+
       speaker: [
         'markup_languages'
       ]
+
       subcorpus: [
         'form_searches'
         'users'
         'tags'
         'corpus_formats'
       ]
+
       syntacticCategory: [
         'syntactic_category_types'
       ]
+
       user: [
         'orthographies'
         'roles'

@@ -466,7 +466,8 @@ define [
 
     getAttributes: ->
       try
-        attrs = @options.search_search_parameters.search_parameters.attributes
+        key = "#{@targetResourceName}_search_parameters"
+        attrs = @options[key].attributes
         _.keys(attrs).sort()
       catch
         []
@@ -475,7 +476,6 @@ define [
       context =
         filterExpression: @filterExpression
         options: @options
-        #attributes: _.keys(@options.search_search_parameters.search_parameters.attributes).sort()
         attributes: @getAttributes()
         subattributes: @subattributes() # TODO: we have to do this ourselves! The OLD should provide it though...
         relations: @getRelations @options
@@ -507,8 +507,8 @@ define [
     # co-referential with "!=" and "regexp" is the same as "regex".
     getRelations: (options) ->
       try
-        relations =
-          _.keys options.search_search_parameters.search_parameters.relations
+        key = "#{@targetResourceName}_search_parameters"
+        relations = _.keys options[key].relations
         (r for r in relations when r isnt 'regexp' and '_' not in r)
       catch
         []

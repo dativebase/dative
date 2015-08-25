@@ -6,8 +6,24 @@ define [
   './../models/search'
   './../models/form'
   './../templates/search-widget'
+  './../utils/globals'
 ], (BaseView, ResourceView, SearchAddWidgetView, SearchFieldView, SearchModel,
-  FormModel, searchWidgetTemplate) ->
+  FormModel, searchWidgetTemplate, globals) ->
+
+  class MySearchAddWidgetView extends SearchAddWidgetView
+
+    # Return the array of resource names that this search add widget needs in
+    # order for a search over the target resource to be created. Note that this
+    # is an override of the super-class's method. This is because here
+    # `@resourceName` alone (i.e., "search") is insufficient: we need to know
+    # also what the target resource is, i.e., what we are searching over.
+    relatedResourcesNeeded: ->
+      key = "#{@targetResourceName}_search"
+      if key of globals.relatedResources
+        globals.relatedResources[key]
+      else
+        []
+
 
   # Search Widget
   # -------------
@@ -85,8 +101,9 @@ define [
     # Appropriate a subset of the methods of `SearchAddWidgetView`.
     mixinSearchAddWidgetView: ->
       methodsWeWant = [
-        'storeOptionsDataGlobally'
-        'weHaveNewResourceData'
+        'relatedResourcesNeeded'
+        'checkForRelatedResourceData'
+        'getNewResourceData'
         'getNewResourceDataStart'
         'getNewResourceDataEnd'
         'getNewResourceDataSuccess'
@@ -94,7 +111,7 @@ define [
         'getOptions'
       ]
       for method in methodsWeWant
-        @[method] = SearchAddWidgetView::[method]
+        @[method] = MySearchAddWidgetView::[method]
 
     # We may have `SearchWidgetView`s over various resources (e.g., forms,
     # files, etc.). Therefore, we need a different global attribute for each
@@ -105,15 +122,18 @@ define [
       "#{@resourceName}Over#{@targetResourceNamePluralCapitalized}Data"
 
     render: ->
-      if not @weHaveNewResourceData()
-        @model.getNewResourceData() # Success in this request will call `@render()`
-        return
+      if @checkForRelatedResourceData() is 'exit' then return
       @searchFieldView = @getSearchFieldView()
       @html()
       @guify()
       @renderSearchFieldView()
       @listenToEvents()
       @
+
+    x: ->
+      if not @weHaveNewResourceData()
+        @model.getNewResourceData() # Success in this request will call `@render()`
+        return
 
     getSearchFieldView: ->
       new @searchFieldViewClass

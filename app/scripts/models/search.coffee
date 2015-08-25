@@ -89,7 +89,8 @@ define [
     # /<target_resource_plural>/new_search to the result of calling GET
     # /formsearches/new.
     getNewTargetResourceSearchDataSuccess: (newSearchData) ->
-      @searchNewData.search_search_parameters = newSearchData
+      key = "#{@targetResourceName}_search_parameters"
+      @searchNewData[key] = newSearchData.search_parameters
       @trigger "getNew#{@resourceNameCapitalized}DataSuccess", @searchNewData
 
     # We listen to this once so that we can tell the user that the request to

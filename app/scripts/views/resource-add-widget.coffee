@@ -403,7 +403,8 @@ define [
     getOptions: ->
       options = {}
       for attr in @relatedResourcesNeeded()
-        options[attr] = globals.get(attr).data
+        try
+          options[attr] = globals.get(attr).data
       options
 
     getNewResourceDataStart: ->
