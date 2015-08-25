@@ -564,7 +564,9 @@ define [
     fetchResourcesSuccess: (paginator) ->
       @saveFetchedMetadata()
       @getResourceViews()
-      if paginator then @paginator.setItems paginator.count
+      if paginator
+        console.log "setItems with #{paginator.count}"
+        @paginator.setItems paginator.count
       if @paginator.items is 0 then @fetchResourcesLastPage = false
       if @fetchResourcesLastPage
         pageBefore = @paginator.page
@@ -633,7 +635,10 @@ define [
         @disableHeader()
         return
       if @paginator.items is 0
-        @headerForEmptyDataSet()
+        if @paginator.setItemsCalled
+          @headerForEmptyDataSet()
+        else
+          @disableHeader()
       else
         @headerForContentfulDataSet()
 

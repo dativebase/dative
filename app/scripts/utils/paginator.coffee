@@ -19,10 +19,13 @@ define ['./../utils/utils'], (utils) ->
       @start = 0
       @end = 1
 
+      @setItemsCalled = false
+
     # Public methods
 
     setItems: (newItems) ->
       @items = newItems
+      @setItemsCalled = true
       @_refresh()
 
     # Set `itemsPerPage` manually.

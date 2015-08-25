@@ -6,8 +6,7 @@
   <div class='dative-resources-view-header dative-two-part-header-part-one'>
 
     <div class='dative-page-header-title container-center'>
-      <div class='no-resources'>There are no <%= @resourceNamePluralHuman %> to
-          display</div>
+      <div class='no-resources'></div>
       <div class='pagination-info'>
         Browsing
         <span class='browse-set'
