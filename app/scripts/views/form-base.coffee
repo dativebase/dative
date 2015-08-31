@@ -105,6 +105,32 @@ define [
       @setAttribute2DisplayView()
       @setAttributeClasses()
 
+    render: ->
+      super
+      # Every second we check if we should refresh the interlinear display.
+      @lastKeydown = new Date()
+      @modelChanged = false
+      setInterval (=> @refreshInterlinear()), 1000
+      @
+
+    # Check if we should refresh the interlinear display. We do so only if the
+    # model has changed since our last interlinear refresh AND if the user has
+    # been idle (no keydown events) for 2 seconds. Note: if we simply refresh
+    # the IGT display on every keydown, we get an undesirable flash when the
+    # default IGT field displays are refreshed and then hidden.
+    refreshInterlinear: ->
+      if @modelChanged and ((new Date()) - @lastKeydown) > 2000
+        @modelChanged = false
+        @interlinearize()
+
+    keydown: (event) ->
+      super event
+      @lastKeydown = new Date()
+
+    indicateModelState: ->
+      super
+      @modelChanged = true
+
     setAttributeClasses: ->
       @setPrimaryAttributes()
       @setSecondaryAttributes()
@@ -212,10 +238,22 @@ define [
     ############################################################################
     # IGT Intelinear Display Logic.
     ############################################################################
+    #
+    # The following methods effect the interlinearization of the form
+    # attributes that are designated as "igt" attributes. The procedure involves
+    # inspecting the IGT attributes as they are displayed via their default
+    # field displays (cf. attribute2displayView), using the data gleaned from
+    # that to generate an HTML <table> representing the columnarly aligned IGT
+    # data, and then hiding the original field display representations. This
+    # works but it is not ideal since as a user updates IGT data the
+    # to-be-hidden field displays are revealed and are only re-hidden again
+    # when the interlinear display is refreshed after a period of user
+    # inactivity. See the method `refreshInterlinear` for how this works.
 
     # The `ResourceView` base class calls this at the end of
     # `renderDisplayViews`.
-    renderDisplayViewsPost: -> @interlinearize()
+    renderDisplayViewsPost: ->
+      @interlinearize()
 
     # Transform the display of the form IGT attributes into an interlinear,
     # columnarly aligned display. This is done by creating a <table> for each
@@ -301,8 +339,8 @@ define [
         @unwrapIGTWords igtMap
         return
 
-      # Get an object that maps word indices the longes word (cell) with that
-      # index.
+      # Get an object that maps word indices to the longest word (cell) with
+      # that index.
       wordWidths = @getIGTWordWidths igtMap
 
       tablesData = @getIGTTablesData wordWidths
@@ -377,7 +415,7 @@ define [
     # table for each line of IGT, i.e., one table for each columnarly aligned
     # group of words.
     displayIGTTables: (tablesData, igtMap, wordWidths) ->
-      $tablesContainer = $ '<div>'
+      $tablesContainer = $ '<div class="igt-tables-container">'
       for tableData, index in tablesData
         leftIndent = @getIGTTableLeftIndent index
         $table = $ "<table class='igt-table' style='margin-bottom:
@@ -396,7 +434,12 @@ define [
             $row.append $("<td class='igt-word-cell' #{style}>#{word}</td>")
           $table.append $row
         $tablesContainer.append $table
-      @$('.resource-primary-data').first().prepend $tablesContainer
+      $extantIGTContainer =
+        @$('.resource-primary-data .igt-tables-container').first()
+      if $extantIGTContainer.length > 0
+        $extantIGTContainer.html $tablesContainer.html()
+      else
+        @$('.resource-primary-data').first().prepend $tablesContainer
 
     # Hide the previous displays for the IGT fields.
     hideIGTFields: (igtMap) ->
