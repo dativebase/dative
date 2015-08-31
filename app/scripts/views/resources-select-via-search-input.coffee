@@ -260,3 +260,18 @@ define [
       else
         @showSelectedResourceViewsAnimate()
 
+    # Respond to the event signaling that our new resource was created. We
+    # select this new resource in the resource select UI.
+    newResourceCreated: (resourceModel) ->
+
+      # We save the newly minted model for later, but anticipate not using it.
+      @lastNewResourceModel = @newResourceModel
+      @stopListening @newResourceModel
+      @newResourceModel = null
+
+      x = =>
+        attributeName = @context.attribute
+        @model.get(attributeName).push resourceModel.attributes
+        @refresh @context
+      setTimeout x, 500
+

@@ -27,6 +27,22 @@
             page.'
         >Search</button>
 
+    <% if @multiSelect: %>
+    <button
+        class='create-new-resource dative-tooltip
+            resource-select-via-search-input-button'
+        title='Click here to create a new <%= @resourceNameHumanSingular %>
+            within the page'
+        ><i class='fa fa-fw fa-plus'></i></button>
+    <% else: %>
+    <button
+        class='create-new-resource dative-tooltip
+            resource-select-via-search-input-button'
+        title='Click here to create a new <%= @resourceNameHuman %> within the
+            page'
+        ><i class='fa fa-fw fa-plus'></i></button>
+    <% end %>
+
 </div>
 
 <div class='resource-results-via-search-table-wrapper ui-corner-all

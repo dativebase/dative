@@ -708,8 +708,8 @@ ul.fieldset textarea.textarea-select-button,
 textarea.textarea-select-button
 {
   width: 73.5%;
-  max-width: 73.5%;
-  min-width: 73.5%;
+  /* max-width: 73.5%;
+  min-width: 73.5%; */
 }
 
 ul.fieldset textarea.textarea-button,
@@ -1917,15 +1917,22 @@ audio.file-data-audio
 .update .resource-select-via-search-input-input
 {
   /* width: 78%; */
-  max-width: 75%;
-  width: 75%;
+  max-width: 67%;
+  width: 67%;
 }
 
 .resource-select-via-search-input-input
 {
   /*width: 83.7%;*/
-  width: 79.9%;
+  width: 73.5%;
+  max-width: 73.5%;
   padding-left: 1.75em !important;
+}
+
+.ui-dialog-content .resource-select-via-search-input-input
+{
+  width: 69.5%;
+  max-width: 69.5%;
 }
 
 i.search-term-icon

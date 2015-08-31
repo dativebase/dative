@@ -216,7 +216,7 @@ define [
       newResourceModel = newResourceModel or
         new @resourceModel({}, collection: @collection)
       new @resourceView
-        headerTitle: "New #{@resourceNameCapitalized}"
+        headerTitle: "New #{@utils.camel2regular @resourceNameCapitalized}"
         model: newResourceModel
         dataLabelsVisible: @dataLabelsVisible
         expanded: @allResourcesExpanded

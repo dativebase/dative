@@ -54,6 +54,7 @@ define [
 
     attributeName: 'elicitor'
 
+
   # Collection Add Widget View
   # --------------------------
   #

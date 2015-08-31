@@ -79,6 +79,9 @@ define [
       # and to perform searches.
       @resourceModel = new @resourceModelClass()
 
+      # Will hold the `Backbone.Model` instance for creating a new resource.
+      @newResourceModel = null
+
       @searchTerm = null
 
       @getNames()
@@ -121,6 +124,9 @@ define [
     render: ->
       @context.multiSelect = @getMultiSelect()
       @context.resourceNameHuman = @utils.snake2regular @context.attribute
+      if @context.multiSelect
+        @context.resourceNameHumanSingular =
+          @utils.singularize @context.resourceNameHuman
       @context.resourceNameHumanCapitalized =
         (@utils.capitalize(w) for w in @context.resourceNameHuman.split(' ')).join ' '
       super
@@ -254,9 +260,39 @@ define [
 
     events:
       'click .perform-search': 'performSearch'
+      'click .create-new-resource': 'createNewResource'
       'keydown .resource-select-via-search-input-input': 'keydown'
 
     keydown: (event) -> if event.which is 13 then @performSearch()
+
+    # Cause an "Add New Resource" view to be displayed in a dialog box.
+    createNewResource: ->
+      @resourcesCollection = new @resourcesCollectionClass()
+      @newResourceModel =
+        new @resourceModelClass({}, {collection: @resourcesCollection})
+      @listenTo @newResourceModel,
+        "add#{@utils.capitalize @resourceName}Success",
+        @newResourceCreated
+      @requestDialogView()
+
+    # Respond to the event signaling that our new resource was created. We
+    # select this new resource in the resource select UI.
+    newResourceCreated: (resourceModel) ->
+
+      # We save the newly minted model for later, but anticipate not using it.
+      @lastNewResourceModel = @newResourceModel
+      @stopListening @newResourceModel
+      @newResourceModel = null
+
+      x = =>
+        attributeName = @context.attribute
+        @model.set attributeName, resourceModel.attributes
+        @refresh @context
+      setTimeout x, 500
+
+    requestDialogView: ->
+      Backbone.trigger 'showResourceModelInDialog', @newResourceModel,
+        @resourceName
 
     listenToEvents: ->
       super
