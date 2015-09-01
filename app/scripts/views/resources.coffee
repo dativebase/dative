@@ -78,6 +78,7 @@ define [
     events:
       'focus input, textarea, .ui-selectmenu-button, button, .ms-container': 'inputFocused'
       'focus .dative-resource-widget': 'resourceFocused'
+      'click .dative-resource-widget': 'resourceClicked'
       'click .expand-all': 'expandAllResources'
       'click .collapse-all': 'collapseAllResources'
       'click .new-resource': 'showNewResourceViewAnimate'
@@ -385,11 +386,18 @@ define [
     itemsPerPageSelectHasFocus: ->
       @$('.ui-selectmenu-button.items-per-page').is ':focus'
 
+    resourceClicked: (event) -> @resourceClicked = true
+
     resourceFocused: (event) ->
       if @$(event.target).hasClass 'dative-resource-widget'
         @rememberFocusedElement event
         $element = @$ event.target
+        setTimeout (=> @scrollToElementIfNotClicked $element), 50
+
+    scrollToElementIfNotClicked: ($element) ->
+      if not @resourceClicked
         @scrollToScrollableElement $element
+      @resourceClicked = false
 
     inputFocused: (event) ->
       @stopEvent event

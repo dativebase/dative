@@ -628,11 +628,9 @@ define [
       @dehighlight()
       @hideSecondaryData()
 
-    focus: ->
-      @highlightOnlyMe()
+    focus: -> @highlightOnlyMe()
 
-    focusout: ->
-      @dehighlight()
+    focusout: -> @dehighlight()
 
     # <Enter> on a closed resource opens it, <Esc> on an open resource closes
     # it.
