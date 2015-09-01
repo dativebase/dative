@@ -2126,3 +2126,18 @@ td.dative-field-label-cell
   padding-right: 20px;
 }
 
+a.morpheme-link
+{
+  text-decoration: none;
+}
+
+a.morpheme-link-partial-match
+{
+  color: green !important;
+}
+
+a.morpheme-link-perfect-match
+{
+  color: blue !important;
+}
+

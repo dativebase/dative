@@ -30,6 +30,7 @@ define [
   './../models/file'
   './../models/elicitation-method'
   './../models/syntactic-category'
+  './../collections/forms'
   './../collections/syntactic-categories'
   './../collections/elicitation-methods'
   './../utils/globals'
@@ -45,7 +46,7 @@ define [
   ModifiedByUserFieldDisplayView, FieldDisplayView,
   RelatedResourceFieldDisplayView, RelatedUserFieldDisplayView,
   EntererFieldDisplayView, ModifierFieldDisplayView, FormModel, FileModel,
-  ElicitationMethodModel, SyntacticCategoryModel,
+  ElicitationMethodModel, SyntacticCategoryModel, FormsCollection,
   SyntacticCategoriesCollection, ElicitationMethodsCollection, globals) ->
 
 
@@ -104,6 +105,23 @@ define [
       super
       @setAttribute2DisplayView()
       @setAttributeClasses()
+      @events['click .morpheme-link'] = 'morphemeLinkClicked'
+
+    # A user has clicked on a morpheme link so we cause that morpheme to be
+    # displayed using a FormView in a dialog.
+    morphemeLinkClicked: (event) ->
+      @stopEvent event
+      id = @$(event.target).attr 'data-id'
+      formsCollection = new FormsCollection()
+      @morphemeModel = new FormModel({}, {collection: formsCollection})
+      @listenToOnce @morphemeModel, "fetchFormSuccess", @fetchMorphemeSuccess
+      @morphemeModel.fetchResource id
+
+    # The morpheme's form model has been fetched from the server so we request
+    # that it be displayed in a dialog box.
+    fetchMorphemeSuccess: (formObject) ->
+      @morphemeModel.set formObject
+      Backbone.trigger 'showResourceModelInDialog', @morphemeModel, 'form'
 
     render: ->
       super
@@ -470,6 +488,7 @@ define [
                             min-width: #{width}px;
                             max-width: #{width}px;
                             #{padding}'"
+            word = @createMorphemeLinks word, attribute
             $row.append $("<td class='igt-word-cell' #{style}>#{word}</td>")
           $table.append $row
         $tablesContainer.append $table
@@ -486,6 +505,76 @@ define [
             my: "right-300 top"
             at: 'right top'
             collision: 'flipfit'
+
+    createMorphemeLinks: (word, attribute) ->
+      try
+        @_createMorphemeLinks word, attribute
+      catch
+        word
+
+    _createMorphemeLinks: (word, attribute) ->
+
+      result = []
+
+      # TODO: this should be based on delimiters in app settings ...
+      delims = ['-', '=']
+      splitter = new RegExp "(#{delims.join '|'})"
+
+      if attribute in ['morpheme_break', 'morpheme_gloss']
+        value = @model.get attribute
+        words = value.split /\s+/
+        index = words.indexOf word
+        if index is -1
+          [word, index] = @morphemeBreakIndexRepair word, words
+        if index is -1
+          result.push word
+        else
+          linkData = @model.get("#{attribute}_ids")[index]
+          morphemes = word.split splitter
+          morphIndex = 0
+          for morpheme in morphemes
+            if morpheme in delims
+              result.push morpheme
+            else
+              morphLinkData = linkData[morphIndex]
+              if morphLinkData.length > 0
+                matchType = @getMatchType attribute, index, morphIndex
+                morphLinkData = morphLinkData[0]
+                morphemeLink = "<a
+                  class='morpheme-link morpheme-link-#{matchType}-match'
+                  href='javascript:;'
+                  data-id='#{morphLinkData[0]}'>#{morpheme}</a>"
+                result.push morphemeLink
+              else
+                result.push morpheme
+              morphIndex += 1
+        result.join ''
+      else
+        word
+
+    # If word begins or ends with '/', then this may have been caused by prior
+    # formatting on the morpheme break value. We attempt to compensate for that
+    # here.
+    morphemeBreakIndexRepair: (word, words) ->
+      if word[0] is '/'
+        word = word[1...]
+        index = words.indexOf word
+      else if word[word.length - 1] is '/'
+        word = word[...-1]
+        index = words.indexOf word
+      [word, index]
+
+    # Does the morpheme have a perfect match in the database or only a partial
+    # one?
+    getMatchType: (attribute, index, morphIndex) ->
+      if attribute is 'morpheme_break'
+        counterpart = 'morpheme_gloss'
+      else
+        counterpart = 'morpheme_break'
+      if @model.get("#{counterpart}_ids")[index][morphIndex].length > 0
+        'perfect'
+      else
+        'partial'
 
     # Hide the previous displays for the IGT fields.
     hideIGTFields: (igtMap) ->

@@ -1059,12 +1059,11 @@ define [
     # Create a view for the passed in `resourceModel` and render it in the
     # application-wide `@resourceDisplayerDialog`.
     showResourceModelInDialog: (resourceModel, resourceName) ->
+      resourceViewClass = @getResourceViewClassFromResourceName resourceName
+      resourceView = new resourceViewClass(model: resourceModel)
       if @resourceAlreadyDisplayed resourceModel
-        Backbone.trigger 'resourceAlreadyDisplayedInDialog', resourceName,
-          resourceModel
+        Backbone.trigger 'resourceAlreadyDisplayedInDialog', resourceView
       else
-        resourceViewClass = @getResourceViewClassFromResourceName resourceName
-        resourceView = new resourceViewClass(model: resourceModel)
         @showResourceInDialog resourceView
 
     getOldestResourceDisplayerDialog: ->
