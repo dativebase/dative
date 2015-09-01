@@ -123,6 +123,16 @@ define [
         @modelChanged = false
         @interlinearize()
 
+    # Form attribute labels and values have just been made visible. We trigger
+    # a model change in order to effect a refresh of the interlinearization
+    # display.
+    contentAndLabelsVisiblePost: -> @model.trigger 'change'
+
+    # Form attribute labels have just been hidden while the values are to still
+    # be displayed. We trigger a model change in order to effect a refresh of
+    # the interlinearization display.
+    contentOnlyVisiblePost: -> @model.trigger 'change'
+
     keydown: (event) ->
       super event
       @lastKeydown = new Date()
@@ -260,6 +270,8 @@ define [
     # multi-field line in the IGT display.
     interlinearize: ->
 
+      @labelWidth = null
+
       # Params
       @igtWordBuffer = 40 # How many pixels between IGT word columns.
       @igtRowStepIndent = 30 # How many pixels to indent each subsequent IGT row.
@@ -287,6 +299,11 @@ define [
       wordCount = 0
       for attribute in @getFormAttributes @activeServerType, 'igt'
         className = @utils.snake2hyphen attribute # WARN: OLD-specific
+        labelSelector = ".dative-field-display >
+          .dative-field-display-label-container > label[for=#{attribute}]"
+        $label = @$(labelSelector).first()
+        title = $label.attr 'title'
+
         selector = ".dative-field-display >
           .dative-field-display-representation-container > .#{className}"
         $element = @$(selector).first()
@@ -299,6 +316,7 @@ define [
           selector: selector
           value: value
           words: words
+          title: title
       [igtMap, wordCount]
 
     # Wrap each word of each IGT field in a <div> so that we can later query
@@ -329,6 +347,14 @@ define [
     # the jQuery `.width()` calls will return 0.
     # TODO: RESEARCH: isn't there a jQuery `complete:` callback to handle this?
     _interlinearize: (igtMap) ->
+
+      # We set the @labelWidth to 242.39px. WARN: this is very brittle but I
+      # had trouble dynamically discovering the appropriate label width using
+      # jQuery inspections like the following. Maybe this can be fixed ...
+      # @labelWidth = @$(".dative-field-display").filter(':visible').first().width()
+      # @labelWidth = @$(".resource-secondary-data .dative-field-display-label-container").filter(':visible').first().width()
+      if not @labelWidth then @labelWidth = 242.39
+
       # Remove any information about IGT fields that are hidden.
       igtMap = @removeEmptyIGTLines igtMap
 
@@ -344,6 +370,7 @@ define [
       wordWidths = @getIGTWordWidths igtMap
 
       tablesData = @getIGTTablesData wordWidths
+
       @displayIGTTables tablesData, igtMap, wordWidths
       @hideIGTFields igtMap
 
@@ -365,6 +392,7 @@ define [
     # containing <div>.
     getIGTTablesData: (wordWidths) ->
       maxWidth = @$('.resource-primary-data').first().width()
+      if @dataLabelsVisible then maxWidth -= @labelWidth
       tablesData = []
       rowWidth = 0
       row = []
@@ -422,6 +450,17 @@ define [
           #{@igtRowVerticalSpacer }px;'>"
         for attribute, vector of igtMap
           $row = $ '<tr>'
+          if @dataLabelsVisible
+            label ="<td class='dative-field-label-cell'
+                style='width:#{@labelWidth}px;
+                       min-width:#{@labelWidth}px;
+                       max-width:#{@labelWidth}px;'
+              ><label
+                for='#{attribute}'
+                class='dative-field-label dative-tooltip'
+                title='#{vector.title}'
+                >#{attribute}</label></td>"
+            $row.append $(label)
           for index, cellIndex in tableData
             word = vector.words[index]
             width = wordWidths[index]
@@ -440,6 +479,13 @@ define [
         $extantIGTContainer.html $tablesContainer.html()
       else
         @$('.resource-primary-data').first().prepend $tablesContainer
+
+      @$('label.dative-tooltip')
+        .tooltip
+          position:
+            my: "right-300 top"
+            at: 'right top'
+            collision: 'flipfit'
 
     # Hide the previous displays for the IGT fields.
     hideIGTFields: (igtMap) ->

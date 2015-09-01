@@ -421,26 +421,36 @@ define [
 
     # Fade out data, then fade in data and labels.
     hideContentAndLabelsThenShowAll: ->
-      @getFieldContainers().find('.dative-field-display').each (index, element) =>
-        $element = @$ element
-        $content = $element.find @dataContentSelector
-        $label = $element.find @dataLabelsSelector
-        $content.fadeOut
-          complete: =>
-            $label.fadeIn().css('display', 'inline-block')
-            $content.fadeIn().removeClass 'no-label'
+      @getFieldContainers()
+        .find('.dative-field-display, .igt-tables-container')
+        .each (index, element) =>
+          $element = @$ element
+          $content = $element.find @dataContentSelector
+          $label = $element.find @dataLabelsSelector
+          $content.fadeOut
+            complete: =>
+              $label.fadeIn().css('display', 'inline-block')
+              $content.fadeIn().removeClass 'no-label'
       @dataLabelsVisible = true
+      @contentAndLabelsVisiblePost()
       @setDataLabelsButtonStateOpen()
+
+    contentAndLabelsVisiblePost: ->
 
     # Fade out data and labels, then fade in data.
     hideContentAndLabelsThenShowContent: ->
       @hideDataLabelsAnimate()
-      @getFieldContainers().find('.dative-field-display').each (index, element) =>
-        $element = @$ element
-        $content = $element.find @dataContentSelector
-        $content.fadeOut
-          complete: =>
-            $content.fadeIn().addClass 'no-label'
+      @getFieldContainers()
+        .find('.dative-field-display, .igt-tables-container')
+        .each (index, element) =>
+          $element = @$ element
+          $content = $element.find @dataContentSelector
+          $content.fadeOut
+            complete: =>
+              $content.fadeIn().addClass 'no-label'
+      @contentOnlyVisiblePost()
+
+    contentOnlyVisiblePost: ->
 
     # "Show labels" button.
     setDataLabelsButtonStateClosed: ->
@@ -466,24 +476,16 @@ define [
           items: 'button'
           content: 'hide labels'
 
-    dataLabelsSelector: '.dative-field-display-label-container'
+    dataLabelsSelector: '.dative-field-display-label-container,
+      td.dative-field-label-cell'
 
     getDataLabels: ->
-      $primaryLabels =
-        @$('.resource-primary-data').first().find(@dataLabelsSelector)
-      $secondaryLabels =
-        @$('.resource-secondary-data').first().find(@dataLabelsSelector)
-      $primaryLabels.add $secondaryLabels
+      @$('.resource-primary-data').first().find(@dataLabelsSelector)
 
-    # Return a jQuery set that combines the primary and secondary data divs;
-    # needed so that we don't inadvertently modify the DOM in other areas,
-    # e.g., div.previous_versions.
-    getFieldContainers: ->
-      $primaryData = @$('.resource-primary-data').first()
-      $secondaryData = @$('.resource-secondary-data').first()
-      $primaryData.add $secondaryData
+    getFieldContainers: -> @$('.resource-primary-data').first()
 
-    dataContentSelector: '.dative-field-display-representation-container'
+    dataContentSelector: '.dative-field-display-representation-container,
+      table.igt-table'
 
     # Hide the labels for the data attributes.
     hideDataLabelsAnimate: (event) ->
@@ -503,13 +505,14 @@ define [
       @dataLabelsVisible = false
       @setDataLabelsButtonStateClosed()
       @getDataLabels().hide()
-      @$(@dataContentSelector).addClass 'no-label'
+      @$(".resource-primary-data #{@dataContentSelector}").addClass 'no-label'
 
     showDataLabels: ->
       @dataLabelsVisible = true
       @setDataLabelsButtonStateOpen()
       @getDataLabels().hide().show().css 'display', 'inline-block'
-      @$(@dataContentSelector).removeClass 'no-label'
+      @$(".resource-primary-data #{@dataContentSelector}")
+        .removeClass 'no-label'
 
     # jQueryUI-ify <button>s
     guifyButtons: ->

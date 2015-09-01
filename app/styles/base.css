@@ -1516,6 +1516,11 @@ div.dative-new-item .dative-widget-center
   margin-bottom: 0.75em;
 }
 
+.update-resource-widget
+{
+  margin-bottom: 3em !important;
+}
+
 div.dative-paginated-item .dative-widget-header-title,
 div.dative-new-item .dative-widget-header-title
 {
@@ -2108,5 +2113,16 @@ span.current-time-seconds
   max-width: 12%;
   min-width: 12%;
   vertical-align: top;
+}
+
+.resource-secondary-data
+{
+  margin-top: 1em;
+}
+
+td.dative-field-label-cell
+{
+  text-align: right;
+  padding-right: 20px;
 }
 
