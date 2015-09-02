@@ -703,12 +703,14 @@ define [
           class='field-display-link dative-tooltip search-display-check'
           title='click to view the search whose results you are browsing'
           >a search over #{@resourceNamePluralHuman}</a>"
+        @$('.search-display-check').tooltip()
       else if @corpus
         @$('.browse-set').html "<a
           href='javascript:;'
           class='field-display-link dative-tooltip corpus-display'
           title='click here to view this corpus in this page'
           >corpus #{@corpus.get('id')}</a>"
+        @$('.corpus-display').tooltip()
       else
         @$('.browse-set').text "all #{@resourceNamePluralHuman}"
       if @paginator.start is @paginator.end
