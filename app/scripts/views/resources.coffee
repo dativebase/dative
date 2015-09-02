@@ -235,8 +235,8 @@ define [
 
     getResourceSearchView: ->
       if @searchable
-        searchModel = new @searchModel({}, collection: @collection)
-        new @searchView
+        searchModel = new @searchModelClass({}, collection: @collection)
+        new @searchViewClass
           headerTitle: "Search #{@resourceNamePluralCapitalized}"
           model: searchModel
           dataLabelsVisible: @dataLabelsVisible
@@ -781,6 +781,12 @@ define [
     # pagination we only store one page worth of resource models/views at a
     # time.
     getResourceViews: ->
+      if @collection.search
+        searchModel = new @searchModelClass(search: @collection.search)
+        searchPatternsObject = searchModel.getPatternsObject()
+      else
+        searchPatternsObject = null
+
       @closeResourceViews()
       @resourceViews = []
       @collection.each (resourceModel) =>
@@ -788,6 +794,7 @@ define [
           model: resourceModel
           dataLabelsVisible: @dataLabelsVisible
           expanded: @allResourcesExpanded
+          searchPatternsObject: searchPatternsObject
         @resourceViews.push newResourceView
 
     spinnerOptions: ->
@@ -1122,11 +1129,11 @@ define [
     # able to create a new resource.
     getCanCreateNew: -> true
 
-    # If this resource is searchable, then set `@searchView` and `@searchModel`
-    # to a view and a model class, respectively, for creating new searches for
-    # this resource.
-    searchView: null
-    searchModel: null
+    # If this resource is searchable, then set `@searchViewClass` and
+    # `@searchModelClass` to a view and a model class, respectively, for
+    # creating new searches for this resource.
+    searchViewClass: null
+    searchModelClass: null
 
     # By default, we have no search object. If this is set, it is assumed to be
     # an object of the form `{query: {filter: [], order_by: []}}`.

@@ -110,6 +110,7 @@ define [
         updateViewVisible: false
         controlsViewVisible: false
         fileDataViewVisible: false
+        searchPatternsObject: null
       _.extend defaults, options
       for key, value of defaults
         @[key] = value
@@ -253,7 +254,19 @@ define [
       @renderDisplayViews()
       @guify()
       @listenToEvents()
+      @highlightSearchMatches()
       @
+
+    # Highlight the attribute values of this resource that match a particular
+    # search. The relevant data with respect to the search is contained in
+    # `@searchPatternsObject`, which maps attribute names to regexes that can
+    # be used to highlight the matching substrings.
+    # TODO: Implement this! It's more difficult than it would appear since the
+    # `interlinearize` method of `FormBaseView` can split a value up and put it
+    # in different parts of the DOM.
+    highlightSearchMatches: ->
+      if @searchPatternsObject
+        console.log 'we should highlight search matches'
 
     # If we are working with an OLD backend, then we request data on our
     # related resources, if our globally held copies of those data haven't been

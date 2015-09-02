@@ -393,6 +393,10 @@ define (require) ->
         break
     "#{bytes.toFixed(1)} #{units[u]}"
 
+
+
+
+
   humanFileSize: humanFileSize
   isValidURL: isValidURL
   clone: clone

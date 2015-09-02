@@ -137,3 +137,96 @@ define [
             /#{@getServerSideResourceName()}/new"
       )
 
+    ############################################################################
+    # Logic for returning a "patterns object" for the search model.
+    ############################################################################
+
+    # A patterns object is an object that maps attributes to regular
+    # expressions that can be used to highlight the attribute's value in order
+    # to better indicate why a given resource matches the search model.
+
+    getPatternsObject: ->
+      patterns = @getPatterns @get('search').filter
+      @_getPatternsObject patterns, true
+
+    # Return a "patterns" array with all of the "positive" filter
+    # expressions (i.e., patterns) in the (OLD-style) filter expression, i.e.,
+    # all of the non-negated filter expressions.
+    getPatterns: (filter) ->
+      patterns = []
+      if filter.length in [4, 5]
+        patterns.push filter
+      else
+        if filter[0] in ['and', 'or']
+          for junct in filter[1]
+            patterns = patterns.concat @getPatterns(junct)
+      patterns
+
+    # Return an object with resource attributes as attributes and regular
+    # expressions for matching search pattern matches as values. Setting the
+    # `flatten` param to `true` will treat all attribute-values as scalars
+    # (i.e., strings or numbers).
+    # The `patterns` param is an array of subarrays, where each subarray is a
+    # "positive" OLD-style filter expression (positive, meaning that it asserts
+    # something content-ful/non-negative of the match). The `patternsObject`
+    # returned maps attributes (and `[attribute, subattribute]` duples) to
+    # `RegExp` instances.
+    _getPatternsObject: (patterns, flatten=false) ->
+      patternsObject = {}
+      for pattern in patterns
+        attribute = pattern[1]
+        if pattern.length is 4
+          relation = pattern[2]
+          term = pattern[3]
+        else
+          subattribute = pattern[2]
+          relation = pattern[3]
+          term = pattern[4]
+        regex = @getRegex relation, term
+        if not regex then continue
+        if attribute of patternsObject
+          if (not flatten) and pattern.length is 5
+            if subattribute of patternsObject[attribute]
+              patternsObject[attribute][subattribute].push regex
+            else
+              patternsObject[attribute][subattribute] = [regex]
+          else
+            patternsObject[attribute].push regex
+        else
+          if (not flatten) and pattern.length is 5
+            patternsObject[attribute] = {}
+            patternsObject[attribute][subattribute] = [regex]
+          else
+            patternsObject[attribute] = [regex]
+      for k, v of patternsObject
+        if @utils.type(v) is 'object'
+          for kk, vv of v
+            patternsObject[k][kk] = new RegExp("((?:#{vv.join ')|(?:'}))", 'g')
+        else
+          patternsObject[k] = new RegExp("((?:#{v.join ')|(?:'}))", 'g')
+      patternsObject
+
+    # Take `relation` and `term` and return an appropriate regular expression
+    # string. Relations currently accounted for: 'regex', 'like', '=', and
+    # 'in'. TODO: relations still needing work: <=, >=, <, and >.
+    getRegex: (relation, term) ->
+      if relation is 'regex'
+        term
+      else if relation is 'like'
+        # Clip off '%' on the edges so that the later `.replace` call
+        # highlights only the pattern and not the entire value.
+        if term.length > 1 and term[0] is '%'
+          term = term[1...]
+        if term.length > 1 and term[term.length - 1] is '%'
+          term = term[...-1]
+        @escapeRegexChars(term).replace(/_/g, '.').replace(/%/g, '.*')
+      else if relation is '='
+        "^#{term}$"
+      else if relation is 'in'
+        "(?:^#{term.join ')$|(?:^'})$"
+      else
+        null
+
+    # Cf. http://stackoverflow.com/a/9310752/992730
+    escapeRegexChars: (input) -> input.replace /[-[\]{}()*+?.,\\^$|#]/g, "\\$&"
+

@@ -503,6 +503,7 @@ define [
         $table = $ "<table class='igt-table' style='margin-bottom:
           #{@igtRowVerticalSpacer }px;'>"
         for attribute, vector of igtMap
+          attrClass = "#{@utils.snake2hyphen attribute}-value"
           $row = $ '<tr>'
           if @dataLabelsVisible
             label ="<td class='dative-field-label-cell'
@@ -525,7 +526,8 @@ define [
                             max-width: #{width}px;
                             #{padding}'"
             word = @getMorphemesAsLinks word, attribute
-            $row.append $("<td class='igt-word-cell' #{style}>#{word}</td>")
+            $row.append $("<td class='igt-word-cell #{attrClass}'
+              #{style}>#{word}</td>")
           $table.append $row
         $tablesContainer.append $table
       $extantIGTContainer =
