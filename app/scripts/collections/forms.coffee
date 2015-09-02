@@ -161,7 +161,7 @@ define [
     # chronological order.
     getFetchAllFieldDBFormsURL: ->
       url = globals.applicationSettings.get('fieldDBApplication').corpus.url
-      "#{url}/_design/pages/_view/datums_chronological"
+      "#{url}/_design/deprecated/_view/datums_chronological"
 
     # Returns a URL for updating a resource on a web service.
     getUpdateResourceURL: (resource) ->

@@ -16,7 +16,7 @@ define [
     url: 'fake-url'
 
     # Fetch FieldDB forms with pagination.
-    # GET `<CorpusServiceURL>/<pouchname>/_design/pages/_view/
+    # GET `<CorpusServiceURL>/<pouchname>/_design/deprecated/_view/
     #   datums_chronological`
     # Note: this uses the obvious pagination approach that
     # http://guide.couchdb.org/draft/recipes.html#pagination
@@ -207,7 +207,7 @@ define [
     getFetchAllFieldDBFormsURL: ->
       url = globals.applicationSettings.get 'baseDBURL'
       pouchname = globals.applicationSettings.get 'activeFieldDBCorpus'
-      "#{url}/#{pouchname}/_design/pages/_view/datums_chronological"
+      "#{url}/#{pouchname}/_design/deprecated/_view/datums_chronological"
 
     getOLDURL: ->
       globals.applicationSettings.get('activeServer').get 'url'
@@ -243,7 +243,7 @@ define [
       (new FormModel()).old2dative(o) for o in responseJSON
 
     # Fetch *all* FieldDB forms.
-    # GET `<CorpusServiceURL>/<pouchname>/_design/pages/_view/datums_chronological`
+    # GET `<CorpusServiceURL>/<pouchname>/_design/deprecated/_view/datums_chronological`
     # TODO: Deprecate this.
     fetchAllFieldDBForms: ->
       Backbone.trigger 'fetchAllFieldDBFormsStart'
