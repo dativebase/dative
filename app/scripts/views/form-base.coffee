@@ -301,7 +301,9 @@ define [
 
       # If we only have one word, then there is no point in creating an
       # interlinear display.
-      if wordCount < 2 then return
+      if wordCount < 2
+        @createMorphemeLinksOnDefaultFieldDisplays()
+        return
 
       # Wrap the IGT words in <div> tags so we can get their widths.
       igtMap = @wrapIGTWords igtMap, wordCount
@@ -321,7 +323,6 @@ define [
           .dative-field-display-label-container > label[for=#{attribute}]"
         $label = @$(labelSelector).first()
         title = $label.attr 'title'
-
         selector = ".dative-field-display >
           .dative-field-display-representation-container > .#{className}"
         $element = @$(selector).first()
@@ -391,6 +392,8 @@ define [
 
       @displayIGTTables tablesData, igtMap, wordWidths
       @hideIGTFields igtMap
+
+      @$('.morpheme-link.dative-tooltip').tooltip()
 
     # If an IGT field is not displayed prior to interlinearization (because
     # it's empty), then it shouldn't be displayed by the `interlinearize`
@@ -488,7 +491,7 @@ define [
                             min-width: #{width}px;
                             max-width: #{width}px;
                             #{padding}'"
-            word = @createMorphemeLinks word, attribute
+            word = @getMorphemesAsLinks word, attribute
             $row.append $("<td class='igt-word-cell' #{style}>#{word}</td>")
           $table.append $row
         $tablesContainer.append $table
@@ -506,13 +509,38 @@ define [
             at: 'right top'
             collision: 'flipfit'
 
-    createMorphemeLinks: (word, attribute) ->
+    # Transform morphemes into links on the default field display views. This
+    # method should be called in the cases where IGT tabularization is not
+    # appropriate but where we still want the morphemes to be links that
+    # trigger the rendering of `FormView`s in dialog boxes.
+    createMorphemeLinksOnDefaultFieldDisplays: ->
+      for attribute in @getFormAttributes @activeServerType, 'igt'
+        if attribute in ['morpheme_break', 'morpheme_gloss']
+          className = @utils.snake2hyphen attribute # WARN: OLD-specific
+          selector = ".dative-field-display >
+            .dative-field-display-representation-container > .#{className}"
+          $element = @$(selector).first()
+          value = $element.text()
+          words = value.split /\s+/
+          newValue = []
+          for word in words
+            newWord = @getMorphemesAsLinks word, attribute
+            newValue.push newWord
+          $element.html newValue.join(' ')
+      @$('.morpheme-link.dative-tooltip').tooltip()
+
+    # Transform `word` into a string of HTML containing anchors that, when
+    # clicked, trigger the display of relevant forms in dialog boxes. This is
+    # the logic that makes perfect matches into "blue" links and partial ones
+    # into "green" links. Note that it depends on the OLD's `morpheme_break_ids`
+    # and `morpheme_gloss_ids` attributes.
+    getMorphemesAsLinks: (word, attribute) ->
       try
-        @_createMorphemeLinks word, attribute
+        @_getMorphemesAsLinks word, attribute
       catch
         word
 
-    _createMorphemeLinks: (word, attribute) ->
+    _getMorphemesAsLinks: (word, attribute) ->
 
       result = []
 
@@ -521,6 +549,7 @@ define [
       splitter = new RegExp "(#{delims.join '|'})"
 
       if attribute in ['morpheme_break', 'morpheme_gloss']
+        @prefix = @suffix = ''
         value = @model.get attribute
         words = value.split /\s+/
         index = words.indexOf word
@@ -531,6 +560,7 @@ define [
         else
           linkData = @model.get("#{attribute}_ids")[index]
           morphemes = word.split splitter
+          morphemeCount = (m for m in morphemes when m not in delims).length
           morphIndex = 0
           for morpheme in morphemes
             if morpheme in delims
@@ -540,28 +570,49 @@ define [
               if morphLinkData.length > 0
                 matchType = @getMatchType attribute, index, morphIndex
                 morphLinkData = morphLinkData[0]
+                meta = "‘#{morphLinkData[1]}’ (#{morphLinkData[2]})"
                 morphemeLink = "<a
-                  class='morpheme-link morpheme-link-#{matchType}-match'
+                  class='dative-tooltip morpheme-link
+                    morpheme-link-#{matchType}-match'
+                  title='#{meta}. Click to view this morpheme in the page'
                   href='javascript:;'
                   data-id='#{morphLinkData[0]}'>#{morpheme}</a>"
-                result.push morphemeLink
+                result.push(@affixRepair(morphemeLink, index, morphIndex,
+                  words, morphemeCount))
               else
-                result.push morpheme
+                result.push(@affixRepair(morpheme, index, morphIndex, words,
+                  morphemeCount))
               morphIndex += 1
         result.join ''
       else
         word
+
+    # Restore the affixes to the IGT line, e.g., the "/" that enclose morpheme
+    # break values.
+    affixRepair: (morpheme, wordIndex, morphIndex, words, morphemeCount) ->
+      if wordIndex is 0 and morphIndex is 0
+        morpheme = "#{@prefix}#{morpheme}"
+      if wordIndex is (words.length - 1) and
+      morphIndex is (morphemeCount - 1)
+        morpheme = "#{morpheme}#{@suffix}"
+      morpheme
 
     # If word begins or ends with '/', then this may have been caused by prior
     # formatting on the morpheme break value. We attempt to compensate for that
     # here.
     morphemeBreakIndexRepair: (word, words) ->
       if word[0] is '/'
+        @prefix = '/'
         word = word[1...]
         index = words.indexOf word
-      else if word[word.length - 1] is '/'
+      else
+        @prefix = ''
+      if word[word.length - 1] is '/'
+        @suffix = '/'
         word = word[...-1]
         index = words.indexOf word
+      else
+        @suffix = ''
       [word, index]
 
     # Does the morpheme have a perfect match in the database or only a partial
