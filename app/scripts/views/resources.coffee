@@ -86,6 +86,7 @@ define [
       'click .toggle-all-labels': 'toggleAllLabels'
       'click .toggle-search': 'toggleResourceSearchViewAnimate'
       'click .corpus-display': 'displayCorpus'
+      'click .search-display-check': 'showResourceSearchViewAnimate'
       'keydown': 'keyboardShortcuts'
       'keyup': 'keyup'
       # @$el is enclosed in top and bottom invisible divs. These allow us to
@@ -179,6 +180,16 @@ define [
 
     listenToResourceSearchView: ->
       @listenTo @resourceSearchView, 'hideMe', @hideResourceSearchViewAnimate
+      @listenTo @resourceSearchView, 'browseReturn', @returnToBrowsingAll
+
+    # User wants to stop browsing search results and simply browse all forms in
+    # the database.
+    # TODO: this refreshes even when we are already browsing all forms; stop
+    # that.
+    returnToBrowsingAll: ->
+      @deleteSearch()
+      @fetchResourcesLastPage = true
+      @fetchResourcesPageToCollection()
 
     listenToNewResourceView: ->
       @listenTo @newResourceView, "new#{@resourceNameCapitalized}View:hide",
@@ -319,6 +330,8 @@ define [
                 @focusPreviousResourceView event
               else
                 @focusNextResourceView event
+            when 191
+              @$('.toggle-search').first().click()
 
     # Return the (jQuery-wrapped) resource view <div> that encloses
     # `$element`, if it exists.
@@ -685,8 +698,11 @@ define [
       @setToggleAllLabelsButtonState()
       @setNewResourceViewButtonState()
       if @search
-        @$('.browse-set').text "a search over
-          #{@resourceNamePluralHuman}"
+        @$('.browse-set').html "<a
+          href='javascript:;'
+          class='field-display-link dative-tooltip search-display-check'
+          title='click to view the search whose results you are browsing'
+          >a search over #{@resourceNamePluralHuman}</a>"
       else if @corpus
         @$('.browse-set').html "<a
           href='javascript:;'
@@ -1205,7 +1221,7 @@ define [
           @scrollToFocusedInput()
 
     focusFirstResourceSearchViewTextarea: ->
-      @$('.resource-search-view textarea').first().focus()
+      @$('.resource-search-view textarea').first().focus().select()
 
     toggleResourceSearchViewAnimate: ->
       if @$('.resource-search-view').is ':visible'

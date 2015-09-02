@@ -107,21 +107,49 @@ define [
       @setAttributeClasses()
       @events['click .morpheme-link'] = 'morphemeLinkClicked'
 
-    # A user has clicked on a morpheme link so we cause that morpheme to be
-    # displayed using a FormView in a dialog.
+    # A user has clicked on a morpheme link so we cause that morpheme (or those
+    # morphemes) to be displayed using one or more FormViews in one or more
+    # dialogs.
     morphemeLinkClicked: (event) ->
       @stopEvent event
-      id = @$(event.target).attr 'data-id'
-      formsCollection = new FormsCollection()
-      @morphemeModel = new FormModel({}, {collection: formsCollection})
-      @listenToOnce @morphemeModel, "fetchFormSuccess", @fetchMorphemeSuccess
-      @morphemeModel.fetchResource id
+      try
+        id = (parseInt(x) for x in @$(event.target).attr('data-id').split(','))
+      catch
+        console.log 'ERROR: unable to get id for morpheme clicked'
+        return
+
+      morphemesCollection = new FormsCollection()
+      @morphemeModel = new FormModel({}, {collection: morphemesCollection})
+
+      if id.length is 1
+        @listenToOnce @morphemeModel, "fetchFormSuccess", @fetchMorphemeSuccess
+        @morphemeModel.fetchResource id
+      else # we search across forms for the ids
+        paginator =
+          page: 1
+          items_per_page: 100
+        query =
+          filter: ["Form", "id", "in", id]
+          order_by: ["Form", "id", "asc"]
+        @listenToOnce @morphemeModel, 'searchSuccess', @searchSuccess
+        @morphemeModel.search query, paginator
 
     # The morpheme's form model has been fetched from the server so we request
     # that it be displayed in a dialog box.
     fetchMorphemeSuccess: (formObject) ->
       @morphemeModel.set formObject
       Backbone.trigger 'showResourceModelInDialog', @morphemeModel, 'form'
+
+    # The morphemes' form models have been fetched from the server so we
+    # request that they be displayed in dialog boxes.
+    searchSuccess: (responseJSON) ->
+      morphemesCollection = new FormsCollection()
+      # TODO: we can only display the first four matches because we only have 4
+      # resource displayer dialogs. This should be fixed by allowing for the
+      # display of multiple `ResourceView` instances in a single dialog box.
+      for formObject in responseJSON.items[...4]
+        model = new FormModel(formObject, {collection: morphemesCollection})
+        Backbone.trigger 'showResourceModelInDialog', model, 'form'
 
     render: ->
       super
@@ -569,14 +597,14 @@ define [
               morphLinkData = linkData[morphIndex]
               if morphLinkData.length > 0
                 matchType = @getMatchType attribute, index, morphIndex
-                morphLinkData = morphLinkData[0]
-                meta = "‘#{morphLinkData[1]}’ (#{morphLinkData[2]})"
+                # morphLinkData = morphLinkData[0]
+                [id, meta] = @getIdMeta morphLinkData
                 morphemeLink = "<a
                   class='dative-tooltip morpheme-link
                     morpheme-link-#{matchType}-match'
                   title='#{meta}. Click to view this morpheme in the page'
                   href='javascript:;'
-                  data-id='#{morphLinkData[0]}'>#{morpheme}</a>"
+                  data-id='#{id}'>#{morpheme}</a>"
                 result.push(@affixRepair(morphemeLink, index, morphIndex,
                   words, morphemeCount))
               else
@@ -586,6 +614,13 @@ define [
         result.join ''
       else
         word
+
+    getIdMeta: (morphLinkData) ->
+      meta = ("‘#{x[1]}’ (#{x[2]})" for x in morphLinkData)
+        .join '; '
+        .replace "'", '&apos;'
+      id = (x[0] for x in morphLinkData).join ','
+      [id, meta]
 
     # Restore the affixes to the IGT line, e.g., the "/" that enclose morpheme
     # break values.
@@ -616,16 +651,23 @@ define [
       [word, index]
 
     # Does the morpheme have a perfect match in the database or only a partial
-    # one?
+    # one? Each morpheme shape/gloss has an array of 3-tuple arrays that
+    # encodes its matches. A morpheme shape is a perfect match if its morpheme
+    # gloss counterpart match array contains all of the ids that it contains.
     getMatchType: (attribute, index, morphIndex) ->
       if attribute is 'morpheme_break'
         counterpart = 'morpheme_gloss'
       else
         counterpart = 'morpheme_break'
-      if @model.get("#{counterpart}_ids")[index][morphIndex].length > 0
-        'perfect'
-      else
-        'partial'
+      myMatches = @model.get("#{attribute}_ids")[index][morphIndex]
+      counterpartMatches = @model.get("#{counterpart}_ids")[index][morphIndex]
+      myMatchIds = (m[0] for m in myMatches)
+      counterpartMatchIds = (m[0] for m in counterpartMatches)
+      response = 'perfect'
+      for id in myMatchIds
+        if id not in counterpartMatchIds
+          response = 'partial'
+      response
 
     # Hide the previous displays for the IGT fields.
     hideIGTFields: (igtMap) ->

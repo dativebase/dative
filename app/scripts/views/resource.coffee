@@ -242,7 +242,12 @@ define [
         @model.destroyResource @model
 
     render: ->
-      @checkForRelatedResourceData()
+
+      # This can cause many needless requests and it doesn't seem necessary.
+      # TODO: verify that it's not necessary and delete this and all related
+      # methods.
+      # @checkForRelatedResourceData()
+
       @getDisplayViews()
       @html()
       @renderDisplayViews()

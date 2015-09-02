@@ -5,10 +5,11 @@ define [
   './search-field'
   './../models/search'
   './../models/form'
+  './../collections/searches'
   './../templates/search-widget'
   './../utils/globals'
 ], (BaseView, ResourceView, SearchAddWidgetView, SearchFieldView, SearchModel,
-  FormModel, searchWidgetTemplate, globals) ->
+  FormModel, SearchesCollection, searchWidgetTemplate, globals) ->
 
   class MySearchAddWidgetView extends SearchAddWidgetView
 
@@ -60,21 +61,45 @@ define [
       'click .save-button': 'save'
       'click .hide-search-widget': 'hideMe'
       'click .help': 'openHelp'
-      'keydown': 'stopPropagation'
+      'click .browse-return': 'browseReturn'
+      'keydown': 'keyboardShortcuts'
 
-    stopPropagation: (event) ->
+    keyboardShortcuts: (event) ->
       event.stopPropagation()
+      switch event.which
+        when 27 then @hideMe()
 
+    # Browse the results of the search in the search widget. Here we trigger a
+    # Backbone event that the master `AppView` instance listens for and then
+    # refreshes the relevant resources browse view.
     search: ->
       Backbone.trigger(
         "request:#{@targetResourceNamePlural}BrowseSearchResults",
         search: @model.get('search'))
 
+    # Initiate a search request in order to count how many results the
+    # currently specified search would return and display that count in a
+    # notifier.
     count: ->
-      console.log 'you want to count the results of this search'
+      paginator = {page: 1, items_per_page: 1}
+      @listenToOnce @targetModel, 'searchSuccess', @displayCount
+      @targetModel.search @model.get('search'), paginator
 
+    # Trigger the notifier into displaying the search results count.
+    displayCount: (searchResponse) ->
+      count = searchResponse.paginator.count
+      Backbone.trigger 'resourceCountSuccess', @targetResourceName, count
+
+    # Save the search that is currently held in the search widget.
     save: ->
-      console.log 'you want to save this search'
+      searchesCollection = new SearchesCollection()
+      @newSearchModel =
+        new SearchModel(@model.attributes, {collection: searchesCollection})
+      Backbone.trigger 'showResourceModelInDialog', @newSearchModel, 'search'
+
+    # Trigger an event so that the superview `ResourcesView` instance will take
+    # us back to browsing all resources.
+    browseReturn: -> @trigger 'browseReturn'
 
     hideMe: ->
       @trigger 'hideMe'
@@ -130,6 +155,7 @@ define [
       @listenToEvents()
       @
 
+    # TODO: can this safely be deleted?
     x: ->
       if not @weHaveNewResourceData()
         @model.getNewResourceData() # Success in this request will call `@render()`
@@ -153,6 +179,8 @@ define [
         @getNewResourceDataSuccess
       @listenTo @model, "getNewSearchDataFail",
         @getNewResourceDataFail
+      if @searchFieldView
+        @listenTo @searchFieldView, 'search', @search
 
     renderSearchFieldView: ->
       @$('ul.primary-data').append @searchFieldView.render().el

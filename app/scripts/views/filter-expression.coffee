@@ -495,7 +495,10 @@ define [
           .tooltip position: @tooltipPositionLeft('-20')
           .end()
         .find('.dative-tooltip').not('.operator')
-          .tooltip()
+          .tooltip position:
+            my: 'left bottom'
+            at: 'left top-20'
+            collision: 'flipfit'
       @renderFilterExpressionSubviews()
       @hideActionWidget()
       @actionButtonsVisibility()

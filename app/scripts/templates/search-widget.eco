@@ -16,6 +16,10 @@
 
     <span class="spinner-container"></span>
 
+    <button class='browse-return dative-tooltip'
+        title='go back to browsing all <%= @targetResourceNamePlural %>'
+    >Browse All</button>
+
     <button class='help dative-tooltip'
           title='help with searching <%= @targetResourceNamePlural %>'
     ><i class='fa fa-fw fa-question'></i>
@@ -45,10 +49,12 @@
           title='count how many results this search returns'
           >Count</button>
 
+        <% if @targetResourceNamePlural is 'forms': %>
         <button
           class="save-button dative-tooltip"
           title='save this search'
           >Save</button>
+        <% end %>
 
       </li>
 

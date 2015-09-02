@@ -86,6 +86,8 @@ define [
       @listenTo Backbone, 'corpusBrowseSuccess', @corpusBrowseSuccess
       @listenTo Backbone, 'corpusBrowseFail', @corpusBrowseFail
 
+      @listenTo Backbone, 'resourceCountSuccess', @resourceCountSuccess
+
       @listenTo Backbone, 'cantDeleteFilterExpressionOnlyChild',
         @cantDeleteFilterExpressionOnlyChild
 
@@ -447,6 +449,14 @@ define [
           corpus with id #{corpusId}."
       @renderNotification notification
 
+    resourceCountSuccess: (resourceName, count) ->
+      notification = new NotificationView
+        title: "#{@utils.capitalize(@utils.camel2regular(resourceName))} count
+          success"
+        content: "Your search returns #{@utils.integerWithCommas count}
+          results."
+      @renderNotification notification
+
     corpusBrowseFail: (error, corpusId) ->
       notification = new NotificationView
         title: 'Corpus browse failed'
@@ -548,11 +558,18 @@ define [
         contentPrefix
 
     resourceAlreadyDisplayedInDialog: (resourceView) ->
-      name = @utils.capitalize(@utils.camel2regular(resourceView.resourceName))
+      name = @utils.camel2regular resourceView.resourceName
+      nameCapitalized = @utils.capitalize name
+      id = resourceView.model.get 'id'
+      if id is null
+        content = "An empty #{name} is already being displayed in a
+          dialog box."
+      else
+        content = "#{nameCapitalized} #{id} is already being displayed in a
+          dialog box."
       notification = new NotificationView
         title: 'Already displayed'
-        content: "#{name} #{resourceView.model.get 'id'}
-          is already being displayed in a dialog box."
+        content: content
         type: 'warning'
       @renderNotification notification
 
