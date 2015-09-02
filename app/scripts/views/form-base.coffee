@@ -395,12 +395,17 @@ define [
     # TODO: RESEARCH: isn't there a jQuery `complete:` callback to handle this?
     _interlinearize: (igtMap) ->
 
-      # We set the @labelWidth to 242.39px. WARN: this is very brittle but I
-      # had trouble dynamically discovering the appropriate label width using
-      # jQuery inspections like the following. Maybe this can be fixed ...
+      # We set the @labelWidth to a specific pixel value here.
+      # WARN: this is very brittle but I had trouble dynamically discovering
+      # the appropriate label width using jQuery inspections like the
+      # following. Maybe this can be fixed ...
       # @labelWidth = @$(".dative-field-display").filter(':visible').first().width()
       # @labelWidth = @$(".resource-secondary-data .dative-field-display-label-container").filter(':visible').first().width()
-      if not @labelWidth then @labelWidth = 242.39
+      if not @labelWidth
+        if @addUpdateType is 'add'
+          @labelWidth = 196.5
+        else
+          @labelWidth = 181.8
 
       # Remove any information about IGT fields that are hidden.
       igtMap = @removeEmptyIGTLines igtMap

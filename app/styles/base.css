@@ -168,6 +168,17 @@ button.help-button
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+  opacity: 0.6;
+}
+
+td.dative-field-label-cell
+{
+  text-align: right;
+  padding-right: 20px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  opacity: 0.6;
 }
 
 .dative-field-label-container.top,
@@ -185,7 +196,7 @@ button.help-button
 
 .dative-form-object .dative-field-display-label-container
 {
-  width: 40%;
+  width: 30%;
 }
 
 .dative-field-input-container,
@@ -744,7 +755,7 @@ label.dative-field-label
   width: 25%;
   max-width: 25%;
   min-width: 25%;
-  opacity: 0.6;
+  /* opacity: 0.6; */
 }
 
 ul.fieldset select[name="elicitation_method"],
@@ -2118,12 +2129,6 @@ span.current-time-seconds
 .resource-secondary-data
 {
   margin-top: 1em;
-}
-
-td.dative-field-label-cell
-{
-  text-align: right;
-  padding-right: 20px;
 }
 
 a.morpheme-link
