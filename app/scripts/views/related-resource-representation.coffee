@@ -83,7 +83,11 @@ define [
     fetchResourceSuccess: (resourceObject) ->
       @resourceModel.set resourceObject
       if @resourceViewClass
-        @resourceView = new @resourceViewClass(model: @resourceModel)
+        searchPatternsObject =
+          @context.searchPatternsObject?[@attributeName] or null
+        @resourceView = new @resourceViewClass
+          model: @resourceModel
+          searchPatternsObject: searchPatternsObject
       else
         @resourceView = true
       @requestDialogView()
