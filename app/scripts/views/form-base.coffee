@@ -8,7 +8,7 @@ define [
   './date-field-display'
   './object-with-name-field-display'
   './array-of-objects-with-name-field-display'
-  './array-of-related-resources-field-display'
+  './array-of-related-tags-field-display'
   './array-of-related-files-field-display'
   './judgement-value-field-display'
   './morpheme-break-field-display'
@@ -37,7 +37,7 @@ define [
 ], (ResourceView, FileView, ElicitationMethodView, SyntacticCategoryView,
   FormAddWidgetView, PersonFieldDisplayView, DateFieldDisplayView,
   ObjectWithNameFieldDisplayView, ArrayOfObjectsWithNameFieldDisplayView,
-  ArrayOfRelatedResourcesFieldDisplayView, ArrayOfRelatedFilesFieldDisplayView,
+  ArrayOfRelatedTagsFieldDisplayView, ArrayOfRelatedFilesFieldDisplayView,
   JudgementValueFieldDisplayView, MorphemeBreakFieldDisplayView,
   MorphemeGlossFieldDisplayView, PhoneticTranscriptionFieldDisplayView,
   GrammaticalityValueFieldDisplayView, TranslationsFieldDisplayView,
@@ -68,7 +68,7 @@ define [
     resourcesCollectionClass: SyntacticCategoriesCollection
     resourceViewClass: SyntacticCategoryView
 
-    resourceAsString: (resource) ->
+    __resourceAsString__: (resource) ->
       try
         resource.name
       catch
@@ -83,7 +83,7 @@ define [
     resourcesCollectionClass: ElicitationMethodsCollection
     resourceViewClass: ElicitationMethodView
 
-    resourceAsString: (resource) ->
+    __resourceAsString__: (resource) ->
       try
         resource.name
       catch
@@ -255,7 +255,7 @@ define [
       modifier: ModifierFieldDisplayView
       verifier: VerifierFieldDisplayView
       collections: ArrayOfObjectsWithTitleFieldDisplayView
-      tags: ArrayOfRelatedResourcesFieldDisplayView
+      tags: ArrayOfRelatedTagsFieldDisplayView
       files: ArrayOfRelatedFilesFieldDisplayView
 
     # Get an array of form attributes (form app settings model) for the

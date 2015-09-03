@@ -1,6 +1,7 @@
 define [
   './representation'
-], (RepresentationView) ->
+  './../templates/related-resource-representation'
+], (RepresentationView, relatedResourceRepresentationTemplate) ->
 
   # Related Resource Representation View
   # ------------------------------------
@@ -9,6 +10,8 @@ define [
   # link should cause the related resource to be displayed in a dialog box.
 
   class RelatedResourceRepresentationView extends RepresentationView
+
+    template: relatedResourceRepresentationTemplate
 
     initialize: (@context) ->
       @contextualize()
@@ -36,15 +39,10 @@ define [
         @getRelatedResourceId = -> @context.getRelatedResourceId.call @
 
     setContextValue: ->
+      @context.resourceNameHuman = @utils.camel2regular @context.resourceName
       try
         if @context.value
-          @context.value = "<a
-            href='javascript:;'
-            class='field-display-link
-                  dative-tooltip'
-            title='click here to view this #{@utils.camel2regular @resourceName}
-                  in the page'
-            >#{@resourceAsString @context.value}</a>"
+          @context.value = @resourceAsString @context.value
         else
           @context.value = ''
       catch error

@@ -51,6 +51,7 @@ define [
       title: @getTooltip()
       value: value
       label: @getLabel()
+      searchPatternsObject: @searchPatternsObject
       fieldDisplayLabelContainerClass: @fieldDisplayLabelContainerClass
       fieldDisplayRepresentationContainerClass:
         @fieldDisplayRepresentationContainerClass
@@ -74,6 +75,7 @@ define [
       @resource = options.resource or 'forms'
       @tooltipIsRefreshable = options.tooltipIsRefreshable or false
       @attribute = options.attribute
+      @searchPatternsObject = options.searchPatternsObject
       @activeServerType = @getActiveServerType()
       @context = @getContext()
       @labelView = @getLabelView()

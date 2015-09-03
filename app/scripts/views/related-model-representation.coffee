@@ -22,6 +22,7 @@ define [
     template: relatedModelRepresentationTemplate
 
     valueFormatter: (value) ->
+      console.log "RelatedModelRepresentationView's valueFormatter called on #{value}"
       try
         value.name
       catch

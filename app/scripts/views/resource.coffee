@@ -265,8 +265,6 @@ define [
     # `interlinearize` method of `FormBaseView` can split a value up and put it
     # in different parts of the DOM.
     highlightSearchMatches: ->
-      if @searchPatternsObject
-        console.log 'we should highlight search matches'
 
     # If we are working with an OLD backend, then we request data on our
     # related resources, if our globally held copies of those data haven't been
@@ -325,6 +323,7 @@ define [
       resource: @resourceNamePlural
       attribute: attribute # e.g., "name"
       model: @model
+      searchPatternsObject: @searchPatternsObject
 
     html: ->
       @$el

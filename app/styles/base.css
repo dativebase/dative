@@ -2146,3 +2146,10 @@ a.morpheme-link-perfect-match
   color: blue !important;
 }
 
+.dative-state-highlight
+{
+  /* border: solid 1px red !important; */
+  /* background-color: #FFFF00; */
+  background-color: rgba(255, 255, 0, 0.6);
+}
+

@@ -25,9 +25,6 @@ define [
     resourceViewClass: ResourceView
     relatedResourceRepresentationViewClass: RelatedResourceRepresentationView
 
-    # This method should return a string representation of the related resource.
-    resourceAsString: (resource) -> resource.name
-
     # Override this in a subclass to swap in a new representation view.
     getRepresentationView: ->
       new @relatedResourceRepresentationViewClass @context
@@ -42,7 +39,30 @@ define [
       context.resourceViewClass = @resourceViewClass
       context.relatedResourceRepresentationViewClass =
         @relatedResourceRepresentationViewClass
+      context.valueFormatter = (v) -> v
       context
+
+    # This method should return a string representation of the related resource.
+    __resourceAsString__: (resource) -> resource.name
+
+    resourceAsString: (resource) ->
+      try
+        if resource.name
+          if @context.searchPatternsObject
+            try
+              regex = @context.searchPatternsObject[@attributeName].name
+            catch
+              regex = null
+            if regex
+              @utils.highlightSearchMatch regex, resource.name
+            else
+              resource.name
+          else
+            resource.name
+        else
+          ''
+      catch
+        ''
 
     # Return an in-line CSS style to hide the HTML of an empty form attribute
     # Note the use of `=>` so that the ECO template knows to use this view's

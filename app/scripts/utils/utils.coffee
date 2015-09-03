@@ -393,10 +393,17 @@ define (require) ->
         break
     "#{bytes.toFixed(1)} #{units[u]}"
 
+  # Use `regex` to wrap `value` in <span> tags that will make it render as
+  # highlighted. Note: this assumes the type of regex generated in the
+  # `SearchModel` class.
+  highlightSearchMatch = (regex, value) ->
+    try
+      String(value).replace(regex, (a, b) ->
+        "<span class='dative-state-highlight'>#{b}</span>")
+    catch
+      value
 
-
-
-
+  highlightSearchMatch: highlightSearchMatch
   humanFileSize: humanFileSize
   isValidURL: isValidURL
   clone: clone

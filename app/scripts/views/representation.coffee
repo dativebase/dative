@@ -17,12 +17,21 @@ define [
 
     initialize: (@context) ->
 
-    valueFormatter: (value) -> value
+    valueFormatter: (value) =>
+      if @context.searchPatternsObject
+        regex = @context.searchPatternsObject[@context.attribute]
+        if regex
+          @utils.highlightSearchMatch regex, value
+        else
+          value
+      else
+        value
 
     template: valueRepresentationTemplate
 
     render: ->
-      @context.valueFormatter = @valueFormatter
+      if not @context.valueFormatter
+        @context.valueFormatter = @valueFormatter
       @$el.html @template(@context)
       @tooltipify()
       @postRender()

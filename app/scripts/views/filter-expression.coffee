@@ -438,7 +438,9 @@ define [
       else
         @consentToHideActionWidget = false
         Backbone.trigger 'filterExpressionsHideActionWidgets'
-        $actionWidgetContainer.slideDown('fast')
+        $actionWidgetContainer
+          .slideDown('fast')
+          .find('button').first().focus()
         @$('button.operator').first()
           .tooltip
             content: 'click here to hide the buttons for changing this node.'
@@ -622,18 +624,18 @@ define [
     formSubattributes: ->
       collections: @collectionAttributes
       corpora: [
-        'id'
-        'UUID'
-        'name'
-        'description'
         'content'
-        'enterer'
-        'modifier'
-        'form_search'
         'datetime_entered'
         'datetime_modified'
-        'tags'
+        'description'
+        'enterer'
         'files'
+        'form_search'
+        'id'
+        'modifier'
+        'name'
+        'tags'
+        'UUID'
       ]
       elicitation_method: [
         'id'
@@ -643,24 +645,25 @@ define [
       ]
       elicitor: @userAttributes
       enterer: @userAttributes
-      files: @fileAttributes
+      modifier: @userAttributes
+      files: @fileAttributesNonRelational
       memorizers: @userAttributes
       source: @sourceAttributes
       speaker: @speakerAttributes
       syntactic_category: [
+        'datetime_modified'
+        'description'
         'id'
         'name'
         'type'
-        'description'
-        'datetime_modified'
       ]
       tags: @tagAttributes
       translations: [
+        'datetime_modified'
+        'form_id'
+        'grammaticality'
         'id'
         'transcription'
-        'grammaticality'
-        'form_id'
-        'datetime_modified'
       ]
       verifier: @userAttributes
 
@@ -737,6 +740,24 @@ define [
       'page_content'
       'html'
       'datetime_modified'
+    ]
+
+    fileAttributesNonRelational: [
+      'id'
+      'date_elicited'
+      'datetime_entered'
+      'datetime_modified'
+      'filename'
+      'name'
+      'lossy_filename'
+      'MIME_type'
+      'size'
+      'description'
+      'utterance_type'
+      'url'
+      'password'
+      'start'
+      'end'
     ]
 
     fileAttributes: [
@@ -846,4 +867,5 @@ define [
       tags: 'name'
       translations: 'transcription'
       verifier: 'last_name'
+      modifier: 'last_name'
 

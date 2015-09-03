@@ -147,7 +147,7 @@ define [
 
     getPatternsObject: ->
       patterns = @getPatterns @get('search').filter
-      @_getPatternsObject patterns, true
+      @_getPatternsObject patterns
 
     # Return a "patterns" array with all of the "positive" filter
     # expressions (i.e., patterns) in the (OLD-style) filter expression, i.e.,
