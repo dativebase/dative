@@ -346,6 +346,7 @@ define [
       igtMap = {}
       wordCount = 0
       for attribute in @getFormAttributes @activeServerType, 'igt'
+
         className = @utils.snake2hyphen attribute # WARN: OLD-specific
         labelSelector = ".dative-field-display >
           .dative-field-display-label-container > label[for=#{attribute}]"
@@ -355,7 +356,11 @@ define [
           .dative-field-display-representation-container > .#{className}"
         $element = @$(selector).first()
         $element.css 'white-space', 'nowrap'
-        value = $element.text()
+
+        # value = $element.text()
+        value = @model.get(attribute) or '' # WARN: OLD-specific, cf. `getValue` of field.coffee.
+
+        patternMatchIndices = @getPatternMatchIndices value, attribute
         words = value.split /\s+/
         if words.length > wordCount then wordCount = words.length
         igtMap[attribute] =
@@ -364,7 +369,28 @@ define [
           value: value
           words: words
           title: title
+          patternMatchIndices: patternMatchIndices
       [igtMap, wordCount]
+
+    # If this attribute matches a search that we are browsing, then this method
+    # will return an array of 2-tuples containing start and end indices for the
+    # ranges within the value of this attribute that should be highlighted in
+    # order to indicate where the match(es) are.
+    # N.B.: this indexed-base strategy is necessary because the "words" will be
+    # split across distinct DOM nodes in the interlinear display yet the
+    # patterns matching a field may span those node boundaries.
+    getPatternMatchIndices: (value, attribute) ->
+      if @searchPatternsObject
+        regex = @searchPatternsObject[attribute]
+        if regex
+          indices = []
+          while match = regex.exec(value)
+            indices.push [match.index, (match.index + match[0].length)]
+          indices
+        else
+          null
+      else
+        null
 
     # Wrap each word of each IGT field in a <div> so that we can later query
     # the widths of these divs in order to determine where to place the words
@@ -499,6 +525,7 @@ define [
     displayIGTTables: (tablesData, igtMap, wordWidths) ->
       $tablesContainer = $ '<div class="igt-tables-container">'
       for tableData, index in tablesData
+        lastTable = if index is (tablesData.length - 1) then true else false
         leftIndent = @getIGTTableLeftIndent index
         $table = $ "<table class='igt-table' style='margin-bottom:
           #{@igtRowVerticalSpacer }px;'>"
@@ -525,9 +552,23 @@ define [
                             min-width: #{width}px;
                             max-width: #{width}px;
                             #{padding}'"
-            word = @getMorphemesAsLinks word, attribute
+
+            wordPatternMatchIndices =
+              @getWordPatternMatchIndices word, vector, index
+            if attribute in ['morpheme_break', 'morpheme_gloss']
+              word = @getMorphemesAsLinks word, attribute, wordPatternMatchIndices
+            else
+              word = @highlightWord word, wordPatternMatchIndices, attribute
+
+            firstWord = index is 0
+            lastWord = false
+            if lastTable and cellIndex is (tableData.length - 1)
+              lastWord = true
+            [prefix, suffix] = @getAffixes attribute, firstWord, lastWord, vector.words[index]
+
             $row.append $("<td class='igt-word-cell #{attrClass}'
-              #{style}>#{word}</td>")
+              #{style}>#{prefix}#{word}#{suffix}</td>")
+
           $table.append $row
         $tablesContainer.append $table
       $extantIGTContainer =
@@ -543,6 +584,81 @@ define [
             my: "right-300 top"
             at: 'right top'
             collision: 'flipfit'
+
+    # Return a 2-tuple `[prefix, suffix]` to circumfix around the word. This
+    # takes care of the "/" around the morpheme_break as well as the
+    # grammaticality before the transcription.
+    getAffixes: (attribute, firstWord, lastWord, word) ->
+      prefix = ''
+      suffix = ''
+      if firstWord
+        switch attribute
+          when 'transcription'
+            prefix = @model.get('grammaticality') or ''
+            if @searchPatternsObject
+              regex = @searchPatternsObject.grammaticality
+              if regex then prefix = @utils.highlightSearchMatch regex, prefix
+          when 'morpheme_break'
+            prefix = '/'
+          when 'phonetic_transcription'
+            prefix = '['
+          when 'narrow_phonetic_transcription'
+            prefix = '['
+      if lastWord
+        switch attribute
+          when 'morpheme_break'
+            suffix = '/'
+          when 'phonetic_transcription'
+            suffix = ']'
+          when 'narrow_phonetic_transcription'
+            suffix = ']'
+      [prefix, suffix]
+
+    # Enclose substrings of `word` in highlighting <span> tags. These
+    # substrings are the ones that match any search parameters.
+    highlightWord: (word, wordPatternMatchIndices, attribute) ->
+      if wordPatternMatchIndices.length > 0 and
+      attribute not in ['morpheme_break', 'morpheme_gloss']
+        pieces = []
+        left = 0
+        for [start, end], index in wordPatternMatchIndices.sort()
+          if start isnt 0 then pieces.push word[left...start]
+          pieces.push "<span class='dative-state-highlight'>"
+          pieces.push word[start...end]
+          pieces.push "</span>"
+          left = end
+          if index is wordPatternMatchIndices.length - 1 and
+          end isnt (word.length - 1)
+            pieces.push word[end...]
+        pieces.join('')
+      else
+        word
+
+    # Return an array of 2-tuples of the form [start-index, end-index] which
+    # describe the start and end points of any pattern-matching substrings
+    # within `word`. Used for highlighting pattern matches.
+    # - `wStart` is the start index of the *word* within the whole attr value
+    # - `wEnd` is the end index of the *word* within the whole attr value
+    # - `pStart` is the start index of the *pattern* within the whole attr value
+    # - `pEnd` is the end index of the *pattern* within the whole attr value
+    getWordPatternMatchIndices: (word, vector, index) ->
+      wordPatternMatchIndices = []
+      if vector.patternMatchIndices
+        wStart = vector.words[...index].join(' ').length + 1
+        if index is 0 then wStart -= 1
+        wEnd = wStart + word.length
+        for [pStart, pEnd] in vector.patternMatchIndices
+          if (wStart <= pStart and wEnd > pStart) or
+          (wStart > pStart and wStart <= pEnd)
+            tmp = pStart - wStart
+            if tmp < 0 then tmp = 0
+            wordPatternMatchIndex = [tmp]
+            if pEnd > wEnd
+              wordPatternMatchIndex.push word.length
+            else
+              wordPatternMatchIndex.push (word.length - (wEnd - pEnd))
+            wordPatternMatchIndices.push wordPatternMatchIndex
+      wordPatternMatchIndices
 
     # Transform morphemes into links on the default field display views. This
     # method should be called in the cases where IGT tabularization is not
@@ -569,13 +685,13 @@ define [
     # the logic that makes perfect matches into "blue" links and partial ones
     # into "green" links. Note that it depends on the OLD's `morpheme_break_ids`
     # and `morpheme_gloss_ids` attributes.
-    getMorphemesAsLinks: (word, attribute) ->
+    getMorphemesAsLinks: (word, attribute, wordPatternMatchIndices=null) ->
       try
-        @_getMorphemesAsLinks word, attribute
+        @_getMorphemesAsLinks word, attribute, wordPatternMatchIndices
       catch
         word
 
-    _getMorphemesAsLinks: (word, attribute) ->
+    _getMorphemesAsLinks: (word, attribute, wordPatternMatchIndices) ->
 
       result = []
 

@@ -13,3 +13,20 @@ define [
 
     template: translationRepresentationTemplate
 
+    valueFormatter: (value, component='transcription') =>
+      if @context.searchPatternsObject
+        if component is 'transcription'
+          regex = @context.searchPatternsObject[@context.attribute]?.transcription
+          if regex
+            @utils.highlightSearchMatch regex, value
+          else
+            value
+        else
+          regex = @context.searchPatternsObject[@context.attribute]?.grammaticality
+          if regex
+            @utils.highlightSearchMatch regex, value
+          else
+            value
+      else
+        value
+

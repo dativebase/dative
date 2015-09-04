@@ -211,7 +211,7 @@ define [
     # 'in'. TODO: relations still needing work: <=, >=, <, and >.
     getRegex: (relation, term) ->
       if relation is 'regex'
-        term
+        regex = term
       else if relation is 'like'
         # Clip off '%' on the edges so that the later `.replace` call
         # highlights only the pattern and not the entire value.
@@ -219,13 +219,20 @@ define [
           term = term[1...]
         if term.length > 1 and term[term.length - 1] is '%'
           term = term[...-1]
-        @escapeRegexChars(term).replace(/_/g, '.').replace(/%/g, '.*')
+        regex = @escapeRegexChars(term).replace(/_/g, '.').replace(/%/g, '.*')
       else if relation is '='
-        "^#{term}$"
+        regex = "^#{term}$"
       else if relation is 'in'
-        "(?:^#{term.join ')$|(?:^'})$"
+        regex = "(?:^#{term.join ')$|(?:^'})$"
       else
-        null
+        regex = null
+
+      # The OLD NFD-Unicode normalizes all data. So we need to normalize our
+      # regex string in order for all matches to work out correctly.
+      try
+        regex.normalize 'NFD'
+      catch
+        regex
 
     # Cf. http://stackoverflow.com/a/9310752/992730
     escapeRegexChars: (input) -> input.replace /[-[\]{}()*+?.,\\^$|#]/g, "\\$&"
