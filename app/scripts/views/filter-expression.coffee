@@ -470,7 +470,8 @@ define [
       try
         key = "#{@targetResourceName}_search_parameters"
         attrs = @options[key].attributes
-        _.keys(attrs).sort()
+        (x for x in _.keys(attrs).sort() \
+        when x not in ['morpheme_break_ids', 'morpheme_gloss_ids'])
       catch
         []
 
@@ -799,13 +800,11 @@ define [
       'elicitation_method'
       'translations'
       'syntax'
-      'morpheme_break_ids'
       'memorizers'
       'syntactic_category'
       'grammaticality'
       'syntactic_category_string'
       'datetime_modified'
-      'morpheme_gloss_ids'
       'date_elicited'
       'phonetic_transcription'
       'morpheme_gloss'

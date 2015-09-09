@@ -115,8 +115,12 @@ define [
       try
         id = (parseInt(x) for x in @$(event.target).attr('data-id').split(','))
       catch
-        console.log 'ERROR: unable to get id for morpheme clicked'
-        return
+        try
+          $anchor = @$(event.target).closest 'a.morpheme-link'
+          id = (parseInt(x) for x in $anchor.attr('data-id').split(','))
+        catch
+          console.log 'ERROR: unable to get id for morpheme clicked'
+          return
 
       morphemesCollection = new FormsCollection()
       @morphemeModel = new FormModel({}, {collection: morphemesCollection})
@@ -294,17 +298,18 @@ define [
     ############################################################################
     # IGT Intelinear Display Logic.
     ############################################################################
-    #
+
     # The following methods effect the interlinearization of the form
     # attributes that are designated as "igt" attributes. The procedure involves
     # inspecting the IGT attributes as they are displayed via their default
-    # field displays (cf. attribute2displayView), using the data gleaned from
-    # that to generate an HTML <table> representing the columnarly aligned IGT
-    # data, and then hiding the original field display representations. This
-    # works but it is not ideal since as a user updates IGT data the
-    # to-be-hidden field displays are revealed and are only re-hidden again
-    # when the interlinear display is refreshed after a period of user
-    # inactivity. See the method `refreshInterlinear` for how this works.
+    # field displays (cf. attribute2displayView), using the (length) data
+    # gleaned from that to generate an HTML <table> representing the columnarly
+    # aligned IGT data, and then hiding the original field display
+    # representations. This works but it is not ideal since as a user updates
+    # IGT data the to-be-hidden field displays are revealed and are only
+    # re-hidden again when the interlinear display is refreshed after a period
+    # of user inactivity. See the method `refreshInterlinear` for how this
+    # works. For now I find this method of interlinearization acceptable.
 
     # The `ResourceView` base class calls this at the end of
     # `renderDisplayViews`.
@@ -330,7 +335,7 @@ define [
       # If we only have one word, then there is no point in creating an
       # interlinear display.
       if wordCount < 2
-        @createMorphemeLinksOnDefaultFieldDisplays()
+        @linksAndPatternMatchesOnDefaultFieldDisplays igtMap
         return
 
       # Wrap the IGT words in <div> tags so we can get their widths.
@@ -372,20 +377,40 @@ define [
           patternMatchIndices: patternMatchIndices
       [igtMap, wordCount]
 
-    # If this attribute matches a search that we are browsing, then this method
-    # will return an array of 2-tuples containing start and end indices for the
-    # ranges within the value of this attribute that should be highlighted in
-    # order to indicate where the match(es) are.
-    # N.B.: this indexed-base strategy is necessary because the "words" will be
-    # split across distinct DOM nodes in the interlinear display yet the
-    # patterns matching a field may span those node boundaries.
+    # If `attribute` matches a search that we are browsing, then
+    # `getPatternMatchIndices` will return an array of 2-tuples containing
+    # start and end indices for the ranges within the value of this attribute
+    # that should be highlighted in order to indicate where the match(es) are.
+    # N.B.: this indexed-based strategy is necessary because the "words" will be
+    # split across distinct DOM nodes by the interlinear display (and possibly
+    # also by the morpheme-interlinking anchor tags) yet the patterns matching
+    # a field may span those node boundaries.
     getPatternMatchIndices: (value, attribute) ->
       if @searchPatternsObject
         regex = @searchPatternsObject[attribute]
         if regex
           indices = []
+          valLen = value.length
           while match = regex.exec(value)
-            indices.push [match.index, (match.index + match[0].length)]
+            l = match.index
+            r = match.index + match[0].length
+            pair = [l, r]
+            prevPair = indices[(indices.length - 1)]
+            # Simply change the right-edge index of the last existing pattern
+            # match index if the two patterns are contiguous---we don't want
+            # stuff like `[[0, 1], [1, 2], [2, 3], ...]` generated from a regex
+            # like /./ since that would result in uneccessary extra
+            # computations as well as Unicode combining characters being
+            # separated from their base characters by <span> tags.
+            if prevPair and prevPair[1] is l
+              prevPair[1] = r
+            else
+              indices.push [l, r]
+            # This is necessary because calling `regex.exec str` for some
+            # regexes (e.g., `/((?:.*))/g`) will result in an infinite loop.
+            if l is valLen
+              regex.lastIndex = 0
+              break
           indices
         else
           null
@@ -541,7 +566,7 @@ define [
                 for='#{attribute}'
                 class='dative-field-label dative-tooltip'
                 title='#{vector.title}'
-                >#{attribute}</label></td>"
+                >#{@utils.snake2regular attribute}</label></td>"
             $row.append $(label)
           for index, cellIndex in tableData
             word = vector.words[index]
@@ -556,15 +581,17 @@ define [
             wordPatternMatchIndices =
               @getWordPatternMatchIndices word, vector, index
             if attribute in ['morpheme_break', 'morpheme_gloss']
-              word = @getMorphemesAsLinks word, attribute, wordPatternMatchIndices
+              word =
+                @getMorphemesAsLinks(word, attribute, wordPatternMatchIndices)
             else
-              word = @highlightWord word, wordPatternMatchIndices, attribute
+              word = @highlightWord word, wordPatternMatchIndices
 
             firstWord = index is 0
             lastWord = false
             if lastTable and cellIndex is (tableData.length - 1)
               lastWord = true
-            [prefix, suffix] = @getAffixes attribute, firstWord, lastWord, vector.words[index]
+            [prefix, suffix] =
+              @getAffixes attribute, firstWord, lastWord
 
             $row.append $("<td class='igt-word-cell #{attrClass}'
               #{style}>#{prefix}#{word}#{suffix}</td>")
@@ -587,8 +614,10 @@ define [
 
     # Return a 2-tuple `[prefix, suffix]` to circumfix around the word. This
     # takes care of the "/" around the morpheme_break as well as the
-    # grammaticality before the transcription.
-    getAffixes: (attribute, firstWord, lastWord, word) ->
+    # grammaticality before the transcription. Params `firstWord` and
+    # `lastWord` are booleans indicating whether the affixes we are returning
+    # are for the first word and/or last word of a form.
+    getAffixes: (attribute, firstWord, lastWord) ->
       prefix = ''
       suffix = ''
       if firstWord
@@ -616,12 +645,11 @@ define [
 
     # Enclose substrings of `word` in highlighting <span> tags. These
     # substrings are the ones that match any search parameters.
-    highlightWord: (word, wordPatternMatchIndices, attribute) ->
-      if wordPatternMatchIndices.length > 0 and
-      attribute not in ['morpheme_break', 'morpheme_gloss']
+    highlightWord: (word, wordPatternMatchIndices) ->
+      if wordPatternMatchIndices.length > 0
         pieces = []
         left = 0
-        for [start, end], index in wordPatternMatchIndices.sort()
+        for [start, end], index in wordPatternMatchIndices
           if start isnt 0 then pieces.push word[left...start]
           pieces.push "<span class='dative-state-highlight'>"
           pieces.push word[start...end]
@@ -634,18 +662,39 @@ define [
       else
         word
 
+    # Enclose substrings of `morpheme` in highlighting <span> tags. These
+    # substrings are the ones that match any search parameters.
+    highlightMorpheme: (morpheme, morphPatternMatchIndices) ->
+      if morphPatternMatchIndices.length > 0
+        pieces = []
+        left = 0
+        for [start, end], index in morphPatternMatchIndices.sort()
+          if start isnt 0 then pieces.push morpheme[left...start]
+          pieces.push "<span class='dative-state-highlight'>"
+          pieces.push morpheme[start...end]
+          pieces.push "</span>"
+          left = end
+          if index is morphPatternMatchIndices.length - 1 and
+          end isnt (morpheme.length - 1)
+            pieces.push morpheme[end...]
+        pieces.join('')
+      else
+        morpheme
+
     # Return an array of 2-tuples of the form [start-index, end-index] which
     # describe the start and end points of any pattern-matching substrings
     # within `word`. Used for highlighting pattern matches.
-    # - `wStart` is the start index of the *word* within the whole attr value
-    # - `wEnd` is the end index of the *word* within the whole attr value
-    # - `pStart` is the start index of the *pattern* within the whole attr value
-    # - `pEnd` is the end index of the *pattern* within the whole attr value
-    getWordPatternMatchIndices: (word, vector, index) ->
+    # - `sentIndex`: the index of the word in the sentence-as-an-array-of-words
+    # - `vector`   : an array of data about the sentence
+    # - `wStart`   : the start index of the *word* within the sentence-as-string
+    # - `wEnd`     : the end index of the *word* within the sentence-as-string
+    # - `pStart`   : the start index of the *pattern* within the sentence-as-string
+    # - `pEnd`     : the end index of the *pattern* within the sentence-as-string
+    getWordPatternMatchIndices: (word, vector, sentIndex) ->
       wordPatternMatchIndices = []
       if vector.patternMatchIndices
-        wStart = vector.words[...index].join(' ').length + 1
-        if index is 0 then wStart -= 1
+        wStart = vector.words[...sentIndex].join(' ').length + 1
+        if sentIndex is 0 then wStart -= 1
         wEnd = wStart + word.length
         for [pStart, pEnd] in vector.patternMatchIndices
           if (wStart <= pStart and wEnd > pStart) or
@@ -660,23 +709,67 @@ define [
             wordPatternMatchIndices.push wordPatternMatchIndex
       wordPatternMatchIndices
 
+    # Return an array of 2-tuples of the form [start-index, end-index] which
+    # describe the start and end points of any pattern-matching substrings
+    # within `morpheme`. Used for highlighting pattern matches within
+    # individual morphemes, which is necessary when morphemes are enclosed in
+    # <a> tags for morpheme inter-linking.
+    # - `wordPatternMatchIndices`: array of 2-tuples of indices indicating
+    #    where search patterns match in the word
+    # - `morphemes`: array of morphemes (including delimiters)
+    # - `morphIndex`: the index of the morpheme in the word-as-an-array-of-morphemes
+    # - `mStart`   : the start index of the *morpheme* within the word-as-string
+    # - `mEnd`     : the end index of the *morpheme* within the word-as-string
+    # - `pStart`   : the start index of a *pattern* within the word-as-string
+    # - `pEnd`     : the end index of a *pattern* within the word-as-string
+    getMorphemePatternMatchIndices: (morpheme, wordPatternMatchIndices,
+    morphemes, morphIndex) ->
+      morphPatternMatchIndices = []
+      if wordPatternMatchIndices.length > 0
+        mStart = morphemes[...morphIndex].join('').length
+        mEnd = mStart + morpheme.length
+        for [pStart, pEnd] in wordPatternMatchIndices
+          if (mStart <= pStart and mEnd > pStart) or
+          (mStart > pStart and mStart < pEnd)
+            tmp = pStart - mStart
+            if tmp < 0 then tmp = 0
+            morphPatternMatchIndex = [tmp]
+            if pEnd > mEnd
+              morphPatternMatchIndex.push morpheme.length
+            else
+              morphPatternMatchIndex.push (morpheme.length - (mEnd - pEnd))
+            morphPatternMatchIndices.push morphPatternMatchIndex
+      morphPatternMatchIndices
+
     # Transform morphemes into links on the default field display views. This
     # method should be called in the cases where IGT tabularization is not
     # appropriate but where we still want the morphemes to be links that
     # trigger the rendering of `FormView`s in dialog boxes.
-    createMorphemeLinksOnDefaultFieldDisplays: ->
+    linksAndPatternMatchesOnDefaultFieldDisplays: (igtMap) ->
       for attribute in @getFormAttributes @activeServerType, 'igt'
-        if attribute in ['morpheme_break', 'morpheme_gloss']
-          className = @utils.snake2hyphen attribute # WARN: OLD-specific
-          selector = ".dative-field-display >
-            .dative-field-display-representation-container > .#{className}"
-          $element = @$(selector).first()
-          value = $element.text()
+        className = @utils.snake2hyphen attribute # WARN: OLD-specific
+        selector = ".dative-field-display >
+          .dative-field-display-representation-container > .#{className}"
+        $element = @$(selector).first()
+        value = @model.get attribute
+        if value
           words = value.split /\s+/
           newValue = []
-          for word in words
-            newWord = @getMorphemesAsLinks word, attribute
-            newValue.push newWord
+          for word, index in words
+            wordPatternMatchIndices =
+              @getWordPatternMatchIndices word, igtMap[attribute], index
+            if attribute in ['morpheme_break', 'morpheme_gloss']
+              newWord =
+                @getMorphemesAsLinks word, attribute, wordPatternMatchIndices
+            else
+              newWord = @highlightWord word, wordPatternMatchIndices
+
+            firstWord = index is 0
+            lastWord = if index is (words.length - 1) then true else false
+            [prefix, suffix] =
+              @getAffixes attribute, firstWord, lastWord
+
+            newValue.push "#{prefix}#{newWord}#{suffix}"
           $element.html newValue.join(' ')
       @$('.morpheme-link.dative-tooltip').tooltip()
 
@@ -685,10 +778,12 @@ define [
     # the logic that makes perfect matches into "blue" links and partial ones
     # into "green" links. Note that it depends on the OLD's `morpheme_break_ids`
     # and `morpheme_gloss_ids` attributes.
-    getMorphemesAsLinks: (word, attribute, wordPatternMatchIndices=null) ->
+    getMorphemesAsLinks: (word, attribute, wordPatternMatchIndices=[]) ->
       try
-        @_getMorphemesAsLinks word, attribute, wordPatternMatchIndices
-      catch
+        @_getMorphemesAsLinks(word, attribute, wordPatternMatchIndices)
+      catch e
+        console.log 'Error in getting morphemes as links ...'
+        console.log e
         word
 
     _getMorphemesAsLinks: (word, attribute, wordPatternMatchIndices) ->
@@ -700,78 +795,64 @@ define [
       splitter = new RegExp "(#{delims.join '|'})"
 
       if attribute in ['morpheme_break', 'morpheme_gloss']
-        @prefix = @suffix = ''
         value = @model.get attribute
         words = value.split /\s+/
         index = words.indexOf word
         if index is -1
-          [word, index] = @morphemeBreakIndexRepair word, words
-        if index is -1
           result.push word
         else
-          linkData = @model.get("#{attribute}_ids")[index]
+          linkData = @model.get("#{attribute}_ids")?[index]
           morphemes = word.split splitter
           morphemeCount = (m for m in morphemes when m not in delims).length
           morphIndex = 0
-          for morpheme in morphemes
+          for morpheme, morphDelimIndex in morphemes
+            morphPatternMatchIndices = @getMorphemePatternMatchIndices(
+              morpheme, wordPatternMatchIndices, morphemes, morphDelimIndex)
             if morpheme in delims
-              result.push morpheme
+              result.push @highlightMorpheme morpheme, morphPatternMatchIndices
             else
-              morphLinkData = linkData[morphIndex]
-              if morphLinkData.length > 0
-                matchType = @getMatchType attribute, index, morphIndex
-                # morphLinkData = morphLinkData[0]
-                [id, meta] = @getIdMeta morphLinkData
-                morphemeLink = "<a
-                  class='dative-tooltip morpheme-link
-                    morpheme-link-#{matchType}-match'
-                  title='#{meta}. Click to view this morpheme in the page'
-                  href='javascript:;'
-                  data-id='#{id}'>#{morpheme}</a>"
-                result.push(@affixRepair(morphemeLink, index, morphIndex,
-                  words, morphemeCount))
+              if linkData
+                morphLinkData = linkData[morphIndex]
+                if morphLinkData.length > 0
+                  matchType = @getMatchType attribute, index, morphIndex
+                  [id, meta, tooltip] =
+                    @getIdMetaTooltip morphLinkData, attribute
+                  morphemeLink = "<a
+                    class='dative-tooltip morpheme-link
+                      morpheme-link-#{matchType}-match'
+                    title='#{meta}. #{tooltip}'
+                    href='javascript:;'
+                    data-id='#{id}'
+                    >#{@highlightMorpheme morpheme, morphPatternMatchIndices}</a>"
+                  result.push morphemeLink
+                else
+                  result.push(@highlightMorpheme(morpheme,
+                    morphPatternMatchIndices))
               else
-                result.push(@affixRepair(morpheme, index, morphIndex, words,
-                  morphemeCount))
+                result.push(@highlightMorpheme(morpheme,
+                  morphPatternMatchIndices))
               morphIndex += 1
         result.join ''
       else
         word
 
-    getIdMeta: (morphLinkData) ->
+    # Process `morphLinkData` (an array of arrays that encode information about
+    # which morphemes in the database match the morpheme under inspection) and
+    # return:
+    # - `id`: a string of comma-delimited integer ids,
+    # - `meta`: a string listing the matches for this morpheme shape/gloss, and
+    # - `tooltip`: a tooltip string to indicate what the link does.
+    getIdMetaTooltip: (morphLinkData, attribute) ->
       meta = ("‘#{x[1]}’ (#{x[2]})" for x in morphLinkData)
         .join '; '
-        .replace "'", '&apos;'
+        .replace /'/g, '&apos;'
       id = (x[0] for x in morphLinkData).join ','
-      [id, meta]
-
-    # Restore the affixes to the IGT line, e.g., the "/" that enclose morpheme
-    # break values.
-    affixRepair: (morpheme, wordIndex, morphIndex, words, morphemeCount) ->
-      if wordIndex is 0 and morphIndex is 0
-        morpheme = "#{@prefix}#{morpheme}"
-      if wordIndex is (words.length - 1) and
-      morphIndex is (morphemeCount - 1)
-        morpheme = "#{morpheme}#{@suffix}"
-      morpheme
-
-    # If word begins or ends with '/', then this may have been caused by prior
-    # formatting on the morpheme break value. We attempt to compensate for that
-    # here.
-    morphemeBreakIndexRepair: (word, words) ->
-      if word[0] is '/'
-        @prefix = '/'
-        word = word[1...]
-        index = words.indexOf word
+      type = if attribute is 'morpheme_break' then 'shape' else 'gloss'
+      if morphLinkData.length is 1
+        tooltip = "Click to view the morpheme that matches this #{type}."
       else
-        @prefix = ''
-      if word[word.length - 1] is '/'
-        @suffix = '/'
-        word = word[...-1]
-        index = words.indexOf word
-      else
-        @suffix = ''
-      [word, index]
+        tooltip = "Click to view the morphemes that match this #{type}."
+      [id, meta, tooltip]
 
     # Does the morpheme have a perfect match in the database or only a partial
     # one? Each morpheme shape/gloss has an array of 3-tuple arrays that
