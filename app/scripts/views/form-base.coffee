@@ -396,21 +396,37 @@ define [
             r = match.index + match[0].length
             pair = [l, r]
             prevPair = indices[(indices.length - 1)]
-            # Simply change the right-edge index of the last existing pattern
-            # match index if the two patterns are contiguous---we don't want
-            # stuff like `[[0, 1], [1, 2], [2, 3], ...]` generated from a regex
-            # like /./ since that would result in uneccessary extra
-            # computations as well as Unicode combining characters being
-            # separated from their base characters by <span> tags.
-            if prevPair and prevPair[1] is l
+
+            # If the current match overlaps with the previous one but the
+            # current one has a greater right-edge index, then we simply set
+            # the previous match's right-edge index to the right-edge index of
+            # the current match. This allows for overlapping matches to be
+            # highlighted while also avoiding the creation of multiple
+            # contiguous match pairs---that is, we don't want stuff like
+            # `[[0, 1], [1, 2], [2, 3], ...]` generated from a regex like /./
+            # since that would result in uneccessary extra computations as
+            # well as Unicode combining characters being separated from their
+            # base characters by <span> tags.
+            if prevPair and (l >= prevPair[0]) and (l <= prevPair[1]) and
+            (r >= prevPair[1])
               prevPair[1] = r
             else
               indices.push [l, r]
-            # This is necessary because calling `regex.exec str` for some
-            # regexes (e.g., `/((?:.*))/g`) will result in an infinite loop.
+
+            # We break out of this loop if our current left-edge index is the
+            # same as the current value's length. This is necessary because
+            # calling `regex.exec str` for some regexes (e.g., `/((?:.*))/g`)
+            # will result in an infinite loop.
             if l is valLen
               regex.lastIndex = 0
               break
+            # We manually increment `regex.lastIndex` in order to get around
+            # JavaScript's default behaviour, which is to set `lastIndex` to
+            # the right edge of the previous match. We need to do this because
+            # we need to account for overlapping matches.
+            else
+              regex.lastIndex = match.index + 1
+
           indices
         else
           null
@@ -668,7 +684,7 @@ define [
       if morphPatternMatchIndices.length > 0
         pieces = []
         left = 0
-        for [start, end], index in morphPatternMatchIndices.sort()
+        for [start, end], index in morphPatternMatchIndices
           if start isnt 0 then pieces.push morpheme[left...start]
           pieces.push "<span class='dative-state-highlight'>"
           pieces.push morpheme[start...end]

@@ -726,7 +726,8 @@ define [
     searchableOption: (o) ->
       if o.searchable
         if o.search
-          @visibleView.setSearch o.search
+          smartSearch = o.smartSearch or null
+          @visibleView.setSearch o.search, smartSearch
         else
           @visibleView.deleteSearch()
 

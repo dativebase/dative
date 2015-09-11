@@ -1747,6 +1747,17 @@ div.scoped-cell,
   border-radius: 15px;
 }
 
+.filter-expression-operand:not(.filter-expression-operand-array)
+{
+  display: flex;
+  align-items: center;
+}
+
+.filter-expression-operand span.ui-selectmenu-button
+{
+  margin-right: 0.5em;
+}
+
 div.filter-expression-operator,
 .filter-expression-operand,
 div.filter-expression
@@ -2151,5 +2162,62 @@ a.morpheme-link-perfect-match
   /* border: solid 1px red !important; */
   /* background-color: #FFFF00; */
   background-color: rgba(255, 255, 0, 0.6);
+}
+
+.smart-search-input
+{
+  font-size: 200% !important;
+  width: 80%;
+  max-width: 80%;
+  margin: 1em auto;
+  display: block;
+  height: 1.5em;
+  min-height: 1.5em;
+  padding: 0.25em 0.25em 0.25em 0.25em;
+  font-family: 'GentiumPlus', serif !important;
+}
+
+.smart-search-preview-container
+{
+  margin: 0em auto 3em auto;
+  width: 80%;
+}
+
+.smart-query-preview-data *
+{
+  vertical-align: top;
+  margin-bottom: 1em;
+}
+
+.smart-query-preview-match-count,
+.smart-query-preview-description,
+.smart-query-preview-buttons
+{
+  display: inline-block;
+  padding: 0.25em;
+}
+
+.smart-query-preview-match-count,
+.smart-query-preview-description
+{
+  font-size: 14pt;
+  font-family: 'GentiumPlus', serif;
+}
+
+.smart-query-preview-match-count
+{
+  width: 20%;
+  position: relative;
+}
+
+.smart-query-preview-description
+{
+  width: 45%;
+  line-height: 125%;
+}
+
+.smart-query-preview-buttons
+{
+  width: 25%;
 }
 

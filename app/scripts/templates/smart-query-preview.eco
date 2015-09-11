@@ -1,0 +1,30 @@
+<div class='smart-query-preview-data'>
+
+    <% if @matchCount is null: %>
+        <div class='smart-query-preview-match-count large-unicode-font'
+            >search pending ...</div>
+    <% else: %>
+        <% noun = if @matchCount is 1 then 'match' else 'matches' %>
+        <div class='smart-query-preview-match-count large-unicode-font'
+            ><%= @matchCount %> <%= noun %></div>
+    <% end %>
+
+    <div class='smart-query-preview-description large-unicode-font'
+        ><%- @description %></div>
+
+    <div class='smart-query-preview-buttons'>
+
+        <button class='smart-query-preview-view-example dative-tooltip'
+            title='See an example of a resource that matches this query'
+            >Example</button>
+
+        <button class='smart-query-preview-browse dative-tooltip'
+            title='Browse the resources that match this query'
+            >Browse</button>
+
+    </div>
+
+</div>
+
+<div class='smart-query-preview-example-match-container'></div>
+

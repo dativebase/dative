@@ -782,8 +782,12 @@ define [
     # time.
     getResourceViews: ->
       if @collection.search
-        searchModel = new @searchModelClass(search: @collection.search)
+        searchModel = new @searchModelClass
+          search: @collection.search
+          smart_search: @collection.smartSearch
         searchPatternsObject = searchModel.getPatternsObject()
+        @resourceSearchView.model = searchModel
+        @resourceSearchView.render()
       else
         searchPatternsObject = null
 
@@ -1145,17 +1149,20 @@ define [
 
     # Give this resources view a (new) search object. This will affect what
     # forms we are browsing.
-    setSearch: (@search) ->
+    setSearch: (@search, @smartSearch=null) ->
       @searchChanged = true
       @paginator = new Paginator page=1, items=0, itemsPerPage=@itemsPerPage
       @collection.search = @search
+      @collection.smartSearch = @smartSearch
 
     # Delete this resource view's a search object. This will also affect what
     # forms we are browsing.
     deleteSearch: ->
       @searchChanged = true
       @search = null
+      @smartSearch = null
       @collection.search = null
+      @collection.smartSearch = null
       @paginator = new Paginator page=1, items=0, itemsPerPage=@itemsPerPage
 
 
