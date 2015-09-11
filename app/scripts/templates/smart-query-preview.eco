@@ -4,9 +4,13 @@
         <div class='smart-query-preview-match-count large-unicode-font'
             >search pending ...</div>
     <% else: %>
-        <% noun = if @matchCount is 1 then 'match' else 'matches' %>
-        <div class='smart-query-preview-match-count large-unicode-font'
-            ><%= @matchCount %> <%= noun %></div>
+        <% if @matchCount is 1: %>
+            <div class='smart-query-preview-match-count large-unicode-font'
+                ><%= @integerWithCommas @matchCount %> match</div>
+        <% else: %>
+            <div class='smart-query-preview-match-count large-unicode-font'
+                ><%= @integerWithCommas @matchCount %> matches</div>
+        <% end %>
     <% end %>
 
     <div class='smart-query-preview-description large-unicode-font'

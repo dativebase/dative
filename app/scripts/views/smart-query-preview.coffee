@@ -31,7 +31,8 @@ define [
       @listenToEvents()
       context =
         description: @description
-        matchCount: @utils.integerWithCommas @matchCount
+        matchCount: @matchCount
+        integerWithCommas: @utils.integerWithCommas
       @$el.html @template(context)
       if @matchCount is 0
         @$('button').button disabled: true
@@ -88,9 +89,12 @@ define [
       else
         @$('button').button 'disable'
         @matchExampleView = null
-      noun = if @matchCount is 1 then 'match' else 'matches'
-      @$('.smart-query-preview-match-count')
-        .text "#{@utils.integerWithCommas @matchCount} #{noun}"
+      if @matchCount is 1
+        noun = 'match'
+      else
+        noun = 'matches'
+      matchCountMessage = "#{@utils.integerWithCommas @matchCount} #{noun}"
+      @$('.smart-query-preview-match-count').text matchCountMessage
 
     searchFail: (errorMessage, targetResourceModel) ->
       @matchCount = 0
