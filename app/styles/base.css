@@ -1277,17 +1277,30 @@ div.dative-display
   text-align: justify;
 }
 
-.dative-exporter-dialog .dative-exporter-dialog-content-container
+.dative-exporter-dialog .dative-exporter-dialog-content-container,
+.exporter-export-content-pre-container
 {
-  overflow-y: scroll;
+  overflow: scroll;
 }
 
-.dative-exporter-dialog .dative-exporter-dialog-content
+.exporter-export-content-pre-container
+{
+  max-height: 20em;
+}
+
+.exporter-export-content-container
+{
+  margin-top: 1em;
+}
+
+.dative-exporter-dialog .dative-exporter-dialog-content,
+.exporter-export-content
 {
   font-size: 120%;
 }
 
-.dative-exporter-dialog .dative-exporter-dialog-content pre
+.dative-exporter-dialog .dative-exporter-dialog-content pre,
+.exporter-export-content pre
 {
   line-height: 120%;
 }
@@ -2219,5 +2232,34 @@ a.morpheme-link-perfect-match
 .smart-query-preview-buttons
 {
   width: 25%;
+}
+
+.exporter
+{
+  margin: 2em auto;
+  width: 90%;
+}
+
+.exporter-controls,
+.exporter-export-controls
+{
+  display: inline-block;
+  width: 23%;
+  vertical-align: top;
+  text-align: right;
+}
+
+.exporter-meta,
+.exporter-export-content-pre-container
+{
+  width: 75%;
+  max-width: 75%;
+  display: inline-block;
+}
+
+.exporter-description,
+.exporter-export-content
+{
+  margin: 0.5em 0 0 1em;
 }
 

@@ -86,6 +86,7 @@ define [
       'click .toggle-all-labels': 'toggleAllLabels'
       'click .toggle-search': 'toggleResourceSearchViewAnimate'
       'click .corpus-display': 'displayCorpus'
+      'click .export-resource-collection': 'exportResourceCollection'
       'click .search-display-check': 'showResourceSearchViewAnimate'
       'keydown': 'keyboardShortcuts'
       'keyup': 'keyup'
@@ -93,6 +94,11 @@ define [
       # close-circuit the tab loop and keep focus in the view.
       'focus .focusable-top':  'focusLastElement'
       'focus .focusable-bottom':  'focusFirstElement'
+
+    exportResourceCollection: (event) ->
+      console.log 'exportResourceCollection'
+      if event then @stopEvent event
+      Backbone.trigger 'openExporterDialog', collection: @collection
 
     displayCorpus: ->
       @corpusView = new SubcorpusView model: @corpus
@@ -869,6 +875,13 @@ define [
             at: "right center"
             collision: "flipfit"
       @$('button.toggle-search')
+        .button()
+        .tooltip
+          position:
+            my: "left+160 center"
+            at: "right center"
+            collision: "flipfit"
+      @$('button.export-resource-collection')
         .button()
         .tooltip
           position:

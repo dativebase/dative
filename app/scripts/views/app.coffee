@@ -1076,6 +1076,6 @@ define [
 
     openExporterDialog: (options) ->
       @exporterDialog.setToBeExported options
-      @exporterDialog.generateExport()
+      #@exporterDialog.generateExport()
       @exporterDialog.dialogOpen()
 

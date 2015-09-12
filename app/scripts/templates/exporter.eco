@@ -1,0 +1,33 @@
+<div class='exporter'>
+
+    <div class='exporter-interface'>
+
+        <div class='exporter-meta'>
+            <h1 class='exporter-title'><%= @title %></h1>
+            <div class='exporter-description'><%= @description %></div>
+        </div>
+
+        <div class='exporter-controls'>
+            <button class='export dative-tooltip'
+                title='Click to generate an export using this exporter'
+                >Export</button>
+        </div>
+
+    </div>
+
+    <div class='exporter-export-content-container'>
+
+        <div class='exporter-export-content-pre-container ui-corner-all'>
+            <div class='exporter-export-content'></div>
+        </div>
+
+        <div class='exporter-export-controls'>
+            <button class='select-all dative-tooltip'
+                title='Select all of the text of this export'
+                >Select all</button>
+        </div>
+
+    </div>
+
+</div>
+
