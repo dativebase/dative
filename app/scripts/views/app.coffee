@@ -134,7 +134,7 @@ define [
   #
   # This is the spine of the application. Only one AppView object is created
   # and it controls the creation and rendering of all of the subviews that
-  # control the content in the body of the page.
+  # control the content in the body of the page. 
 
   class AppView extends BaseView
 
