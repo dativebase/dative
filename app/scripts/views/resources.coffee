@@ -96,7 +96,6 @@ define [
       'focus .focusable-bottom':  'focusFirstElement'
 
     exportResourceCollection: (event) ->
-      console.log 'exportResourceCollection'
       if event then @stopEvent event
       Backbone.trigger 'openExporterDialog', collection: @collection
 

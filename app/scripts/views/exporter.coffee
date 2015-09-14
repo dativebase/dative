@@ -28,6 +28,8 @@ define [
     exportResources: ->
       ['*']
 
+    hasSettings: -> false
+
     contentSelector: -> '.exporter-export-content'
     contentContainerSelector: -> '.exporter-export-content-container'
 
@@ -50,6 +52,7 @@ define [
       context =
         title: @title()
         description: @description()
+        hasSettings: @hasSettings()
       @$el.html @template(context)
 
     guify: ->
@@ -57,12 +60,14 @@ define [
       @$('.dative-tooltip').tooltip
         position: @tooltipPositionRight('+100')
       @$(@contentContainerSelector()).hide()
+      @$('.exporter-settings').hide()
 
     listenToEvents: ->
       super
 
     events:
       'click .export': 'export'
+      'click .exporter-settings-button': 'toggleSettingsInterface'
       'click .select-all': 'selectAllExportText'
 
     # Select/highlight all of the export text.
@@ -70,9 +75,10 @@ define [
       @utils.selectText @$('.exporter-export-content pre')[0]
 
     setModel: (@model) ->
-      console.log 'in setModel with this resource ...'
-      console.log @model.resourceName
       @collection = null
+      @clearExportConent()
+      @updateDescription()
+      @updateControls()
       if 'model' in @exportTypes() or '*' in @exportTypes()
         if '*' in @exportResources() or
         @model.resourceName in @exportResources()
@@ -83,9 +89,10 @@ define [
         @$el.hide()
 
     setCollection: (@collection) ->
-      console.log 'in setCollection with this resource ...'
-      console.log @collection.resourceName
       @model = null
+      @clearExportConent()
+      @updateDescription()
+      @updateControls()
       if 'collection' in @exportTypes() or '*' in @exportTypes()
         if '*' in @exportResources() or
         @collection.resourceName in @exportResources()
@@ -95,18 +102,72 @@ define [
       else
         @$el.hide()
 
+    updateDescription: ->
+      description = @description()
+      @$('.exporter-description').text description
+
+    updateControls: ->
+
+    clearExportConent: ->
+      @$('.exporter-export-content').html ''
+
     # The user has clicked on the "export" button so we should initiate the
     # request for the data.
     export: (event) ->
 
     spinnerOptions: ->
       options = super
-      options.top = '50%'
-      options.left = '-10%'
+      options.top = '0%'
+      options.left = '0%'
+      options.zIndex = '200'
+      options.modal = true
       options
 
-    spin: -> @$('.selector').first().spin @spinnerOptions()
+    fetchResourceCollection: ->
+      options = {} # add pagination params here, if needed
+      @fetchResourceCollectionStart()
+      @collection.model.cors.request(
+        parseJSON: false # No point in parsing JSON to JS if we just want JSON in the end anyways!
+        method: @collection.getResourcesHTTPMethod()
+        url: @collection.getResourcesPaginationURL options
+        payload: @collection.getResourcesPayload options
+        onload: (responseJSONString, xhr) =>
+          @fetchResourceCollectionEnd()
+          if xhr.status is 200
+            @fetchResourceCollectionSuccess responseJSONString
+          else
+            @fetchResourceCollectionFail()
+        onerror: (responseJSON) =>
+          @fetchResourceCollectionEnd()
+          @fetchResourceCollectionFail()
+      )
 
-    stopSpin: -> @$('.selector').first().spin false
+    fetchResourceCollectionEnd: ->
 
+    fetchResourceCollectionStart: ->
+
+    fetchResourceCollectionFail: ->
+      console.log 'fetch resource collection fail'
+      @$('.exporter-export-content')
+        .html 'Sorry, an error occurred when generating your export.'
+
+    fetchResourceCollectionSuccess: (collectionJSONString) ->
+
+    selectAllButton: ->
+      button = "<button class='select-all dative-tooltip'
+        title='Select all of the text of this export'
+        >Select all</button>"
+      @$('.exporter-export-controls').append button
+      @$('.exporter-export-controls button.select-all').button()
+      @$('.exporter-export-controls .dative-tooltip').tooltip()
+
+    removeSelectAllButton: ->
+      @$('.select-all').remove()
+
+    toggleSettingsInterface: ->
+      $target = @$ '.exporter-settings'
+      if $target.is ':visible'
+        $target.slideUp()
+      else
+        $target.slideDown().html 'hey there'
 

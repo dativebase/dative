@@ -8,25 +8,82 @@ define [
 
   class ExporterCollectionJSONView extends ExporterView
 
-    title: -> 'JSON (JavaScript Object Notation)'
+    title: -> 'JSON'
 
     description: ->
-      'JSON export of a collection of resources'
+      if @model
+        "JSON (JavaScript Object Notation) export of #{@model.resourceName}
+          #{@model.id}"
+      else if @collection
+        if @collection.corpus
+          "JSON (JavaScript Object Notation) export of the forms in
+            #{@collection.corpus.name}."
+        else if @collection.search
+          if @collection.search.name
+            "JSON (JavaScript Object Notation) export of the
+              #{@collection.resourceNamePlural} in search
+              #{@collection.search.name}."
+          else
+            "JSON (JavaScript Object Notation) export of the
+              #{@collection.resourceNamePlural} that match the search currently
+              being browsed."
+        else
+          "JSON (JavaScript Object Notation) export of all
+            #{@collection.resourceNamePlural} in the database."
+      else
+        'JSON (JavaScript Object Notation) export of a collection of resources'
 
     # This array should contain 'collection' or 'model' or '*'
     exportTypes: -> ['*']
 
+    listenToEvents: ->
+      super
+
+    updateControls: ->
+      if @model
+        @selectAllButton()
+      else
+        @removeSelectAllButton()
+
     export: ->
-      console.log 'you want to export as JSON'
       @$(@contentContainerSelector()).slideDown()
       $contentContainer = @$ @contentSelector()
       if @model
         content = "<pre>#{@getModelAsFormattedJSON @model}</pre>"
       else if @collection
-        content = "<pre>#{@getCollectionAsFormattedJSON @collection}</pre>"
+        if @collection.corpus
+          msg = "fetching a corpus of #{@collection.resourceNamePlural} ..."
+        else if @collection.search
+          msg = "fetching a search over #{@collection.resourceNamePlural} ..."
+        else
+          msg = "fetching all #{@collection.resourceNamePlural} ..."
+        @fetchResourceCollection()
+        content = "<i class='fa fa-fw fa-circle-o-notch fa-spin'></i>#{msg}"
       else
         content = 'Sorry, unable to generate an export.'
       $contentContainer.html content
+
+    # We have retrieved a string of JSON (`collectionJSONString`) so we simply
+    # create an anchor/link to it that causes the browser to download the file.
+    fetchResourceCollectionSuccess: (collectionJSONString) ->
+      super
+      blob = new Blob [collectionJSONString], {type : 'application/json'}
+      url = URL.createObjectURL blob
+      if @collection.corpus
+        name = "corpus-of-#{@collection.resourceNamePlural}-#{(new Date()).toISOString()}.json"
+      else if @collection.search
+        name = "search-over-#{@collection.resourceNamePlural}-#{(new Date()).toISOString()}.json"
+      else
+        name = "#{@collection.resourceNamePlural}-#{(new Date()).toISOString()}.json"
+      anchor = "<a href='#{url}'
+        class='export-link dative-tooltip'
+        type='application/json'
+        title='Click to download your export file'
+        download='#{name}'
+        target='_blank'
+        ><i class='fa fa-fw fa-file-o'></i>#{name}</a>"
+      @$('.exporter-export-content').html anchor
+      @$('.export-link.dative-tooltip').tooltip()
 
     getModelAsFormattedJSON: (model) ->
       modelObject = @model.toJSON()
@@ -40,3 +97,4 @@ define [
         delete modelObject.collection
         modelArray.push modelObject
       JSON.stringify modelArray, undefined, 4
+

@@ -2261,5 +2261,16 @@ a.morpheme-link-perfect-match
 .exporter-export-content
 {
   margin: 0.5em 0 0 1em;
+  line-height: 1.5em;
+}
+
+.exporter-export-content
+{
+  line-height: 2em;
+}
+
+a.export-link
+{
+  line-height: 2em;
 }
 
