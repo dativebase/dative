@@ -6,7 +6,7 @@ define [
   # This class defines an interface to the exporter as well as the logic for
   # querying the server and formatting the data for export.
 
-  class ExporterCollectionJSONView extends ExporterView
+  class ExporterJSONView extends ExporterView
 
     title: -> 'JSON'
 
@@ -36,14 +36,9 @@ define [
     # This array should contain 'collection' or 'model' or '*'
     exportTypes: -> ['*']
 
-    listenToEvents: ->
-      super
-
     updateControls: ->
-      if @model
-        @selectAllButton()
-      else
-        @removeSelectAllButton()
+      @clearControls()
+      if @model then @selectAllButton()
 
     export: ->
       @$(@contentContainerSelector()).slideDown()
@@ -85,16 +80,9 @@ define [
       @$('.exporter-export-content').html anchor
       @$('.export-link.dative-tooltip').tooltip()
 
+    # We pretty-print a single model's worth of JSON, because Why not?
     getModelAsFormattedJSON: (model) ->
       modelObject = @model.toJSON()
       delete modelObject.collection
       JSON.stringify modelObject, undefined, 4
-
-    getCollectionAsFormattedJSON: (collection) ->
-      collectionArray = @collection.toJSON()
-      modelArray = []
-      for modelObject in collectionArray
-        delete modelObject.collection
-        modelArray.push modelObject
-      JSON.stringify modelArray, undefined, 4
 

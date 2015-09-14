@@ -1,22 +1,22 @@
 define [
   './base'
   './exporter-collection-csv'
-  './exporter-collection-json'
+  './exporter-json'
   './../templates/exporter-dialog'
-], (BaseView, ExporterCollectionCSVView, ExporterCollectionJSONView,
+], (BaseView, ExporterCollectionCSVView, ExporterJSONView,
   exporterDialogTemplate) ->
 
   # Exporter Dialog View
   # --------------------
   #
-  # This is a jQueryUI dialog that contains the interface for choosing export
-  # options and displaying the export of a form or a collection of forms.
+  # This is a jQueryUI dialog that contains the interface for interacting with
+  # various exporters that can be used to export various types of data.
 
   class ExporterDialogView extends BaseView
 
     registeredExporterClasses: [
       ExporterCollectionCSVView
-      ExporterCollectionJSONView
+      ExporterJSONView
     ]
 
     template: exporterDialogTemplate

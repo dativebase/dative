@@ -4,7 +4,7 @@
 
         <div class='exporter-meta'>
             <h1 class='exporter-title'><%= @title %></h1>
-            <div class='exporter-description'><%= @description %></div>
+            <div class='exporter-description'><%- @description %></div>
         </div>
 
         <div class='exporter-controls'>

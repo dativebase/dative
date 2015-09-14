@@ -106,6 +106,7 @@ define [
       @listenTo Backbone, 'resourceModelAlreadyDisplayedInDialog',
         @resourceModelAlreadyDisplayedInDialog
       @listenTo Backbone, 'resourceAlreadySelected', @resourceAlreadySelected
+      @listenTo Backbone, 'csvExportError', @csvExportError
 
       @listenToCRUDResources()
 
@@ -588,6 +589,15 @@ define [
         title: 'Already selected'
         content: "#{name} #{resourceId} has already being selected and cannot
           be selected more than once."
+        type: 'warning'
+      @renderNotification notification
+
+    csvExportError: ->
+      notification = new NotificationView
+        title: 'CSV Export Error'
+        content: "At least one error occurred while generating your CSV export.
+          Search the generated CSV file for 'ERROR' to determine which resource
+          and resource attribute caused the error."
         type: 'warning'
       @renderNotification notification
 
