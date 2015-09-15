@@ -16,7 +16,7 @@ define ['./resource'], (ResourceModel) ->
     defaults: ->
       first_name: ''           # Max 255 chars, can't be empty.
       last_name: ''            # Max 255 chars, can't be empty.
-      dialect: ''              # Max 255 chars, 
+      dialect: ''              # Max 255 chars,
       markup_language: ''      # One of "Markdown" or "reStructuredText",
                                # defaults to "reStructuredText".
       page_content: ''         # A string of lightweight markup.

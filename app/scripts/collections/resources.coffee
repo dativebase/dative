@@ -47,7 +47,7 @@ define [
 
     # Fetch Resources (with pagination, if needed)
     # OLD case: GET `<URL>/<resource_name_plural>?page=x&items_per_page=y
-    # FieldDB case: 
+    # FieldDB case:
     # See http://online-linguistic-database.readthedocs.org/en/latest/interface.html#get-resources
     fetchResources: (options) ->
       Backbone.trigger "fetch#{@resourceNamePluralCapitalized}Start"

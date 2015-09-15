@@ -81,7 +81,7 @@ define [
       id: null              # An integer relational id
       enterer: null         # an object (attributes: `id`, `first_name`,
                             # `last_name`, `role`)
-      datetime_modified: "" # <string>  (datetime search was last modified;
+      datetime_modified: "" # <string>  (datetime search was last modified,
                             # format and construction same as
                             # `datetime_entered`.)
 

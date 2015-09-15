@@ -445,7 +445,7 @@ define [
           $content = $element.find @dataContentSelector
           $label = $element.find @dataLabelsSelector
           $content.fadeOut
-            complete: =>
+            complete: ->
               $label.fadeIn().css('display', 'inline-block')
               $content.fadeIn().removeClass 'no-label'
       @dataLabelsVisible = true
@@ -463,7 +463,7 @@ define [
           $element = @$ element
           $content = $element.find @dataContentSelector
           $content.fadeOut
-            complete: =>
+            complete: ->
               $content.fadeIn().addClass 'no-label'
       @contentOnlyVisiblePost()
 

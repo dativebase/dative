@@ -130,20 +130,6 @@ define [
       @getInputViews()
       @render()
 
-    # Remove the input set view with index = `index` from the DOM and destroy
-    # it. This is called when the "x" button is clicked.
-    removeInputView: (index) ->
-      inputView = @inputViews[index]
-      inputView.$el.slideUp
-        complete: =>
-          inputView.close()
-          inputView.$el
-            .prev()
-            .find('button').focus()
-          inputView.$el.remove()
-          delete @inputViews[index]
-          @trigger 'setToModel' # FieldView listens for this and calls `setToModel`
-
     # Render an input set view; setting `animate` to true will cause `slideDown`.
     renderInputView: (inputView, animate=false) ->
       @$el.append inputView.render().el

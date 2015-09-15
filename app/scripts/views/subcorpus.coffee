@@ -39,7 +39,7 @@ define [
 
     resourceName: 'subcorpus'
 
-    resourceNameHumanReadable: => 'corpus'
+    resourceNameHumanReadable: -> 'corpus'
 
     resourceAddWidgetView: SubcorpusAddWidgetView
 

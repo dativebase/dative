@@ -134,7 +134,7 @@ define [
   #
   # This is the spine of the application. Only one AppView object is created
   # and it controls the creation and rendering of all of the subviews that
-  # control the content in the body of the page. 
+  # control the content in the body of the page.
 
   class AppView extends BaseView
 
@@ -345,7 +345,7 @@ define [
               Backbone.trigger 'authenticate:logout'
             console.log 'Asking again'
             @confirmIdentityErrorCount = @confirmIdentityErrorCount or 0
-            @confirmIdentityErrorCount++
+            @confirmIdentityErrorCount += 1
             @authenticateConfirmIdentity "#{@originalMessage}
               #{loginDetails.userFriendlyErrors.join ' '}"
       )
@@ -838,7 +838,7 @@ define [
       linkHTML = $jQueryUILinkElement.get(0).outerHTML
       $('#font-awesome-css').after linkHTML
       outerCallback = =>
-        innerCallback = =>
+        innerCallback = ->
           Backbone.trigger 'application-settings:jQueryUIThemeChanged'
         @constructor.refreshJQueryUIColors innerCallback
       @listenForLinkOnload outerCallback
@@ -992,7 +992,7 @@ define [
             .get('fieldDBApplication')
             .authentication
             .confirmIdentity(password: dialog.response)
-            .then successCallback, failureCallback 
+            .then successCallback, failureCallback
       ,
         cancelCallback
       )

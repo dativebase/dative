@@ -186,7 +186,7 @@ define (require) ->
     if seconds < 0
       prefix = 'in '
       suffix = ''
-    else 
+    else
       prefix = ''
       suffix = ' ago'
     seconds = Math.abs(seconds)
@@ -388,7 +388,7 @@ define (require) ->
     u = -1
     loop
       bytes /= thresh
-      ++u
+      a += 1
       if not ((Math.abs(bytes) >= thresh) and (u < (units.length - 1)))
         break
     "#{bytes.toFixed(1)} #{units[u]}"

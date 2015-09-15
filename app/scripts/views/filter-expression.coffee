@@ -579,7 +579,7 @@ define [
         filterExpressionSubview.$el
           .hide()
           .fadeIn
-            complete: =>
+            complete: ->
               filterExpressionSubview
                 .$('button, .ui-selectmenu-button, .textarea').first().focus()
       @rendered filterExpressionSubview

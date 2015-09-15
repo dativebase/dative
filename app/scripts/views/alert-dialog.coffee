@@ -66,7 +66,7 @@ define [
         create: =>
           @$('.dative-alert-dialog-target').first().find('button').attr('tabindex', 0)
             .end()
-        open: =>
+        open: ->
 
     tooltipify: ->
       @$('button.ok')

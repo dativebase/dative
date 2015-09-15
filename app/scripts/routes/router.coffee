@@ -28,7 +28,7 @@ define [
           route2 = "#{utils.camel2hyphen resourceName}/:resourceId"
           methodName2 = "request#{resourceCapitalized}View"
           eventName2 = "request:#{resourceCapitalized}View"
-          @[methodName2] = (resourceId) =>
+          @[methodName2] = (resourceId) ->
             Backbone.trigger eventName2, resourceId
           @route route2, methodName2
 

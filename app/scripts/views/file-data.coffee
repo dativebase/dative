@@ -187,7 +187,7 @@ define [
       </audio>"
       @$('div.file-data-container').html audioHTML
 
-    # Try to get <HTML> for embedding an externally-hosted resource. 
+    # Try to get <HTML> for embedding an externally-hosted resource.
     getEmbedCode: ->
       url = @model.get 'url'      # If there is no URL, there is no embed code.
       if not url then return null

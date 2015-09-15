@@ -210,8 +210,9 @@ define [
 
 
       id: null               # <int> relational id
-      datetime_modified: ""  # <string>  (datetime resource was last modified;
-                             # format and construction same as `datetime_entered`.)
+      datetime_modified: ""  # <string>  (datetime resource was last modified,
+                             # format and construction same as
+                             # `datetime_entered`.)
 
     editableAttributes: [
       'file'
