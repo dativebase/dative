@@ -9,7 +9,7 @@ define [
   #
   # For displaying individual OLD application settings models/resources.
 
-  class OLDApplicationSettingsView extends ResourceView
+  class OLDApplicationSettingsResourceView extends ResourceView
 
     resourceName: 'oldApplicationSettings'
 
