@@ -16,6 +16,10 @@ define [
     tagName: 'div'
     template: serversTemplate
 
+    # Return `true` if you want the triangle button for toggling the servers
+    # view.
+    hideable: -> false
+
     initialize: (options) ->
       @serverTypes = options.serverTypes
       @serverViews = []
@@ -24,7 +28,7 @@ define [
           model: server
           serverTypes: @serverTypes
         @serverViews.push newServerView
-      @bodyVisible = false
+      @bodyVisible = options.bodyVisible or false
 
     listenToEvents: ->
       @listenTo Backbone, 'removeServerView', @removeServerView
@@ -48,9 +52,20 @@ define [
       'keydown button.add-server': 'addServerKeys'
       'click button.toggle-appear': 'toggleServerConfig'
       'click button.add-server': 'addServer'
+      'click button.servers-help': 'serversHelp'
+
+    # Tell the Help dialog to open itself and search for "servers"
+    # and scroll to the Xth match. WARN: this is brittle because if the help
+    # HTML changes, then the Xth match may not be what we want....
+    serversHelp: ->
+      Backbone.trigger(
+        'helpDialog:openTo',
+        searchTerm: "servers"
+        scrollToIndex: 1
+      )
 
     render: ->
-      @$el.html @template()
+      @$el.html @template(hideable: @hideable())
       @guify()
       @$widgetBody = @$('div.dative-widget-body').first()
       container = document.createDocumentFragment()
@@ -89,8 +104,10 @@ define [
 
       @$('button').button().attr('tabindex', 0)
 
+      @$('button.servers-help')
+        .tooltip position: @tooltipPositionRight()
+
       @$('button.toggle-appear')
-        .button()
         .tooltip
           position:
             my: "right-20 center"
@@ -98,7 +115,6 @@ define [
             collision: "flipfit"
 
       @$('button.add-server')
-        .button()
         .tooltip
           position:
             my: "right-50 center"

@@ -537,7 +537,8 @@ div.dative-page-header-title
 .add-form-widget,
 .update-form-widget,
 .dative-shadowed-widget,
-.dative-form-object.expanded
+.dative-form-object.expanded,
+.big-button
 {
     box-shadow: 5px 5px 10px rgba(0, 0, 0, 0.5);
     -webkit-box-shadow: 5px 5px 10px rgba(0, 0, 0, 0.5);
@@ -545,7 +546,8 @@ div.dative-page-header-title
 }
 
 .dative-form-object.expanded:focus,
-.dative-shadowed-widget.expanded:focus
+.dative-shadowed-widget.expanded:focus,
+.dative-shadowed-widget.jquery-theme-image-container:focus
 {
     /*outline: none !important;*/
     /*box-shadow: 0 0 10px orange !important;*/
@@ -672,7 +674,9 @@ div.linguistic-data-entry-form ul.fieldset label,
 .ui-button:focus,
 .ms-list:focus,
 input:not(.ui-autocomplete-input):focus,
-textarea:focus {
+div.big-button:focus,
+textarea:focus
+{
     outline: none !important;
     box-shadow: 0 0 10px orange !important;
 }
@@ -2272,5 +2276,59 @@ a.morpheme-link-perfect-match
 a.export-link
 {
   line-height: 2em;
+}
+
+div.application-settings-big-buttons,
+div.application-settings-interfaces
+{
+  margin: 1em;
+  text-align: center;
+}
+
+div.big-button
+{
+  cursor: pointer;
+  padding: 2em;
+  margin: 1em;
+  width: 15em;
+  height: 8em;
+  display: inline-block;
+  border-width: 1px;
+  border-style: solid;
+}
+
+div.big-button-icon
+{
+  text-align: center;
+  margin-top: 2em;
+}
+
+div.big-button-text
+{
+  text-align: center;
+  font-size: 150%;
+}
+
+.jquery-theme-image-container
+{
+  cursor: pointer;
+  display: inline-block;
+  margin: 1em;
+  padding: 0.25em;
+  border-width: 1px;
+  border-style: solid;
+}
+
+.jquery-theme-name
+{
+  margin-bottom: 0.5em;
+  font-size: 125%;
+}
+
+.servers-interface label[for=activeServer]
+{
+  position: relative;
+  top: 0.75em;
+  margin-right: 1em;
 }
 

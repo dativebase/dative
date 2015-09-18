@@ -24,6 +24,10 @@ define [
       'click button.activate-server': 'activateServer'
       'selectmenuchange': 'toggleServerCodeSelect'
 
+      'keyup input': 'setModelFromGUI'
+      'selectmenuchange': 'setModelFromGUI'
+      #'click': 'setModelFromGUI'
+
     listenToEvents: ->
       @stopListening()
       @undelegateEvents()
@@ -122,6 +126,7 @@ define [
         .tooltip content: 'make this server the active one'
 
     activateServer: ->
+      console.log 'activateServer of ServerView'
       # The ApplicationSettingsView changes the active server.
       Backbone.trigger 'activateServer', @model.get('id')
 
@@ -219,7 +224,7 @@ define [
       @$('.ui-selectmenu-button').filter('.server-type')
         .tooltip
           items: 'span'
-          content: "is it a FieldDB server or an OLD one?"
+          content: "Is it a FieldDB server or an OLD one?"
           position: position
 
       @$('.ui-selectmenu-button').filter('.server-code').each ->

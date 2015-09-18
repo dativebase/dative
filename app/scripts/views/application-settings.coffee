@@ -7,10 +7,204 @@ define [
 ], (Backbone, BaseView, ServersView, ActiveServerView,
   applicationSettingsTemplate) ->
 
-  # Application Settings View
-  # -------------------------
-
   class ApplicationSettingsView extends BaseView
+
+    tagName: 'div'
+    template: applicationSettingsTemplate
+
+    events:
+      'click button.all-settings': 'showOnlySettingsList'
+      'click .big-button.servers': 'showServersInterface'
+      'click .big-button.appearance': 'showAppearanceInterface'
+      'click .big-button.server-settings': 'showServerSettingsInterface'
+      'click .jquery-theme-image-container': 'changeJQueryUITheme'
+      'click .application-settings-help': 'applicationSettingsHelp'
+      'keydown .big-button': 'keydownBigButton'
+      'keydown .jquery-theme-image-container': 'keydownJQueryThemeImageContainer'
+      'selectmenuchange select[name=activeServer]': 'setModelFromGUI'
+
+    # Tell the Help dialog to open itself and search for "application settings"
+    # and scroll to the Xth match. WARN: this is brittle because if the help
+    # HTML changes, then the Xth match may not be what we want....
+    applicationSettingsHelp: ->
+      Backbone.trigger(
+        'helpDialog:openTo',
+        searchTerm: "application settings"
+        scrollToIndex: 1
+      )
+
+    setModelFromGUI: ->
+      # We don't want to change the active server if we are logged in with it.
+      if not @loggedIn()
+        selectedActiveServerId = @$('select[name=activeServer]').val()
+        activeServer = @model.get('servers').get selectedActiveServerId
+        @model.set 'activeServer', activeServer
+      @serversView.setCollectionFromGUI()
+      # @model.set 'activeJQueryUITheme', @$('select[name=css-theme]').val()
+      @model.save()
+
+    keydownBigButton: (event) ->
+      if event.which is 13
+        @$(event.currentTarget).click()
+
+    keydownJQueryThemeImageContainer: (event) ->
+      if event.which is 13
+        @$(event.currentTarget).click()
+
+    initialize: ->
+      @serversView = new ServersView
+        collection: @model.get('servers')
+        serverTypes: @model.get('serverTypes')
+        bodyVisible: true
+      @activeServerView = new ActiveServerView
+        model: @model
+        tooltipPosition:
+          my: "right-100 center"
+          at: "left center"
+          collision: "flipfit"
+        width: 500
+
+    listenToEvents: ->
+      @stopListening()
+      @undelegateEvents()
+      @listenTo Backbone, 'activateServer', @activateServer
+      @listenTo Backbone, 'removeServerView', @setModelFromGUI
+      @delegateEvents()
+
+    activateServer: (id) ->
+      @$('select[name=activeServer]')
+        .val(id)
+        .selectmenu('refresh')
+      @setModelFromGUI()
+
+    # Change the jQuery UI CSS Theme
+    changeJQueryUITheme: (event) ->
+      try
+        themeName =
+          (x for x in event.currentTarget.className.split(/\s+/) \
+          when @utils.startsWith(x, 'theme-'))[0][6...]
+      catch
+        console.log 'Error occured while attempting to to change the jQuery
+          theme'
+        return
+      @$('.jquery-theme-image-container')
+        .removeClass 'ui-state-highlight'
+      @$(event.currentTarget).addClass 'ui-state-highlight'
+      @model.set 'activeJQueryUITheme', themeName
+      @model.save()
+      Backbone.trigger 'applicationSettings:changeTheme'
+
+    showSettingsList: ->
+      @$('.application-settings-big-buttons').show()
+
+    hideSettingsList: ->
+      @$('.application-settings-big-buttons').hide()
+
+    showInterfaceContainer: ->
+      @$('.application-settings-interfaces').show()
+
+    hideInterfaceContainer: ->
+      @$('.application-settings-interfaces').hide()
+
+    hideInterfaces: ->
+      @$('.application-settings-interface').hide()
+
+    showOnlySettingsList: ->
+      @hideInterfaceContainer()
+      @hideAllSettingsButton()
+      @showSettingsList()
+
+    hideAllSettingsButton: ->
+      @$('button.all-settings').hide()
+
+    showAllSettingsButton: ->
+      @$('button.all-settings').show()
+
+    showOnlyInterfaces: ->
+      @hideSettingsList()
+      @showAllSettingsButton()
+      @showInterfaceContainer()
+
+    showServersInterface: ->
+      @showOnlyInterfaces()
+      @hideInterfaces()
+      @$('.servers-interface').show()
+
+    showAppearanceInterface: ->
+      @showOnlyInterfaces()
+      @hideInterfaces()
+      @$('.appearance-interface').show()
+
+    showServerSettingsInterface: ->
+      @showOnlyInterfaces()
+      @hideInterfaces()
+      @$('.server-settings-interface').show()
+
+    render: (taskId) ->
+      @html()
+      @renderServersView()
+      @renderActiveServerView()
+      @matchHeights()
+      @guify()
+      @listenToEvents()
+      Backbone.trigger 'longTask:deregister', taskId
+      @fixRoundedBorders()
+      @$('.application-settings-interfaces').hide()
+      @hideAllSettingsButton()
+      @$('.big-button').first().focus()
+      @$('#dative-page-body').scroll => @closeAllTooltips()
+      @
+
+    renderServersView: ->
+      @serversView.setElement @$('div.servers-collection').first()
+      @serversView.render()
+      @rendered @serversView
+
+    renderActiveServerView: ->
+      @activeServerView.setElement @$('div.active-server').first()
+      @activeServerView.render()
+      @rendered @activeServerView
+
+    html: ->
+      try
+        activeJQueryUIThemeHumanReadable =
+          (x for x in @model.get('jQueryUIThemes') \
+          when x[0] is @model.get('activeJQueryUITheme'))[0][1]
+      catch
+        activeJQueryUIThemeHumanReadable =
+          @model.get('activeJQueryUITheme')
+
+      params = _.extend(
+        {
+          headerTitle: 'Application Settings'
+          activeJQueryUIThemeHumanReadable: activeJQueryUIThemeHumanReadable
+          loggedIn: @loggedIn()
+        },
+        @model.attributes
+      )
+      @$el.html @template(params)
+
+    loggedIn: -> @model.get 'loggedIn'
+
+    guify: ->
+      @$('.big-button')
+        .css 'border-color', @constructor.jQueryUIColors().defBo
+        .attr 'tabindex', 0
+        .tooltip()
+      @$('.button-container-left button,.button-container-right button')
+        .button()
+        .tooltip()
+      @$('.jquery-theme-image-container')
+        .css 'border-color', @constructor.jQueryUIColors().defBo
+        .tooltip position: @tooltipPositionLeft('-20')
+
+
+  # Application Settings View PREVIOUS
+  # ----------------------------------
+  #
+  # Components of this should be reused in the new application settings ...
+
+  class ApplicationSettingsView_PREVIOUS extends BaseView
 
     tagName: 'div'
     template: applicationSettingsTemplate
@@ -63,6 +257,8 @@ define [
       @listenToEvents()
       Backbone.trigger 'longTask:deregister', taskId
       @fixRoundedBorders()
+      @hideAllSettingsButton()
+      @$('.big-button').first().focus()
       @
 
     html: ->
@@ -91,7 +287,7 @@ define [
         activeServer = @model.get('servers').get selectedActiveServerId
         @model.set 'activeServer', activeServer
       @serversView.setCollectionFromGUI()
-      @model.set 'activeJQueryUITheme', @$('select[name=css-theme]').val()
+      # @model.set 'activeJQueryUITheme', @$('select[name=css-theme]').val()
       @model.save()
 
     guify: ->
@@ -229,4 +425,6 @@ define [
           callback()
           clearInterval ti
       ti = setInterval func, 10
+
+  ApplicationSettingsView
 

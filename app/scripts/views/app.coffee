@@ -195,7 +195,10 @@ define [
       @listenTo Backbone, 'showResourceModelInDialog',
         @showResourceModelInDialog
       @listenTo Backbone, 'openExporterDialog', @openExporterDialog
+      @listenTo Backbone, 'routerNavigateRequest', @routerNavigateRequest
       @listenToResources()
+
+    routerNavigateRequest: (route) -> @router.navigate route
 
     # Listen for resource-related events. The resources and relevant events
     # are configured by the `@myResources` object.
