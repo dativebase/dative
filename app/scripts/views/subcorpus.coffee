@@ -9,7 +9,7 @@ define [
   './date-field-display'
   './object-with-name-field-display'
   './array-of-objects-with-name-field-display'
-  './array-of-related-resources-field-display'
+  './array-of-related-tags-field-display'
   './enterer-field-display'
   './modifier-field-display'
   './../models/search'
@@ -18,7 +18,7 @@ define [
   FieldDisplayView, RelatedResourceFieldDisplayView,
   PersonFieldDisplayView, DateFieldDisplayView, ObjectWithNameFieldDisplayView,
   ArrayOfObjectsWithNameFieldDisplayView,
-  ArrayOfRelatedResourcesFieldDisplayView, EntererFieldDisplayView,
+  ArrayOfRelatedTagsFieldDisplayView, EntererFieldDisplayView,
   ModifierFieldDisplayView, SearchModel, SearchesCollection) ->
 
   class FormSearchDisplayView extends RelatedResourceFieldDisplayView
@@ -39,7 +39,7 @@ define [
 
     resourceName: 'subcorpus'
 
-    resourceNameHumanReadable: => 'corpus'
+    resourceNameHumanReadable: -> 'corpus'
 
     resourceAddWidgetView: SubcorpusAddWidgetView
 
@@ -68,7 +68,7 @@ define [
     ]
 
     attribute2displayView:
-      tags: ArrayOfRelatedResourcesFieldDisplayView
+      tags: ArrayOfRelatedTagsFieldDisplayView
       form_search: FormSearchDisplayView
       enterer: EntererFieldDisplayView
       modifier: ModifierFieldDisplayView

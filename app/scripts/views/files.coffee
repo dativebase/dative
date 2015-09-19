@@ -49,6 +49,6 @@ define [
     resourcesCollection: FilesCollection
     resourceModel: FileModel
     searchable: true
-    searchView: FileSearchWidgetView
-    searchModel: FileSearchModel
+    searchViewClass: FileSearchWidgetView
+    searchModelClass: FileSearchModel
 

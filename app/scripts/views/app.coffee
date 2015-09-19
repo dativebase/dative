@@ -195,7 +195,10 @@ define [
       @listenTo Backbone, 'showResourceModelInDialog',
         @showResourceModelInDialog
       @listenTo Backbone, 'openExporterDialog', @openExporterDialog
+      @listenTo Backbone, 'routerNavigateRequest', @routerNavigateRequest
       @listenToResources()
+
+    routerNavigateRequest: (route) -> @router.navigate route
 
     # Listen for resource-related events. The resources and relevant events
     # are configured by the `@myResources` object.
@@ -345,7 +348,7 @@ define [
               Backbone.trigger 'authenticate:logout'
             console.log 'Asking again'
             @confirmIdentityErrorCount = @confirmIdentityErrorCount or 0
-            @confirmIdentityErrorCount++
+            @confirmIdentityErrorCount += 1
             @authenticateConfirmIdentity "#{@originalMessage}
               #{loginDetails.userFriendlyErrors.join ' '}"
       )
@@ -726,7 +729,8 @@ define [
     searchableOption: (o) ->
       if o.searchable
         if o.search
-          @visibleView.setSearch o.search
+          smartSearch = o.smartSearch or null
+          @visibleView.setSearch o.search, smartSearch
         else
           @visibleView.deleteSearch()
 
@@ -837,7 +841,7 @@ define [
       linkHTML = $jQueryUILinkElement.get(0).outerHTML
       $('#font-awesome-css').after linkHTML
       outerCallback = =>
-        innerCallback = =>
+        innerCallback = ->
           Backbone.trigger 'application-settings:jQueryUIThemeChanged'
         @constructor.refreshJQueryUIColors innerCallback
       @listenForLinkOnload outerCallback
@@ -991,7 +995,7 @@ define [
             .get('fieldDBApplication')
             .authentication
             .confirmIdentity(password: dialog.response)
-            .then successCallback, failureCallback 
+            .then successCallback, failureCallback
       ,
         cancelCallback
       )
@@ -1075,6 +1079,6 @@ define [
 
     openExporterDialog: (options) ->
       @exporterDialog.setToBeExported options
-      @exporterDialog.generateExport()
+      #@exporterDialog.generateExport()
       @exporterDialog.dialogOpen()
 

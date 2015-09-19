@@ -62,6 +62,6 @@ define [
 
     searchable: true
 
-    searchView: SearchWidgetView
-    searchModel: SearchModel
+    searchViewClass: SearchWidgetView
+    searchModelClass: SearchModel
 

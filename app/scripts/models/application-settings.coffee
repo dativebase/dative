@@ -47,7 +47,7 @@ define [
           url: 'package.json',
           type: 'GET'
           dataType: 'json'
-          error: (jqXHR, textStatus, errorThrown) =>
+          error: (jqXHR, textStatus, errorThrown) ->
             console.log "Ajax request for package.json threw an error:
               #{errorThrown}"
           success: (packageDetails, textStatus, jqXHR) =>

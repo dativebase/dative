@@ -43,3 +43,8 @@ define [
       'keydown textarea, input, .ui-selectmenu-button, .ms-container':
         'controlEnterSubmit'
 
+    controlEnterSubmit: (event) ->
+      if event.which is 13 and event.ctrlKey
+        @stopEvent event
+        @trigger 'search'
+

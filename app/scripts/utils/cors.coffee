@@ -7,7 +7,7 @@ define [], ->
 
   class CORS
 
-    vocal: true
+    vocal: false
 
     request: (options={}) ->
       try
@@ -93,35 +93,62 @@ define [], ->
     # of the handlers so that they receive an object representation of the
     # response body.
     _getHandlers: (options, method, url) ->
-      onload = @_jsonify(options.onload or ->
-        console.log "Successful request to #{method} #{url}.") if @vocal
-      onerror = @_jsonify(options.onerror or ->
-        console.log "Error requesting #{method} #{url}.") if @vocal
+
+      vocal = @vocal
+
+      if 'parseJSON' of options
+        parseJSON = options.parseJSON
+      else
+        parseJSON = true
+
+      onload = options.onload or do (vocal, method, url) ->
+        -> if vocal then console.log "Successful request to #{method} #{url}."
+      onload = @_jsonify onload, parseJSON
+
+      onerror = options.onerror or do (vocal, method, url) ->
+        -> if vocal then console.log "Error requesting #{method} #{url}."
+      onerror = @_jsonify onerror, parseJSON
 
       # Default non-standard request handlers (JSON.parse response bodies?)
-      onloadstart = options.onloadstart or ->
-        console.log 'onloadstart: the request has started' if @vocal
-      onabort = options.onabort or ->
-        console.log 'onabort: the request has been aborted. For instance, by
-          invoking the abort() method.' if @vocal
-      onprogress = options.onprogress or ->
-        console.log 'onprogress: while loading and sending data.' if @vocal
-      ontimeout = options.ontimeout or ->
-        console.log 'ontimeout: author-specified timeout has passed before the
-          request could complete.' if @vocal
-      onloadend = options.onloadend or ->
-        console.log 'onloadend: the request has completed (either in success
-          or failure).' if @vocal
+
+      onloadstart = options.onloadstart or do (vocal) ->
+        -> if vocal then console.log 'onloadstart: the request has started'
+
+      onabort = options.onabort or do (vocal) ->
+        ->
+          if vocal
+            console.log 'onabort: the request has been aborted. For instance, by
+              invoking the abort() method.'
+
+      onprogress = options.onprogress or do (vocal) ->
+        ->
+          if vocal
+            console.log 'onprogress: while loading and sending data.'
+
+      ontimeout = options.ontimeout or do (vocal) ->
+        ->
+          if vocal
+            console.log 'ontimeout: author-specified timeout has passed before
+              the request could complete.'
+
+      onloadend = options.onloadend or do (vocal) ->
+        ->
+          if vocal
+            console.log 'onloadend: the request has completed (either in success
+              or failure).'
 
       [onload, onerror, onloadstart, onabort, onprogress, ontimeout, onloadend]
 
     # Wrap a CORS XHR response event handler so that it receives the response
     # as JSON as its first argument (and the XHR as its second).
-    _jsonify: (callback) ->
+    _jsonify: (callback, parseJSON=true) ->
       (xhrProgressEvent) ->
         xhr = xhrProgressEvent.target # previously had `.currentTarget` ...
         try
-          responseJSON = JSON.parse xhr.responseText
+          if parseJSON
+            responseJSON = JSON.parse xhr.responseText
+          else
+            responseJSON = xhr.responseText
         catch error
           try
             responseJSON = xhr.responseText

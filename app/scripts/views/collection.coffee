@@ -10,14 +10,14 @@ define [
   './html-snippet-display'
   './person-field-display'
   './array-of-objects-with-name-field-display'
-  './array-of-related-resources-field-display'
+  './array-of-related-tags-field-display'
   './array-of-related-files-field-display'
 ], (ResourceView, CollectionAddWidgetView, DateFieldDisplayView,
   RelatedUserFieldDisplayView, SpeakerFieldDisplayView, EntererFieldDisplayView,
   ModifierFieldDisplayView, SourceFieldDisplayView,
   HTMLSnippetFieldDisplayView, PersonFieldDisplayView,
   ArrayOfObjectsWithNameFieldDisplayView,
-  ArrayOfRelatedResourcesFieldDisplayView, ArrayOfRelatedFilesFieldDisplayView) ->
+  ArrayOfRelatedTagsFieldDisplayView, ArrayOfRelatedFilesFieldDisplayView) ->
 
 
   class ElicitorFieldDisplayView extends RelatedUserFieldDisplayView
@@ -87,7 +87,7 @@ define [
       enterer: EntererFieldDisplayView
       modifier: ModifierFieldDisplayView
       source: SourceFieldDisplayView
-      tags: ArrayOfRelatedResourcesFieldDisplayView
+      tags: ArrayOfRelatedTagsFieldDisplayView
       files: ArrayOfRelatedFilesFieldDisplayView
       html: HTMLSnippetFieldDisplayView
 

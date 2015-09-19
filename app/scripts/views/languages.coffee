@@ -54,8 +54,8 @@ define [
     resourcesCollection: LanguagesCollection
     resourceModel: LanguageModel
     searchable: true
-    searchView: LanguageSearchWidgetView
-    searchModel: LanguageSearchModel
+    searchViewClass: LanguageSearchWidgetView
+    searchModelClass: LanguageSearchModel
 
     # New languages cannot be created. (Change this?)
     getCanCreateNew: -> false

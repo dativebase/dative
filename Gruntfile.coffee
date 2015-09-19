@@ -202,7 +202,7 @@ module.exports = (grunt) ->
         no_plusplus:
           level: 'warn'
         no_implicit_parens:
-          level: 'warn'
+          level: 'ignore' # change to 'warn' to warn about this
         max_line_length:
           level: 'ignore'
 

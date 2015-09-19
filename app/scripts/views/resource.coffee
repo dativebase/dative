@@ -110,6 +110,7 @@ define [
         updateViewVisible: false
         controlsViewVisible: false
         fileDataViewVisible: false
+        searchPatternsObject: null
       _.extend defaults, options
       for key, value of defaults
         @[key] = value
@@ -242,13 +243,28 @@ define [
         @model.destroyResource @model
 
     render: ->
-      @checkForRelatedResourceData()
+
+      # This can cause many needless requests and it doesn't seem necessary.
+      # TODO: verify that it's not necessary and delete this and all related
+      # methods.
+      # @checkForRelatedResourceData()
+
       @getDisplayViews()
       @html()
       @renderDisplayViews()
       @guify()
       @listenToEvents()
+      @highlightSearchMatches()
       @
+
+    # Highlight the attribute values of this resource that match a particular
+    # search. The relevant data with respect to the search is contained in
+    # `@searchPatternsObject`, which maps attribute names to regexes that can
+    # be used to highlight the matching substrings.
+    # TODO: Implement this! It's more difficult than it would appear since the
+    # `interlinearize` method of `FormBaseView` can split a value up and put it
+    # in different parts of the DOM.
+    highlightSearchMatches: ->
 
     # If we are working with an OLD backend, then we request data on our
     # related resources, if our globally held copies of those data haven't been
@@ -307,6 +323,7 @@ define [
       resource: @resourceNamePlural
       attribute: attribute # e.g., "name"
       model: @model
+      searchPatternsObject: @searchPatternsObject
 
     html: ->
       @$el
@@ -428,7 +445,7 @@ define [
           $content = $element.find @dataContentSelector
           $label = $element.find @dataLabelsSelector
           $content.fadeOut
-            complete: =>
+            complete: ->
               $label.fadeIn().css('display', 'inline-block')
               $content.fadeIn().removeClass 'no-label'
       @dataLabelsVisible = true
@@ -446,7 +463,7 @@ define [
           $element = @$ element
           $content = $element.find @dataContentSelector
           $content.fadeOut
-            complete: =>
+            complete: ->
               $content.fadeIn().addClass 'no-label'
       @contentOnlyVisiblePost()
 

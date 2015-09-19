@@ -51,6 +51,6 @@ define [
     resourcesCollection: CollectionsCollection
     resourceModel: CollectionModel
     searchable: true
-    searchView: CollectionSearchWidgetView
-    searchModel: CollectionSearchModel
+    searchViewClass: CollectionSearchWidgetView
+    searchModelClass: CollectionSearchModel
 

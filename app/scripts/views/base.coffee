@@ -239,7 +239,7 @@ define [
           scrollTop: scrollTop
           250
           'swing'
-          =>
+          ->
             # Since Dative tooltips close upon scroll events, we have to re-open
             # the tooltip of the focused element after we programmatically scroll
             # here. BUG @jrwdunham: this doesn't work as consistently as I'd like

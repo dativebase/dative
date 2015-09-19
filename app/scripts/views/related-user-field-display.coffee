@@ -21,9 +21,40 @@ define [
 
     resourceAsString: (resource) ->
       try
-        firstName = resource.first_name or ''
-        lastName = resource.last_name or ''
+        if resource.first_name
+          if @context.searchPatternsObject
+            try
+              regex = @context.searchPatternsObject[@attributeName].first_name
+            catch
+              regex = null
+            if regex
+              firstName = @utils.highlightSearchMatch regex, resource.first_name
+            else
+              firstName = resource.first_name
+          else
+            firstName = resource.first_name
+        else
+          firstName = ''
+        if resource.last_name
+          if @context.searchPatternsObject
+            try
+              regex = @context.searchPatternsObject[@attributeName].last_name
+            catch
+              regex = null
+            if regex
+              lastName = @utils.highlightSearchMatch regex, resource.last_name
+            else
+              lastName = resource.last_name
+          else
+            lastName = resource.last_name
+        else
+          lastName = ''
         "#{firstName} #{lastName}".trim()
       catch
         ''
+
+    getContext: ->
+      context = super
+      context.valueFormatter = (v) -> v
+      context
 

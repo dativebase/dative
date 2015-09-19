@@ -438,7 +438,9 @@ define [
       else
         @consentToHideActionWidget = false
         Backbone.trigger 'filterExpressionsHideActionWidgets'
-        $actionWidgetContainer.slideDown('fast')
+        $actionWidgetContainer
+          .slideDown('fast')
+          .find('button').first().focus()
         @$('button.operator').first()
           .tooltip
             content: 'click here to hide the buttons for changing this node.'
@@ -468,7 +470,8 @@ define [
       try
         key = "#{@targetResourceName}_search_parameters"
         attrs = @options[key].attributes
-        _.keys(attrs).sort()
+        (x for x in _.keys(attrs).sort() \
+        when x not in ['morpheme_break_ids', 'morpheme_gloss_ids'])
       catch
         []
 
@@ -495,7 +498,10 @@ define [
           .tooltip position: @tooltipPositionLeft('-20')
           .end()
         .find('.dative-tooltip').not('.operator')
-          .tooltip()
+          .tooltip position:
+            my: 'left bottom'
+            at: 'left top-20'
+            collision: 'flipfit'
       @renderFilterExpressionSubviews()
       @hideActionWidget()
       @actionButtonsVisibility()
@@ -573,7 +579,7 @@ define [
         filterExpressionSubview.$el
           .hide()
           .fadeIn
-            complete: =>
+            complete: ->
               filterExpressionSubview
                 .$('button, .ui-selectmenu-button, .textarea').first().focus()
       @rendered filterExpressionSubview
@@ -619,18 +625,18 @@ define [
     formSubattributes: ->
       collections: @collectionAttributes
       corpora: [
-        'id'
-        'UUID'
-        'name'
-        'description'
         'content'
-        'enterer'
-        'modifier'
-        'form_search'
         'datetime_entered'
         'datetime_modified'
-        'tags'
+        'description'
+        'enterer'
         'files'
+        'form_search'
+        'id'
+        'modifier'
+        'name'
+        'tags'
+        'UUID'
       ]
       elicitation_method: [
         'id'
@@ -640,24 +646,25 @@ define [
       ]
       elicitor: @userAttributes
       enterer: @userAttributes
-      files: @fileAttributes
+      modifier: @userAttributes
+      files: @fileAttributesNonRelational
       memorizers: @userAttributes
       source: @sourceAttributes
       speaker: @speakerAttributes
       syntactic_category: [
+        'datetime_modified'
+        'description'
         'id'
         'name'
         'type'
-        'description'
-        'datetime_modified'
       ]
       tags: @tagAttributes
       translations: [
+        'datetime_modified'
+        'form_id'
+        'grammaticality'
         'id'
         'transcription'
-        'grammaticality'
-        'form_id'
-        'datetime_modified'
       ]
       verifier: @userAttributes
 
@@ -736,6 +743,24 @@ define [
       'datetime_modified'
     ]
 
+    fileAttributesNonRelational: [
+      'id'
+      'date_elicited'
+      'datetime_entered'
+      'datetime_modified'
+      'filename'
+      'name'
+      'lossy_filename'
+      'MIME_type'
+      'size'
+      'description'
+      'utterance_type'
+      'url'
+      'password'
+      'start'
+      'end'
+    ]
+
     fileAttributes: [
       'id'
       'date_elicited'
@@ -775,13 +800,11 @@ define [
       'elicitation_method'
       'translations'
       'syntax'
-      'morpheme_break_ids'
       'memorizers'
       'syntactic_category'
       'grammaticality'
       'syntactic_category_string'
       'datetime_modified'
-      'morpheme_gloss_ids'
       'date_elicited'
       'phonetic_transcription'
       'morpheme_gloss'
@@ -843,4 +866,5 @@ define [
       tags: 'name'
       translations: 'transcription'
       verifier: 'last_name'
+      modifier: 'last_name'
 

@@ -307,7 +307,7 @@ define [
     # If `options.grammaticalities` is an array, return it with '' as its first
     # member and all other empty strings removed. Useful for grammaticality
     # <select>s for OLD apps where the '' grammatical value may be left
-    # implicit. 
+    # implicit.
     addGrammaticalToGrammaticalities: (options) ->
       if options?.grammaticalities
         if @utils.type options.grammaticalities is 'array'

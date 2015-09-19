@@ -1,19 +1,28 @@
 define [
   './base'
+  './exporter-collection-csv'
+  './exporter-json'
   './../templates/exporter-dialog'
-], (BaseView, exporterDialogTemplate) ->
+], (BaseView, ExporterCollectionCSVView, ExporterJSONView,
+  exporterDialogTemplate) ->
 
   # Exporter Dialog View
   # --------------------
   #
-  # This is a jQueryUI dialog that contains the interface for choosing export
-  # options and displaying the export of a form or a collection of forms.
+  # This is a jQueryUI dialog that contains the interface for interacting with
+  # various exporters that can be used to export various types of data.
 
   class ExporterDialogView extends BaseView
+
+    registeredExporterClasses: [
+      ExporterCollectionCSVView
+      ExporterJSONView
+    ]
 
     template: exporterDialogTemplate
 
     initialize: ->
+      @getExporterViews()
       @hasBeenRendered = false
       @listenTo Backbone, 'exporterDialog:toggle', @toggle
       @listenTo Backbone, 'exporterDialog:openTo', @openTo
@@ -26,8 +35,22 @@ define [
       @$el.append @template()
       @$target = @$ '.dative-exporter-dialog-target'
       @dialogify()
+      @renderExporterViews()
       @guify()
       @
+
+    getExporterViews: ->
+      @exporterViews = []
+      for exporterClass in @registeredExporterClasses
+        exporterView = new exporterClass()
+        @exporterViews.push exporterView
+
+    renderExporterViews: ->
+      fragment = document.createDocumentFragment()
+      for exporterView in @exporterViews
+        fragment.appendChild exporterView.render().el
+        @rendered exporterView
+      @$('.dative-exporter-dialog-exporters').html fragment
 
     # Transform the help dialog HTML to a jQueryUI dialog box.
     dialogify: ->
@@ -40,12 +63,6 @@ define [
         show: {effect: 'fade'}
         autoOpen: false
         appendTo: @$('.dative-exporter-dialog-target')
-        buttons: [
-            text: 'Select all' # Maybe use font awesome fa-clipboard icon
-            class: 'exporter-select-all exporter-button dative-tooltip'
-            title: 'Select all of the text of this export'
-            click: => @selectAllExportText()
-        ]
         dialogClass: 'dative-exporter-dialog-widget'
         title: 'Export'
         width: width
@@ -71,9 +88,12 @@ define [
     guify: ->
 
     setToBeExported: (options) ->
-      @model = options.model
-      @collection = options.collection
-      @toBeExported = @model or @collection
+      if options.model
+        for exporterView in @exporterViews
+          exporterView.setModel options.model
+      if options.collection
+        for exporterView in @exporterViews
+          exporterView.setCollection options.collection
 
     generateExport: ->
       $contentContainer = @$ '.dative-exporter-dialog-content'

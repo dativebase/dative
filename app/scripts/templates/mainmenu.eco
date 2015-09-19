@@ -3,7 +3,7 @@
     <li><a>Dative</a>
         <ul class='ui-corner-bottom'>
             <li>
-              <a data-event="request:applicationSettings"
+              <a data-event="request:applicationSettingsBrowse"
                  >Application Settings</a>
             </li>
             <li>

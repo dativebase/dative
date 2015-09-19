@@ -23,7 +23,21 @@ define [
 
     resourceAsString: (resource) ->
       try
-        (new @resourceModelClass(resource)).getAuthorEditorYearDefaults()
+        r = (new @resourceModelClass(resource)).getAuthorEditorYearDefaults()
+
+        # It is too difficult to correctly highlight the exact matches in a
+        # source-as-string representation so we simply highlight the whole
+        # thing if the source was matched in the search.
+        if @context.searchPatternsObject
+          if @attributeName of @context.searchPatternsObject
+            sourceIsMatched = false
+            for subattribute, re of @context.searchPatternsObject[@attributeName]
+              if re.test resource[subattribute]
+                sourceIsMatched = true
+                break
+            if sourceIsMatched
+              r = "<span class='dative-state-highlight'>#{r}</span>"
+        r
       catch
         ''
 

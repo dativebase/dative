@@ -86,12 +86,18 @@ define [
       'click .toggle-all-labels': 'toggleAllLabels'
       'click .toggle-search': 'toggleResourceSearchViewAnimate'
       'click .corpus-display': 'displayCorpus'
+      'click .export-resource-collection': 'exportResourceCollection'
+      'click .search-display-check': 'showResourceSearchViewAnimate'
       'keydown': 'keyboardShortcuts'
       'keyup': 'keyup'
       # @$el is enclosed in top and bottom invisible divs. These allow us to
       # close-circuit the tab loop and keep focus in the view.
       'focus .focusable-top':  'focusLastElement'
       'focus .focusable-bottom':  'focusFirstElement'
+
+    exportResourceCollection: (event) ->
+      if event then @stopEvent event
+      Backbone.trigger 'openExporterDialog', collection: @collection
 
     displayCorpus: ->
       @corpusView = new SubcorpusView model: @corpus
@@ -179,6 +185,16 @@ define [
 
     listenToResourceSearchView: ->
       @listenTo @resourceSearchView, 'hideMe', @hideResourceSearchViewAnimate
+      @listenTo @resourceSearchView, 'browseReturn', @returnToBrowsingAll
+
+    # User wants to stop browsing search results and simply browse all forms in
+    # the database.
+    # TODO: this refreshes even when we are already browsing all forms; stop
+    # that.
+    returnToBrowsingAll: ->
+      @deleteSearch()
+      @fetchResourcesLastPage = true
+      @fetchResourcesPageToCollection()
 
     listenToNewResourceView: ->
       @listenTo @newResourceView, "new#{@resourceNameCapitalized}View:hide",
@@ -224,8 +240,8 @@ define [
 
     getResourceSearchView: ->
       if @searchable
-        searchModel = new @searchModel({}, collection: @collection)
-        new @searchView
+        searchModel = new @searchModelClass({}, collection: @collection)
+        new @searchViewClass
           headerTitle: "Search #{@resourceNamePluralCapitalized}"
           model: searchModel
           dataLabelsVisible: @dataLabelsVisible
@@ -319,6 +335,8 @@ define [
                 @focusPreviousResourceView event
               else
                 @focusNextResourceView event
+            when 191
+              @$('.toggle-search').first().click()
 
     # Return the (jQuery-wrapped) resource view <div> that encloses
     # `$element`, if it exists.
@@ -685,14 +703,19 @@ define [
       @setToggleAllLabelsButtonState()
       @setNewResourceViewButtonState()
       if @search
-        @$('.browse-set').text "a search over
-          #{@resourceNamePluralHuman}"
+        @$('.browse-set').html "<a
+          href='javascript:;'
+          class='field-display-link dative-tooltip search-display-check'
+          title='click to view the search whose results you are browsing'
+          >a search over #{@resourceNamePluralHuman}</a>"
+        @$('.search-display-check').tooltip()
       else if @corpus
         @$('.browse-set').html "<a
           href='javascript:;'
           class='field-display-link dative-tooltip corpus-display'
           title='click here to view this corpus in this page'
           >corpus #{@corpus.get('id')}</a>"
+        @$('.corpus-display').tooltip()
       else
         @$('.browse-set').text "all #{@resourceNamePluralHuman}"
       if @paginator.start is @paginator.end
@@ -763,6 +786,16 @@ define [
     # pagination we only store one page worth of resource models/views at a
     # time.
     getResourceViews: ->
+      if @collection.search
+        searchModel = new @searchModelClass
+          search: @collection.search
+          smart_search: @collection.smartSearch
+        searchPatternsObject = searchModel.getPatternsObject()
+        @resourceSearchView.model = searchModel
+        @resourceSearchView.render()
+      else
+        searchPatternsObject = null
+
       @closeResourceViews()
       @resourceViews = []
       @collection.each (resourceModel) =>
@@ -770,6 +803,7 @@ define [
           model: resourceModel
           dataLabelsVisible: @dataLabelsVisible
           expanded: @allResourcesExpanded
+          searchPatternsObject: searchPatternsObject
         @resourceViews.push newResourceView
 
     spinnerOptions: ->
@@ -840,6 +874,13 @@ define [
             at: "right center"
             collision: "flipfit"
       @$('button.toggle-search')
+        .button()
+        .tooltip
+          position:
+            my: "left+160 center"
+            at: "right center"
+            collision: "flipfit"
+      @$('button.export-resource-collection')
         .button()
         .tooltip
           position:
@@ -1104,11 +1145,11 @@ define [
     # able to create a new resource.
     getCanCreateNew: -> true
 
-    # If this resource is searchable, then set `@searchView` and `@searchModel`
-    # to a view and a model class, respectively, for creating new searches for
-    # this resource.
-    searchView: null
-    searchModel: null
+    # If this resource is searchable, then set `@searchViewClass` and
+    # `@searchModelClass` to a view and a model class, respectively, for
+    # creating new searches for this resource.
+    searchViewClass: null
+    searchModelClass: null
 
     # By default, we have no search object. If this is set, it is assumed to be
     # an object of the form `{query: {filter: [], order_by: []}}`.
@@ -1120,17 +1161,20 @@ define [
 
     # Give this resources view a (new) search object. This will affect what
     # forms we are browsing.
-    setSearch: (@search) ->
+    setSearch: (@search, @smartSearch=null) ->
       @searchChanged = true
       @paginator = new Paginator page=1, items=0, itemsPerPage=@itemsPerPage
       @collection.search = @search
+      @collection.smartSearch = @smartSearch
 
     # Delete this resource view's a search object. This will also affect what
     # forms we are browsing.
     deleteSearch: ->
       @searchChanged = true
       @search = null
+      @smartSearch = null
       @collection.search = null
+      @collection.smartSearch = null
       @paginator = new Paginator page=1, items=0, itemsPerPage=@itemsPerPage
 
 
@@ -1205,7 +1249,7 @@ define [
           @scrollToFocusedInput()
 
     focusFirstResourceSearchViewTextarea: ->
-      @$('.resource-search-view textarea').first().focus()
+      @$('.resource-search-view textarea').first().focus().select()
 
     toggleResourceSearchViewAnimate: ->
       if @$('.resource-search-view').is ':visible'

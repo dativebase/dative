@@ -2,6 +2,6 @@
   class='<%= @transcriptionClass %>'
   ><span
     class='<%= @compatibilityClass %>'
-    ><%= @compatibilityValue %></span
-  ><%= @transcriptionValue %></div>
+    ><%- @valueFormatter @compatibilityValue, 'compatibility' %></span
+  ><%- @valueFormatter @transcriptionValue %></div>
 

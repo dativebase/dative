@@ -7,12 +7,25 @@
     <div class='dative-widget-header-title'>Servers</div>
 
     <div class='button-container-left'>
-      <button class="toggle-appear dative-tooltip" title="show servers">
-        <i class='fa fa-caret-right fa-fw'></i>
-      </button>
+
+      <% if @hideable: %>
+        <button class="toggle-appear dative-tooltip" title="show servers">
+            <i class='fa fa-caret-right fa-fw'></i>
+        </button>
+      <% end %>
+
       <button class="add-server dative-tooltip" title="create a new server">
         <i class='fa fa-plus fa-fw'></i>
       </button>
+
+    </div>
+
+    <div class='button-container-right'>
+
+      <button class="servers-help dative-tooltip" title="Help with servers">
+        <i class='fa fa-question fa-fw'></i>
+      </button>
+
     </div>
 
   </div>

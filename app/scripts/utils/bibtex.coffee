@@ -107,7 +107,7 @@ define [], ->
               else
                 authorOutput[0].push part
           else
-            throw "BibTeX name #{input} cannot be parsed"
+            throw new Error("BibTeX name #{input} cannot be parsed")
         output.push authorOutput
       output
 

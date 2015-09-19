@@ -58,6 +58,11 @@
             ><i class='fa fa-fw fa-search'></i></button>
       <% end %>
 
+      <button class="export-resource-collection dative-tooltip"
+              title="Export multiple <%= @resourceNamePluralHuman  %>"
+              ><i class='fa fa-fw fa-download'></i>
+      </button>
+
       <button class="toggle-all-labels dative-tooltip"
               title="<%= @resourceNameHuman %> labels are off; click here to
               turn them on">labels:
