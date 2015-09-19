@@ -485,7 +485,7 @@ module.exports = (grunt) ->
           ' git checkout master;' +
           ' git pull cesine master;' +
           ' npm install; ' +
-          ' grunt browserify; ' +
+          ' grunt browserify:src; ' +
           ' fi '
 
     rev:
