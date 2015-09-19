@@ -27,8 +27,6 @@ before_install:
   - npm install -g grunt-cli
   - npm install -g bower
   - npm install -g jasmine-node
-  - npm install d3
-  - npm install node-jsdom
   - npm install
   - bower install
 
