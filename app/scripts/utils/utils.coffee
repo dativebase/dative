@@ -19,6 +19,12 @@ define (require) ->
       flags += 'y' if obj.sticky?
       return new RegExp(obj.source, flags)
 
+    # You can't really copy a Blob instance, so let's not try.
+    # TODO: check whether this cause issues with an add view being able to tell
+    # whether it's model has been altered.
+    if obj instanceof Blob
+      return null
+
     newInstance = new obj.constructor()
 
     for key of obj
@@ -60,22 +66,29 @@ define (require) ->
   endsWith = (s, suffix) -> suffix is '' or s[-suffix.length..] is suffix
 
   integerWithCommas = (integer) ->
-    integer.toString().replace /\B(?=(\d{3})+(?!\d))/g, ','
+    try
+      integer.toString().replace /\B(?=(\d{3})+(?!\d))/g, ','
+    catch
+      integer
 
   singularize = (noun) ->
     try
       if endsWith(noun, 'ies')
         "#{noun[0..-4]}y"
-      else if endsWith(noun, 'es')
+      else if endsWith(noun, 'hes')
         noun[...-2]
       else
         noun[...-1]
     catch
       noun
 
+  # A very ad hoc pluralize function; patch it up as needed but beware: it is
+  # used extensively in the core logic.
   pluralize = (noun) ->
     if endsWith noun, 'y'
       "#{noun[...-1]}ies"
+    else if endsWith noun, 'tatus' # status
+      "#{noun}es"
     else if endsWith noun, 'us' # "corpus/corpora"
       "#{noun[...-2]}ora"
     else if endsWith(noun, 'z') or
@@ -90,6 +103,15 @@ define (require) ->
     switch numeral
       when 1 then noun
       else pluralize noun
+
+  indefiniteDeterminer = (complement) ->
+    if complement[0].toLowerCase() in ['a', 'e', 'i', 'o', 'u']
+      if startsWith complement.toLowerCase(), 'user'
+        'a'
+      else
+        'an'
+    else
+      'a'
 
   # Parses a date(time) string to a Date instance
   dateString2object = (dateString) ->
@@ -164,7 +186,7 @@ define (require) ->
     if seconds < 0
       prefix = 'in '
       suffix = ''
-    else 
+    else
       prefix = ''
       suffix = ' ago'
     seconds = Math.abs(seconds)
@@ -179,7 +201,19 @@ define (require) ->
     if interval > 1 then return "#{prefix}#{interval} hours#{suffix}"
     interval = Math.floor(seconds / 60)
     if interval > 1 then return "#{prefix}#{interval} minutes#{suffix}"
-    return "#{prefix}#{Math.floor(seconds)} seconds#{suffix}"
+    "#{prefix}#{Math.floor(seconds)} seconds#{suffix}"
+
+  # Convert a number of milliseconds to a string formatted as 00h00m00s.
+  millisecondsToTimeString = (milliseconds) ->
+    hours = Math.floor(milliseconds / 36e5)
+    minutes = Math.floor((milliseconds % 36e5) / 6e4)
+    seconds = Math.floor((milliseconds % 6e4) / 1000)
+    "#{leftPad hours, 2}h#{leftPad minutes, 2}m#{leftPad seconds, 2}s"
+
+  # Add `padding` number of "0"s to the left of `value`.
+  leftPad = (value, padding) ->
+    value = '0' + value while ('' + value).length < padding
+    value
 
   # "snake_case" to "camelCase"
   snake2camel = (string) ->
@@ -273,6 +307,105 @@ define (require) ->
       selection.removeAllRanges()
       selection.addRange range
 
+  isValidURL = (url) ->
+    if url
+      regex = /// ^
+        (?:(?:https?|ftp):\/\/)
+        (?:\S+(?::\S*)?@)?
+        (?:
+          (?!10(?:\.\d{1,3}){3})
+          (?!127(?:\.‌​\d{1,3}){3})
+          (?!169\.254(?:\.\d{1,3}){2})
+          (?!192\.168(?:\.\d{1,3}){2})
+          (?!172\.(?:1[‌​6-9]|2\d|3[0-1])(?:\.\d{1,3}){2})
+          (?:[1-9]\d?|1\d\d|2[01]\d|22[0-3])
+          (?:\.(?:1?\d{1‌​,2}|2[0-4]\d|25[0-5])){2}
+          (?:\.(?:[1-9]\d?|1\d\d|2[0-4]\d|25[0-4]))
+          | (?:(?:[a-z\u00‌​a1-\uffff0-9]+-?)*[a-z\u00a1-\uffff0-9]+)
+          (?:\.(?:[a-z\u00a1-\uffff0-9]+-?)*[a-z\u‌​00a1-\uffff0-9]+)*
+          (?:\.(?:[a-z\u00a1-\uffff]{2,}))
+        )
+        (?::\d{2,5})?
+        (?:\/[^\s]*)?
+        $ ///i
+      if url.match regex then true else false
+    else
+      false
+
+  # Maps file extensions to MIME types. Potentially problematic parts include
+  # the audio/mp3 type for .mp3 files ...
+  extensions =
+    mpeg: 'video/mpeg'
+    mp4:  'video/mp4'
+    ogv:  'video/ogg'
+    qt:   'video/quicktime'
+    mov:  'video/quicktime'
+    wmv:  'video/x-ms-wmv'
+    pdf:  'application/pdf'
+    gif:  'image/gif'
+    jpeg: 'image/jpeg'
+    jpg:  'image/jpeg'
+    png:  'image/png'
+    mpga: 'audio/mpeg'
+    mp3:  'audio/mp3'
+    ogg:  'audio/ogg'
+    oga:  'audio/ogg'
+    wav:  'audio/x-wav'
+
+  getExtension = (path) ->
+    try
+      path.split('.')[-1..][0]
+    catch
+      null
+
+  getFilenameAndExtension = (path) ->
+    try
+      parts = path.split('.')
+      if parts.length is 1
+        [path, null]
+      else
+        [parts[...-1].join('.'), parts[-1..][0]]
+    catch
+      [path, null]
+
+  getFilenameWithoutExtension = (path) ->
+    getFilenameAndExtension(path)[0]
+
+  getMIMEType = (path) ->
+    try
+      extensions[getExtension(path)]
+    catch
+      null
+
+  # From http://stackoverflow.com/questions/10420352/converting-file-size-in-bytes-to-human-readable
+  humanFileSize = (bytes, si) ->
+    thresh = if si then 1000 else 1024
+    if Math.abs(bytes) < thresh then return "#{bytes} B"
+    if si
+      units = ['kB','MB','GB','TB','PB','EB','ZB','YB']
+    else
+      units = ['KiB','MiB','GiB','TiB','PiB','EiB','ZiB','YiB']
+    u = -1
+    loop
+      bytes /= thresh
+      a += 1
+      if not ((Math.abs(bytes) >= thresh) and (u < (units.length - 1)))
+        break
+    "#{bytes.toFixed(1)} #{units[u]}"
+
+  # Use `regex` to wrap `value` in <span> tags that will make it render as
+  # highlighted. Note: this assumes the type of regex generated in the
+  # `SearchModel` class.
+  highlightSearchMatch = (regex, value) ->
+    try
+      String(value).replace(regex, (a, b) ->
+        "<span class='dative-state-highlight'>#{b}</span>")
+    catch
+      value
+
+  highlightSearchMatch: highlightSearchMatch
+  humanFileSize: humanFileSize
+  isValidURL: isValidURL
   clone: clone
   type: type
   guid: guid
@@ -301,4 +434,12 @@ define (require) ->
   smallCapsAcronyms: smallCapsAcronyms
   convertDateISO2mdySlash: convertDateISO2mdySlash
   selectText: selectText
+  millisecondsToTimeString: millisecondsToTimeString
+  leftPad: leftPad
+  getExtension: getExtension
+  getFilenameWithoutExtension: getFilenameWithoutExtension
+  getFilenameAndExtension: getFilenameAndExtension
+  getMIMEType: getMIMEType
+  extensions: extensions
+  indefiniteDeterminer: indefiniteDeterminer
 

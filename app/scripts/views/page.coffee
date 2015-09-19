@@ -1,21 +1,36 @@
 define [
-    'backbone'
-    './../templates/page'
-  ], (Backbone, pageTemplate) ->
+  './resource'
+  './page-add-widget'
+  './date-field-display'
+  './html-snippet-display'
+], (ResourceView, PageAddWidgetView, DateFieldDisplayView,
+  HTMLSnippetFieldDisplayView) ->
 
-    # Page Item View
-    # --------------
+  # Page View
+  # ---------
+  #
+  # For displaying individual pages.
 
-    class PageView extends Backbone.View
-      tagName:  'div'
+  class PageView extends ResourceView
 
-      # Cache the template function for a single item.
-      template: pageTemplate
+    resourceName: 'page'
 
-      initialize: ->
-        @model.on 'change', @render, @
-        @model.on 'destroy', @remove, @
+    resourceAddWidgetView: PageAddWidgetView
 
-      render: ->
-        @$el.html @template(@model.toJSON())
-        this
+    # Attributes that are always displayed.
+    primaryAttributes: ['name']
+
+    # Attributes that may be hidden.
+    secondaryAttributes: [
+      'heading'
+      'markup_language'
+      'html'
+      'datetime_modified'
+      'id'
+    ]
+
+    # Map attribute names to display view class names.
+    attribute2displayView:
+      datetime_modified: DateFieldDisplayView
+      html: HTMLSnippetFieldDisplayView
+

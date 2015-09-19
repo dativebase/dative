@@ -6,7 +6,7 @@
   <% if not @required: %>
     <option></option>
   <% end %>
-  <% for selectOption in @options[@optionsAttribute] or []: %>
+  <% for selectOption in @selectOptions: %>
     <% if @selectValueGetter(selectOption) is @selectValueGetter(@value): %>
       <option value="<%= @selectValueGetter selectOption %>" selected
         ><%= @selectTextGetter selectOption %></option>

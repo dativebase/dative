@@ -2,10 +2,14 @@ define [
   './resource-add-widget'
   './textarea-field'
   './select-field'
+  './boolean-select-field'
   './relational-select-field'
+  './subcorpus-select-via-search-field'
   './../models/morphology'
+  './../utils/globals'
 ], (ResourceAddWidgetView, TextareaFieldView, SelectFieldView,
-  RelationalSelectFieldView, MorphologyModel) ->
+  BooleanSelectFieldView, RelationalSelectFieldView,
+  SubcorpusSelectViaSearchFieldView, MorphologyModel, globals) ->
 
 
   class TextareaFieldView255 extends TextareaFieldView
@@ -47,14 +51,23 @@ define [
     resourceModel: MorphologyModel
 
     storeOptionsDataGlobally: (data) ->
-      data.script_types = ['regex', 'lexc']
+      if @model.get('id') # The GET /<resources>/<id>/edit case
+        data.data.script_types = ['regex', 'lexc']
+        data.data.booleans = [true, false]
+      else
+        data.script_types = ['regex', 'lexc']
+        data.booleans = [true, false]
       super data
 
     attribute2fieldView:
       name: TextareaFieldView255
-      lexicon_corpus: CorpusSelectFieldView
-      rules_corpus: CorpusSelectFieldView
+      lexicon_corpus: SubcorpusSelectViaSearchFieldView
+      rules_corpus: SubcorpusSelectViaSearchFieldView
       script_type: ScriptTypeSelectFieldView
+      extract_morphemes_from_rules_corpus: BooleanSelectFieldView
+      rich_upper: BooleanSelectFieldView
+      rich_lower: BooleanSelectFieldView
+      include_unknowns: BooleanSelectFieldView
 
     primaryAttributes: [
       'name'

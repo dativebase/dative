@@ -74,8 +74,9 @@
                     <% end %>
 
                     <select name='attribute' class='attribute dative-tooltip'
-                            tabindex='0' title='select a form attribute to build a
-                            search expression on.'>
+                            tabindex='0'
+                            title='select a <%= @snake2regular(myModel).toLowerCase() %>
+                                attribute to build a search expression on.'>
                         <% for attribute in @attributes: %>
                             <% if attribute is myAttribute: %>
                                 <option value='<%= attribute %>' selected

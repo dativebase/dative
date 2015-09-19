@@ -13,13 +13,25 @@ define [
 
   class ApplyControlView extends BaseView
 
+    # Change these attributes when subclassing this.
     direction: 'down'
+    buttonText: 'Phonologize'
+    resourceName: 'phonology'
+    textareaTitle: ->
+      "Enter one or more morphologically segmented words here and click the
+      “Phonologize” button in order to convert those words to their surface
+      representations using this phonology."
+    buttonTitle: ->
+      "Enter one or more morphologically segmented words in the input on the
+      left and click here in order to convert them to their surface
+      representations using this phonology."
 
     template: textareaButtonControlTemplate
     className: ->
       "apply-#{@direction}-control-view control-view dative-widget-center"
 
     initialize: (options) ->
+      @directionCapitalized = @utils.capitalize @direction
       @activeServerType = @getActiveServerType()
       @listenToEvents()
       @events["click button.apply-#{@direction}"] = 'apply'
@@ -42,10 +54,10 @@ define [
 
     listenToEvents: ->
       super
-      @listenTo @model, "applyStart", @applyStart
-      @listenTo @model, "applyEnd", @applyEnd
-      @listenTo @model, "applyFail", @applyFail
-      @listenTo @model, "applySuccess", @applySuccess
+      @listenTo @model, "apply#{@directionCapitalized}Start", @applyStart
+      @listenTo @model, "apply#{@directionCapitalized}End", @applyEnd
+      @listenTo @model, "apply#{@directionCapitalized}Fail", @applyFail
+      @listenTo @model, "apply#{@directionCapitalized}Success", @applySuccess
       @listenTo @model, "change:compile_succeeded", @compileSucceededChanged
 
     compileSucceededChanged: ->
@@ -66,14 +78,10 @@ define [
     html: ->
       context =
         textareaName: "apply-#{@direction}"
-        textareaTitle: 'Enter one or more morphologically segmented words here
-          and click the “Phonologize” button in order to convert those
-          words to their surface representations using this phonology.'
+        textareaTitle: @textareaTitle()
         buttonClass: "apply-#{@direction}"
-        buttonTitle: 'Enter one or more morphologically segmented words in the
-          input on the left and click here in order to convert those words
-          to their surface representations using this phonology.'
-        buttonText: 'Phonologize'
+        buttonTitle: @buttonTitle()
+        buttonText: @buttonText
         resultsContainerClass: "apply-#{@direction}-results"
       @$el.html @template(context)
 
@@ -120,7 +128,7 @@ define [
       @$(selector).spin false
 
     ############################################################################
-    # Apply 
+    # Apply
     ############################################################################
 
     applyInputState: ->
@@ -134,7 +142,7 @@ define [
 
     apply: ->
       input = @$("textarea[name=apply-#{@direction}]").val()
-      @model.apply input
+      @model["apply#{@directionCapitalized}"] input
 
     applyStart: ->
       @spin "button.apply-#{@direction}", '50%', '120%'
@@ -145,11 +153,11 @@ define [
       @enableApplyButton()
 
     applyFail: (error) ->
-      Backbone.trigger "phonologyApply#{@utils.capitalize @direction}Fail",
+      Backbone.trigger "#{@resourceName}Apply#{@directionCapitalized}Fail",
         error, @model.get('id')
 
     applySuccess: (applyResults) ->
-      Backbone.trigger "phonologyApply#{@utils.capitalize @direction}Success",
+      Backbone.trigger "#{@resourceName}Apply#{@directionCapitalized}Success",
         @model.get('id')
       @displayApplyResultsInTable applyResults
 

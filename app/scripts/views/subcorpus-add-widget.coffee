@@ -2,10 +2,11 @@ define [
   './resource-add-widget'
   './textarea-field'
   './relational-select-field'
-  './multiselect-field'
+  './multi-element-tag-field'
+  './search-select-via-search-field'
   './../models/subcorpus'
 ], (ResourceAddWidgetView, TextareaFieldView, RelationalSelectFieldView,
-  MultiselectFieldView, SubcorpusModel) ->
+  MultiElementTagFieldView, SearchSelectViaSearchFieldView, SubcorpusModel) ->
 
 
   class TextareaFieldView255 extends TextareaFieldView
@@ -35,17 +36,17 @@ define [
     # This is where field-specific configuration should go.
     attribute2fieldView:
       name:        TextareaFieldView255
-      tags:        MultiselectFieldView
-      form_search: RelationalSelectFieldView
+      tags:        MultiElementTagFieldView
+      form_search: SearchSelectViaSearchFieldView
+      #form_search: RelationalSelectFieldView
 
     primaryAttributes: [
       'name'
       'description'
+      'content'
+      'form_search'
+      'tags'
     ]
 
-    editableSecondaryAttributes: [
-      'content'
-      'tags'
-      'form_search'
-    ]
+    editableSecondaryAttributes: [ ]
 

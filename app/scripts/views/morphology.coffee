@@ -4,11 +4,40 @@ define [
   './person-field-display'
   './date-field-display'
   './object-with-name-field-display'
+  './related-resource-field-display'
   './boolean-icon-display'
   './morphology-controls'
+  './subcorpus'
+  './related-model-representation'
+  './../models/subcorpus'
+  './../collections/subcorpora'
+  './enterer-field-display'
+  './modifier-field-display'
 ], (ResourceView, MorphologyAddWidgetView, PersonFieldDisplayView,
   DateFieldDisplayView, ObjectWithNameFieldDisplayView,
-  BooleanIconFieldDisplayView, MorphologyControlsView) ->
+  RelatedResourceFieldDisplayView, BooleanIconFieldDisplayView,
+  MorphologyControlsView, SubcorpusView, RelatedModelRepresentationView,
+  SubcorpusModel, SubcorporaCollection, EntererFieldDisplayView,
+  ModifierFieldDisplayView) ->
+
+
+  class RelatedCorpusFieldDisplayView extends RelatedResourceFieldDisplayView
+
+    resourceName: 'subcorpus'
+    resourceModelClass: SubcorpusModel
+    resourcesCollectionClass: SubcorporaCollection
+    resourceViewClass: SubcorpusView
+
+
+  class LexiconCorpusDisplayView extends RelatedCorpusFieldDisplayView
+
+    attributeName: 'lexicon_corpus'
+
+
+  class RulesCorpusDisplayView extends RelatedCorpusFieldDisplayView
+
+    attributeName: 'rules_corpus'
+
 
   # Morphology View
   # ---------------
@@ -52,15 +81,15 @@ define [
 
     # Map attribute names to display view class names.
     attribute2displayView:
-      enterer: PersonFieldDisplayView
-      modifier: PersonFieldDisplayView
+      enterer: EntererFieldDisplayView
+      modifier: ModifierFieldDisplayView
       datetime_entered: DateFieldDisplayView
       datetime_modified: DateFieldDisplayView
-      lexicon_corpus: ObjectWithNameFieldDisplayView
-      rules_corpus: ObjectWithNameFieldDisplayView
+      lexicon_corpus: LexiconCorpusDisplayView
+      rules_corpus: RulesCorpusDisplayView
       compile_succeeded: BooleanIconFieldDisplayView
 
-    excludedActions: ['history']
+    excludedActions: ['history', 'data']
 
     controlsViewClass: MorphologyControlsView
 

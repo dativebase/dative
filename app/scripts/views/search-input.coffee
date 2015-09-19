@@ -9,9 +9,9 @@ define [
   # -----------------
   #
   # A view for a complex structure of buttons, selects and inputs that
-  # represent a single search over forms. Most of the heavy lifting here is
-  # done by the `FilterExpressionView` instance and its recursively
-  # instantiated sub-instances.
+  # represent a single search over a collection of resources. Most of the heavy
+  # lifting here is done by the `FilterExpressionView` instance and its
+  # recursively instantiated sub-instances.
 
   class SearchInputView extends InputView
 
@@ -20,6 +20,7 @@ define [
     initialize: (@context) ->
       @filterExpressionView = new FilterExpressionView
         model: @context.model
+        targetResourceName: @context.targetResourceName
         filterExpression: @context.value.filter
         options: @context.options
         rootNode: true

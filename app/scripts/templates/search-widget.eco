@@ -1,7 +1,8 @@
 <div class="dative-widget-header ui-widget-header ui-corner-top">
 
   <div class='dative-widget-header-title container-center'
-    >Search Forms</div>
+     ><span class='search-type-header'><%= @searchTypeCapitalized %></span>
+    Search over <%= @targetResourceNamePluralCapitalized %></div>
 
   <div class='button-container-left'>
 
@@ -10,14 +11,30 @@
       <i class='fa fa-times fa-fw'></i>
     </button>
 
+    <button class='advanced-search dative-tooltip'
+        title='Show the advanced search interface'
+        >Advanced Search</button>
+
+    <button class='smart-search dative-tooltip'
+        title='Show the smart search interface'
+        >Smart Search</button>
+
   </div>
 
   <div class='button-container-right'>
 
     <span class="spinner-container"></span>
 
+    <button class='browse-return dative-tooltip'
+        title='go back to browsing all <%= @targetResourceNamePlural %>'
+    >Browse All</button>
+
+    <button class='reset-query dative-tooltip'
+        title='Reset the query'
+        ><i class='fa fa-fw fa-refresh'></i></button>
+
     <button class='help dative-tooltip'
-            title='help with searching'
+          title='help with searching <%= @targetResourceNamePlural %>'
     ><i class='fa fa-fw fa-question'></i>
     </button>
 
@@ -29,32 +46,47 @@
 
     <div class="search-form linguistic-data-entry-form">
 
-    <ul class="fieldset primary-data"></ul>
+        <div class="advanced-search-interface">
+            <ul class="fieldset advanced-search-interface"></ul>
+        </div>
 
-    <ul class="fieldset button-only-fieldset">
+        <div class="smart-search-interface">
+            <textarea
+             class='smart-search-input dative-tooltip ui-corner-all'
+             title='Enter some stuff to search for and Dative will try to guess
+                what you want'
+             name='smart-search'><%= @smartSearch %></textarea>
 
-      <li class="center">
+            <div class='smart-search-preview-container'></div>
 
-        <button
-          class="search-button dative-tooltip"
-          title='browse the results of this search'
-          >Search</button>
+        </div>
 
-        <button
-          class="count-button dative-tooltip"
-          title='count how many results this search returns'
-          >Count</button>
+        <ul class="fieldset button-only-fieldset">
 
-        <button
-          class="save-button dative-tooltip"
-          title='save this search'
-          >Save</button>
+            <li class="center">
 
-      </li>
+                <button
+                    class="search-button dative-tooltip"
+                    title='browse the results of this search'
+                >Search</button>
 
-    </ul>
+                <button
+                    class="count-button dative-tooltip"
+                    title='count how many results this search returns'
+                >Count</button>
 
-  </div>
+                <% if @targetResourceNamePlural is 'forms': %>
+                <button
+                    class="save-button dative-tooltip"
+                    title='save this search'
+                >Save</button>
+                <% end %>
+
+            </li>
+
+        </ul>
+
+    </div>
 
 </div>
 

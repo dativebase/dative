@@ -16,6 +16,6 @@ define [
 
     getContext: ->
       context = super
-      # context.value = @utils.convertDateISO2mdySlash context.value
+      context.value = @utils.convertDateISO2mdySlash context.value
       context
 

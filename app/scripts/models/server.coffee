@@ -1,14 +1,14 @@
 define [
   'underscore'
   'backbone'
-  './base-relational'
+  './base'
   './../utils/utils'
-], (_, Backbone, BaseRelationalModel, utils) ->
+], (_, Backbone, BaseModel, utils) ->
 
   # Server Model
   # ------------
 
-  class ServerModel extends BaseRelationalModel
+  class ServerModel extends BaseModel
 
     idAttribute: 'id'
 
@@ -19,7 +19,4 @@ define [
       url: '' # must be unique
       serverCode: 'production' # FieldDB-specific; see `model/application-settings` for the list.
       corpusServerURL: null
-
-  # Backbone-relational + CoffeeScript requirement:
-  ServerModel.setup()
 

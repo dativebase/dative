@@ -3,37 +3,131 @@ define [
   'FieldDB'
   './../routes/router'
   './base'
+  './resource'
   './mainmenu'
   './notifier'
   './login-dialog'
   './register-dialog'
   './alert-dialog'
+  './tasks-dialog'
   './help-dialog'
   './resource-displayer-dialog'
-  './application-settings'
-  './pages'
+  './exporter-dialog'
   './home'
-  './form-add'
-  './forms-search'
-  './forms'
-  './subcorpora'
-  './phonologies'
-  './morphologies'
-  './language-models'
-  './morphological-parsers'
+
+  './application-settings'
+  './collections'
   './corpora'
+  './elicitation-methods'
+  './files'
+  './forms'
+  './language-models'
+  './languages'
+  './morphological-parsers'
+  './morphologies'
+  './orthographies'
+  './pages'
+  './phonologies'
   './searches'
+  './sources'
+  './speakers'
+  './subcorpora'
+  './syntactic-categories'
+  './tags'
+  './users'
+
+  './collection'
+  './elicitation-method'
+  './file'
+  './form'
+  './language-model'
+  './language'
+  './morphological-parser'
+  './morphology'
+  './orthography'
+  './page'
+  './phonology'
+  './search'
+  './source'
+  './speaker'
+  './subcorpus'
+  './syntactic-category'
+  './tag'
+  './user-old-circular'
+
   './../models/application-settings'
+  './../models/collection'
+  './../models/elicitation-method'
+  './../models/file'
   './../models/form'
+  './../models/language-model'
+  './../models/language'
+  './../models/morphological-parser'
+  './../models/morphology'
+  './../models/orthography'
+  './../models/page'
+  './../models/phonology'
+  './../models/search'
+  './../models/source'
+  './../models/speaker'
+  './../models/subcorpus'
+  './../models/syntactic-category'
+  './../models/tag'
+  './../models/user-old'
+
+  './../collections/collections'
+  './../collections/elicitation-methods'
+  './../collections/files'
+  './../collections/forms'
+  './../collections/language-models'
+  './../collections/languages'
+  './../collections/morphological-parsers'
+  './../collections/morphologies'
+  './../collections/orthographies'
+  './../collections/pages'
+  './../collections/phonologies'
+  './../collections/searches'
+  './../collections/sources'
+  './../collections/speakers'
+  './../collections/subcorpora'
+  './../collections/syntactic-categories'
+  './../collections/tags'
+  './../collections/users'
+
   './../utils/globals'
   './../templates/app'
-], (Backbone, FieldDB, Workspace, BaseView, MainMenuView, NotifierView,
-  LoginDialogView, RegisterDialogView, AlertDialogView, HelpDialogView,
-  ResourceDisplayerDialogView, ApplicationSettingsView, PagesView,
-  HomePageView, FormAddView, FormsSearchView, FormsView, SubcorporaView,
-  PhonologiesView, MorphologiesView, LanguageModelsView,
-  MorphologicalParsersView, CorporaView, SearchesView,
-  ApplicationSettingsModel, FormModel, globals, appTemplate) ->
+], (Backbone, FieldDB, Workspace, BaseView, ResourceView, MainMenuView,
+  NotifierView, LoginDialogView, RegisterDialogView, AlertDialogView,
+  TasksDialogView, HelpDialogView, ResourceDisplayerDialogView,
+  ExporterDialogView, HomePageView,
+
+  ApplicationSettingsView, CollectionsView, CorporaView,
+  ElicitationMethodsView, FilesView, FormsView, LanguageModelsView,
+  LanguagesView, MorphologicalParsersView, MorphologiesView, OrthographiesView,
+  PagesView, PhonologiesView, SearchesView, SourcesView, SpeakersView,
+  SubcorporaView, SyntacticCategoriesView, TagsView, UsersView,
+
+  CollectionView, ElicitationMethodView, FileView, FormView, LanguageModelView,
+  LanguageView, MorphologicalParserView, MorphologyView, OrthographyView,
+  PageView, PhonologyView, SearchView, SourceView, SpeakerView, SubcorpusView,
+  SyntacticCategoryView, TagView, UserView,
+
+  ApplicationSettingsModel, CollectionModel, ElicitationMethodModel, FileModel,
+  FormModel, LanguageModelModel, LanguageModel, MorphologicalParserModel,
+  MorphologyModel, OrthographyModel, PageModel, PhonologyModel, SearchModel,
+  SourceModel, SpeakerModel, SubcorpusModel, SyntacticCategoryModel, TagModel,
+  UserModel,
+
+  CollectionsCollection, ElicitationMethodsCollection, FilesCollection,
+  FormsCollection, LanguageModelsCollection, LanguagesCollection,
+  MorphologicalParsersCollection, MorphologiesCollection,
+  OrthographiesCollection, PagesCollection, PhonologiesCollection,
+  SearchesCollection, SourcesCollection, SpeakersCollection,
+  SubcorporaCollection, SyntacticCategoriesCollection, TagsCollection,
+  UsersCollection,
+
+  globals, appTemplate) ->
+
 
   # App View
   # --------
@@ -48,22 +142,20 @@ define [
     el: '#dative-client-app'
 
     initialize: (options) ->
-      @router = new Workspace()
       @getApplicationSettings options
       globals.applicationSettings = @applicationSettings
       @overrideFieldDBNotificationHooks()
       @initializePersistentSubviews()
+      @resourceModel = null # this and the next attribute are for displaying a single resource in the main page.
+      @resourcesCollection = null
+      @router = new Workspace
+        resources: @myResources
+        mainMenuView: @mainMenuView
       @listenToEvents()
       @render()
       @setTheme()
       Backbone.history.start()
       @showHomePageView()
-
-    resources: [
-      'subcorpus'
-      'phonology'
-      'morphology'
-    ]
 
     events:
       'click': 'bodyClicked'
@@ -80,113 +172,108 @@ define [
 
     listenToEvents: ->
       @listenTo @mainMenuView, 'request:home', @showHomePageView
-      @listenTo @mainMenuView, 'request:applicationSettings',
-        @showApplicationSettingsView
       @listenTo @mainMenuView, 'request:openLoginDialogBox', @toggleLoginDialog
       @listenTo @mainMenuView, 'request:toggleHelpDialogBox', @toggleHelpDialog
+      @listenTo @mainMenuView, 'request:toggleTasksDialog', @toggleTasksDialog
       @listenTo @mainMenuView, 'request:openRegisterDialogBox',
         @toggleRegisterDialog
-      @listenTo @mainMenuView, 'request:corporaBrowse', @showCorporaView
-      @listenTo @mainMenuView, 'request:formAdd', @showNewFormView
-      @listenTo @mainMenuView, 'request:formsBrowse', @showFormsView
-      @listenTo Backbone, 'request:formsBrowseSearchResults',
-        @showFormsSearchResultsBrowseView
-      @listenTo Backbone, 'request:formsBrowseCorpus',
-        @showFormsCorpusBrowseView
-      @listenTo @mainMenuView, 'request:formsSearch', @showFormsSearchView
-      @listenTo @mainMenuView, 'request:subcorpusAdd', @showNewSubcorpusView
-      @listenTo @mainMenuView, 'request:subcorporaBrowse', @showSubcorporaView
-      @listenTo @mainMenuView, 'request:phonologyAdd', @showNewPhonologyView
-      @listenTo @mainMenuView, 'request:phonologiesBrowse', @showPhonologiesView
-      @listenTo @mainMenuView, 'request:morphologyAdd', @showNewMorphologyView
-      @listenTo @mainMenuView, 'request:morphologiesBrowse',
-        @showMorphologiesView
-      @listenTo @mainMenuView, 'request:languageModelsBrowse',
-        @showLanguageModelsView
-      @listenTo @mainMenuView, 'request:morphologicalParsersBrowse',
-        @showMorphologicalParsersView
-      @listenTo @mainMenuView, 'request:searchesBrowse',
-        @showSearchesView
-      @listenTo @mainMenuView, 'request:pages', @showPagesView
 
       @listenTo @router, 'route:home', @showHomePageView
-      @listenTo @router, 'route:applicationSettings',
-        @showApplicationSettingsView
       @listenTo @router, 'route:openLoginDialogBox', @toggleLoginDialog
       @listenTo @router, 'route:openRegisterDialogBox', @toggleRegisterDialog
-      @listenTo @router, 'route:corporaBrowse', @showCorporaView
-      @listenTo @router, 'route:formAdd', @showNewFormView
-      @listenTo @router, 'route:formsBrowse', @showFormsView
-      @listenTo @router, 'route:formsSearch', @showFormsSearchView
-      @listenTo @router, 'route:pages', @showPagesView
 
       @listenTo @loginDialog, 'request:openRegisterDialogBox',
         @toggleRegisterDialog
       @listenTo Backbone, 'loginSuggest', @openLoginDialogWithDefaults
       @listenTo Backbone, 'authenticateSuccess', @authenticateSuccess
-      @listenTo Backbone, 'authenticate:success', @authenticateSuccess
-      @listenTo Backbone, 'authenticate:mustconfirmidentity', @authenticateConfirmIdentity
+      @listenTo Backbone, 'authenticate:mustconfirmidentity',
+        @authenticateConfirmIdentity
       @listenTo Backbone, 'logoutSuccess', @logoutSuccess
-      @listenTo Backbone, 'logout:success', @logoutSuccess
       @listenTo Backbone, 'useFieldDBCorpus', @useFieldDBCorpus
       @listenTo Backbone, 'applicationSettings:changeTheme', @changeTheme
-
-      @listenTo Backbone, 'formsView:expandAllForms', @setAllFormsExpanded
-      @listenTo Backbone, 'formsView:collapseAllForms', @setAllFormsCollapsed
-      @listenTo Backbone, 'formsView:itemsPerPageChange', @setFormsItemsPerPage
-      @listenTo Backbone, 'formsView:hideAllLabels',
-        @setFormsPrimaryDataLabelsHidden
-      @listenTo Backbone, 'formsView:showAllLabels',
-        @setFormsPrimaryDataLabelsVisible
       @listenTo Backbone, 'showResourceInDialog', @showResourceInDialog
-
+      @listenTo Backbone, 'showResourceModelInDialog',
+        @showResourceModelInDialog
+      @listenTo Backbone, 'openExporterDialog', @openExporterDialog
+      @listenTo Backbone, 'routerNavigateRequest', @routerNavigateRequest
       @listenToResources()
 
+    routerNavigateRequest: (route) -> @router.navigate route
+
+    # Listen for resource-related events. The resources and relevant events
+    # are configured by the `@myResources` object.
     # TODO/QUESTION: why not just listen on the resources subclass instead of
     # on Backbone with all of this complex naming stuff?
     listenToResources: ->
-      for resource in @resources
-        resourcePlural = @utils.pluralize resource
-        resourcePluralCapitalized = @utils.capitalize resourcePlural
-        @listenTo Backbone,
-          "#{resourcePlural}View:expandAll#{resourcePluralCapitalized}",
-          @["setAll#{resourcePluralCapitalized}Expanded"]
-        @listenTo Backbone,
-          "#{resourcePlural}View:collapseAll#{resourcePluralCapitalized}",
-          @["setAll#{resourcePluralCapitalized}Collapsed"]
-        @listenTo Backbone, "#{resourcePlural}View:itemsPerPageChange",
-          @["set#{resourcePluralCapitalized}ItemsPerPage"]
-        @listenTo Backbone, "#{resourcePlural}View:hideAllLabels",
-          @["set#{resourcePluralCapitalized}PrimaryDataLabelsHidden"]
-        @listenTo Backbone, "#{resourcePlural}View:showAllLabels",
-          @["set#{resourcePluralCapitalized}PrimaryDataLabelsVisible"]
+      for resource, config of @myResources
+        do =>
+          resourceName = resource
+          resourcePlural = @utils.pluralize resourceName
+          resourceCapitalized = @utils.capitalize resourceName
+          resourcePluralCapitalized = @utils.capitalize resourcePlural
+          @listenTo Backbone, "destroy#{resourceCapitalized}Success",
+            (resourceModel) => @destroyResourceSuccess resourceModel
+          @listenTo Backbone, "#{resourcePlural}View:showAllLabels",
+            => @changeDisplaySetting resourcePlural, 'dataLabelsVisible', true
+          @listenTo Backbone, "#{resourcePlural}View:hideAllLabels",
+            =>
+              @changeDisplaySetting resourcePlural, 'dataLabelsVisible', false
+          @listenTo Backbone,
+            "#{resourcePlural}View:expandAll#{resourcePluralCapitalized}",
+            =>
+              @changeDisplaySetting resourcePlural,
+                "all#{resourcePluralCapitalized}Expanded", true
+          @listenTo Backbone,
+            "#{resourcePlural}View:collapseAll#{resourcePluralCapitalized}",
+            =>
+              @changeDisplaySetting resourcePlural,
+                "all#{resourcePluralCapitalized}Expanded", false
+          @listenTo Backbone, "#{resourcePlural}View:itemsPerPageChange",
+            (newItemsPerPage) =>
+              @changeDisplaySetting resourcePlural, 'itemsPerPage',
+                newItemsPerPage
+          @listenTo @mainMenuView, "request:#{resourcePlural}Browse",
+            (options={}) => @showResourcesView resourceName, options
+          @listenTo @mainMenuView, "request:#{resourceName}Add",
+            => @showNewResourceView resourceName
+          if config.params?.searchable is true
+            @listenTo Backbone, "request:#{resourcePlural}BrowseSearchResults",
+              (options={}) => @showResourcesView resourceName, options
+          if config.params?.corpusElement is true
+            @listenTo Backbone, "request:#{resourcePlural}BrowseCorpus",
+              (options={}) => @showResourcesView resourceName, options
+          @listenTo Backbone, "request:#{resourceCapitalized}View",
+            (id) => @showResourceView(resourceName, id)
 
     initializePersistentSubviews: ->
       @mainMenuView = new MainMenuView model: @applicationSettings
       @loginDialog = new LoginDialogView model: @applicationSettings
       @registerDialog = new RegisterDialogView model: @applicationSettings
       @alertDialog = new AlertDialogView model: @applicationSettings
+      @tasksDialog = new TasksDialogView model: @applicationSettings
       @helpDialog = new HelpDialogView()
-      @notifier = new NotifierView()
-      @resourceDisplayerDialog = new ResourceDisplayerDialogView()
+      @notifier = new NotifierView(@myResources)
+      @exporterDialog = new ExporterDialogView()
+      @getResourceDisplayerDialogs()
 
     renderPersistentSubviews: ->
       @mainMenuView.setElement(@$('#mainmenu')).render()
       @loginDialog.setElement(@$('#login-dialog-container')).render()
       @registerDialog.setElement(@$('#register-dialog-container')).render()
       @alertDialog.setElement(@$('#alert-dialog-container')).render()
+      @tasksDialog.setElement(@$('#tasks-dialog-container')).render()
       @helpDialog.setElement(@$('#help-dialog-container'))
-      @resourceDisplayerDialog
-        .setElement(@$('#resource-displayer-dialog-container'))
-        .render()
+      @renderResourceDisplayerDialogs()
       @notifier.setElement(@$('#notifier-container')).render()
+      @exporterDialog.setElement(@$('#exporter-dialog-container')).render()
 
       @rendered @mainMenuView
       @rendered @loginDialog
       @rendered @registerDialog
       @rendered @alertDialog
+      @rendered @tasksDialog
       @rendered @notifier
-      @rendered @resourceDisplayerDialog
+      @rendered @exporterDialog
 
     renderHelpDialog: ->
       @helpDialog.render()
@@ -214,6 +301,7 @@ define [
     logoutSuccess: ->
       @closeVisibleView()
       @corporaView = null
+      @usersView = null # TODO: all of these collection views should be DRY-ly emptied upon logout ...
       @showHomePageView()
 
     activeServerType: ->
@@ -225,12 +313,15 @@ define [
     authenticateSuccess: ->
       activeServerType = @activeServerType()
       switch activeServerType
-        when 'FieldDB' 
-          # if @applicationSettings.get 'fieldDBApplication' is not FieldDB.FieldDBObject.application # TODO GC: withe the if, the below line never fires.
-          @applicationSettings.set 'fieldDBApplication', FieldDB.FieldDBObject.application 
+        when 'FieldDB'
+          if @applicationSettings.get('fieldDBApplication') isnt
+          FieldDB.FieldDBObject.application
+            @applicationSettings.set 'fieldDBApplication',
+              FieldDB.FieldDBObject.application
           @showCorporaView()
         when 'OLD' then @showFormsView()
-        else console.log 'Error: you logged in to a non-FieldDB/non-OLD server (?).'
+        else console.log 'Error: you logged in to a non-FieldDB/non-OLD server
+          (?).'
 
     authenticateConfirmIdentity: (message) =>
       message = message or 'We need to make sure this is you. Confirm your
@@ -257,7 +348,7 @@ define [
               Backbone.trigger 'authenticate:logout'
             console.log 'Asking again'
             @confirmIdentityErrorCount = @confirmIdentityErrorCount or 0
-            @confirmIdentityErrorCount++
+            @confirmIdentityErrorCount += 1
             @authenticateConfirmIdentity "#{@originalMessage}
               #{loginDetails.userFriendlyErrors.join ' '}"
       )
@@ -278,249 +369,28 @@ define [
         @$('#appview').css height: $(window).height() - 50
 
     renderVisibleView: (taskId=null) ->
-      @visibleView.setElement @$('#appview')
-      @visibleView.render taskId
+      if (@visibleView instanceof ResourceView)
+        @$('#appview')
+          .css 'overflow-y', 'scroll'
+          .html @visibleView.render().el
+      else
+        $appView = @$ '#appview'
+        $appView.css 'overflow-y', 'initial'
+        @visibleView.setElement $appView
+        @visibleView.render taskId
       @rendered @visibleView
 
-    closeVisibleView: ->
-      if @visibleView
-        @visibleView.close()
-        @closed @visibleView
+    closeVisibleView: -> if @visibleView then @closeView @visibleView
 
-    loggedIn: -> 
-      if @applicationSettings.get('fieldDBApplication') and
-      @applicationSettings.get('fieldDBApplication').authentication and 
-      @applicationSettings.get('fieldDBApplication').authentication.user and 
-      @applicationSettings.get('fieldDBApplication').authentication.user.authenticated
-        @applicationSettings.set 'loggedIn', true
-        @applicationSettings.set 'loggedInUserRoles', @applicationSettings.get('fieldDBApplication').authentication.user.roles
+    loggedIn: ->
+      if @applicationSettings.get('fieldDBApplication')
+        fieldDBApp = @applicationSettings.get 'fieldDBApplication'
+        if fieldDBApp.authentication and fieldDBApp.authentication.user and
+        fieldDBApp.authentication.user.authenticated
+          @applicationSettings.set 'loggedIn', true
+          @applicationSettings.set 'loggedInUserRoles',
+            fieldDBApp.authentication.user.roles
       @applicationSettings.get 'loggedIn'
-
-    ############################################################################
-    # Methods for showing the main "pages" of Dative                           #
-    ############################################################################
-
-    showApplicationSettingsView: ->
-      if @applicationSettingsView and
-      @visibleView is @applicationSettingsView then return
-      @router.navigate 'application-settings'
-      taskId = @guid()
-      Backbone.trigger 'longTask:register', 'Opening application settings', taskId
-      @closeVisibleView()
-      if not @applicationSettingsView
-        @applicationSettingsView = new ApplicationSettingsView(
-          model: @applicationSettings)
-      @visibleView = @applicationSettingsView
-      @renderVisibleView taskId
-
-    showFormsView: (options) ->
-      if not @loggedIn() then return
-      if options?.search then @visibleView = null
-      if @formsView and @visibleView is @formsView then return
-      @router.navigate 'forms-browse'
-      taskId = @guid()
-      Backbone.trigger 'longTask:register', 'Opening form browse view', taskId
-      @closeVisibleView()
-      if @formsView
-        if @activeServerType() is 'FieldDB' and options?.fieldDBCorpusHasChanged
-          @formsView.close()
-          @closed @formsView
-          @formsView = new FormsView
-            applicationSettings: @applicationSettings
-            activeFieldDBCorpus: @activeFieldDBCorpus
-      else
-        @formsView = new FormsView
-          applicationSettings: @applicationSettings
-          activeFieldDBCorpus: @activeFieldDBCorpus
-      @visibleView = @formsView
-      # This is relevant if the user is trying to add a new form.
-      if options?.showNewFormView
-        @formsView.newFormViewVisible = true
-        @formsView.weShouldFocusFirstAddViewInput = true
-      if options?.search
-        @formsView.setSearch options.search
-      else
-        @formsView.deleteSearch()
-      if options?.corpus
-        @formsView.setCorpus options.corpus
-      else
-        @formsView.deleteCorpus()
-      @renderVisibleView taskId
-
-    showFormsSearchResultsBrowseView: (options) ->
-      @showFormsView options
-
-    showFormsCorpusBrowseView: (options) ->
-      @showFormsView options
-
-    showNewFormView: ->
-      if not @loggedIn() then return
-      if @formsView and @visibleView is @formsView
-        @visibleView.toggleNewResourceViewAnimate()
-      else
-        @showFormsView showNewFormView: true
-
-    # Show the page for browsing subcorpora (i.e., OLD corpora) AND open upt
-    # the interface for creating a new subcorpus.
-    showNewSubcorpusView: ->
-      if not @loggedIn() then return
-      if @subcorporaView and @visibleView is @subcorporaView
-        @visibleView.toggleNewSubcorpusViewAnimate()
-      else
-        @showSubcorporaView showNewSubcorpusView: true
-
-    # Show the page for browsing subcorpora (i.e., OLD corpora).
-    showSubcorporaView: (options) ->
-      if not @loggedIn() then return
-      if @subcorporaView and @visibleView is @subcorporaView then return
-      @router.navigate 'subcorpora-browse'
-      taskId = @guid()
-      Backbone.trigger 'longTask:register', 'Opening corpora browse view', taskId
-      @closeVisibleView()
-      if not @subcorporaView
-        @subcorporaView = new SubcorporaView()
-      @visibleView = @subcorporaView
-      # This is relevant if the user is trying to add a new corpus.
-      if options?.showNewSubcorpusView
-        @subcorporaView.newSubcorpusViewVisible = true
-        @subcorporaView.weShouldFocusFirstAddViewInput = true
-      @renderVisibleView taskId
-
-    # Show the page for browsing phonologies AND open up the interface for
-    # creating a new phonology.
-    showNewPhonologyView: ->
-      if not @loggedIn() then return
-      if @phonologiesView and @visibleView is @phonologiesView
-        @visibleView.toggleNewResourceViewAnimate()
-      else
-        @showPhonologiesView showNewPhonologyView: true
-
-    # Show the page for browsing phonologies.
-    showPhonologiesView: (options) ->
-      if not @loggedIn() then return
-      if @phonologiesView and @visibleView is @phonologiesView then return
-      @router.navigate 'phonologies-browse'
-      taskId = @guid()
-      Backbone.trigger 'longTask:register', 'Opening phonologies browse view', taskId
-      @closeVisibleView()
-      if not @phonologiesView
-        @phonologiesView = new PhonologiesView()
-      @visibleView = @phonologiesView
-      # This is relevant if the user is trying to add a new corpus.
-      if options?.showNewPhonologyView
-        @phonologiesView.newResourceViewVisible = true
-        @phonologiesView.weShouldFocusFirstAddViewInput = true
-      @renderVisibleView taskId
-
-    # Show the page for browsing morphologies AND open up the interface for
-    # creating a new morphology.
-    showNewMorphologyView: ->
-      if not @loggedIn() then return
-      if @morphologiesView and @visibleView is @morphologiesView
-        @visibleView.toggleNewResourceViewAnimate()
-      else
-        @showMorphologiesView showNewMorphologyView: true
-
-    # Show the page for browsing morphologies.
-    showMorphologiesView: (options) ->
-      if not @loggedIn() then return
-      if @morphologiesView and @visibleView is @morphologiesView then return
-      @router.navigate 'morphologies-browse'
-      taskId = @guid()
-      Backbone.trigger 'longTask:register', 'Opening morphologies browse view', taskId
-      @closeVisibleView()
-      if not @morphologiesView
-        @morphologiesView = new MorphologiesView()
-      @visibleView = @morphologiesView
-      # This is relevant if the user is trying to add a new morphology.
-      if options?.showNewMorphologyView
-        @morphologiesView.newResourceViewVisible = true
-        @morphologiesView.weShouldFocusFirstAddViewInput = true
-      @renderVisibleView taskId
-
-    # Show the page for browsing morpheme language models.
-    showLanguageModelsView: (options) ->
-      if not @loggedIn() then return
-      if @languageModelsView and
-      @visibleView is @languageModelsView
-        return
-      @router.navigate 'language-models-browse'
-      taskId = @guid()
-      Backbone.trigger(
-        'longTask:register', 'Opening language models browse view', taskId)
-      @closeVisibleView()
-      if not @languageModelsView
-        @languageModelsView = new LanguageModelsView()
-      @visibleView = @languageModelsView
-      @renderVisibleView taskId
-
-    # Show the page for browsing morphological parsers.
-    showMorphologicalParsersView: (options) ->
-      if not @loggedIn() then return
-      if @morphologicalParsersView and
-      @visibleView is @morphologicalParsersView
-        return
-      @router.navigate 'morphological-parsers-browse'
-      taskId = @guid()
-      Backbone.trigger('longTask:register', 'Opening morphological parsers
-        browse view', taskId)
-      @closeVisibleView()
-      if not @morphologicalParsersView
-        @morphologicalParsersView = new MorphologicalParsersView()
-      @visibleView = @morphologicalParsersView
-      @renderVisibleView taskId
-
-    # Show the page for browsing searches.
-    showSearchesView: (options) ->
-      if not @loggedIn() then return
-      if @searchesView and
-      @visibleView is @searchesView
-        return
-      @router.navigate 'searches-browse'
-      taskId = @guid()
-      Backbone.trigger('longTask:register', 'Opening searches browse view',
-        taskId)
-      @closeVisibleView()
-      if not @searchesView
-        @searchesView = new SearchesView()
-      @visibleView = @searchesView
-      @renderVisibleView taskId
-
-    # Put out of use for now. Now adding a form is done via the browse
-    # interface. See `showFormAddView`.
-    showFormAddView_OLD: ->
-      if not @loggedIn() then return
-      if @formAddView and @visibleView is @formAddView then return
-      @router.navigate 'form-add'
-      taskId = @guid()
-      Backbone.trigger 'longTask:register', 'Opening form add view', taskId
-      @closeVisibleView()
-      if not @formAddView
-        @formAddView = new FormAddView(model: new FormModel())
-      @visibleView = @formAddView
-      @renderVisibleView taskId
-
-    showFormsSearchView: ->
-      if not @loggedIn() then return
-      if @formsSearchView and @visibleView is @formsSearchView then return
-      @router.navigate 'forms-search'
-      taskId = @guid()
-      Backbone.trigger 'longTask:register', 'Opening form search view', taskId
-      @closeVisibleView()
-      if not @formsSearchView then @formsSearchView = new FormsSearchView()
-      @visibleView = @formsSearchView
-      @renderVisibleView taskId
-
-    showPagesView: ->
-      if not @loggedIn() then return
-      if @pagesView and @visibleView is @pagesView then return
-      @router.navigate 'pages'
-      taskId = @guid()
-      Backbone.trigger 'longTask:register', 'Opening pages view', taskId
-      @closeVisibleView()
-      if not @pagesView then @pagesView = new PagesView()
-      @visibleView = @pagesView
-      @renderVisibleView taskId
 
     showHomePageView: ->
       if @homePageView and @visibleView is @homePageView then return
@@ -530,25 +400,390 @@ define [
       @visibleView = @homePageView
       @renderVisibleView()
 
-    showCorporaView: ->
-      if not @loggedIn() then return
-      if @corporaView and @visibleView is @corporaView then return
-      if @visibleView then @visibleView.spin()
-      @router.navigate 'corpora'
+    ############################################################################
+    # Show resources view machinery
+    ############################################################################
+
+    # Render (and perhaps instantiate) a view over a collection of resources.
+    # This method works in conjunction with the metadata in the `@myResources`
+    # object; CRUCIALLY, only resources with an attribute in that object can be
+    # shown using this method. The simplest case is to call this method with
+    # the singular camelCase name of a resource as its first argument; e.g.,
+    # `@showResourcesView 'elicitationMethod'`.
+    showResourcesView: (resourceName, options={}) ->
+      o = @showResourcesViewSetDefaultOptions resourceName, options
+      names = @getResourceNames resourceName
+      myViewAttr = "#{names.plural}View"
+      if o.authenticationRequired and not @loggedIn() then return
+      if o.searchable and o.search
+        @closeVisibleView()
+        @visibleView = null
+      if @[myViewAttr] and @visibleView is @[myViewAttr] then return
+      @router.navigate names.hypPlur
       taskId = @guid()
-      Backbone.trigger 'longTask:register', 'Opening corpora view', taskId
+      Backbone.trigger 'longTask:register', "Opening #{names.regPlur} view",
+        taskId
       @closeVisibleView()
-      if not @corporaView
-        @corporaView = new CorporaView
-          applicationSettings: @applicationSettings
-          activeFieldDBCorpus: @activeFieldDBCorpus
-      if @visibleView then @visibleView.stopSpin()
-      @visibleView = @corporaView
+      if @[myViewAttr]
+        if @fieldDBCorpusHasChanged(myViewAttr, o)
+          @closeView @[myViewAttr]
+          @[myViewAttr] = @instantiateResourcesView resourceName, o
+      else
+        @[myViewAttr] = @instantiateResourcesView resourceName, o
+      @visibleView = @[myViewAttr]
+      @showNewResourceViewOption o
+      @searchableOption o
+      @corpusElementOption o
       @renderVisibleView taskId
 
+    # Show the resource of type `resourceName` with id `id` in the main page of
+    # the application. This is what happens when you navigate to, e.g.,
+    # /#form/123.
+    showResourceView: (resourceName, resourceId, options={}) ->
+      o = @showResourceViewSetDefaultOptions resourceName, options
+      names = @getResourceNames resourceName
+      myViewAttr = "#{resourceName}View"
+      if o.authenticationRequired and not @loggedIn() then return
+      if @[myViewAttr] and @visibleView is @[myViewAttr] then return
+      @router.navigate "#{names.hyphen}/#{resourceId}"
+      @closeVisibleView()
+      @resourcesCollection =
+        new @myResources[resourceName].resourcesCollectionClass()
+      if @resourceModel then @stopListening @resourceModel
+      @resourceModel = new @myResources[resourceName].resourceModelClass(
+        {}, {collection: @resourcesCollection})
+      # We have to listen and fetch here, which is different from
+      # `ResourcesView` sub-classes, which fetch their collections post-render.
+      @listenToOnce @resourceModel, "fetch#{names.capitalized}Fail",
+        @fetchResourceFail
+      @listenToOnce @resourceModel, "fetch#{names.capitalized}Success",
+        (resourceObject) =>
+          @fetchResourceSuccess resourceName, myViewAttr, resourceObject
+      @resourceModel.fetchResource resourceId
+
+    # We failed to fetch the resource model data from the server.
+    fetchResourceFail: (error, resourceModel) ->
+      console.log "Failed to fetch the following resource ..."
+      console.log error
+      console.log resourceModel
+
+    # We succeeded in fetching the resource model data from the server,
+    # so we render a `ResourceView` subclass for it.
+    fetchResourceSuccess: (resourceName, myViewAttr, resourceObject) ->
+      @resourceModel.set resourceObject
+      @[myViewAttr] = new @myResources[resourceName].resourceViewClass
+        model: @resourceModel
+        dataLabelsVisible: true
+        expanded: true
+      @visibleView = @[myViewAttr]
+      @renderVisibleView()
+
+    # We heard that a resource was destroyed. If the destroyed resource is the
+    # one that we are currently displaying, then we hide it, close it, and
+    # navigate to the home page.
+    destroyResourceSuccess: (resourceModel) ->
+      if @visibleView and
+      @visibleView.model is @resourceModel and
+      resourceModel.get('id') is @resourceModel.get('id') and
+      resourceModel instanceof @resourceModel.constructor
+        @visibleView.$el.slideUp
+          complete: =>
+            @closeVisibleView()
+            @showHomePageView()
+
+    # The information in this object controls how `@showResourcesView` behaves.
+    # The `resourceName` param of that method must be an attribute of this
+    # object. NOTE: default params not supplied here are filled in by
+    # `@showResourcesViewSetDefaultOptions`.
+    myResources:
+
+      applicationSetting:
+        resourcesViewClass: ApplicationSettingsView
+        resourceViewClass: null
+        resourceModelClass: null
+        resourcesCollectionClass: null
+        params:
+          authenticationRequired: false
+          needsAppSettings: true
+
+      collection:
+        resourcesViewClass: CollectionsView
+        resourceViewClass: CollectionView
+        resourceModelClass: CollectionModel
+        resourcesCollectionClass: CollectionsCollection
+        params:
+          searchable: true
+
+      corpus:
+        resourcesViewClass: CorporaView
+        resourceViewClass: null
+        resourceModelClass: null
+        resourcesCollectionClass: null
+        params:
+          needsAppSettings: true
+          needsActiveFieldDBCorpus: true
+
+      elicitationMethod:
+        resourcesViewClass: ElicitationMethodsView
+        resourceViewClass: ElicitationMethodView
+        resourceModelClass: ElicitationMethodModel
+        resourcesCollectionClass: ElicitationMethodsCollection
+
+      file:
+        resourcesViewClass: FilesView
+        resourceViewClass: FileView
+        resourceModelClass: FileModel
+        resourcesCollectionClass: FilesCollection
+        params:
+          searchable: true
+
+      form:
+        resourcesViewClass: FormsView
+        resourceViewClass: FormView
+        resourceModelClass: FormModel
+        resourcesCollectionClass: FormsCollection
+        params:
+          needsAppSettings: true
+          searchable: true
+          corpusElement: true
+          needsActiveFieldDBCorpus: true
+
+      languageModel:
+        resourcesViewClass: LanguageModelsView
+        resourceViewClass: LanguageModelView
+        resourceModelClass: LanguageModelModel
+        resourcesCollectionClass: LanguageModelsCollection
+
+      language:
+        resourcesViewClass: LanguagesView
+        resourceViewClass: LanguageView
+        resourceModelClass: LanguageModel
+        resourcesCollectionClass: LanguagesCollection
+        params:
+          searchable: true
+
+      morphologicalParser:
+        resourcesViewClass: MorphologicalParsersView
+        resourceViewClass: MorphologicalParserView
+        resourceModelClass: MorphologicalParserModel
+        resourcesCollectionClass: MorphologicalParsersCollection
+
+      morphology:
+        resourcesViewClass: MorphologiesView
+        resourceViewClass: MorphologyView
+        resourceModelClass: MorphologyModel
+        resourcesCollectionClass: MorphologiesCollection
+
+      orthography:
+        resourcesViewClass: OrthographiesView
+        resourceViewClass: OrthographyView
+        resourceModelClass: OrthographyModel
+        resourcesCollectionClass: OrthographiesCollection
+
+      page:
+        resourcesViewClass: PagesView
+        resourceViewClass: PageView
+        resourceModelClass: PageModel
+        resourcesCollectionClass: PagesCollection
+
+      phonology:
+        resourcesViewClass: PhonologiesView
+        resourceViewClass: PhonologyView
+        resourceModelClass: PhonologyModel
+        resourcesCollectionClass: PhonologiesCollection
+
+      search:
+        resourcesViewClass: SearchesView
+        resourceViewClass: SearchView
+        resourceModelClass: SearchModel
+        resourcesCollectionClass: SearchesCollection
+        params:
+          searchable: true
+
+      source:
+        resourcesViewClass: SourcesView
+        resourceViewClass: SourceView
+        resourceModelClass: SourceModel
+        resourcesCollectionClass: SourcesCollection
+        params:
+          searchable: true
+
+      speaker:
+        resourcesViewClass: SpeakersView
+        resourceViewClass: SpeakerView
+        resourceModelClass: SpeakerModel
+        resourcesCollectionClass: SpeakersCollection
+
+      subcorpus:
+        resourcesViewClass: SubcorporaView
+        resourceViewClass: SubcorpusView
+        resourceModelClass: SubcorpusModel
+        resourcesCollectionClass: SubcorporaCollection
+
+      syntacticCategory:
+        resourcesViewClass: SyntacticCategoriesView
+        resourceViewClass: SyntacticCategoryView
+        resourceModelClass: SyntacticCategoryModel
+        resourcesCollectionClass: SyntacticCategoriesCollection
+
+      tag:
+        resourcesViewClass: TagsView
+        resourceViewClass: TagView
+        resourceModelClass: TagModel
+        resourcesCollectionClass: TagsCollection
+
+      user:
+        resourcesViewClass: UsersView
+        resourceViewClass: UserView
+        resourceModelClass: UserModel
+        resourcesCollectionClass: UsersCollection
+
+    # Show the ResourcesView subclass for `resourceName` but also make sure
+    # that the "Add a new resource" subview is rendered too.
+    showNewResourceView: (resourceName) ->
+      if not @loggedIn() then return
+      resourcePlural = @utils.pluralize resourceName
+      myViewAttr = "#{resourcePlural}View"
+      if @[myViewAttr] and @visibleView is @[myViewAttr]
+        @visibleView.toggleNewResourceViewAnimate()
+      else
+        @["show#{@utils.capitalize resourcePlural}View"]
+          showNewResourceView: true
+
+    # Return camelCase `resourceName` in a bunch of other forms that are useful
+    # for dynamically displaying/manipulating that resource.
+    getResourceNames: (resourceName) ->
+      plural = @utils.pluralize resourceName
+      regular = @utils.camel2regular resourceName
+      hyphen = @utils.camel2hyphen resourceName
+      regular: regular
+      regPlur: @utils.pluralize regular
+      hyphen: hyphen
+      hypPlur: @utils.pluralize hyphen
+      plural: plural
+      capitalized: @utils.capitalize resourceName
+      capPlur: @utils.capitalize plural
+
+    # Get `obj[attr]`, returning `default` if `attr` is not a key of `obj`.
+    get: (obj, attr, default_=null) ->
+      if attr of obj then obj[attr] else default_
+
+    # Return `options` with resource-specific values (from `@myResources`) and
+    # defaults.
+    showResourcesViewSetDefaultOptions: (resourceName, options={}) ->
+      params = @myResources[resourceName].params or {}
+      _.extend options, params
+      # Authentication is required to view most resources views.
+      options.authenticationRequired =
+        @get options, 'authenticationRequired', true
+      # Most resources views do not need to be passed app settings on init.
+      options.needsAppSettings = @get options, 'needsAppSettings', false
+      # When using FieldDB backend, the forms view needs the active FieldDB corpus.
+      options.needsActiveFieldDBCorpus =
+        @get options, 'needsActiveFieldDBCorpus', false
+      # Most resources views are not searchable.
+      options.searchable = @get options, 'searchable', false
+      # Most resources views are not elements of a corpus (only forms).
+      options.corpusElement = @get options, 'corpusElement', false
+      options
+
+    # Return `options` with resource-specific values (from `@myResources`) and
+    # defaults.
+    showResourceViewSetDefaultOptions: (resourceName, options={}) ->
+      params = @myResources[resourceName].params or {}
+      _.extend options, params
+      # Authentication is required to view most resources views.
+      options.authenticationRequired =
+        @get options, 'authenticationRequired', true
+      options
+
+    # Return `true` if the FieldDB corpus has changed.
+    fieldDBCorpusHasChanged: (myViewAttr, options={}) ->
+      myViewAttr is 'formsView' and
+      @activeServerType() is 'FieldDB' and
+      options.fieldDBCorpusHasChanged
+
+    closeView: (view) ->
+      view.close()
+      @closed view
+
+    # Instantiate a new `ResourcesView` subclass for `resourceName`.
+    instantiateResourcesView: (resourceName, options={}) ->
+      myParams = {}
+      if options.needsAppSettings
+        myParams.model = @applicationSettings
+        myParams.applicationSettings = @applicationSettings
+      if options.needsActiveFieldDBCorpus
+        myParams.activeFieldDBCorpus = @activeFieldDBCorpus
+      new @myResources[resourceName].resourcesViewClass myParams
+
+    # Alter the visible resources view so that it displays the "create a new
+    # resource" view when rendered.
+    showNewResourceViewOption: (o) ->
+      if o.showNewResourceView
+        @visibleView.newResourceViewVisible = true
+        @visibleView.weShouldFocusFirstAddViewInput = true
+
+    # Alter a searchable resources view so that it has (or lacks) a search
+    # object when rendered.
+    searchableOption: (o) ->
+      if o.searchable
+        if o.search
+          smartSearch = o.smartSearch or null
+          @visibleView.setSearch o.search, smartSearch
+        else
+          @visibleView.deleteSearch()
+
+    # Alter a view of resources that can be members of corpora so that the
+    # resources view has (or lacks) a corpus that it should be displaying.
+    corpusElementOption: (o) ->
+      if o.corpusElement
+        if o.corpus
+          @visibleView.setCorpus o.corpus
+        else
+          @visibleView.deleteCorpus()
+
+
+    ############################################################################
+    # Show X-type resources view methods.
+    # TODO: maybe these can all be dynamically defined too.
+    ############################################################################
+
+    showApplicationSettingsView: (options={}) ->
+      @showResourcesView 'applicationSetting', options
+    showCorporaView: (options={}) -> @showResourcesView 'corpus', options
+    showFilesView: (options={}) -> @showResourcesView 'file', options
+    showFormsView: (options={}) -> @showResourcesView 'form', options
+    showLanguageModelsView: (options) ->
+      @showResourcesView 'languageModel', options
+    showMorphologicalParsersView: (options) ->
+      @showResourcesView 'morphologicalParser', options
+    showMorphologiesView: (options={}) ->
+      @showResourcesView 'morphology', options
+    showPagesView: (options={}) -> @showResourcesView 'page', options
+    showPhonologiesView: (options={}) -> @showResourcesView 'phonology', options
+    showSearchesView: (options) -> @showResourcesView 'search', options
+    showSubcorporaView: (options={}) -> @showResourcesView 'subcorpus', options
+    showUsersView: (options={}) -> @showResourcesView 'user', options
+
+
+    ############################################################################
+    # Show X-type "add a new" resource view methods (within the resources view)
+    # TODO: maybe these can all be dynamically defined too.
+    ############################################################################
+
+    showNewFormView: -> @showNewResourceView 'form'
+    showNewSubcorpusView: -> @showNewResourceView 'subcorpus'
+    showNewPhonologyView: -> @showNewResourceView 'phonology'
+    showNewMorphologyView: -> @showNewResourceView 'morphology'
+
+
+    ############################################################################
+    # Dialog-base view toggling.
+    ############################################################################
+
     # Open/close the login dialog box
-    toggleLoginDialog: ->
-      Backbone.trigger 'loginDialog:toggle'
+    toggleLoginDialog: -> Backbone.trigger 'loginDialog:toggle'
 
     openLoginDialogWithDefaults: (username, password) ->
       @loginDialog.dialogOpenWithDefaults
@@ -556,18 +791,20 @@ define [
         password: password
 
     # Open/close the register dialog box
-    toggleRegisterDialog: ->
-      Backbone.trigger 'registerDialog:toggle'
+    toggleRegisterDialog: -> Backbone.trigger 'registerDialog:toggle'
 
     # Open/close the alert dialog box
-    toggleAlertDialog: ->
-      Backbone.trigger 'alertDialog:toggle'
+    toggleAlertDialog: -> Backbone.trigger 'alertDialog:toggle'
+
+    # Open/close the tasks dialog box
+    toggleTasksDialog: -> Backbone.trigger 'tasksDialog:toggle'
 
     # Open/close the help dialog box
     toggleHelpDialog: ->
       if not @helpDialog.hasBeenRendered
         @renderHelpDialog()
       Backbone.trigger 'helpDialog:toggle'
+
 
     ############################################################################
     # Change the jQuery UI CSS Theme
@@ -577,8 +814,7 @@ define [
     setTheme: ->
       activeTheme = @applicationSettings.get 'activeJQueryUITheme'
       defaultTheme = @applicationSettings.get 'defaultJQueryUITheme'
-      if activeTheme isnt defaultTheme
-        @changeTheme()
+      if activeTheme isnt defaultTheme then @changeTheme()
 
     changeTheme: (event) ->
 
@@ -605,7 +841,7 @@ define [
       linkHTML = $jQueryUILinkElement.get(0).outerHTML
       $('#font-awesome-css').after linkHTML
       outerCallback = =>
-        innerCallback = =>
+        innerCallback = ->
           Backbone.trigger 'application-settings:jQueryUIThemeChanged'
         @constructor.refreshJQueryUIColors innerCallback
       @listenForLinkOnload outerCallback
@@ -652,10 +888,11 @@ define [
           clearInterval ti
       ti = setInterval func, 10
 
+
     ############################################################################
     # FieldDB .bug, .warn and .confirm hooks
     ############################################################################
-    #
+
     overrideFieldDBNotificationHooks: ->
       # Overriding FieldDB's logging hooks to do nothing
       FieldDB.FieldDBObject.verbose = -> {}
@@ -746,135 +983,103 @@ define [
 
       deferred.promise
 
-    displayConfirmIdentityDialog: (message, successCallback, failureCallback, cancelCallback) =>
+    displayConfirmIdentityDialog: (message, successCallback, failureCallback,
+    cancelCallback) =>
       cancelCallback = cancelCallback or failureCallback
-      if @applicationSettings.get 'fieldDBApplication' != FieldDB.FieldDBObject.application
-        @applicationSettings.set 'fieldDBApplication', FieldDB.FieldDBObject.application
+      if @applicationSettings.get 'fieldDBApplication' isnt
+      FieldDB.FieldDBObject.application
+        @applicationSettings.set 'fieldDBApplication',
+          FieldDB.FieldDBObject.application
       @displayPromptDialog(message).then(
         (dialog) =>
           @applicationSettings
             .get('fieldDBApplication')
             .authentication
             .confirmIdentity(password: dialog.response)
-            .then successCallback, failureCallback 
+            .then successCallback, failureCallback
       ,
         cancelCallback
       )
 
-    ############################################################################
-    # Persist application settings.
-    ############################################################################
-
-    # Change `attribute` to `value` in applicationSettings.formsDisplaySettings.
-    changeFormsDisplaySetting: (attribute, value) ->
-      try
-        formsDisplaySettings = @applicationSettings.get 'formsDisplaySettings'
-        formsDisplaySettings[attribute] = value
-        @applicationSettings.save 'formsDisplaySettings', formsDisplaySettings
-
-    # Set app settings' "all forms expanded" to true.
-    setAllFormsExpanded: ->
-      @changeFormsDisplaySetting 'allFormsExpanded', true
-
-    # Set app settings' "all forms expanded" to false.
-    setAllFormsCollapsed: ->
-      @changeFormsDisplaySetting 'allFormsExpanded', false
-
-    # Persist the new "items per page" to app settings.
-    setFormsItemsPerPage: (newItemsPerPage) ->
-      @changeFormsDisplaySetting 'itemsPerPage', newItemsPerPage
-
-    # Set app settings' "primary data labels visible" to false.
-    setFormsPrimaryDataLabelsHidden: ->
-      @changeFormsDisplaySetting 'dataLabelsVisible', false
-
-    # Set app settings' "primary data labels visible" to true.
-    setFormsPrimaryDataLabelsVisible: ->
-      @changeFormsDisplaySetting 'dataLabelsVisible', true
-
-
     # Change `attribute` to `value` in
-    # applicationSettings.`resource`DisplaySettings.
+    # `applicationSettings.get('<resource_name_plural>DisplaySettings').`
     changeDisplaySetting: (resource, attribute, value) ->
       try
         displaySettings = @applicationSettings.get "#{resource}DisplaySettings"
         displaySettings[attribute] = value
         @applicationSettings.save "#{resource}DisplaySettings", displaySettings
 
-    # Phonologies Settings
+
     ############################################################################
-
-    # Set app settings' "all phonologies expanded" to true.
-    setAllPhonologiesExpanded: ->
-      @changeDisplaySetting 'phonologies', 'allPhonologiesExpanded', true
-
-    # Set app settings' "all phonologies expanded" to false.
-    setAllPhonologiesCollapsed: ->
-      @changeDisplaySetting 'phonologies', 'allPhonologiesExpanded', false
-
-    # Persist the new "items per page" to app settings.
-    setPhonologiesItemsPerPage: (newItemsPerPage) ->
-      @changeDisplaySetting 'phonologies', 'itemsPerPage', newItemsPerPage
-
-    # Set app settings' "primary data labels visible" to false.
-    setPhonologiesPrimaryDataLabelsHidden: ->
-      @changeDisplaySetting 'phonologies', 'dataLabelsVisible', false
-
-    # Set app settings' "primary data labels visible" to true.
-    setPhonologiesPrimaryDataLabelsVisible: ->
-      @changeDisplaySetting 'phonologies', 'dataLabelsVisible', true
-
-
-    # Subcorpora Settings
+    # Resource Displayer Dialog logic
     ############################################################################
+    #
+    # These are the jQuery Dialog Boxes that are used to display a single
+    # resource view.
 
-    # Set app settings' "all subcorpora expanded" to true.
-    setAllSubcorporaExpanded: ->
-      @changeDisplaySetting 'subcorpora', 'allSubcorporaExpanded', true
+    maxNoResourceDisplayerDialogs: 4
 
-    # Set app settings' "all subcorpora expanded" to false.
-    setAllSubcorporaCollapsed: ->
-      @changeDisplaySetting 'subcorpora', 'allSubcorporaExpanded', false
+    getResourceDisplayerDialogs: ->
+      for int in [1..@maxNoResourceDisplayerDialogs]
+        @["resourceDisplayerDialog#{int}"] =
+          new ResourceDisplayerDialogView index: int
 
-    # Persist the new "items per page" to app settings.
-    setSubcorporaItemsPerPage: (newItemsPerPage) ->
-      @changeDisplaySetting 'subcorpora', 'itemsPerPage', newItemsPerPage
-
-    # Set app settings' "primary data labels visible" to false.
-    setSubcorporaPrimaryDataLabelsHidden: ->
-      @changeDisplaySetting 'subcorpora', 'dataLabelsVisible', false
-
-    # Set app settings' "primary data labels visible" to true.
-    setSubcorporaPrimaryDataLabelsVisible: ->
-      @changeDisplaySetting 'subcorpora', 'dataLabelsVisible', true
-
-
-    # Morphologies Settings
-    ############################################################################
-
-    # Set app settings' "all morphologies expanded" to true.
-    setAllMorphologiesExpanded: ->
-      @changeDisplaySetting 'morphologies', 'allMorphologiesExpanded', true
-
-    # Set app settings' "all morphologies expanded" to false.
-    setAllMorphologiesCollapsed: ->
-      @changeDisplaySetting 'morphologies', 'allMorphologiesExpanded', false
-
-    # Persist the new "items per page" to app settings.
-    setMorphologiesItemsPerPage: (newItemsPerPage) ->
-      @changeDisplaySetting 'morphologies', 'itemsPerPage', newItemsPerPage
-
-    # Set app settings' "primary data labels visible" to false.
-    setMorphologiesPrimaryDataLabelsHidden: ->
-      @changeDisplaySetting 'morphologies', 'dataLabelsVisible', false
-
-    # Set app settings' "primary data labels visible" to true.
-    setMorphologiesPrimaryDataLabelsVisible: ->
-      @changeDisplaySetting 'morphologies', 'dataLabelsVisible', true
-
+    renderResourceDisplayerDialogs: ->
+      for int in [1..@maxNoResourceDisplayerDialogs]
+        @["resourceDisplayerDialog#{int}"]
+          .setElement(@$("#resource-displayer-dialog-container-#{int}"))
+          .render()
+        @rendered @["resourceDisplayerDialog#{int}"]
 
     # Render the passed in resource view in the application-wide
     # `@resourceDisplayerDialog`
-    showResourceInDialog: (resourceView, $target) ->
-      Backbone.trigger 'resourceDisplayerDialog:show', resourceView, $target
+    showResourceInDialog: (resourceView) ->
+      if @resourceViewAlreadyDisplayed resourceView
+        Backbone.trigger 'resourceAlreadyDisplayedInDialog', resourceView
+      else
+        if not resourceView.model.collection
+          collectionClass =
+            @myResources[resourceView.resourceName].resourcesCollectionClass
+          try
+            resourceView.model.collection = new collectionClass()
+        oldestResourceDisplayer = @getOldestResourceDisplayerDialog()
+        oldestResourceDisplayer.showResourceView resourceView
+
+    resourceViewAlreadyDisplayed: (resourceView) ->
+      @resourceAlreadyDisplayed resourceView.model
+
+    resourceAlreadyDisplayed: (resourceModel) ->
+      isit = false
+      for int in [1..@maxNoResourceDisplayerDialogs]
+        try
+          displayedModel = @["resourceDisplayerDialog#{int}"].resourceView.model
+          if displayedModel.get('id') is resourceModel.get('id') and
+          displayedModel.constructor.name is resourceModel.constructor.name
+            isit = true
+      isit
+
+    getResourceViewClassFromResourceName: (resourceName) ->
+      @myResources[resourceName].resourceViewClass
+
+    # Create a view for the passed in `resourceModel` and render it in the
+    # application-wide `@resourceDisplayerDialog`.
+    showResourceModelInDialog: (resourceModel, resourceName) ->
+      resourceViewClass = @getResourceViewClassFromResourceName resourceName
+      resourceView = new resourceViewClass(model: resourceModel)
+      if @resourceAlreadyDisplayed resourceModel
+        Backbone.trigger 'resourceAlreadyDisplayedInDialog', resourceView
+      else
+        @showResourceInDialog resourceView
+
+    getOldestResourceDisplayerDialog: ->
+      oldest = @resourceDisplayerDialog1
+      for int in [2..@maxNoResourceDisplayerDialogs]
+        other = @["resourceDisplayerDialog#{int}"]
+        if other.timestamp < oldest.timestamp then oldest = other
+      oldest
+
+    openExporterDialog: (options) ->
+      @exporterDialog.setToBeExported options
+      #@exporterDialog.generateExport()
+      @exporterDialog.dialogOpen()
 

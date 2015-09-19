@@ -10,10 +10,12 @@
       <i class='fa fa-times fa-fw'></i>
     </button>
 
-    <button class="toggle-secondary-data-fields dative-tooltip"
-      title="show the secondary data input fields">
-      <i class='fa fa-angle-down fa-fw'></i>
-    </button>
+    <% if @editableSecondaryAttributes.length > 0: %>
+        <button class="toggle-secondary-data-fields dative-tooltip"
+                title="show the secondary data input fields"
+                ><i class='fa fa-angle-down fa-fw'></i>
+        </button>
+    <% end %>
 
   </div>
 
@@ -66,11 +68,13 @@
           <% end %>
           >Save</button>
 
-        <button
-          class="toggle-secondary-data-fields dative-tooltip"
-          title="show the secondary data input fields"
-          ><i class='fa fa-angle-down fa-fw'></i>
-        </button>
+        <% if @editableSecondaryAttributes.length > 0: %>
+            <button
+                class="toggle-secondary-data-fields dative-tooltip"
+                title="show the secondary data input fields"
+                ><i class='fa fa-angle-down fa-fw'></i>
+            </button>
+        <% end %>
 
       </li>
 

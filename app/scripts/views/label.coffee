@@ -24,8 +24,17 @@ define [
     tooltipify: ->
       @$('label.dative-tooltip')
         .tooltip
-          position:
-            my: "right-300 top"
-            at: 'right top'
-            collision: 'flipfit'
+          position: @myTooltipPosition
+
+    refreshTooltip: (tooltip) ->
+      @$('label.dative-tooltip')
+        .tooltip
+          content: tooltip
+          position: @myTooltipPosition
+
+    myTooltipPosition:
+      my: "right-300 top"
+      at: 'right top'
+      collision: 'flipfit'
+
 

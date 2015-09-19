@@ -7,7 +7,7 @@ define [
   # Serve Compiled Control View
   # ---------------------------
   #
-  # View for a control for requesting that a phonology resource return its
+  # View for a control for requesting that an FST-based resource return its
   # compiled file representation.
 
   class ServeCompiledControlView extends BaseView
@@ -109,9 +109,11 @@ define [
           href: url
           download: filename
           title: title
+          class: 'serve-compiled-anchor'
         .html "#{filename}<i class='fa fa-fw fa-download'></i>"
         .tooltip()
-      @$(".#{@conrolSummaryClass}").html $anchor
+      @$(".#{@controlResultsClass}").html $anchor
+      @$(".#{@conrolSummaryClass}").html 'DAVe'
 
     disableServeCompiledButton: ->
       @$('button.serve-compiled').button 'disable'

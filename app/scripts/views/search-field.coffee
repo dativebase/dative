@@ -11,6 +11,8 @@ define [
 
   class SearchFieldView extends FieldView
 
+    targetResourceName: 'form'
+
     getFieldLabelContainerClass: ->
       "#{super} top"
 
@@ -18,6 +20,7 @@ define [
       "#{super} full-width"
 
     getInputView: ->
+      @context.targetResourceName = @targetResourceName
       new SearchInputView @context
 
     setToModel: ->
@@ -39,4 +42,9 @@ define [
     events:
       'keydown textarea, input, .ui-selectmenu-button, .ms-container':
         'controlEnterSubmit'
+
+    controlEnterSubmit: (event) ->
+      if event.which is 13 and event.ctrlKey
+        @stopEvent event
+        @trigger 'search'
 

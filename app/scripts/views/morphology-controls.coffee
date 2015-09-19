@@ -1,10 +1,11 @@
 define [
   './controls'
   './generate-and-compile-control'
+  './apply-control'
   './apply-down-control'
   './apply-up-control'
   './serve-compiled-control'
-], (ControlsView, GenerateAndCompileControlView,
+], (ControlsView, GenerateAndCompileControlView, ApplyControlView,
   ApplyDownControlView, ApplyUpControlView, ServeCompiledControlView) ->
 
   # Morphology Controls View
@@ -19,19 +20,115 @@ define [
   # 4. requesting apply up conversion of a word or list of surface forms.
   # 5. requesting the compiled morphology file for download.
 
+
+  class MorphologyApplyUpControlView extends ApplyControlView
+
+    direction: 'up'
+    buttonText: 'Apply Up'
+    resourceName: 'morphology'
+
+    textareaTitle: ->
+      if @model.get('rich_upper')
+        if @model.get('rich_lower')
+          "Enter a richly represented morphological analysis here and click the
+            “Apply Up” button to see whether it is recognized during
+            parsing."
+        else
+          "Enter a richly represented morphological analysis here and click the
+            “Apply Up” button to see its corresponding impoverished
+            representation."
+      else
+        if @model.get('rich_upper')
+          "Enter an impoverished morphological analysis here and click the
+            “Apply Up” button to see its corresponding rich representation."
+        else
+          "Enter an impoverished morphological analysis here and click the
+            “Apply Up” button to see whether it is recognized during
+            parsing."
+
+    buttonTitle: ->
+      if @model.get('rich_upper')
+        if @model.get('rich_lower')
+          "Enter a richly represented morphological analysis in the input on
+            the left and click here to see whether it is recognized during
+            generation."
+        else
+          "Enter a richly represented morphological analysis in the input on
+            the left and click here to see its corresponding impoverished
+            representation."
+      else
+        if @model.get('rich_upper')
+          "Enter an impoverished morphological analysis in the input on the
+            left and click here to see its corresponding rich representation."
+        else
+          "Enter an impoverished morphological analysis in the input on the
+            left and click here to see whether it is recognized during
+            generation."
+
+  class MorphologyApplyDownControlView extends ApplyControlView
+
+    direction: 'down'
+    buttonText: 'Apply Down'
+    resourceName: 'morphology'
+
+    textareaTitle: ->
+      if @model.get('rich_upper')
+        if @model.get('rich_lower')
+          "Enter a richly represented morphological analysis here and click the
+            “Apply Down” button to see whether it is recognized during
+            generation."
+        else
+          "Enter a richly represented morphological analysis here and click the
+            “Apply Down” button to see its corresponding impoverished
+            representation."
+      else
+        if @model.get('rich_upper')
+          "Enter an impoverished morphological analysis here and click the
+            “Apply Down” button to see its corresponding rich representation."
+        else
+          "Enter an impoverished morphological analysis here and click the
+            “Apply Down” button to see whether it is recognized during
+            generation."
+
+    buttonTitle: ->
+      if @model.get('rich_upper')
+        if @model.get('rich_lower')
+          "Enter a richly represented morphological analysis in the input on
+            the left and click here to see whether it is recognized during
+            generation."
+        else
+          "Enter a richly represented morphological analysis in the input on
+            the left and click here to see its corresponding impoverished
+            representation."
+      else
+        if @model.get('rich_upper')
+          "Enter an impoverished morphological analysis in the input on the
+            left and click here to see its corresponding rich representation."
+        else
+          "Enter an impoverished morphological analysis in the input on the
+            left and click here to see whether it is recognized during
+            generation."
+
+
   class MorphologyGenerateAndCompileControlView extends GenerateAndCompileControlView
 
     initialize: (options) ->
       options?.resourceName = 'morphology'
       super options
 
+  class MorphologyServeCompiledControlView extends ServeCompiledControlView
+
+    initialize: (options) ->
+      options.resourceName = 'morphology'
+      super options
+
   class MorphologyControlsView extends ControlsView
 
     actionViewClasses: [
       MorphologyGenerateAndCompileControlView
-      ApplyDownControlView
-      ApplyUpControlView
-      ServeCompiledControlView
+      MorphologyApplyDownControlView
+      MorphologyApplyUpControlView
+      MorphologyServeCompiledControlView
     ]
 
     initialize: (options) ->

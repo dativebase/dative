@@ -1,11 +1,11 @@
-define ['./resource'], (ResourceModel) ->
+define ['./fst-based'], (FSTBasedModel) ->
 
   # Morphology Model
   # ---------------
   #
   # A Backbone model for Dative morphologies.
 
-  class MorphologyModel extends ResourceModel
+  class MorphologyModel extends FSTBasedModel
 
     resourceName: 'morphology'
 
@@ -27,10 +27,10 @@ define ['./resource'], (ResourceModel) ->
                                                  # 255 chars.
       description: ''                            # <string> description of the
                                                  # morphology.
-      lexicon_corpus: ''                         # <object> An OLD corpus model:
+      lexicon_corpus: null                       # <object> An OLD corpus model:
                                                  # received as an object, but
                                                  # OLD expects to receive an id.
-      rules_corpus: ''                           # <object> An OLD corpus model:
+      rules_corpus: null                         # <object> An OLD corpus model:
                                                  # received as an object, but
                                                  # OLD expects to receive an id.
       script_type: ''                            # <string> forced choice; one of
@@ -110,7 +110,8 @@ define ['./resource'], (ResourceModel) ->
 
     rulesOrRulesCorpus: (value) ->
       error = null
-      if @get('rules').trim() is '' and not @get('rules_corpus')?
+      if @get('rules').trim() is '' and
+      not @get('rules_corpus')?
         error = 'You must either specify rules or a rules corpus'
       error
 

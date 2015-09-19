@@ -16,5 +16,5 @@ define [
     utils: utils
 
     requiredString: (value) ->
-      if value.trim?() is '' then 'Please enter a value' else null
+      if value?.trim?() in ['', undefined] then 'Please enter a value' else null
 

@@ -3,14 +3,14 @@
     <li><a>Dative</a>
         <ul class='ui-corner-bottom'>
             <li>
-              <a data-event="request:applicationSettings"
+              <a data-event="request:applicationSettingsBrowse"
                  >Application Settings</a>
             </li>
             <li>
                 <a data-event="request:home">Home</a>
             </li>
             <li class="requires-authentication">
-                <a data-event="request:pages">Pages</a>
+                <a data-event="request:pagesBrowse">Pages</a>
             </li>
             <li class='requires-authentication fielddb'>
                 <a data-event="request:corporaBrowse">Corpora</a>
@@ -18,6 +18,9 @@
             <li>
               <a data-event="request:openRegisterDialogBox"
                 >Register</a>
+            </li>
+            <li class="requires-authentication">
+                <a data-event="request:toggleTasksDialog">Tasks</a>
             </li>
         </ul>
     </li>
@@ -43,6 +46,43 @@
             </li>
             <li class='requires-authentication'>
               <a data-event="request:subcorporaBrowse">Browse</a>
+            </li>
+        </ul>
+    </li>
+
+    <li class='requires-authentication old'><a>Resources</a>
+        <ul class='ui-corner-bottom'>
+            <li class='requires-authentication'>
+              <a data-event="request:filesBrowse">Files</a>
+            </li>
+            <li class='requires-authentication'>
+              <a data-event="request:collectionsBrowse">Collections</a>
+            </li>
+            <li class='requires-authentication'>
+              <a data-event="request:usersBrowse">Users</a>
+            </li>
+            <li class='requires-authentication'>
+                <a data-event="request:elicitationMethodsBrowse"
+                    >Elicitation Methods</a>
+            </li>
+            <li class='requires-authentication'>
+                <a data-event="request:tagsBrowse">Tags</a>
+            </li>
+            <li class='requires-authentication'>
+                <a data-event="request:syntacticCategoriesBrowse"
+                    >Categories</a>
+            </li>
+            <li class='requires-authentication'>
+                <a data-event="request:languagesBrowse">Languages</a>
+            </li>
+            <li class='requires-authentication'>
+                <a data-event="request:orthographiesBrowse">Orthographies</a>
+            </li>
+            <li class='requires-authentication'>
+                <a data-event="request:speakersBrowse">Speakers</a>
+            </li>
+            <li class='requires-authentication'>
+                <a data-event="request:sourcesBrowse">Sources</a>
             </li>
         </ul>
     </li>

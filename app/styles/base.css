@@ -150,7 +150,8 @@ button.help-button
 .form-igt-data span.dative-tooltip,
 .form-translations-data div.dative-tooltip,
 .form-translations-data span.dative-tooltip,
-.dative-field-label.dative-tooltip
+.dative-field-label.dative-tooltip,
+.header-title-content
 {
     cursor: pointer;
 }
@@ -163,6 +164,21 @@ button.help-button
   vertical-align: top;
   text-align: right;
   margin-right: 0.75em;
+
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  opacity: 0.6;
+}
+
+td.dative-field-label-cell
+{
+  text-align: right;
+  padding-right: 20px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  opacity: 0.6;
 }
 
 .dative-field-label-container.top,
@@ -180,13 +196,14 @@ button.help-button
 
 .dative-form-object .dative-field-display-label-container
 {
-  width: 40%;
+  width: 30%;
 }
 
 .dative-field-input-container,
 .dative-field-display-representation-container,
 .dative-field-display-label-container,
-.dative-pagin-item-index-cell
+.dative-pagin-item-index-cell,
+div.resource-as-row-cell.text
 {
   font-family: 'GentiumPlus', serif;
 }
@@ -228,6 +245,12 @@ button.help-button
   width: 70%;
 }
 
+.dative-pagin-item .dative-form-object .dative-field-input-container 
+{
+    max-width: 394.7px;
+}
+
+
 .update-widget .dative-field-input-container.full-width,
 .dative-field-input-container.full-width,
 .dative-field-display-representation-container.full-width
@@ -244,14 +267,14 @@ button.help-button
 }
 
 .update-widget .dative-field-input-container.full-width textarea,
-.dative-field-input-container.full-widt textarea
+.dative-field-input-container.full-width textarea
 {
   overflow: scroll;
 }
 
 .dative-form-object .dative-field-display-representation-container
 {
-  width: 55%;
+  width: 65%;
 }
 
 .dative-field-display-representation-container.no-label
@@ -514,7 +537,8 @@ div.dative-page-header-title
 .add-form-widget,
 .update-form-widget,
 .dative-shadowed-widget,
-.dative-form-object.expanded
+.dative-form-object.expanded,
+.big-button
 {
     box-shadow: 5px 5px 10px rgba(0, 0, 0, 0.5);
     -webkit-box-shadow: 5px 5px 10px rgba(0, 0, 0, 0.5);
@@ -522,7 +546,8 @@ div.dative-page-header-title
 }
 
 .dative-form-object.expanded:focus,
-.dative-shadowed-widget.expanded:focus
+.dative-shadowed-widget.expanded:focus,
+.dative-shadowed-widget.jquery-theme-image-container:focus
 {
     /*outline: none !important;*/
     /*box-shadow: 0 0 10px orange !important;*/
@@ -648,8 +673,10 @@ div.linguistic-data-entry-form ul.fieldset label,
 .ui-selectmenu-button:focus,
 .ui-button:focus,
 .ms-list:focus,
-input:focus,
-textarea:focus {
+input:not(.ui-autocomplete-input):focus,
+div.big-button:focus,
+textarea:focus
+{
     outline: none !important;
     box-shadow: 0 0 10px orange !important;
 }
@@ -683,7 +710,8 @@ div.dative-display
 }
 
 ul.fieldset textarea.textarea-only,
-textarea.textarea-only
+textarea.textarea-only,
+input.input-only
 {
   width: 94.1%;
   max-width: 94.1%;
@@ -695,8 +723,8 @@ ul.fieldset textarea.textarea-select-button,
 textarea.textarea-select-button
 {
   width: 73.5%;
-  /* max-width: 76.5%;
-  min-width: 76.5%; */
+  /* max-width: 73.5%;
+  min-width: 73.5%; */
 }
 
 ul.fieldset textarea.textarea-button,
@@ -731,6 +759,7 @@ label.dative-field-label
   width: 25%;
   max-width: 25%;
   min-width: 25%;
+  /* opacity: 0.6; */
 }
 
 ul.fieldset select[name="elicitation_method"],
@@ -843,8 +872,14 @@ button.ui-multiselect {
 
 /* reStructuredText-generated HTML styles */
 div.document {
-    margin: 0 100px;
+  /*margin: 0 100px;*/
 }
+
+div.html-snippet div.html div.document a
+{
+  text-decoration: underline;
+}
+
 div.document a {
     text-decoration: none;
 }
@@ -1130,6 +1165,19 @@ div.button-container-center
   -webkit-transform: translate(-50%, -50%);
 }
 
+div.container-center-left
+{
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-80%, -50%);
+  -webkit-transform: translate(-80%, -50%);
+  width: 40%;
+  max-width: 40%;
+  overflow-x: scroll;
+  white-space: nowrap;
+}
+
 div.button-container-center
 {
   width: 700px;
@@ -1233,17 +1281,30 @@ div.dative-display
   text-align: justify;
 }
 
-.dative-exporter-dialog .dative-exporter-dialog-content-container
+.dative-exporter-dialog .dative-exporter-dialog-content-container,
+.exporter-export-content-pre-container
 {
-  overflow-y: scroll;
+  overflow: scroll;
 }
 
-.dative-exporter-dialog .dative-exporter-dialog-content
+.exporter-export-content-pre-container
+{
+  max-height: 20em;
+}
+
+.exporter-export-content-container
+{
+  margin-top: 1em;
+}
+
+.dative-exporter-dialog .dative-exporter-dialog-content,
+.exporter-export-content
 {
   font-size: 120%;
 }
 
-.dative-exporter-dialog .dative-exporter-dialog-content pre
+.dative-exporter-dialog .dative-exporter-dialog-content pre,
+.exporter-export-content pre
 {
   line-height: 120%;
 }
@@ -1264,56 +1325,72 @@ div.dative-display
 .dative-help-dialog .help-content h3,
 .dative-help-dialog .help-content h4,
 .dative-help-dialog .help-content h5,
-.dative-help-dialog .help-content p
+.dative-help-dialog .help-content p,
+.html-snippet h1,
+.html-snippet h2,
+.html-snippet h3,
+.html-snippet h4,
+.html-snippet h5,
+.html-snippet p
 {
   margin-top: 0.75em;
 }
 
-.dative-help-dialog .help-content h1
+.dative-help-dialog .help-content h1,
+.html-snippet h1
 {
   font-size: 150%;
 }
 
-.dative-help-dialog .help-content h2
+.dative-help-dialog .help-content h2,
+.html-snippet h2
 {
   font-size: 140%;
 }
 
-.dative-help-dialog .help-content h3
+.dative-help-dialog .help-content h3,
+.html-snippet h3
 {
   font-size: 130%;
 }
 
-.dative-help-dialog .help-content h4
+.dative-help-dialog .help-content h4,
+.html-snippet h4
 {
   font-size: 120%;
 }
 
-.dative-help-dialog .help-content h5
+.dative-help-dialog .help-content h5,
+.html-snippet h5
 {
   font-size: 110%;
 }
 
 .dative-help-dialog .help-content ul,
-.dative-help-dialog .help-content ol
+.html-snippet ul,
+.dative-help-dialog .help-content ol,
+.html-snippet ol
 {
   margin-top: 1em;
   margin-bottom: 1em;
 }
 
-.dative-help-dialog .help-content ul > li
+.dative-help-dialog .help-content ul > li,
+.html-snippet ul > li
 {
   list-style: disc outside none;
   margin-left: 2em;
 }
 
-.dative-help-dialog .help-content ol > li
+.dative-help-dialog .help-content ol > li,
+.html-snippet ol > li
 {
   list-style: decimal outside none;
   margin-left: 2em;
 }
 
-.dative-help-dialog .help-content strong
+.dative-help-dialog .help-content strong,
+.html-snippet strong
 {
   font-weight: bold;
 }
@@ -1465,6 +1542,11 @@ div.dative-new-item .dative-widget-center
   width: 98%;
   margin-top: 1em;
   margin-bottom: 0.75em;
+}
+
+.update-resource-widget
+{
+  margin-bottom: 3em !important;
 }
 
 div.dative-paginated-item .dative-widget-header-title,
@@ -1634,6 +1716,17 @@ ul.fieldset .script-textarea,
   margin-top: 0.25em;
 }
 
+.button-control-results
+{
+  display: inline-block;
+}
+
+.serve-compiled-anchor
+{
+  position: relative;
+  top: 0.75em;
+}
+
 span.match
 {
   font-weight: bold;
@@ -1669,6 +1762,17 @@ div.scoped-cell,
 {
   border-left: 2px solid black;
   border-radius: 15px;
+}
+
+.filter-expression-operand:not(.filter-expression-operand-array)
+{
+  display: flex;
+  align-items: center;
+}
+
+.filter-expression-operand span.ui-selectmenu-button
+{
+  margin-right: 0.5em;
 }
 
 div.filter-expression-operator,
@@ -1748,5 +1852,483 @@ button.make-not-not i
 .dative-resource-displayer-dialog-widget.ui-dialog .ui-dialog-title
 {
   width: auto !important;
+}
+
+.dative-tasks-dialog
+{
+  /*font-size: 12pt;*/
+}
+
+.dative-tasks-dialog h2
+{
+  font-size: 120%;
+}
+
+div.dative-tasks-content
+{
+  overflow-x: scroll;
+}
+
+.dative-tasks-content .current-tasks,
+.dative-tasks-content .terminated-tasks
+{
+  margin-top: 1em;
+}
+
+table.tasks-table
+{
+  min-width: 50em;
+}
+
+div.tasks-table
+{
+  margin-top: 0.5em;
+}
+
+table.tasks-table th
+{
+  white-space: nowrap;
+  font-weight: bold;
+}
+
+table.tasks-table td,
+table.tasks-table th
+{
+  padding: 0.25em 2em 0.25em 0.25em;
+  text-align: left;
+}
+
+.current-tasks .live-task
+{
+  position: relative;
+  /*padding-left: 2em;*/
+  width: 1em;
+  height: 2em;
+}
+
+.current-tasks .live-task-container
+{
+  width: 2em;
+}
+
+img.file-data-image,
+video.file-data-video
+{
+  max-width: 100%;
+  width: 100%;
+  margin-bottom: -2px;
+}
+
+object.file-data-pdf
+{
+  width: 100%;
+  height: 100%;
+}
+
+audio.file-data-audio
+{
+  width: 100%;
+}
+
+.file-data-no-display
+{
+  padding: 1em;
+  font-size: 12pt;
+}
+
+.file-upload-container
+{
+  display: inline-block;
+  width: 79.7%;
+}
+
+.file-upload-progress-bar
+{
+  display: inline-block;
+  width: 60%;
+  position: relative;
+  top: 0.75em;
+}
+
+.file-upload-status
+{
+  display: inline-block;
+  font-size: 12pt;
+  position: relative;
+  top: 0.15em;
+}
+
+.update .resource-select-via-search-input-input
+{
+  /* width: 78%; */
+  max-width: 66%;
+  width: 66%;
+}
+
+.resource-select-via-search-input-input
+{
+  /*width: 83.7%;*/
+  width: 73.5%;
+  max-width: 73.5%;
+  padding-left: 1.75em !important;
+}
+
+.ui-dialog-content .resource-select-via-search-input-input
+{
+  width: 69.5%;
+  max-width: 69.5%;
+}
+
+i.search-term-icon
+{
+  position: absolute;
+  display: block;
+  top: 0.75em;
+  left: 0.6em;
+  font-size: 12pt;
+}
+
+.resource-select-via-search-input-button
+{
+  position: relative;
+  bottom: 0.4em;
+}
+
+div.resource-results-via-search-table-wrapper,
+div.selected-resource-display-container
+{
+  /* border-width: 1px;
+  border-style: solid; */
+  width: 98%;
+  max-width: 98%;
+  min-width: 98%;
+  margin-top: 0.5em;
+}
+
+div.resource-results-via-search-table
+{
+  max-height: 10em;
+  /*font-size: 12pt;*/
+  overflow-x: scroll;
+  margin: 0.5em 0 0.5em 0.5em;
+  width: 95%;
+  max-width: 95%;
+  min-width: 95%;
+}
+
+div.resource-as-row-row,
+div.resource-as-row-header-row
+{
+  display: inline-block;
+  white-space: nowrap;
+}
+
+div.resource-as-row-cell,
+div.resource-as-row-header-cell
+{
+  display: inline-block;
+  width: 7em;
+  white-space: nowrap;
+  overflow-x: scroll;
+  /* overflow: hidden;
+  text-overflow: ellipsis; */
+  line-height: 1.5em;
+  margin-right: 0.75em;
+  padding-top: 0.5em;
+  padding-bottom: 0.5em;
+  padding-left: 0.5em;
+  vertical-align: middle;
+}
+
+div.resource-as-row-cell.resource-as-row-attr-size,
+div.resource-as-row-header-cell.resource-as-row-attr-size
+{
+  width: 5em;
+}
+
+div.resource-as-row-cell.resource-as-row-attr-filename,
+div.resource-as-row-header-cell.resource-as-row-attr-filename,
+div.resource-as-row-cell.resource-as-row-attr-forms,
+div.resource-as-row-cell.resource-as-row-attr-tags
+{
+  width: 12em;
+  text-overflow: clip;
+  overflow-x: scroll;
+}
+
+div.resource-as-row-cell.resource-as-row-attr-id,
+div.resource-as-row-header-cell.resource-as-row-attr-id
+{
+  width: 3.5em;
+}
+
+div.resource-as-row-cell.controls-header
+{
+  width: 100px;
+}
+
+div.resource-as-row-cell.text
+{
+  font-size: 12pt;
+  line-height: 1.75em;
+}
+
+div.resource-as-row-cell.header
+{
+  font-weight: bold;
+}
+
+div.resource-select-via-search-input-container
+{
+  position: relative;
+  max-width: 100%;
+}
+
+span.current-time-seconds
+{
+  width: 7em;
+  display: inline-block;
+  text-align: right;
+}
+
+.resource-results-via-search-table-wrapper .results-count
+{
+  padding-left: 1em;
+}
+
+.resource-results-via-search-table-wrapper .results-showing-count
+{
+  padding-right: 1em;
+}
+
+.resource-icon i
+{
+  margin-right: 0.25em;
+}
+
+.resource-sub-icon-
+{
+  margin-left: 0.25em;
+}
+
+.dative-form-field .tagit-choice
+{
+  padding: 0.5em 18px 0.5em 0.5em !important;
+  font-size: 120%;
+}
+
+.dative-form-field ul.tagit
+{
+  max-width: 94.4%;
+  padding-left: 10px;
+  padding-right: 10px;
+  background: white;
+}
+
+.dative-form-field ul.tagit input.ui-autocomplete-input
+{
+  background: white;
+  color: initial;
+}
+
+.selected-resource-container
+{
+  display: inline-block;
+  width: 86%;
+  max-width: 86%;
+  min-width: 86%;
+}
+
+.selected-resource-container .field-display-link
+{
+  position: relative;
+  top: 0.1em;
+}
+
+.selected-resource-controls
+{
+  display: inline-block;
+  width: 12%;
+  max-width: 12%;
+  min-width: 12%;
+  vertical-align: top;
+}
+
+.resource-secondary-data
+{
+  margin-top: 1em;
+}
+
+a.morpheme-link
+{
+  text-decoration: none;
+}
+
+a.morpheme-link-partial-match
+{
+  color: green !important;
+}
+
+a.morpheme-link-perfect-match
+{
+  color: blue !important;
+}
+
+.dative-state-highlight
+{
+  /* border: solid 1px red !important; */
+  /* background-color: #FFFF00; */
+  background-color: rgba(255, 255, 0, 0.6);
+}
+
+.smart-search-input
+{
+  font-size: 200% !important;
+  width: 80%;
+  max-width: 80%;
+  margin: 1em auto;
+  display: block;
+  height: 1.5em;
+  min-height: 1.5em;
+  padding: 0.25em 0.25em 0.25em 0.25em;
+  font-family: 'GentiumPlus', serif !important;
+}
+
+.smart-search-preview-container
+{
+  margin: 0em auto 3em auto;
+  width: 80%;
+}
+
+.smart-query-preview-data *
+{
+  vertical-align: top;
+  margin-bottom: 1em;
+}
+
+.smart-query-preview-match-count,
+.smart-query-preview-description,
+.smart-query-preview-buttons
+{
+  display: inline-block;
+  padding: 0.25em;
+}
+
+.smart-query-preview-match-count,
+.smart-query-preview-description
+{
+  font-size: 14pt;
+  font-family: 'GentiumPlus', serif;
+}
+
+.smart-query-preview-match-count
+{
+  width: 20%;
+  position: relative;
+}
+
+.smart-query-preview-description
+{
+  width: 45%;
+  line-height: 125%;
+}
+
+.smart-query-preview-buttons
+{
+  width: 25%;
+}
+
+.exporter
+{
+  margin: 2em auto;
+  width: 90%;
+}
+
+.exporter-controls,
+.exporter-export-controls
+{
+  display: inline-block;
+  width: 23%;
+  vertical-align: top;
+  text-align: right;
+}
+
+.exporter-meta,
+.exporter-export-content-pre-container
+{
+  width: 75%;
+  max-width: 75%;
+  display: inline-block;
+}
+
+.exporter-description,
+.exporter-export-content
+{
+  margin: 0.5em 0 0 1em;
+  line-height: 1.5em;
+}
+
+.exporter-export-content
+{
+  line-height: 2em;
+}
+
+a.export-link
+{
+  line-height: 2em;
+}
+
+div.application-settings-big-buttons,
+div.application-settings-interfaces
+{
+  margin: 1em;
+  text-align: center;
+}
+
+div.big-button
+{
+  cursor: pointer;
+  padding: 2em;
+  margin: 1em;
+  width: 15em;
+  height: 8em;
+  display: inline-block;
+  border-width: 1px;
+  border-style: solid;
+}
+
+div.big-button-icon
+{
+  text-align: center;
+  margin-top: 2em;
+}
+
+div.big-button-text
+{
+  text-align: center;
+  font-size: 150%;
+}
+
+.jquery-theme-image-container
+{
+  cursor: pointer;
+  display: inline-block;
+  margin: 1em;
+  padding: 0.25em;
+  border-width: 1px;
+  border-style: solid;
+}
+
+.jquery-theme-name
+{
+  margin-bottom: 0.5em;
+  font-size: 125%;
+}
+
+.servers-interface label[for=activeServer]
+{
+  position: relative;
+  top: 0.75em;
+  margin-right: 1em;
 }
 

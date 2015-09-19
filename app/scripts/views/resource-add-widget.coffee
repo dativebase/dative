@@ -39,6 +39,12 @@ define [
       ui-widget ui-widget-content ui-corner-all'
 
     initialize: (options) ->
+      @callRenderAfterNewResourceDataSuccess = false
+      @primaryFieldViews = []
+      @secondaryFieldViews = []
+      # Maps attributes to the FieldView instance that have been constructed for
+      # them. Useful for saving state.
+      @attribute2fieldViewInstance = {}
       @resourceNameCapitalized = @utils.capitalize @resourceName
       @resourceNamePlural = @utils.pluralize @resourceName
       @resourceNamePluralCapitalized = @utils.capitalize @resourceNamePlural
@@ -62,9 +68,7 @@ define [
       newModel
 
     render: ->
-      if @activeServerTypeIsOLD() and not @weHaveNewResourceData()
-        @model.getNewResourceData() # Success in this request will call `@render()`
-        return
+      if @checkForRelatedResourceData() is 'exit' then return
       @getFieldViews()
       @html()
       @secondaryDataVisibility()
@@ -73,6 +77,29 @@ define [
       @fixRoundedBorders() # defined in BaseView
       @listenToEvents()
       @
+
+    # If we are working with an OLD backend and if we need to first get some
+    # data on our related resources before we can render, then we return the
+    # string 'exit'. We also re-request the related resource data if we haven't
+    # updated it in a while.
+    checkForRelatedResourceData: ->
+      if @activeServerTypeIsOLD()
+        [weHaveNewResourceData, lastRetrieved] = @weHaveNewResourceData()
+        if weHaveNewResourceData
+          if ((new Date()) - lastRetrieved) > @relatedResourceDataExpires
+            @getNewResourceData()
+        else
+          # Setting this to true will cause `render` to be called again after
+          # we successfully retrieve the data needed for adding a resource.
+          @callRenderAfterNewResourceDataSuccess = true
+          @getNewResourceData()
+          'exit'
+
+    getNewResourceData: ->
+      if @model.get('id')
+        @model.getEditResourceData()
+      else
+        @model.getNewResourceData()
 
     events:
       'click button.add-resource-button':          'submitForm'
@@ -85,24 +112,42 @@ define [
 
     listenToEvents: ->
       super
-      # Events specific to an OLD backend and the request for the data needed to create a resource.
-      @listenTo Backbone, "getNew#{@resourceNameCapitalized}DataStart",
+
+      # Events specific to an OLD backend and the request for the data needed
+      # to create a resource.
+      @listenTo @model, "getNew#{@resourceNameCapitalized}DataStart",
         @getNewResourceDataStart
-      @listenTo Backbone, "getNew#{@resourceNameCapitalized}DataEnd",
+      @listenTo @model, "getNew#{@resourceNameCapitalized}DataEnd",
         @getNewResourceDataEnd
-      @listenTo Backbone, "getNew#{@resourceNameCapitalized}DataSuccess",
+      @listenTo @model, "getNew#{@resourceNameCapitalized}DataSuccess",
         @getNewResourceDataSuccess
-      @listenTo Backbone, "getNew#{@resourceNameCapitalized}DataFail",
+      @listenTo @model, "getNew#{@resourceNameCapitalized}DataFail",
+        @getNewResourceDataFail
+
+      # Events specific to an OLD backend and the request for the data needed
+      # to update this resource.
+      @listenTo @model, "getEdit#{@resourceNameCapitalized}DataStart",
+        @getNewResourceDataStart
+      @listenTo @model, "getEdit#{@resourceNameCapitalized}DataEnd",
+        @getNewResourceDataEnd
+      @listenTo @model, "getEdit#{@resourceNameCapitalized}DataSuccess",
+        @getNewResourceDataSuccess
+      @listenTo @model, "getEdit#{@resourceNameCapitalized}DataFail",
         @getNewResourceDataFail
 
       @listenTo @model, "add#{@resourceNameCapitalized}Start", @addResourceStart
       @listenTo @model, "add#{@resourceNameCapitalized}End", @addResourceEnd
       @listenTo @model, "add#{@resourceNameCapitalized}Fail", @addResourceFail
+      @listenTo @model, "add#{@resourceNameCapitalized}Success",
+        @addResourceSuccess
 
-      @listenTo @model, "update#{@resourceNameCapitalized}Start", @addResourceStart
+      @listenTo @model, "update#{@resourceNameCapitalized}Start",
+        @addResourceStart
       @listenTo @model, "update#{@resourceNameCapitalized}End", @addResourceEnd
-      @listenTo @model, "update#{@resourceNameCapitalized}Fail", @updateResourceFail
-      @listenTo @model, "update#{@resourceNameCapitalized}Success", @updateResourceSuccess
+      @listenTo @model, "update#{@resourceNameCapitalized}Fail",
+        @updateResourceFail
+      @listenTo @model, "update#{@resourceNameCapitalized}Success",
+        @updateResourceSuccess
 
       @listenToFieldViews()
 
@@ -119,13 +164,16 @@ define [
         activeServerType: @getActiveServerType()
         resourceName: @resourceName
         resourceNameHuman: @utils.camel2regular @resourceName
+        editableSecondaryAttributes: @editableSecondaryAttributes
       @$el
         .attr 'id', @model.cid
         .html @template(context)
+        .addClass @addUpdateType
 
     getHeaderTitle: ->
       if @addUpdateType is 'add'
-        "Add a #{@resourceNameCapitalized}"
+        "Add #{@utils.indefiniteDeterminer @resourceNameCapitalized}
+          #{@utils.camel2regular @resourceNameCapitalized}"
       else
         "Update this #{@resourceName}"
 
@@ -165,7 +213,6 @@ define [
         @submitAttempted = true
         @propagateSubmitAttempted()
         @stopEvent event
-        # Here is the problem
         @setToModel()
         @disableForm()
         clientSideValidationErrors = @model.validate()
@@ -173,7 +220,8 @@ define [
           for attribute, error of clientSideValidationErrors
             @model.trigger "validationError:#{attribute}", error
           msg = 'See the error message(s) beneath the input fields.'
-          Backbone.trigger "#{@addUpdateType}#{@resourceNameCapitalized}Fail", msg, @model
+          Backbone.trigger "#{@addUpdateType}#{@resourceNameCapitalized}Fail",
+            msg, @model
           @enableForm()
         else
           if @addUpdateType is 'add'
@@ -227,6 +275,9 @@ define [
     updateResourceFail: (error) ->
       Backbone.trigger "update#{@resourceNameCapitalized}Fail", error, @model
 
+    addResourceSuccess: ->
+      Backbone.trigger "add#{@resourceNameCapitalized}Success", @model
+
     updateResourceSuccess: ->
       @originalModelCopy = @copyModel @model
       Backbone.trigger "update#{@resourceNameCapitalized}Success", @model
@@ -269,8 +320,6 @@ define [
           @stopEvent event
           @hideSelf()
 
-    activeServerTypeIsOLD: -> @getActiveServerType() is 'OLD'
-
     primaryDataSelector: 'ul.primary-data'
 
     secondaryDataSelector: 'ul.secondary-data'
@@ -293,11 +342,16 @@ define [
         attribute: attribute # e.g., "name"
         model: @model
         options: @getOptions() # These are the OLD-specific <select> options relevant to the resource, cf. GET requests to <resource_name_plural>/new
-      if attribute of @attribute2fieldView
+        addUpdateType: @addUpdateType
+      if attribute of @attribute2fieldViewInstance
+        result = @attribute2fieldViewInstance[attribute]
+      else if attribute of @attribute2fieldView
         MyFieldView = @attribute2fieldView[attribute]
-        new MyFieldView params
+        result = new MyFieldView params
       else # the default field view is a(n expandable) textarea.
-        new TextareaFieldView params
+        result = new TextareaFieldView params
+      @attribute2fieldViewInstance[attribute] = result
+      result
 
     # Put the appropriate FieldView instances in `@primaryFieldViews` and.
     # `@secondaryFieldViews`
@@ -344,33 +398,51 @@ define [
     # OLD input options (i.e., possible speakers, users, categories, etc.)
     ############################################################################
 
-    # Returns true of `globals` has a key for `resourceData`. The value of
-    # this key is an object containing a subset of the following keys:
-    # `form_searches`, `users`, `tags`, and `corpus_formats`.
-    weHaveNewResourceData: -> globals["#{@resourceName}Data"]?
-
     # Return an object representing the options for forced-choice inputs.
     # Currently only relevant for the OLD.
     getOptions: ->
-      if globals["#{@resourceName}Data"]
-        globals["#{@resourceName}Data"]
-      else
-        {}
+      options = {}
+      for attr in @relatedResourcesNeeded()
+        try
+          options[attr] = globals.get(attr).data
+      options
 
-    getNewResourceDataStart: -> @spin()
+    getNewResourceDataStart: ->
+      @spin()
 
     getNewResourceDataEnd: -> @stopSpin()
 
+    # We have successfully retrieved from the server the data needed to create
+    # a new resource or update an existing one. If these data are different
+    # from what we already had stored, we may need to re-render the entire
+    # `ResourceAddWidgetView` or just ask certain field views to refresh
+    # themselves.
     getNewResourceDataSuccess: (data) ->
-      @storeOptionsDataGlobally data
-      @render()
+      changed = @storeOptionsDataGlobally data
+      if changed.length > 0
+        if @callRenderAfterNewResourceDataSuccess
+          @callRenderAfterNewResourceDataSuccess = false
+          @render()
+        else
+          options = @getOptions()
+          fieldViews = @fieldViews()
+          for resourceName in changed
+            affectedFieldViews = (f for f in fieldViews \
+              when f.context.optionsAttribute is resourceName)
+            for fieldView in affectedFieldViews
+              fieldView.options = options
+              fieldView.refresh()
 
-    storeOptionsDataGlobally: (data) ->
-      globals["#{@resourceName}Data"] = data
+    # Deprecated
+    getGlobalDataAttribute: -> "#{@resourceName}Data"
 
     getNewResourceDataFail: ->
-      console.log "Failed to retrieve the data from the OLD server which is
-        necessary for creating a new #{@resourceName}"
+      if @model.get('id') # The GET /<resources>/<id>/edit case
+        console.log "Failed to retrieve the data from the OLD server which is
+          necessary for updating #{@resourceName} #{@model.get('id')}"
+      else
+        console.log "Failed to retrieve the data from the OLD server which is
+          necessary for creating a new #{@resourceName}"
 
 
     ############################################################################
@@ -485,7 +557,13 @@ define [
       @setSecondaryDataToggleButtonState()
       @$(@secondaryDataSelector).slideDown
         complete: =>
-          @$(@secondaryDataSelector).find('textarea').first().focus()
+          @focusFirstSecondaryAttributesField()
+
+    # Focus the first visible field view in the secondary attributes section.
+    focusFirstSecondaryAttributesField: ->
+      @$(@secondaryDataSelector)
+        .find('textarea, .ui-selectmenu-button')
+        .filter(':visible').first().focus()
 
     toggleSecondaryData: ->
       if @secondaryDataVisible

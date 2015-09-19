@@ -1,0 +1,54 @@
+<div class='dative-tasks-dialog'>
+
+    <div class='dative-tasks-content'>
+
+        <div class='current-tasks'>
+            <h2>Current Tasks</h2>
+            <div class='tasks-table current-tasks-table'>
+                <div class='no-current-tasks'>There are no tasks currently
+                pending.</div>
+                <table class='tasks-table'>
+                    <thead>
+                        <tr>
+                            <th></th>
+                            <th>Resource</th>
+                            <th>Task</th>
+                            <th>Successful</th>
+                            <th>Time Elapsed</th>
+                            <th>Start Time</th>
+                            <th>End Time</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class='terminated-tasks'>
+            <h2>Terminated Tasks</h2>
+            <div class='tasks-table terminated-tasks-table'>
+                <div class='no-terminated-tasks'>There are no terminated
+                tasks.</div>
+                <table class='tasks-table'>
+                    <thead>
+                        <tr>
+                            <th></th>
+                            <th>Resource</th>
+                            <th>Task</th>
+                            <th>Successful</th>
+                            <th>Time Elapsed</th>
+                            <th>Start Time</th>
+                            <th>End Time</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+        </div>
+
+    </div>
+
+</div>
+
+<div class='dative-tasks-dialog-target'><div>
+

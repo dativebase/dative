@@ -1,0 +1,8 @@
+<ul
+    title='<%= @title %>'
+    class='<%= @class %>'>
+    <% for object in @value: %>
+        <li><%= object.name %></li>
+    <% end %>
+</ul>
+

@@ -74,3 +74,11 @@ define ['./resource'], (ResourceModel) ->
                             # `filename`, `MIME_type`, `size`, `url`,
                             # `lossy_filename`)
 
+    # OLD corpora are searched by issuing a SEARCH request against
+    # /corpora/searchcorpora
+    getSearchURL: -> "#{@getOLDURL()}/corpora/searchcorpora"
+
+    # Getting the data needed to perform a search across OLD corpora requires
+    # issuing a GET request to /corpora/new_search_corpora
+    getNewSearchDataURL: -> "#{@getOLDURL()}/corpora/new_search_corpora"
+
