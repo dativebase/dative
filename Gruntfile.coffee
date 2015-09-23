@@ -361,6 +361,9 @@ module.exports = (grunt) ->
       packagejson:
         src: 'package.json'
         dest: '.tmp/'
+      unicodedatajson:
+        src: 'UnicodeData.json'
+        dest: '.tmp/'
       dist:
         files: [
           expand: true
@@ -373,6 +376,7 @@ module.exports = (grunt) ->
             'favicon.ico'
             'help/html/help.html'
             './../package.json'
+            './../UNIDATA.json'
             'images/{,*/}*.{webp,gif}'
             'styles/fonts/{,*/}*.*'
             'bower_components/sass-bootstrap/fonts/*.*'
@@ -532,6 +536,7 @@ module.exports = (grunt) ->
         'clean:server'
         'copy:coffee'
         'copy:packagejson'
+        'copy:unicodedatajson'
         'coffee:serve'
         'coffee:test'
         #'createDefaultTemplate'
@@ -548,6 +553,7 @@ module.exports = (grunt) ->
       'clean:server'
       'copy:coffee'
       'copy:packagejson'
+      'copy:unicodedatajson'
       'coffee:serve'
       #'createDefaultTemplate'
       #'jst'
@@ -584,6 +590,7 @@ module.exports = (grunt) ->
     'clean:dist' # remove everything in dist/ and .tmp/
     'copy:coffee' # copy all .coffee files in app/scripts/ to .tmp/scripts/
     'copy:packagejson'
+    'copy:unicodedatajson'
     'coffee:dist' # convert all .coffee files in .tmp/scripts to .js in situ
 
     # eco: convert all .eco files in app/scripts/templates/ to .js files in

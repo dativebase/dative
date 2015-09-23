@@ -388,7 +388,7 @@ define (require) ->
     u = -1
     loop
       bytes /= thresh
-      a += 1
+      u += 1
       if not ((Math.abs(bytes) >= thresh) and (u < (units.length - 1)))
         break
     "#{bytes.toFixed(1)} #{units[u]}"
