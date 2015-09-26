@@ -1633,6 +1633,13 @@ button.align-top
   min-width: 80%;
 }
 
+.get-probabilities-control-input.control-input
+{
+  width: 70%;
+  max-width: 70%;
+  min-width: 70%;
+}
+
 i.boolean-icon
 {
   font-family: FontAwesome;
