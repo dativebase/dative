@@ -364,20 +364,27 @@ module.exports = (grunt) ->
       unicodedatajson:
         src: 'UnicodeData.json'
         dest: '.tmp/'
+      unicodedatajsondist:
+        src: 'UnicodeData.json'
+        dest: 'dist/'
       dist:
         files: [
           expand: true
           dot: true
           cwd: '<%= yeoman.app %>'
           dest: '<%= yeoman.dist %>'
+          src_: [
+            'UnicodeData.json'
+            'bower_components/jqueryui/**/*.*' # added, cf. http://stackoverflow.com/questions/20509145/managing-images-in-bower-packages-using-grunt?lq=1
+          ]
           src: [
             '*.{ico,txt}'
             '.htaccess'
             'favicon.ico'
             'help/html/help.html'
             './../package.json'
-            './../UNIDATA.json'
-            'images/{,*/}*.{webp,gif}'
+            './../.tmp/UnicodeData.json'
+            'images/{,*/}*.{webp,gif,png}' # added png so that my jQuery images in /images would copy over, cf. imagemin headache
             'styles/fonts/{,*/}*.*'
             'bower_components/sass-bootstrap/fonts/*.*'
             'bower_components/jqueryui/**/*.*' # added, cf. http://stackoverflow.com/questions/20509145/managing-images-in-bower-packages-using-grunt?lq=1
@@ -623,7 +630,11 @@ module.exports = (grunt) ->
     # my JavaScript
     'requirejs'
 
-    'imagemin'
+    # I have commented-out imagemin because it adds a random prefix to my
+    # images which screws up my application logic and I don't know how to stop
+    # that from happening... The images are already quite small, ...
+    # 'imagemin'
+
     'htmlmin'
     'concat' # task configured by `useminPrepare` above.
 
@@ -656,6 +667,8 @@ module.exports = (grunt) ->
 
     # copy everything that is supposed ot be in the dist, not sure why there are other copy tasks like disttmp and distJQueryUIImages and distrequirejs
     'copy:dist'
+
+    'copy:unicodedatajsondist'
   ]
 
   grunt.registerTask 'default', ['jshint', 'test', 'build']
@@ -665,4 +678,8 @@ module.exports = (grunt) ->
   grunt.registerTask 'docs', ['clean:docs', 'clean:doctmp', 'copy:docco', 'docco', 'clean:doctmp']
 
   grunt.registerTask 'deploy', ['exec:updateFieldDB', 'exec:symlinkFieldDBIfAvailable', 'jshint', 'build', 'exec:setContinuousDeploymentVersion']
+
+  grunt.registerTask 'copydist', 'copy:dist'
+  grunt.registerTask 'cleandist', 'clean:dist'
+  grunt.registerTask 'imagemin', 'clean:dist'
 
