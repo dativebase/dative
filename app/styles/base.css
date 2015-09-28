@@ -1860,7 +1860,8 @@ button.make-not-not i
   left: 2.75em;*/
 }
 
-.dative-resource-displayer-dialog-widget.ui-dialog .ui-dialog-title
+.dative-resource-displayer-dialog-widget.ui-dialog .ui-dialog-title,
+.dative-help-dialog-widget.ui-dialog .ui-dialog-title
 {
   width: auto !important;
 }

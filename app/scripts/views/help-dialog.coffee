@@ -1,8 +1,8 @@
 define [
   'backbone'
-  './base'
+  './dialog-base'
   './../templates/help-dialog'
-], (Backbone, BaseView, helpDialogTemplate) ->
+], (Backbone, DialogBaseView, helpDialogTemplate) ->
 
   # Help Dialog View
   # ----------------
@@ -12,16 +12,26 @@ define [
   #
   # This view includes a search interface to that help file.
 
-  class HelpDialogView extends BaseView
+  class HelpDialogView extends DialogBaseView
 
     template: helpDialogTemplate
+
+    # This is the class selector of the <div> in the template that becomes
+    # dialogified.
+    getDialogClassSelector: -> '.dative-help-dialog'
+
+    # This is a class name that should be passed in as the value of the
+    # `.dialog` method's `dialogClass` param. It will be a class name in the
+    # .ui-dialog.ui-widget <div> that holds everything.
+    getDialogWidgetClass: -> 'dative-help-dialog-widget'
 
     initialize: ->
       @hasBeenRendered = false
       @HELP_HTML = ''
       @searchPattern = ''
       @EXPANDED_WIDTH = 500
-      @COLLAPSED_WIDTH = 230
+      @setDimensions()
+      @lastPosition = null
       @scrolledToMatchedElementIndex = 0
       @postHTMLRetrievedAction = null # may be specified as a method to call once the Help HTML has been retrieved.
       @listenTo Backbone, 'helpDialog:toggle', @toggle
@@ -33,9 +43,19 @@ define [
     expandedHeight: ->
       $(window).height() - 50
 
+    minimizedPosition: -> @defaultPosition()
+
+    getMinimizedWidth: (windowWidth) -> 230
+    getMinWidth: (windowWidth) -> 230
+    getWidth: (windowWidth) -> 230
+    getMaxWidth: (windowWidth) -> 700
+
+    getHeight: (windowHeight) -> windowHeight - 50
+    getMaxHeight: (windowHeight) -> @getHeight windowHeight
+
     events:
-      'dialogdragstart': 'closeAllTooltips'
-      'dialogresize': 'resizeSearchInput'
+      'click .minimize': 'minimize'
+      'click .maximize': 'maximize'
       'keyup input[name=help-search]': 'keyupEventInHelpSearchInput'
       'click a[href]': 'scrollToInternalLink'
 
@@ -207,6 +227,7 @@ define [
       @$el.append @template()
       @$target = @$ '.dative-help-dialog-target'
       @dialogify()
+      @addHeaderButtons()
       @guify()
       @$('div.help-content-container').first().scroll => @closeAllTooltips()
       @getHelpHTML()
@@ -229,7 +250,7 @@ define [
 
 
     spinnerOptions: ->
-      _.extend BaseView::spinnerOptions(), {top: '5%', left: '5%'}
+      _.extend DialogBaseView::spinnerOptions(), {top: '5%', left: '5%'}
 
     spin: -> @$('.help-content').spin @spinnerOptions()
 
@@ -238,66 +259,43 @@ define [
     # Transform the help dialog HTML to a jQueryUI dialog box.
     dialogify: ->
       @$('.dative-help-dialog').dialog
-        position: @defaultPosition()
+        position: (=> @defaultPosition())()
         hide: {effect: 'fade'}
         show: {effect: 'fade'}
         autoOpen: false
         appendTo: @$('.dative-help-dialog-target')
-        buttons: [
-            text: ''
-            class: 'help-expand help-button dative-tooltip'
-            title: 'Expand and center this help widget'
-            click: => @expand()
-          ,
-            text: ''
-            class: 'help-collapse help-button dative-tooltip'
-            title: 'Collapse this help widget and move it off to the side'
-            click: => @collapse()
-        ]
-        dialogClass: 'dative-help-dialog-widget'
+        buttons: []
+        dialogClass: @getDialogWidgetClass()
         title: 'Help'
-        width: @COLLAPSED_WIDTH
-        minWidth: @COLLAPSED_WIDTH
-        maxWidth: 700
-        height: $(window).height() - 50
-        maxHeight: $(window).height() - 50
+        # width: @COLLAPSED_WIDTH
+        # maxWidth: 700
+        width: @width
+        maxWidth: @maxWidth
+        minWidth: @minWidth
+        # height: $(window).height() - 50
+        # maxHeight: $(window).height() - 50
+        height: @height
+        maxHeight: @maxHeight
         create: =>
           @fontAwesomateCloseIcon()
-          @expandCollapseButtons()
         close: =>
           @closeAllTooltips()
+        resizeStop: (event, ui) => @resizeStop event, ui
+        dragStart: => @closeAllTooltips()
+        dragStop: (event, ui) => @dragStop event, ui
 
     defaultPosition: ->
       my: "right top"
       at: "right-20px top+35px"
-      of: @$target.first().parent().parent()
+      of: window
+
+    getMaximizedPosition: ->
+      if @lastPosition then @lastPosition else @centerPosition()
 
     centerPosition: ->
       my: "center"
       at: "center"
-      of: @$target.first().parent().parent()
-
-    expand: ->
-      @$('.dative-help-dialog').dialog 'option',
-        width: @EXPANDED_WIDTH
-        height: @expandedHeight()
-        position: @centerPosition()
-      @closeAllTooltips()
-
-    collapse: ->
-      @$('.dative-help-dialog').dialog 'option',
-        width: @COLLAPSED_WIDTH
-        height: @collapsedHeight()
-        position: @defaultPosition()
-      @closeAllTooltips()
-
-    expandCollapseButtons: ->
-      @$('.help-expand')
-        .html '<i class="fa fa-fw fa-expand"></i>'
-        .tooltip()
-      @$('.help-collapse')
-        .html '<i class="fa fa-fw fa-compress"></i>'
-        .tooltip()
+      of: window
 
     guify: ->
       $searchInput = @$('input[name=help-search]')
@@ -305,6 +303,7 @@ define [
         .width '90%'
         .css('border-color', @constructor.jQueryUIColors().defBo)
       @watermark $searchInput, 'Search help'
+      @guifyHeaderButtons()
 
     dialogOpen: ->
       Backbone.trigger 'help-dialog:open'
