@@ -2,7 +2,12 @@ define [
   './resource-add-widget'
   './textarea-field'
   './relational-select-field'
-  './multiselect-field'
+  './relational-select-field-with-add-button'
+  './elicitation-method-select-field-with-add-button'
+  './speaker-select-field-with-add-button'
+  './syntactic-category-select-field-with-add-button'
+  './user-select-field-with-add-button'
+  './multi-element-tag-field'
   './utterance-judgement-field'
   './comments-field'
   './transcription-grammaticality-field'
@@ -10,16 +15,32 @@ define [
   './person-select-field'
   './user-select-field'
   './source-select-field'
+  './source-select-via-search-field'
+  './files-select-via-search-field'
   './required-select-field'
   './date-field'
   './../models/form'
   './../utils/globals'
 ], (ResourceAddWidgetView, TextareaFieldView, RelationalSelectFieldView,
-  MultiselectFieldView, UtteranceJudgementFieldView, CommentsFieldView,
+  RelationalSelectFieldWithAddButtonView,
+  ElicitationMethodSelectFieldWithAddButtonView,
+  SpeakerSelectFieldWithAddButtonView,
+  SyntacticCategorySelectFieldWithAddButtonView,
+  UserSelectFieldWithAddButtonView, MultiElementTagFieldView,
+  UtteranceJudgementFieldView, CommentsFieldView,
   TranscriptionGrammaticalityFieldView, TranslationsFieldView,
   PersonSelectFieldView, UserSelectFieldView, SourceSelectFieldView,
-  RequiredSelectFieldView, DateFieldView, 
-  FormModel, globals) ->
+  SourceSelectViaSearchFieldView, FilesSelectViaSearchFieldView,
+  RequiredSelectFieldView, DateFieldView, FormModel, globals) ->
+
+
+  class StatusSelectFieldView extends RequiredSelectFieldView
+
+    initialize: (options) ->
+      options.selectValueGetter = (o) -> o
+      options.selectTextGetter = (o) -> o
+      super options
+
 
   ##############################################################################
   # Field sub-classes with max lengths
@@ -45,6 +66,16 @@ define [
       options.domAttributes =
         maxlength: 255
       super options
+
+
+  class ElicitorSelectFieldWithAddButtonView extends UserSelectFieldWithAddButtonView
+
+    attributeName: 'elicitor'
+
+
+  class VerifierSelectFieldWithAddButtonView extends UserSelectFieldWithAddButtonView
+
+    attributeName: 'verifier'
 
 
   # Form Add Widget View
@@ -111,15 +142,16 @@ define [
       syntax:                        TextareaFieldView1023
       semantics:                     TextareaFieldView1023
       translations:                  TranslationsFieldView
-      elicitation_method:            RelationalSelectFieldView
-      syntactic_category:            RelationalSelectFieldView
-      speaker:                       PersonSelectFieldView
-      elicitor:                      UserSelectFieldView
-      verifier:                      UserSelectFieldView
-      source:                        SourceSelectFieldView
-      status:                        RequiredSelectFieldView
+      elicitation_method:            ElicitationMethodSelectFieldWithAddButtonView
+      syntactic_category:            SyntacticCategorySelectFieldWithAddButtonView
+      speaker:                       SpeakerSelectFieldWithAddButtonView
+      elicitor:                      ElicitorSelectFieldWithAddButtonView
+      verifier:                      VerifierSelectFieldWithAddButtonView
+      source:                        SourceSelectViaSearchFieldView
+      status:                        StatusSelectFieldView
       date_elicited:                 DateFieldView
-      tags:                          MultiselectFieldView
+      tags:                          MultiElementTagFieldView
+      files:                         FilesSelectViaSearchFieldView
 
     primaryAttributes: []
     editableSecondaryAttributes: []
@@ -206,4 +238,14 @@ define [
               emptyModelObject[attribute] = modelDefaults[attribute]
           emptyModelObject.datumFields = modelDefaults.datumFields
           emptyModelObject
+
+    # This returns the options for our forced-choice field views. we add
+    # options for the `status` attribute.
+    getOptions: ->
+      options = super
+      options.statuses = [
+        'tested'
+        'requires testing'
+      ]
+      options
 

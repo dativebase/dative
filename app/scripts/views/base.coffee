@@ -239,7 +239,7 @@ define [
           scrollTop: scrollTop
           250
           'swing'
-          =>
+          ->
             # Since Dative tooltips close upon scroll events, we have to re-open
             # the tooltip of the focused element after we programmatically scroll
             # here. BUG @jrwdunham: this doesn't work as consistently as I'd like
@@ -354,6 +354,8 @@ define [
       catch
         null
 
+    activeServerTypeIsOLD: -> @getActiveServerType() is 'OLD'
+
     getLoggedInUsername: ->
       try
         globals.applicationSettings.get 'username'
@@ -404,4 +406,94 @@ define [
 
     # Can be overridden in sub-classes with more sophisticated button behaviour.
     buttonify: -> @$('button').button()
+
+    # I am an admin or I am (i.e., my logged-in user is) this resource.
+    # Useful for the user resource visibility condition.
+    imAdminOrImResource: ->
+      try
+        myId = globals.applicationSettings.get('loggedInUser').id
+        @imAdmin() or (@model.get('id') is myId)
+      catch
+        false
+
+    imAdmin: ->
+      try
+        globals.applicationSettings.get('loggedInUser').role is 'administrator'
+      catch
+        false
+
+    # The following methods are needed by a variety of resource-related classes
+    # that share no superclass but this one.
+
+    # Store the options for adding a resource in the global `globals` object.
+    # Note that we store each set of options in their own attribute; in this
+    # way, the array of tags in `globals.tags.data` can be used by multiple
+    # different add/update widgets for different resources and an update in
+    # this array can affect multiple interfaces. We also return an array
+    # containing all of the resource names that have changed.
+    storeOptionsDataGlobally: (data) ->
+      changed = []
+      if @model.get('id') # The OLD's GET /<resources>/<id>/edit case
+        data = data.data
+      for attr, val of data
+        if globals.has attr
+          globals.get(attr).timestamp = new Date()
+          if not _.isEqual(globals.get(attr).data, val)
+            changed.push attr
+            globals.get(attr).data = val
+        else
+          changed.push attr
+          attrVal =
+            data: val
+            timestamp: new Date()
+          globals.set attr, attrVal
+      changed
+
+    # Respond with a 2-ary array where the first element is a boolean
+    # indicating whether we have all of the needed related resource data and,
+    # if we do, element 2 is a `Date` instance indicating when those data were
+    # last updated.
+    weHaveNewResourceData: ->
+      response = true
+      lastRetrieved = null
+      for attr in @relatedResourcesNeeded()
+        if globals.has(attr)
+          if lastRetrieved and (globals.get(attr).timestamp < lastRetrieved)
+            lastRetrieved = globals.get(attr).timestamp
+          else
+            lastRetrieved = globals.get(attr).timestamp
+        else
+          response = false
+      if not response then lastRetrieved = null
+      [response, lastRetrieved]
+
+    # An array of resource names that a certain resource needs some information
+    # about in order to be created/updated. Note that these resources may also
+    # be needed simply for displaying the resource. This is because a field
+    # display may need to be updated when a related resource is
+    # add/update/delete-ed.
+    relatedResourcesNeeded: ->
+      if @resourceName of globals.relatedResources
+        globals.relatedResources[@resourceName]
+      else
+        []
+
+    # We re-request the related resource data if the last time that we
+    # retrieved it was over a minute ago.
+    relatedResourceDataExpires: 60000
+
+    # Fetch UnicodeData.json. This is a 1.2MB JSON object that maps some 29,000
+    # Unicode code points to their names.
+    fetchUnicodeData: (callback=null) ->
+      url = 'UnicodeData.json'
+      $.ajax
+        url: url
+        type: 'GET'
+        dataType: 'json'
+        error: (jqXHR, textStatus, errorThrown) ->
+          console.log "Ajax request for #{url} threw an error:
+            #{errorThrown}"
+        success: (unicodeCharMap, textStatus, jqXHR) =>
+          globals.unicodeCharMap = unicodeCharMap
+          if callback then callback()
 

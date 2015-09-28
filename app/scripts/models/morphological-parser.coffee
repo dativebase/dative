@@ -1,7 +1,7 @@
 define ['./resource'], (ResourceModel) ->
 
-  # morphological parser Model
-  # --------------------
+  # Morphological Parser Model
+  # --------------------------
   #
   # A Backbone model for Dative morphological parsers.
 

@@ -10,10 +10,12 @@
       <i class='fa fa-times fa-fw'></i>
     </button>
 
-    <button class="toggle-secondary-data-fields dative-tooltip"
-      title="show the secondary data input fields">
-      <i class='fa fa-angle-down fa-fw'></i>
-    </button>
+    <% if @editableSecondaryAttributes.length > 0: %>
+        <button class="toggle-secondary-data-fields dative-tooltip"
+                title="show the secondary data input fields"
+                ><i class='fa fa-angle-down fa-fw'></i>
+        </button>
+    <% end %>
 
   </div>
 
@@ -35,9 +37,13 @@
 
     <button class='resource-add-help dative-tooltip'
       <% if @addUpdateType is 'add': %>
-            title='help with adding a <%= @resourceNameHuman %>'
+            title='help with adding
+                <%= @indefiniteDeterminer @resourceNameHuman %>
+                <%= @resourceNameHuman %>'
       <% else: %>
-            title='help with updating a <%= @resourceNameHuman %>'
+            title='help with updating
+                <%= @indefiniteDeterminer @resourceNameHuman %>
+                <%= @resourceNameHuman %>'
       <% end %>
     ><i class='fa fa-fw fa-question'></i>
     </button>
@@ -66,11 +72,13 @@
           <% end %>
           >Save</button>
 
-        <button
-          class="toggle-secondary-data-fields dative-tooltip"
-          title="show the secondary data input fields"
-          ><i class='fa fa-angle-down fa-fw'></i>
-        </button>
+        <% if @editableSecondaryAttributes.length > 0: %>
+            <button
+                class="toggle-secondary-data-fields dative-tooltip"
+                title="show the secondary data input fields"
+                ><i class='fa fa-angle-down fa-fw'></i>
+            </button>
+        <% end %>
 
       </li>
 

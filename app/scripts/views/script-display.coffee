@@ -3,12 +3,10 @@ define [
   './script-representation'
 ], (FieldDisplayView, ScriptRepresentationView) ->
 
-  # Person Field Display View
+  # Script Field Display View
   # -------------------------
   #
-  # A view for displaying a person field. Note: currently tailored only for
-  # OLD-style "persons", i.e., objects with `first_name` and `last_name`
-  # attributes.
+  # A view for displaying a script field, e.g., for a phonology.
 
   class ScriptFieldDisplayView extends FieldDisplayView
 

@@ -12,8 +12,8 @@ define [
   # ------------------
   #
   # A base class view for views that display a label and a representation for a
-  # single field (or attribute) of a model.
-  # NOTE: assumes that the `@model` is a form model.
+  # single field (or attribute) of a model. Note: this might more accurately be
+  # named `AttributeView`.
   #
   # Example usage:
   #
@@ -42,14 +42,16 @@ define [
 
     # Override this in a subclass to provide non-standard contextual attributes.
     getContext: ->
+      value = @getValue()
       attribute: @attribute
       options: @options
       model: @model
       name: @getName()
       class: @getClass()
       title: @getTooltip()
-      value: @getValue()
+      value: value
       label: @getLabel()
+      searchPatternsObject: @searchPatternsObject
       fieldDisplayLabelContainerClass: @fieldDisplayLabelContainerClass
       fieldDisplayRepresentationContainerClass:
         @fieldDisplayRepresentationContainerClass
@@ -71,7 +73,9 @@ define [
 
     initialize: (options) ->
       @resource = options.resource or 'forms'
+      @tooltipIsRefreshable = options.tooltipIsRefreshable or false
       @attribute = options.attribute
+      @searchPatternsObject = options.searchPatternsObject
       @activeServerType = @getActiveServerType()
       @context = @getContext()
       @labelView = @getLabelView()

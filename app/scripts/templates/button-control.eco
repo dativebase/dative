@@ -3,5 +3,6 @@
     title='<%= @buttonTitle %>'><%= @buttonText %></button>
 <div class='button-control-summary <%= @controlSummaryClass %>'
     ><%- @controlSummary %></div>
-<div class='<%= @controlResultsClass %>'><%= @controlResults %></div>
+<div class='button-control-results <%= @controlResultsClass %>'
+    ><%= @controlResults %></div>
 

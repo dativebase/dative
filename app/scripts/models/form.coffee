@@ -66,6 +66,7 @@ define [
 
     manyToManyAttributesOLD: [
       'tags'
+      'files'
     ]
 
     getValidator: (attribute) ->
@@ -589,7 +590,7 @@ define [
       semantics: ""                     # <string>  (max length = 1023; intended
                                         #            for formal semantic
                                         #            denotations.)
-      status: ""                        # <string>  (max length = 40; indicates
+      status: "tested"                  # <string>  (max length = 40; indicates
                                         #            whether this is a form
                                         #            that has been elicited or
                                         #            whether it is one that
@@ -597,7 +598,7 @@ define [
                                         #            (i.e., is part of an
                                         #            elicitation plan); default
                                         #            value is "tested". Only other
-                                        #            licit value is 'requries
+                                        #            licit value is 'requires
                                         #            testing'. See https://github.com/jrwdunham/old/blob/master/onlinelinguisticdatabase/lib/utils.py#L1483.
                                         #            Similar to
                                         #            `validationStatus` in

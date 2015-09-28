@@ -1,4 +1,7 @@
-define ['./select-field'], (SelectFieldView) ->
+define [
+  './select-field'
+  './../utils/bibtex'
+], (SelectFieldView, BibTeXUtils) ->
 
   # Source Select(menu) Field View
   # ------------------------------
@@ -12,8 +15,23 @@ define ['./select-field'], (SelectFieldView) ->
 
     initialize: (options) ->
       options.selectTextGetter = (option) ->
-        "#{option.author} (#{option.year})"
+        "#{option.citationFormAuthor} (#{option.citationFormYear})"
       super options
+
+    # Return the options for this source select field. Here we sort the source
+    # options by author (in citation form, e.g., "Chomsky and Halle (1968)")
+    # and we give them two new attributes for the convenience of
+    # `@selectTextGetter`.
+    getSelectOptions: ->
+      r = @options[@optionsAttribute] or []
+      sortedOptions = []
+      for option in r
+        citationFormAuthor = BibTeXUtils.getAuthor option
+        option.citationFormAuthor = citationFormAuthor
+        option.citationFormYear = BibTeXUtils.getYear option
+        sortedOptions.push [citationFormAuthor.toLowerCase(), option]
+      sortedOptions.sort()
+      (o[1] for o in sortedOptions)
 
     getValueFromDOM: ->
       @getValueFromRelationalIdFromDOM super

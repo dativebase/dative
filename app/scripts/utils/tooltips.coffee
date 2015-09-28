@@ -162,6 +162,614 @@ define ['./utils'], (utils) ->
 
     old:
 
+      pages:
+
+        heading:
+          eng: 'The text of the primary heading of this page.'
+
+        markup_language:
+          eng: 'The markup language (“Markdown” or
+            “reStructuredText”) that is used to generate HTML from the
+            “content” value of this page.'
+
+        content:
+          eng: 'This is text that defines the page in Dative;
+            use markup conventions from the selected “markup language”
+            in this field and the output will be rendered as HTML.'
+
+        html:
+          eng: 'The HTML of the page; this is generated from the
+            “content” value using the specified “markup language”.'
+
+        name: name
+        id: id
+        datetime_modified: datetimeModified
+
+
+      speakers:
+        first_name:
+          eng: 'The first (given) name of this speaker.'
+
+        last_name:
+          eng: 'The last name (surname) of this speaker.'
+
+        dialect:
+          eng: 'This speaker’s dialect.'
+
+        markup_language:
+          eng: 'The markup language (“Markdown” or
+            “reStructuredText”) that is used to generate HTML from the
+            speaker’s “page content” value.'
+
+        page_content:
+          eng: 'This is text that defines the speaker’s page in Dative;
+            use markup conventions from the selected “markup language”
+            in this field and the output will be rendered as HTML.'
+
+        html:
+          eng: 'The HTML of the speaker’s page; this is generated from the
+            “page content” using the specified “markup language”.'
+
+        id: id
+        datetime_modified: datetimeModified
+
+      collections:
+
+        title:
+          eng: 'A title for the collection.'
+
+        description: description
+
+        type:
+          eng: 'The type of this collection, one of “story”,
+            “elicitation”, “paper”, “discourse”, or “other”.'
+
+        url:
+          eng: 'The URL path that can be used to navigate to this collection.'
+
+        markup_language:
+          eng: 'The markup language (“Markdown” or
+            “reStructuredText”) that is used to generate HTML from the
+            “contents” value.'
+
+        html:
+          eng: "The HTML generated from the “contents” value using the
+            specified “markup language”."
+
+        contents:
+          eng: "The string of lightweight markup and references to forms that
+            defines the contents of this collection."
+
+        source:
+          eng: "The textual source (e.g., research paper, text collection, book
+            of learning materials) from which the collection was drawn, if
+            applicable."
+
+        speaker:
+          eng: "The speaker (consultant) with whom this collection was
+            elicited, if appropriate."
+
+        elicitor:
+          eng: 'The person who elicited this collection, if appropriate.'
+
+        date_elicited:
+          eng: (options) ->
+            if options.value
+              "This collection was elicited on #{utils.humanDate options.value}"
+            else
+              'The date this collection was elicited'
+
+        tags:
+          eng: "Tags for categorizing collections. (These are the same tags that
+            are used throughout an OLD application; i.e., the same tag can be
+            used to categorize a form and a collection.)"
+
+        files:
+          eng: "File resources that are associated to this collection."
+
+        enterer: enterer
+        modifier: modifier
+        datetime_entered: datetimeEntered
+        datetime_modified: datetimeModified
+        UUID: uuid
+        id: id
+
+      sources:
+
+        file:
+          eng: 'A file resource (e.g., a PDF) containing a digital
+            representation of this source.'
+
+        crossref_source:
+          eng: 'Another source model for cross-referencing.'
+
+        crossref:
+          eng: 'The “key” value of another source to be cross-referenced. Any
+            attribute values that are missing from the source model are
+            inherited from the source cross-referenced via this attribute.'
+
+        type:
+          eng: 'The BibTeX entry type, e.g., “article”, “book”, etc. A
+            valid type value is obligatory for all source models. The chosen
+            type value will determine which other attributes must also possess
+            non-empty values.'
+
+        key:
+          eng: 'The BibTeX key, i.e., the unique string used to unambiguously
+            identify a source. E.g., “chomsky57”.'
+
+        address:
+          eng: 'Usually the address of the publisher or other type of
+            institution.'
+
+        annote:
+          eng: 'An annotation. It is not used by the standard bibliography
+            styles, but may be used by others that produce an annotated
+            bibliography.'
+
+        author:
+          eng: 'The name(s) of the author(s), in the format described in Kopka
+            and Daly (2004), i.e., either Given Names Surname or Surname, Given
+            Names. For multiple authors, use the formats just specified and
+            separate each such formatted name by the word “and”.'
+
+        booktitle:
+          eng: 'Title of a book, part of which is being cited.  See Kopka and
+            Daly (2004) for details on how to type titles. For book entries,
+            use the title field instead.'
+
+        chapter:
+          eng: 'A chapter (or section or whatever) number.'
+
+        edition:
+          eng: 'The edition of a book—for example, “Second”. This should
+            be an ordinal, and should have the first letter capitalized, as
+            shown here; the standard styles convert to lower case when
+            necessary.'
+
+        editor:
+          eng: 'Name(s) of editor(s), typed as indicated in Kopka and Daly
+            (2004). At its most basic, this means either as Given Names Surname
+            or Surname, Given Names and using “and” to separate multiple
+            editor names. If there is also a value for the author attribute,
+            then the editor attribute gives the editor of the book or
+            collection in which the reference appears.'
+
+        howpublished:
+          eng: 'How something has been published. The first word should be
+            capitalized.'
+
+        institution:
+          eng: 'The sponsoring institution of a technical report.'
+
+        journal:
+          eng: 'A journal name. Abbreviations are provided for many journals.'
+
+        key_field:
+          eng: 'Used for alphabetizing, cross referencing, and creating a label
+            when the author information is missing. This field should not be
+            confused with the source’s key attribute.'
+
+        month:
+          eng: 'The month in which the work was published or, for an
+            unpublished work, in which it was written.'
+
+        note:
+          eng: 'Any additional information that can help the reader. The first
+            word should be capitalized.'
+
+        number:
+          eng: 'The number of a journal, magazine, technical report, or of a
+            work in a series. An issue of a journal or magazine is usually
+            identified by its volume and number; the organization that issues a
+            technical report usually gives it a number; and sometimes books are
+            given numbers in a named series.'
+
+        organization:
+          eng: 'The organization that sponsors a conference or that publishes a
+            manual.'
+
+        pages:
+          eng: 'One or more page numbers or range of numbers, such as 42–111
+            or 7,41,73–97 or 43+ (the “+” in this last example indicates
+            pages following that don’t form a simple range).'
+
+        publisher:
+          eng: 'The publisher’s name.'
+
+        school:
+          eng: 'The name of the school where a thesis was written.'
+
+        series:
+          eng: 'The name of a series or set of books. When citing an entire
+            book, the title attribute gives its title and an optional series
+            attribute gives the name of a series or multi-volume set in which
+            the book is published.'
+
+        title:
+          eng: 'The work’s title, typed as explained in Kopka and Daly (2004).'
+
+        type_field:
+          eng: 'The type of a technical report—for example, “Research Note”.'
+
+        url:
+          eng: 'The universal resource locator for online documents; this is
+            not standard but supplied by more modern bibliography styles.'
+
+        volume:
+          eng: 'The volume of a journal or multi-volume book.'
+
+        year:
+          eng: 'The year of publication or, for an unpublished work, the year
+            it was written. Generally it should consist of four numerals, such
+            as 1984.'
+
+        affiliation:
+          eng: 'The author’s affiliation.'
+
+        abstract:
+          eng: 'An abstract of the work.'
+
+        contents:
+          eng: 'A table of contents.'
+
+        copyright:
+          eng: 'Copyright information.'
+
+        ISBN:
+          eng: 'The International Standard Book Number.'
+
+        ISSN:
+          eng: 'The International Standard Serial Number. Used to identify a
+            journal.'
+
+        keywords:
+          eng: 'Key words used for searching or possibly for annotation.'
+
+        language:
+          eng: 'The language the document is in.'
+
+        location:
+          eng: 'A location associated with the entry, such as the city in which
+            a conference took place.'
+
+        LCCN:
+          eng: 'The Library of Congress Call Number.'
+
+        mrnumber:
+          eng: 'The Mathematical Reviews number.'
+
+        price:
+          eng: 'The price of the document.'
+
+        size:
+          eng: 'The physical dimensions of a work.'
+
+        id: id
+        datetime_modified: datetimeModified
+
+      orthographies:
+        name: name
+        datetime_modified: datetimeModified
+        id: id
+
+        orthography:
+          eng: 'A comma-delimited sequence of characters that defines the
+            graphemes/polygraphs of this orthography.'
+
+        lowercase:
+          eng: 'When set to “true” (the default), the system assumes that only
+            lowercase graphemes are used in this orthography. When set to
+            “false”, the system tries to guess uppercase alternants for the
+            graphemes in this orthography.'
+
+        initial_glottal_stops:
+          eng: 'When set to “true” (the default), the system assumes that
+            glottal stops are written (overtly) at the beginning of a word in
+            this orthography. When set to “false”, the system removes
+            initial glottal stops when translating strings into this
+            orthography.'
+
+      languages:
+        datetime_modified: datetimeModified
+
+        Id:
+          eng: 'The three-letter 639-3 identifier.'
+
+        Part2B:
+          eng: 'Equivalent 639-2 identifier of the bibliographic applications
+            code set, if there is one.'
+
+        Part2T:
+          eng: 'Equivalent 639-2 identifier of the terminology applications
+            code set, if there is one.'
+
+        Part1:
+          eng: 'Equivalent 639-1 identifier, if there is one.'
+
+        Scope:
+          eng: 'I(ndividual), M(acrolanguage), or S(pecial).'
+
+        Type:
+          eng: 'A(ncient), C(onstructed), E(xtinct), H(istorical), L(iving), or
+            S(pecial).'
+
+        Ref_Name:
+          eng: 'Reference language name.'
+
+        Comment:
+          eng: 'Comment relating to one or more of the columns.'
+
+      syntacticCategories:
+        name: name
+        description: description
+        id: id
+        datetime_modified: datetimeModified
+
+        type:
+          eng: "The type of syntactic category; one of “lexical”,
+            “phrasal” or “sentential”."
+
+      oldApplicationSettingses:
+
+        id: id
+        datetime_modified: datetimeModified
+
+        object_language_name:
+          eng: 'The name of the language that is being documented and analyzed
+            by means of this OLD web service. This may be the ISO 639-3
+            “reference name” but this is not required.'
+
+        object_language_id:
+          eng: 'The three-letter ISO 639-3 identifier for the language that is
+            being documented and analyzed by means of this OLD web service.'
+
+        metalanguage_name:
+          eng: 'The name of the language that is being used to translate,
+            document and analyze the object language. This may be the ISO 639-3
+            “reference name” but this is not required.'
+
+        metalanguage_id:
+          eng: 'The three-letter ISO 639-3 identifier for the language that is
+            being used to translate, document and analyze the object language.'
+
+        metalanguage_inventory:
+          eng: 'A comma-delimited list of graphemes that should be used when
+            writing in the metalanguage.'
+
+        orthographic_validation:
+          eng: 'This value determines whether and, if so, how values input into
+            the transcription field should be validated against the storage
+            orthography. If set to “None”, then no validation will be
+            performed. If set to “Warning”, then the system will alert
+            users when their transcriptions cannot be written using the storage
+            orthography. If set to “Error”, then invalid transcriptions
+            will not be permitted.'
+
+        narrow_phonetic_inventory:
+          eng: 'Narrow phonetic inventory: a comma-delimited list of graphemes
+            that should be used when entering data into the narrow phonetic
+            transcription field.'
+
+        narrow_phonetic_validation:
+          eng: 'Narrow phonetic validation: this value determines whether and,
+            if so, how values input into the narrow phonetic transcription
+            field should be validated against the narrow phonetic inventory.
+            If set to “None”, then no validation will be performed. If
+            set to “Warning”, then the system will alert users when their
+            narrow phonetic transcriptions cannot be written using the narrow
+            phonetic inventory. If set to “Error”, then invalid narrow
+            phonetic transcriptions will not be permitted.'
+
+        broad_phonetic_inventory:
+          eng: 'Broad phonetic inventory: a comma-delimited list of graphemes
+            that should be used when entering data into the phonetic
+            transcription field.'
+
+        broad_phonetic_validation:
+          eng: 'Broad phonetic validation: this value determines whether and,
+            if so, how values input into the phonetic transcription field
+            should be validated against the broad phonetic inventory. If set to
+            “None”, then no validation will be performed. If set to
+            “Warning”, then the system will alert users when their phonetic
+            transcriptions cannot be written using the broad phonetic
+            inventory. If set to “Error”, then invalid phonetic
+            transcriptions will not be permitted.'
+
+        morpheme_break_is_orthographic:
+          eng: 'Morpheme break is orthographic: if set to true, then the system
+            will assume that the data entered into the morpheme break field
+            should be written using the same orthography as is used in the
+            (orthographic) transcription field. If set to false, then the system
+            will assume that the phonemic inventory should be used for morpheme
+            break values.'
+
+        morpheme_break_validation:
+          eng: 'Morpheme break validation: this value determines whether and,
+            if so, how values input into the morpheme break field should be
+            validated against the storage orthography (or against the phonemic
+            inventory, cf. the “morpheme break is orthographic” option.) If
+            set to “None”, then no validation will be performed. If set to
+            “Warning”, then the system will alert users when their morpheme
+            break transcriptions cannot be written using the relevant
+            orthography/inventory. If set to “Error”, then invalid morpheme
+            break transcriptions will not be permitted.'
+
+        phonemic_inventory:
+          eng: 'A comma-delimited list of phonemes/graphemes that should be
+            used when entering data into the morpheme break field (assuming
+            “morpheme break is orthographic” is set to false).'
+
+        morpheme_delimiters:
+          eng: 'A comma-delimited list of delimiter characters that should be
+            used to separate morphemes in the morpheme break field and morpheme
+            glosses in the morpheme gloss field.'
+
+        punctuation:
+          eng: 'A string of punctuation characters that should define, along
+            with the graphemes in the storage orthography, the licit strings in
+            the transcription field.'
+
+        grammaticalities:
+          eng: 'A comma-delimited list of characters that will define the
+            options in the grammaticality fields. Example: “*,?,#”.'
+
+        storage_orthography:
+          eng: 'The orthography that transcription values should be stored in.
+            This orthography may affect how orthographic validation works
+            and/or how orthography conversion works.'
+
+        input_orthography:
+          eng: 'The orthography that transcription values should be entered in.
+            If specified and if different from the storage orthography, then the
+            system should convert user input in the input orthography to
+            strings in the storage orthography.'
+
+        output_orthography:
+          eng: 'The orthography that transcription values should be displayed in.
+            If specified and if different from the storage orthography, then the
+            system should convert stored data in the storage orthography to
+            strings in the output orthography.'
+
+        unrestricted_users:
+          eng: 'A list of users that the OLD server considers to be
+            “unrestricted”. These users are able to access data that has
+            been tagged with the “restricted” tag.'
+
+      tags:
+        name: name
+        description: description
+        id: id
+        datetime_modified: datetimeModified
+
+      elicitationMethods:
+        name: name
+        description: description
+        id: id
+        datetime_modified: datetimeModified
+
+      users:
+        id: id
+        first_name:
+          eng: 'The first (given) name of this user.'
+
+        last_name:
+          eng: 'The last name (surname) of this user.'
+
+        email:
+          eng: 'The user’s email address.'
+
+        role:
+          eng: 'The user’s role, which determines their level of access: one
+            of “administrator”, “contributor”, or “viewer”.'
+
+        username:
+          eng: 'The user’s username, a unique identifier.'
+
+        password:
+          eng: 'The user’s password. Leave this field blank when updating a
+            user and their password will be left unchanged.'
+
+        password_confirm:
+          eng: 'Retype the user’s password here.'
+
+        affiliation:
+          eng: 'The academic institution, First Nation, museum, etc. that the
+            user is affiliated with.'
+
+        markup_language:
+          eng: 'The markup language—Markdown or
+            reStructuredText—that will be used to generate HTML from the
+            user’s “page content”.'
+
+        page_content:
+          eng: 'This is text that defines the user’s page in Dative; users
+            may use markup conventions from the selected “markup language”
+            in this field and the output will be rendered as HTML.'
+
+        html:
+          eng: 'The HTML of the user’s page; this is generated from the
+            “page content” using the specified “markup language”.'
+
+        datetime_modified: datetimeModified
+
+      files:
+        id: id
+        description: description
+        datetime_entered: datetimeEntered
+        datetime_modified: datetimeModified
+        enterer: enterer
+        modifier: modifier
+
+        tags:
+          eng: "Tags for categorizing files. (These are the same tags that
+            are used throughout an OLD application; i.e., the same tag can be
+            used to categorize a form and a file.)"
+
+        filename:
+          eng: 'The name of the file.'
+
+        name:
+          eng: 'The name of the file; relevant for externally hosted files or
+            subinterval files.'
+
+        lossy_filename:
+          eng: 'The name given to the reduced-size copy that was made of this
+            file.'
+
+        size:
+          eng: (options) ->
+            "The size of the file (#{utils.integerWithCommas options.value}
+              bytes)"
+
+        MIME_type:
+          eng: "The type of the file; technically, this is the MIME
+            (Multipurpose Internet Mail Extensions) type or Internet media
+            type."
+
+        utterance_type:
+          eng: 'If this file represents an utterance, then this value indicates
+            whether that utterance is in the object language, the metalanguage,
+            or both.'
+
+        speaker:
+          eng: 'The speaker of the content encoded in this file, if relevant.'
+
+        elicitor:
+          eng: 'The person who elicited/recorded this file, if appropriate.'
+
+        date_elicited:
+          eng: (options) ->
+            if options.value
+              "This file was elicited on #{utils.humanDate options.value}"
+            else
+              'The date this file was elicited'
+
+        url:
+          eng: "The URL where this file’s data are stored."
+
+        password:
+          eng: "The password needed to access this file’s data on the external
+            server, if needed."
+
+        parent_file:
+          eng: "The audio or video file that this (subinterval-referencing)
+            file refers to for its file data."
+
+        start:
+          eng: "The time in the parent file where this file’s data begins."
+
+        end:
+          eng: "The time in the parent file where this file’s data ends."
+
+        dative_file_type:
+          eng: "Indicates whether the file’s data are stored on the server,
+            are hosted elsewhere, or are a subinterval of another “parent”
+            file."
+
+        file_data:
+          eng: "Click this button to choose a file for upload."
+
       morphologicalParsers:
         id: id
         UUID: uuid
@@ -209,6 +817,18 @@ define ['./utils'], (utils) ->
         datetime_modified: datetimeModified
         enterer: enterer
         modifier: modifier
+
+        restricted:
+          eng: 'The system will set this to true if any of this corpus’ forms
+            are tagged as restricted.'
+
+        generate_succeeded:
+          eng: 'Will be set to true if this language model has been
+            successfully generated, i.e., estimated.'
+
+        perplexity_computed:
+          eng: 'Will be set to true if there has been an attempt to compute the
+            perplexity of this language model.'
 
         corpus:
           eng: 'A corpus that will be used to estimate the language model.'
@@ -324,6 +944,9 @@ define ['./utils'], (utils) ->
       searches:
         name: name
         description: description
+        datetime_modified: datetimeModified
+        enterer: enterer
+        id: id
 
         search:
           eng: 'The search expression that defines what forms are to be

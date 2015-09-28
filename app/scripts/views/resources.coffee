@@ -1,7 +1,6 @@
 define [
   './base'
   './resource'
-  './exporter-dialog'
   './pagination-menu-top'
   './pagination-item-table'
   './subcorpus'
@@ -10,9 +9,9 @@ define [
   './../utils/paginator'
   './../utils/globals'
   './../templates/resources'
-], (BaseView, ResourceView, ExporterDialogView, PaginationMenuTopView,
-  PaginationItemTableView, SubcorpusView, ResourcesCollection, ResourceModel,
-  Paginator, globals, resourcesTemplate) ->
+], (BaseView, ResourceView, PaginationMenuTopView, PaginationItemTableView,
+  SubcorpusView, ResourcesCollection, ResourceModel, Paginator, globals,
+  resourcesTemplate) ->
 
   # Resources View
   # ---------------
@@ -67,7 +66,6 @@ define [
       @collection = new @resourcesCollection()
       @newResourceView = @getNewResourceView()
       @resourceSearchView = @getResourceSearchView()
-      @exporterDialog = new ExporterDialogView()
       @newResourceViewVisible = false
       @resourceSearchViewVisible = false
       @resourceSearchViewRendered = false
@@ -80,6 +78,7 @@ define [
     events:
       'focus input, textarea, .ui-selectmenu-button, button, .ms-container': 'inputFocused'
       'focus .dative-resource-widget': 'resourceFocused'
+      'click .dative-resource-widget': 'resourceClicked'
       'click .expand-all': 'expandAllResources'
       'click .collapse-all': 'collapseAllResources'
       'click .new-resource': 'showNewResourceViewAnimate'
@@ -87,6 +86,8 @@ define [
       'click .toggle-all-labels': 'toggleAllLabels'
       'click .toggle-search': 'toggleResourceSearchViewAnimate'
       'click .corpus-display': 'displayCorpus'
+      'click .export-resource-collection': 'exportResourceCollection'
+      'click .search-display-check': 'showResourceSearchViewAnimate'
       'keydown': 'keyboardShortcuts'
       'keyup': 'keyup'
       # @$el is enclosed in top and bottom invisible divs. These allow us to
@@ -94,8 +95,11 @@ define [
       'focus .focusable-top':  'focusLastElement'
       'focus .focusable-bottom':  'focusFirstElement'
 
+    exportResourceCollection: (event) ->
+      if event then @stopEvent event
+      Backbone.trigger 'openExporterDialog', collection: @collection
+
     displayCorpus: ->
-      console.log 'you want to display this corpus'
       @corpusView = new SubcorpusView model: @corpus
       Backbone.trigger 'showResourceInDialog', @corpusView, @$el
 
@@ -107,7 +111,6 @@ define [
       @renderPaginationMenuTopView()
       @renderNewResourceView()
       @renderResourceSearchView()
-      @renderExporterDialogView()
       @newResourceViewVisibility()
       @resourceSearchViewVisibility()
       if @weNeedToFetchResourcesAgain()
@@ -121,11 +124,6 @@ define [
       Backbone.trigger 'longTask:deregister', taskId
       @
 
-    renderExporterDialogView: ->
-      @exporterDialog.setElement(@$('#exporter-dialog-container'))
-      @exporterDialog.render()
-      @rendered @exporterDialog
-
     html: ->
       @$el.html @template
         resourceName: @resourceName
@@ -135,6 +133,7 @@ define [
         pluralizeByNum: @utils.pluralizeByNum
         paginator: @paginator
         searchable: @searchable
+        canCreateNew: @getCanCreateNew()
 
     listenToEvents: ->
       super
@@ -159,8 +158,6 @@ define [
         @scrollToFirstValidationError
       @listenTo Backbone, "add#{@resourceNameCapitalized}Fail",
         @scrollToFirstValidationError
-
-      @listenTo Backbone, 'openExporterDialog', @openExporterDialog
 
       @listenTo @paginationMenuTopView, 'paginator:changeItemsPerPage',
         @changeItemsPerPage
@@ -188,6 +185,16 @@ define [
 
     listenToResourceSearchView: ->
       @listenTo @resourceSearchView, 'hideMe', @hideResourceSearchViewAnimate
+      @listenTo @resourceSearchView, 'browseReturn', @returnToBrowsingAll
+
+    # User wants to stop browsing search results and simply browse all forms in
+    # the database.
+    # TODO: this refreshes even when we are already browsing all forms; stop
+    # that.
+    returnToBrowsingAll: ->
+      @deleteSearch()
+      @fetchResourcesLastPage = true
+      @fetchResourcesPageToCollection()
 
     listenToNewResourceView: ->
       @listenTo @newResourceView, "new#{@resourceNameCapitalized}View:hide",
@@ -226,15 +233,15 @@ define [
       newResourceModel = newResourceModel or
         new @resourceModel({}, collection: @collection)
       new @resourceView
-        headerTitle: "New #{@resourceNameCapitalized}"
+        headerTitle: "New #{@utils.camel2regular @resourceNameCapitalized}"
         model: newResourceModel
         dataLabelsVisible: @dataLabelsVisible
         expanded: @allResourcesExpanded
 
     getResourceSearchView: ->
       if @searchable
-        searchModel = new @searchModel({}, collection: @collection)
-        new @searchView
+        searchModel = new @searchModelClass({}, collection: @collection)
+        new @searchViewClass
           headerTitle: "Search #{@resourceNamePluralCapitalized}"
           model: searchModel
           dataLabelsVisible: @dataLabelsVisible
@@ -258,7 +265,6 @@ define [
 
       # 3. If the new resource should be displayed on the current page, then
       # do that; otherwise notify the user that it's on the last page.
-      Backbone.trigger "add#{@resourceNameCapitalized}Success", resourceModel
       if newResourceShouldBeOnCurrentPage
         @addNewResourceViewToPage()
         @closeNewResourceView()
@@ -313,7 +319,7 @@ define [
         if not event.ctrlKey and not event.metaKey and not event.altKey
           switch event.which
             when 70 then @$('.first-page').click() # f
-            when 80 then @$('.previous-page').click() # p
+            when 80 then @$('.previous-page').first().click() # p
             when 78 then @$('.next-page').click() # n
             when 76 then @$('.last-page').click() # l
             when 40 # down arrow
@@ -322,12 +328,15 @@ define [
             when 38 # up arrow
               if not @itemsPerPageSelectHasFocus()
                 @$('.collapse-all').click()
-            when 65 then @toggleNewResourceViewAnimate() # a
+            when 65
+              if @getCanCreateNew() then @toggleNewResourceViewAnimate() # a
             when 32 # spacebar goes to next resource view, shift+spacebar goes to previous.
               if event.shiftKey
                 @focusPreviousResourceView event
               else
                 @focusNextResourceView event
+            when 191
+              @$('.toggle-search').first().click()
 
     # Return the (jQuery-wrapped) resource view <div> that encloses
     # `$element`, if it exists.
@@ -395,11 +404,18 @@ define [
     itemsPerPageSelectHasFocus: ->
       @$('.ui-selectmenu-button.items-per-page').is ':focus'
 
+    resourceClicked: (event) -> @resourceClicked = true
+
     resourceFocused: (event) ->
       if @$(event.target).hasClass 'dative-resource-widget'
         @rememberFocusedElement event
         $element = @$ event.target
+        setTimeout (=> @scrollToElementIfNotClicked $element), 50
+
+    scrollToElementIfNotClicked: ($element) ->
+      if not @resourceClicked
         @scrollToScrollableElement $element
+      @resourceClicked = false
 
     inputFocused: (event) ->
       @stopEvent event
@@ -538,9 +554,10 @@ define [
 
     # Render the New Resource view.
     renderNewResourceView: ->
-      @newResourceView.setElement @$('.new-resource-view').first()
-      @newResourceView.render()
-      @rendered @newResourceView
+      if @getCanCreateNew()
+        @newResourceView.setElement @$('.new-resource-view').first()
+        @newResourceView.render()
+        @rendered @newResourceView
 
     # Close the New Resource view.
     closeNewResourceView: ->
@@ -573,7 +590,8 @@ define [
     fetchResourcesSuccess: (paginator) ->
       @saveFetchedMetadata()
       @getResourceViews()
-      if paginator then @paginator.setItems paginator.count
+      if paginator
+        @paginator.setItems paginator.count
       if @paginator.items is 0 then @fetchResourcesLastPage = false
       if @fetchResourcesLastPage
         pageBefore = @paginator.page
@@ -642,7 +660,10 @@ define [
         @disableHeader()
         return
       if @paginator.items is 0
-        @headerForEmptyDataSet()
+        if @paginator.setItemsCalled
+          @headerForEmptyDataSet()
+        else
+          @disableHeader()
       else
         @headerForContentfulDataSet()
 
@@ -682,14 +703,19 @@ define [
       @setToggleAllLabelsButtonState()
       @setNewResourceViewButtonState()
       if @search
-        @$('.browse-set').text "a search over
-          #{@resourceNamePluralHuman}"
+        @$('.browse-set').html "<a
+          href='javascript:;'
+          class='field-display-link dative-tooltip search-display-check'
+          title='click to view the search whose results you are browsing'
+          >a search over #{@resourceNamePluralHuman}</a>"
+        @$('.search-display-check').tooltip()
       else if @corpus
         @$('.browse-set').html "<a
           href='javascript:;'
           class='field-display-link dative-tooltip corpus-display'
           title='click here to view this corpus in this page'
           >corpus #{@corpus.get('id')}</a>"
+        @$('.corpus-display').tooltip()
       else
         @$('.browse-set').text "all #{@resourceNamePluralHuman}"
       if @paginator.start is @paginator.end
@@ -743,6 +769,7 @@ define [
       while @resourceViews.length
         resourceView = @resourceViews.pop()
         resourceView.close()
+        @stopListening resourceView
         @closed resourceView
 
     # Close all rendered pagination item table views, i.e., the mini-tables that
@@ -759,6 +786,16 @@ define [
     # pagination we only store one page worth of resource models/views at a
     # time.
     getResourceViews: ->
+      if @collection.search
+        searchModel = new @searchModelClass
+          search: @collection.search
+          smart_search: @collection.smartSearch
+        searchPatternsObject = searchModel.getPatternsObject()
+        @resourceSearchView.model = searchModel
+        @resourceSearchView.render()
+      else
+        searchPatternsObject = null
+
       @closeResourceViews()
       @resourceViews = []
       @collection.each (resourceModel) =>
@@ -766,6 +803,7 @@ define [
           model: resourceModel
           dataLabelsVisible: @dataLabelsVisible
           expanded: @allResourcesExpanded
+          searchPatternsObject: searchPatternsObject
         @resourceViews.push newResourceView
 
     spinnerOptions: ->
@@ -801,7 +839,8 @@ define [
         @renderedResourceViews[@renderedResourceViews.length - 1].$el.focus()
 
     focusFirstNewResourceViewTextarea: ->
-      @$('.new-resource-view .add-resource-widget textarea').first().focus()
+      @$('.new-resource-view .add-resource-widget textarea')
+        .filter(':visible').first().focus()
 
     # GUI-fy: make nice buttons and nice titles/tooltips
     guify: ->
@@ -835,6 +874,13 @@ define [
             at: "right center"
             collision: "flipfit"
       @$('button.toggle-search')
+        .button()
+        .tooltip
+          position:
+            my: "left+160 center"
+            at: "right center"
+            collision: "flipfit"
+      @$('button.export-resource-collection')
         .button()
         .tooltip
           position:
@@ -1088,11 +1134,6 @@ define [
       @listenToNewResourceView()
       @showNewResourceViewAnimate()
 
-    openExporterDialog: (options) ->
-      @exporterDialog.setToBeExported options
-      @exporterDialog.generateExport()
-      @exporterDialog.dialogOpen()
-
 
     # Search-relevant stuff
     ############################################################################
@@ -1100,9 +1141,15 @@ define [
     # Set `@searchable` to `true` if this resource can be searched.
     searchable: false
 
-    # If this resource is searchable, then set `@searchView` to a view class
-    # for creating new searches for this resource.
-    searchView: null
+    # Override this to return `false` in those cases where a user should not be
+    # able to create a new resource.
+    getCanCreateNew: -> true
+
+    # If this resource is searchable, then set `@searchViewClass` and
+    # `@searchModelClass` to a view and a model class, respectively, for
+    # creating new searches for this resource.
+    searchViewClass: null
+    searchModelClass: null
 
     # By default, we have no search object. If this is set, it is assumed to be
     # an object of the form `{query: {filter: [], order_by: []}}`.
@@ -1114,17 +1161,20 @@ define [
 
     # Give this resources view a (new) search object. This will affect what
     # forms we are browsing.
-    setSearch: (@search) ->
+    setSearch: (@search, @smartSearch=null) ->
       @searchChanged = true
       @paginator = new Paginator page=1, items=0, itemsPerPage=@itemsPerPage
       @collection.search = @search
+      @collection.smartSearch = @smartSearch
 
     # Delete this resource view's a search object. This will also affect what
     # forms we are browsing.
     deleteSearch: ->
       @searchChanged = true
       @search = null
+      @smartSearch = null
       @collection.search = null
+      @collection.smartSearch = null
       @paginator = new Paginator page=1, items=0, itemsPerPage=@itemsPerPage
 
 
@@ -1199,7 +1249,7 @@ define [
           @scrollToFocusedInput()
 
     focusFirstResourceSearchViewTextarea: ->
-      @$('.resource-search-view textarea').first().focus()
+      @$('.resource-search-view textarea').first().focus().select()
 
     toggleResourceSearchViewAnimate: ->
       if @$('.resource-search-view').is ':visible'

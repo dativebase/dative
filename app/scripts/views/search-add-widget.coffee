@@ -43,3 +43,12 @@ define [
 
     editableSecondaryAttributes: []
 
+    # NOTE: we override these three methods because we don't need the added
+    # complication of requesting /formsearches/edit; we just request
+    # /formsearches/new every time.
+    getNewResourceDataFail: ->
+      console.log "Failed to retrieve the data from the OLD server which is
+        necessary for creating a new #{@resourceName}"
+
+    getNewResourceData: -> @model.getNewResourceData()
+

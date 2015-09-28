@@ -1,10 +1,102 @@
 <div id='dative-page-header' class='ui-widget-header ui-corner-top'>
 
-  <div class='dative-page-header-title'><%= @headerTitle %></div>
+    <div class='button-container-left'>
+        <button class="all-settings dative-tooltip"
+                title="Show all settings"
+                ><i class='fa fa-th-large fa-fw'></i>
+        </button>
+    </div>
+
+    <div class='dative-page-header-title'><%= @headerTitle %></div>
+
+    <div class='button-container-right'>
+
+        <button class="application-settings-help dative-tooltip"
+                title="Help with application settings"
+                ><i class='fa fa-question fa-fw'></i>
+        </button>
+
+    </div>
 
 </div>
 
 <div id='dative-page-body'>
+
+    <div class='application-settings-big-buttons'>
+
+        <div class='big-button ui-corner-all servers dative-tooltip'
+             title='Click to configure the LingSync/OLD servers that you want to
+                connect to'
+            ><div class='big-button-text'>Servers</div>
+            <div class='big-button-icon'>
+                <i class='fa fa-server fa-4x fa-fw fa-align-center'></i>
+            </div>
+        </div>
+
+        <div class='big-button ui-corner-all appearance dative-tooltip'
+             title='Click to change how your Dative looks'
+            ><div class='big-button-text'>Appearance</div>
+            <div class='big-button-icon'>
+                <i class='fa fa-picture-o fa-4x fa-fw fa-align-center'></i>
+            </div>
+        </div>
+
+        <% if @loggedIn is true: %>
+            <div class='big-button ui-corner-all server-settings dative-tooltip'
+                title='Click to configure the settings of the OLD server that you
+                    are logged in to'
+                ><div class='big-button-text'>Server Settings</div>
+                <div class='big-button-icon'>
+                    <i class='fa fa-server fa-4x fa-fw fa-align-center'></i>
+                    <i class='fa fa-cogs fa-4x fa-fw fa-align-center'></i>
+                </div>
+            </div>
+        <% end %>
+
+    </div>
+
+    <div class='application-settings-interfaces'>
+
+        <div class='servers-interface application-settings-interface'>
+            <div class='active-server'></div>
+            <div class='servers-collection'></div>
+        </div>
+
+        <div class='appearance-interface application-settings-interface'>
+
+            <% for [themeName, themeNameHumanReadable] in @jQueryUIThemes: %>
+                <% if themeName is @activeJQueryUITheme: %>
+                    <div class='jquery-theme-image-container dative-tooltip
+                                dative-shadowed-widget ui-corner-all
+                                ui-state-highlight
+                                theme-<%= themeName %>'
+                         tabindex='0'
+                         title='Click to make Dative look like this
+                            “<%= themeNameHumanReadable %>” theme'>
+                <% else: %>
+                    <div class='jquery-theme-image-container dative-tooltip
+                                dative-shadowed-widget ui-corner-all
+                                theme-<%= themeName %>'
+                         tabindex='0'
+                         title='Click to make Dative look like this
+                            “<%= themeNameHumanReadable %>” theme'>
+                <% end %>
+                        <div class='jquery-theme-name'><%= themeNameHumanReadable %></div>
+                        <img src='images/jqueryui-theme-examples/<%= themeName %>.png' />
+                    </div>
+            <% end %>
+
+        </div>
+
+        <div class='server-settings-interface ui-corner-all
+            dative-shadowed-widget dative-widget-center ui-widget
+            ui-widget-content application-settings-interface'></div>
+
+    </div>
+
+</div>
+
+  <!--
   <div class="applicationSettingsForm">
     <ul class="fieldset">
 
@@ -29,5 +121,5 @@
 
     </ul>
   </div>
-</div>
+  -->
 

@@ -10,6 +10,10 @@ define [
 
   class DateFieldDisplayView extends FieldDisplayView
 
+    initialize: (options) ->
+      options.tooltipIsRefreshable = true
+      super options
+
     getContext: ->
       context = super
       try

@@ -24,6 +24,12 @@ define [
       # error: "Uncaught TypeError: Cannot read property 'apply' of undefined".
       # So I'm just using the 'click' attribute of the "Ok" button.
       # 'click .ok': 'dialogClose'
+      'keydown': 'escapeKey'
+      'click .ui-dialog-titlebar-close': 'closeButtonClicked'
+
+    closeButtonClicked: (event) -> @triggerCancelEvent()
+
+    escapeKey: (event) -> if event.which is 27 then @triggerCancelEvent()
 
     render: ->
       @$el.append @template()
@@ -60,7 +66,7 @@ define [
         create: =>
           @$('.dative-alert-dialog-target').first().find('button').attr('tabindex', 0)
             .end()
-        open: =>
+        open: ->
 
     tooltipify: ->
       @$('button.ok')
@@ -78,25 +84,32 @@ define [
     focusCancelButton: ->
       @$('.dative-alert-dialog-target button.cancel').first().focus()
 
+    getEventTarget: ->
+      eventTarget = @eventTarget or Backbone
+      @eventTarget = null
+      eventTarget
+
     triggerConfirmEvent: ->
       if @confirmEvent
+        eventTarget = @getEventTarget()
         if @prompt
           @confirmArgument = @getPromptInput()
         if @confirmArgument
-          Backbone.trigger @confirmEvent, @confirmArgument
+          eventTarget.trigger @confirmEvent, @confirmArgument
           @confirmArgument = null
         else
-          Backbone.trigger @confirmEvent
+          eventTarget.trigger @confirmEvent
         @confirmEvent = null
       @setPromptInput('')
 
     triggerCancelEvent: ->
       if @cancelEvent
+        eventTarget = @getEventTarget()
         if @cancelArgument
-          Backbone.trigger @cancelEvent, @cancelArgument
+          eventTarget.trigger @cancelEvent, @cancelArgument
           @confirmArgument = null
         else
-          Backbone.trigger @cancelEvent
+          eventTarget.trigger @cancelEvent
         @cancelEvent = null
       @setPromptInput('')
 
@@ -110,9 +123,15 @@ define [
       if options.confirmEvent then @confirmEvent = options.confirmEvent
       if options.cancelEvent then @cancelEvent = options.cancelEvent
       if options.confirmArgument then @confirmArgument = options.confirmArgument
+      if options.eventTarget
+        @eventTarget = options.eventTarget
       if options.cancelArgument then @cancelArgument = options.cancelArgument
+      focusButton = options.focusButton or 'cancel'
       Backbone.trigger 'alert-dialog:open'
-      @$('.dative-alert-dialog').on("dialogopen", => @focusCancelButton)
+      if focusButton is 'ok'
+        @$('.dative-alert-dialog').on("dialogopen", => @focusOkButton())
+      else
+        @$('.dative-alert-dialog').on("dialogopen", => @focusCancelButton())
       @$('.dative-alert-dialog').first().dialog 'open'
 
     setupButtons: ->

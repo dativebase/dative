@@ -112,3 +112,62 @@ define ['./resource'], (ResourceModel) ->
       'vocabulary_morphology'
     ]
 
+    # Perform a "generate" request on the LM.
+    # e.g., PUT `<URL>/morpheme_language_model/{id}/generate`
+    generate: ->
+      @trigger "generateStart"
+      @constructor.cors.request(
+        method: 'PUT'
+        url: "#{@getOLDURL()}/#{@getServerSideResourceName()}/\
+          #{@get 'id'}/generate"
+        onload: (responseJSON, xhr) =>
+          @trigger "generateEnd"
+          if xhr.status is 200
+            @trigger "generateSuccess", responseJSON
+          else
+            error = responseJSON.error or 'No error message provided.'
+            @trigger "generateFail", error
+            console.log "PUT request to
+              #{@getOLDURL()}/#{@getServerSideResourceName()}/\
+              #{@get 'id'}/generate failed (status not 200)."
+            console.log error
+        onerror: (responseJSON) =>
+          @trigger "generateEnd"
+          error = responseJSON.error or 'No error message provided.'
+          @trigger "generateFail", error
+          console.log "Error in PUT request to
+            #{@getOLDURL()}/#{@getServerSideResourceName()}/\
+            #{@get 'id'}/generate (onerror triggered)."
+      )
+
+    # Perform a `get_probabilities` request against the LM.
+    # e.g., PUT `<URL>/morpheme_language_model/{id}/get_probabilities`
+    # with a request body JSON object with a `morpheme_sequences` attribute that
+    # valuates to an array of strings representing analyzed words.
+    getProbabilities: (words) ->
+      @trigger "getProbabilitiesStart"
+      @constructor.cors.request(
+        method: 'PUT'
+        payload: words
+        url: "#{@getOLDURL()}/#{@getServerSideResourceName()}/\
+          #{@get 'id'}/get_probabilities"
+        onload: (responseJSON, xhr) =>
+          @trigger "getProbabilitiesEnd"
+          if xhr.status is 200
+            @trigger "getProbabilitiesSuccess", responseJSON
+          else
+            error = responseJSON.error or 'No error message provided.'
+            @trigger "getProbabilitiesFail", error
+            console.log "PUT request to
+              #{@getOLDURL()}/#{@getServerSideResourceName()}/\
+              #{@get 'id'}/get_probabilities failed (status not 200)."
+            console.log error
+        onerror: (responseJSON) =>
+          @trigger "getProbabilitiesEnd"
+          error = responseJSON.error or 'No error message provided.'
+          @trigger "getProbabilitiesFail", error
+          console.log "Error in PUT request to
+            #{@getOLDURL()}/#{@getServerSideResourceName()}/\
+            #{@get 'id'}/get_probabilities (onerror triggered)."
+      )
+

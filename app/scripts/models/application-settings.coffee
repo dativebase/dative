@@ -3,10 +3,14 @@ define [
   'backbone'
   './base'
   './server'
+  './morphology'
+  './language-model'
   './../collections/servers'
   './../utils/utils'
+  './../utils/globals'
   'FieldDB'
-], (_, Backbone, BaseModel, ServerModel, ServersCollection, utils, FieldDB) ->
+], (_, Backbone, BaseModel, ServerModel, MorphologyModel, LanguageModelModel,
+  ServersCollection, utils, globals, FieldDB) ->
 
   # Application Settings Model
   # --------------------------
@@ -17,6 +21,10 @@ define [
   # Also contains the authentication logic.
 
   class ApplicationSettingsModel extends BaseModel
+
+    modelClassName2model:
+      'MorphologyModel': MorphologyModel
+      'LanguageModelModel': LanguageModelModel
 
     initialize: ->
       @fetch()
@@ -42,7 +50,7 @@ define [
           url: 'package.json',
           type: 'GET'
           dataType: 'json'
-          error: (jqXHR, textStatus, errorThrown) =>
+          error: (jqXHR, textStatus, errorThrown) ->
             console.log "Ajax request for package.json threw an error:
               #{errorThrown}"
           success: (packageDetails, textStatus, jqXHR) =>
@@ -103,6 +111,7 @@ define [
               username: credentials.username
               password: credentials.password
               loggedIn: true
+              loggedInUser: responseJSON.user
             @save()
             Backbone.trigger 'authenticateSuccess'
           else
@@ -251,10 +260,13 @@ define [
         url: "#{@getURL()}/login/logout"
         method: 'GET'
         timeout: 3000
-        onload: (responseJSON) =>
+        onload: (responseJSON, xhr) =>
           @authenticateAttemptDone taskId
           Backbone.trigger 'logoutEnd'
-          if responseJSON.authenticated is false
+          if responseJSON.authenticated is false or
+          (xhr.status is 401 and
+          responseJSON.error is "Authentication is required to access this
+          resource.")
             @set 'loggedIn', false
             @save()
             Backbone.trigger 'logoutSuccess'
@@ -404,6 +416,13 @@ define [
       appSetObj.servers = new ServersCollection(serverModelsArray)
       activeServer = appSetObj.activeServer
       appSetObj.activeServer = appSetObj.servers.get activeServer.id
+      longRunningTasks = appSetObj.longRunningTasks
+      for task in appSetObj.longRunningTasks
+        task.resourceModel =
+          new @modelClassName2model[task.modelClassName](task.resourceModel)
+      for task in appSetObj.longRunningTasksTerminated
+        task.resourceModel =
+          new @modelClassName2model[task.modelClassName](task.resourceModel)
       appSetObj
 
     # Defaults
@@ -486,6 +505,11 @@ define [
       activeFieldDBCorpus: null
       activeFieldDBCorpusTitle: null
 
+      languagesDisplaySettings:
+        itemsPerPage: 100
+        dataLabelsVisible: true
+        allFormsExpanded: false
+
       formsDisplaySettings:
         itemsPerPage: 10
         dataLabelsVisible: false
@@ -533,6 +557,43 @@ define [
         ['black-tie', 'Black Tie']
         ['trontastic', 'Trontastic']
         ['swanky-purse', 'Swanky Purse']
+      ]
+
+      # Use this to limit how many "long-running" tasks can be initiated from
+      # within the app. A "long-running task" is a request to the server that
+      # requires polling to know when it has terminated, e.g., phonology
+      # compilation, morphology generation and compilation, etc.
+      # NOTE !IMPORTANT: the OLD has a single foma worker and all requests to
+      # compile FST-based resources appear to enter into a queue. This means
+      # that a 3s request made while a 1h request is ongoing will take 1h1s!
+      # Not good ...
+      longRunningTasksMax: 2
+
+      # An array of objects with keys `resourceName`, `taskName`,
+      # `taskStartTimestamp`, and `taskPreviousUUID`.
+      longRunningTasks: []
+
+      # An array of objects with keys `resourceName`, `taskName`,
+      # `taskStartTimestamp`, and `taskPreviousUUID`.
+      longRunningTasksTerminated: []
+
+      # IME types that can be uploaded (to an OLD server, at least).
+      # TODO: this should be expanded and/or made backend-specific.
+      allowedFileTypes: [
+        'application/pdf'
+        'image/gif'
+        'image/jpeg'
+        'image/png'
+        'audio/mpeg'
+        'audio/mp3'
+        'audio/ogg'
+        'audio/x-wav'
+        'audio/wav'
+        'video/mpeg'
+        'video/mp4'
+        'video/ogg'
+        'video/quicktime'
+        'video/x-ms-wmv'
       ]
 
       version: 'da'
@@ -643,8 +704,8 @@ define [
           'datetime_modified'
           'verifier'
           'source'
-          #'files'
-          #'collections'
+          'files'
+          #'collections' # Does the OLD provide the collections when the forms resource is fetched?
           'syntax'
           'semantics'
           'status'

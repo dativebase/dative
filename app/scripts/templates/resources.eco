@@ -6,8 +6,7 @@
   <div class='dative-resources-view-header dative-two-part-header-part-one'>
 
     <div class='dative-page-header-title container-center'>
-      <div class='no-resources'>There are no <%= @resourceNamePluralHuman %> to
-          display</div>
+      <div class='no-resources'></div>
       <div class='pagination-info'>
         Browsing
         <span class='browse-set'
@@ -29,10 +28,12 @@
 
     <div class='button-container-left'>
 
+      <% if @canCreateNew: %>
       <button class='new-resource dative-tooltip' title='create a new
         <%= @resourceNameHuman %>'>
         <i class='fa fa-fw fa-plus'></i>
       </button>
+      <% end %>
 
       <button class='expand-all dative-tooltip' title='expand all
           <%= @resourceNamePluralHuman %>'>
@@ -56,6 +57,11 @@
                     <%= @resourceNamePluralHuman %>"
             ><i class='fa fa-fw fa-search'></i></button>
       <% end %>
+
+      <button class="export-resource-collection dative-tooltip"
+              title="Export multiple <%= @resourceNamePluralHuman  %>"
+              ><i class='fa fa-fw fa-download'></i>
+      </button>
 
       <button class="toggle-all-labels dative-tooltip"
               title="<%= @resourceNameHuman %> labels are off; click here to
@@ -95,8 +101,4 @@
 </div>
 
 <div class='focusable-bottom' tabindex='0'></div>
-
-<div id='exporter-dialog-container'></div>
-
-
 

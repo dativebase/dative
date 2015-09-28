@@ -20,6 +20,8 @@ define [
       'update'
       'delete'
       'history'
+      'data'
+      'controls'
     ]
 
     resourceNameHumanReadable: ->

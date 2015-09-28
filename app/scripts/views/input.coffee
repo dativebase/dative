@@ -23,12 +23,23 @@ define ['./base', 'autosize'], (BaseView) ->
 
     autosize: -> @$('textarea').autosize append: false
 
+    selectmenuDefaultZIndex: 100
+
     # Make <select>s into jQuery selectmenus.
+    # NOTE: the functions triggered by the open and close events are a hack so
+    # that the menu data will be displayed in jQueryUI dialogs, which have a
+    # higher z-index.
     selectmenuify: (width='auto', selectClass=null) ->
       selectClass = selectClass or @selectClass or null
       selector = if selectClass then "select.#{selectClass}" else 'select'
       @$(selector)
-        .selectmenu width: width
+        .selectmenu
+          width: width
+          open: (event, ui) ->
+            @selectmenuDefaultZIndex = $('.ui-selectmenu-open').first().zIndex()
+            $('.ui-selectmenu-open').zIndex 120
+          close: (event, ui) ->
+            $('.ui-selectmenu-open').zIndex @selectmenuDefaultZIndex
         .each (index, element) =>
           @transferClassAndTitle @$(element) # so we can tooltipify the selectmenu
 

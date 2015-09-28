@@ -44,11 +44,11 @@ define [
           else
             Backbone.trigger 'newCorpusFail', "Request to create corpus failed: `corpusadded` not truthy."
             console.log 'Failed request to /newcorpus: `corpusadded` not truthy.'
-        onerror: (responseJSON) =>
+        onerror: (responseJSON) ->
           Backbone.trigger 'newCorpusEnd'
           Backbone.trigger 'newCorpusFail', "Request to create corpus failed with an error."
           console.log 'Failed request to /newcorpus: error.'
-        ontimeout: =>
+        ontimeout: ->
           Backbone.trigger 'newCorpusEnd'
           Backbone.trigger 'newCorpusFail', "Request to create corpus failed: request timed out."
           console.log 'Failed request to /newcorpus: timed out.'

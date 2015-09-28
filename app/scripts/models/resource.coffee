@@ -38,11 +38,16 @@ define [
     url: 'fakeurl'
 
     getActiveServerType: ->
-      globals.applicationSettings.get('activeServer').get 'type'
+      try
+        globals.applicationSettings.get('activeServer').get 'type'
+      catch
+        'OLD'
 
     # Validate the model. If there are errors, returns an object with errored
     # attributes as keys and error messages as values; otherwise returns
     # `undefined`.
+    # TODO: I think a "form submit" action results in this method being called
+    # many times too many (i.e., redundantly).
     validate: (attributes, options) ->
       attributes = attributes or @attributes
       errors = {}
@@ -50,8 +55,16 @@ define [
         attributeValidator = @getValidator attribute
         if attributeValidator
           error = attributeValidator.apply @, [value]
-          if error then errors[attribute] = error
-      if _.isEmpty errors then undefined else errors
+          if error
+            if @utils.type(error) is 'object'
+              for errorAttr, errorMsg of error
+                errors[errorAttr] = errorMsg
+            else
+              errors[attribute] = error
+      if _.isEmpty errors
+        undefined
+      else
+        errors
 
     # Override this in subclasses for validation: return a `@validator` method
     # for the input `attribute`, or `null` if it shouldn't be validated.
@@ -113,8 +126,8 @@ define [
         onerror: (responseJSON) =>
           @trigger "fetch#{@resourceNameCapitalized}End"
           error = responseJSON.error or 'No error message provided.'
-          @trigger "fetch#{@resourceNameCapitalized}Fail", error
-          console.log "Error in DELETE request to
+          @trigger "fetch#{@resourceNameCapitalized}Fail", error, @
+          console.log "Error in GET request to
             /#{@getServerSideResourceName()}/#{@get 'id'} (onerror triggered)."
       )
 
@@ -128,7 +141,7 @@ define [
         @trigger "fetch#{@resourceNameCapitalized}Success", responseJSON
       else
         error = responseJSON.error or 'No error message provided.'
-        @trigger "fetch#{@resourceNameCapitalized}Fail", error
+        @trigger "fetch#{@resourceNameCapitalized}Fail", error, @
         console.log "GET request to /#{@getServerSideResourceName()}/#{@get 'id'}
           failed (status not 200)."
         console.log error
@@ -137,47 +150,82 @@ define [
     # server. In the OLD API, this type of request returns a JSON object
     # containing the data necessary to create a new OLD resource.
     getNewResourceData: ->
-      Backbone.trigger "getNew#{@resourceNameCapitalized}DataStart"
+      @trigger "getNew#{@resourceNameCapitalized}DataStart"
       @constructor.cors.request(
         method: 'GET'
         url: "#{@getOLDURL()}/#{@getServerSideResourceName()}/new"
         onload: (responseJSON, xhr) =>
-          Backbone.trigger "getNew#{@resourceNameCapitalized}DataEnd"
+          @trigger "getNew#{@resourceNameCapitalized}DataEnd"
           if xhr.status is 200
-            Backbone.trigger "getNew#{@resourceNameCapitalized}DataSuccess",
+            @trigger "getNew#{@resourceNameCapitalized}DataSuccess",
               responseJSON
           else
-            Backbone.trigger "getNew#{@resourceNameCapitalized}DataSuccess",
+            @trigger "getNew#{@resourceNameCapitalized}DataSuccess",
               "Failed in fetching the data required to create new
                 #{@getServerSideResourceName()}."
         onerror: (responseJSON) =>
-          Backbone.trigger "getNew#{@resourceNameCapitalized}DataEnd"
-          Backbone.trigger "getNew#{@resourceNameCapitalized}DataFail",
+          @trigger "getNew#{@resourceNameCapitalized}DataEnd"
+          @trigger "getNew#{@resourceNameCapitalized}DataFail",
             "Error in GET request to OLD server for /#{@getServerSideResourceName()}/new"
           console.log "Error in GET request to OLD server for
             /#{@getServerSideResourceName()}/new"
       )
 
+    # Issue a GET request to /<resource_name_plural>/<id>/edit on the active OLD
+    # server. In the OLD API, this type of request returns a JSON object
+    # containing both the resource with id <id> as well as the data necessary
+    # to update that resource. Example returned object:
+    # `{form: {...}, data: {...}}`.
+    getEditResourceData: ->
+      @trigger "getEdit#{@resourceNameCapitalized}DataStart"
+      @constructor.cors.request(
+        method: 'GET'
+        url: "#{@getOLDURL()}/#{@getServerSideResourceName()}/\
+          #{@get('id')}/edit"
+        onload: (responseJSON, xhr) =>
+          @trigger "getEdit#{@resourceNameCapitalized}DataEnd"
+          if xhr.status is 200
+            @trigger "getEdit#{@resourceNameCapitalized}DataSuccess",
+              responseJSON
+          else
+            @trigger "getEdit#{@resourceNameCapitalized}DataSuccess",
+              "Failed in fetching the data required to create edit
+                #{@getServerSideResourceName()} #{@get('id')}."
+        onerror: (responseJSON) =>
+          @trigger "getEdit#{@resourceNameCapitalized}DataEnd"
+          @trigger "getEdit#{@resourceNameCapitalized}DataFail",
+            "Error in GET request to OLD server for
+            /#{@getServerSideResourceName()}/#{@get('id')}/edit"
+          console.log "Error in GET request to OLD server for
+            /#{@getServerSideResourceName()}/#{@get('id')}/edit"
+      )
+
+      url: "#{@getOLDURL()}/#{@getServerSideResourceName()}/new_search"
+
+    # This may need to be overridden in sub-classes.
+    getNewSearchDataURL: ->
+      "#{@getOLDURL()}/#{@getServerSideResourceName()}/new_search"
+
     # Issue a GET request to /<resource_name_plural>/new_search on the active OLD
     # server. In the OLD API, this type of request returns a JSON object
     # containing the data necessary to create a new OLD search over that resource.
     getNewSearchData: ->
-      Backbone.trigger "getNew#{@resourceNameCapitalized}SearchDataStart"
+      @trigger "getNew#{@resourceNameCapitalized}SearchDataStart"
       @constructor.cors.request(
         method: 'GET'
-        url: "#{@getOLDURL()}/#{@getServerSideResourceName()}/new_search"
+        url: @getNewSearchDataURL()
         onload: (responseJSON, xhr) =>
-          Backbone.trigger "getNew#{@resourceNameCapitalized}SearchDataEnd"
+          @trigger "getNew#{@resourceNameCapitalized}SearchDataEnd"
           if xhr.status is 200
-            Backbone.trigger "getNew#{@resourceNameCapitalized}SearchDataSuccess",
+            @trigger "getNew#{@resourceNameCapitalized}SearchDataSuccess",
               responseJSON
           else
-            Backbone.trigger "getNew#{@resourceNameCapitalized}SearchDataSuccess",
+            @trigger "getNew#{@resourceNameCapitalized}SearchDataSuccess",
               "Failed in fetching the data required to create a new search over
                 #{@resourceNamePlural}."
         onerror: (responseJSON) =>
-          Backbone.trigger "getNew#{@resourceNameCapitalized}SearchDataEnd"
-          Backbone.trigger "getNew#{@resourceNameCapitalized}SearchDataFail",
+          @trigger "getNew#{@resourceNameCapitalized}SearchDataEnd"
+          @trigger "getNew#{@resourceNameCapitalized}SearchDataFail",
             "Error in GET request to OLD server for /#{@getServerSideResourceName()}/new_search"
           console.log "Error in GET request to OLD server for
             /#{@getServerSideResourceName()}/new_search"
@@ -205,6 +253,7 @@ define [
       Backbone.trigger "destroy#{@resourceNameCapitalized}End"
       if xhr.status is 200
         Backbone.trigger "destroy#{@resourceNameCapitalized}Success", @
+        @trigger "destroy#{@resourceNameCapitalized}Success"
       else
         error = responseJSON.error or 'No error message provided.'
         Backbone.trigger "destroy#{@resourceNameCapitalized}Fail", error
@@ -267,17 +316,23 @@ define [
     #    },
     #    "paginator": { ... }
     #  }
+    # TODO: the default `order_by` should not reference the Form model ...
     getSearchPayload: (query, paginator) ->
       paginator = paginator or {page: 1, items_per_page: 10}
       if 'order_by' not of query then query.order_by = ['Form', 'id', 'asc']
       query: query
       paginator: paginator
 
+    # This may need to be overridden in sub-classes, cf. the complication of
+    # searching across corpora in the OLD.
+    getSearchURL: ->
+      "#{@getOLDURL()}/#{@getServerSideResourceName()}"
+
     search: (query, paginator=null) ->
       @trigger "searchStart"
       @constructor.cors.request(
         method: 'SEARCH'
-        url: "#{@getOLDURL()}/#{@getServerSideResourceName()}"
+        url: @getSearchURL()
         payload: @getSearchPayload query, paginator
         onload: (responseJSON, xhr) =>
           @trigger "searchEnd"

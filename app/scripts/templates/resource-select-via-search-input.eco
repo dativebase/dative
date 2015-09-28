@@ -1,0 +1,75 @@
+<div class='resource-select-via-search-input-container'>
+
+<div class='resource-select-via-search-interface'>
+
+    <i class="fa fa-search search-term-icon black-fa"></i>
+
+    <% if @multiSelect: %>
+    <input
+        type='text'
+        name='search-term'
+        class='dative-tooltip ui-corner-all resource-select-via-search-input-input'
+        title='Enter a pattern to search for <%= @resourceNameHuman %>.'
+        />
+    <% else: %>
+    <input
+        type='text'
+        name='search-term'
+        class='dative-tooltip ui-corner-all resource-select-via-search-input-input'
+        title='Enter a pattern to search for a <%= @resourceNameHuman %>.'
+        />
+    <% end %>
+
+    <button
+        class='perform-search dative-tooltip
+            resource-select-via-search-input-button'
+        title='Click here to perform the search; results will be returned in the
+            page.'
+        >Search</button>
+
+    <% if @multiSelect: %>
+    <button
+        class='create-new-resource dative-tooltip
+            resource-select-via-search-input-button'
+        title='Click here to create a new <%= @resourceNameHumanSingular %>
+            within the page'
+        ><i class='fa fa-fw fa-plus'></i></button>
+    <% else: %>
+    <button
+        class='create-new-resource dative-tooltip
+            resource-select-via-search-input-button'
+        title='Click here to create a new <%= @resourceNameHuman %> within the
+            page'
+        ><i class='fa fa-fw fa-plus'></i></button>
+    <% end %>
+
+</div>
+
+<div class='resource-results-via-search-table-wrapper ui-corner-all
+    dative-shadowed-widget ui-widget ui-widget-content'>
+
+    <div class='dative-widget-header ui-widget-header ui-corner-top'>
+
+        <div class='button-container-left'>
+            <span class='results-count'></span>
+        </div>
+
+        <div class='dative-widget-header-title container-center'
+            ><%= @resourceNameHumanCapitalized %> Search Results</div>
+
+        <div class='button-container-right'>
+            <span class='results-showing-count'></span>
+        </div>
+
+    </div>
+
+    <div class='dative-widget-body ui-corner-bottom
+        resource-results-via-search-table'></div>
+
+</div>
+
+<div class='selected-resource-display-container'></div>
+<!-- <div class='selected-resource-display-container dative-shadowed-widget
+    ui-widget ui-widget-content ui-corner-all'></div> -->
+
+</div>

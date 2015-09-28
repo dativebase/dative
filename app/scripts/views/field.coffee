@@ -84,6 +84,8 @@ define [
     className: 'dative-form-field'
 
     initialize: (options) ->
+      @addUpdateType = options.addUpdateType or 'add'
+      @tooltipIsRefreshable = options.tooltipIsRefreshable or false
       @resource = options.resource or 'forms'
       @submitAttempted = false
       @attribute = options.attribute
@@ -111,7 +113,12 @@ define [
       @renderInputView()
       @guify()
       @listenToEvents()
+      if not @visibilityCondition() then @$el.hide()
       @
+
+    # Make this method evaluate to false under those conditions when this view
+    # should be hidden.
+    visibilityCondition: -> true
 
     # Refresh re-renders all of the input views. This is called by the form add
     # widget when the “clear form” button is clicked.
@@ -124,9 +131,28 @@ define [
     listenToEvents: ->
       super
       if @inputView
-        @listenTo @inputView, 'setToModel', @setToModel
-      # We listen to validation error events that are relevant to our attribute(s).
-      @listenTo @context.model, "validationError:#{@attribute}", @validationError
+        @listenTo @inputView, 'setToModel', @inputViewSetToModel
+      @listenForValidationErrors()
+      for crucialAttribute in @getCrucialAttributes()
+        @listenTo @model, "change:#{crucialAttribute}", @crucialAttributeChanged
+
+    # Override this to return an array of model attributes. This will cause this
+    # field view's visibility to vary depending on characteristics of the
+    # values of those attributes.
+    getCrucialAttributes: -> []
+
+    crucialAttributeChanged: ->
+      if @visibilityCondition() then @showAnimate() else @hideAnimate()
+
+    hideAnimate: -> if @$el.is ':visible' then @$el.slideUp()
+
+    showAnimate: -> if not @$el.is(':visible') then @$el.slideDown()
+
+    # We listen to validation error events that are relevant to our
+    # attribute(s). Note: this may need to be over-ridden in sub-classes.
+    listenForValidationErrors: ->
+      @listenTo @context.model, "validationError:#{@attribute}",
+        @validationError
 
     renderLabelView: ->
       @labelView.setElement @$('.dative-field-label-container')
@@ -171,13 +197,18 @@ define [
         when 'OLD' then @model.set domValue
       if @submitAttempted then @validate()
 
+    inputViewSetToModel: -> @setToModel()
+
     validate: (errors) ->
       clientSideValidationErrors = errors or @model.validate()
       if clientSideValidationErrors
-        ourError = clientSideValidationErrors[@attribute]
-        if ourError then @validationError(ourError) else @validationError()
+        myError = @getMyError clientSideValidationErrors
+        if myError then @validationError(myError) else @validationError()
       else
         @validationError()
+
+    # This may need to be overridden in sub-classes.
+    getMyError: (errorObject) -> errorObject[@attribute]
 
     # Display the validation error display, or remove it if there isn't an error.
     validationError: (error) ->
@@ -255,6 +286,9 @@ define [
         when 'OLD' then @utils.snake2regular attribute
         else 'default'
 
+    refreshTooltip: ->
+      if @tooltipIsRefreshable then @labelView.refreshTooltip @getTooltip()
+
     # The tooltip (the HTML title attribute) for both the label and the input.
     getTooltip: (attribute=@attribute) ->
       switch @activeServerType
@@ -273,7 +307,7 @@ define [
     # If `options.grammaticalities` is an array, return it with '' as its first
     # member and all other empty strings removed. Useful for grammaticality
     # <select>s for OLD apps where the '' grammatical value may be left
-    # implicit. 
+    # implicit.
     addGrammaticalToGrammaticalities: (options) ->
       if options?.grammaticalities
         if @utils.type options.grammaticalities is 'array'

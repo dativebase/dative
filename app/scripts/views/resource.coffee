@@ -48,33 +48,64 @@ define [
       @activeServerType = @getActiveServerType()
       @setState options
       @addUpdateType = @getUpdateViewType()
-      @updateView = new @resourceAddWidgetView
-        model: @model,
-        addUpdateType: @addUpdateType
+      @getUpdateView()
       @updateViewRendered = false
+      @getControlsView()
+      @getFileDataView()
+
+    getUpdateView: ->
+      if 'update' not in @excludedActions
+        @updateView = new @resourceAddWidgetView
+          model: @model,
+          addUpdateType: @addUpdateType
+      else
+        @updateView = null
+
+    getFileDataView: ->
+      if 'data' not in @excludedActions
+        @fileDataView = new @fileDataViewClass
+          model: @model
+          resourceName: @resourceName
+        @fileDataViewRendered = false
+
+    getControlsView: ->
       if 'controls' not in @excludedActions
-        @controlsView = new @controlsViewClass(model: @model)
+        @controlsView = new @controlsViewClass
+          model: @model
+          resourceName: @resourceName
         @controlsViewRendered = false
 
     # An array of actions that are not relevant to this resource, e.g.,
     # 'history', and 'controls'.
     # WARN: if you remove 'controls' from this array, then you MUST assign
-    # a working "controls" view to `@controlsViewClass`.
+    # a working "controls" view to `@controlsViewClass`. Same thing with 'data'
+    # and `@fileDataViewClass`.
     excludedActions: [
-      'history'
-      'controls'
+      'history'  # forms have this, since everything is version controlled.
+      'controls' # phonologies have this, for, e.g., phonologizing.
+      'data'     # file resources have this, for accessing their file data.
     ]
 
     controlsViewClass: null
+    fileDataViewClass: null
 
     getUpdateViewType: -> if @model.get('id') then 'update' else 'add'
 
+    # Have this return false if you do *not* want this resource to be viewable
+    # in the main page, i.e., by navigating to #/<resource_name>/<resource_id>.
+    # For example, OLD application settings resources are never displayed as a
+    # collection so it doesn't make sense to have their header be a clickable
+    # UI element that causes the app settings resource to be displayed in the
+    # main page (since it's always already displayed in the main page).
+    mainPageViewable: -> true
+
     # Render the Add a Resource view.
     renderUpdateView: ->
-      @updateView.setElement @$('.update-resource-widget').first()
-      @updateView.render()
-      @updateViewRendered = true
-      @rendered @updateView
+      if 'update' not in @excludedActions
+        @updateView.setElement @$('.update-resource-widget').first()
+        @updateView.render()
+        @updateViewRendered = true
+        @rendered @updateView
 
     # Set the state of the resource display: what is visible.
     setState: (options) ->
@@ -86,6 +117,8 @@ define [
         secondaryDataVisible: false # comments, tags, etc.
         updateViewVisible: false
         controlsViewVisible: false
+        fileDataViewVisible: false
+        searchPatternsObject: null
       _.extend defaults, options
       for key, value of defaults
         @[key] = value
@@ -117,35 +150,52 @@ define [
       @listenTo Backbone, "#{@resourceNamePlural}View:hideAllLabels",
         @hideContentAndLabelsThenShowContent
       @listenTo Backbone, "delete#{@resourceNameCapitalized}", @delete
-      @listenTo @updateView, "#{@resourceName}AddView:hide",
-        @hideUpdateViewAnimate
-      @listenTo @model, 'change', @indicateModelState
-      @listenTo @updateView, 'forceModelChanged', @indicateModelState
       @listenTo @model, "update#{@resourceNameCapitalized}Success",
         @updateSuccess
+      @listenTo @model, 'change', @indicateModelState
+      if 'update' not in @excludedActions
+        @listenTo @updateView, "#{@resourceName}AddView:hide",
+          @hideUpdateViewAnimate
+        @listenTo @updateView, 'forceModelChanged', @indicateModelState
       if 'controls' not in @excludedActions
         @listenTo @controlsView, "controlsView:hide",
           @hideControlsViewAnimate
+      if 'data' not in @excludedActions
+        @listenTo @fileDataView, "fileDataView:hide",
+          @hideFileDataViewAnimate
+        @listenTo @fileDataView, "fileDataView:show",
+          @showFileDataViewAnimate
+      @listenToRelatedResourceEvents()
 
     indicateModelState: ->
-      if @updateView.modelAltered()
-        @indicateModelIsAltered()
-      else
-        @indicateModelIsUnaltered()
+      if 'update' not in @excludedActions
+        if @updateView.modelAltered()
+          @indicateModelIsAltered()
+        else
+          @indicateModelIsUnaltered()
 
     indicateModelIsAltered: ->
-      @$('.dative-widget-header').addClass 'ui-state-error'
+      @$('.dative-widget-header').first().addClass 'ui-state-error'
       headerTitleHTML = "#{@getHeaderTitle()} (<i class='fa fa-fw
         fa-exclamation-triangle'></i>Unsaved changes)"
-      @$('.dative-widget-header-title').first()
+      @$('.dative-widget-header-title .header-title-content').first()
         .html headerTitleHTML
 
     updateSuccess: ->
       @indicateModelIsUnaltered()
+      @refreshTooltips()
+
+    # Since the content of some tooltips (e.g., datetime modified tooltips)
+    # depends on the value of a particular resource attribute, we need to
+    # refresh the tooltips when an update is successful.
+    refreshTooltips: ->
+      for displayView in @primaryDisplayViews.concat @secondaryDisplayViews
+        displayView.refreshTooltip()
 
     indicateModelIsUnaltered: ->
-      @$('.dative-widget-header').removeClass 'ui-state-error'
-      @$('.dative-widget-header-title').first().html @getHeaderTitle()
+      @$('.dative-widget-header').first().removeClass 'ui-state-error'
+      @$('.dative-widget-header-title .header-title-content').first()
+        .html @getHeaderTitle()
 
     events:
       'click .resource-primary-data': 'showAndHighlightOnlyMe'
@@ -163,6 +213,12 @@ define [
       'click .delete-resource': 'deleteConfirm'
       'click .export-resource': 'exportResource'
       'click .controls': 'toggleControlsViewAnimate'
+      'click .file-data': 'toggleFileDataViewAnimate'
+      'click .header-title-content': 'viewResourceInPage'
+
+    viewResourceInPage: ->
+      Backbone.trigger "request:#{@resourceNameCapitalized}View",
+        @model.get('id')
 
     exportResource: (event) ->
       if event then @stopEvent event
@@ -195,13 +251,54 @@ define [
         @model.destroyResource @model
 
     render: ->
+
+      # This can cause many needless requests and it doesn't seem necessary.
+      # TODO: verify that it's not necessary and delete this and all related
+      # methods.
+      # @checkForRelatedResourceData()
+
       @getDisplayViews()
       @html()
       @renderDisplayViews()
       @guify()
       @listenToEvents()
-      #@renderUpdateView()
+      @highlightSearchMatches()
       @
+
+    # Highlight the attribute values of this resource that match a particular
+    # search. The relevant data with respect to the search is contained in
+    # `@searchPatternsObject`, which maps attribute names to regexes that can
+    # be used to highlight the matching substrings.
+    # TODO: Implement this! It's more difficult than it would appear since the
+    # `interlinearize` method of `FormBaseView` can split a value up and put it
+    # in different parts of the DOM.
+    highlightSearchMatches: ->
+
+    # If we are working with an OLD backend, then we request data on our
+    # related resources, if our globally held copies of those data haven't been
+    # refreshed in a while.
+    checkForRelatedResourceData: ->
+      if @activeServerTypeIsOLD()
+        [weHaveNewResourceData, lastRetrieved] = @weHaveNewResourceData()
+        if weHaveNewResourceData
+          if lastRetrieved and
+          ((new Date()) - lastRetrieved) > @relatedResourceDataExpires
+            @getNewResourceData()
+        else
+          @callRenderAfterNewResourceDataSuccess = true
+          @getNewResourceData()
+
+    getNewResourceData: ->
+      if @model.get('id')
+        @model.getEditResourceData()
+      else
+        @model.getNewResourceData()
+
+    # We have successfully retrieved from the server the data on the resources
+    # that can be associated to this one. Here we simply store it in the
+    # `globals` model. Our `RelatedResourceFieldDisplays` will hear changes
+    # that are relevant to them and will auto-refresh as needed.
+    getNewResourceDataSuccess: (data) -> @storeOptionsDataGlobally data
 
     getDisplayViews: ->
       @getPrimaryDisplayViews()
@@ -234,20 +331,29 @@ define [
       resource: @resourceNamePlural
       attribute: attribute # e.g., "name"
       model: @model
+      searchPatternsObject: @searchPatternsObject
 
     html: ->
       @$el
         .attr 'tabindex', 0
-        .html @template(
-          activeServerType: @activeServerType
-          headerTitle: @getHeaderTitle()
-          addUpdateType: @addUpdateType
-          headerAlwaysVisible: @headerAlwaysVisible
-          resourceName: @resourceName
-          resourceNameHumanReadable: @resourceNameHumanReadable
-          excludedActions: @excludedActions
-          showControlsWithNew: @showControlsWithNew
-        )
+        .html @template(@getContext())
+
+    getContext: ->
+      activeServerType: @activeServerType
+      headerTitle: @getHeaderTitle()
+      resourceIcon: @getResourceIcon()
+      addUpdateType: @addUpdateType
+      headerAlwaysVisible: @headerAlwaysVisible
+      resourceName: @resourceName
+      resourceNameHumanReadable: @resourceNameHumanReadable
+      excludedActions: @excludedActions
+      showControlsWithNew: @showControlsWithNew
+      secondaryDataFieldsLength: @getSecondaryDataFieldsLength()
+      mainPageViewable: @mainPageViewable()
+
+    getSecondaryDataFieldsLength: -> @secondaryAttributes.length
+
+    getResourceIcon: -> ''
 
     # Set this to `true` if you want the controls button to be visible on a new
     # resource, i.e., an unsaved resource.
@@ -305,6 +411,8 @@ define [
       @updateViewVisibility()
       if 'controls' not in @excludedActions
         @controlsViewVisibility()
+      if 'data' not in @excludedActions
+        @fileDataViewVisibility()
 
     # Make the header visible, or not, depending on state.
     headerVisibility: ->
@@ -342,26 +450,36 @@ define [
 
     # Fade out data, then fade in data and labels.
     hideContentAndLabelsThenShowAll: ->
-      @getFieldContainers().find('.dative-field-display').each (index, element) =>
-        $element = @$ element
-        $content = $element.find @dataContentSelector
-        $label = $element.find @dataLabelsSelector
-        $content.fadeOut
-          complete: =>
-            $label.fadeIn().css('display', 'inline-block')
-            $content.fadeIn().removeClass 'no-label'
+      @getFieldContainers()
+        .find('.dative-field-display, .igt-tables-container')
+        .each (index, element) =>
+          $element = @$ element
+          $content = $element.find @dataContentSelector
+          $label = $element.find @dataLabelsSelector
+          $content.fadeOut
+            complete: ->
+              $label.fadeIn().css('display', 'inline-block')
+              $content.fadeIn().removeClass 'no-label'
       @dataLabelsVisible = true
+      @contentAndLabelsVisiblePost()
       @setDataLabelsButtonStateOpen()
+
+    contentAndLabelsVisiblePost: ->
 
     # Fade out data and labels, then fade in data.
     hideContentAndLabelsThenShowContent: ->
       @hideDataLabelsAnimate()
-      @getFieldContainers().find('.dative-field-display').each (index, element) =>
-        $element = @$ element
-        $content = $element.find @dataContentSelector
-        $content.fadeOut
-          complete: =>
-            $content.fadeIn().addClass 'no-label'
+      @getFieldContainers()
+        .find('.dative-field-display, .igt-tables-container')
+        .each (index, element) =>
+          $element = @$ element
+          $content = $element.find @dataContentSelector
+          $content.fadeOut
+            complete: ->
+              $content.fadeIn().addClass 'no-label'
+      @contentOnlyVisiblePost()
+
+    contentOnlyVisiblePost: ->
 
     # "Show labels" button.
     setDataLabelsButtonStateClosed: ->
@@ -387,24 +505,16 @@ define [
           items: 'button'
           content: 'hide labels'
 
-    dataLabelsSelector: '.dative-field-display-label-container'
+    dataLabelsSelector: '.dative-field-display-label-container,
+      td.dative-field-label-cell'
 
     getDataLabels: ->
-      $primaryLabels =
-        @$('.resource-primary-data').first().find(@dataLabelsSelector)
-      $secondaryLabels =
-        @$('.resource-secondary-data').first().find(@dataLabelsSelector)
-      $primaryLabels.add $secondaryLabels
+      @$('.resource-primary-data').first().find(@dataLabelsSelector)
 
-    # Return a jQuery set that combines the primary and secondary data divs;
-    # needed so that we don't inadvertently modify the DOM in other areas,
-    # e.g., div.previous_versions.
-    getFieldContainers: ->
-      $primaryData = @$('.resource-primary-data').first()
-      $secondaryData = @$('.resource-secondary-data').first()
-      $primaryData.add $secondaryData
+    getFieldContainers: -> @$('.resource-primary-data').first()
 
-    dataContentSelector: '.dative-field-display-representation-container'
+    dataContentSelector: '.dative-field-display-representation-container,
+      table.igt-table'
 
     # Hide the labels for the data attributes.
     hideDataLabelsAnimate: (event) ->
@@ -424,13 +534,14 @@ define [
       @dataLabelsVisible = false
       @setDataLabelsButtonStateClosed()
       @getDataLabels().hide()
-      @$(@dataContentSelector).addClass 'no-label'
+      @$(".resource-primary-data #{@dataContentSelector}").addClass 'no-label'
 
     showDataLabels: ->
       @dataLabelsVisible = true
       @setDataLabelsButtonStateOpen()
       @getDataLabels().hide().show().css 'display', 'inline-block'
-      @$(@dataContentSelector).removeClass 'no-label'
+      @$(".resource-primary-data #{@dataContentSelector}")
+        .removeClass 'no-label'
 
     # jQueryUI-ify <button>s
     guifyButtons: ->
@@ -472,6 +583,8 @@ define [
                 my: "left+#{leftOffset} center"
                 at: "right center"
                 collision: "flipfit"
+
+      @$('.header-title-content.dative-tooltip').tooltip()
 
     # Button for toggling secondary data: when secondary data are hidden.
     setSecondaryDataButtonStateClosed: ->
@@ -547,11 +660,9 @@ define [
       @dehighlight()
       @hideSecondaryData()
 
-    focus: ->
-      @highlightOnlyMe()
+    focus: -> @highlightOnlyMe()
 
-    focusout: ->
-      @dehighlight()
+    focusout: -> @dehighlight()
 
     # <Enter> on a closed resource opens it, <Esc> on an open resource closes
     # it.
@@ -704,7 +815,7 @@ define [
         complete: =>
           @showFull()
           Backbone.trigger "add#{@resourceNameCapitalized}WidgetVisible"
-          @focusFirstUpdateViewTextarea()
+          @focusFirstUpdateViewField()
 
     hideUpdateView: ->
       @updateViewVisible = false
@@ -726,13 +837,13 @@ define [
         complete: =>
           tmp = =>
             @stopSpin()
-            @focusFirstUpdateViewTextarea()
+            @focusFirstUpdateViewField()
           @showSecondaryDataEvent = @getShowSecondaryDataEvent()
           @listenToOnce Backbone, @getShowSecondaryDataEvent(), tmp
           @showFullAnimate()
           Backbone.trigger "add#{@resourceNameCapitalized}WidgetVisible"
 
-    focusFirstUpdateViewTextarea: ->
+    focusFirstUpdateViewField: ->
       @$('.update-resource-widget textarea').first().focus()
 
     hideUpdateViewAnimate: ->
@@ -874,6 +985,7 @@ define [
     onClose: ->
       @updateViewRendered = false
       @controlsViewRendered = false
+      @fileDataViewRendered = false
 
     showControlsView: ->
       if not @controlsViewRendered then @renderControlsView()
@@ -920,4 +1032,133 @@ define [
         @hideControlsViewAnimate()
       else
         @showControlsViewAnimate()
+
+
+    # File Data View
+    ############################################################################
+
+    # Make the file data view visible, or not, depending on state.
+    fileDataViewVisibility: ->
+      if @fileDataViewVisible
+        @showFileDataView()
+      else
+        @hideFileDataView()
+
+    setFileDataButtonStateOpen: -> @$('.file-data').button 'disable'
+
+    setFileDataButtonStateClosed: -> @$('.file-data').button 'enable'
+
+    # Render the file data view.
+    renderFileDataView: ->
+      @fileDataView.setElement @$('.file-data-widget').first()
+      @fileDataView.render()
+      @fileDataViewRendered = true
+      @rendered @fileDataView
+
+    showFileDataView: ->
+      if not @fileDataViewRendered then @renderFileDataView()
+      @fileDataViewVisible = true
+      @setFileDataButtonStateOpen()
+      @$('.file-data-widget').first().show
+        complete: =>
+          @showFull()
+          Backbone.trigger "add#{@resourceNameCapitalized}WidgetVisible"
+
+    hideFileDataView: ->
+      @fileDataViewVisible = false
+      @setFileDataButtonStateClosed()
+      @$('.file-data-widget').first().hide()
+
+    toggleFileDataView: ->
+      if @fileDataViewVisible
+        @hideFileDataView()
+      else
+        @showFileDataView()
+
+    showFileDataViewAnimateCheck: ->
+      if not @$('.file-data-widget').first().is(':visible')
+        @showFileDataViewAnimate()
+
+    showFileDataViewAnimate: ->
+      if not @fileDataViewRendered then @renderFileDataView()
+      @fileDataViewVisible = true
+      @setFileDataButtonStateOpen()
+      @$('.file-data-widget').first().slideDown
+        complete: =>
+          @showFullAnimate()
+          Backbone.trigger "showFileDataViewVisible"
+
+    hideFileDataViewAnimate: ->
+      @fileDataViewVisible = false
+      @setFileDataButtonStateClosed()
+      @$('.file-data-widget').first().slideUp
+        complete: => @$el.focus()
+
+    toggleFileDataViewAnimate: ->
+      if @fileDataViewVisible
+        @hideFileDataViewAnimate()
+      else
+        @showFileDataViewAnimate()
+
+
+    # Relational Synchronization stuff
+    ############################################################################
+    #
+    # Since a resource may be valuated by references to other resources, a
+    # `ResourceView` needs to be notified when those resources are deleted or
+    # updated since that may affect the state of the `ResourceView`.
+
+    # This is a resource-specific object that maps CamelCase names of resources
+    # that the parent resource has relations to to arrays of attribute names on
+    # the parent resource that are affected by changes to the resources.
+    relatedResources: {}
+
+    listenToRelatedResourceEvents: ->
+      for resourceName, attributeNames of @relatedResources
+        for request in ['update', 'destroy']
+          do (resourceName, attributeNames, request) =>
+            @listenTo Backbone, "#{request}#{resourceName}Success",
+              (resourceModel) =>
+                @resourceCollectionChanged request, resourceModel,
+                  resourceName, attributeNames
+
+    valueNonEmpty: (value) ->
+      if @utils.type(value) is 'array'
+        value.length > 0
+      else
+        value?
+
+    resourceCollectionChanged: (request, resourceModel, resourceName,
+    attributeNames) ->
+
+      # If the change in the resource collection is relevant to us, then we may
+      # need to update our model. This should automatically update the display
+      # state of our subviews.
+
+      for myAttribute in attributeNames
+        myValue = @model.get myAttribute
+        if @utils.type(myValue) is 'array'
+          if myValue.length > 0
+            try
+              ids = (o.id for o in myValue)
+              if resourceModel.get('id') in ids
+                if request is 'destroy'
+                  @model.set myAttribute,
+                    (o for o in myValue when o.id isnt resourceModel.get('id'))
+                else
+                  for o in myValue
+                    if o.id is resourceModel.get('id')
+                      for attr of o
+                        o[attr] = resourceModel.get(attr)
+                  @model.trigger "change:#{myAttribute}"
+        else
+          if myValue
+            try
+              if resourceModel.get('id') is myValue.id
+                if request is 'destroy'
+                  @model.set myAttribute, @model.defaults()[myAttribute]
+                else
+                  for attr of myValue
+                    myValue[attr] = resourceModel.get(attr)
+                  @model.trigger "change:#{myAttribute}"
 

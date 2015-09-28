@@ -3,9 +3,12 @@ define [
   './textarea-field'
   './select-field'
   './relational-select-field'
+  './subcorpus-select-via-search-field'
+  './morphology-select-via-search-field'
   './../models/language-model'
 ], (ResourceAddWidgetView, TextareaFieldView, SelectFieldView,
-  RelationalSelectFieldView, LanguageModelModel) ->
+  RelationalSelectFieldView, SubcorpusSelectViaSearchFieldView,
+  MorphologySelectViaSearchFieldView, LanguageModelModel) ->
 
   # Language Model Add Widget View
   # -------------------------
@@ -92,8 +95,8 @@ define [
     attribute2fieldView:
       name: TextareaFieldView255
       toolkit: ToolkitSelectFieldView
-      corpus: CorpusSelectFieldView
-      vocabulary_morphology: MorphologySelectFieldView
+      corpus: SubcorpusSelectViaSearchFieldView
+      vocabulary_morphology: MorphologySelectViaSearchFieldView
       smoothing: SmoothingSelectFieldView
       order: OrderSelectFieldView
       categorial: BooleanSelectFieldView
@@ -101,16 +104,15 @@ define [
     primaryAttributes: [
       'name'
       'description'
-    ]
-
-    editableSecondaryAttributes: [
       'corpus'
-      'vocabulary_morphology'
       'toolkit'
       'order'
       'smoothing'
       'categorial'
+      'vocabulary_morphology'
     ]
+
+    editableSecondaryAttributes: []
 
     getNewResourceDataSuccess: (data) ->
       data = @fixToolkits data
@@ -125,7 +127,8 @@ define [
         smoothingAlgorithms: []
         orders: [2, 3, 4, 5]
         booleans: [true, false]
-      for attr, val of data
+      iterator = if @model.get('id') then data.data else data
+      for attr, val of iterator
         if attr is 'toolkits'
           newToolkits = []
           for toolkitName, toolkitObject of val
@@ -135,5 +138,6 @@ define [
           newData[attr] = newToolkits
         else
           newData[attr] = val
-      newData
+      if @model.get('id') then data.data = newData else data = newData
+      data
 

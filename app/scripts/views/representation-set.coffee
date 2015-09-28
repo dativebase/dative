@@ -28,7 +28,8 @@ define [
     # super-view is already listening to.
     events: {}
 
-    # Add representation views to `@representationViews`, one for each object in `@context.value`.
+    # Add representation views to `@representationViews`, one for each object
+    # in `@context.value`.
     getRepresentationViews: ->
       value = @context.value or []
       for object in value
@@ -50,11 +51,12 @@ define [
     # initialization.
     getRepresentationContext: (object) ->
       tmp =
-        attribute:    @attribute
-        subattribute: @subattribute
-        class:        @getClass @subattribute
-        title:        @getTooltip "#{@attribute}.#{@subattribute}"
-        value:        object[@subattribute]
+        attribute:     @attribute
+        subattribute:  @subattribute
+        class:         @getClass @subattribute
+        title:         @getTooltip "#{@attribute}.#{@subattribute}"
+        value:         object[@subattribute]
+        originalValue: object[@subattribute]
       _.extend {}, @context, tmp
 
     # Refresh the display of this set of representation views. This means

@@ -14,22 +14,29 @@ define [
 
     template: notifierTemplate
 
-    initialize: ->
+    initialize: (@resourcesObject) ->
 
-      @crudResources = [
-        'form'
-        'subcorpus'
-        'phonology'
-        'morphology'
-        'languageModel'
-        'morphologicalParser'
-        'search'
-      ]
       @crudRequests = ['add', 'update', 'destroy']
       @crudOutcomes = ['Success', 'Fail']
       @notifications = []
       @maxNotifications = 3
       @listenToEvents()
+
+    listenToCRUDResources: ->
+      for resource, config of @resourcesObject
+        if config.params?.searchable
+          requests = @crudRequests.concat ['search']
+        else
+          requests = @crudRequests
+        for request in requests
+          for outcome in @crudOutcomes
+            do =>
+              resourceName = resource
+              event = "#{request}#{@utils.capitalize resource}#{outcome}"
+              methodName = "#{request}Resource#{outcome}"
+              @listenTo Backbone, event,
+                (arg) =>
+                  @[methodName] arg, resourceName
 
     listenToEvents: ->
 
@@ -72,11 +79,14 @@ define [
 
       @listenTo Backbone, 'formSearchSuccess', @formSearchSuccess
       @listenTo Backbone, 'formSearchFail', @formSearchFail
+      @listenTo Backbone, 'fileSearchFail', @fileSearchFail
 
       @listenTo Backbone, 'corpusCountSuccess', @corpusCountSuccess
       @listenTo Backbone, 'corpusCountFail', @corpusCountFail
       @listenTo Backbone, 'corpusBrowseSuccess', @corpusBrowseSuccess
       @listenTo Backbone, 'corpusBrowseFail', @corpusBrowseFail
+
+      @listenTo Backbone, 'resourceCountSuccess', @resourceCountSuccess
 
       @listenTo Backbone, 'cantDeleteFilterExpressionOnlyChild',
         @cantDeleteFilterExpressionOnlyChild
@@ -84,16 +94,24 @@ define [
       @listenTo Backbone, 'disabledKeyboardShortcut', @disabledKeyboardShortcut
 
       @listenTo Backbone, 'generateAndCompileStart', @generateAndCompileStart
+      @listenTo Backbone, 'tooManyTasks', @tooManyTasks
+      @listenTo Backbone, 'taskAlreadyPending', @taskAlreadyPending
+
+      @listenTo Backbone, 'fileSelectForbiddenType', @fileSelectForbiddenType
+      @listenTo Backbone, 'fileSelectInvalidName', @fileSelectInvalidName
+      @listenTo Backbone, 'fileSelectError', @fileSelectError
+
+      @listenTo Backbone, 'resourceAlreadyDisplayedInDialog',
+        @resourceAlreadyDisplayedInDialog
+      @listenTo Backbone, 'resourceModelAlreadyDisplayedInDialog',
+        @resourceModelAlreadyDisplayedInDialog
+      @listenTo Backbone, 'resourceAlreadySelected', @resourceAlreadySelected
+      @listenTo Backbone, 'csvExportError', @csvExportError
+
+      @listenTo Backbone, 'updateOldApplicationSettingsFail',
+        (arg) => @updateResourceFail arg, 'applicationSettings'
 
       @listenToCRUDResources()
-
-    listenToCRUDResources: ->
-
-      for resource in @crudResources
-        for request in @crudRequests
-          for outcome in @crudOutcomes
-            event = "#{request}#{@utils.capitalize resource}#{outcome}"
-            @listenTo Backbone, event, @[event]
 
     render: ->
       @$el.html @template()
@@ -121,168 +139,64 @@ define [
     # Forms
     ############################################################################
 
-    getFormId: (formModel) ->
-      id = formModel.get 'id'
-      activeServerType = globals
-        .applicationSettings.get('activeServer').get 'type'
-      if activeServerType is 'FieldDB' then id = id[-7..]
-      id
-
-    addFormSuccess: (formModel) ->
-      notification = new NotificationView
-        title: 'Form created'
-        content: "You have successfully created a new form. Its id is
-          #{@getFormId formModel}."
-      @renderNotification notification
-
-    updateFormSuccess: (formModel) ->
-      notification = new NotificationView
-        title: 'Form updated'
-        content: "You have successfully updated form #{@getFormId formModel}."
-      @renderNotification notification
-
-    addUpdateFormFail: (error, type) ->
-      if error
-        content = "Your form #{type} request was unsuccessful. #{error}"
-      else
-        content = "Your form #{type} request was unsuccessful. See the error
-          message(s) beneath the input fields."
-      notification = new NotificationView
-        title: "Form #{type} failed"
-        content: content
-        type: 'error'
-      @renderNotification notification
-
-    addFormFail: (error) ->
-      @addUpdateFormFail error, 'creation'
-
-    updateFormFail: (error) ->
-      @addUpdateFormFail error, 'update'
-
-    destroyFormFail: (error) ->
-      notification = new NotificationView
-        title: 'Form deletion failed'
-        content: "Your form creation request was unsuccessful. #{error}"
-        type: 'error'
-      @renderNotification notification
-
-    destroyFormSuccess: (formModel) ->
-      notification = new NotificationView
-        title: 'Form deleted'
-        content: "You have successfully deleted the form with id
-          #{@getFormId formModel}."
-      @renderNotification notification
-
-
-    ############################################################################
-    # Subcorpora: add, update, & destroy notifications
-    ############################################################################
-
-    addSubcorpusSuccess: (model) -> @addResourceSuccess model, 'subcorpus'
-    addSubcorpusFail: (error) -> @addResourceFail error, 'subcorpus'
-    updateSubcorpusSuccess: (model) -> @updateResourceSuccess model, 'subcorpus'
-    updateSubcorpusFail: (error) -> @updateResourceFail error, 'subcorpus'
-    destroySubcorpusFail: (error) -> @destroyResourceFail error, 'subcorpus'
-    destroySubcorpusSuccess: (model) ->
-      @destroyResourceSuccess model, 'subcorpus'
-
-    ############################################################################
-    # Phonologies: add, update, & destroy notifications
-    ############################################################################
-
-    addPhonologySuccess: (model) -> @addResourceSuccess model, 'phonology'
-    addPhonologyFail: (error) -> @addResourceFail error, 'phonology'
-    updatePhonologySuccess: (model) -> @updateResourceSuccess model, 'phonology'
-    updatePhonologyFail: (error) -> @updateResourceFail error, 'phonology'
-    destroyPhonologyFail: (error) -> @destroyResourceFail error, 'phonology'
-    destroyPhonologySuccess: (model) ->
-      @destroyResourceSuccess model, 'phonology'
-
-    ############################################################################
-    # Morphologies: add, update, & destroy notifications
-    ############################################################################
-
-    addMorphologySuccess: (model) -> @addResourceSuccess model, 'morphology'
-    addMorphologyFail: (error) -> @addResourceFail error, 'morphology'
-    updateMorphologySuccess: (model) ->
-      @updateResourceSuccess model, 'morphology'
-    updateMorphologyFail: (error) -> @updateResourceFail error, 'morphology'
-    destroyMorphologyFail: (error) -> @destroyResourceFail error, 'morphology'
-    destroyMorphologySuccess: (model) ->
-      @destroyResourceSuccess model, 'morphology'
-
-    ############################################################################
-    # Language models: add, update, & destroy notifications
-    ############################################################################
-
-    addLanguageModelSuccess: (model) ->
-      @addResourceSuccess model, 'language model'
-    addLanguageModelFail: (error) ->
-      @addResourceFail error, 'language model'
-    updateLanguageModelSuccess: (model) ->
-      @updateResourceSuccess model, 'language model'
-    updateLanguageModelFail: (error) ->
-      @updateResourceFail error, 'language model'
-    destroyLanguageModelFail: (error) ->
-      @destroyResourceFail error, 'language model'
-    destroyLanguageModelSuccess: (model) ->
-      @destroyResourceSuccess model, 'language model'
-
-    ############################################################################
-    # Morphological parsers: add, update, & destroy notifications
-    ############################################################################
-
-    addMorphologicalParserSuccess: (model) ->
-      @addResourceSuccess model, 'morphological parser'
-    addMorphologicalParserFail: (error) ->
-      @addResourceFail error, 'morphological parser'
-    updateMorphologicalParserSuccess: (model) ->
-      @updateResourceSuccess model, 'morphological parser'
-    updateMorphologicalParserFail: (error) ->
-      @updateResourceFail error, 'morphological parser'
-    destroyMorphologicalParserFail: (error) ->
-      @destroyResourceFail error, 'morphological parser'
-    destroyMorphologicalParserSuccess: (model) ->
-      @destroyResourceSuccess model, 'morphological parser'
-
-    ############################################################################
-    # Searches: add, update, & destroy notifications
-    ############################################################################
-
-    addSearchSuccess: (model) -> @addResourceSuccess model, 'search'
-    addSearchFail: (error) -> @addResourceFail error, 'search'
-    updateSearchSuccess: (model) ->
-      @updateResourceSuccess model, 'search'
-    updateSearchFail: (error) -> @updateResourceFail error, 'search'
-    destroySearchFail: (error) -> @destroyResourceFail error, 'search'
-    destroySearchSuccess: (model) ->
-      @destroyResourceSuccess model, 'search'
 
     ############################################################################
     # Resources: add, update, & destroy notifications
     ############################################################################
 
+    # Get the id of the resource. If we're using FieldDB and this is a form,
+    # return a truncated UUID.
+    getResourceId: (resourceModel, resourceName) ->
+      id = resourceModel.get 'id'
+      if resourceName is 'form'
+        activeServerType = globals
+          .applicationSettings.get('activeServer').get 'type'
+        if activeServerType is 'FieldDB' then id = id[-7..]
+      id
+
     addResourceSuccess: (model, resource) ->
       notification = new NotificationView
-        title: "#{@utils.capitalize resource} created"
+        title: "#{@utils.capitalize(@utils.camel2regular(resource))} created"
         content: "You have successfully created a new #{resource}. Its id is
-          #{model.get 'id'}."
+          #{@getResourceId model, resource}."
+      @renderNotification notification
+
+    searchResourceSuccess: (model, resource) ->
+      notification = new NotificationView
+        title: "#{@utils.capitalize(@utils.camel2regular(resource))} search
+          succeeded"
+        content: "You have successfully performed a search over the
+          #{@utils.camel2regular(@utils.capitalize(resource))}."
+      @renderNotification notification
+
+    searchResourceFail: (errorMessage, resource) ->
+      notification = new NotificationView
+        title: "#{@utils.capitalize(@utils.camel2regular(resource))} search
+          failed"
+        content: "Your attempt to perform a search across
+          #{@utils.capitalize(@utils.camel2regular(resource))} was unsuccessful:
+          #{errorMessage}"
+        type: 'error'
       @renderNotification notification
 
     updateResourceSuccess: (model, resource) ->
       notification = new NotificationView
-        title: "#{@utils.capitalize resource} updated"
-        content: "You have successfully updated #{resource} #{model.get 'id'}."
+        title: "#{@utils.capitalize(@utils.camel2regular(resource))} updated"
+        content: "You have successfully updated
+          #{@utils.camel2regular(resource)} #{@getResourceId model, resource}."
       @renderNotification notification
 
     addUpdateResourceFail: (error, type, resource) ->
       if error
-        content = "Your #{resource} #{type} request was unsuccessful. #{error}"
+        content = "Your #{@utils.camel2regular resource} #{type} request was
+          unsuccessful. #{error}"
+
       else
-        content = "Your #{resource} #{type} request was unsuccessful. See the
-          error message(s) beneath the input fields."
+        content = "Your #{@utils.camel2regular resource} #{type} request was
+          unsuccessful. See the error message(s) beneath the input fields."
       notification = new NotificationView
-        title: "#{@utils.capitalize resource} #{type} failed"
+        title: "#{@utils.capitalize(@utils.camel2regular(resource))} #{type}
+          failed"
         content: content
         type: 'error'
       @renderNotification notification
@@ -295,17 +209,20 @@ define [
 
     destroyResourceFail: (error, resource) ->
       notification = new NotificationView
-        title: "#{@utils.capitalize resource} deletion failed"
-        content: "Your #{resource} deletion request was unsuccessful. #{error}"
+        title: "#{@utils.capitalize(@utils.camel2regular(resource))} deletion failed"
+        content: "Your #{@utils.camel2regular(resource)} deletion request was
+          unsuccessful. #{error}"
         type: 'error'
       @renderNotification notification
 
     destroyResourceSuccess: (model, resource) ->
       notification = new NotificationView
-        title: "#{@utils.capitalize resource} deleted"
-        content: "You have successfully deleted the #{resource} with id
-          #{model.get 'id'}."
+        title: "#{@utils.capitalize(@utils.camel2regular(resource))} deleted"
+        content: "You have successfully deleted the
+          #{@utils.camel2regular(resource)} with id
+          #{@getResourceId model, resource}."
       @renderNotification notification
+
 
     fetchHistoryFormFail: (formModel) ->
       notification = new NotificationView
@@ -510,7 +427,15 @@ define [
       notification = new NotificationView
         title: 'Form search success'
         content: "You have successfully used the saved search with id
-          #{formSearchId} to search!."
+          #{formSearchId} to search."
+      @renderNotification notification
+
+    fileSearchFail: (errorMessage) ->
+      notification = new NotificationView
+        title: 'File search failed'
+        content: "Your attempt to search through the files was unsuccessful:
+          #{errorMessage}"
+        type: 'error'
       @renderNotification notification
 
     corpusCountFail: (error, corpusId) ->
@@ -526,6 +451,14 @@ define [
         title: 'Corpus count success'
         content: "You have successfully counted the number of forms in the
           corpus with id #{corpusId}."
+      @renderNotification notification
+
+    resourceCountSuccess: (resourceName, count) ->
+      notification = new NotificationView
+        title: "#{@utils.capitalize(@utils.camel2regular(resourceName))} count
+          success"
+        content: "Your search returns #{@utils.integerWithCommas count}
+          results."
       @renderNotification notification
 
     corpusBrowseFail: (error, corpusId) ->
@@ -571,6 +504,44 @@ define [
           ##{morphologyModel.get('id')} was successful."
       @renderNotification notification
 
+    tooManyTasks: ->
+      notification = new NotificationView
+        title: 'Too many tasks'
+        content: 'Sorry, you cannot initiate another long-running tasks until
+          one of your currently pending tasks terminates.'
+        type: 'error'
+      @renderNotification notification
+
+    taskAlreadyPending: (taskDescription, resourceName, resourceModel) ->
+      notification = new NotificationView
+        title: 'Task already in-progress'
+        content: "Sorry, there is already an in-progress request to
+          #{taskDescription} #{resourceName} #{resourceModel.get('id')}"
+        type: 'error'
+      @renderNotification notification
+
+    fileSelectForbiddenType: (errorMessage) ->
+      notification = new NotificationView
+        title: 'Forbidden file type'
+        content: errorMessage
+        type: 'error'
+      @renderNotification notification
+
+    fileSelectInvalidName: (errorMessage) ->
+      notification = new NotificationView
+        title: 'Invalid filename'
+        content: errorMessage
+        type: 'error'
+      @renderNotification notification
+
+    fileSelectError: ->
+      notification = new NotificationView
+        title: 'Error selecting a file'
+        content: 'For some reason an error occurred while trying to select your
+          file'
+        type: 'error'
+      @renderNotification notification
+
     getAuthenticateFailContent: (errorObj) ->
       contentPrefix = 'Yor attempt to log in was unsuccessful.'
       if errorObj
@@ -589,4 +560,47 @@ define [
             "#{contentPrefix} #{errorObj}"
       else
         contentPrefix
+
+    resourceAlreadyDisplayedInDialog: (resourceView) ->
+      name = @utils.camel2regular resourceView.resourceName
+      nameCapitalized = @utils.capitalize name
+      id = resourceView.model.get 'id'
+      if id is null
+        content = "An empty #{name} is already being displayed in a
+          dialog box."
+      else
+        content = "#{nameCapitalized} #{id} is already being displayed in a
+          dialog box."
+      notification = new NotificationView
+        title: 'Already displayed'
+        content: content
+        type: 'warning'
+      @renderNotification notification
+
+    resourceModelAlreadyDisplayedInDialog: (resourceName, resourceModel) ->
+      name = @utils.capitalize @utils.camel2regular(resourceName)
+      notification = new NotificationView
+        title: 'Already displayed'
+        content: "#{name} #{resourceModel.get 'id'}
+          is already being displayed in a dialog box."
+        type: 'warning'
+      @renderNotification notification
+
+    resourceAlreadySelected: (resourceName, resourceId) ->
+      name = @utils.capitalize(@utils.camel2regular(resourceName))
+      notification = new NotificationView
+        title: 'Already selected'
+        content: "#{name} #{resourceId} has already being selected and cannot
+          be selected more than once."
+        type: 'warning'
+      @renderNotification notification
+
+    csvExportError: ->
+      notification = new NotificationView
+        title: 'CSV Export Error'
+        content: "At least one error occurred while generating your CSV export.
+          Search the generated CSV file for 'ERROR' to determine which resource
+          and resource attribute caused the error."
+        type: 'warning'
+      @renderNotification notification
 

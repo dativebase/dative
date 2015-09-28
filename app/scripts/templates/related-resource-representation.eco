@@ -1,0 +1,10 @@
+<div
+  class='<%= @class %>'
+  ><a
+        href='javascript:;'
+        class='field-display-link
+               dative-tooltip'
+        title='click here to view this <%= @resourceNameHuman %> in the page'
+    ><%- @valueFormatter @value %></a>
+</div>
+

@@ -1,0 +1,12 @@
+<div
+  class='<%= @class %>'
+  ><a
+    href='javascript:;'
+    class='field-display-link
+           related-<%= @hyphenatedAttribute %>-display
+           dative-tooltip'
+           title='click here to view this <%= @regularAttribute %>
+                  in the page'
+    ><%- @valueFormatter @value %></a>
+</div>
+

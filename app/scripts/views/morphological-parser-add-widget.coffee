@@ -3,9 +3,14 @@ define [
   './textarea-field'
   './select-field'
   './relational-select-field'
+  './morphology-select-via-search-field'
+  './phonology-select-via-search-field'
+  './language-model-select-via-search-field'
   './../models/morphological-parser'
 ], (ResourceAddWidgetView, TextareaFieldView, SelectFieldView,
-  RelationalSelectFieldView, MorphologicalParserModel) ->
+  RelationalSelectFieldView, MorphologySelectViaSearchFieldView,
+  PhonologySelectViaSearchFieldView, LanguageModelSelectViaSearchFieldView,
+  MorphologicalParserModel) ->
 
   # Morphological Parser Add Widget View
   # ------------------------------------
@@ -57,20 +62,19 @@ define [
 
     attribute2fieldView:
       name: TextareaFieldView255
-      phonology: PhonologySelectFieldView
-      morphology: MorphologySelectFieldView
-      language_model: LanguageModelSelectFieldView
+      phonology: PhonologySelectViaSearchFieldView
+      morphology: MorphologySelectViaSearchFieldView
+      language_model: LanguageModelSelectViaSearchFieldView
 
     primaryAttributes: [
       'name'
       'description'
-    ]
-
-    editableSecondaryAttributes: [
       'phonology'
       'morphology'
       'language_model'
     ]
+
+    editableSecondaryAttributes: []
 
     getNewResourceDataSuccess: (data) ->
       data = @fixToolkits data
