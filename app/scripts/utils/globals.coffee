@@ -172,6 +172,12 @@ define [
         'booleans'
       ]
 
+      oldApplicationSettings: [
+        'languages'
+        'orthographies'
+        'users'
+      ]
+
       page: [
         'markup_languages'
       ]

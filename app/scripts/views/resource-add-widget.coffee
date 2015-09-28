@@ -165,6 +165,7 @@ define [
         resourceName: @resourceName
         resourceNameHuman: @utils.camel2regular @resourceName
         editableSecondaryAttributes: @editableSecondaryAttributes
+        indefiniteDeterminer: @utils.indefiniteDeterminer
       @$el
         .attr 'id', @model.cid
         .html @template(context)
@@ -175,7 +176,7 @@ define [
         "Add #{@utils.indefiniteDeterminer @resourceNameCapitalized}
           #{@utils.camel2regular @resourceNameCapitalized}"
       else
-        "Update this #{@resourceName}"
+        "Update this #{@utils.camel2regular @resourceNameCapitalized}"
 
     propagateSubmitAttempted: ->
       for fieldView in @fieldViews()

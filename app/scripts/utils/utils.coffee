@@ -171,7 +171,8 @@ define (require) ->
     catch
       return null
 
-  # Takes a Date instance and returns a string indicating how long ago it was from now.
+  # Takes a Date instance and returns a string indicating how long ago it was
+  # from now.
   timeSince = (dateObject) ->
     dateObject = asDateObject dateObject
     if type(dateObject) in ['string', 'null'] then return dateObject
@@ -211,7 +212,8 @@ define (require) ->
     "#{leftPad hours, 2}h#{leftPad minutes, 2}m#{leftPad seconds, 2}s"
 
   # Add `padding` number of "0"s to the left of `value`.
-  leftPad = (value, padding) ->
+  leftPad = (value, padding=2) ->
+    value = String value
     value = '0' + value while ('' + value).length < padding
     value
 
@@ -230,8 +232,9 @@ define (require) ->
 
   # "camelCase" to "snake_case"
   camel2snake = (string) ->
-    string.replace(/([A-Z])/g, ($1) ->
-      "_#{$1.toLowerCase()}")
+    string
+      .replace /([A-Z])/g, ($1) -> "_#{$1.toLowerCase()}"
+      .replace /^_/, ''
 
   # "camelCase" to "camel case".
   camel2regular = (string) ->
@@ -252,6 +255,7 @@ define (require) ->
   camel2hyphen = (string) ->
     string
       .replace /([A-Z])/g, '-$1'
+      .replace /^-/, ''
       .toLowerCase()
       .trim()
 
@@ -378,7 +382,7 @@ define (require) ->
       null
 
   # From http://stackoverflow.com/questions/10420352/converting-file-size-in-bytes-to-human-readable
-  humanFileSize = (bytes, si) ->
+  humanFileSize = (bytes, si=true) ->
     thresh = if si then 1000 else 1024
     if Math.abs(bytes) < thresh then return "#{bytes} B"
     if si
@@ -388,7 +392,7 @@ define (require) ->
     u = -1
     loop
       bytes /= thresh
-      a += 1
+      u += 1
       if not ((Math.abs(bytes) >= thresh) and (u < (units.length - 1)))
         break
     "#{bytes.toFixed(1)} #{units[u]}"
@@ -426,6 +430,7 @@ define (require) ->
   snake2regular: snake2regular
   camel2snake: camel2snake
   camel2regular: camel2regular
+  camel2regularUpper: camel2regularUpper
   camel2hyphen: camel2hyphen
   capitalize: capitalize
   encloseIfNotAlready: encloseIfNotAlready
@@ -442,4 +447,5 @@ define (require) ->
   getMIMEType: getMIMEType
   extensions: extensions
   indefiniteDeterminer: indefiniteDeterminer
+  asDateObject: asDateObject
 

@@ -37,9 +37,13 @@
 
     <button class='resource-add-help dative-tooltip'
       <% if @addUpdateType is 'add': %>
-            title='help with adding a <%= @resourceNameHuman %>'
+            title='help with adding
+                <%= @indefiniteDeterminer @resourceNameHuman %>
+                <%= @resourceNameHuman %>'
       <% else: %>
-            title='help with updating a <%= @resourceNameHuman %>'
+            title='help with updating
+                <%= @indefiniteDeterminer @resourceNameHuman %>
+                <%= @resourceNameHuman %>'
       <% end %>
     ><i class='fa fa-fw fa-question'></i>
     </button>

@@ -305,6 +305,7 @@ ul.sf-menu li a
     padding: 10px 0;
 }
 
+.server-settings-interface > .dative-widget-body,
 .dative-form-object > .dative-widget-body,
 .dative-paginated-item > .dative-widget-body,
 .dative-new-item > .dative-widget-body
@@ -880,7 +881,9 @@ div.html-snippet div.html div.document a
   text-decoration: underline;
 }
 
-div.document a {
+div.document a,
+a.undecorated-link
+{
     text-decoration: none;
 }
 
@@ -1630,6 +1633,13 @@ button.align-top
   min-width: 80%;
 }
 
+.get-probabilities-control-input.control-input
+{
+  width: 70%;
+  max-width: 70%;
+  min-width: 70%;
+}
+
 i.boolean-icon
 {
   font-family: FontAwesome;
@@ -1837,6 +1847,7 @@ button.make-not-not i
 .field-display-link
 {
   cursor: pointer;
+  text-decoration: none;
 }
 
 .dialog-header-button
@@ -2279,7 +2290,8 @@ a.export-link
 }
 
 div.application-settings-big-buttons,
-div.application-settings-interfaces
+div.application-settings-interfaces .servers-interface,
+div.application-settings-interfaces .appearance-interface
 {
   margin: 1em;
   text-align: center;
@@ -2330,5 +2342,10 @@ div.big-button-text
   position: relative;
   top: 0.75em;
   margin-right: 1em;
+}
+
+.server-settings-interface
+{
+  width: 90%;
 }
 

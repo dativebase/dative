@@ -34,6 +34,7 @@ define [
     corpus: null
 
     initialize: (models, options) ->
+      @utils = utils
       @resourceNameCapitalized = utils.capitalize @resourceName
       @resourceNamePlural = utils.pluralize @resourceName
       @resourceNamePluralCapitalized = utils.capitalize @resourceNamePlural
@@ -147,6 +148,9 @@ define [
       if xhr.status is 200
         resource.set responseJSON
         resource.trigger "add#{@resourceNameCapitalized}Success", resource
+
+        console.log "triggering add#{@resourceNameCapitalized}Success"
+
       else
         errors = responseJSON.errors or {}
         if utils.type(errors) is 'object'

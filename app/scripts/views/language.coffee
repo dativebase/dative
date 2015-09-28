@@ -15,6 +15,13 @@ define [
 
   class LanguageView extends ResourceView
 
+    # The default behaviour for `ResourceView` is to return `'add'` of the
+    # model has no `id` attribute. However, since ISO 639-3 language resources
+    # are immutable, we don't neither "update" nor "add" make sense here. We
+    # return `'update'` because this will prevent the "x" button ("hide this
+    # new language widget") button from being displayed.
+    getUpdateViewType: -> 'update'
+
     resourceName: 'language'
 
     resourceAddWidgetView: null

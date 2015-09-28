@@ -4,12 +4,13 @@ define [
   './base'
   './server'
   './morphology'
+  './language-model'
   './../collections/servers'
   './../utils/utils'
   './../utils/globals'
   'FieldDB'
-], (_, Backbone, BaseModel, ServerModel, MorphologyModel, ServersCollection,
-  utils, globals, FieldDB) ->
+], (_, Backbone, BaseModel, ServerModel, MorphologyModel, LanguageModelModel,
+  ServersCollection, utils, globals, FieldDB) ->
 
   # Application Settings Model
   # --------------------------
@@ -23,6 +24,7 @@ define [
 
     modelClassName2model:
       'MorphologyModel': MorphologyModel
+      'LanguageModelModel': LanguageModelModel
 
     initialize: ->
       @fetch()

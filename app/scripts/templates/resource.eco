@@ -15,11 +15,13 @@
       </button>
     <% end %>
 
-    <button class="toggle-secondary-data dative-tooltip"
-            title="hide the secondary data of this
-                <%= @resourceNameHumanReadable() %>">
-      <i class='fa fa-angle-up fa-fw'></i>
-    </button>
+    <% if @secondaryDataFieldsLength > 0: %>
+        <button class="toggle-secondary-data dative-tooltip"
+                title="hide the secondary data of this
+                    <%= @resourceNameHumanReadable() %>">
+            <i class='fa fa-angle-up fa-fw'></i>
+        </button>
+    <% end %>
 
     <button class="toggle-data-labels dative-tooltip"
       title="show labels">labels:
@@ -28,7 +30,7 @@
 
   </div>
 
-  <% if @addUpdateType is 'add': %>
+  <% if @addUpdateType is 'add' or (not @mainPageViewable): %>
     <div class='dative-widget-header-title container-center'
         ><span class='resource-icon'><%- @resourceIcon %></span
         ><span

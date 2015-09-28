@@ -91,6 +91,14 @@ define [
 
     getUpdateViewType: -> if @model.get('id') then 'update' else 'add'
 
+    # Have this return false if you do *not* want this resource to be viewable
+    # in the main page, i.e., by navigating to #/<resource_name>/<resource_id>.
+    # For example, OLD application settings resources are never displayed as a
+    # collection so it doesn't make sense to have their header be a clickable
+    # UI element that causes the app settings resource to be displayed in the
+    # main page (since it's always already displayed in the main page).
+    mainPageViewable: -> true
+
     # Render the Add a Resource view.
     renderUpdateView: ->
       if 'update' not in @excludedActions
@@ -340,6 +348,10 @@ define [
       resourceNameHumanReadable: @resourceNameHumanReadable
       excludedActions: @excludedActions
       showControlsWithNew: @showControlsWithNew
+      secondaryDataFieldsLength: @getSecondaryDataFieldsLength()
+      mainPageViewable: @mainPageViewable()
+
+    getSecondaryDataFieldsLength: -> @secondaryAttributes.length
 
     getResourceIcon: -> ''
 

@@ -1,0 +1,22 @@
+<textarea
+    rows='1'
+    name='<%= @textareaName %>'
+    class='ui-corner-all
+           form-add-input
+           dative-tooltip
+           dative-input-field
+           control-input
+           get-probabilities-control-input'
+    title='<%= @textareaTitle %>'
+></textarea>
+<button
+    class='rare-delimiter-insert align-top dative-tooltip'
+    title='Click to insert this delimiter at the current cursor position'
+><%= @rareDelimiter %></button>
+<button
+    class='<%= @buttonClass %> align-top dative-tooltip'
+    title='<%= @buttonTitle %>'
+><%= @buttonText %></button>
+<div class='<%= @resultsContainerClass %>'></div>
+
+

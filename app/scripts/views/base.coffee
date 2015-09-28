@@ -482,3 +482,18 @@ define [
     # retrieved it was over a minute ago.
     relatedResourceDataExpires: 60000
 
+    # Fetch UnicodeData.json. This is a 1.2MB JSON object that maps some 29,000
+    # Unicode code points to their names.
+    fetchUnicodeData: (callback=null) ->
+      url = 'UnicodeData.json'
+      $.ajax
+        url: url
+        type: 'GET'
+        dataType: 'json'
+        error: (jqXHR, textStatus, errorThrown) ->
+          console.log "Ajax request for #{url} threw an error:
+            #{errorThrown}"
+        success: (unicodeCharMap, textStatus, jqXHR) =>
+          globals.unicodeCharMap = unicodeCharMap
+          if callback then callback()
+

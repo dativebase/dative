@@ -3,9 +3,13 @@ define [
   './base'
   './servers'
   './active-server'
+  './old-application-settings-resource'
+  './../collections/old-application-settings'
+  './../utils/globals'
   './../templates/application-settings'
 ], (Backbone, BaseView, ServersView, ActiveServerView,
-  applicationSettingsTemplate) ->
+  OLDApplicationSettingsResourceView, OLDApplicationSettingsCollection,
+  globals, applicationSettingsTemplate) ->
 
   # Application Settings View
   # ----------------------------------------------------------------------------
@@ -79,13 +83,34 @@ define [
           at: "left center"
           collision: "flipfit"
         width: 500
+      @oldApplicationSettingsCollection = new OLDApplicationSettingsCollection()
 
     listenToEvents: ->
       @stopListening()
       @undelegateEvents()
       @listenTo Backbone, 'activateServer', @activateServer
       @listenTo Backbone, 'removeServerView', @setModelFromGUI
+      @listenTo Backbone, "addOldApplicationSettingsSuccess",
+        @addOLDApplicationSettingsSuccess
+      @listenToOLDApplicationSettingsCollection()
       @delegateEvents()
+
+    addOLDApplicationSettingsSuccess: (model) ->
+      console.log 'the general app settings view knows that a new OLD app
+        settings was successfully created. this is the model ...'
+      console.log model
+
+    # Note the strange spellings of the events triggered here; just go along
+    # with it ...
+    listenToOLDApplicationSettingsCollection: ->
+      @listenTo Backbone, 'fetchOldApplicationSettingsesEnd',
+        @fetchOLDApplicationSettingsEnd
+      @listenTo Backbone, 'fetchOldApplicationSettingsesStart',
+        @fetchOLDApplicationSettingsStart
+      @listenTo Backbone, 'fetchOldApplicationSettingsesSuccess',
+        @fetchOLDApplicationSettingsSuccess
+      @listenTo Backbone, 'fetchOldApplicationSettingsesFail',
+        @fetchOLDApplicationSettingsFail
 
     render: (taskId) ->
       @html()
@@ -209,7 +234,40 @@ define [
     showServerSettingsInterface: ->
       @showOnlyInterfaces()
       @hideInterfaces()
+      if globals.unicodeCharMap
+        @oldApplicationSettingsCollection.fetchResources()
+      else
+        @fetchUnicodeData(=> @oldApplicationSettingsCollection.fetchResources())
+
+    fetchOLDApplicationSettingsEnd: ->
+      @$('.application-settings-interfaces').spin false
+
+    fetchOLDApplicationSettingsStart: ->
+      @$('.application-settings-interfaces').spin @spinnerOptions()
+
+    spinnerOptions: ->
+      options = super
+      options.top = '5%'
+      options.left = '5%'
+      options.color = @constructor.jQueryUIColors().defCo
+      options
+
+    fetchOLDApplicationSettingsFail: ->
+      console.log 'Failed to fetch OLD application settings'
+
+    fetchOLDApplicationSettingsSuccess: ->
       @$('.server-settings-interface').show()
+      if @oldApplicationSettingsCollection.length > 0
+        lastModel = @oldApplicationSettingsCollection
+          .at(@oldApplicationSettingsCollection.length - 1)
+      else
+        lastModel = new OLDApplicationSettingsModel()
+      @oldApplicationSettingsResourceView =
+        new OLDApplicationSettingsResourceView model: lastModel
+      @oldApplicationSettingsResourceView
+        .setElement @$('.server-settings-interface').first()
+      @oldApplicationSettingsResourceView.render()
+      @rendered @oldApplicationSettingsResourceView
 
     loggedIn: -> @model.get 'loggedIn'
 
