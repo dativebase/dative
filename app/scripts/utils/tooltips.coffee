@@ -510,6 +510,132 @@ define ['./utils'], (utils) ->
           eng: "The type of syntactic category; one of “lexical”,
             “phrasal” or “sentential”."
 
+      oldApplicationSettingses:
+
+        id: id
+        datetime_modified: datetimeModified
+
+        object_language_name:
+          eng: 'The name of the language that is being documented and analyzed
+            by means of this OLD web service. This may be the ISO 639-3
+            “reference name” but this is not required.'
+
+        object_language_id:
+          eng: 'The three-letter ISO 639-3 identifier for the language that is
+            being documented and analyzed by means of this OLD web service.'
+
+        metalanguage_name:
+          eng: 'The name of the language that is being used to translate,
+            document and analyze the object language. This may be the ISO 639-3
+            “reference name” but this is not required.'
+
+        metalanguage_id:
+          eng: 'The three-letter ISO 639-3 identifier for the language that is
+            being used to translate, document and analyze the object language.'
+
+        metalanguage_inventory:
+          eng: 'A comma-delimited list of graphemes that should be used when
+            writing in the metalanguage.'
+
+        orthographic_validation:
+          eng: 'This value determines whether and, if so, how values input into
+            the transcription field should be validated against the storage
+            orthography. If set to “None”, then no validation will be
+            performed. If set to “Warning”, then the system will alert
+            users when their transcriptions cannot be written using the storage
+            orthography. If set to “Error”, then invalid transcriptions
+            will not be permitted.'
+
+        narrow_phonetic_inventory:
+          eng: 'Narrow phonetic inventory: a comma-delimited list of graphemes
+            that should be used when entering data into the narrow phonetic
+            transcription field.'
+
+        narrow_phonetic_validation:
+          eng: 'Narrow phonetic validation: this value determines whether and,
+            if so, how values input into the narrow phonetic transcription
+            field should be validated against the narrow phonetic inventory.
+            If set to “None”, then no validation will be performed. If
+            set to “Warning”, then the system will alert users when their
+            narrow phonetic transcriptions cannot be written using the narrow
+            phonetic inventory. If set to “Error”, then invalid narrow
+            phonetic transcriptions will not be permitted.'
+
+        broad_phonetic_inventory:
+          eng: 'Broad phonetic inventory: a comma-delimited list of graphemes
+            that should be used when entering data into the phonetic
+            transcription field.'
+
+        broad_phonetic_validation:
+          eng: 'Broad phonetic validation: this value determines whether and,
+            if so, how values input into the phonetic transcription field
+            should be validated against the broad phonetic inventory. If set to
+            “None”, then no validation will be performed. If set to
+            “Warning”, then the system will alert users when their phonetic
+            transcriptions cannot be written using the broad phonetic
+            inventory. If set to “Error”, then invalid phonetic
+            transcriptions will not be permitted.'
+
+        morpheme_break_is_orthographic:
+          eng: 'Morpheme break is orthographic: if set to true, then the system
+            will assume that the data entered into the morpheme break field
+            should be written using the same orthography as is used in the
+            (orthographic) transcription field. If set to false, then the system
+            will assume that the phonemic inventory should be used for morpheme
+            break values.'
+
+        morpheme_break_validation:
+          eng: 'Morpheme break validation: this value determines whether and,
+            if so, how values input into the morpheme break field should be
+            validated against the storage orthography (or against the phonemic
+            inventory, cf. the “morpheme break is orthographic” option.) If
+            set to “None”, then no validation will be performed. If set to
+            “Warning”, then the system will alert users when their morpheme
+            break transcriptions cannot be written using the relevant
+            orthography/inventory. If set to “Error”, then invalid morpheme
+            break transcriptions will not be permitted.'
+
+        phonemic_inventory:
+          eng: 'A comma-delimited list of phonemes/graphemes that should be
+            used when entering data into the morpheme break field (assuming
+            “morpheme break is orthographic” is set to false).'
+
+        morpheme_delimiters:
+          eng: 'A comma-delimited list of delimiter characters that should be
+            used to separate morphemes in the morpheme break field and morpheme
+            glosses in the morpheme gloss field.'
+
+        punctuation:
+          eng: 'A string of punctuation characters that should define, along
+            with the graphemes in the storage orthography, the licit strings in
+            the transcription field.'
+
+        grammaticalities:
+          eng: 'A comma-delimited list of characters that will define the
+            options in the grammaticality fields. Example: “*,?,#”.'
+
+        storage_orthography:
+          eng: 'The orthography that transcription values should be stored in.
+            This orthography may affect how orthographic validation works
+            and/or how orthography conversion works.'
+
+        input_orthography:
+          eng: 'The orthography that transcription values should be entered in.
+            If specified and if different from the storage orthography, then the
+            system should convert user input in the input orthography to
+            strings in the storage orthography.'
+
+        output_orthography:
+          eng: 'The orthography that transcription values should be displayed in.
+            If specified and if different from the storage orthography, then the
+            system should convert stored data in the storage orthography to
+            strings in the output orthography.'
+
+        unrestricted_users:
+          eng: 'A list of users that the OLD server considers to be
+            “unrestricted”. These users are able to access data that has
+            been tagged with the “restricted” tag.'
+
       tags:
         name: name
         description: description

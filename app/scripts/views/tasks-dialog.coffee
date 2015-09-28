@@ -72,7 +72,8 @@ define [
   #
   # This is a dialog box for showing the user the long-running tasks that are
   # pending. Examples of such long-running tasks are compile or
-  # generate-and-compile requests against FST-based recources.
+  # generate-and-compile requests against FST-based recources, or generate
+  # requests for LMs.
 
   class TasksDialogView extends BaseView
 
@@ -229,10 +230,10 @@ define [
       else
         @dialogOpen()
 
-    # A resource that wants to initiate a long-running task, should issue
-    # `Backbone.trigger 'longRunningTaskPreflight', @model`. If the task can be
-    # initiated, we pass `true` in the response event, otherwise we pass
-    # `false`.
+    # A resource that wants to initiate a long-running task should issue
+    # `Backbone.trigger 'longRunningTaskPreflight', @model @model.get('UUID')`.
+    # If the task can be initiated, we pass `true` in the response event,
+    # otherwise we pass `false`.
     longRunningTaskPreflight: (resourceModel, resourceId) ->
       longRunningTasks = @model.get 'longRunningTasks'
       tasksMaxedOut = longRunningTasks.length >=
@@ -262,6 +263,7 @@ define [
           taskObject.resourceModel.get(taskObject.taskAttemptAttribute)
         @poll taskObject
 
+    # TODO: why are these two methods here? Are they even used? ...
     disableGenerateAndCompileButton: ->
       @$("button.#{@buttonClass}").button 'disable'
 
@@ -278,6 +280,8 @@ define [
         @fetchResourceFail
       taskObject.resourceModel.fetchResource id
 
+    # TODO: isn't it possible that different resources with the same id could
+    # exist in `longRunningTasks`?
     getTaskObject: (id) ->
       taskObjects = @model.get 'longRunningTasks'
       _.findWhere taskObjects, resourceId: id
@@ -285,24 +289,38 @@ define [
     fetchResourceSuccess: (resourceObject) ->
       taskObject = @getTaskObject resourceObject.UUID
       taskModel = taskObject.resourceModel
-      if resourceObject.compile_attempt is taskModel.get('compile_attempt')
+      if resourceObject[taskObject.taskAttemptAttribute] is
+      taskModel.get(taskObject.taskAttemptAttribute)
         @poll taskObject
       else
-        taskModel.set
-          compile_succeeded: resourceObject.compile_succeeded
-          compile_attempt: resourceObject.compile_attempt
-          compile_message: resourceObject.compile_message
+        taskAttemptAttribute =
+          taskObject.taskAttemptAttribute or 'compile_attempt'
+        taskSuccessAttribute =
+          taskObject.taskSuccessAttribute or 'compile_succeeded'
+        taskMessageAttribute =
+          taskObject.taskMessageAttribute or 'compile_message'
+        objectToSet =
           datetime_modified: resourceObject.datetime_modified
           modifier: resourceObject.modifier
-        if taskModel.get('compile_succeeded')
-          Backbone.trigger("#{taskObject.resourceName}CompileSuccess",
-            taskModel.get('compile_message'), taskModel.get('id'))
-          taskModel.trigger 'trueGenerateAndCompileSuccess'
+        objectToSet[taskAttemptAttribute] = resourceObject[taskAttemptAttribute]
+        objectToSet[taskSuccessAttribute] = resourceObject[taskSuccessAttribute]
+        objectToSet[taskMessageAttribute] = resourceObject[taskMessageAttribute]
+        taskModel.set objectToSet
+        if taskModel.get(taskSuccessAttribute)
+          # WARN: this used to trigger 'morphologyCompileSuccess', but now it'll
+          # trigger 'morphologyGenerateAndCompileSuccess' ...
+          Backbone.trigger("#{taskObject.resourceName}\
+            #{@utils.capitalize taskObject.taskName}Success",
+            taskModel.get(taskMessageAttribute), taskModel.get('id'))
+          taskModel.trigger(
+            "true#{@utils.capitalize taskObject.taskName}Success")
           taskObject.successful = true
         else
-          Backbone.trigger("#{taskObject.resourceName}CompileFail",
-            taskModel.get('compile_message'), taskModel.get('id'))
-          taskModel.trigger 'trueGenerateAndCompileFail'
+          Backbone.trigger("#{taskObject.resourceName}\
+            #{@utils.capitalize taskObject.taskName}Fail",
+            taskModel.get(taskMessageAttribute), taskModel.get('id'))
+          taskModel.trigger(
+            "true#{@utils.capitalize taskObject.taskName}Fail")
           taskObject.successful = false
         @removeTask taskObject
 
@@ -336,9 +354,10 @@ define [
       taskObject = @getTaskObject resourceModel.get('UUID')
       taskModel = taskObject.resourceModel
       @removeTask taskObject
-      Backbone.trigger "#{taskObject.resourceName}GenerateAndCompileFail",
-        error, taskModel.get('id')
-      taskModel.trigger 'trueGenerateAndCompileFail'
+      Backbone.trigger("#{taskObject.resourceName}\
+        #{@utils.capitalize taskObject.taskName}Fail",
+        error, taskModel.get('id'))
+      taskModel.trigger "true#{@utils.capitalize taskObject.taskName}Fail"
 
     poll: (taskObject) ->
       setTimeout((=> @fetchResource(taskObject)), 500)

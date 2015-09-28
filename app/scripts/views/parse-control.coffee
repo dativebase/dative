@@ -125,8 +125,53 @@ define [
     parseFail: (error) ->
       Backbone.trigger 'morphologicalParseFail', error, @model.get('id')
 
-    parseSuccess: ->
+    parseSuccess: (parseResults) ->
       Backbone.trigger 'morphologicalParseSuccess', @model.get('id')
+      @displayParseResultsInTable parseResults
+
+    parseHTML: (parse) ->
+      # nit|1|agra-ihpiyi|dance|vai
+      if parse
+        shapes = []
+        glosses = []
+        cats = []
+        # TODO: this should be based on delimiters in app settings ...
+        delims = ['-', '=']
+        splitter = new RegExp "(#{delims.join '|'})"
+        for morpheme in parse.split splitter
+          if morpheme in delims
+            shapes.push morpheme
+            glosses.push morpheme
+            cats.push morpheme
+          else
+            [shape, gloss, cat] = morpheme.split '\u2980'
+            shapes.push shape
+            glosses.push gloss
+            cats.push cat
+        "<div>#{shapes.join ''}</div>\
+          <div>#{glosses.join ''}</div>\
+          <div>#{cats.join ''}</div"
+      else
+        'no parse'
+
+    displayParseResultsInTable: (parseResults) ->
+      table = ['<table class="io-results-table">
+        <tr><th>words</th><th>parses</th></tr>']
+      oddEven = 0
+      parses = ([w, @parseHTML(p)] for w, p of parseResults)
+      for [word, parse] in parses
+        if oddEven is 0
+          oddEven = 1
+          table.push "<tr class='even'><td>#{word}</td>
+            <td>#{parse}</td></tr>"
+        else
+          oddEven = 0
+          table.push "<tr><td>#{word}</td><td>#{parse}</td></tr>"
+      table.push "</table>"
+      @$('.parse-results')
+        .hide()
+        .html table.join('')
+        .slideDown()
 
     disableParseButton: -> @$('button.parse').button 'disable'
 

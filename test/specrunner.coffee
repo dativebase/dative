@@ -1,4 +1,5 @@
 #/*global require*/
+'use strict'
 
 require.config
 
@@ -7,17 +8,19 @@ require.config
       exports: '$'
     lodash:
       exports: '_'
+    FieldDB:
+      exports: 'FieldDB'
     backbone:
       exports: 'Backbone'
       deps: ['lodash', 'jquery']
     jqueryui: ['jquery']
-    backboneindexeddb: ['backbone']
+    # backboneindexeddb: ['backbone']
     multiselect: ['jquery', 'jqueryui']
     jqueryelastic: ['jquery']
-    jqueryuicolors: ['jquery', 'jqueryui']
+    autosize: ['jquery']
     superfish: ['jquery']
+    superclick: ['jquery']
     supersubs: ['jquery']
-    perfectscrollbar: ['jquery']
     backbonerelational: ['backbone']
     backbonelocalstorage: ['backbone']
 
@@ -26,38 +29,46 @@ require.config
     backbone: '../bower_components/backbone/backbone'
     lodash: '../bower_components/lodash/dist/lodash'
     underscore: '../bower_components/lodash/dist/lodash.underscore'
-    backboneindexeddb:
-      '../bower_components/indexeddb-backbonejs-adapter/backbone-indexeddb'
+    # backboneindexeddb:
+    #   '../bower_components/indexeddb-backbonejs-adapter/backbone-indexeddb'
     bootstrap: '../bower_components/sass-bootstrap/dist/js/bootstrap'
     text: '../bower_components/requirejs-text/text'
     jqueryui: '../bower_components/jqueryui/jquery-ui'
     superfish: '../bower_components/superfish/dist/js/superfish'
+    superclick: '../bower_components/superclick/dist/js/superclick'
+
+
     igt: '../scripts/jquery-extensions/igt'
     jqueryuicolors: '../scripts/jquery-extensions/jqueryui-colors'
+    tagit: 'jquery-extensions/tag-it'
     sfjquimatch: '../scripts/jquery-extensions/superfish-jqueryui-match'
     # Supersubs plugin removed in v1.6 of superfish. See
     # https://github.com/joeldbirch/superfish.
     supersubs: '../bower_components/superfish/dist/js/supersubs'
+
+
     multiselect: '../bower_components/multiselect/js/jquery.multi-select'
     jqueryelastic: '../bower_components/jakobmattsson-jquery-elastic/jquery.elastic.source'
+    autosize: '../bower_components/autosize/jquery.autosize'
+
     spin: '../bower_components/spin.js/spin'
     jqueryspin: '../bower_components/spin.js/jquery.spin'
-    perfectscrollbar: '../bower_components/perfect-scrollbar/src/perfect-scrollbar'
-    fielddb: '../bower_components/fielddb/fielddb'
+    FieldDB: '../bower_components/fielddb/fielddb'
     backbonerelational: '../bower_components/backbone-relational/backbone-relational'
     backbonelocalstorage: '../bower_components/backbone.localStorage/backbone.localStorage'
 
 specs = [
   #'spec/models/form.js' # FAILING
   #'spec/collections/forms.js' # FAILING
-  'spec/utils/indexeddb-utils.js'
-  'spec/views/base.js'
-  'spec/views/app.js'
-  'spec/views/mainmenu.js'
-  'spec/views/application-settings.js'
-  'spec/views/login-dialog.js'
-  'spec/models/base.js'
-  'spec/models/application-settings.js'
+  #'spec/utils/indexeddb-utils.js'
+  #'spec/views/base.js'
+  #'spec/views/app.js'
+  #'spec/views/mainmenu.js'
+  #'spec/views/application-settings.js'
+  #'spec/views/login-dialog.js'
+  #'spec/models/application-settings.js'
+  #'spec/models/base.js'
+  'spec/utils/utils.js'
 ]
 
 require specs, ->

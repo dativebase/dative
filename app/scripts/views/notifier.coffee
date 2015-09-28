@@ -108,6 +108,9 @@ define [
       @listenTo Backbone, 'resourceAlreadySelected', @resourceAlreadySelected
       @listenTo Backbone, 'csvExportError', @csvExportError
 
+      @listenTo Backbone, 'updateOldApplicationSettingsFail',
+        (arg) => @updateResourceFail arg, 'applicationSettings'
+
       @listenToCRUDResources()
 
     render: ->

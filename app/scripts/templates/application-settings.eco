@@ -88,8 +88,9 @@
 
         </div>
 
-        <div class='server-settings-interface
-            application-settings-interface'>Server Settings</div>
+        <div class='server-settings-interface ui-corner-all
+            dative-shadowed-widget dative-widget-center ui-widget
+            ui-widget-content application-settings-interface'></div>
 
     </div>
 

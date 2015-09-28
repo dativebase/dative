@@ -5,56 +5,55 @@ define [
   'autosize'
 ], (BaseView, globals, buttonControlTemplate) ->
 
-  # Generate and Compile Control View
-  # ---------------------------------
+  # Generate Control View
+  # ---------------------
   #
-  # View for a control for requesting that a morphological parser or morphology
-  # generate its FST script and then compile it.
+  # View for a control for requesting that a language model be generated (i.e.,
+  # estimated).
 
-  class GenerateAndCompileControlView extends BaseView
+  class GenerateControlView extends BaseView
 
-    modelClassName: 'MorphologyModel'
+    modelClassName: 'LanguageModelModel'
 
     template: buttonControlTemplate
-    className: 'generate-and-compile-control-view control-view
-      dative-widget-center'
+    className: 'generate-control-view control-view dative-widget-center'
 
     initialize: (options) ->
-      @resourceName = options?.resourceName or 'morphologicalParser'
+      @resourceName = options?.resourceName or 'languageModel'
       @activeServerType = @getActiveServerType()
       @listenToEvents()
 
     events:
-      'click button.generate-and-compile':         'generateAndCompilePreflight'
+      'click button.generate':         'generatePreflight'
 
     listenToEvents: ->
       super
-      @listenTo @model, "generateAndCompileStart", @generateAndCompileStart
-      @listenTo @model, "generateAndCompileEnd", @generateAndCompileEnd
-      @listenTo @model, "generateAndCompileFail", @generateAndCompileFail
-      @listenTo @model, "generateAndCompileSuccess", @generateAndCompileSuccess
-      @listenTo @model, "trueGenerateAndCompileFail",
-        @trueGenerateAndCompileFail
-      @listenTo @model, "trueGenerateAndCompileSuccess",
-        @trueGenerateAndCompileSuccess
+      @listenTo @model, "generateStart", @generateStart
+      @listenTo @model, "generateEnd", @generateEnd
+      @listenTo @model, "generateFail", @generateFail
+      @listenTo @model, "generateSuccess", @generateSuccess
+      @listenTo @model, "trueGenerateFail",
+        @trueGenerateFail
+      @listenTo @model, "trueGenerateSuccess",
+        @trueGenerateSuccess
       @listenTo @model, 'tooManyTasks', @enable
       @listenTo Backbone, 'change:longRunningTasks', @longRunningTasksChanged
 
-    buttonClass: 'generate-and-compile'
-    controlSummaryClass: 'generate-and-compile-summary'
-    controlResultsClass: 'generate-and-compile-results'
+    buttonClass: 'generate'
+    controlSummaryClass: 'generate-summary'
+    controlResultsClass: 'generate-results'
     controlResults: ''
 
     getControlSummary: ->
-      switch @model.get('compile_succeeded')
+      switch @model.get('generate_succeeded')
         when true
           @controlSummary = "<i class='fa fa-check boolean-icon true'></i>
-            Compile succeeded: #{@model.get('compile_message')}"
+            Generate succeeded: #{@model.get('generate_message')}"
         when false
           @controlSummary = "<i class='fa fa-check boolean-icon false'></i>
-            Compile failed: #{@model.get('compile_message')}"
+            Generate failed: #{@model.get('generate_message')}"
         when null
-          @controlSummary = "Nobody has yet attempted to compile this
+          @controlSummary = "Nobody has yet attempted to generate this
             #{@resourceName}"
 
     # Write the initial HTML to the page.
@@ -64,7 +63,7 @@ define [
         buttonTitle: "Click this button to request that this
           #{@utils.camel2regular @resourceName}’s FST script be generated and
           compiled so that it can be used."
-        buttonText: 'Generate & Compile'
+        buttonText: 'Generate'
         controlResultsClass: @controlResultsClass
         controlSummaryClass: @controlSummaryClass
         controlResults: @controlResults
@@ -101,13 +100,13 @@ define [
       @$(selector).spin false
 
     ############################################################################
-    # Generate & Compile
+    # Generate
     ############################################################################
 
     # Before we initiate a `generate_and_compile` request, we must first check
     # with the TasksDialogView to see whether we have permission to do so,
     # i.e., whether we have too many in-progress requests pending.
-    generateAndCompilePreflight: ->
+    generatePreflight: ->
       @listenToOnce @model, 'preflightResponse', @preflightResponse
       Backbone.trigger 'longRunningTaskPreflight', @model, @model.get('UUID')
 
@@ -115,11 +114,11 @@ define [
     # here, we do not allow the long-running task to be initiated.
     preflightResponse: (goodToGo, errorMsg='') ->
       if goodToGo
-        @generateAndCompile()
+        @generate()
       else
         @enable()
         if errorMsg is 'taskAlreadyPending'
-          Backbone.trigger 'taskAlreadyPending', 'generate and compile',
+          Backbone.trigger 'taskAlreadyPending', 'generate',
             @resourceName, @model
         else
           Backbone.trigger 'tooManyTasks'
@@ -131,44 +130,43 @@ define [
         @enable()
         @$(".#{@controlSummaryClass}").html @getControlSummary()
       else
-        @disableGenerateAndCompileButton()
+        @disableGenerateButton()
         if statusMsg is 'taskAlreadyPending'
-          @indicateGenerateAndCompileInProgress()
+          @indicateGenerateInProgress()
 
     # The `TasksDialogView` has broadcast that the long-running tasks array has
     # changed. This may have consequences for this view; so we handle them
     # here.
     longRunningTasksChanged: (longRunningTasks, longRunningTasksMax) ->
       if longRunningTasks.length >= longRunningTasksMax
-        @disableGenerateAndCompileButton()
+        @disableGenerateButton()
       else if @model.get('UUID') in (t.resourceId for t in longRunningTasks)
-        @indicateGenerateAndCompileInProgress()
+        @indicateGenerateInProgress()
       else
         @enable()
 
-    generateAndCompile: -> @model.generateAndCompile()
+    generate: -> @model.generate()
 
-    generateAndCompileStart: ->
-      @disableGenerateAndCompileButton()
-      Backbone.trigger 'generateAndCompileStart', @model
-      @indicateGenerateAndCompileInProgress()
+    generateStart: ->
+      @disableGenerateButton()
+      Backbone.trigger 'generateStart', @model
+      @indicateGenerateInProgress()
 
-    indicateGenerateAndCompileInProgress: ->
+    indicateGenerateInProgress: ->
       @$(".#{@controlSummaryClass}").html ''
       @spin "button.#{@buttonClass}", '50%', '135%'
 
-    generateAndCompileEnd: ->
+    generateEnd: ->
 
-    generateAndCompileFail: (error) ->
-      Backbone.trigger "#{@resourceName}GenerateAndCompileFail", error,
+    generateFail: (error) ->
+      Backbone.trigger "#{@resourceName}GenerateFail", error,
         @model.get('id')
 
-    # This is called when we have made a successful `generate_and_compile`
-    # request. `trueGenerateAndCompileSuccess` is called when the
-    # `TasksDialogView` tells us (after polling) that the `compile_attempt`
-    # value of our resource has changed and the (generate and) compile request
-    # succeeded.
-    generateAndCompileSuccess: ->
+    # This is called when we have made a successful `generate`
+    # request. `trueGenerateSuccess` is called when the
+    # `TasksDialogView` tells us (after polling) that the `generate_attempt`
+    # value of our resource has changed and the generate request succeeded.
+    generateSuccess: ->
       # The TasksDialogView is the controller for these long-running tasks. We
       # request that the task/request be initiated by triggering a
       # Backbone-wide event that the tasks dialog view listens for.
@@ -176,29 +174,29 @@ define [
         resourceId: @model.get 'UUID'
         resourceName: @resourceName
         resourceModel: @model
-        taskName: 'generateAndCompile'
+        taskName: 'generate'
         taskStartTimestamp: new Date().getTime()
         taskEndTimestamp: null
-        taskAttemptAttribute: 'compile_attempt'
-        taskSuccessAttribute: 'compile_succeeded'
-        taskMessageAttribute: 'compile_message'
+        taskAttemptAttribute: 'generate_attempt'
+        taskSuccessAttribute: 'generate_succeeded'
+        taskMessageAttribute: 'generate_message'
         modelClassName: @modelClassName
       Backbone.trigger 'longRunningTask', params
 
-    disableGenerateAndCompileButton: ->
+    disableGenerateButton: ->
       @$("button.#{@buttonClass}").button 'disable'
 
-    enableGenerateAndCompileButton: ->
+    enableGenerateButton: ->
       @$("button.#{@buttonClass}").button 'enable'
 
     enable: ->
       @stopSpin "button.#{@buttonClass}"
-      @enableGenerateAndCompileButton()
+      @enableGenerateButton()
 
-    trueGenerateAndCompileSuccess: ->
+    trueGenerateSuccess: ->
       @$(".#{@controlSummaryClass}").html @getControlSummary()
       @enable()
 
-    trueGenerateAndCompileFail: (error) ->
+    trueGenerateFail: (error) ->
       @enable()
 

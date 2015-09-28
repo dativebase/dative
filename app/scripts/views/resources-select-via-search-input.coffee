@@ -184,8 +184,8 @@ define [
 
     deselectResourceView: (resourceView) ->
       modelToBeDeselected = @getSelectedModelFromSelectedResourceView resourceView
+      newSelectedResourceViews = []
       for view in @selectedResourceViews
-        newSelectedResourceViews = []
         if view is resourceView
           view.close()
           @closed view

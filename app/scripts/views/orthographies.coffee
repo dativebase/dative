@@ -24,3 +24,9 @@ define [
     resourceModel: OrthographyModel
 
 
+    render: (taskId) ->
+      if not globals.unicodeCharMap
+        @fetchUnicodeData(=> @render taskId)
+        return
+      super taskId
+

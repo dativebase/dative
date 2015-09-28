@@ -8,6 +8,17 @@ define ['./resource'], (ResourceModel) ->
   class OLDApplicationSettingsModel extends ResourceModel
 
     resourceName: 'oldApplicationSettings'
+    serverSideResourceName: 'applicationsettings'
+
+    manyToOneAttributes: [
+      'storage_orthography'
+      'input_orthography'
+      'output_orthography'
+    ]
+
+    manyToManyAttributes: [
+      'unrestricted_users'
+    ]
 
     ############################################################################
     # OLDApplicationSettings Schema
@@ -30,7 +41,7 @@ define ['./resource'], (ResourceModel) ->
       morpheme_break_validation: ''  # one of 'None', 'Warning', or 'Error'
       phonemic_inventory: '' # long text; should be comma-delimited graphemes
       morpheme_delimiters: '' # 255 chars max; should be COMMA-DELIMITED single chars...
-      punctuation: '' # long text; should be comma-delimited punctuation chars
+      punctuation: '' # long text; should be punctuation chars
       grammaticalities: '' # 255 chars max ...
       storage_orthography: null # id of an orthography
       input_orthography: null # id of an orthography
@@ -64,42 +75,18 @@ define ['./resource'], (ResourceModel) ->
 
     getValidator: (attribute) ->
       switch attribute
-        when 'name' then @requiredString
+        when 'metalanguage_id' then @realISOLanguageId
+        when 'object_language_id' then @realISOLanguageId
         else null
 
-    ###
-    Here is what the OLD v. 0.2 interface says about orthographies. Note that
-    the current version of the OLD does not, server-side, use orthographies for
-    anything. That is, it is expected (I think) that the client will handle
-    conversion between orthographies.
-
-    An [object language] orthography is an ordered list of graphemes (or
-    polygraphs) that can be used to write [orthographic object] language data.
-    Graphemes must be separated by commas.
-
-    The order of graphemes is important for collation purposes. Graphemes that
-    are not ordered relative to one another (e.g, a vowel and its accented
-    counterpart) are grouped together in square brackets.
-
-    Do not list uppercase counterparts of lowercase graphemes. If the
-    orthography uses uppercase variants, deselect the Only Lowercase option
-    below and the system will guess uppercase variants for the graphemes you
-    have entered
-
-    In order for the system to define mappings (and convert strings) between
-    object language orthographies, all orthographies must have the exact same
-    structure, i.e., the same number of graphemes and the same number of
-    bracket groupings in the same order.
-
-    For example, orthographies (2) and (1) have the same structure but
-    orthographies (3) and (4) have unique structures.
-
-    1. “[_a, _á], b, c, d”
-
-    2. “[ae, áé], b, c, d”
-
-    3. “ae, áé, b, c, d”
-
-    4. “[ae, áé, àè], b, c, d”
-    ###
+    realISOLanguageId: (value) ->
+      console.log "check if #{value} is a real ISO 639-3 language Id"
+      if value.trim()
+        if value in @languageRefNames
+          null
+        else
+          "#{value} is not a valid ISO 639-3 language Id; please enter a valid
+            Id or nothing at all."
+      else
+        null
 

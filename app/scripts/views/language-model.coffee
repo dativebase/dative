@@ -10,6 +10,8 @@ define [
   './modifier-field-display'
   './related-resource-field-display'
   './boolean-icon-display'
+  './unicode-string-field-display'
+  './language-model-controls'
   './../models/subcorpus'
   './../models/morphology'
   './../collections/subcorpora'
@@ -17,8 +19,24 @@ define [
 ], (ResourceView, SubcorpusView, MorphologyView, LanguageModelAddWidgetView,
   PersonFieldDisplayView, DateFieldDisplayView, ObjectWithNameFieldDisplayView,
   EntererFieldDisplayView, ModifierFieldDisplayView,
-  RelatedResourceFieldDisplayView, BooleanIconFieldDisplayView, SubcorpusModel,
+  RelatedResourceFieldDisplayView, BooleanIconFieldDisplayView,
+  UnicodeStringFieldDisplayView, LanguageModelControlsView, SubcorpusModel,
   MorphologyModel, SubcorporaCollection, MorphologiesCollection) ->
+
+
+  class RareDelimiterFieldDisplayView extends UnicodeStringFieldDisplayView
+
+    # We alter `context` so that `context.valueFormatter` is a function that
+    # returns an inventory as a list of links that, on mouseover, indicate the
+    # Unicode code point and Unicode name of the characters in the graph.
+    getContext: ->
+      context = super
+      context.valueFormatter = (value) =>
+        try
+          @unicodeLink value
+        catch
+          value
+      context
 
 
   class CorpusFieldDisplayView extends RelatedResourceFieldDisplayView
@@ -72,6 +90,7 @@ define [
       'perplexity'
       'perplexity_attempt'
       'perplexity_computed'
+      'rare_delimiter'
       'enterer'
       'modifier'
       'datetime_entered'
@@ -89,4 +108,9 @@ define [
       corpus: CorpusFieldDisplayView
       vocabulary_morphology: MorphologyFieldDisplayView
       generate_succeeded: BooleanIconFieldDisplayView
+      rare_delimiter: RareDelimiterFieldDisplayView
+
+    excludedActions: ['history', 'data']
+
+    controlsViewClass: LanguageModelControlsView
 
