@@ -66,8 +66,10 @@ define [
       if href[0] is '#'
         @stopEvent event
         # This is the id value that Markdown generates for headers with named anchors
-        headerIdSelector = "##{href[1..]}-a-data-name-#{href[1..]}-a-"
-        @scrollToElementById headerIdSelector
+        # headerIdSelector = "##{href[1..]}-a-data-name-#{href[1..]}-a-"
+        # @scrollToElementById headerIdSelector
+        console.log "scrolling to first one of these: [data-name=#{href[1..]}]"
+        @scrollToMatch @$("[data-name=#{href[1..]}]").first()
 
     scrollToElementById: (idSelector) ->
       @scrollToMatch @$(idSelector)

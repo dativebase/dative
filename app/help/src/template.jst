@@ -2,17 +2,25 @@
 <%=content%>
 </div>
 <script>
+
 if (FieldDB && FieldDB.FieldDBObject && FieldDB.FieldDBObject.application && FieldDB.FieldDBObject.application.brand) {
-  var replaceVariables = function(content) {
-    content = content.replace(/{{FieldDB.FieldDBObject.application.brand}}/g, FieldDB.FieldDBObject.application.brand)
-                    .replace(/{{FieldDB.FieldDBObject.application.website}}/g, FieldDB.FieldDBObject.application.website);
-    return content;
-  }
-  if ($ && $(".markdown-content")) {
-    $(".markdown-content")
-      .each(function() {
-        $(this).html(replaceVariables($(this).html()));
-      });
-  }
+  var brand = FieldDB.FieldDBObject.application.brand;
+  var website = FieldDB.FieldDBObject.application.website;
+} else {
+  var brand = 'FieldDB';
+  var website = 'https://www.google.ca/webhp?q=dog#safe=active&q=fielddb';
+}
+
+var replaceVariables = function(content) {
+  content = content.replace(/{{FieldDB.FieldDBObject.application.brand}}/g, brand)
+    .replace(/{{FieldDB.FieldDBObject.application.website}}/g, website);
+  return content;
+}
+
+if ($ && $(".markdown-content")) {
+  $(".markdown-content")
+    .each(function() {
+      $(this).html(replaceVariables($(this).html()));
+    });
 }
 </script>

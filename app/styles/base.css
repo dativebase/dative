@@ -1398,6 +1398,11 @@ div.dative-display
   font-weight: bold;
 }
 
+.dative-help-dialog .help-content em
+{
+  font-style: italic;
+}
+
 .watermark
 {
   color: #999;
