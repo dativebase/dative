@@ -31,6 +31,13 @@ define [
       if @get('fieldDBApplication')
         @set 'fieldDBApplication', new (FieldDB.App)(@get('fieldDBApplication'))
         @get('fieldDBApplication').authentication.eventDispatcher = Backbone
+      else 
+        # Simplified app placeholder for so that the help file shows info
+        FieldDB.FieldDBObject.application = {
+          brand: "LingSync",
+          website: "http://lingsync.org"
+          # contextualizer: new FieldDB.Contextualizer().loadDefaults(),
+        }
       @listenTo Backbone, 'authenticate:login', @authenticate
       @listenTo Backbone, 'authenticate:logout', @logout
       @listenTo Backbone, 'authenticate:register', @register
@@ -132,8 +139,8 @@ define [
       Backbone.trigger 'longTask:register', 'authenticating', taskId
       Backbone.trigger 'authenticateStart'
       if not @get 'fieldDBApplication'
-        if not FieldDB.FieldDBObject.application
-          new FieldDB.App()
+        if FieldDB.FieldDBObject.application not instanceof FieldDB.App
+          new FieldDB.App(FieldDB.FieldDBObject.application)
         @set 'fieldDBApplication', FieldDB.FieldDBObject.application
       if not @get('fieldDBApplication').authentication or not @get('fieldDBApplication').authentication.login
         @get('fieldDBApplication').authentication = new FieldDB.Authentication()
