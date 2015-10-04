@@ -1,4 +1,4 @@
-[![Build Status](https://travis-ci.org/OpenSourceFieldlinguistics/dative.svg?branch=master)](https://travis-ci.org/OpenSourceFieldlinguistics/dative)
+[![Build Status](https://travis-ci.org/FieldDB/dative.svg?branch=master)](https://travis-ci.org/FieldDB/dative)
 # Dative: a GUI for FieldDB and the OLD
 
 
