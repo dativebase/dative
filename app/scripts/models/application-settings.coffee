@@ -132,6 +132,8 @@ define [
       Backbone.trigger 'longTask:register', 'authenticating', taskId
       Backbone.trigger 'authenticateStart'
       if not @get 'fieldDBApplication'
+        if not FieldDB.FieldDBObject.application
+          new FieldDB.App()
         @set 'fieldDBApplication', FieldDB.FieldDBObject.application
       if not @get('fieldDBApplication').authentication or not @get('fieldDBApplication').authentication.login
         @get('fieldDBApplication').authentication = new FieldDB.Authentication()
