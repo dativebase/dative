@@ -13,7 +13,16 @@
     <div id="mocha"></div>
     <script src="bower_components/mocha/mocha.js"></script>
     <script>mocha.setup('bdd')</script>
-    <div id="fixtures" style="display: none; visibility: hidden;"></div>
+
+    <div style="overflow: hidden; position: relative;">
+        <div id="fixtures"
+             style="display: inline; visibility: visible;
+               position: absolute;
+               height: 100px;
+               width: 100px;
+               right: -5000px;"></div>
+    </div>
+
     <script src="bower_components/chai/chai.js"></script>
     <script src="bower_components/chai-jquery/chai-jquery.js"></script>
     <script>

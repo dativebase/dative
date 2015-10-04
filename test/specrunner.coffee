@@ -58,6 +58,9 @@ require.config
     backbonelocalstorage: '../bower_components/backbone.localStorage/backbone.localStorage'
 
 specs = [
+  # These specs are old and at this point are probably only good as a reference
+  # for how mocha/chai/sinon works.
+
   #'spec/models/form.js' # FAILING
   #'spec/collections/forms.js' # FAILING
   #'spec/utils/indexeddb-utils.js'
@@ -68,7 +71,10 @@ specs = [
   #'spec/views/login-dialog.js'
   #'spec/models/application-settings.js'
   #'spec/models/base.js'
+
+  # These are the good specs ...
   'spec/utils/utils.js'
+  'spec/views/form.js'
 ]
 
 require specs, ->
