@@ -491,6 +491,7 @@ define [
       tablesData = @getIGTTablesData wordWidths
 
       @displayIGTTables tablesData, igtMap, wordWidths
+
       @hideIGTFields igtMap
 
       @$('.morpheme-link.dative-tooltip').tooltip()
@@ -588,7 +589,7 @@ define [
             word = vector.words[index]
             width = wordWidths[index]
             padding = ''
-            if cellIndex is 0 then padding = "padding-left: #{leftIndent}px;'"
+            if cellIndex is 0 then padding = "padding-left: #{leftIndent}px;"
             style = "style='width: #{width}px;
                             min-width: #{width}px;
                             max-width: #{width}px;
@@ -714,7 +715,7 @@ define [
         wEnd = wStart + word.length
         for [pStart, pEnd] in vector.patternMatchIndices
           if (wStart <= pStart and wEnd > pStart) or
-          (wStart > pStart and wStart <= pEnd)
+          (wStart > pStart and wStart < pEnd) # used to be `wStart <= pEnd`
             tmp = pStart - wStart
             if tmp < 0 then tmp = 0
             wordPatternMatchIndex = [tmp]
