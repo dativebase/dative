@@ -384,7 +384,7 @@ module.exports = (grunt) ->
             'help/html/help.html'
             './../package.json'
             './../.tmp/UnicodeData.json'
-            'images/{,*/}*.{webp,gif,png}' # added png so that my jQuery images in /images would copy over, cf. imagemin headache
+            'images/{,*/}*.{webp,gif,png,jpg}' # added png so that my jQuery images in /images would copy over, cf. imagemin headache
             'styles/fonts/{,*/}*.*'
             'bower_components/sass-bootstrap/fonts/*.*'
             'bower_components/jqueryui/**/*.*' # added, cf. http://stackoverflow.com/questions/20509145/managing-images-in-bower-packages-using-grunt?lq=1

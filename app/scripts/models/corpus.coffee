@@ -37,13 +37,13 @@ define [
     ############################################################################
 
     # Fetch the corpus data.
-    # GET `<CorpusServiceURL>/<corpusname>/_design/pages/_view/private_corpuses`
+    # GET `<CorpusServiceURL>/<corpusname>/_design/deprecated/_view/private_corpuses`
     fetch: ->
       @trigger 'fetchStart'
       CorpusModel.cors.request(
         method: 'GET'
         timeout: 10000
-        url: "#{@getCorpusServerURL()}/_design/pages/_view/private_corpuses"
+        url: "#{@getCorpusServerURL()}/_design/deprecated/_view/private_corpuses"
         onload: (responseJSON) =>
           fieldDBCorpusObject = @getFieldDBCorpusObject responseJSON
           # TODO @jrwdunham: should this `set` be a `save`?

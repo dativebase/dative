@@ -1,76 +1,540 @@
 <div class="markdown-content">
 <h1 id="dative-help">Dative Help</h1>
 <p>Dative is an application for linguistic fieldwork. It helps groups of
-fieldworkers to collaboratively build corpora of language data.</p>
-<p>This document contains information to help you in using Dative. This
-help document is fully searchable using the search field above. For
-additional help with using this help document see the <a href="#help-with-the-help">Help with the
-Help</a> section.</p>
+fieldworkers to build corpora of language data collaboratively.</p>
+<p>This help document contains information to help you in using Dative. It
+is fully searchable using the search field above. For additional help with
+using this help document see the <a href="#help-with-the-help">Help with the Help</a>
+section.</p>
+<p><strong>Note:</strong> In its current state of development, Dative works with OLD web
+services. It does not yet work with
+{{FieldDB.FieldDBObject.application.brand}}-style web services. Therefore, this
+help document currently assumes that you are using Dative to interact with an
+OLD web service.</p>
 <h2 id="table-of-contents-a-name-toc-a-">Table of Contents<a name="toc"></a></h2>
+<!--- - [QuickStart](#quickstart) -->
 <ul>
-<li><a href="#quickstart">QuickStart</a></li>
-<li><a href="#frequently-asked-questions">FAQ</a></li>
 <li><a href="#about-dative">About Dative</a></li>
-<li><a href="#help-with-the-help">Help with the Help</a></li>
+<li><a href="#resources">Resources</a></li>
 <li><a href="#application-settings">Application Settings</a></li>
-<li><a href="#browsing-forms">Browsing Forms</a></li>
-<li><a href="#adding-a-form">Adding a Form</a></li>
+<li><a href="#forms">Forms</a></li>
+<li><a href="#files">Files</a></li>
+<li><a href="#texts">Texts</a></li>
+<li><a href="#corpora">Corpora</a></li>
+<li><a href="#parsers">Parsers</a></li>
+<li><a href="#other-resources">Other resources</a></li>
+<li><a href="#help-with-the-help">Help with the Help</a></li>
 <li><a href="#keyboard-shortcuts">Keyboard Shortcuts</a></li>
+<li><a href="#frequently-asked-questions">FAQ</a></li>
 </ul>
-<h2 id="quickstart-a-data-name-quickstart-a-">QuickStart<a data-name="quickstart"></a></h2>
-<p>Using Dative is all about entering linguistic fieldwork data, refining it,
+<!---
+## QuickStart<a data-name="quickstart"></a>
+
+Using Dative is all about entering linguistic fieldwork data, refining it,
 browsing it, searching through it, and using it to write papers, develop
-learning materials, or generate documentary or archive-quality artifacts.</p>
-<p>Dative can work with both <a href="{{FieldDB.FieldDBObject.application.website}}">{{FieldDB.FieldDBObject.application.brand}}</a> and
-<a href="http://www.onlinelinguisticdatabase.org/">OLD</a>-type web servers. This means
-that if you have an account with {{FieldDB.FieldDBObject.application.brand}} or an OLD application, you can use
-Dative to work with your existing corpora and data sets.</p>
-<p>If you have an account with a {{FieldDB.FieldDBObject.application.brand}} or an OLD server, the first step
+learning materials, or generate documentary or archive-quality artifacts.
+
+Dative can work with both
+[{{FieldDB.FieldDBObject.application.brand}}]({{FieldDB.FieldDBObject.application.website}})
+and [OLD](http://www.onlinelinguisticdatabase.org/)-type web servers. This
+means that if you have an account with
+{{FieldDB.FieldDBObject.application.brand}} or an OLD application, you can use
+Dative to work with your existing corpora and data sets.
+
+If you have an account with a {{FieldDB.FieldDBObject.application.brand}} or an OLD server, the first step
 is to login by clicking on the lock icon <i class="fa fa-fw fa-lock"></i> in
-the top right or by clicking on Account &gt; Login. In the login dialog that
+the top right or by clicking on Account > Login. In the login dialog that
 appears, select the appropriate server, enter your username and password,
 and click the “Login” button. If you have a {{FieldDB.FieldDBObject.application.brand}} account, you will most
 likely want to login to the server called “{{FieldDB.FieldDBObject.application.brand}}”. If you are unable to
-login, you may need to manually create a new server (see the <a href="#application-settings">application
-settings</a> section).</p>
-<p>If you do not have a {{FieldDB.FieldDBObject.application.brand}} account, you may create one through Dative.
-First, open the registration form by clicking on Dative &gt; Register (or
+login, you may need to manually create a new server (see the [application
+settings](#application-settings) section).
+
+If you do not have a {{FieldDB.FieldDBObject.application.brand}} account, you may create one through Dative.
+First, open the registration form by clicking on Dative > Register (or
 by pressing ⌃R). Choose a {{FieldDB.FieldDBObject.application.brand}}-type server to register with,
 enter your desired username and password (and your email), and click the
-“Register” button and an account should be generated for you.</p>
-<p>Once you have successfully logged in, you will be brought either to the
+“Register” button and an account will be generated for you.
+
+Once you have successfully logged in, you will be brought either to the
 corpora interface (if you have logged into a {{FieldDB.FieldDBObject.application.brand}} server) or to the
 browse forms interface (if you have logged into an OLD server). At the
 corpus interface, you must choose the {{FieldDB.FieldDBObject.application.brand}} corpus that you
 wish to use; you do this by clicking on the “activate corpus” button
 <i class="fa fa-fw fa-toggle-off"></i>. This will take you to the browse
-forms interface where you can view the data in the corpus, modify it,
-and add to it.</p>
-<p>WARNING: THE DATA MODIFICATION/ADDITION FEATURE IS CURRENTLY NOT YET
-IMPLEMENTED IN DATIVE.</p>
-<h2 id="frequently-asked-questions-a-data-name-frequently-asked-questions-a-">Frequently Asked Questions<a data-name="frequently-asked-questions"></a></h2>
-<ol>
-<li>What is a “form”?<ul>
-<li>A form is a linguistic form. It is a general term meant to encompass
-all of the data points that you might enter into a linguistic fieldwork/
-language documentation database. In practice, may be a morpheme, word,
-phrase, sentence, or even a multi-sentential unit. In {{FieldDB.FieldDBObject.application.brand}}
-applications, the term “datum” is sometimes used. These two terms may
-be considered equivalent here.</li>
-</ul>
-</li>
-</ol>
+forms interface where you can view the data in the corpus, make modifications,
+perform searches, export, etc.
+
+-->
 <h2 id="about-dative-a-data-name-about-dative-a-">About Dative<a data-name="about-dative"></a></h2>
-<p>Dative is an application for linguistic fieldwork. It is a graphical user
-interface that runs in modern web browsers. The data that you enter into
-Dative are saved to the web server that you are logged into at the time.
-This may be a <a href="{{FieldDB.FieldDBObject.application.website}}">{{FieldDB.FieldDBObject.application.brand}}</a> server or an
-<a href="http://www.onlinelinguisticdatabase.org/">OLD</a> one. {{FieldDB.FieldDBObject.application.brand}} and the OLD
-are web services that allow linguistic data to be stored and manipulated
-on web servers by multiple users at the same time.</p>
+<p>Dative is an application for linguistic fieldwork. It allows you to create
+web-accessible data sets in collaboration with other field workers, linguists,
+language documenters, speakers, educators, etc. Dative helps you to structure
+search, analyze, share, and export your data.</p>
+<p><img style="float: right; margin: 1em 0 1em 1em;"
+  src="/images/help/dative-old-lingsync-200.jpg"></p>
+<p>Dative is a graphical user interface that runs in modern web browsers. The data
+that you enter into Dative are saved to the web service (a general-purpose
+program that runs on a web server) that you are logged into at the time.  This
+web service may be a
+<a href="{{FieldDB.FieldDBObject.application.website}}">{{FieldDB.FieldDBObject.application.brand}}</a>
+one or an <a href="http://www.onlinelinguisticdatabase.org/">OLD</a> one. 
+{{FieldDB.FieldDBObject.application.brand}} and the OLD are services that allow
+linguistic data to be stored and manipulated on web servers by multiple users
+at the same time.</p>
+<p>In order to log in to an OLD or {{FieldDB.FieldDBObject.application.brand}} web
+service, you must know the web service&#39;s URL and you must create a Dative
+“server” object for that web service in Dative’s
+<a href="#application-settings">application settings</a>.</p>
 <p>Dative is written in CoffeeScript (and HTML and CSS) using the Backbone
 framework. It is open source and its source code can be found on
 <a href="https://github.com/jrwdunham/dative">GitHub</a>.</p>
+<!--- ![Dative-OLD-FieldDB architecture](/images/dative-old-lingsync-500.jpg "How Dative works with the OLD and {{FieldDB.FieldDBObject.application.brand}}") -->
+<h2 id="resources-a-data-name-resources-a-">Resources<a data-name="resources"></a></h2>
+<p>Dative is designed around the concept of “resources”. A resource is a
+collection of items of the same type, which can undergo a small set of
+operations via a standard interface. The four operations that all Dative
+resources allow are as follows.</p>
+<ul>
+<li>view (<a href="#viewing-single-resource">one</a> or <a href="#browsing-resources">many</a>)</li>
+<li><a href="#create-resource">create</a></li>
+<li><a href="#update-resource">update</a></li>
+<li><a href="#destroy-resource">destroy</a></li>
+</ul>
+<p>Certain resources allow additional operations, such as
+<a href="#search-resources">search</a> and <a href="#export-resources">export</a>.</p>
+<p>The primary resources in Dative are <em>forms</em>, <em>files</em>, <em>texts</em> (a.k.a.
+“collections”), and <em>corpora</em>. Additional resources include <em>sources</em>,
+<em>speakers</em>, <em>searches</em>, <em>phonologies</em>, and <em>morphological parsers</em>.</p>
+<p>Since Dative provides the same type of interface to all resources, this section
+describes how to perform the above-mentioned operations on any resource.</p>
+<h3 id="browsing-resources-a-data-name-browsing-resources-a-">Browsing Resources<a data-name="browsing-resources"></a></h3>
+<p>Dative provides a browsing interface for viewing multiple resources at the same
+time. How to access the browsing interface depends on the resource. To browse
+form resources, click on “Forms” in the top menu bar and then “Browse”.
+Alternatively, you may use the keyboard shortcut ^B (i.e., control B). The
+browse interfaces for the other resources can be accessed under the
+“Resources” or “Analysis” menus.</p>
+<p>The screenshot below shows what browsing forms in Dative looks like.</p>
+<p><img src="/images/help/browse-forms-500.png" alt="screenshot of browsing forms"></p>
+<p>The resource browsing interface contains a header, which displays information
+about the set of resources being browsed and controls for performing operations on
+that set, as well as a body of resources.</p>
+<p>The header tells you what you are browsing–e.g., all corpora, a search over
+files, a corpus of forms–as well as how many items are in the set that you
+are viewing, what page you are viewing, etc. The functions of the control
+buttons in this header are as follows.</p>
+<ul>
+<li><i class="fa fa-fw fa-plus"></i>: open the interface for creating a new
+resource.</li>
+<li><p><i class="fa fa-fw fa-angle-double-down"></i>: expand all of the
+visible resources so that all of their data are visible.</p>
+</li>
+<li><p><i class="fa fa-fw fa-angle-double-up"></i>: collapse all of the
+visible resources so that only their primary fields are visible.</p>
+</li>
+<li><p><i class="fa fa-fw fa-search"></i>: open the search interface for searching
+over the set of resources.</p>
+</li>
+<li><p><i class="fa fa-fw fa-download"></i>: open the export interface so you can
+choose an export option for exporting the collection of resources and saving
+it to your computer.</p>
+</li>
+<li><p>“labels” <i class="fa fa-fw fa-toggle-on"></i>: toggle the labels on the
+field displays of the visible resources.</p>
+</li>
+<li><p><i class="fa fa-fw fa-question"></i>: open this help dialog to the
+section that is relevant for understanding how to browse the resource at hand.</p>
+</li>
+<li><p><i class="fa fa-fw fa-angle-double-left"></i>: navigate to the first page.</p>
+</li>
+<li><p><i class="fa fa-fw fa-angle-left"></i>: navigate to the previous page.</p>
+</li>
+<li><p><i class="fa fa-fw fa-angle-right"></i>: navigate to the next page.</p>
+</li>
+<li><p><i class="fa fa-fw fa-angle-double-right"></i>: navigate to the last page.</p>
+</li>
+</ul>
+<p>The controls in the center of the bottom row allow you to jump to other nearby
+pages and to choose how many resources are displayed per page.</p>
+<h3 id="viewing-a-single-resource-a-data-name-viewing-single-resource-a-">Viewing a Single Resource<a data-name="viewing-single-resource"></a></h3>
+<p>A single resource may be displayed in a browsing interface (along with other
+resources of the same type), or it may also be displayed in a modal dialog
+window, or it may occupy the entire main page of Dative. In all cases, however,
+the interface to the resource is the same.</p>
+<p><img src="/images/help/view-file-500.png" alt="screenshot of viewing a file"></p>
+<p>The screenshot above illustrates how a file resource is displayed in Dative.
+This is a video file. The controls at the top of the resource interface have
+the following functions.</p>
+<ul>
+<li><p><i class="fa fa-fw fa-angle-up"></i>: hide the secondary fields of the
+resource.</p>
+</li>
+<li><p><i class="fa fa-fw fa-angle-down"></i>: show the secondary fields of the
+resource.</p>
+</li>
+<li><p>“labels” <i class="fa fa-fw fa-toggle-on"></i>: toggle (i.e., show/hide)
+the labels of just this resource.</p>
+</li>
+<li><p><i class="fa fa-fw fa-file-o"></i> (<i class="fa fa-fw fa-file-video-o"></i>
+<i class="fa fa-fw fa-file-audio-o"></i>, etc.): reveal (and play or display)
+the file data of the resource. (Relevant only for file resources.)</p>
+</li>
+<li><p><i class="fa fa-fw fa-pencil-square-o"></i>: edit (i.e., update) the resource.</p>
+</li>
+<li><p><i class="fa fa-fw fa-download"></i>: open the export interface so you can
+choose an export option for exporting this resource and saving it to your
+computer.</p>
+</li>
+<li><p><i class="fa fa-fw fa-trash"></i>: destroy (i.e., delete) this resource. Note
+that a confirm dialog will pop up when you click this button and it will ask
+you to confirm that you reall want to delete the resource in question.</p>
+</li>
+<li><p><i class="fa fa-fw fa-copy"></i>: duplicate this resource. Clicking this
+button will cause the “create new” interface to be opened with the
+information from the to-be-duplicated resource in its input fields.</p>
+</li>
+<li><p><i class="fa fa-fw fa-history"></i>: view the history of this resource.
+Clicking this button will cause any previous versions of this resource to be
+displayed.</p>
+</li>
+</ul>
+<p>Note that you can navigate directly to a particular resource if you know its
+unique id value. Just change the path of the URL in the address bar of your
+browser so that it consists of the number sign “#”, followed by the name of
+the resource (with words separated by hyphens), followed by a forward slash,
+followed by the id value and Dative will display that resource in its main
+page. Some examples:</p>
+<ul>
+<li><em>#form/25109</em> displays the form with id 25109</li>
+<li><em>#morphological-parser/55</em> displays the morphological parser with id 55</li>
+</ul>
+<h3 id="creating-a-new-resource-a-data-name-create-resource-a-">Creating a New Resource<a data-name="create-resource"></a></h3>
+<p>Clicking on the <i class="fa fa-fw fa-plus"></i> button in a resources browse
+interface will reveal the interface for creating a new resource of that type.
+The screenshot below shows the interface for creating a new form resource.</p>
+<p><img src="/images/help/create-form-500.png" alt="screenshot of creating a new form"></p>
+<p>After entering some information into the fields, clicking the “Save” button
+will trigger a request to the web service that the resource be saved on the
+server. If invalid information is entered into the resource creation fields,
+then the system will alert you to this and will not trigger a create request to
+the server.</p>
+<ul>
+<li><p><i class="fa fa-fw fa-times"></i>: hide the interface for creating a new
+resource.</p>
+</li>
+<li><p><i class="fa fa-fw fa-angle-down"></i>/<i class="fa fa-fw fa-angle-up"></i>:
+show/hide the secondary input fields for creating this type of resource.</p>
+</li>
+<li><p><i class="fa fa-fw fa-eraser"></i>: clear any information that may be in the
+input fields. This button resets the resource creation form to its default
+state.</p>
+</li>
+<li><p><i class="fa fa-fw fa-question"></i>: open this help dialog to the
+section that is relevant for understanding how to create resources of the
+given type.</p>
+</li>
+<li><p>“Save”: click this button to validate the data in the input fields and
+trigger a create request against the web service. Note that the keyboard
+shortcut Control + Enter does the same thing as clicking “Save”.</p>
+</li>
+</ul>
+<h3 id="updating-an-existing-resource-a-data-name-update-resource-a-">Updating an Existing Resource<a data-name="update-resource"></a></h3>
+<p>Clicking on the <i class="fa fa-pencil-square-o fa-fw"></i> button at the top
+of a resource will reveal the interface for updating that resource. (Note that
+for form resources you may need to click on the form first, in order to reveal
+the control buttons.)</p>
+<p>The update interface for a resource is, for the most part, identical to the
+create interface, except that the existing data of the resource will be present
+in the input fields in the update case. Note that as information is entered,
+the display representation of the resource will be updated in real time.</p>
+<p>The <i class="fa fa-undo fa-fw"></i> button will undo changes. That is, it will
+return the information in the input fields to their initial values, i.e., to
+the values that they had before you began making changes.</p>
+<h3 id="destroying-a-resource-a-data-name-destroy-resource-a-">Destroying a Resource<a data-name="destroy-resource"></a></h3>
+<p>To destroy (i.e., delete) a resource, click on the
+<i class="fa fa-trash fa-fw"></i> button at the top of the resource&#39;s interface.
+Doing this will cause a confirm dialog to be displayed. You must click the
+“Ok” button in order to issue the destroy request. You may also click
+“Cancel” (or press Esc) in order to abort the destroy action.</p>
+<p><img src="/images/help/destroy-form-500.png" alt="screenshot of deleting a form"></p>
+<p>Note that, depending on the web service that you are connecting to via Dative,
+your destroyed data may be preserved in some state on the server. OLD web
+services make backup copies of all forms, texts, corpora, parsers, phonologies,
+morphologies, and language models whenever a successful destroy request occurs.
+{{FieldDB.FieldDBObject.application.brand}} web services do not actually
+destroy forms (i.e., datums), they simply tag them as deleted and behave as
+though they were deleted. This means that, in general, your deleted resources
+may be recoverable.</p>
+<h3 id="searching-through-resources-a-data-name-search-resources-a-">Searching through Resources<a data-name="search-resources"></a></h3>
+<p>Searchable resources will have a button with the icon
+<i class="fa fa-fw fa-search"></i> in the top control bar of the resource
+browse interface. (When using an OLD web service, the form, file, text (i.e.,
+collection), language, search, and source resources are all searchable.)
+Clicking this button will reveal the search interface at the top of the
+resource browse page.</p>
+<p>Dative provides two types of search interface: <a href="#advanced-search">advanced
+search</a> and <a href="#smart-search">smart search</a>. Click the
+“Advanced Search” button to reveal the advanced search interface. Click the
+“Smart Search” button to reveal the smart search interface.</p>
+<ul>
+<li><p><i class="fa fa-fw fa-times"></i>: hide the search interface.</p>
+</li>
+<li><p>“Browse All”: return to browsing <em>all</em> of the resources of the given
+type. That is, escape from browsing the results of a search that has been
+executed.</p>
+</li>
+<li><p><i class="fa fa-fw fa-refresh"></i>: refresh the search interface, i.e.,
+reset the search interfaces to their default states.</p>
+</li>
+<li><p><i class="fa fa-fw fa-question"></i>: open this help dialog to the
+section that is relevant for understanding how to search over resources of the
+given type.</p>
+</li>
+</ul>
+<h4 id="advanced-search-a-data-name-advanced-search-a-">Advanced Search<a data-name="advanced-search"></a></h4>
+<p>The advanced search interface allows you to specify multiple conditions on the
+types of resource that you want to view. The screenshot below shows an example
+of an advanced search over form resources.</p>
+<p><img src="/images/help/advanced-search-500.png" alt="screenshot of an advanced search"></p>
+<p>In the screenshot above, we see an advanced search expression which requires
+that all matching forms have both of the following properties:</p>
+<ol>
+<li><p>the morpheme break value contains the morpheme <em>áak</em> (a future-marking
+prefix in Blackfoot); and</p>
+</li>
+<li><p>the form does <em>not</em> contain the string <em>will</em> in any of its translations.</p>
+</li>
+</ol>
+<p>Searches of arbitrary structural complexity can be created by using the “and”,
+“not”, “or”, or “...” buttons to create more boolean nodes or
+change existing ones. By changing the select menus you can change the field
+that a given search condition is targeting or you can change the type of search
+from, say, a regular expression search (<em>regex</em>) to an exact match search (<em>=</em>).</p>
+<ul>
+<li><p>“Search”: this button will execute the search on the server and cause the
+browse interface to display the matching resources, if there are any.</p>
+</li>
+<li><p>“Count”: this button will execute the search on the server but Dative
+will respond simply by telling you how many resources match your search. This
+can be useful when you just want to test whether a search returns anything.</p>
+</li>
+<li><p>“Save”: this button, if present, will open up a new search resource in a
+dialog box. This new search resource will contain the current search within
+it. You can give the search resource a name and (optionally) a description,
+and click its own “Save” button to save it to the web service. At
+present, only searches over (OLD) form resources can be saved. Saved searches
+can be used later, shared with collaborators, and/or used to create
+sub-corpora.</p>
+</li>
+</ul>
+<p>When browsing a set of search results, Dative will highlight the portions of
+the resource field values that were matched by the specified search.</p>
+<h4 id="smart-search-a-data-name-smart-search-a-">Smart Search<a data-name="smart-search"></a></h4>
+<p>The smart search interface has a single search input. Dative tries to guess
+what you want to search for, given your input, and reports back on the type of
+searches it thinks you&#39;re after and how many results they would return. The
+screenshot below shows an example of a smart search for “dog” and the
+suggestions that Dative has returned.</p>
+<p><img src="/images/help/smart-search-500.png" alt="screenshot of an advanced search"></p>
+<p>In the screenshot above, the user has requested a smart search for the string
+“dog”. Dative responds by reporting on the number of results that various
+types of “dog”-like searches will return.</p>
+<p>The “Example” button will reveal a resource that matches the particular
+search suggested by the smart search interface. The “Browse” button will
+cause the browse interface to display the resources that match the search in
+question.</p>
+<p>Note that when you click “Browse” the advanced search interface will contain the
+advanced search that is being used to build the search that you have chosen via
+the smart search interface. That is, all smart search suggestions are advanced
+searches underlyingly and may be saved to the server, as described in the
+<a href="#advanced-search">advanced search</a> section above.</p>
+<h3 id="exporting-resources-a-data-name-export-resources-a-">Exporting Resources<a data-name="export-resources"></a></h3>
+<p>Clicking the button with the icon <i class="fa fa-fw fa-download"></i> in the
+top control bar of the resource browse interface, or in the control bar of a
+particular resource display interface, will reveal an export interface that
+displays the exporters available to that resource or collection thereof. If you
+are browsing search results, the export interface will assume that you want to
+export the resources that match the search that you are browsing.</p>
+<p><img src="/images/help/forms-export-500.png" alt="screenshot of an export interface"></p>
+<p>The screenshot above shows the export interface for a collection of form
+resources. The two exporters currently available will create exports in CSV
+(i.e., comma-separated values) and JSON (i.e., JavaScript Object Notation)
+formats.</p>
+<p>You click the “Export” button to generate an export file using a given
+exporter. When the export file has been generated, clicking on the revealed
+link (in this case,
+“<i class="fa fa-fw fa-file-o" ></i>forms-2015-09-29T17:56:26.989Z.csv”)
+will cause the file to be downloaded to your computer.</p>
+<p>CSV files can be opened in a spreadsheet program like Microsoft Excel,
+OpenOffice or Google Sheets.</p>
+<p>JSON files can be parsed by most modern programming languages.</p>
+<h2 id="application-settings-a-data-name-application-settings-a-">Application Settings<a data-name="application-settings"></a></h2>
+<p>Dative&#39;s application settings allows you to:</p>
+<ol>
+<li><p><i class="fa fa-fw fa-server"></i>
+<a href="#configuring-servers">Configure servers</a>, i.e., connections to
+{{FieldDB.FieldDBObject.application.brand}} or OLD web services.</p>
+</li>
+<li><p><i class="fa fa-fw fa-picture-o"></i>
+<a href="#changing-appearance">Change the appearance</a> (i.e., theme) of
+the application.</p>
+</li>
+<li><p><i class="fa fa-fw fa-server"></i><i class="fa fa-fw fa-gears"></i>
+<a href="#configuring-server-settings">Configure server settings</a>, i.e., the
+settings for a particular {{FieldDB.FieldDBObject.application.brand}} or OLD
+web service.</p>
+</li>
+</ol>
+<p>When you are in a Dative application settings sub-interface, click the
+<i class="fa fa-fw fa-th-large"></i> button to return to the top-level
+application settings interface.</p>
+<h3 id="configuring-servers-a-data-name-configuring-servers-a-">Configuring Servers<a data-name="configuring-servers"></a></h3>
+<p>A “server” in this context is a {{FieldDB.FieldDBObject.application.brand}}
+or OLD web service that receives, stores, and returns linguistic data. A server
+is defined by a name, a URL, a type
+(“{{FieldDB.FieldDBObject.application.brand}}” or “OLD”), and
+potentially a server code.</p>
+<p>To change the active server, simply select one of the existing servers from
+the <em>Active Server</em> select menu, or click on that server&#39;s
+<i class="fa fa-fw fa-toggle-off"></i> button. Note that you cannot change the
+active server while you are logged in to a server.</p>
+<p>To create a new server, click on the <i class="fa fa-fw fa-plus"></i> button to
+reveal the interface for creating a new one. In the new server form, enter a
+name, the server&#39;s URL, its type, and (if it’s a FieldDB-type server) its
+server code. If you do not know which server code value to choose, then choose
+“production.” If you do not know which values to enter to create a new
+server, please contact your {{FieldDB.FieldDBObject.application.brand}} or OLD
+server administrator. Note that there is no “Save” button for creating
+servers: Dative saves all of your application settings changes automatically to
+your browser&#39;s local storage.</p>
+<p>To delete a server configuration, click its <i class="fa fa-fw fa-trash"></i>
+button. A confirm dialog will verify that you really want to proceed with the
+deletion.</p>
+<p>Note that you cannot delete or modify a server while it is the designated
+active one.</p>
+<h3 id="changing-dative-s-appearance-a-data-name-changing-appearance-a-">Changing Dative&#39;s Appearance<a data-name="changing-appearance"></a></h3>
+<p>To change how Dative looks, simply click on one of the example form resources
+in the application settings appearance sub-section. The form examples
+illustrate how Dative will look using each of the possible visual themes.</p>
+<p>Note that the interface has not been fully tested with all of these themes so
+some things may be difficult or impossible to view using a particular theme.
+Two themes that are known to work well with Dative are “Pepper Grinder” and
+“Cupertino”.</p>
+<h3 id="configuring-server-settings-a-data-name-configuring-server-settings-a-">Configuring Server Settings<a data-name="configuring-server-settings"></a></h3>
+<p>At present, Dative only allows for the configuration of an OLD web server&#39;s
+application settings. Support for viewing and altering the settings of a
+{{FieldDB.FieldDBObject.application.brand}} web service will be available soon.</p>
+<p>The interface for configuring the settings of a server (i.e., a particular
+server-side web service) works very much like the standard
+<a href="#viewing-single-resource">resource interface described above</a>. Note that you
+must be an administrator in order to have permission to modify a web service&#39;s
+application settings.</p>
+<h4 id="configuring-old-server-settings-a-data-name-configuring-old-server-settings-a-">Configuring OLD Server Settings<a data-name="configuring-old-server-settings"></a></h4>
+<p>An OLD web service&#39;s application-wide settings are used to identify the
+language being documented (the “object language”), the language used to
+document and analyze (the “metalanguage”), validation settings for various
+form transcription fields, and the set of users designated as “unrestricted”.</p>
+<h5 id="object-language">Object Language</h5>
+<p>The object language, i.e., the language being documented via the OLD web
+service being configured, is specified via the <em>object language name</em> and
+<em>object language id</em> fields. The former may be anything you want. However, the
+latter must be an
+<a href="http://www-01.sil.org/iso639-3/codes.asp">ISO 639-3 three-letter language identifier code</a>.
+Luckily, the OLD and Dative contain a copy of the ISO 639-3 language database so
+that the application settings interface&#39;s input fields will help you to find the
+appropriate code for the language that you are documenting/analyzing. If the
+language categorization of ISO 639-3 standard is not suitable or appropriate for
+your language of documentation, then leave the object language id field blank.</p>
+<p>Note that the <em>object language name</em> field will also autosuggest language
+“reference names” from the ISO 639-3 standard. This is merely a convenience;
+the system does <em>not</em> require that you use these reference names.</p>
+<h5 id="metalanguage">Metalanguage</h5>
+<p>The metalanguage is the language that you are using to translate the object
+language and to transcribe your metadata about the object language. Like the
+object language, the metalanguage is specified via <em>name</em> and <em>id</em> fields and
+the <em>id</em> field must (if it is not empty) contain an
+<a href="http://www-01.sil.org/iso639-3/codes.asp">ISO 639-3 three-letter language identifier code</a>.</p>
+<p>An (orthographic) inventory (i.e., an alphabet) can also be specified for the
+metalanguage. At present, neither Dative nor the OLD use the metalanguage
+inventory for anything. However, this information may be used down the road,
+e.g., for collating a metalanguage-to-object-language dictionary interface to
+your Dative/OLD data.</p>
+<h5 id="form-field-validation">Form Field Validation</h5>
+<p><strong>Important Notice:</strong> form field validation is not yet implemented in Dative.
+That is, while you can specify inventories and validation settings via Dative&#39;s
+interface, they will have no effect at present.</p>
+<p>The following form fields can be configured to have validation:</p>
+<ul>
+<li>transcription</li>
+<li>morpheme break</li>
+<li>narrow phonetic transcription</li>
+<li>phonetic transcription</li>
+</ul>
+<h2 id="forms-a-data-name-forms-a-">Forms<a data-name="forms"></a></h2>
+<p>The form is the primary resource type in Dative. It is a textual representation
+of a morpheme, word, phrase, or sentence.</p>
+<h2 id="files-a-data-name-files-a-">Files<a data-name="files"></a></h2>
+<p>In Dative, a file resource represents a digital file, i.e., an audio or video
+recording, an image, or a textual file, such as a PDF.</p>
+<p>...</p>
+<h2 id="texts-a-k-a-collections-a-data-name-texts-a-">Texts (a.k.a. Collections)<a data-name="texts"></a></h2>
+<p>A text resource reresents a text in the object language. A text may be a story
+or narrative or it may be a conversation, or even a record of an elicitation
+session. In Dative, a text is simply a sequence of forms and is specified as a
+sequence of references to forms.</p>
+<p>...</p>
+<h2 id="corpora-a-data-name-corpora-a-">Corpora<a data-name="corpora"></a></h2>
+<p>A corpus is, like a text, also a sequence of forms. A corpus may be specified
+manually, i.e., by listing form references in the same way as a text is
+specified, or it may be specified by referencing a saved search.</p>
+<p>Corpora may be used in the construction of OLD morphologies and language models.</p>
+<p>...</p>
+<h2 id="parsers-a-data-name-parsers-a-">Parsers<a data-name="parsers"></a></h2>
+<p>Dative provides an interface to the morphological parser creation tools of OLD
+web services. These tools allow users to construct morphological parsers using
+finite-state formalisms and N-gram language models. The resources relevant for
+parser creation are:</p>
+<ul>
+<li>morphological parsers</li>
+<li>language models</li>
+<li>morphologies</li>
+<li>phonologies</li>
+</ul>
+<p>...</p>
+<h2 id="other-resources-a-data-name-other-resources-a-">Other Resources<a data-name="other-resources"></a></h2>
+<p>When logged in to an OLD web service, Dative provides standard resource-style
+interfaces to the following additional resources:</p>
+<ul>
+<li><p>sources: textual sources (in BibTeX format) for creating citations.</p>
+</li>
+<li><p>searches: saved searches over forms, for later re-use and for the
+construction of corpora.</p>
+</li>
+<li><p>speakers: the speakers (i.e., consultants) who have produced the utterances
+or made the judgments that are being documented.</p>
+</li>
+<li><p>users: modifiable by administrators only, these are the users who can access
+a given OLD web service.</p>
+</li>
+<li><p>elicitation methods: resources for describing how a particular form was
+documented, or elicited.</p>
+</li>
+<li><p>tags: general-purpose tags for categorizing forms and other resources.</p>
+</li>
+<li><p>categories: syntactic (or morphological) categories for classifying forms.
+Categories are used by OLD web services to generate <em>break-gloss-category</em> and
+<em>syntactic category string</em> values for forms.</p>
+</li>
+<li><p>languages: these are the languages of the world, as specified in the
+<a href="http://www-01.sil.org/iso639-3/codes.asp">ISO 639-3</a> standard. This resource
+is read-only.</p>
+</li>
+<li><p>orthographies: sequences of graphs that are used in a given orthographic
+transcription of the object language. Orthographies may be used for automatic
+orthography conversion, though this is not yet implemented.</p>
+</li>
+</ul>
 <h2 id="help-with-the-help-a-data-name-help-with-the-help-a-">Help with the Help<a data-name="help-with-the-help"></a></h2>
 <p>This section describes how to use this help document.</p>
 <p>There are several ways to open this help document. You may click on the
@@ -88,64 +552,9 @@ and scroll to the next match. Press the up arrow key to highlight and scroll to
 the previous match.</p>
 <p>This help text is displayed inside of a movable and resizable dialog widget.
 You can change its width and/or height by clicking and dragging on its borders
-or corners. You can also expand/compress it to its default large and small
-sizes by clicking on the expand/compress button <i class="fa fa-fw
-fa-expand"></i><i class="fa fa-fw fa-compress"></i> at the bottom.</p>
-<h2 id="application-settings-a-data-name-application-settings-a-">Application Settings<a data-name="application-settings"></a></h2>
-<p>At this stage of development, Dative’s application settings allow you to
-do two things:</p>
-<ol>
-<li>Configure servers (e.g., {{FieldDB.FieldDBObject.application.brand}} or OLD servers)</li>
-<li>Change the appearance (i.e., theme) of the application</li>
-</ol>
-<p>A “server” in this context is a {{FieldDB.FieldDBObject.application.brand}} or OLD web service that receives,
-stores, and returns linguistic data. A server is defined by a name, a URL,
-a type (“{{FieldDB.FieldDBObject.application.brand}}” or “OLD”), and potentially a server code.</p>
-<p>To change the active server, simply select one of the existing servers from
-the <em>Active Server</em> select menu.</p>
-<p>To create a new server, click on the “show servers” button (with the
-right-facing caret symbol: <i class="fa fa-fw fa-caret-right"></i>) to reveal
-the existing servers. Then click on the “create a new server” plus-sign (<i
-class="fa fa-fw fa-plus"></i>) button to reveal the interface for creating a
-new server.</p>
-<p>In the new server form, first enter a name for your server. This can be whatever
-you like, whatever will be memorable to you. Then enter the server&#39;s URL, its
-type, and (if it’s a FieldDB-type server) its server code. The appropriate
-server code value that you will want to choose is probably “production.” If you
-do not know which values to enter to create a new server, please contact your
-{{FieldDB.FieldDBObject.application.brand}} or OLD server administrator.</p>
-<p>Note that you do not need to click “Save” here. Dative saves all of your
-application settings changes automatically to your browser&#39;s local storage.</p>
-<h2 id="browsing-forms-a-data-name-browsing-forms-a-">Browsing Forms<a data-name="browsing-forms"></a></h2>
-<p>When you click on the Forms &gt; Browse menu button, enter the keyboard shortcut
-⌃B, or click on a {{FieldDB.FieldDBObject.application.brand}} “activate corpus” button (<i class="fa fa-fw
-fa-toggle-off"></i>), you will be brought to the forms browsing interface.
-This interface displays all of your forms (i.e., data points) in a paginated
-display; that is the forms are split across a number of pages. You may change
-the number of forms displayed per page and can navigate to particular pages
-using the controls provided.</p>
-<p>Each form may be expanded to reveal controls related to it as well as more
-information about it. Click on a form to expand it. You can expand all forms
-on the page by clicking the “expand all” <i class="fa fa-fw
-fa-angle-double-down"></i> button or collapse all forms by clicking on the
-“collapse all” <i class="fa fa-fw fa-angle-double-up"></i> button.</p>
-<h2 id="adding-a-form-a-data-name-adding-a-form-a-">Adding a Form<a data-name="adding-a-form"></a></h2>
-<p>To create a new form, click on the “create a new form” button <i class="fa
-fa-fw fa-plus"></i> from within the “browse forms” interface (or enter the
-keyboard shortcut ⌃A). This will cause the “Add a Form” widget to be displayed
-at the top of the browse forms page. Enter the data for the form (usually
-at minimum a transcription and a translation) and click on the “Add a Form”
-button at the bottom.</p>
-<p>Dative divides the “Add a Form” form into two parts: the primary fields and
-the secondary ones. By default only the primary fields are displayed. You
-may reveal the secondary fields by clicking on the “show secondary fields”
-button <i class="fa fa-fw fa-angle-down"></i> near the top right of the “Add
-a Form” widget.</p>
-<h3 id="modifying-the-form-fields">Modifying the Form Fields</h3>
-<p>WARN: THIS IS NOT IMPLEMENTED YET.</p>
-<p>Dative allows users to control which fields are present on a form. When using
-a {{FieldDB.FieldDBObject.application.brand}} server, the user may define any number of text-based fields,
-i.e., fields whose values are strings of characters.</p>
+or corners. You can also maximize/minimize it by clicking on the
+<i class="fa fa-fw fa-expand"></i> and <i class="fa fa-fw fa-minus"></i>
+buttons, respectively.</p>
 <h2 id="keyboard-shortcuts-a-data-name-keyboard-shortcuts-a-">Keyboard Shortcuts<a data-name="keyboard-shortcuts"></a></h2>
 <p>Dative has keyboard shortcuts for most actions. Some keyboard shortcuts are
 global and work throughout the application, no matter which pages or widgets
@@ -156,7 +565,9 @@ pages or widgets are visible.</p>
 application are associated to keyboard shortcuts. These shortcuts are indicated
 at the righthand side of the menu button. For example, ⌃H at the righthand
 side of the “Home” menu button indicates that the keyboard shortcut for
-navigating to the home page is to hold down the control key and press “H”.</p>
+navigating to the home page is to hold down the control key and press “H”. Note
+that the keyboard shortcuts do not require holding down the Shift button; the
+capitalization is simply a widely used convention in software interfaces.</p>
 <p>The list of global shortcuts is as follows:</p>
 <ul>
 <li><strong>⌃,</strong> open the application settings page</li>
@@ -174,11 +585,13 @@ navigating to the home page is to hold down the control key and press “H”.</
 element on the page (e.g., a button or a text input) will be focused. By
 pressing Tab or Shift+Tab you can move to the next or previous actionable
 element, respectively.</p>
-<h3 id="page-specific-keyboard-shortcuts">Page-specific Keyboard Shortcuts</h3>
+<h3 id="interface-specific-keyboard-shortcuts">Interface-specific Keyboard Shortcuts</h3>
 <p>Certain interfaces (or pages) in Dative have their own keyboard shortcuts.
-These shortcuts are only in effect when the relevant page is open.</p>
-<h4 id="forms-browsing-shortcuts">Forms Browsing Shortcuts</h4>
-<p>In the forms browse page, the following keyboard shortcuts are in effect:</p>
+These shortcuts are only in effect when the relevant interface is open and
+focused.</p>
+<h4 id="resource-browsing-shortcuts">Resource Browsing Shortcuts</h4>
+<p>In all of the resource browse pages, the following keyboard shortcuts are in
+effect:</p>
 <ul>
 <li><strong>↓</strong> expand all forms (i.e., so that the buttons and metadata of each for are
 visible)</li>
@@ -188,28 +601,82 @@ visible)</li>
 <li><strong>l</strong> open the last page of forms</li>
 <li><strong>f</strong> open the first page of forms</li>
 </ul>
-<p>When a particular form is focused, the following shortcuts are activated for
-that particular form:</p>
+<p>When a particular resource is focused, the following shortcuts are activated for
+that particular resource:</p>
 <ul>
-<li><strong>enter/return</strong> expand the form</li>
-<li><strong>escape</strong> collapse the form</li>
-<li><strong>tab</strong> focus the next form</li>
-<li><strong>shift+tab</strong> focus the previous form</li>
+<li><strong>enter/return</strong> expand the resource</li>
+<li><strong>escape</strong> collapse the resource</li>
+<li><strong>space</strong> focus the next resource</li>
+<li><strong>shift+space</strong> focus the previous resource</li>
 </ul>
+<h2 id="frequently-asked-questions-a-data-name-frequently-asked-questions-a-">Frequently Asked Questions<a data-name="frequently-asked-questions"></a></h2>
+<ol>
+<li><p>What is a “form”?</p>
+<ul>
+<li>A form is a linguistic form. It is a general term meant to encompass
+all of the textual data points that you might enter into a linguistic
+fieldwork/ language documentation database. In practice, it may be a
+morpheme, word, phrase, sentence, or even a multi-sentential unit. In
+{{FieldDB.FieldDBObject.application.brand}} applications, the term
+“datum” is sometimes used. These two terms may be considered
+equivalent here.</li>
+</ul>
+</li>
+<li><p>How can I request new features or report bugs?</p>
+<ul>
+<li>At present, the best way to do this is by creating an issue on
+<a href="https://github.com/jrwdunham/dative/issues">Dative&#39;s GitHub issues page</a>.</li>
+</ul>
+</li>
+<li><p>Can I import my existing data into an OLD or
+{{FieldDB.FieldDBObject.application.brand}} web service using Dative?</p>
+<ul>
+<li>At present, no. We are working on import functionality. Stay tuned.</li>
+</ul>
+</li>
+<li><p>Can I make global changes (i.e., bulk edit) to a subset of forms?</p>
+<ul>
+<li>At present, no. We are working on bulk edit functionality. Stay tuned.</li>
+</ul>
+</li>
+<li><p>The way I organize my data is different from the way Dative / the OLD /
+{{FieldDB.FieldDBObject.application.brand}} does. Yet I want to use Dative.
+How can I?</p>
+<ul>
+<li>{{FieldDB.FieldDBObject.application.brand}} allows for a user-defined
+data structure. The OLD will soon also allow users to modify its data
+structure. Dative will also soon provide an interface for modifying these
+data structures. Stay tuned.</li>
+</ul>
+</li>
+<li><p>Are there any video tutorials on how to use Dative?</p>
+<ul>
+<li>Not yet. They&#39;re a comin&#39;.</li>
+</ul>
+</li>
+</ol>
 
 </div>
 <script>
+
 if (FieldDB && FieldDB.FieldDBObject && FieldDB.FieldDBObject.application && FieldDB.FieldDBObject.application.brand) {
-  var replaceVariables = function(content) {
-    content = content.replace(/{{FieldDB.FieldDBObject.application.brand}}/g, FieldDB.FieldDBObject.application.brand)
-                    .replace(/{{FieldDB.FieldDBObject.application.website}}/g, FieldDB.FieldDBObject.application.website);
-    return content;
-  }
-  if ($ && $(".markdown-content")) {
-    $(".markdown-content")
-      .each(function() {
-        $(this).html(replaceVariables($(this).html()));
-      });
-  }
+  var brand = FieldDB.FieldDBObject.application.brand;
+  var website = FieldDB.FieldDBObject.application.website;
+} else {
+  var brand = 'FieldDB';
+  var website = 'https://www.google.ca/webhp?q=dog#safe=active&q=fielddb';
+}
+
+var replaceVariables = function(content) {
+  content = content.replace(/{{FieldDB.FieldDBObject.application.brand}}/g, brand)
+    .replace(/{{FieldDB.FieldDBObject.application.website}}/g, website);
+  return content;
+}
+
+if ($ && $(".markdown-content")) {
+  $(".markdown-content")
+    .each(function() {
+      $(this).html(replaceVariables($(this).html()));
+    });
 }
 </script>
