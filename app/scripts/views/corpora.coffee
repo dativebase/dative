@@ -45,7 +45,7 @@ define [
         if (corpusConnection.dbname == 'public-firstcorpus' || corpusConnection.dbname == 'llinglama-communitycorpus')
           continue
         # corpusConnection.applicationSettings = @applicationSettings
-        corpusModel = new CorpusModel(corpusConnection)
+        corpusModel = new CorpusModel({connection: corpusConnection} )
         @collection.add corpusModel
         newCorpusView = new CorpusView
           model: corpusModel

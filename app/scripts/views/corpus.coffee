@@ -259,7 +259,7 @@ define [
         @editCorpusView.closeGUI()
 
     getContext: ->
-      context = _.extend @model.attributes, isActive: @isActive()
+      context = @model.corpus.toJSON()
       if context.dbname is 'lingllama-communitycorpus'
         context.title = "LingLlama's Community Corpus"
       # The following works with local FieldDB but not with production, as of Jan 11, 2015

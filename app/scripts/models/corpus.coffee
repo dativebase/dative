@@ -29,6 +29,16 @@ define [
 
     initialize: (options) ->
       console.log 'Initializing backbone corpus model with a fielddb corpus model inside of it', this.attributes
+      @corpus = new FieldDB.Corpus(options)
+      if @corpus.connection and @corpus.connection.corpusid 
+        @corpus.id = @corpus.connection.corpusid
+        # @corpus.fetch().then(()=>{
+        #     console.log 'Could cause corpus to re-render, it has more info now.'
+        #   })
+      if not @corpus.title and @corpus.connection.title
+        @corpus.title = @corpus.connection.title
+      if not @corpus.description and @corpus.connection.description
+        @corpus.description = @corpus.connection.description
       # @applicationSettings = options.applicationSettings
       # @dbname = options.dbname
 
