@@ -9,8 +9,8 @@ define [
   # ------------
   #
   # A model for FieldDB corpora. A `CorpusModel` is instantiated with a dbname
-  # for the corpus. This is a unique, spaceless, lowercase name that begins with
-  # its creator's username.
+  # for the corpus. This is a unique, spaceless, lowercase name that is namespaced with
+  # its team's username.
   #
   # A corpus model's data must be retrieved by two requests. (1) retrieves the
   # bulk of the corpus data while (2) returns the users with access to the
