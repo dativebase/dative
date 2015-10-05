@@ -66,14 +66,9 @@ define [
 
     activeServerChanged: ->
       #console.log 'active server has changed says the app settings model'
-      if @get('fieldDBApplication')
-        @get('fieldDBApplication').website = @get('activeServer').get('website')
-        @get('fieldDBApplication').brand = @get('activeServer').get('brand') or
-          @get('activeServer').get('userFriendlyServerName')
-        @get('fieldDBApplication').brandLowerCase =
-          @get('activeServer').get('brandLowerCase') or
-            @get('activeServer').get('serverCode')
-
+      if FieldDB.FieldDBObject.application
+        FieldDB.FieldDBObject.application.connection = @get('activeServer').toJSON();
+        
     activeServerURLChanged: ->
       #console.log 'active server URL has changed says the app settings model'
 
@@ -440,17 +435,8 @@ define [
 
     defaults: ->
 
-      server1Object = new FieldDB.Connection(FieldDB.Connection.defaultConnection('localhost'))
-      server1 =
-        new ServerModel
-          id: @guid()
-          name: server1Object.userFriendlyServerName
-          type: 'FieldDB'
-          url: server1Object.authUrl
-          serverCode: server1Object.serverLabel # should be "localhost"
-          website: server1Object.website
-          corpusServerURL: server1Object.corpusUrl
-
+      server1 = new ServerModel new FieldDB.Connection(FieldDB.Connection.defaultConnection('localhost'))
+      server1.type = 'FieldDB'
       server2 =
         new ServerModel
           id: @guid()
@@ -461,17 +447,8 @@ define [
           corpusServerURL: null
           website: 'http://www.onlinelinguisticdatabase.org'
 
-      server3Object = new FieldDB.Connection(FieldDB.Connection.defaultConnection('lingsync'))
-      server3 =
-        new ServerModel
-          id: @guid()
-          name: server3Object.userFriendlyServerName
-          type: 'FieldDB'
-          url: server3Object.authUrl
-          serverCode: server3Object.serverLabel
-          corpusServerURL: server3Object.corpusUrl
-          website: server3Object.website
-
+      server3 = new ServerModel new FieldDB.Connection(FieldDB.Connection.defaultConnection('lingsync'))
+      server3.type = 'FieldDB'
       server4 =
         new ServerModel
           id: @guid()
