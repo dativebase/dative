@@ -47,6 +47,12 @@ define [
         # corpusConnection.applicationSettings = @applicationSettings
         corpusModel = new CorpusModel(corpusConnection)
         @collection.add corpusModel
+        newCorpusView = new CorpusView
+          model: corpusModel
+          applicationSettings: @applicationSettings.toJSON()
+          activeFieldDBCorpus: @activeFieldDBCorpus
+        @corpusViews.push newCorpusView
+        @render()
 
     getAndFetchCorpusViews: ->
       @collection.each (corpus) =>
@@ -54,7 +60,7 @@ define [
           model: corpus
           applicationSettings: @applicationSettings.toJSON()
           activeFieldDBCorpus: @activeFieldDBCorpus
-        corpus.fetch()
+        # corpus.fetch()
         @corpusViews.push newCorpusView
 
     listenToEvents: ->
