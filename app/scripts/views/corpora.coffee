@@ -41,11 +41,11 @@ define [
         console.log 'Waiting another ' + @exponentialBackoffLoadCorpora + ' seconds for the user to become available' 
         setTimeout((=> @addCorpusModelsToCollection()), @exponentialBackoffLoadCorpora)
         return
-      for corpus in @applicationSettings.get('fieldDBApplication').authentication.user.corpora.collection
-        if (corpus.dbname == 'public-firstcorpus' || corpus.dbname == 'llinglama-communitycorpus')
+      for corpusConnection in @applicationSettings.get('fieldDBApplication').authentication.user.corpora.collection
+        if (corpusConnection.dbname == 'public-firstcorpus' || corpusConnection.dbname == 'llinglama-communitycorpus')
           continue
-        # corpus.applicationSettings = @applicationSettings
-        corpusModel = new CorpusModel(corpus)
+        # corpusConnection.applicationSettings = @applicationSettings
+        corpusModel = new CorpusModel(corpusConnection)
         @collection.add corpusModel
 
     getAndFetchCorpusViews: ->
