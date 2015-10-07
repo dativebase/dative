@@ -17,6 +17,8 @@ define [
       dative-shadowed-widget ui-widget ui-widget-content ui-corner-all'
 
     initialize: (options) ->
+      @resourceName = options.resourceName or 'form'
+      @resourceNamePlural = @utils.pluralize @resourceName
       @iTriggeredVisibilityChange = false
       @resourceName = options?.resourceName or ''
       @activeServerType = @getActiveServerType()
@@ -59,23 +61,25 @@ define [
       name = $target.attr 'name'
       value = $target.val()
       try
-        hiddenFormFields = globals.applicationSettings.get('resources')
-          .forms.fieldsMeta[@activeServerType].hidden
+        hiddenFields = globals.applicationSettings
+          .get('resources')[@resourceNamePlural]
+          .fieldsMeta[@activeServerType].hidden
         if value is 'hidden'
           @$("div.attribute-name.attribute-#{@utils.snake2hyphen name}")
             .addClass 'hidden'
-          if name not in hiddenFormFields
-            hiddenFormFields.push name
+          if name not in hiddenFields
+            hiddenFields.push name
         else if value is 'visible'
           @$("div.attribute-name.attribute-#{@utils.snake2hyphen name}")
             .removeClass 'hidden'
-          if name in hiddenFormFields
-            hiddenFormFields.splice(hiddenFormFields.indexOf(name), 1)
+          if name in hiddenFields
+            hiddenFields.splice(hiddenFields.indexOf(name), 1)
         globals.applicationSettings.save()
         @iTriggeredVisibilityChange = true
-        Backbone.trigger 'fieldVisibilityChange', 'forms', name, value
+        Backbone.trigger 'fieldVisibilityChange', @resourceNamePlural, name, value
       catch
-        console.log 'unable to access the fields metadata for forms'
+        console.log "unable to access the fields metadata for
+          #{@resourceNamePlural}"
 
     # Tell the Help dialog to open itself and search for
     # "<resource-name-plural> settings" and scroll to the second match. WARN:
@@ -97,10 +101,16 @@ define [
 
     getFieldCategories: ->
       try
-        globals.applicationSettings.get('resources')
-          .forms.fieldsMeta[@activeServerType]
+        globals.applicationSettings.get('resources')[@resourceNamePlural]
+          .fieldsMeta[@activeServerType]
       catch
         {}
+
+    # Sub-classes should redefine this method so that it returns an array of
+    # category names that are the keys of an object in the global application
+    # settings model. For example, form fields are categorized into 'igt'
+    # fields, 'secondary' fields, etc.
+    getFieldCategoryNames: -> []
 
     # Return a (case-insensitively) sorted list of the fields of the resource
     # that this settings view is for. Note that these are the *displayable*
@@ -108,14 +118,9 @@ define [
     # are absent.
     getResourceFields: (fieldCategories) ->
       resourceFields = {}
-      fields = []
-        #.concat(fieldCategories.grammaticality or [])
-        .concat(fieldCategories.igt or [])
-        .concat(fieldCategories.translation or [])
-        .concat(fieldCategories.secondary or [])
-        .concat(fieldCategories.readonly or [])
-      for field in fields
-        resourceFields[field] = null
+      for categoryName in @getFieldCategoryNames()
+        for field in fieldCategories[categoryName]
+          resourceFields[field] = null
       resourceFields = _.keys(resourceFields)
         .sort (a, b) -> a.toLowerCase().localeCompare(b.toLowerCase())
 

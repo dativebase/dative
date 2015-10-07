@@ -10,3 +10,10 @@ define [
 
   class FormSettingsView extends SettingsView
 
+    getFieldCategoryNames: -> [
+      'igt'
+      'translation'
+      'secondary'
+      'readonly'
+    ]
+
