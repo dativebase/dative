@@ -58,14 +58,12 @@ define [
         )
         tooltip
 
-    # Get an array of form attributes (form app settings model) for the
-    # specified server type and category (e.g., 'igt' or 'secondary').
+    # Get an array of form attribute metadata (from the app settings model) for
+    # the specified server type and category (e.g., 'igt' or 'secondary').
     getFormAttributes: (serverType, category) ->
-      switch serverType
-        when 'FieldDB' then attribute = 'fieldDBFormCategories'
-        when 'OLD' then attribute = 'oldFormCategories'
       try
-        globals.applicationSettings.get(attribute)[category]
+        globals.applicationSettings.get('resources')
+          .forms.fieldsMeta[serverType][category]
       catch
         console.log "WARNING: could not get an attributes array for
           #{serverType} and #{category}"

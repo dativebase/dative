@@ -110,6 +110,13 @@
 
     <% end %>
 
+    <% if 'settings' not in @excludedActions: %>
+      <button class="settings dative-tooltip"
+              title="<%= @resourceNameHumanReadable() %> settings"
+        ><i class='fa fa-gears fa-fw'></i>
+      </button>
+    <% end %>
+
 
   </div>
 
@@ -125,6 +132,11 @@
 
   <% if 'controls' not in @excludedActions: %>
     <div class='controls-widget dative-widget-center
+      dative-shadowed-widget ui-widget ui-widget-content ui-corner-all'></div>
+  <% end %>
+
+  <% if 'settings' not in @excludedActions: %>
+    <div class='settings-widget dative-widget-center
       dative-shadowed-widget ui-widget ui-widget-content ui-corner-all'></div>
   <% end %>
 

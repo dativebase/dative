@@ -597,129 +597,140 @@ define [
 
       version: 'da'
 
-      # These objects control how particular FieldDB form (i.e., datum) fields
-      # are displayed. Note that FieldDB datumFields can be arbitrarily defined
-      # by users so these fields may not all be present. This simply causes these
-      # fields to be ordered (in both display and input views) as shown here,
-      # if the fields exist. This will need to be made user-configurable and
-      # corpus-specific in the future.
-      fieldDBFormCategories:
+      # This object contains metadata about Dative resources, i.e., forms,
+      # files, etc.
+      # TODO: resource display settings (e.g., `formsDisplaySettings` above)
+      # should be migrated here.
+      resources:
 
-        # This is the set of form attributes that are considered by Dative to
-        # denote grammaticalities.
-        grammaticality: [
-          'judgement'
-        ]
+        forms:
 
-        # IGT FieldDB form attributes.
-        # The returned array defines the "IGT" attributes of a FieldDB form (along
-        # with their order). These are those that are aligned into columns of
-        # one word each when displayed in an IGT view.
-        igt: [
-          'utterance'
-          'morphemes'
-          'gloss'
-        ]
+          # These objects define metadata on the fields of form resources.
+          # Note that there are separate metadata objects for OLD fields and
+          # for FieldDB fields.
+          fieldsMeta:
 
-        # This is the set of form attributes that are considered by Dative to
-        # denote a translation.
-        translation: [
-          'translation'
-        ]
+            OLD:
 
-        # Secondary FieldDB form attributes.
-        # The returned array defines the order of how the secondary attributes
-        # are displayed. It is defined in models/application-settings because
-        # it should ultimately be user-configurable.
-        # QUESTION: @cesine: how is the elicitor of a FieldDB datum/session
-        # documented?
-        # TODO: `audioVideo`, `images`
-        secondary: [
-          'syntacticCategory'
-          'comments'
-          'tags'
-          'dateElicited' # session field
-          'language' # session field
-          'dialect' # session field
-          'consultants' # session field
-          'enteredByUser'
-          'dateEntered'
-          'modifiedByUser'
-          'dateModified'
-          'syntacticTreeLatex'
-          'validationStatus'
-          'timestamp' # make this visible?
-          'id'
-        ]
+              grammaticality: [
+                'grammaticality'
+              ]
 
-        # These read-only fields will not be given input fields in add/update
-        # interfaces.
-        readonly: [
-          'enteredByUser'
-          'dateEntered'
-          'modifiedByUser'
-          'dateModified'
-        ]
+              # IGT OLD Form Attributes.
+              igt: [
+                'narrow_phonetic_transcription'
+                'phonetic_transcription'
+                'transcription'
+                'morpheme_break'
+                'morpheme_gloss'
+              ]
 
-      # These objects are valuated by arrays that determine how OLD form fields
-      # are displayed. Note that the OLD case is simpler than the FieldDB one
-      # since the OLD data structure is (at present) fixed.
-      oldFormCategories:
+              # Note: this is currently not being used (just being consistent
+              # with the FieldDB `fieldsMeta` object below)
+              translation: [
+                'translations'
+              ]
 
-        grammaticality: [
-          'grammaticality'
-        ]
+              # Secondary OLD Form Attributes.
+              secondary: [
+                'syntactic_category_string'
+                'break_gloss_category'
+                'comments'
+                'speaker_comments'
+                'elicitation_method'
+                'tags'
+                'syntactic_category'
+                'date_elicited'
+                'speaker'
+                'elicitor'
+                'enterer'
+                'datetime_entered'
+                'modifier'
+                'datetime_modified'
+                'verifier'
+                'source'
+                'files'
+                #'collections' # Does the OLD provide the collections when the forms resource is fetched?
+                'syntax'
+                'semantics'
+                'status'
+                'UUID'
+                'id'
+              ]
 
-        # IGT OLD Form Attributes.
-        igt: [
-          'narrow_phonetic_transcription'
-          'phonetic_transcription'
-          'transcription'
-          'morpheme_break'
-          'morpheme_gloss'
-        ]
+              readonly: [
+                'syntactic_category_string'
+                'break_gloss_category'
+                'enterer'
+                'datetime_entered'
+                'modifier'
+                'datetime_modified'
+                'UUID'
+                'id'
+              ]
 
-        # Note: this is currently not being used (just being consistent with
-        # FieldDB above.)
-        translation: [
-          'translations'
-        ]
+              # This array may contain the names of OLD form attributes that should
+              # be hidden. This is the (for now only client-side-stored) data
+              # structure that users manipulate in the settings widget of a
+              # `FormView` instance.
+              hidden: []
 
-        # Secondary OLD Form Attributes.
-        secondary: [
-          'syntactic_category_string'
-          'break_gloss_category'
-          'comments'
-          'speaker_comments'
-          'elicitation_method'
-          'tags'
-          'syntactic_category'
-          'date_elicited'
-          'speaker'
-          'elicitor'
-          'enterer'
-          'datetime_entered'
-          'modifier'
-          'datetime_modified'
-          'verifier'
-          'source'
-          'files'
-          #'collections' # Does the OLD provide the collections when the forms resource is fetched?
-          'syntax'
-          'semantics'
-          'status'
-          'UUID'
-          'id'
-        ]
+            FieldDB:
 
-        readonly: [
-          'syntactic_category_string'
-          'break_gloss_category'
-          'enterer'
-          'datetime_entered'
-          'modifier'
-          'datetime_modified'
-          'UUID'
-          'id'
-        ]
+              # This is the set of form attributes that are considered by
+              # Dative to denote grammaticalities.
+              grammaticality: [
+                'judgement'
+              ]
+
+              # IGT FieldDB form attributes.
+              # The returned array defines the "IGT" attributes of a FieldDB
+              # form (along with their order). These are those that are aligned
+              # into columns of one word each when displayed in an IGT view.
+              igt: [
+                'utterance'
+                'morphemes'
+                'gloss'
+              ]
+
+              # This is the set of form attributes that are considered by
+              # Dative to denote a translation.
+              translation: [
+                'translation'
+              ]
+
+              # Secondary FieldDB form attributes.
+              # The returned array defines the order of how the secondary
+              # attributes are displayed. It is defined in
+              # models/application-settings because it should ultimately be
+              # user-configurable.
+              # QUESTION: @cesine: how is the elicitor of a FieldDB
+              # datum/session documented?
+              # TODO: `audioVideo`, `images`
+              secondary: [
+                'syntacticCategory'
+                'comments'
+                'tags'
+                'dateElicited' # session field
+                'language' # session field
+                'dialect' # session field
+                'consultants' # session field
+                'enteredByUser'
+                'dateEntered'
+                'modifiedByUser'
+                'dateModified'
+                'syntacticTreeLatex'
+                'validationStatus'
+                'timestamp' # make this visible?
+                'id'
+              ]
+
+              # These read-only fields will not be given input fields in
+              # add/update interfaces.
+              readonly: [
+                'enteredByUser'
+                'dateEntered'
+                'modifiedByUser'
+                'dateModified'
+              ]
 

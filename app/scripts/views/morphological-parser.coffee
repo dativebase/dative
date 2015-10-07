@@ -63,7 +63,7 @@ define [
 
     resourceName: 'morphologicalParser'
 
-    excludedActions: ['history', 'data']
+    excludedActions: ['history', 'data', 'settings']
 
     controlsViewClass: MorphologicalParserControlsView
 

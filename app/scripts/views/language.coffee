@@ -31,6 +31,7 @@ define [
       'controls'
       'data'
       'update' # you can't update read-only language resources
+      'settings'
     ]
 
     getHeaderTitle: -> @model.get 'Id'

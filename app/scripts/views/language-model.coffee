@@ -110,7 +110,7 @@ define [
       generate_succeeded: BooleanIconFieldDisplayView
       rare_delimiter: RareDelimiterFieldDisplayView
 
-    excludedActions: ['history', 'data']
+    excludedActions: ['history', 'data', 'settings']
 
     controlsViewClass: LanguageModelControlsView
 

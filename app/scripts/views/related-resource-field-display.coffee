@@ -67,7 +67,9 @@ define [
     # Return an in-line CSS style to hide the HTML of an empty form attribute
     # Note the use of `=>` so that the ECO template knows to use this view's
     # context.
-    shouldBeHidden: ->
+    # TODO: why was this method redefined exactly as it is in the superclass.
+    # This can probably be deleted.
+    __shouldBeHidden__: ->
       value = @context.value
       if _.isDate(value) or _.isNumber(value) or _.isBoolean(value)
         false
@@ -83,6 +85,7 @@ define [
     listenToEvents: ->
       @stopAndRelisten()
       @listenTo @model, "change:#{@attributeName}", @refresh
+      @listenTo Backbone, 'fieldVisibilityChange', @fieldVisibilityChange
 
     # TODO: delete all this stuff. It has all now been moved to `ResourceView`,
     # which is where it belongs ...

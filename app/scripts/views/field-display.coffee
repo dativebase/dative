@@ -95,6 +95,11 @@ define [
     listenToEvents: ->
       @stopAndRelisten()
       @listenTo @model, 'change', @refresh
+      @listenTo Backbone, 'fieldVisibilityChange', @fieldVisibilityChange
+
+    fieldVisibilityChange: (resource, attribute, visibility) ->
+      if resource is @resource and attribute is @attribute
+        @visibilityAnimate()
 
     # Refresh the field display: essentially, make the display reflect the
     # model state.
@@ -114,6 +119,18 @@ define [
       else
         @$el.show()
 
+    visibilityAnimate: ->
+      if @shouldBeHidden()
+        if not @$el.is(':visible') then @$el.show()
+        @$el.slideUp
+          complete: =>
+            @model.trigger 'fieldVisibilityChanged'
+      else
+        if @$el.is(':visible') then @$el.hide()
+        @$el.slideDown
+          complete: =>
+            @model.trigger 'fieldVisibilityChanged'
+
     renderLabelView: ->
       @labelView.render()
       @rendered @labelView
@@ -126,13 +143,21 @@ define [
     # Note the use of `=>` so that the ECO template knows to use this view's
     # context.
     shouldBeHidden: ->
-      value = @context.value
-      if _.isDate(value) or _.isNumber(value) or _.isBoolean(value)
-        false
-      else if _.isEmpty(value) or @isValueless(value)
+      try
+        hidden = globals.applicationSettings.get('resources')[@resource]
+          .fieldsMeta[@activeServerType].hidden
+      catch
+        hidden = []
+      if @attribute in hidden
         true
       else
-        false
+        value = @context.value
+        if _.isDate(value) or _.isNumber(value) or _.isBoolean(value)
+          false
+        else if _.isEmpty(value) or @isValueless(value)
+          true
+        else
+          false
 
     # Returns `true` only if thing is an object all of whose values are either
     # `null` or empty strings.

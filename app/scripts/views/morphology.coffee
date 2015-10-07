@@ -89,7 +89,7 @@ define [
       rules_corpus: RulesCorpusDisplayView
       compile_succeeded: BooleanIconFieldDisplayView
 
-    excludedActions: ['history', 'data']
+    excludedActions: ['history', 'data', 'settings']
 
     controlsViewClass: MorphologyControlsView
 

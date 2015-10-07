@@ -1,8 +1,9 @@
 define [
   './form-base'
   './form-previous-version'
+  './form-settings'
   './../models/form'
-], (FormBaseView, FormPreviousVersionView, FormModel) ->
+], (FormBaseView, FormPreviousVersionView, FormSettingsView, FormModel) ->
 
   # Form View
   # ---------
@@ -27,6 +28,9 @@ define [
 
     # Forms have histories, so we remove 'history' from the excluded actions.
     excludedActions: ['controls', 'data']
+
+    # Forms have settings.
+    settingsViewClass: FormSettingsView
 
     listenToEvents: ->
       super

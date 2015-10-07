@@ -124,6 +124,7 @@ define [
       'data'     # file resources have this, for accessing their file data.
       'delete'
       'duplicate'
+      'settings'
     ]
 
     mainPageViewable: -> false

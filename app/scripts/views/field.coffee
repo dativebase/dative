@@ -118,7 +118,16 @@ define [
 
     # Make this method evaluate to false under those conditions when this view
     # should be hidden.
-    visibilityCondition: -> true
+    visibilityCondition: ->
+      try
+        hidden = globals.applicationSettings.get('resources')[@resource]
+          .fieldsMeta[@activeServerType].hidden
+      catch
+        hidden = []
+      if @attribute in hidden
+        false
+      else
+        true
 
     # Refresh re-renders all of the input views. This is called by the form add
     # widget when the “clear form” button is clicked.
@@ -135,6 +144,11 @@ define [
       @listenForValidationErrors()
       for crucialAttribute in @getCrucialAttributes()
         @listenTo @model, "change:#{crucialAttribute}", @crucialAttributeChanged
+      @listenTo Backbone, 'fieldVisibilityChange', @fieldVisibilityChange
+
+    fieldVisibilityChange: (resource, attribute, visibility) ->
+      if resource is @resource and attribute is @attribute
+        @crucialAttributeChanged()
 
     # Override this to return an array of model attributes. This will cause this
     # field view's visibility to vary depending on characteristics of the

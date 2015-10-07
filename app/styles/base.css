@@ -2355,3 +2355,57 @@ div.big-button-text
   width: 90%;
 }
 
+.attribute-visibility-container
+{
+  margin: 3em;
+}
+
+.attribute-visibility-container .attribute-name
+{
+  /* text-align: right; */
+}
+
+.attribute-visibility-container .attribute-visibility
+{
+  vertical-align: top;
+}
+
+.attribute-visibility-container .attribute-name
+{
+  width: 75%;
+  margin-left: 1em;
+}
+
+.attribute-visibility-container .attribute-visibility
+{
+  width: 20%;
+}
+
+.attribute-visibility-container .attribute-name,
+.attribute-visibility-container .attribute-visibility
+{
+  display: inline-block;
+}
+
+.attribute-visibility-container .hidden
+{
+  opacity: 0.4;
+}
+
+.attribute-visibility-container .attribute-name span
+{
+  position: relative;
+  top: 0.25em;
+}
+
+.attribute-visibilities-attributes
+{
+  max-height: 20em;
+  overflow-y: scroll;
+}
+
+.attribute-visibilities p
+{
+  margin: 0.5em 0;
+}
+

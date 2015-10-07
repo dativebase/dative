@@ -51,6 +51,7 @@ define [
       @getUpdateView()
       @updateViewRendered = false
       @getControlsView()
+      @getSettingsView()
       @getFileDataView()
 
     getUpdateView: ->
@@ -75,18 +76,27 @@ define [
           resourceName: @resourceName
         @controlsViewRendered = false
 
+    getSettingsView: ->
+      if 'settings' not in @excludedActions
+        @settingsView = new @settingsViewClass
+          model: @model
+          resourceName: @resourceName
+        @settingsViewRendered = false
+
     # An array of actions that are not relevant to this resource, e.g.,
     # 'history', and 'controls'.
     # WARN: if you remove 'controls' from this array, then you MUST assign
     # a working "controls" view to `@controlsViewClass`. Same thing with 'data'
-    # and `@fileDataViewClass`.
+    # and `@fileDataViewClass` and 'settings' and `@settingsViewClass`.
     excludedActions: [
       'history'  # forms have this, since everything is version controlled.
       'controls' # phonologies have this, for, e.g., phonologizing.
       'data'     # file resources have this, for accessing their file data.
+      'settings' # form resources have settings, e.g., for input field visibility.
     ]
 
     controlsViewClass: null
+    settingsViewClass: null
     fileDataViewClass: null
 
     getUpdateViewType: -> if @model.get('id') then 'update' else 'add'
@@ -117,6 +127,7 @@ define [
         secondaryDataVisible: false # comments, tags, etc.
         updateViewVisible: false
         controlsViewVisible: false
+        settingsViewVisible: false
         fileDataViewVisible: false
         searchPatternsObject: null
       _.extend defaults, options
@@ -160,6 +171,9 @@ define [
       if 'controls' not in @excludedActions
         @listenTo @controlsView, "controlsView:hide",
           @hideControlsViewAnimate
+      if 'settings' not in @excludedActions
+        @listenTo @settingsView, "settingsView:hide",
+          @hideSettingsViewAnimate
       if 'data' not in @excludedActions
         @listenTo @fileDataView, "fileDataView:hide",
           @hideFileDataViewAnimate
@@ -213,6 +227,7 @@ define [
       'click .delete-resource': 'deleteConfirm'
       'click .export-resource': 'exportResource'
       'click .controls': 'toggleControlsViewAnimate'
+      'click .settings': 'toggleSettingsViewAnimate'
       'click .file-data': 'toggleFileDataViewAnimate'
       'click .header-title-content': 'viewResourceInPage'
 
@@ -413,6 +428,8 @@ define [
         @controlsViewVisibility()
       if 'data' not in @excludedActions
         @fileDataViewVisibility()
+      if 'settings' not in @excludedActions
+        @settingsViewVisibility()
 
     # Make the header visible, or not, depending on state.
     headerVisibility: ->
@@ -667,6 +684,7 @@ define [
     # <Enter> on a closed resource opens it, <Esc> on an open resource closes
     # it.
     keydown: (event) ->
+      # TODO: comma keydown should open resource settings
       switch event.which
         when 27
           if @addUpdateType is 'add'
@@ -1032,6 +1050,79 @@ define [
         @hideControlsViewAnimate()
       else
         @showControlsViewAnimate()
+
+
+    # Settings View
+    ############################################################################
+
+    # Make the settings view visible, or not, depending on state.
+    settingsViewVisibility: ->
+      if @settingsViewVisible
+        @showSettingsView()
+      else
+        @hideSettingsView()
+
+    setSettingsButtonStateOpen: -> @$('.settings').button 'disable'
+
+    setSettingsButtonStateClosed: -> @$('.settings').button 'enable'
+
+    # Render the settings view.
+    renderSettingsView: ->
+      @settingsView.setElement @$('.settings-widget').first()
+      @settingsView.render()
+      @settingsViewRendered = true
+      @rendered @settingsView
+
+    onClose: ->
+      @updateViewRendered = false
+      @settingsViewRendered = false
+      @fileDataViewRendered = false
+
+    showSettingsView: ->
+      if not @settingsViewRendered then @renderSettingsView()
+      @settingsViewVisible = true
+      @setSettingsButtonStateOpen()
+      @$('.settings-widget').first().show
+        complete: =>
+          @showFull()
+          Backbone.trigger "add#{@resourceNameCapitalized}WidgetVisible"
+          @focusFirstSettingsViewTextarea()
+
+    hideSettingsView: ->
+      @settingsViewVisible = false
+      @setSettingsButtonStateClosed()
+      @$('.settings-widget').first().hide()
+
+    toggleSettingsView: ->
+      if @settingsViewVisible
+        @hideSettingsView()
+      else
+        @showSettingsView()
+
+    showSettingsViewAnimate: ->
+      if not @settingsViewRendered then @renderSettingsView()
+      @settingsViewVisible = true
+      @setSettingsButtonStateOpen()
+      @$('.settings-widget').first().slideDown
+        complete: =>
+          @showFullAnimate()
+          Backbone.trigger "showSettingsViewVisible"
+          @focusFirstSettingsViewTextarea()
+
+    focusFirstSettingsViewTextarea: ->
+      @$('.settings-widget textarea').first().focus()
+
+    hideSettingsViewAnimate: ->
+      @settingsViewVisible = false
+      @setSettingsButtonStateClosed()
+      @$('.settings-widget').first().slideUp
+        complete: => @$el.focus()
+
+    toggleSettingsViewAnimate: ->
+      if @settingsViewVisible
+        @hideSettingsViewAnimate()
+      else
+        @showSettingsViewAnimate()
 
 
     # File Data View

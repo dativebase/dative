@@ -204,6 +204,7 @@ define [
       'history'
       'controls'
       'duplicate'
+      'settings'
     ]
 
     fileDataViewClass: FileDataView

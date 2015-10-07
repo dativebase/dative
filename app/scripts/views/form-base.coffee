@@ -107,6 +107,27 @@ define [
       @setAttributeClasses()
       @events['click .morpheme-link'] = 'morphemeLinkClicked'
 
+    listenToEvents: ->
+      super
+      @listenTo Backbone, 'fieldVisibilityChange', @fieldVisibilityChange
+
+    # Return the object of arrays that categorize the fields of a forms
+    # resource, e.g., into IGT fields, visible fields, etc.
+    getFieldCategories: ->
+      try
+        globals.applicationSettings.get('resources')
+          .forms.fieldsMeta[@activeServerType]
+      catch
+        {}
+
+    fieldVisibilityChange: (resource, fieldName, visibilityValue) ->
+      fieldCategories = @getFieldCategories()
+      igtFields = fieldCategories.igt or []
+      if resource is 'forms' and fieldName in igtFields
+        @listenToOnce @model, 'fieldVisibilityChanged', @igtFieldVisibilityChanged
+
+    igtFieldVisibilityChanged: -> @interlinearize true
+
     # A user has clicked on a morpheme link so we cause that morpheme (or those
     # morphemes) to be displayed using one or more FormViews in one or more
     # dialogs.
@@ -262,14 +283,12 @@ define [
       tags: ArrayOfRelatedTagsFieldDisplayView
       files: ArrayOfRelatedFilesFieldDisplayView
 
-    # Get an array of form attributes (form app settings model) for the
-    # specified server type and category (e.g., 'igt' or 'secondary').
+    # Get an array of form attribute metadata (from the app settings model) for
+    # the specified server type and category (e.g., 'igt' or 'secondary').
     getFormAttributes: (serverType, category) ->
-      switch serverType
-        when 'FieldDB' then attribute = 'fieldDBFormCategories'
-        when 'OLD' then attribute = 'oldFormCategories'
       try
-        globals.applicationSettings.get(attribute)[category]
+        globals.applicationSettings.get('resources')
+          .forms.fieldsMeta[serverType][category]
       catch
         console.log "WARNING: could not get an attributes array for
           #{serverType} and #{category}"
@@ -319,8 +338,13 @@ define [
     # Transform the display of the form IGT attributes into an interlinear,
     # columnarly aligned display. This is done by creating a <table> for each
     # multi-field line in the IGT display.
-    interlinearize: ->
-
+    # Setting the `showIGTFields` param to `true` will result in the default
+    # IGT field display views being made visible prior to the real
+    # interlinearization transformation. This is usually not necessary because
+    # these field views are, in general, visible prior to interlinearization;
+    # however, when the visibility settings are being altered, then this
+    # re-displaying is necessary.
+    interlinearize: (showIGTFields=false) ->
       @labelWidth = null
 
       # Params
@@ -331,6 +355,14 @@ define [
 
       # Get info about IGT data (`igtMap`) and the longest word count (`wordCount`)
       [igtMap, wordCount] = @getIGTWords()
+
+      # Show the IGT fields. Note that we call `visibility` on the primary
+      # field display views so that the empty ones will be re-hidden and will
+      # not clutter up the IGT display.
+      if showIGTFields
+        @showIGTFields igtMap
+        for displayView in @primaryDisplayViews
+          displayView.visibility()
 
       # If we only have one word, then there is no point in creating an
       # interlinear display.
@@ -445,15 +477,21 @@ define [
           ("<div class='igt-word'>#{w}</div>" for w in vector.words)
         wrappedValue = wrappedValue.join ''
         $igtLine = @$(vector.selector).first()
+
+        # The regex-replace here removes any `.igt-word`-classed <div>s in the
+        # value. This is necessary because sometimes changing the field
+        # displays can allow them to slip in.
         vector.originalValue = $igtLine.html()
+          .replace(/<div class="igt-word">(.+?)<\/div>/g, '$1 ').trim()
+
         $igtLine.html wrappedValue
       igtMap
 
     # Unwrap the words that we had previously wrapped.
     unwrapIGTWords: (igtMap) ->
       for attribute, vector of igtMap
-        @$(vector.selector)
-          .first().html vector.originalValue
+        @$(vector.selector).first()
+          .html vector.originalValue
           .css 'white-space', 'normal'
 
     # A continuation of the `interlinearize` method meant to be called after a
@@ -475,13 +513,15 @@ define [
           @labelWidth = 181.8
 
       # Remove any information about IGT fields that are hidden.
+      originalIGTMap = igtMap
       igtMap = @removeEmptyIGTLines igtMap
 
       # If there is only one IGT field with a value, then we should also
       # break from interlinearizing.
-      # TODO: we should also remove the <div>-wrapping performed above.
       if _.keys(igtMap).length < 2
         @unwrapIGTWords igtMap
+        @clearIGTTables()
+        @linksAndPatternMatchesOnDefaultFieldDisplays originalIGTMap
         return
 
       # Get an object that maps word indices to the longest word (cell) with
@@ -560,6 +600,9 @@ define [
         leftIndent = index * @igtRowStepIndent
       else
         leftIndent = @igtMaxIndentations * @igtRowStepIndent
+
+    clearIGTTables: ->
+      $('div.igt-tables-container').remove()
 
     # Write the IGT data to the DOM as a series of IGT tables. There is one
     # table for each line of IGT, i.e., one table for each columnarly aligned
@@ -900,6 +943,17 @@ define [
       @$('.dative-field-display').each (index, element) =>
         $element = @$ element
         if $element.has(igtClasses).length then $element.hide()
+
+    # Show the standard field displays for the IGT fields.
+    showIGTFields: (igtMap) ->
+      # TODO: we should actually just tell the relevant IGT views to show
+      # themselves; however, this requires keeping an attribute-based dict to
+      # them in the form superview, which we currently don't do ...
+      igtClasses = (".dative-field-display-representation-container >
+        .#{v.className}" for v in _.values igtMap).join ', '
+      @$('.dative-field-display').each (index, element) =>
+        $element = @$ element
+        if $element.has(igtClasses).length then $element.show()
 
 
     # Keys are the CamelCase names of resources that forms have relations to

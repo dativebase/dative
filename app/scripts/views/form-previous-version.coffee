@@ -22,6 +22,7 @@ define [
       'history'
       'data'
       'controls'
+      'settings'
     ]
 
     resourceNameHumanReadable: ->

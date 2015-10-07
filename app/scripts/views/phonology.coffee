@@ -34,7 +34,7 @@ define [
           if not @addUpdateResourceWidgetHasFocus()
             @$('textarea[name=apply-down]').first().focus()
 
-    excludedActions: ['history', 'data']
+    excludedActions: ['history', 'data', 'settings']
 
     controlsViewClass: PhonologyControlsView
 

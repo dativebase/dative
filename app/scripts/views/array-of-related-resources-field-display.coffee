@@ -51,6 +51,7 @@ define [
     listenToEvents: ->
       @stopAndRelisten()
       @listenTo @model, "change:#{@attributeName}", @refresh
+      @listenTo Backbone, 'fieldVisibilityChange', @fieldVisibilityChange
 
     # TODO: delete all this stuff. It has all now been moved to `ResourceView`,
     # which is where it belongs ...

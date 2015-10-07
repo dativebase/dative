@@ -1,0 +1,82 @@
+<div class="dative-widget-header ui-widget-header ui-corner-top">
+
+  <div class='dative-widget-header-title container-center'
+    ><%= @headerTitle %></div>
+
+  <div class='button-container-left'>
+
+    <button class="hide-settings-widget dative-tooltip"
+            title="hide this <%= @resourceName %> settings widget">
+      <i class='fa fa-times fa-fw'></i>
+    </button>
+
+  </div>
+
+  <div class='button-container-right'>
+
+    <span class="spinner-container"></span>
+
+    <button class='settings-help dative-tooltip'
+            title='help with using the settings of this
+              <%= @resourceName %>'
+    ><i class='fa fa-fw fa-question'></i>
+    </button>
+
+  </div>
+
+</div>
+
+<div class="dative-widget-body">
+
+    <div class="settings-container ">
+
+        <div class="attribute-visibilities dative-widget-center">
+
+            <h1>Field Visibility</h1>
+
+            <p>Control the visibility of <%= @resourceName %> fields.</p>
+
+            <div class="attribute-visibilities-attributes">
+
+            <% for attribute in @resourceFields: %>
+                <div class="attribute-visibility-container dative-widget-center">
+
+                    <div class='attribute-visibility
+                        attribute-visibility-<%= @utils.snake2hyphen attribute %>'
+                     ><select name='<%= attribute %>'
+                              class='attribute-visibility-select'>
+                            <% if attribute in @fieldCategories.hidden: %>
+                                <option value='visible'>visible</option>
+                                <option value='hidden' selected>hidden</option>
+                            <% else: %>
+                                <option value='visible' selected>visible</option>
+                                <option value='hidden'>hidden</option>
+                            <% end %>
+                        </select>
+                    </div>
+
+                    <% if attribute in @fieldCategories.hidden: %>
+                        <div class='attribute-name hidden large-unicode-font
+                                    attribute-<%= @utils.snake2hyphen attribute %>'>
+                            <span><%= @utils.snake2regular attribute %></span>
+                        </div>
+                    <% else: %>
+                        <div class='attribute-name large-unicode-font
+                                    attribute-<%= @utils.snake2hyphen attribute %>'>
+                            <span><%= @utils.snake2regular attribute %></span>
+                        </div>
+                    <% end %>
+
+                </div>
+            <% end %>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+

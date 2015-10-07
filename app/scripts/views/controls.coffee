@@ -35,7 +35,20 @@ define [
 
     events:
       'click button.hide-controls-widget': 'hideSelf'
-      'keydown':                                   'keydown'
+      'click button.controls-help':        'openControlsHelp'
+      'keydown':                           'keydown'
+
+    # Tell the Help dialog to open itself and search for
+    # "<resource-name-plural> controls" and scroll to the second match. WARN:
+    # this is brittle because if the help HTML changes, then the second match
+    # may not be what we want...
+    openControlsHelp: ->
+      searchTerm = "#{@utils.snake2regular @resourceName} controls"
+      Backbone.trigger(
+        'helpDialog:openTo',
+        searchTerm: searchTerm
+        scrollToIndex: 1
+      )
 
     render: ->
       @html()

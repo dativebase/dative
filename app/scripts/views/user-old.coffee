@@ -67,6 +67,7 @@ define [
           'history'
           'controls'
           'data'
+          'settings'
         ]
       else if @imAdminOrImResource()
         @excludedActions = [

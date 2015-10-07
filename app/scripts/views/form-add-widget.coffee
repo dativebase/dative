@@ -208,15 +208,13 @@ define [
       readonlyAttributes = @getFormAttributes @activeServerType, 'readonly'
       (a for a in secondaryAttributes when a not in readonlyAttributes)
 
-    # Get an array of form attributes (form app settings model) for the
+    # Get an array of form attributes (from the app settings model) for the
     # specified server type and category (e.g., 'igt' or 'secondary').
     # TODO: remove code duplication from form-handler-base.coffee.
     getFormAttributes: (serverType, category) ->
-      switch serverType
-        when 'FieldDB' then attribute = 'fieldDBFormCategories'
-        when 'OLD' then attribute = 'oldFormCategories'
       try
-        globals.applicationSettings.get(attribute)[category]
+        globals.applicationSettings.get('resources')
+          .forms.fieldsMeta[serverType][category]
       catch
         console.log "WARNING: could not get an attributes array for
           #{serverType} and #{category}"
