@@ -221,7 +221,7 @@ define [
           term = term[...-1]
         regex = @escapeRegexChars(term).replace(/_/g, '.').replace(/%/g, '.*')
       else if relation is '='
-        regex = "^#{term}$"
+        regex = "^#{@escapeRegexChars term}$"
       else if relation is 'in'
         regex = "(?:^#{term.join ')$|(?:^'})$"
       else
