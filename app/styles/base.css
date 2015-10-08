@@ -1393,7 +1393,8 @@ div.dative-display
 }
 
 .dative-help-dialog .help-content strong,
-.html-snippet strong
+.html-snippet strong,
+.parser-settings span.bold
 {
   font-weight: bold;
 }
@@ -2398,14 +2399,36 @@ div.big-button-text
   top: 0.25em;
 }
 
-.attribute-visibilities-attributes
+.attribute-visibilities-attributes,
+.parser-settings
 {
   max-height: 20em;
   overflow-y: scroll;
+  margin-top: 0.5em;
 }
 
 .attribute-visibilities p
 {
   margin: 0.5em 0;
+}
+
+.settings-container p
+{
+  display: inline-block;
+}
+
+.settings-container h1
+{
+  margin-bottom: 0.3em;
+}
+
+.parser-settings span.ui-selectmenu-button
+{
+  vertical-align: middle;
+}
+
+div.parser-task-container
+{
+  margin: 1em 0.5em;
 }
 

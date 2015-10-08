@@ -7,7 +7,7 @@ define [
   # Settings View
   # -------------
   #
-  # View for viewing and altering the settingsof a resource. At the moment, the
+  # View for viewing and altering the settings of a resource. At the moment, the
   # settings simply govern which attribute fields are visible.
 
   class SettingsView extends BaseView
@@ -22,6 +22,7 @@ define [
       @iTriggeredVisibilityChange = false
       @resourceName = options?.resourceName or ''
       @activeServerType = @getActiveServerType()
+      @attributeVisibilitiesVisible = false
       @listenToEvents()
 
     listenToEvents: ->
@@ -52,6 +53,8 @@ define [
       'keydown':                           'keydown'
       'click button.settings-help':        'openSettingsHelp'
       'selectmenuchange':                  'visibilitySettingChanged'
+      'click button.toggle-attribute-visibilities':
+        'toggleAttributeVisibilities'
 
     # When the user changes the selectmenu value for a field, we alter the
     # `hidden` array for that resource in `globals.applicationSettings`
@@ -97,6 +100,7 @@ define [
       @html()
       @guify()
       @listenToEvents()
+      @attributeVisibilitiesVisibility()
       @
 
     getFieldCategories: ->
@@ -124,11 +128,13 @@ define [
       resourceFields = _.keys(resourceFields)
         .sort (a, b) -> a.toLowerCase().localeCompare(b.toLowerCase())
 
+    getHeaderTitle: -> 'Settings'
+
     html: ->
       fieldCategories = @getFieldCategories()
       context =
         resourceName: @resourceName
-        headerTitle: 'Settings'
+        headerTitle: @getHeaderTitle()
         activeServerType: @activeServerType
         resourceFields: @getResourceFields fieldCategories
         utils: @utils
@@ -139,13 +145,15 @@ define [
       @fixRoundedBorders() # defined in BaseView
       @$el.css 'border-color': @constructor.jQueryUIColors().defBo
       @$('button').button()
-      @$('.attribute-visibility select').selectmenu width: '100%'
+      @$('select').selectmenu width: 'auto'
       @tooltipify()
 
     tooltipify: ->
       @$('.button-container-right .dative-tooltip')
         .tooltip position: @tooltipPositionRight('+20')
       @$('.button-container-left .dative-tooltip')
+        .tooltip position: @tooltipPositionLeft('-20')
+      @$('.dative-widget-body .dative-tooltip')
         .tooltip position: @tooltipPositionLeft('-20')
 
     # The resource super-view will handle this hiding.
@@ -171,4 +179,30 @@ define [
 
     stopSpin: (selector='.spinner-container') ->
       @$(selector).spin false
+
+    attributeVisibilitiesVisibility: ->
+      if @attributeVisibilitiesVisible
+        @$('.attribute-visibilities-attributes').show()
+      else
+        @$('.attribute-visibilities-attributes').hide()
+      @setAttributeVisibilitiesToggleButtonState()
+
+    toggleAttributeVisibilities: ->
+      if @attributeVisibilitiesVisible
+        @attributeVisibilitiesVisible = false
+        @$('.attribute-visibilities-attributes').slideUp()
+      else
+        @attributeVisibilitiesVisible = true
+        @$('.attribute-visibilities-attributes').slideDown()
+      @setAttributeVisibilitiesToggleButtonState()
+
+    setAttributeVisibilitiesToggleButtonState: ->
+      if @attributeVisibilitiesVisible
+        @$('button.toggle-attribute-visibilities i')
+          .removeClass 'fa-caret-right'
+          .addClass 'fa-caret-down'
+      else
+        @$('button.toggle-attribute-visibilities i')
+          .removeClass 'fa-caret-down'
+          .addClass 'fa-caret-right'
 

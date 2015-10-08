@@ -597,6 +597,28 @@ define [
 
       version: 'da'
 
+      parserTasks:
+
+        # These attributes should evaluate to `null` or to the id values of
+        # morphological parser resources to be used to parse specific
+        # transcription fields.
+        transcriptionParser: null
+        phoneticTranscriptionParser: null
+        narrowPhoneticTranscriptionParser: null
+
+        # These attributes should evaluate to `null` or to the id values of
+        # phonology resources to be used to alert users when their
+        # morphological analyses do not correspond (given the specified
+        # phonology) to specific transcription values.
+        toTranscriptionPhonologizer: null
+        toPhoneticTranscriptionPhonologizer: null
+        toNarrowPhoneticTranscriptionPhonologizer: null
+
+        # This attribute should evaluate to `null` or to the id value of a
+        # morphology resource to be used to alert users when their
+        # morphological analysis is not recognized by this morphology.
+        morphologicalAnalysisRecognizer: null
+
       # This object contains metadata about Dative resources, i.e., forms,
       # files, etc.
       # TODO: resource display settings (e.g., `formsDisplaySettings` above)
