@@ -38,8 +38,11 @@ define [
       if 'getRelatedResourceId' of @context
         @getRelatedResourceId = -> @context.getRelatedResourceId.call @
 
+    getEmptyValue: -> ''
+
     setContextValue: ->
       @context.resourceNameHuman = @utils.camel2regular @context.resourceName
+      @context.emptyValue = @getEmptyValue()
       try
         if @context.value
           @context.value = @resourceAsString @context.value

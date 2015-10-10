@@ -407,6 +407,12 @@ define (require) ->
     catch
       value
 
+  unique = (array) ->
+    output = {}
+    output[array[key]] = array[key] for key in [0...array.length]
+    value for key, value of output
+
+  unique: unique
   highlightSearchMatch: highlightSearchMatch
   humanFileSize: humanFileSize
   isValidURL: isValidURL

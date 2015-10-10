@@ -1,16 +1,15 @@
 define [
-  'underscore'
-  'backbone'
   './base'
   './server'
+  './parser-task-set'
   './morphology'
   './language-model'
   './../collections/servers'
   './../utils/utils'
   './../utils/globals'
   'FieldDB'
-], (_, Backbone, BaseModel, ServerModel, MorphologyModel, LanguageModelModel,
-  ServersCollection, utils, globals, FieldDB) ->
+], (BaseModel, ServerModel, ParserTaskSetModel, MorphologyModel,
+  LanguageModelModel, ServersCollection, utils, globals, FieldDB) ->
 
   # Application Settings Model
   # --------------------------
@@ -411,10 +410,12 @@ define [
     # Transform certain attribute values of the `appSetObj`
     # object into Backbone collections/models and return the `appSetObj`.
     backbonify: (appSetObj) ->
+
       serverModelsArray = ((new ServerModel(s)) for s in appSetObj.servers)
       appSetObj.servers = new ServersCollection(serverModelsArray)
       activeServer = appSetObj.activeServer
       appSetObj.activeServer = appSetObj.servers.get activeServer.id
+
       longRunningTasks = appSetObj.longRunningTasks
       for task in appSetObj.longRunningTasks
         task.resourceModel =
@@ -422,6 +423,9 @@ define [
       for task in appSetObj.longRunningTasksTerminated
         task.resourceModel =
           new @modelClassName2model[task.modelClassName](task.resourceModel)
+
+      appSetObj.parserTaskSet = new ParserTaskSetModel(appSetObj.parserTaskSet)
+
       appSetObj
 
     # Defaults
@@ -475,6 +479,8 @@ define [
         servers = new ServersCollection([server1, server2, server3, server4])
       else
         servers = new ServersCollection([server3, server4])
+
+      parserTaskSetModel = new ParserTaskSetModel()
 
       id: @guid()
       activeServer: servers.at 0
@@ -597,27 +603,7 @@ define [
 
       version: 'da'
 
-      parserTasks:
-
-        # These attributes should evaluate to `null` or to the id values of
-        # morphological parser resources to be used to parse specific
-        # transcription fields.
-        transcriptionParser: null
-        phoneticTranscriptionParser: null
-        narrowPhoneticTranscriptionParser: null
-
-        # These attributes should evaluate to `null` or to the id values of
-        # phonology resources to be used to alert users when their
-        # morphological analyses do not correspond (given the specified
-        # phonology) to specific transcription values.
-        toTranscriptionPhonologizer: null
-        toPhoneticTranscriptionPhonologizer: null
-        toNarrowPhoneticTranscriptionPhonologizer: null
-
-        # This attribute should evaluate to `null` or to the id value of a
-        # morphology resource to be used to alert users when their
-        # morphological analysis is not recognized by this morphology.
-        morphologicalAnalysisRecognizer: null
+      parserTaskSet: parserTaskSetModel
 
       # This object contains metadata about Dative resources, i.e., forms,
       # files, etc.

@@ -19,6 +19,7 @@ define [
   './files-select-via-search-field'
   './required-select-field'
   './date-field'
+  './morpheme-break-field'
   './../models/form'
   './../utils/globals'
 ], (ResourceAddWidgetView, TextareaFieldView, RelationalSelectFieldView,
@@ -31,7 +32,8 @@ define [
   TranscriptionGrammaticalityFieldView, TranslationsFieldView,
   PersonSelectFieldView, UserSelectFieldView, SourceSelectFieldView,
   SourceSelectViaSearchFieldView, FilesSelectViaSearchFieldView,
-  RequiredSelectFieldView, DateFieldView, FormModel, globals) ->
+  RequiredSelectFieldView, DateFieldView, MorphemeBreakFieldView, FormModel,
+  globals) ->
 
 
   class StatusSelectFieldView extends RequiredSelectFieldView
@@ -137,7 +139,7 @@ define [
       narrow_phonetic_transcription: TextareaFieldView255
       phonetic_transcription:        TextareaFieldView255
       transcription:                 TranscriptionGrammaticalityFieldView255
-      morpheme_break:                TextareaFieldView255
+      morpheme_break:                MorphemeBreakFieldView
       morpheme_gloss:                TextareaFieldView255
       syntax:                        TextareaFieldView1023
       semantics:                     TextareaFieldView1023

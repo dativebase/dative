@@ -84,10 +84,12 @@ define ['./resource'], (ResourceModel) ->
     # Input in body of HTTP request that phonology resources expect:
     # ``{'transcriptions': [t1, t2, ...]}``.
     getApplyDownPayload: (words) ->
+      if @utils.type(words) is 'string'
+        words = words.split /\s+/
       if @resourceName is 'phonology'
-        {transcriptions: words.split(/\s+/)}
+        {transcriptions: words}
       else
-        {morpheme_sequences: words.split(/\s+/)}
+        {morpheme_sequences: words}
 
     getApplyUpPayload: (words) -> @getApplyDownPayload words
 

@@ -55,7 +55,9 @@
         </div>
 
         <div class='dative-widget-header-title container-center'
-            ><%= @resourceNameHumanCapitalized %> Search Results</div>
+            ><span
+                class='search-results-resource-name-truncated'
+                ><%= @resourceNameHumanCapitalized %></span> Search Results</div>
 
         <div class='button-container-right'>
             <span class='results-showing-count'></span>

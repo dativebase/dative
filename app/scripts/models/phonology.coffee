@@ -1,4 +1,7 @@
-define ['./fst-based'], (FSTBasedModel) ->
+define [
+  './fst-based'
+  './../utils/globals'
+], (FSTBasedModel, globals) ->
 
   # Phonology Model
   # ---------------
@@ -8,6 +11,74 @@ define ['./fst-based'], (FSTBasedModel) ->
   class PhonologyModel extends FSTBasedModel
 
     resourceName: 'phonology'
+
+    initialize: (attributes, options) ->
+      super attributes, options
+      @listenTo @, 'change:compile_attempt', @resetApplyDownCache
+      @applyDownCache = @fetchApplyDownCache()
+
+    getLocalStorageKey: (previous=false) ->
+      serverURL = globals.applicationSettings.get('activeServer').get 'url'
+      if previous
+        compileAttempt = @previousAttributes().compile_attempt
+      else
+        compileAttempt = @get 'compile_attempt'
+      if compileAttempt
+        "dative-#{serverURL}-phonology-#{compileAttempt}-applydown-cache"
+      else
+        null
+
+    fetchApplyDownCache: ->
+      key = @getLocalStorageKey()
+      if key
+        localStorageCache = localStorage.getItem key
+        if localStorageCache
+          JSON.parse localStorageCache
+        else
+          localStorage.setItem key, JSON.stringify({})
+          {}
+      else
+        console.log "WARN: unable to get persisted cache: this phonology has no
+          `compile_attempt` attribute"
+        {}
+
+    persistApplyDownCache: ->
+      key = @getLocalStorageKey()
+      if key
+        localStorage.setItem key, JSON.stringify(@applyDownCache)
+      else
+        console.log "WARN: unable to persist cache: this phonology has no
+          `compile_attempt` attribute"
+
+    resetApplyDownCache: ->
+      previousLocalStorageKey = @getLocalStorageKey true
+      currentLocalStorageKey = @getLocalStorageKey()
+      console.log "in resetApplyDownCache.\nDeleting\n#{previousLocalStorageKey}\nAdding\n#{currentLocalStorageKey}"
+      localStorage.removeItem previousLocalStorageKey
+      @applyDownCache = {}
+      @persistApplyDownCache()
+
+    cacheApplyDownResults: (applyDownResults) ->
+      for uf, sfSet of applyDownResults
+        @applyDownCache[uf] = sfSet
+      @persistApplyDownCache()
+
+    applyDown_: (words) ->
+      wordsNeedingApplyDown =
+        (w for w in words when w not of @applyDownCache)
+      if wordsNeedingApplyDown.length > 0
+        # TODO: is this going to wreck the super-class's listening-to of this
+        # applyDownSuccess event?
+        @listenToOnce @, 'applyDownSuccess', @cacheApplyDownResults
+        super words
+      else
+        console.log 'Apply Down from Cache (no need to request from server)'
+        @trigger "applyDownStart"
+        result = {}
+        for word in wordsNeedingApplyDown
+          result[word] = @applyDownCache[word]
+        @trigger "applyDownSuccess", result
+        @trigger "applyDownEnd"
 
     ############################################################################
     # Phonology Schema

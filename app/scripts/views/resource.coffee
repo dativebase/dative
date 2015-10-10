@@ -45,6 +45,7 @@ define [
       @resourceNamePluralCapitalized = @utils.capitalize @resourceNamePlural
       @headerTitle = options.headerTitle or ''
       @headerAlwaysVisible = true # the header full of buttons should always be visible.
+      @labelsAlwaysVisible = @getLabelsAlwaysVisible options
       @activeServerType = @getActiveServerType()
       @setState options
       @addUpdateType = @getUpdateViewType()
@@ -53,6 +54,12 @@ define [
       @getControlsView()
       @getSettingsView()
       @getFileDataView()
+
+    getLabelsAlwaysVisible: (options) ->
+      if 'labelsAlwaysVisible' of options
+        options.labelsAlwaysVisible
+      else
+        false
 
     getUpdateView: ->
       if 'update' not in @excludedActions
@@ -120,7 +127,7 @@ define [
     # Set the state of the resource display: what is visible.
     setState: (options) ->
       defaults =
-        dataLabelsVisible: false # labels for data fields
+        dataLabelsVisible: @labelsAlwaysVisible or false # labels for data fields
         expanded: false # means that the header of buttons and the secondary data should both be visible
         headerVisible: @headerAlwaysVisible or false # the header full of buttons: is it currently visible?
         headerTitleAttribute: 'name' # the attribute of the model that should be displayed in the header center.
@@ -359,6 +366,7 @@ define [
       resourceIcon: @getResourceIcon()
       addUpdateType: @addUpdateType
       headerAlwaysVisible: @headerAlwaysVisible
+      labelsAlwaysVisible: @labelsAlwaysVisible
       resourceName: @resourceName
       resourceNameHumanReadable: @resourceNameHumanReadable
       excludedActions: @excludedActions

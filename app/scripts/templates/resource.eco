@@ -23,10 +23,12 @@
         </button>
     <% end %>
 
-    <button class="toggle-data-labels dative-tooltip"
-      title="show labels">labels:
-      <i class='fa fa-toggle-off fa-fw'></i>
-    </button>
+    <% if not @labelsAlwaysVisible: %>
+        <button class="toggle-data-labels dative-tooltip"
+            title="show labels">labels:
+            <i class='fa fa-toggle-off fa-fw'></i>
+        </button>
+    <% end %>
 
   </div>
 

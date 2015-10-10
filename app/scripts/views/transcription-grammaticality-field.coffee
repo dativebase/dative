@@ -12,6 +12,50 @@ define [
 
   class TranscriptionGrammaticalityFieldView extends FieldView
 
+    # Default is to call `set` on the model any time a field input changes.
+    events:
+      'change':                'setToModel' # fires when multi-select changes
+      'input':                 'userInput' # fires when an input, textarea or date-picker changes
+      'selectmenuchange':      'setToModel' # fires when a selectmenu changes
+      'menuselect':            'setToModel' # fires when the tags multi-select changes (not working?...)
+      'keydown .ms-container': 'multiselectKeydown'
+      'keydown textarea, input, .ui-selectmenu-button, .ms-container':
+                               'controlEnterSubmit'
+
+    listenToEvents: ->
+      super
+      @listenTo @model, 'transcription:suggestion', @suggestionReceived
+
+    userInput: ->
+      @setToModel()
+      @systemSuggested = false
+
+    initialize: (options) ->
+      super options
+      @systemSuggested = false
+
+    suggestionReceived: (suggestion) ->
+      $transcriptionInput = @$('textarea[name=transcription]').first()
+      currentValue = $transcriptionInput.val().trim()
+      suggestedValue = @getSuggestedValue suggestion
+      if @systemSuggested or (not currentValue)
+        @systemSuggested = true
+        $transcriptionInput.val suggestedValue
+        @setToModel()
+
+    getSuggestedValue: (suggestion) ->
+      suggestedValue = []
+      for word in suggestion.sourceWords
+        try
+          suggestedWord = suggestion.suggestion[word][0]
+        catch
+          suggestedWord = word
+        if suggestedWord
+          suggestedValue.push suggestedWord
+        else
+          suggestedValue.push word
+      suggestedValue.join ' '
+
     # Override this in a subclass to swap in a new input view, e.g., one based
     # on a <select> or an <input[type=text]>, etc.
     getInputView: ->

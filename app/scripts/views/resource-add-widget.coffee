@@ -63,6 +63,14 @@ define [
     copyModel: (inputModel) ->
       newModel = new @resourceModel()
       for attr, val of @model.attributes
+
+        toClone = inputModel.get attr
+        if (toClone instanceof ResourceModel)
+          console.log "calling `utils.clone` on `inputModel.get(attr)` in
+            `ResourceAddWidgetView` this is what we are trying to clone (the
+            #{attr} of the `inputModel`):"
+          console.log inputModel.get(attr)
+
         inputValue = @utils.clone inputModel.get(attr)
         newModel.set attr, inputValue
       newModel
@@ -83,7 +91,7 @@ define [
     # string 'exit'. We also re-request the related resource data if we haven't
     # updated it in a while.
     checkForRelatedResourceData: ->
-      if @activeServerTypeIsOLD()
+      if @activeServerTypeIsOLD() and not @model.clientSideOnlyModel
         [weHaveNewResourceData, lastRetrieved] = @weHaveNewResourceData()
         if weHaveNewResourceData
           if ((new Date()) - lastRetrieved) > @relatedResourceDataExpires
@@ -225,7 +233,18 @@ define [
             msg, @model
           @enableForm()
         else
-          if @addUpdateType is 'add'
+          if @model.clientSideOnlyModel
+            @model.trigger "update#{@resourceNameCapitalized}Start"
+            try
+              # TODO: is this necessary? I think the `save()` call may be
+              # sufficient ...
+              globals.applicationSettings[@resourceName] = @model
+              globals.applicationSettings.save()
+              @model.trigger "update#{@resourceNameCapitalized}Success"
+            catch
+              @model.trigger "update#{@resourceNameCapitalized}Fail"
+            @model.trigger "update#{@resourceNameCapitalized}End"
+          else if @addUpdateType is 'add'
             @model.collection.addResource @model
           else
             @model.collection.updateResource @model

@@ -16,6 +16,12 @@ define [
     # Override this in subclasses.
     resourceName: 'resource'
 
+    # Set this to `true` if this is a model that is never saved to a server;
+    # its persistence is always client-side.
+    clientSideOnlyModel: false
+
+    clientSideOnlyAttributes: []
+
     # Override this in the sub-class with something sensible, i.e., something
     # that makes sense for the resource model being represented here.
     defaults: ->
@@ -93,6 +99,8 @@ define [
         result[attribute] = result[attribute]?.id or null
       for attribute in @manyToManyAttributes
         result[attribute] = (v.id for v in result[attribute] or [])
+      for attribute in @clientSideOnlyAttributes
+        delete result[attribute]
       result
 
     ############################################################################

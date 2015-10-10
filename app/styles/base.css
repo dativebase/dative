@@ -194,6 +194,16 @@ td.dative-field-label-cell
   margin-bottom: 0.5em;
 }
 
+.dative-form-object .parser-task-set-container .dative-field-display-label-container
+{
+  width: 60%;
+}
+
+.dative-form-object .parser-task-set-container .dative-field-display-representation-container
+{
+  width: 35%;
+}
+
 .dative-form-object .dative-field-display-label-container
 {
   width: 30%;
@@ -1976,6 +1986,12 @@ audio.file-data-audio
   top: 0.15em;
 }
 
+.parser-task-set-container .resource-select-via-search-input-input
+{
+  max-width: 50% !important;
+  width: 50% !important;
+}
+
 .update .resource-select-via-search-input-input
 {
   /* width: 78%; */
@@ -2430,5 +2446,14 @@ div.big-button-text
 div.parser-task-container
 {
   margin: 1em 0.5em;
+}
+
+.search-results-resource-name-truncated
+{
+  white-space: nowrap;
+  max-width: 10em;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: inline-block;
 }
 

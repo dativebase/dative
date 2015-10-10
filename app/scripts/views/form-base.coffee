@@ -181,8 +181,10 @@ define [
       # Every second we check if we should refresh the interlinear display.
       @lastKeydown = new Date()
       @modelChanged = false
-      setInterval (=> @refreshInterlinear()), 1000
+      @setIntervalId = setInterval (=> @refreshInterlinear()), 1000
       @
+
+    onClose: -> clearInterval @setIntervalId
 
     # Check if we should refresh the interlinear display. We do so only if the
     # model has changed since our last interlinear refresh AND if the user has

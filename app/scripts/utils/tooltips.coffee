@@ -157,10 +157,42 @@ define ['./utils'], (utils) ->
             The date and time the comment was made and the commenter are
             automatically saved when a comment is created."
 
-          text:
-            eng: "The content of the comment."
+        text:
+          eng: "The content of the comment."
 
     old:
+
+      parserTaskSets:
+
+        transcription_parser:
+          eng: '“Transcription parser”: the morphological parser that you
+            use to parse transcription values.'
+
+        phonetic_transcription_parser:
+          eng: '“Phonetic transcription parser”: the morphological parser
+            that you use to parse phonetic transcription values.'
+
+        narrow_phonetic_transcription_parser:
+          eng: '“Narrow phonetic transcription parser”: the morphological
+            parser that you use to parser narrow phonetic transcription values.'
+
+        to_transcription_phonology:
+          eng: '“To transcription phonology”: the phonology that you use to
+            generate transcriptions from morphological analyses.'
+
+        to_phonetic_transcription_phonology:
+          eng: '“To phonetic transcription phonology”: the phonology that
+            you use to generate phonetic transcriptions from morphological
+            analyses.'
+
+        to_narrow_phonetic_transcription_phonology:
+          eng: '“To narrow phonetic transcription phonology”: the phonology
+            that you use to generate narrow phonetic transcriptions from
+            morphological analyses.'
+
+        recognizer_morphology:
+          eng: '“Recognizer morphology”: the morphology that you use to
+            recognize (i.e., validate) morphological analyses.'
 
       pages:
 

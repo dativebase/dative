@@ -36,7 +36,7 @@
 
                 <h1>Parser, Phonology &amp; Morphology Tasks</h1>
 
-                <button class='toggle-parser-settings dative-tooltip'
+                <button class='toggle-parser-task-set dative-tooltip'
                         title='toggle controls for assigning tasks to parsers,
                                phonologies and morphologies '
                         ><i class='fa fa-fw fa-caret-right'></i></button>
@@ -44,102 +44,7 @@
                 <p>Assign form-related tasks to parsers, phonologies and
                     morphologies.</p>
 
-                <div class='parser-settings'>
-
-                    <div class='parser-task-container'>
-                        Use
-                        <button class='transcription-parser-select-button
-                                    parser-select-button dative-tooltip'
-                            title='click to find a morphological parser for parsing
-                                    transcriptions'
-                            >choose ...</button>
-                        to parse <span class='bold'>transcriptions</span>.
-                        <div class='fst-select-interface-container
-                            transcription-parser-select-interface-container'></div>
-                    </div>
-
-                    <div class='parser-task-container'>
-                        Use
-                        <button class='phonetic-transcription-parser-select-button
-                                    parser-select-button dative-tooltip'
-                            title='click to find a morphological parser for parsing
-                                    phonetic transcriptions'
-                            >choose ...</button>
-                        to parse <span class='bold'>phonetic
-                        transcriptions</span>.
-                        <div class='fst-select-interface-container
-                            phonetic-transcription-parser-select-interface-container'></div>
-                    </div>
-
-                    <div class='parser-task-container'>
-                        Use
-                        <button class='narrow-phonetic-transcription-parser-select-button
-                                    parser-select-button dative-tooltip'
-                            title='click to find a morphological parser for parsing
-                                    narrow phonetic transcriptions'
-                            >choose ...</button>
-                        to parse <span class='bold'>narrow phonetic
-                        transcriptions</span>.
-                        <div class='fst-select-interface-container
-                            narrow-phonetic-transcription-parser-select-interface-container'></div>
-                    </div>
-
-                    <div class='parser-task-container'>
-                        Use
-                        <button class='transcription-phonologizer-phonology-select-button
-                                    phonology-select-button dative-tooltip'
-                            title='click to find a phonology for checking the
-                                    correspondence between morphological analyses and
-                                    transcriptions'
-                            >choose ...</button>
-                        to check the correspondence between morphological
-                        analyses and <span class='bold'>transcriptions</span>.
-                        <div class='fst-select-interface-container
-                            transcription-phonologizer-phonology-select-interface-container'></div>
-                    </div>
-
-                    <div class='parser-task-container'>
-                        Use
-                        <button class='phonetic-transcription-phonologizer-phonology-select-button
-                                    phonology-select-button dative-tooltip'
-                            title='click to find a phonology for checking the
-                                    correspondence between morphological analyses and
-                                    phonetic transcriptions'
-                            >choose ...</button>
-                        to check the correspondence between morphological
-                        analyses and <span class='bold'>phonetic
-                        transcriptions</span>.
-                        <div class='fst-select-interface-container
-                            phonetic-transcription-phonologizer-phonology-select-interface-container'></div>
-                    </div>
-
-                    <div class='parser-task-container'>
-                        Use
-                        <button class='narrow-phonetic-transcription-phonologizer-phonology-select-button
-                                    phonology-select-button dative-tooltip'
-                            title='click to find a phonology for checking the
-                                    correspondence between morphological analyses and
-                                    narrow phonetic transcriptions'
-                            >choose ...</button>
-                        to check the correspondence between morphological
-                        analyses and <span class='bold'>narrow phonetic
-                        transcriptions</span>.
-                        <div class='fst-select-interface-container
-                            narrow-phonetic-transcription-phonologizer-phonology-select-interface-container'></div>
-                    </div>
-
-                    <div class='parser-task-container'>
-                        Use
-                        <button class='recognizer-morphology-select-button dative-tooltip'
-                            title='click to find a morphology for checking whether
-                                    your morphological analyses are recognized'
-                            >choose ...</button>
-                        to try to recognize your morphological analyses.
-                        <div class='fst-select-interface-container
-                            recognizer-morphology-select-interface-container'></div>
-                    </div>
-
-                </div>
+                <div class='parser-task-set-container'></div>
             </div>
 
         <% end %>
