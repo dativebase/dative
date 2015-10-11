@@ -119,7 +119,9 @@ define [
     # Render the Add a Resource view.
     renderUpdateView: ->
       if 'update' not in @excludedActions
-        @updateView.setElement @$('.update-resource-widget').first()
+        $updateViewEl = @$('.dative-widget-body').first()
+          .find('.update-resource-widget').first()
+        @updateView.setElement $updateViewEl
         @updateView.render()
         @updateViewRendered = true
         @rendered @updateView
