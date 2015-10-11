@@ -18,6 +18,10 @@ define [
   # --------------
   #
   # For displaying individual resources.
+  #
+  # TODO: why are events like 'addFormWidgetVisible' being triggered on
+  # `Backbone` when a "controls" or "file data" view is made visible? See
+  # `showControlsView` below for an example.
 
   class ResourceView extends BaseView
 
@@ -50,7 +54,6 @@ define [
       @setState options
       @addUpdateType = @getUpdateViewType()
       @getUpdateView()
-      @updateViewRendered = false
       @getControlsView()
       @getSettingsView()
       @getFileDataView()
@@ -62,33 +65,46 @@ define [
         false
 
     getUpdateView: ->
-      if 'update' not in @excludedActions
+      if 'update' in @excludedActions
+        @updateView = null
+      else
         @updateView = new @resourceAddWidgetView
           model: @model,
           addUpdateType: @addUpdateType
-      else
-        @updateView = null
+        @updateViewRendered = false
 
     getFileDataView: ->
-      if 'data' not in @excludedActions
+      if 'data' in @excludedActions
+        @fileDataView = null
+      else
         @fileDataView = new @fileDataViewClass
           model: @model
           resourceName: @resourceName
         @fileDataViewRendered = false
 
     getControlsView: ->
-      if 'controls' not in @excludedActions
+      if 'controls' in @excludedActions
+        @controlsView = null
+      else
         @controlsView = new @controlsViewClass
           model: @model
           resourceName: @resourceName
         @controlsViewRendered = false
 
     getSettingsView: ->
-      if 'settings' not in @excludedActions
+      if 'settings' in @excludedActions
+        @settingsView = null
+      else
         @settingsView = new @settingsViewClass
           model: @model
           resourceName: @resourceName
         @settingsViewRendered = false
+
+    onClose: ->
+      @updateViewRendered = false
+      @controlsViewRendered = false
+      @settingsViewRendered = false
+      @fileDataViewRendered = false
 
     # An array of actions that are not relevant to this resource, e.g.,
     # 'history', and 'controls'.
@@ -1005,15 +1021,13 @@ define [
 
     # Render the controls view.
     renderControlsView: ->
-      @controlsView.setElement @$('.controls-widget').first()
-      @controlsView.render()
-      @controlsViewRendered = true
-      @rendered @controlsView
-
-    onClose: ->
-      @updateViewRendered = false
-      @controlsViewRendered = false
-      @fileDataViewRendered = false
+      if 'controls' not in @excludedActions
+        $controlsViewEl = @$('.dative-widget-body').first()
+          .find('.controls-widget').first()
+        @controlsView.setElement $controlsViewEl
+        @controlsView.render()
+        @controlsViewRendered = true
+        @rendered @controlsView
 
     showControlsView: ->
       if not @controlsViewRendered then @renderControlsView()
@@ -1078,15 +1092,13 @@ define [
 
     # Render the settings view.
     renderSettingsView: ->
-      @settingsView.setElement @$('.settings-widget').first()
-      @settingsView.render()
-      @settingsViewRendered = true
-      @rendered @settingsView
-
-    onClose: ->
-      @updateViewRendered = false
-      @settingsViewRendered = false
-      @fileDataViewRendered = false
+      if 'settings' not in @excludedActions
+        $settingsViewEl = @$('.dative-widget-body').first()
+          .find('.settings-widget').first()
+        @settingsView.setElement $settingsViewEl
+        @settingsView.render()
+        @settingsViewRendered = true
+        @rendered @settingsView
 
     showSettingsView: ->
       if not @settingsViewRendered then @renderSettingsView()
@@ -1151,10 +1163,13 @@ define [
 
     # Render the file data view.
     renderFileDataView: ->
-      @fileDataView.setElement @$('.file-data-widget').first()
-      @fileDataView.render()
-      @fileDataViewRendered = true
-      @rendered @fileDataView
+      if 'data' not in @excludedActions
+        $fileDataViewEl = @$('.dative-widget-body').first()
+          .find('.file-data-widget').first()
+        @fileDataView.setElement $fileDataViewEl
+        @fileDataView.render()
+        @fileDataViewRendered = true
+        @rendered @fileDataView
 
     showFileDataView: ->
       if not @fileDataViewRendered then @renderFileDataView()

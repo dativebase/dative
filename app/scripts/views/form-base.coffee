@@ -184,7 +184,9 @@ define [
       @setIntervalId = setInterval (=> @refreshInterlinear()), 1000
       @
 
-    onClose: -> clearInterval @setIntervalId
+    onClose: ->
+      clearInterval @setIntervalId
+      super
 
     # Check if we should refresh the interlinear display. We do so only if the
     # model has changed since our last interlinear refresh AND if the user has

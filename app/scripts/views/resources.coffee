@@ -839,7 +839,7 @@ define [
         @renderedResourceViews[@renderedResourceViews.length - 1].$el.focus()
 
     focusFirstNewResourceViewTextarea: ->
-      @$('.new-resource-view .add-resource-widget textarea')
+      @$('.new-resource-view .update-resource-widget textarea')
         .filter(':visible').first().focus()
 
     # GUI-fy: make nice buttons and nice titles/tooltips

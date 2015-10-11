@@ -82,6 +82,8 @@ define [
       super
       @
 
+    onClose: -> clearInterval @setIntervalId
+
     # Respond to an 'input' event in our <textarea>: user is entering data.
     recordInput: ->
       # The super-class would have called `setToModel` on an input event, so we
