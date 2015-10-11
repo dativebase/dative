@@ -40,6 +40,9 @@ define [
 
     listenToEvents: ->
 
+      @listenTo Backbone, 'updateParserTaskSetSuccess', @updateParserTaskSetSuccess
+      @listenTo Backbone, 'updateParserTaskSetFail', @updateParserTaskSetFail
+
       @listenTo Backbone, 'authenticateFail', @authenticateFail
       @listenTo Backbone, 'authenticateSuccess', @authenticateSuccess
 
@@ -190,7 +193,6 @@ define [
       if error
         content = "Your #{@utils.camel2regular resource} #{type} request was
           unsuccessful. #{error}"
-
       else
         content = "Your #{@utils.camel2regular resource} #{type} request was
           unsuccessful. See the error message(s) beneath the input fields."
@@ -601,6 +603,21 @@ define [
         content: "At least one error occurred while generating your CSV export.
           Search the generated CSV file for 'ERROR' to determine which resource
           and resource attribute caused the error."
+        type: 'warning'
+      @renderNotification notification
+
+    updateParserTaskSetSuccess: (model) ->
+      notification = new NotificationView
+        title: "Parser-related tasks updated"
+        content: "You have successfully updated your setting relating to tasks
+          assigned to parsers, phonologies and/or morphologies"
+      @renderNotification notification
+
+    updateParserTaskSetFail: (error) ->
+      notification = new NotificationView
+        title: "Parser-related tasks update fail"
+        content: "Oops. Something went wrong while trying to save your
+          parser-related tasks."
         type: 'warning'
       @renderNotification notification
 
