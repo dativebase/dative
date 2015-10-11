@@ -136,7 +136,7 @@ define [
     renderUpdateView: ->
       if 'update' not in @excludedActions
         $updateViewEl = @$('.dative-widget-body').first()
-          .find('.update-resource-widget').first()
+          .children('.update-resource-widget').first()
         @updateView.setElement $updateViewEl
         @updateView.render()
         @updateViewRendered = true
@@ -653,9 +653,13 @@ define [
           items: 'button'
           content: "hide the secondary data of this #{@resourceNameHumanReadable()}"
 
-    setUpdateButtonStateOpen: -> @$('.update-resource').button 'disable'
+    setUpdateButtonStateOpen: ->
+      @$('dative-widget-header').first()
+        .find('.update-resource').button 'disable'
 
-    setUpdateButtonStateClosed: -> @$('.update-resource').button 'enable'
+    setUpdateButtonStateClosed: ->
+      @$('dative-widget-header').first()
+        .find('.update-resource').button 'enable'
 
     # Expand the resource view: show buttons and secondary data.
     expand: ->
@@ -855,7 +859,8 @@ define [
       if not @updateViewRendered then @renderUpdateView()
       @updateViewVisible = true
       @setUpdateButtonStateOpen()
-      @$('.update-resource-widget').first().show
+      # @$('.update-resource-widget').first().show
+      @updateView.$el.show
         complete: =>
           @showFull()
           Backbone.trigger "add#{@resourceNameCapitalized}WidgetVisible"
@@ -864,7 +869,11 @@ define [
     hideUpdateView: ->
       @updateViewVisible = false
       @setUpdateButtonStateClosed()
+      # Note that the following two lines are purposefully redundant: it's
+      # possible for not to have been rendered and for its `$el` to not really
+      # be in the DOM.
       @$('.update-resource-widget').first().hide()
+      @updateView.$el.hide()
 
     toggleUpdateView: ->
       if @updateViewVisible
@@ -877,7 +886,8 @@ define [
       if not @updateViewRendered then @renderUpdateView()
       @updateViewVisible = true
       @setUpdateButtonStateOpen()
-      @$('.update-resource-widget').first().slideDown
+      # @$('.update-resource-widget').first().slideDown
+      @updateView.$el.slideDown
         complete: =>
           tmp = =>
             @stopSpin()
@@ -888,12 +898,14 @@ define [
           Backbone.trigger "add#{@resourceNameCapitalized}WidgetVisible"
 
     focusFirstUpdateViewField: ->
-      @$('.update-resource-widget textarea').first().focus()
+      # @$('.update-resource-widget textarea').first().focus()
+      @updateView.$('textarea').first().focus()
 
     hideUpdateViewAnimate: ->
       @updateViewVisible = false
       @setUpdateButtonStateClosed()
-      @$('.update-resource-widget').first().slideUp
+      # @$('.update-resource-widget').first().slideUp
+      @updateView.$el.slideUp
         complete: => @$el.focus()
 
     toggleUpdateViewAnimate: ->
