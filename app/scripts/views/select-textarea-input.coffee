@@ -53,6 +53,7 @@ define [
         buffer = 33
         textareaNewWidth = @$el.width() - selectWidth - buffer
         $textarea.css 'width': textareaNewWidth
+        @model.trigger 'textareaWidthResize'
 
     disable: ->
       @disableTextareas()

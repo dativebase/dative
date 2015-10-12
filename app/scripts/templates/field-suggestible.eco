@@ -1,0 +1,17 @@
+<div class='suggestion-button-container'>
+    <button class='toggle-suggestions dative-tooltip'
+            title='toggle all suggestions'
+        ><i class='fa fa-ellipsis-v'></i></button>
+</div>
+<div class='<%= @fieldLabelContainerClass %>'></div>
+<div class='<%= @fieldInputContainerClass %> with-suggestions'></div>
+<div class='suggestions invisible ui-corner-bottom'></div>
+<div class='dative-field-validation-container'>
+    <div
+        class='ui-state-error
+               ui-corner-all
+               dative-field-validation-error'
+        ><i class='fa fa-fw fa-exclamation-triangle'></i
+        ><span class='dative-field-validation-error-message'></span></div>
+</div>
+

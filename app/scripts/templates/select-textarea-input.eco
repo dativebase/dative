@@ -13,6 +13,7 @@
 </select>
 
 <textarea
+  spellcheck='false'
   rows='1'
   name='<%= @textareaName %>'
   class='<%= @textareaClass %>

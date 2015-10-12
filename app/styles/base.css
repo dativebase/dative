@@ -748,8 +748,8 @@ ul.fieldset textarea.textarea-select,
 textarea.textarea-select
 {
   width: 81%;
-  /* max-width: 85%;
-  min-width: 85%; */
+  max-width: 82%;
+  /* min-width: 85%; */
 }
 
 ul.fieldset textarea.textarea-input,
@@ -1500,7 +1500,8 @@ p.paragraph-widget
 .linguistic-data-entry-form ul.fieldset .ui-selectmenu-button,
 .linguistic-data-entry-form ul.fieldset label,
 textarea.control-input,
-.dative-exporter-dialog-container
+.dative-exporter-dialog-container,
+.suggestions
 {
   font-size: 12pt;
   font-family: 'GentiumPlus', serif;
@@ -2455,5 +2456,49 @@ div.parser-task-container
   overflow: hidden;
   text-overflow: ellipsis;
   display: inline-block;
+}
+
+.suggestions
+{
+  width: 60.1%;
+  margin-left: 34.5%;
+  background-color: white;
+  position: relative;
+  top: -7px;
+  border: 1px solid;
+  max-height: 5em;
+  overflow-y: scroll;
+}
+
+.suggestion-button-container
+{
+  position: relative;
+}
+
+.suggestions .suggestion
+{
+  padding: 0.25em 0.5em;
+}
+
+.suggestions .suggestion:hover,
+.suggestions .suggestion:focus
+{
+  cursor: pointer;
+}
+
+button.toggle-suggestions
+{
+  position: absolute;
+  top: 4px;
+}
+
+.add button.toggle-suggestions
+{
+  right: 15px;
+}
+
+.update button.toggle-suggestions
+{
+  right: 1px;
 }
 
