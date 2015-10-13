@@ -898,8 +898,7 @@ define [
           Backbone.trigger "add#{@resourceNameCapitalized}WidgetVisible"
 
     focusFirstUpdateViewField: ->
-      # @$('.update-resource-widget textarea').first().focus()
-      @updateView.$('textarea').first().focus()
+      @updateView.$('textarea').filter(':visible').first().focus()
 
     hideUpdateViewAnimate: ->
       @updateViewVisible = false
