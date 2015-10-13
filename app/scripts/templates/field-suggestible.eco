@@ -1,6 +1,7 @@
 <div class='suggestion-button-container'>
     <button class='toggle-suggestions dative-tooltip'
-            title='toggle all suggestions'
+            title='show suggested values for this <%= @label %> field'
+            tabindex='-1'
         ><i class='fa fa-ellipsis-v'></i></button>
 </div>
 <div class='<%= @fieldLabelContainerClass %>'></div>

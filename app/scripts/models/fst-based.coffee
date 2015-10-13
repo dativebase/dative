@@ -62,16 +62,7 @@ define ['./resource'], (ResourceModel) ->
           #{@get 'id'}/apply#{direction}"
         payload: @["getApply#{directionCapitalized}Payload"] words
         onload: (responseJSON, xhr) =>
-          @trigger "apply#{directionCapitalized}End"
-          if xhr.status is 200
-            @trigger "apply#{directionCapitalized}Success", responseJSON
-          else
-            error = responseJSON.error or 'No error message provided.'
-            @trigger "apply#{directionCapitalized}Fail", error
-            console.log "PUT request to
-              #{@getOLDURL()}/#{@getServerSideResourceName()}/#{@get 'id'}/\
-              apply#{direction} failed (status not 200)."
-            console.log error
+          @applyOnloadHandler responseJSON, xhr, directionCapitalized
         onerror: (responseJSON) =>
           @trigger "apply#{directionCapitalized}End"
           error = responseJSON.error or 'No error message provided.'
@@ -80,6 +71,20 @@ define ['./resource'], (ResourceModel) ->
             #{@getOLDURL()}/#{@getServerSideResourceName()}/#{@get 'id'}/\
               apply#{direction} (onerror triggered)."
       )
+
+    # Method to handle the 'onload' event of an apply up/down request. This can
+    # be overridden in sub-classes.
+    applyOnloadHandler: (responseJSON, xhr, directionCapitalized) ->
+      @trigger "apply#{directionCapitalized}End"
+      if xhr.status is 200
+        @trigger "apply#{directionCapitalized}Success", responseJSON
+      else
+        error = responseJSON.error or 'No error message provided.'
+        @trigger "apply#{directionCapitalized}Fail", error
+        console.log "PUT request to
+          #{@getOLDURL()}/#{@getServerSideResourceName()}/#{@get 'id'}/\
+          apply#{direction} failed (status not 200)."
+        console.log error
 
     # Input in body of HTTP request that phonology resources expect:
     # ``{'transcriptions': [t1, t2, ...]}``.

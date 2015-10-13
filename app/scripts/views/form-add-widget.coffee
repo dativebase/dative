@@ -10,6 +10,7 @@ define [
   './multi-element-tag-field'
   './utterance-judgement-field'
   './comments-field'
+  './transcription-base-field'
   './transcription-grammaticality-field'
   './translations-field'
   './person-select-field'
@@ -28,7 +29,7 @@ define [
   SpeakerSelectFieldWithAddButtonView,
   SyntacticCategorySelectFieldWithAddButtonView,
   UserSelectFieldWithAddButtonView, MultiElementTagFieldView,
-  UtteranceJudgementFieldView, CommentsFieldView,
+  UtteranceJudgementFieldView, CommentsFieldView, TranscriptionBaseFieldView,
   TranscriptionGrammaticalityFieldView, TranslationsFieldView,
   PersonSelectFieldView, UserSelectFieldView, SourceSelectFieldView,
   SourceSelectViaSearchFieldView, FilesSelectViaSearchFieldView,
@@ -136,8 +137,8 @@ define [
       comments:                      CommentsFieldView
 
     attribute2fieldViewOLD:
-      narrow_phonetic_transcription: TextareaFieldView255
-      phonetic_transcription:        TextareaFieldView255
+      narrow_phonetic_transcription: TranscriptionBaseFieldView
+      phonetic_transcription:        TranscriptionBaseFieldView
       transcription:                 TranscriptionGrammaticalityFieldView255
       morpheme_break:                MorphemeBreakFieldView
       morpheme_gloss:                TextareaFieldView255

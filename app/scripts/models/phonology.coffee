@@ -7,6 +7,11 @@ define [
   # ---------------
   #
   # A Backbone model for Dative phonologies.
+  #
+  # Note: this model has extensive logic for cacheing "apply down" request
+  # results in localStorage on the client. This functionality should be
+  # generalized for other FST-based resources and moved to `FSTBasedModel` in
+  # the future.
 
   class PhonologyModel extends FSTBasedModel
 
@@ -17,6 +22,11 @@ define [
       @listenTo @, 'change:compile_attempt', @resetApplyDownCache
       @applyDownCache = @fetchApplyDownCache()
 
+    # Each phonology resource has a cache in localStorage whose key is a unique
+    # string constructed from the web service's URL and the phonology's last
+    # compile_attempt value. Note that multiple `PhonologyModel` instances can
+    # exist in a Dative app and they will (should) all access and modify the
+    # same localStorage cache, as needed.
     getLocalStorageKey: (previous=false) ->
       serverURL = globals.applicationSettings.get('activeServer').get 'url'
       if previous
@@ -28,6 +38,8 @@ define [
       else
         null
 
+    # Fetch our client-side-stored (in localStorage) cache of "apply down"
+    # mappings.
     fetchApplyDownCache: ->
       key = @getLocalStorageKey()
       if key
@@ -42,6 +54,7 @@ define [
           `compile_attempt` attribute"
         {}
 
+    # Save the in-memory cache of "apply down" results to localStorage.
     persistApplyDownCache: ->
       key = @getLocalStorageKey()
       if key
@@ -50,35 +63,73 @@ define [
         console.log "WARN: unable to persist cache: this phonology has no
           `compile_attempt` attribute"
 
+    # We delete our old localStorage apply down cache and create a new one when
+    # our PhonologyModel's `compile_attempt` attribute changes. This attribute
+    # changing usually means that the phonology will behave differently, though
+    # that isn't necessarily true if the compile was made with no change in the
+    # phonology's script.
+    # TODO: make this reset sensitive to `PhonologyModel.script` content: if
+    # script hasn't changed, then don't delete the cache, just copy it over to
+    # the new localStorage address.
     resetApplyDownCache: ->
       previousLocalStorageKey = @getLocalStorageKey true
       currentLocalStorageKey = @getLocalStorageKey()
-      console.log "in resetApplyDownCache.\nDeleting\n#{previousLocalStorageKey}\nAdding\n#{currentLocalStorageKey}"
       localStorage.removeItem previousLocalStorageKey
       @applyDownCache = {}
       @persistApplyDownCache()
 
+    # Cache our apply down results from the server in memory and in
+    # localStorage.
     cacheApplyDownResults: (applyDownResults) ->
       for uf, sfSet of applyDownResults
         @applyDownCache[uf] = sfSet
       @persistApplyDownCache()
 
-    applyDown_: (words) ->
+    # The `PhonologyModel` overrides the super-class's `applyDown` method in
+    # order to provide in-memory and client-side localStorage caching of parser
+    # results. We try to minimize requests to the server and to minimize how
+    # many words are sent to the server for "apply down" transformation on all
+    # necessary requests.
+    applyDown: (words) ->
       wordsNeedingApplyDown =
         (w for w in words when w not of @applyDownCache)
       if wordsNeedingApplyDown.length > 0
-        # TODO: is this going to wreck the super-class's listening-to of this
-        # applyDownSuccess event?
-        @listenToOnce @, 'applyDownSuccess', @cacheApplyDownResults
-        super words
+        # We remember the words that we already have (cached) outputs for so we
+        # can add them to the server's response on a successful request. See
+        # the `applyOnloadHandler` below.
+        @wordsCached = (w for w in words when w of @applyDownCache)
+        super wordsNeedingApplyDown
       else
-        console.log 'Apply Down from Cache (no need to request from server)'
+        # Client-side retrieval of cached apply down results. Note we use the
+        # same API, i.e., we trigger the same events that a successful request
+        # to the server would.
         @trigger "applyDownStart"
         result = {}
-        for word in wordsNeedingApplyDown
+        for word in words
           result[word] = @applyDownCache[word]
         @trigger "applyDownSuccess", result
         @trigger "applyDownEnd"
+
+    # Respond to a successful "apply down" request to the server. The override
+    # here is needed in order to:
+    # 1. cache the results from the server
+    # 2. add our cached response to the object passed to any 'applyDownSuccess'
+    #    listeners.
+    applyOnloadHandler: (responseJSON, xhr, directionCapitalized) ->
+      @trigger "apply#{directionCapitalized}End"
+      if xhr.status is 200
+        @cacheApplyDownResults responseJSON
+        if @wordsCached and @wordsCached.length > 0
+          for word in @wordsCached
+            responseJSON[word] = @applyDownCache[word]
+        @trigger "apply#{directionCapitalized}Success", responseJSON
+      else
+        error = responseJSON.error or 'No error message provided.'
+        @trigger "apply#{directionCapitalized}Fail", error
+        console.log "PUT request to
+          #{@getOLDURL()}/#{@getServerSideResourceName()}/#{@get 'id'}/\
+          apply#{direction} failed (status not 200)."
+        console.log error
 
     ############################################################################
     # Phonology Schema

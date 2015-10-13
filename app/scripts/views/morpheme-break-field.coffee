@@ -6,7 +6,7 @@ define [
 ], (TextareaFieldView, PhonologyModel, MorphologyModel, globals) ->
 
   # Morpheme Break Field View
-  ############################################################################
+  # -------------------------
   #
   # Special view for morpheme break field. Purpose: to allow for phonologies
   # and morphologies to respond to user input into the form.morpheme_break
@@ -151,8 +151,31 @@ define [
         wordsToPhonologize = (w for w in @wordsSeen \
           when w not in @toPhoneticTranscriptionRequested)
         if (wordsToPhonologize.length > 0) and
+        (not @toPhoneticEqualsToTranscription()) and
         (not @toPhoneticTranscriptionRequestPending)
           @toPhoneticTranscriptionPhonology.applyDown wordsToPhonologize
+
+    # Return `true` if `@toPhoneticTranscriptionPhonology` is equal to
+    # `@toTranscriptionPhonology`. If there is equality, then we piggy-back on
+    # the requests of the transcription phonology.
+    toPhoneticEqualsToTranscription: ->
+      if @toTranscriptionPhonology
+        @toTranscriptionPhonology.id is @toPhoneticTranscriptionPhonology.id
+      else
+        false
+
+    # Return `true` if `@toNarrowPhoneticTranscriptionPhonology` is equal to
+    # either of the other two phonologies. If there is equality, then we
+    # piggy-back on the requests of one of the other phonologies.
+    toNarrowEqualsOther: ->
+      if @toTranscriptionPhonology and
+      @toTranscriptionPhonology.id is @toNarrowPhoneticTranscriptionPhonology.id
+        true
+      else if @toPhoneticTranscriptionPhonology and
+      @toPhoneticTranscriptionPhonology.id is @toNarrowPhoneticTranscriptionPhonology.id
+        true
+      else
+        false
 
     # Use morpheme break value to generate a narrow phonetic transcription
     # using the appropriate phonology resource.
@@ -161,6 +184,7 @@ define [
         wordsToPhonologize = (w for w in @wordsSeen \
           when w not in @toNarrowPhoneticTranscriptionRequested)
         if (wordsToPhonologize.length > 0) and
+        (not @toNarrowEqualsOther()) and
         (not @toNarrowPhoneticTranscriptionRequestPending)
           @toNarrowPhoneticTranscriptionPhonology.applyDown wordsToPhonologize
 
@@ -246,6 +270,25 @@ define [
         @toTranscriptionCache[uf] = sfSet
         @toTranscriptionRequested.push uf
       @triggerToTranscriptionSuggestion()
+      @cacheAndTriggerSubordinatePhonologies response
+
+    # If the "to phonetic" or "to narrow phonetic" phonologies are the same as
+    # the "to transcription" one, then we populate those phonologies' caches
+    # with our response and we trigger their suggestion events. This prevents
+    # redundant requests to the same phonology on the server.
+    cacheAndTriggerSubordinatePhonologies: (response) ->
+      if @toPhoneticTranscriptionPhonology and
+      @toPhoneticTranscriptionPhonology.id is @toTranscriptionPhonology.id
+        for uf, sfSet of response
+          @toPhoneticTranscriptionCache[uf] = sfSet
+          @toPhoneticTranscriptionRequested.push uf
+        @triggerToPhoneticTranscriptionSuggestion()
+      if @toNarrowPhoneticTranscriptionPhonology and
+      @toNarrowPhoneticTranscriptionPhonology.id is @toTranscriptionPhonology.id
+        for uf, sfSet of response
+          @toNarrowPhoneticTranscriptionCache[uf] = sfSet
+          @toNarrowPhoneticTranscriptionRequested.push uf
+        @triggerToNarrowPhoneticTranscriptionSuggestion()
 
     triggerToTranscriptionSuggestion: ->
       @triggerSuggestion 'transcription', 'toTranscriptionCache'
@@ -271,6 +314,19 @@ define [
         @toPhoneticTranscriptionCache[uf] = sfSet
         @toPhoneticTranscriptionRequested.push uf
       @triggerToPhoneticTranscriptionSuggestion()
+      @cacheAndTriggerSubordinatePhonology response
+
+    # If the "to narrow phonetic" phonology is the same as the "to phonetic"
+    # one, then we populate its cache with our response and we trigger its
+    # suggestion event. This prevents redundant requests to the same phonology
+    # on the server.
+    cacheAndTriggerSubordinatePhonology: (response) ->
+      if @toNarrowPhoneticTranscriptionPhonology and
+      @toNarrowPhoneticTranscriptionPhonology.id is @toPhoneticTranscriptionPhonology.id
+        for uf, sfSet of response
+          @toNarrowPhoneticTranscriptionCache[uf] = sfSet
+          @toNarrowPhoneticTranscriptionRequested.push uf
+        @triggerToNarrowPhoneticTranscriptionSuggestion()
 
     triggerToPhoneticTranscriptionSuggestion: ->
       @triggerSuggestion 'phonetic_transcription', 'toPhoneticTranscriptionCache'
