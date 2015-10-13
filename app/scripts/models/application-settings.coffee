@@ -681,7 +681,10 @@ define [
               # be hidden. This is the (for now only client-side-stored) data
               # structure that users manipulate in the settings widget of a
               # `FormView` instance.
-              hidden: []
+              hidden: [
+                'narrow_phonetic_transcription'
+                'phonetic_transcription'
+              ]
 
             FieldDB:
 
