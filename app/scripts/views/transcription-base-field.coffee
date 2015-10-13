@@ -90,6 +90,8 @@ define [
     # We have received a suggestion; respond accordingly. This means:
     # 1. potentially inserting the primary suggestion into our <textarea>
     # 2. populating our .suggestions <div> with (a subset of) the suggestions.
+    # 3. alerting the user if their current transcription value is not in the
+    #    suggestions list.
     suggestionReceived: (suggestion) ->
       $transcriptionInput = @$("textarea[name=#{@attribute}]").first()
       currentValue = $transcriptionInput.val().trim()
@@ -141,6 +143,7 @@ define [
     # Populate our .suggestions <div> with our first `@maxNoSuggestions`
     addSuggestionsToSuggestionsDiv: ->
       if @suggestedValues.length > 0
+        @alertIncongruity()
         @showSuggestionsButtonCheck()
         @$('.suggestions').first().html @getSuggestedValuesHTML()
         # If nothing is currently focused, we take that to mean that the last
@@ -159,6 +162,19 @@ define [
       for suggestion in @suggestedValues[...@maxNoSuggestions]
         result.push "<div class='suggestion' tabindex='0'>#{suggestion}</div>"
       result.join ''
+
+    # TODO: figure out how to add this alert to the UI in a useful way.
+    # TODO: trigger the incongruity check whenever the transcription value
+    # changes too (not just when the suggestions change, as is done at present)
+    alertIncongruity: ->
+      if @suggestedValues and @suggestedValues.length > 0
+        value = @model.get @attribute
+        if not (value in @suggestedValues or
+        value.toLowerCase() in @suggestedValues or
+        value.toLowerCase().replace(/[“”‘’.!?]/, '') in @suggestedValues)
+          # console.log "The #{@attribute} value #{value} is not compatible with
+          #   the current morpheme break value, given the specified phonology."
+          return
 
     # Respond to a 'click' event on a <div.selection> element: put its
     # suggestion text in our <textarea>.
