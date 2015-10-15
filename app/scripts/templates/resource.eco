@@ -145,7 +145,11 @@
   <div class='update-resource-widget update-widget dative-widget-center
     dative-shadowed-widget ui-widget ui-widget-content ui-corner-all'></div>
 
-  <div class='resource-primary-data large-unicode-font'> </div>
+  <div class='resource-primary-data large-unicode-font'>
+      <% if @resourceName is 'form': %>
+          <div class='igt-tables-container'></div>
+      <% end %>
+  </div>
 
   <div class='resource-secondary-data large-unicode-font'></div>
 

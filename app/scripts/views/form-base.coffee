@@ -606,7 +606,8 @@ define [
         leftIndent = @igtMaxIndentations * @igtRowStepIndent
 
     clearIGTTables: ->
-      $('div.igt-tables-container').remove()
+      # $('div.igt-tables-container').remove()
+      $('div.igt-tables-container').html ''
 
     # Write the IGT data to the DOM as a series of IGT tables. There is one
     # table for each line of IGT, i.e., one table for each columnarly aligned
@@ -662,12 +663,9 @@ define [
 
           $table.append $row
         $tablesContainer.append $table
-      $extantIGTContainer =
-        @$('.resource-primary-data .igt-tables-container').first()
-      if $extantIGTContainer.length > 0
-        $extantIGTContainer.html $tablesContainer.html()
-      else
-        @$('.resource-primary-data').first().prepend $tablesContainer.html()
+
+      @$('.resource-primary-data .igt-tables-container').first()
+        .html $tablesContainer.html()
 
       @$('label.dative-tooltip')
         .tooltip
