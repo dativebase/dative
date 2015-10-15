@@ -667,7 +667,7 @@ define [
       if $extantIGTContainer.length > 0
         $extantIGTContainer.html $tablesContainer.html()
       else
-        @$('.resource-primary-data').first().prepend $tablesContainer
+        @$('.resource-primary-data').first().prepend $tablesContainer.html()
 
       @$('label.dative-tooltip')
         .tooltip
