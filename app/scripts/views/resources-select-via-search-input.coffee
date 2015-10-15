@@ -272,6 +272,7 @@ define [
       x = =>
         attributeName = @context.attribute
         @model.get(attributeName).push resourceModel.attributes
+        @model.trigger "change:#{attributeName}"
         @refresh @context
       setTimeout x, 500
 
