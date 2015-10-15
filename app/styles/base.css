@@ -581,14 +581,22 @@ span.dative-triangle-icon,
 
 /*** Form input styles ***/
 
-ul.fieldset {
+ul.fieldset,
+div.dative-field-display-representation-container.html-snippet .form-container ul.fieldset,
+div.dative-field-display-representation-container.html-snippet .file-container ul.fieldset
+{
     margin: 0 auto;
-    /*display: inline-block;*/
     list-style-type: none;
     padding: 15px;
     margin-top: 0;
     position: relative;
     font-size: 12px;
+}
+
+div.dative-field-display-representation-container.html-snippet .form-container ul.fieldset > li,
+div.dative-field-display-representation-container.html-snippet .file-container ul.fieldset > li
+{
+    list-style-type: none;
 }
 
 ul.fieldset.button-only-fieldset
@@ -1467,10 +1475,30 @@ div.form-translations-data div,
 div.form-secondary-data div,
 span.dative-pagin-item-index,
 p.paragraph-widget,
-.large-unicode-font *
+.large-unicode-font *,
+div.dative-field-display-representation-container.html-snippet .form-container .large-unicode-font *,
+div.dative-field-display-representation-container.html-snippet .file-container .large-unicode-font *
 {
   font-size: 14pt;
   font-family: 'GentiumPlus', serif;
+}
+
+div.dative-field-display-representation-container.html-snippet .form-container *,
+div.dative-field-display-representation-container.html-snippet .file-container *
+{
+  font-family: 'Trebuchet MS', Tahoma, Verdana, Arial, sans-serif;
+  font-size: 12px;
+}
+
+button.ui-widget,
+button.ui-widget *
+{
+  font-size: 12px;
+}
+
+.fa
+{
+  font-family: FontAwesome !important;
 }
 
 div.dative-field-display
@@ -1499,6 +1527,14 @@ p.paragraph-widget
 .linguistic-data-entry-form ul.fieldset input,
 .linguistic-data-entry-form ul.fieldset .ui-selectmenu-button,
 .linguistic-data-entry-form ul.fieldset label,
+div.dative-field-display-representation-container.html-snippet .form-container .linguistic-data-entry-form ul.fieldset textarea,
+div.dative-field-display-representation-container.html-snippet .form-container .linguistic-data-entry-form ul.fieldset input,
+div.dative-field-display-representation-container.html-snippet .form-container .linguistic-data-entry-form ul.fieldset .ui-selectmenu-button,
+div.dative-field-display-representation-container.html-snippet .form-container .linguistic-data-entry-form ul.fieldset label,
+div.dative-field-display-representation-container.html-snippet .file-container .linguistic-data-entry-form ul.fieldset textarea,
+div.dative-field-display-representation-container.html-snippet .file-container .linguistic-data-entry-form ul.fieldset input,
+div.dative-field-display-representation-container.html-snippet .file-container .linguistic-data-entry-form ul.fieldset .ui-selectmenu-button,
+div.dative-field-display-representation-container.html-snippet .file-container .linguistic-data-entry-form ul.fieldset label,
 textarea.control-input,
 .dative-exporter-dialog-container,
 .suggestions
@@ -2500,5 +2536,11 @@ button.toggle-suggestions
 .update button.toggle-suggestions
 {
   right: 1px;
+}
+
+.dative-field-representation-container.html-snippet *
+{
+  font-size: inherit;
+  font-family: inherit;
 }
 

@@ -46,11 +46,10 @@ define [
                 data-resource-id='#{resourceId}'
                 >#{anchorName}</a>"
           )
-          .replace(/file\[(\d+)\]/g,
-            ($0, fileId) ->
-              console.log "you want to embed the file #{fileId}"
-              "<div class='file-#{fileId}'>File #{fileId} will be embedded
-                here</div>"
+          .replace(/(form|file)\[(\d+)\]/g,
+            ($0, resourceName, resourceId) ->
+              "<div class='#{resourceName}-container' data-id='#{resourceId}'
+                >#{resourceName} #{resourceId}</div>"
           )
       catch
         ''

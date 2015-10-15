@@ -2,9 +2,11 @@ define [
   './html-snippet-representation'
   './related-model-representation'
   './form'
+  './file'
   './../models/form'
+  './../models/file'
 ], (HTMLSnippetRepresentationView, RelatedModelRepresentationView, FormView,
-  FormModel) ->
+  FileView, FormModel, FileModel) ->
 
 
   # HTML Snippet Representation View
@@ -28,6 +30,7 @@ define [
 
     resourceName2viewAndModel:
       form: [FormView, FormModel]
+      file: [FileView, FileModel]
 
     postRender: ->
       @$('.link-to-resource.dative-tooltip').tooltip()

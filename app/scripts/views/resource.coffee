@@ -264,7 +264,8 @@ define [
       if event then @stopEvent event
       Backbone.trigger 'openExporterDialog', model: @model
 
-    update: ->
+    update: (event) ->
+      @stopEvent event
       @showUpdateViewAnimate()
 
     duplicate: ->
@@ -744,7 +745,8 @@ define [
 
     # Hide details and self-focus. Clicking on the double-angle-up
     # (hide-resource-details) button calls this, as does `@keydown` with <Esc>.
-    hideResourceDetails: ->
+    hideResourceDetails: (event) ->
+      if event then @stopEvent event
       @hideFullAnimate()
       @$el.focus()
 
@@ -873,7 +875,7 @@ define [
       # possible for not to have been rendered and for its `$el` to not really
       # be in the DOM.
       @$('.update-resource-widget').first().hide()
-      @updateView.$el.hide()
+      if @updateView and @updateView.$el then @updateView.$el.hide()
 
     toggleUpdateView: ->
       if @updateViewVisible
