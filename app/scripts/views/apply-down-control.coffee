@@ -130,7 +130,7 @@ define [
 
     applyDown: ->
       input = @$('textarea[name=apply-down]').val()
-      @model.applyDown input
+      @model.applyDown input.split(/\s+/)
 
     applyDownStart: ->
       @spin 'button.apply-down', '50%', '120%'
