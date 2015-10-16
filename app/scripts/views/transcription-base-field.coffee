@@ -83,9 +83,20 @@ define [
       # should be.
       @listenTo @model, "#{@attribute}:suggestion", @suggestionReceived
 
+      # Something is telling us to hide our current suggestions. This happens
+      # when a morpheme break field recognizes that its "to-X-transcription"
+      # phonology has changed to `null`.
+      @listenTo @model, "#{@attribute}:turnOffSuggestions", @turnOffSuggestions
+
       # The input view's <textarea> has resized itself, so we respond by resizing
       # our .suggestions <div>.
       @listenTo @model, 'textareaWidthResize', @resizeAndPositionSuggestionsDiv
+
+    turnOffSuggestions: ->
+      @closeSuggestionsAnimate()
+      @suggestionsVisible = false
+      @toggleSuggestionsButtonState()
+      @suggestedValues = []
 
     # The user has entered something into the <textarea>.
     userInput: ->

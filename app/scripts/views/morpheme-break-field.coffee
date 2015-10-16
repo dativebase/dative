@@ -76,6 +76,18 @@ define [
       # method will cause us to listen to their relevant events.
       @listenToFSTModels()
 
+      @listenForParserTaskSetChange()
+
+    listenForParserTaskSetChange: ->
+      @listenTo globals.applicationSettings, 'change:parserTaskSet',
+        @parserTaskSetChanged
+
+    parserTaskSetChanged: ->
+      @stopListeningToFSTModels()
+      @getFSTModels()
+      @listenToFSTModels()
+      @model.trigger "#{targetField}:turnOffSuggestions"
+
     render: ->
       @lastInput = new Date()
       @setIntervalId = setInterval (=> @issueRequestsCheck()), 500
@@ -445,6 +457,16 @@ define [
       if @toNarrowPhoneticTranscriptionPhonology
         @listenToToNarrowPhoneticTranscriptionPhonology()
       if @recognizerMorphology then @listenToRecognizerMorphology()
+
+    # Stop listening to any FST-based resource models that we may already be
+    # listening to.
+    stopListeningToFSTModels: ->
+      if @toTranscriptionPhonology then @stopListening @toTranscriptionPhonology
+      if @toPhoneticTranscriptionPhonology
+        @stopListening @toPhoneticTranscriptionPhonology
+      if @toNarrowPhoneticTranscriptionPhonology
+        @stopListening @toNarrowPhoneticTranscriptionPhonology
+      if @recognizerMorphology then @stopListening @recognizerMorphology
 
     # Given an object `object`, the name of a resource `resource`, and the
     # name of an attribute on `@`, instantiate a model class using `object`,

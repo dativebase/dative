@@ -233,6 +233,7 @@ define [
             msg, @model
           @enableForm()
         else
+          # TODO: move this persistence machinery to the model!
           if @model.clientSideOnlyModel
             @model.trigger "update#{@resourceNameCapitalized}Start"
             try
@@ -241,6 +242,7 @@ define [
               globals.applicationSettings[@resourceName] = @model
               globals.applicationSettings.save()
               @model.trigger "update#{@resourceNameCapitalized}Success"
+              globals.applicationSettings.trigger "change:#{@resourceName}"
             catch
               @model.trigger "update#{@resourceNameCapitalized}Fail"
             @model.trigger "update#{@resourceNameCapitalized}End"
