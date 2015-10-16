@@ -894,7 +894,7 @@ div.document {
   /*margin: 0 100px;*/
 }
 
-div.html-snippet div.html div.document a
+div.html-snippet div.html div.document a:not(.morpheme-link)
 {
   text-decoration: underline;
 }
