@@ -684,6 +684,7 @@ define [
               hidden: [
                 'narrow_phonetic_transcription'
                 'phonetic_transcription'
+                'verifier'
               ]
 
             FieldDB:
