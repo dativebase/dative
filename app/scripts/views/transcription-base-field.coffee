@@ -59,13 +59,18 @@ define [
 
     # <Ctrl+Enter> should still submit the form, but now <down arrow> should
     # open the suggestions <div>.
+    # NOTE: I stopped stopping the event because stopping it means that you can
+    # no longer move up and down within the textarea using the arrow keys.
+    # However, this doesn't really fix things for the down arrow since in that
+    # case the first suggestion becomes highlighted and you don't move to the
+    # next line (or end of) the textarea anyways.
     myControlEnterSubmit: (event) ->
       switch event.which
         when 40
-          @stopEvent event
+          # @stopEvent event
           @openSuggestionsAnimateCheck()
         when 38
-          @stopEvent event
+          # @stopEvent event
           if @$('.suggestions').length > 0 then @closeSuggestionsAnimate()
       @controlEnterSubmit event
 
