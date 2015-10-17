@@ -181,8 +181,8 @@ define [
 
     getIsCreator: ->
       username = @model.get('applicationSettings').get 'username'
-      if @utils.startsWith @model.get('pouchname'), username
-        true
+      if @model.get('team').username == username
+        true # TODO GC: why does the creator matter? The corpus has a 'team' which says who it belongs to, and this could change over time so dont look in the dbname for this
       else
         false
 
@@ -205,8 +205,8 @@ define [
 
     isActive: ->
       activeFieldDBCorpusPouchname = globals.applicationSettings.get 'activeFieldDBCorpus'
-      pouchname = @model.get 'pouchname'
-      if activeFieldDBCorpusPouchname is pouchname then true else false
+      dbname = @model.get 'dbname'
+      if activeFieldDBCorpusPouchname is dbname then true else false
 
     setModelFromGUI: ->
       @$('input, select').each (index, element) =>
@@ -259,12 +259,12 @@ define [
         @editCorpusView.closeGUI()
 
     getContext: ->
-      context = _.extend @model.attributes, isActive: @isActive()
-      if context.pouchname is 'lingllama-communitycorpus'
+      context = @model.corpus.toJSON()
+      if context.dbname is 'lingllama-communitycorpus'
         context.title = "LingLlama's Community Corpus"
       # The following works with local FieldDB but not with production, as of Jan 11, 2015
       ###
-      [ownerName, corpusName] = context.pouchname.split('-')
+      [ownerName, corpusName] = context.dbname.split('-')
       myUsername = @model.get('applicationSettings').get 'username'
       if corpusName is 'firstcorpus'
         if myUsername is ownerName
@@ -279,19 +279,19 @@ define [
     # Add user subviews to the appropriate array of this corpus view.
     getUserViews: ->
       authUrl = @model.get('applicationSettings').get('activeServer').get('url')
-      pouchname = @model.get('pouchname')
+      dbname = @model.get('dbname')
       username = @model.get('applicationSettings').get('username')
       serverCode = @model.get('applicationSettings').get('activeServer')
         .get('serverCode')
       users = @model.get 'users'
-      if users and authUrl and username and serverCode and pouchname
+      if users and authUrl and username and serverCode and dbname
         for roleClass in ['admins', 'writers', 'readers']
           for userObject in @usersWithoutDuplicates[roleClass]
             if userObject.username not in (uv.model.get('username') for uv in @[roleClass])
               userObject.authUrl = authUrl
               userObject.loggedInUsername = username
               userObject.serverCode = serverCode
-              userObject.pouchname = pouchname
+              userObject.dbname = dbname
               userObject.role = roleClass[0..-2]
               userModel = new UserModel userObject
               userView = new UserView
@@ -330,7 +330,7 @@ define [
     useCorpus: (event) ->
       if event then @stopEvent event
       @setUseCorpusButtonStateActive()
-      Backbone.trigger 'useFieldDBCorpus', @model.get('pouchname')
+      Backbone.trigger 'useFieldDBCorpus', @model.get('dbname')
 
     toggleAddUserKeys: (event) ->
       if event.which in [13, 32]

@@ -4,7 +4,7 @@
     Hello from the alert dialog!
   </div>
 
-  <textarea class='dative-alert-prompt'></textarea>
+  <input class='dative-alert-prompt'></input>
   
 </div>
 

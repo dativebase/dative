@@ -73,7 +73,7 @@ define [
           dateEntered: payload.dateEntered
           dateModified: payload.dateModified
           timestamp: payload.timestamp
-          pouchname: payload.pouchname
+          dbname: payload.dbname
           comments: payload.comments
         newEnteredByUser = _.findWhere payload.datumFields, label: 'enteredByUser'
         enteredByUser = _.findWhere resource.get('datumFields'), label: 'enteredByUser'
@@ -119,7 +119,7 @@ define [
           _rev: responseJSON.rev
           dateModified: payload.dateModified
           timestamp: payload.timestamp
-          pouchname: payload.pouchname
+          dbname: payload.dbname
           comments: payload.comments
         newModifiedByUser = _.findWhere payload.datumFields, label: 'modifiedByUser'
         modifiedByUser = _.findWhere resource.get('datumFields'), label: 'modifiedByUser'
@@ -170,11 +170,11 @@ define [
         when 'FieldDB' then @getUpdateResourceURLFieldDB resource
 
     # Returns a URL for updating a resource on a FieldDB web service.
-    # PUT <corpus_url>/<pouchname>/<datum_id>?rev=<datum_rev>
+    # PUT <corpus_url>/<dbname>/<datum_id>?rev=<datum_rev>
     getUpdateResourceURLFieldDB: (resource) ->
       url = globals.applicationSettings.get 'baseDBURL'
-      pouchname = globals.applicationSettings.get 'activeFieldDBCorpus'
-      "#{url}/#{pouchname}/#{resource.get '_id'}?rev=#{resource.get '_rev'}"
+      dbname = globals.applicationSettings.get 'activeFieldDBCorpus'
+      "#{url}/#{dbname}/#{resource.get '_id'}?rev=#{resource.get '_rev'}"
 
     # Return a URL for adding a resource to a web service.
     getAddResourceURL: (resource) ->
@@ -183,11 +183,11 @@ define [
         when 'FieldDB' then @getAddResourceURLFieldDB resource
 
     # Returns a URL for adding a resource to a FieldDB web service.
-    # POST <corpus_url>/<pouchname>/
+    # POST <corpus_url>/<dbname>/
     getAddResourceURLFieldDB: (resource) ->
       url = globals.applicationSettings.get 'baseDBURL'
-      pouchname = globals.applicationSettings.get 'activeFieldDBCorpus'
-      "#{url}/#{pouchname}"
+      dbname = globals.applicationSettings.get 'activeFieldDBCorpus'
+      "#{url}/#{dbname}"
 
 
     ############################################################################

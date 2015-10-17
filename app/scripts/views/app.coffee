@@ -282,13 +282,13 @@ define [
     bodyClicked: ->
       Backbone.trigger 'bodyClicked' # Mainmenu superclick listens for this
 
-    useFieldDBCorpus: (corpusId) ->
+    useFieldDBCorpus: (dbname) ->
       currentlyActiveFieldDBCorpus = @activeFieldDBCorpus
       fieldDBCorporaCollection = @corporaView?.collection
       @activeFieldDBCorpus = fieldDBCorporaCollection?.findWhere
-        pouchname: corpusId
+        dbname: dbname
       @applicationSettings.save
-        'activeFieldDBCorpus': corpusId
+        'activeFieldDBCorpus': dbname
         'activeFieldDBCorpusTitle': @activeFieldDBCorpus.get 'title'
         'activeFieldDBCorpusModel': @activeFieldDBCorpus # TODO: FIX THIS ABERRATION!
       globals.activeFieldDBCorpus = @activeFieldDBCorpus
@@ -901,6 +901,7 @@ define [
       FieldDB.FieldDBObject.bug = @displayBugReportDialog
       FieldDB.FieldDBObject.warn = @displayWarningMessagesDialog
       FieldDB.FieldDBObject.confirm = @displayConfirmDialog
+      # FieldDB.FieldDBObject.prompt = @displayPromptDialog // TODO there is a problem with scoping 'Uncaught TypeError: this.listenTo is not a function' -GC
 
     displayBugReportDialog: (message, optionalLocale) =>
       deferred = FieldDB.Q.defer()
