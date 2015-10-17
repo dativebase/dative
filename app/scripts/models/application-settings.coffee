@@ -137,7 +137,8 @@ define [
         if FieldDB.FieldDBObject.application not instanceof FieldDB.App
           new FieldDB.App(FieldDB.FieldDBObject.application)
         @set 'fieldDBApplication', FieldDB.FieldDBObject.application
-      if not @get('fieldDBApplication').authentication or not @get('fieldDBApplication').authentication.login
+      if (not @get('fieldDBApplication').authentication) or
+      (not @get('fieldDBApplication').authentication.login)
         @get('fieldDBApplication').authentication = new FieldDB.Authentication()
       @get('fieldDBApplication').authentication.login(credentials).then(
         (promisedResult) =>
@@ -153,7 +154,7 @@ define [
         (error) =>
           @authenticateAttemptDone taskId
           Backbone.trigger 'authenticateEnd'
-          Backbone.trigger 'authenticateFail', responseJSON.userFriendlyErrors
+          Backbone.trigger 'authenticateFail', error.userFriendlyErrors
       ).fail (error) =>
         Backbone.trigger 'authenticateEnd'
         Backbone.trigger 'authenticateFail', error: 'Request timed out'

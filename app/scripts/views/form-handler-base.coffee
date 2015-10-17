@@ -23,7 +23,7 @@ define [
     getCorpusDatumFields: ->
       try
         globals.applicationSettings
-          .get('activeFieldDBCorpusModel').get 'datumFields'
+          .get('activeFieldDBCorpusModel').corpus.get 'datumFields'
       catch
         null
 

@@ -330,7 +330,7 @@ define [
     useCorpus: (event) ->
       if event then @stopEvent event
       @setUseCorpusButtonStateActive()
-      Backbone.trigger 'useFieldDBCorpus', @model.get('dbname')
+      Backbone.trigger 'useFieldDBCorpus', @model
 
     toggleAddUserKeys: (event) ->
       if event.which in [13, 32]
@@ -426,11 +426,16 @@ define [
         .button()
         .tooltip content: 'activate this corpus and view its data'
 
+    fetchCorpus: ->
+      @model.corpus.loadCorpusByDBname(@model.corpus.dbname)
+
+    # Fix this, it make-a no sense
     fetchThenOpen: ->
       if @haveFetchedUsers
         @openBody()
       else
-        @fetchUsers()
+        #@fetchCorpus()
+        @openBody()
 
     openBody: ->
       @setBodyStateOpen()
