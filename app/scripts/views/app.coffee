@@ -283,6 +283,18 @@ define [
       Backbone.trigger 'bodyClicked' # Mainmenu superclick listens for this
 
     useFieldDBCorpus: (corpusModel) ->
+      if corpusModel.corpus._rev
+        @displayFieldDBCorpus()
+      else
+        corpusModel.corpus.fetch().then(
+          (response) =>
+            @displayFieldDBCorpus()
+        ,
+          (error) =>
+            console.log 'error fetching fielddb corpus'
+        )
+
+    displayFieldDBCorpus: ->
       currentlyActiveFieldDBCorpus = @activeFieldDBCorpus
       @activeFieldDBCorpus = corpusModel
       @applicationSettings.save
