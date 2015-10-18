@@ -60,7 +60,7 @@ define [
           model: corpus
           applicationSettings: @applicationSettings.toJSON()
           activeFieldDBCorpus: @activeFieldDBCorpus
-        # corpus.fetch()
+        #corpus.fetch()
         @corpusViews.push newCorpusView
 
     listenToEvents: ->

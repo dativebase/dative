@@ -50,6 +50,20 @@ define [
     # GET `<CorpusServiceURL>/<corpusname>/_design/deprecated/_view/private_corpuses`
     fetch: ->
       @trigger 'fetchStart'
+      @corpus.fetch().then(
+        (response) =>
+          console.log 'success'
+          console.log response
+          @trigger 'fetchSuccess'
+      ,
+        (error) =>
+          console.log 'error'
+          @trigger 'fetchFail'
+      ).done =>
+        @trigger 'fetchEnd'
+
+    oldfetch: ->
+      @trigger 'fetchStart'
       CorpusModel.cors.request(
         method: 'GET'
         timeout: 10000
