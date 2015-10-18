@@ -360,7 +360,6 @@ define [
         @applicationSettings = options.applicationSettings
       else
         @applicationSettings = new ApplicationSettingsModel()
-        @applicationSettings.fetch()
 
     # Size the #appview div relative to the window size
     matchWindowDimensions: ->
