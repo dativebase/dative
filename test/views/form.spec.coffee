@@ -20,19 +20,25 @@ define (require) ->
 
   describe '`FormView`', ->
 
-
     before ->
 
       @spied = [
         'interlinearize'
         '_interlinearize'
         'hideIGTFields'
+        'toggleHistory'
+        'disableHistoryButton'
+        'fetchHistoryFormStart'
+        'fetchHistoryFormEnd'
+        'fetchHistoryFormFail'
+        'fetchHistoryFormSuccess'
       ]
       for method in @spied
         sinon.spy FormView::, method
+      spinStub = sinon.stub FormView::, 'spin', -> console.log 'spinning'
+      stopSpinStub = sinon.stub FormView::, 'stopSpin', -> console.log 'stopping spinning'
 
       @$fixture = $ '<div id="view-fixture"></div>'
-
 
     beforeEach ->
 
@@ -50,23 +56,28 @@ define (require) ->
       @$fixture.empty().appendTo $('#fixtures')
       @$fixture.prepend '<div id="form"></div>'
 
+    afterEach -> $('#fixtures').empty()
 
-    afterEach ->
+    # Return a FormView whose $el is in our fixture.
+    getForm = (populate=true) ->
+      if populate
+        formModel = new FormModel formObject
+      else
+        formModel = new FormModel()
+      formView = new FormView model: formModel
+      formView.setElement $('#form')
+      formView
 
-      $('#fixtures').empty()
 
-
+    # Interlinearize
+    # TODO: this should be in the test spec for `FormBaseView`
     describe '`@interlinearize`', ->
 
       it 'highlights a single-char regex that matches one morpheme break word',
         (done) ->
-
-          formModel = new FormModel formObject
-          formView = new FormView model: formModel
-
           # Simulate a search for /k/ in morpheme_break
+          formView = getForm()
           formView.searchPatternsObject = morpheme_break: /((?:k))/g
-          formView.setElement $('#form')
           formView.render()
           x = ->
             $morphemeBreakIGTCells =
@@ -85,15 +96,10 @@ define (require) ->
           # delay.
           setTimeout x, 3
 
-
       it 'highlights nothing on regex search for space character', (done) ->
-
-        formModel = new FormModel formObject
-        formView = new FormView model: formModel
-
         # Simulate a search for /( )/ in morpheme_break
+        formView = getForm()
         formView.searchPatternsObject = morpheme_break: /((?:( )))/g
-        formView.setElement $('#form')
         formView.render()
         x = ->
           $morphemeBreakIGTCells =
@@ -110,12 +116,127 @@ define (require) ->
           done()
         setTimeout x, 3
 
+
+    # HTML
+    describe 'its HTML', ->
+
+      it 'has a header which is hidden by default', ->
+        formView = getForm false
+        formView.render()
+        expect(formView.$('div.dative-widget-header').length).to.equal 1
+        expect(formView.$('div.dative-widget-header').first().is(':visible'))
+          .to.be.false
+
+      it 'has no header title text', ->
+        $headerTitleDiv = $('div.dative-widget-header').first()
+          .find 'div.dative-widget-header-title'
+        expect($headerTitleDiv.text()).to.equal ''
+
+      describe 'with an empty model, it ...', ->
+
+        it 'has update, export, and settings buttons', ->
+          formView = getForm false
+          formView.render()
+          expect(formView.$('button.update-resource').length).to.equal 1
+          expect(formView.$('button.export-resource').length).to.equal 1
+          expect(formView.$('button.settings').length).to.equal 1
+
+        it 'does NOT have delete, duplicate, history, controls, or data buttons',
+          ->
+            formView = getForm false
+            formView.render()
+            expect(formView.$('button.delete-resource').length).to.equal 0
+            expect(formView.$('button.duplicate-resource').length).to.equal 0
+            expect(formView.$('button.resource-history').length).to.equal 0
+            expect(formView.$('button.controls').length).to.equal 0
+            expect(formView.$('button.file-data').length).to.equal 0
+
+      describe 'with a non-empty model, it ...', ->
+
+        it 'has update, export, delete, duplicate, history, and settings
+          buttons', ->
+            formView = getForm()
+            formView.render()
+            expect(formView.$('button.update-resource').length).to.equal 1
+            expect(formView.$('button.delete-resource').length).to.equal 1
+            expect(formView.$('button.duplicate-resource').length).to.equal 1
+            expect(formView.$('button.export-resource').length).to.equal 1
+            expect(formView.$('button.resource-history').length).to.equal 1
+            expect(formView.$('button.settings').length).to.equal 1
+
+        it 'does NOT have controls or data buttons', ->
+          formView = getForm()
+          formView.render()
+          expect(formView.$('button.controls').length).to.equal 0
+          expect(formView.$('button.file-data').length).to.equal 0
+
+
+    describe 'History functionality', ->
+
+      describe 'its init state', ->
+
+        it 'starts off with no previous versions', ->
+          formView = getForm()
+          formView.render()
+          previousVersionsDivIsEmpty =
+            formView.$('div.resource-previous-versions').first().is ':empty'
+          expect(formView.previousVersionModels).to.be.empty
+          expect(formView.previousVersionView).to.be.empty
+          expect(previousVersionsDivIsEmpty).to.be.true
+
+        it 'involves no history event responders having been called', ->
+          formView = getForm()
+          expect(formView.fetchHistoryFormStart).not.to.have.been.called
+          expect(formView.fetchHistoryFormEnd).not.to.have.been.called
+          expect(formView.fetchHistoryFormFail).not.to.have.been.called
+          expect(formView.fetchHistoryFormSuccess).not.to.have.been.called
+
+      describe 'its “history” button', ->
+
+        it 'triggers `@toggleHistory` when clicked', ->
+          formView = getForm()
+          formView.render()
+          $historyButton = formView.$('button.resource-history').first()
+          expect(formView.toggleHistory).not.to.have.been.called
+          expect(formView.disableHistoryButton).not.to.have.been.called
+          expect($historyButton.button 'option', 'disabled').to.be.false
+          $historyButton.click()
+          expect(formView.toggleHistory).to.have.been.calledOnce
+          expect(formView.disableHistoryButton).to.have.been.calledOnce
+          # Unsure why the following is failing. I must not be understanding
+          # the jQuery button API ...
+          #expect($historyButton.button 'option', 'disabled').to.be.true
+
+      describe 'clicking its “history” button', ->
+
+        it 'results in `@fetchHistoryFormStart` being called once', ->
+          newFetchHistory = ->
+            @trigger 'fetchHistoryFormStart'
+            #@trigger 'fetchHistoryFormSuccess'
+            @trigger 'fetchHistoryFormEnd'
+          fetchHistoryStub = sinon.stub FormModel::, 'fetchHistory',
+            newFetchHistory
+          formModel = new FormModel formObject
+          formView = new FormView model: formModel
+          formView.setElement $('#form')
+          formView.render()
+          $historyButton = formView.$('button.resource-history').first()
+          expect(fetchHistoryStub).not.to.have.been.called
+          expect(formView.fetchHistoryFormStart).not.to.have.been.called
+          #expect(formView.fetchHistoryFormSuccess).not.to.have.been.called
+          expect(formView.fetchHistoryFormEnd).not.to.have.been.called
+          $historyButton.click()
+          expect(fetchHistoryStub).to.have.been.calledOnce
+          expect(formView.fetchHistoryFormStart).to.have.been.calledOnce
+          #expect(formView.fetchHistoryFormSuccess).to.have.been.calledOnce
+          expect(formView.fetchHistoryFormEnd).to.have.been.calledOnce
+
+
   # An object for creating an OLD-style `FormModel` instance. Core values:
   #
   #     nitsspiyi   k    nitsspiyi
   #     /nit-ihpiyi k    nit-ihpiyi/
   #     1-dance     COMP 1-dance
-  #
   formObject = {
     "files": [],
     "syntax": "",
