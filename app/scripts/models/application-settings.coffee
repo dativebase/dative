@@ -26,6 +26,7 @@ define [
       'LanguageModelModel': LanguageModelModel
 
     initialize: ->
+      @fetch()
       fieldDBTempApp = new (FieldDB.App)(@get('fieldDBApplication'))
       fieldDBTempApp.authentication.eventDispatcher = Backbone
       @listenTo Backbone, 'authenticate:login', @authenticate
@@ -130,8 +131,8 @@ define [
       Backbone.trigger 'authenticateStart'
       if not @get 'fieldDBApplication'
         @set 'fieldDBApplication', FieldDB.FieldDBObject.application
-      @get('fieldDBApplication').authentication =
-        @get('fieldDBApplication').authentication or new FieldDB.Authentication()
+      if not @get('fieldDBApplication').authentication or not @get('fieldDBApplication').authentication.login
+        @get('fieldDBApplication').authentication = new FieldDB.Authentication()
       @get('fieldDBApplication').authentication.login(credentials).then(
         (promisedResult) =>
           @set

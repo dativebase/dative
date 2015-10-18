@@ -15,7 +15,6 @@ define (require) ->
 
       # New default model and view for each test
       @applicationSettings = new ApplicationSettingsModel()
-      #@applicationSettings.fetch()
       @mainMenuView = new MainMenuView(
         model: @applicationSettings
         el: @$fixture
