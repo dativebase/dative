@@ -235,5 +235,12 @@ define [
         regex
 
     # Cf. http://stackoverflow.com/a/9310752/992730
-    escapeRegexChars: (input) -> input.replace /[-[\]{}()*+?.,\\^$|#]/g, "\\$&"
+    escapeRegexChars: (input) ->
+      try
+        input.replace /[-[\]{}()*+?.,\\^$|#]/g, "\\$&"
+      catch
+        try
+          String(input).replace /[-[\]{}()*+?.,\\^$|#]/g, "\\$&"
+        catch
+          input
 
