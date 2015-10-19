@@ -22,8 +22,9 @@ define [
       ['id']
       ['name']
       ['description']
-      ['lexicon_corpus', 'name']
-      ['rules_corpus', 'name']
+      ['phonology', 'name']
+      ['morphology', 'name']
+      ['language_model', 'name']
     ]
 
 

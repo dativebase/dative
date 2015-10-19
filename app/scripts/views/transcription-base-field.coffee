@@ -1,28 +1,61 @@
 define [
   './field'
+  './../models/morphological-parser'
   './../templates/field-suggestible'
-], (FieldView, suggestibleFieldTemplate) ->
+  './../utils/globals'
+], (FieldView, MorphologicalParserModel, suggestibleFieldTemplate, globals) ->
 
   # Transcription Base Field View
   # -----------------------------
   #
-  # A field view for transcription-type fields/attributes, i.e.,
-  # 'transcription', 'phonetic_transcription', and
+  # Transcription fields can be both suggesters and suggestion receivers. They
+  # may:
+  #
+  # 1. receive suggestions from morpheme break fields (based on phonologies)
+  # 2. give suggestions to morpheme break fields (using parsers)
+  #
+  # This field is to be inherited by field views for transcription-type
+  # fields/attributes, i.e.,  'transcription', 'phonetic_transcription', and
   # 'narrow_phonetic_transcription'.
   #
-  # The special-purpose logic in this class is for responding to events on the
-  # model that communicate suggestions from other fields with respect to the
-  # values that a transcription field may want to suggest to the user.
+  # The special-purpose logic in this class is for triggering suggestions and
+  # reacting to suggestions that target these fields.
 
   class TranscriptionBaseFieldView extends FieldView
+
+    events:
+      'change':                'setToModel' # fires when multi-select changes
+      'selectmenuchange':      'setToModel' # fires when a selectmenu changes
+      'menuselect':            'setToModel' # fires when the tags multi-select changes (not working?...)
+      'keydown .ms-container': 'multiselectKeydown'
+      # New/different from `FieldView` super-class.
+      'keydown input, .ui-selectmenu-button, .ms-container':
+                               'controlEnterSubmit'
+      'keydown textarea':      'myControlEnterSubmit'
+      'input':                 'respondToInput' # fires when an input, textarea or date-picker changes
+      'keydown div.suggestion':
+                               'suggestionsKeyboardControl'
+      'click .toggle-suggestions':
+                               'toggleSuggestions'
+      'click div.suggestion':  'suggestionClicked'
+      'mouseover .suggestion': 'hoverStateSuggestionOn'
+      'mouseout .suggestion':  'hoverStateSuggestionOff'
+      'focusin .suggestion':   'hoverStateSuggestionOn'
+      'focusout .suggestion':  'hoverStateSuggestionOff'
+
+    template: suggestibleFieldTemplate
 
     initialize: (options) ->
       super options
 
+      ##########################################################################
+      # Suggestion RECEIVER attributes
+      ##########################################################################
+
       # When set to `true` this means that the (suggestion) system is
       # responsible for the current value in our <textarea>. When set to
       # `false` (the default), this means that the user is responsible for this
-      # value; this prevents our suggestions from overwriting the
+      # value; this prevents the suggestions we receive from overwriting the
       # user-specified input.
       @systemSuggested = false
 
@@ -33,26 +66,96 @@ define [
       # This will hold any suggestion object that we may receive.
       @suggestionUnaltered = null
 
+      # Indicates whether the suggestions are visible in the UI.
       @suggestionsVisible = false
 
-    # Over-write the super-classes `@events` with suggestion-specific listeners.
-    events:
-      'change':                'setToModel' # fires when multi-select changes
-      'selectmenuchange':      'setToModel' # fires when a selectmenu changes
-      'menuselect':            'setToModel' # fires when the tags multi-select changes (not working?...)
-      'keydown .ms-container': 'multiselectKeydown'
-      # New/different from `FieldView` super-class.
-      'keydown input, .ui-selectmenu-button, .ms-container':
-                               'controlEnterSubmit'
-      'keydown textarea':      'myControlEnterSubmit'
-      'input':                 'userInput' # fires when an input, textarea or date-picker changes
-      'keydown div.suggestion': 'suggestionsKeyboardControl'
-      'click .toggle-suggestions': 'toggleSuggestions'
-      'click div.suggestion':  'suggestionClicked'
-      'mouseover .suggestion': 'hoverStateSuggestionOn'
-      'mouseout .suggestion': 'hoverStateSuggestionOff'
-      'focusin .suggestion': 'hoverStateSuggestionOn'
-      'focusout .suggestion': 'hoverStateSuggestionOff'
+      ##########################################################################
+      # Suggestion ISSUER attributes
+      ##########################################################################
+
+      # For keeping track of the words seen as a user modifies the
+      # transcription input field. This is an array of all of the unique words
+      # that the user has typed into the transcription field.
+      @wordsSeen = []
+
+      # This array will hold strings that we've already requested parses for.
+      @parseRequested = []
+
+      # This cache object maps input words (from the user) to output parses
+      # previously returned by the server.
+      @parseCache = {}
+
+      @parser = @getParser()
+
+      @parseRequestPending = false
+
+      # Return an array of field names that we may target, i.e., send
+      # suggestions to.
+      @targetFields = @getTargetFields()
+
+    listenToEvents: ->
+      super
+
+      # Something is offering us a suggestion for what our transcription value
+      # should be.
+      @listenTo @model, "#{@attribute}:suggestion", @suggestionReceived
+
+      # Something is telling us to hide our current suggestions. This happens
+      # when a morpheme break field recognizes that its "to-X-transcription"
+      # phonology has changed to `null`.
+      @listenTo @model, "#{@attribute}:turnOffSuggestions", @turnOffSuggestions
+
+      # The input view's <textarea> has resized itself, so we respond by resizing
+      # our .suggestions <div>.
+      @listenTo @model, 'textareaWidthResize', @resizeAndPositionSuggestionsDiv
+
+      @listenToParser()
+      @listenForParserTaskSetChange()
+
+    render: ->
+      @lastInput = new Date()
+      @setIntervalId = setInterval (=> @requestParseCheck()), 500
+      super
+      @
+
+    guify: ->
+      super
+      @guifyForSuggestions()
+
+    onClose: -> clearInterval @setIntervalId
+
+    # The user has entered something into the <textarea>.
+    respondToInput: ->
+      # The super-class would have called `setToModel` on an input event, so we
+      # do that here too.
+      @setToModel()
+
+      # Remember the timestamp of the last input event; this info will be used
+      # to decide when we should make requests to the server.
+      @lastInput = new Date()
+
+      # Update `@wordsSeen` so that it is an array of all of the words that we
+      # have seen the user type into our field (with no duplicates).
+      currentWords = @getCurrentWords()
+      @wordsSeen = @utils.unique @wordsSeen.concat(currentWords)
+
+      if @parser then @triggerSuggestion()
+      @systemSuggested = false
+      @alertIncongruity()
+
+
+    ############################################################################
+    # Suggestion RECEIVER logic
+    ############################################################################
+
+    guifyForSuggestions: ->
+      @$('.suggestions')
+        .css "border-color", @constructor.jQueryUIColors().defBo
+      @$('button.toggle-suggestions')
+        .button()
+        .tooltip()
+        .hide()
+      setTimeout (=> @resizeAndPositionSuggestionsDiv()), 10
 
     hoverStateSuggestionOn: (event) ->
       @$(event.currentTarget).addClass 'ui-state-hover'
@@ -77,23 +180,22 @@ define [
           if @$('.suggestions').length > 0 then @closeSuggestionsAnimate()
       @controlEnterSubmit event
 
-    template: suggestibleFieldTemplate
-
-    listenToEvents: ->
-      super
-
-      # Something is offering us a suggestion for what our transcription value
-      # should be.
-      @listenTo @model, "#{@attribute}:suggestion", @suggestionReceived
-
-      # Something is telling us to hide our current suggestions. This happens
-      # when a morpheme break field recognizes that its "to-X-transcription"
-      # phonology has changed to `null`.
-      @listenTo @model, "#{@attribute}:turnOffSuggestions", @turnOffSuggestions
-
-      # The input view's <textarea> has resized itself, so we respond by resizing
-      # our .suggestions <div>.
-      @listenTo @model, 'textareaWidthResize', @resizeAndPositionSuggestionsDiv
+    # We have received a suggestion; respond accordingly. This means:
+    # 1. potentially inserting the primary suggestion into our <textarea>
+    # 2. populating our .suggestions <div> with (a subset of) the suggestions.
+    # 3. alerting the user if their current value is not in the suggestions
+    #    list.
+    suggestionReceived: (suggestion) ->
+      $input = @$("textarea[name=#{@attribute}]").first()
+      currentValue = $input.val().trim()
+      @suggestionUnaltered = suggestion
+      @suggestedValues = @getSuggestedValues suggestion
+      if (@systemSuggested or (not currentValue)) and
+      @suggestedValues.length > 0
+        @systemSuggested = true
+        $input.val @suggestedValues[0]
+        @setToModel()
+      @addSuggestionsToSuggestionsDiv()
 
     turnOffSuggestions: ->
       @closeSuggestionsAnimate()
@@ -101,38 +203,24 @@ define [
       @toggleSuggestionsButtonState()
       @suggestedValues = []
 
-    # The user has entered something into the <textarea>.
-    userInput: ->
-      @setToModel()
-      @systemSuggested = false
-      @alertIncongruity()
+    # Due to combinatoric explosion, we can get too many suggestions, so we
+    # display this many at most.
+    maxNoSuggestions: 20
 
-    # We have received a suggestion; respond accordingly. This means:
-    # 1. potentially inserting the primary suggestion into our <textarea>
-    # 2. populating our .suggestions <div> with (a subset of) the suggestions.
-    # 3. alerting the user if their current transcription value is not in the
-    #    suggestions list.
-    suggestionReceived: (suggestion) ->
-      $transcriptionInput = @$("textarea[name=#{@attribute}]").first()
-      currentValue = $transcriptionInput.val().trim()
-      @suggestionUnaltered = suggestion
-      @suggestedValues = @getSuggestedValues suggestion
-      if (@systemSuggested or (not currentValue)) and @suggestedValues.length > 0
-        @systemSuggested = true
-        $transcriptionInput.val @suggestedValues[0]
-        @setToModel()
-      @addSuggestionsToSuggestionsDiv()
-
-    # Extra GUI niceties for our suggestion machinery.
-    guify: ->
-      super
-      @$('.suggestions')
-        .css "border-color", @constructor.jQueryUIColors().defBo
-      @$('button.toggle-suggestions')
-        .button()
-        .tooltip()
-        .hide()
-      setTimeout (=> @resizeAndPositionSuggestionsDiv()), 10
+    # Populate our .suggestions <div> with our first `@maxNoSuggestions`
+    addSuggestionsToSuggestionsDiv: ->
+      if @suggestedValues.length > 0
+        @alertIncongruity()
+        @showSuggestionsButtonCheck()
+        @$('.suggestions').first().html @getSuggestedValuesHTML()
+        # If nothing is currently focused, we take that to mean that the last
+        # thing focused was a .suggestion <div> that we just destroyed; so we
+        # focus the first new .suggestion <div>.
+        if $(':focus').length is 0
+          @$('.suggestions').first().find('.suggestion').first().focus()
+      else
+        @$('.suggestions').html ''
+        @hideSuggestionsButtonCheck()
 
     # We set the width and position of the .suggestions <div> in accordance
     # with the with and position of the <textarea> that the suggestions are
@@ -156,25 +244,6 @@ define [
           at: 'left bottom-5'
           of: $textarea
           collision: 'none'
-
-    # Due to combinatoric explosion, we can get too many suggestions, so we
-    # display this many at most.
-    maxNoSuggestions: 20
-
-    # Populate our .suggestions <div> with our first `@maxNoSuggestions`
-    addSuggestionsToSuggestionsDiv: ->
-      if @suggestedValues.length > 0
-        @alertIncongruity()
-        @showSuggestionsButtonCheck()
-        @$('.suggestions').first().html @getSuggestedValuesHTML()
-        # If nothing is currently focused, we take that to mean that the last
-        # thing focused was a .suggestion <div> that we just destroyed; so we
-        # focus the first new .suggestion <div>.
-        if $(':focus').length is 0
-          @$('.suggestions').first().find('.suggestion').first().focus()
-      else
-        @$('.suggestions').html ''
-        @hideSuggestionsButtonCheck()
 
     # Get the HTML for displaying our array of selections (truncated, if
     # needed).
@@ -353,4 +422,161 @@ define [
             result.push "#{prefix} #{suffix}"
         result
 
+
+    ############################################################################
+    # Suggestion ISSUER logic
+    ############################################################################
+
+    listenForParserTaskSetChange: ->
+      @listenTo globals.applicationSettings, 'change:parserTaskSet',
+        @parserTaskSetChanged
+
+    # Our global parser task set model has changed. Since this might affect us,
+    # we refresh our state relative to our parser (if we have one).
+    parserTaskSetChanged: ->
+      @stopListeningToParser()
+      @parser = @getParser()
+      @listenToParser()
+      for targetField in @targetFields
+        @model.trigger "#{targetField}:turnOffSuggestions"
+
+    # This number is how long the user must be idle for (in terms of input into
+    # the transcription field) in order for us to allow parse requests to the
+    # server to be possible.
+    idle: 500
+
+    # Tell our parser to issue a parse request to the server, but only if the
+    # user has been idle for a sufficient period of time.
+    requestParseCheck: ->
+      if (((new Date()) - @lastInput) > @idle) then @requestParse()
+
+    # Request parses for the words typed into our transcription-type textarea
+    # that we haven't already requested parses for.
+    requestParse: ->
+      if @parser
+        wordsToParse =
+          (w for w in @wordsSeen when w not in @parseRequested)
+        if (wordsToParse.length > 0) and
+        (not @parseRequestPending)
+          @parser.parse wordsToParse
+
+    # Get the words that are currently in our value.
+    getCurrentWords: ->
+      (w for w in \
+        @model.get(@attribute).trim().normalize('NFD').split(/\s+/) \
+        when w)
+
+    # Trigger an event on the (form) model that other fields (i.e., the
+    # morpheme break and morpheme gloss fields) can listen for. The argument
+    # passed to listeners is an object that contains the suggestion for the
+    # recipient field as well as information about the source, the target, the
+    # suggester FST resource, etc.
+    triggerSuggestion: ->
+      morphemeBreakSuggestion = {}
+      morphemeGlossSuggestion = {}
+      currentWords = @getCurrentWords()
+      for word in currentWords
+        parse = @parseCache[word]
+        if parse
+          [morphemeBreakParse, morphemeGlossParse] = @parseParse parse
+          morphemeBreakSuggestion[word] = morphemeBreakParse
+          morphemeGlossSuggestion[word] = morphemeGlossParse
+        else
+          # Suggest simply using the word's transcription value (i.e., the
+          # input) for morpheme break and '?' for the gloss, if the parser
+          # resource has not given us any suggestions.
+          morphemeBreakSuggestion[word] = word
+          morphemeGlossSuggestion[word] = '?'
+      suggester = "Morphological Parser #{@parser.id}"
+      morphemeBreakPayload =
+        source: @attribute
+        sourceWords: currentWords
+        target: 'morpheme_break'
+        suggestion: morphemeBreakSuggestion
+        suggester: suggester
+      morphemeGlossPayload =
+        source: @attribute
+        sourceWords: currentWords
+        target: 'morpheme_gloss'
+        suggestion: morphemeGlossSuggestion
+        suggester: suggester
+      @model.trigger "morpheme_break:suggestion", morphemeBreakPayload
+      @model.trigger "morpheme_gloss:suggestion", morphemeGlossPayload
+
+    # Use the info in `globals.applicationSettings.get('parserTaskSet') to get
+    # a parser model for this transcription-type field. If there is no parser
+    # assigned to this transcription (i.e., in app settings), then return
+    # `null`.
+    getParser: ->
+      # See if we can get global parser-related tasks.
+      try
+        @parserRelatedTasks = globals.applicationSettings.get('parserTaskSet')
+      catch
+        @parserRelatedTasks = null
+      if @parserRelatedTasks
+        parser = @parserRelatedTasks.get "#{@attribute}_parser"
+        if parser
+          if @_parserModel and @_parserModel.get('UUID') is parser.UUID
+            @_parserModel
+          else
+            new MorphologicalParserModel parser
+      else
+        null
+
+    listenToParser: ->
+      if @parser
+        @listenTo @parser, "parseStart", @parseStart
+        @listenTo @parser, "parseEnd", @parseEnd
+        @listenTo @parser, "parseSuccess", @parseSuccess
+        @listenTo @parser, "parseFail", @parseFail
+
+    stopListeningToParser: ->
+      if @parser then @stopListening @parser
+
+    parseStart: ->
+      @parseRequestPending = true
+
+    parseEnd: ->
+      @parseRequestPending = false
+
+    parseSuccess: (response) ->
+      for word, parse of response
+        @parseCache[word] = parse
+        @parseRequested.push word
+      @triggerSuggestion()
+
+    parseFail: (error) ->
+      console.log "attempted 'parse' request with #{@attribute}'s parser failed
+        ..."
+      console.log error
+
+    # Return the morpheme delimiters that the (OLD) backend that we are
+    # connected to is assuming.
+    getDelims: -> ['-', '=']
+
+    # Return a regex that can split parses based on delimiters while retaining
+    # those delimiters.
+    getSplitterRegex: ->
+      if not @_splitter
+        @_splitter = new RegExp "(#{@getDelims().join '|'})"
+      @_splitter
+
+    # Parse the parse, i.e., take a string like 'nit⦀1⦀agra-ihpiyi⦀dance⦀vai'
+    # and return an array like ['nit-ihpiyi', '1-dance'].
+    parseParse: (parse) ->
+      rareDelimiter = @parser.get 'morphology_rare_delimiter'
+      shapes = []
+      glosses = []
+      for morphemeTriplet in parse.split @getSplitterRegex()
+        if morphemeTriplet in @getDelims()
+          shapes.push morphemeTriplet
+          glosses.push morphemeTriplet
+        else
+          [shape, gloss, ...] = morphemeTriplet.split rareDelimiter
+          shapes.push shape
+          glosses.push gloss
+      [shapes.join(''), glosses.join('')]
+
+    # These are the fields that our parse suggestions will be directed to.
+    getTargetFields: -> ['morpheme_break', 'morpheme_gloss']
 

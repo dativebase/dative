@@ -133,7 +133,10 @@ define ['./resource'], (ResourceModel) ->
             (onerror triggered)."
       )
 
+    # Input in body of HTTP request that morphological parser resources expect:
+    # ``{'transcriptions': [t1, t2, ...]}``.
     getParsePayload: (words) ->
-      {transcriptions: words.split(/\s+/)}
-
+      if @utils.type(words) is 'string'
+        words = words.split /\s+/
+      {transcriptions: words}
 

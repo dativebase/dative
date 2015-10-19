@@ -618,6 +618,6 @@ define [
         title: "Parser-related tasks update fail"
         content: "Oops. Something went wrong while trying to save your
           parser-related tasks."
-        type: 'warning'
+        type: 'error'
       @renderNotification notification
 
