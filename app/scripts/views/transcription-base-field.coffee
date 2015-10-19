@@ -30,6 +30,9 @@ define [
       # field.
       @suggestedValues = []
 
+      # This will hold any suggestion object that we may receive.
+      @suggestionUnaltered = null
+
       @suggestionsVisible = false
 
     # Over-write the super-classes `@events` with suggestion-specific listeners.
@@ -102,6 +105,7 @@ define [
     userInput: ->
       @setToModel()
       @systemSuggested = false
+      @alertIncongruity()
 
     # We have received a suggestion; respond accordingly. This means:
     # 1. potentially inserting the primary suggestion into our <textarea>
@@ -111,6 +115,7 @@ define [
     suggestionReceived: (suggestion) ->
       $transcriptionInput = @$("textarea[name=#{@attribute}]").first()
       currentValue = $transcriptionInput.val().trim()
+      @suggestionUnaltered = suggestion
       @suggestedValues = @getSuggestedValues suggestion
       if (@systemSuggested or (not currentValue)) and @suggestedValues.length > 0
         @systemSuggested = true
@@ -179,18 +184,33 @@ define [
         result.push "<div class='suggestion' tabindex='0'>#{suggestion}</div>"
       result.join ''
 
-    # TODO: figure out how to add this alert to the UI in a useful way.
-    # TODO: trigger the incongruity check whenever the transcription value
-    # changes too (not just when the suggestions change, as is done at present)
+    removePunctuation: (value) ->
+      value.replace(/['"“”‘’,.!?]/g, '')
+
+    # Alert the user to the fact that their transcription-type value does not
+    # match any of the values in the received suggestion. We perform this alert
+    # by adding an Error class to the small "show suggestions" button, changing
+    # the tooltip message, and giving it an "Error" appearance too.
     alertIncongruity: ->
       if @suggestedValues and @suggestedValues.length > 0
         value = @model.get @attribute
-        if not (value in @suggestedValues or
+        if value in @suggestedValues or
         value.toLowerCase() in @suggestedValues or
-        value.toLowerCase().replace(/[“”‘’.!?]/, '') in @suggestedValues)
-          # console.log "The #{@attribute} value #{value} is not compatible with
-          #   the current morpheme break value, given the specified phonology."
-          return
+        @removePunctuation(value.toLowerCase()) in @suggestedValues or
+        @utils.singleSpace(@removePunctuation(value.toLowerCase())) in @suggestedValues
+          @$('button.toggle-suggestions').first()
+            .removeClass 'ui-state-error'
+            .tooltip 'option', 'content', 'show suggested values for this field'
+            .tooltip 'option', 'tooltipClass', ''
+        else
+          @$('button.toggle-suggestions').first()
+            .addClass 'ui-state-error'
+            .tooltip 'option', 'content', "Warning: the value in this field is
+              not among the values suggested by
+              #{@suggestionUnaltered.suggester} given the
+              #{@utils.snake2regular @suggestionUnaltered.source} value; click
+              here to show suggested values for this field"
+            .tooltip 'option', 'tooltipClass', 'ui-state-error'
 
     # Respond to a 'click' event on a <div.selection> element: put its
     # suggestion text in our <textarea>.

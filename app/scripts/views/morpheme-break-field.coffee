@@ -303,7 +303,8 @@ define [
         @triggerToNarrowPhoneticTranscriptionSuggestion()
 
     triggerToTranscriptionSuggestion: ->
-      @triggerSuggestion 'transcription', 'toTranscriptionCache'
+      suggester = "Phonology #{@toTranscriptionPhonology.id}"
+      @triggerSuggestion 'transcription', 'toTranscriptionCache', suggester
 
 
     ############################################################################
@@ -341,7 +342,9 @@ define [
         @triggerToNarrowPhoneticTranscriptionSuggestion()
 
     triggerToPhoneticTranscriptionSuggestion: ->
-      @triggerSuggestion 'phonetic_transcription', 'toPhoneticTranscriptionCache'
+      suggester = "Phonology #{@toPhoneticTranscriptionPhonology.id}"
+      @triggerSuggestion 'phonetic_transcription',
+        'toPhoneticTranscriptionCache', suggester
 
 
     ############################################################################
@@ -366,8 +369,9 @@ define [
       @triggerToNarrowPhoneticTranscriptionSuggestion()
 
     triggerToNarrowPhoneticTranscriptionSuggestion: ->
+      suggester = "Phonology #{@toNarrowPhoneticTranscriptionPhonology.id}"
       @triggerSuggestion 'narrow_phonetic_transcription',
-        'toNarrowPhoneticTranscriptionCache'
+        'toNarrowPhoneticTranscriptionCache', suggester
 
     ############################################################################
     # Event handlers for "recognizer morphology"
@@ -392,7 +396,7 @@ define [
     # Trigger an event on the (form) model that other fields (e.g., the
     # transcription field) can listen for. The argument passed to listeners is
     # an object that contains the suggestion for the recipient field.
-    triggerSuggestion: (targetField, cacheAttribute) ->
+    triggerSuggestion: (targetField, cacheAttribute, suggester) ->
       suggestion = {}
       currentWords = @getCurrentWords()
       for word in currentWords
@@ -408,6 +412,7 @@ define [
         sourceWords: currentWords
         target: targetField
         suggestion: suggestion
+        suggester: suggester
       @model.trigger "#{targetField}:suggestion", payload
 
     # Use the info in `globals.applicationSettings.get('parserTaskSet') to get

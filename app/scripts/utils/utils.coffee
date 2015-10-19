@@ -407,11 +407,21 @@ define (require) ->
     catch
       value
 
+  # Return `array` with no duplicates.
   unique = (array) ->
     output = {}
     output[array[key]] = array[key] for key in [0...array.length]
     value for key, value of output
 
+  # Convert a string so that all strings of whitespace are replaced by a single
+  # space character and so that there is no leading or trailing whitespace.
+  singleSpace = (string) ->
+    try
+      string.trim().split(/\s+/).join ' '
+    catch
+      string
+
+  singleSpace: singleSpace
   unique: unique
   highlightSearchMatch: highlightSearchMatch
   humanFileSize: humanFileSize
