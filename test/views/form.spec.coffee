@@ -28,10 +28,6 @@ define (require) ->
         'hideIGTFields'
         'toggleHistory'
         'disableHistoryButton'
-        'fetchHistoryFormStart'
-        'fetchHistoryFormEnd'
-        'fetchHistoryFormFail'
-        'fetchHistoryFormSuccess'
       ]
       for method in @spied
         sinon.spy FormView::, method
@@ -185,11 +181,19 @@ define (require) ->
           expect(previousVersionsDivIsEmpty).to.be.true
 
         it 'involves no history event responders having been called', ->
+          sinon.spy FormView::, 'fetchHistoryFormStart'
+          sinon.spy FormView::, 'fetchHistoryFormEnd'
+          sinon.spy FormView::, 'fetchHistoryFormSuccess'
+          sinon.spy FormView::, 'fetchHistoryFormFail'
           formView = getForm()
           expect(formView.fetchHistoryFormStart).not.to.have.been.called
           expect(formView.fetchHistoryFormEnd).not.to.have.been.called
           expect(formView.fetchHistoryFormFail).not.to.have.been.called
           expect(formView.fetchHistoryFormSuccess).not.to.have.been.called
+          FormView::fetchHistoryFormStart.restore()
+          FormView::fetchHistoryFormEnd.restore()
+          FormView::fetchHistoryFormSuccess.restore()
+          FormView::fetchHistoryFormFail.restore()
 
       describe 'its “history” button', ->
 
@@ -206,31 +210,6 @@ define (require) ->
           # Unsure why the following is failing. I must not be understanding
           # the jQuery button API ...
           #expect($historyButton.button 'option', 'disabled').to.be.true
-
-      describe 'clicking its “history” button', ->
-
-        it 'results in `@fetchHistoryFormStart` being called once', ->
-          newFetchHistory = ->
-            @trigger 'fetchHistoryFormStart'
-            #@trigger 'fetchHistoryFormSuccess'
-            @trigger 'fetchHistoryFormEnd'
-          fetchHistoryStub = sinon.stub FormModel::, 'fetchHistory',
-            newFetchHistory
-          formModel = new FormModel formObject
-          formView = new FormView model: formModel
-          formView.setElement $('#form')
-          formView.render()
-          $historyButton = formView.$('button.resource-history').first()
-          expect(fetchHistoryStub).not.to.have.been.called
-          expect(formView.fetchHistoryFormStart).not.to.have.been.called
-          #expect(formView.fetchHistoryFormSuccess).not.to.have.been.called
-          expect(formView.fetchHistoryFormEnd).not.to.have.been.called
-          $historyButton.click()
-          expect(fetchHistoryStub).to.have.been.calledOnce
-          expect(formView.fetchHistoryFormStart).to.have.been.calledOnce
-          #expect(formView.fetchHistoryFormSuccess).to.have.been.calledOnce
-          expect(formView.fetchHistoryFormEnd).to.have.been.calledOnce
-
 
   # An object for creating an OLD-style `FormModel` instance. Core values:
   #
@@ -367,6 +346,1110 @@ define (require) ->
       "last_name": "Dunham",
       "role": "administrator",
       "id": 1
+    }
+  }
+
+  # An object containing both an OLD-style form and its previous versions. See
+  # attributes `form` and `previous_versions`. Core values:
+  #
+  #     Áístotoinoyiiawa                     anni        Piitaakiiyi.
+  #     aist-oto-ino-yii-wa                  ann-yi      piitaakii-yi
+  #     to.speaker-go.to.do-see-DIR-PROX.SG  DEM-OBV.SG  eagle.woman-OBV.SG
+  #     ‘He came to see Piitaakii.’
+
+  formObjectWithHistory = {
+    "previous_versions": [
+      {
+        "status": "tested",
+        "files": [],
+        "elicitor": null,
+        "form_id": 25105,
+        "tags": [],
+        "elicitation_method": null,
+        "translations": [
+          {
+            "transcription": "He came to see Piitaakii.",
+            "grammaticality": "",
+            "id": 25214
+          }
+        ],
+        "syntax": "",
+        "morpheme_break_ids": [
+          [
+            [
+              [
+                353,
+                "to.speaker",
+                "adt"
+              ]
+            ],
+            [
+              [
+                148,
+                "go.to.do",
+                "adt"
+              ]
+            ],
+            [
+              [
+                3597,
+                "see",
+                "avta"
+              ]
+            ],
+            [
+              [
+                14666,
+                "DIR",
+                "thm"
+              ]
+            ],
+            [
+              [
+                14624,
+                "PROX.SG",
+                "num"
+              ]
+            ]
+          ],
+          [
+            [
+              [
+                402,
+                "DEM",
+                "drt"
+              ]
+            ],
+            [
+              [
+                14634,
+                "OBV.SG",
+                "num"
+              ]
+            ]
+          ],
+          [
+            [
+              [
+                25107,
+                "eagle.woman",
+                "PN"
+              ]
+            ],
+            [
+              [
+                14634,
+                "OBV.SG",
+                "num"
+              ]
+            ]
+          ]
+        ],
+        "syntactic_category": null,
+        "grammaticality": "",
+        "syntactic_category_string": "adt-adt-avta-thm-num drt-num PN-num",
+        "datetime_modified": "2015-09-01T20:41:10",
+        "morpheme_gloss_ids": [
+          [
+            [
+              [
+                353,
+                "aist",
+                "adt"
+              ]
+            ],
+            [
+              [
+                148,
+                "oto",
+                "adt"
+              ]
+            ],
+            [
+              [
+                3597,
+                "ino",
+                "avta"
+              ]
+            ],
+            [
+              [
+                14666,
+                "yii",
+                "thm"
+              ]
+            ],
+            [
+              [
+                14624,
+                "wa",
+                "num"
+              ]
+            ]
+          ],
+          [
+            [
+              [
+                402,
+                "ann",
+                "drt"
+              ]
+            ],
+            [
+              [
+                14634,
+                "yi",
+                "num"
+              ]
+            ]
+          ],
+          [
+            [
+              [
+                25107,
+                "piitaakii",
+                "PN"
+              ]
+            ],
+            [
+              [
+                14634,
+                "yi",
+                "num"
+              ]
+            ]
+          ]
+        ],
+        "date_elicited": null,
+        "phonetic_transcription": "",
+        "morpheme_gloss": "to.speaker-go.to.do-see-DIR-PROX.SG DEM-OBV.SG eagle.woman-OBV.SG",
+        "id": 34873,
+        "semantics": "",
+        "break_gloss_category": "aist|to.speaker|adt-oto|go.to.do|adt-ino|see|avta-yii|DIR|thm-wa|PROX.SG|num ann|DEM|drt-yi|OBV.SG|num piitaakii|eagle.woman|PN-yi|OBV.SG|num",
+        "datetime_entered": "2015-08-31T20:35:11",
+        "UUID": "3b484bd6-86b0-49b0-a587-ba2d32c800c7",
+        "narrow_phonetic_transcription": "",
+        "transcription": "Áístotoinoyiiwa anni Piitaakiiyi.",
+        "enterer": {
+          "first_name": "Joel",
+          "last_name": "Dunham",
+          "role": "administrator",
+          "id": 1
+        },
+        "comments": "",
+        "source": null,
+        "verifier": null,
+        "speaker": null,
+        "morpheme_break": "aist-oto-ino-yii-wa ann-yi piitaakii-yi",
+        "modifier": {
+          "first_name": "Joel",
+          "last_name": "Dunham",
+          "role": "administrator",
+          "id": 1
+        },
+        "speaker_comments": ""
+      },
+      {
+        "status": "tested",
+        "files": [],
+        "elicitor": null,
+        "form_id": 25105,
+        "tags": [],
+        "elicitation_method": null,
+        "translations": [
+          {
+            "transcription": "He came to see Piitaakii.",
+            "grammaticality": "",
+            "id": 25214
+          }
+        ],
+        "syntax": "",
+        "morpheme_break_ids": [
+          [
+            [
+              [
+                353,
+                "to.speaker",
+                "adt"
+              ]
+            ],
+            [
+              [
+                148,
+                "go.to.do",
+                "adt"
+              ]
+            ],
+            [
+              [
+                3597,
+                "see",
+                "avta"
+              ]
+            ],
+            [
+              [
+                14666,
+                "DIR",
+                "thm"
+              ]
+            ],
+            [
+              [
+                14624,
+                "PROX.SG",
+                "num"
+              ]
+            ]
+          ],
+          [
+            [
+              [
+                402,
+                "DEM",
+                "drt"
+              ]
+            ],
+            [
+              [
+                14634,
+                "OBV.SG",
+                "num"
+              ]
+            ]
+          ],
+          [
+            [],
+            [
+              [
+                14634,
+                "OBV.SG",
+                "num"
+              ]
+            ]
+          ]
+        ],
+        "syntactic_category": null,
+        "grammaticality": "",
+        "syntactic_category_string": "adt-adt-avta-thm-num drt-num PN-num",
+        "datetime_modified": "2015-09-01T20:40:36",
+        "morpheme_gloss_ids": [
+          [
+            [
+              [
+                353,
+                "aist",
+                "adt"
+              ]
+            ],
+            [
+              [
+                148,
+                "oto",
+                "adt"
+              ]
+            ],
+            [
+              [
+                3597,
+                "ino",
+                "avta"
+              ]
+            ],
+            [
+              [
+                14666,
+                "yii",
+                "thm"
+              ]
+            ],
+            [
+              [
+                14624,
+                "wa",
+                "num"
+              ]
+            ]
+          ],
+          [
+            [
+              [
+                402,
+                "ann",
+                "drt"
+              ]
+            ],
+            [
+              [
+                14634,
+                "yi",
+                "num"
+              ]
+            ]
+          ],
+          [
+            [
+              [
+                25107,
+                "piitaakii",
+                "PN"
+              ]
+            ],
+            [
+              [
+                14634,
+                "yi",
+                "num"
+              ]
+            ]
+          ]
+        ],
+        "date_elicited": null,
+        "phonetic_transcription": "",
+        "morpheme_gloss": "to.speaker-go.to.do-see-DIR-PROX.SG DEM-OBV.SG eagle.woman-OBV.SG",
+        "id": 34615,
+        "semantics": "",
+        "break_gloss_category": "aist|to.speaker|adt-oto|go.to.do|adt-ino|see|avta-yii|DIR|thm-wa|PROX.SG|num ann|DEM|drt-yi|OBV.SG|num Piitaakii|eagle.woman|PN-yi|OBV.SG|num",
+        "datetime_entered": "2015-08-31T20:35:11",
+        "UUID": "3b484bd6-86b0-49b0-a587-ba2d32c800c7",
+        "narrow_phonetic_transcription": "",
+        "transcription": "Áístotoinoyiiwa anni Piitaakiiyi.",
+        "enterer": {
+          "first_name": "Joel",
+          "last_name": "Dunham",
+          "role": "administrator",
+          "id": 1
+        },
+        "comments": "",
+        "source": null,
+        "verifier": null,
+        "speaker": null,
+        "morpheme_break": "aist-oto-ino-yii-wa ann-yi Piitaakii-yi",
+        "modifier": {
+          "first_name": "Joel",
+          "last_name": "Dunham",
+          "role": "administrator",
+          "id": 1
+        },
+        "speaker_comments": ""
+      },
+      {
+        "status": "tested",
+        "files": [],
+        "elicitor": null,
+        "form_id": 25105,
+        "tags": [],
+        "elicitation_method": null,
+        "translations": [
+          {
+            "transcription": "He came to see Piitaakii.",
+            "grammaticality": "",
+            "id": 25214
+          }
+        ],
+        "syntax": "",
+        "morpheme_break_ids": [
+          [
+            [
+              [
+                353,
+                "to.speaker",
+                "adt"
+              ]
+            ],
+            [
+              [
+                148,
+                "go.to.do",
+                "adt"
+              ]
+            ],
+            [
+              [
+                3597,
+                "see",
+                "avta"
+              ]
+            ],
+            [
+              [
+                14666,
+                "DIR",
+                "thm"
+              ]
+            ],
+            [
+              [
+                14624,
+                "PROX.SG",
+                "num"
+              ]
+            ]
+          ],
+          [
+            [
+              [
+                402,
+                "DEM",
+                "drt"
+              ]
+            ],
+            [
+              [
+                14634,
+                "OBV.SG",
+                "num"
+              ]
+            ]
+          ],
+          [
+            [],
+            [
+              [
+                14634,
+                "OBV.SG",
+                "num"
+              ]
+            ]
+          ]
+        ],
+        "syntactic_category": null,
+        "grammaticality": "",
+        "syntactic_category_string": "adt-adt-avta-thm-num drt-num ?-num",
+        "datetime_modified": "2015-09-01T18:44:31",
+        "morpheme_gloss_ids": [
+          [
+            [
+              [
+                353,
+                "aist",
+                "adt"
+              ]
+            ],
+            [
+              [
+                148,
+                "oto",
+                "adt"
+              ]
+            ],
+            [
+              [
+                3597,
+                "ino",
+                "avta"
+              ]
+            ],
+            [
+              [
+                14666,
+                "yii",
+                "thm"
+              ]
+            ],
+            [
+              [
+                14624,
+                "wa",
+                "num"
+              ]
+            ]
+          ],
+          [
+            [
+              [
+                402,
+                "ann",
+                "drt"
+              ]
+            ],
+            [
+              [
+                14634,
+                "yi",
+                "num"
+              ]
+            ]
+          ],
+          [
+            [],
+            [
+              [
+                14634,
+                "yi",
+                "num"
+              ]
+            ]
+          ]
+        ],
+        "date_elicited": null,
+        "phonetic_transcription": "",
+        "morpheme_gloss": "to.speaker-go.to.do-see-DIR-PROX.SG DEM-OBV.SG eagle.woman-OBV.SG",
+        "id": 34614,
+        "semantics": "",
+        "break_gloss_category": "aist|to.speaker|adt-oto|go.to.do|adt-ino|see|avta-yii|DIR|thm-wa|PROX.SG|num ann|DEM|drt-yi|OBV.SG|num Piitaakii|eagle.woman|?-yi|OBV.SG|num",
+        "datetime_entered": "2015-08-31T20:35:11",
+        "UUID": "3b484bd6-86b0-49b0-a587-ba2d32c800c7",
+        "narrow_phonetic_transcription": "",
+        "transcription": "Áístotoinoyiiwa anni Piitaakiiyi.",
+        "enterer": {
+          "first_name": "Joel",
+          "last_name": "Dunham",
+          "role": "administrator",
+          "id": 1
+        },
+        "comments": "",
+        "source": null,
+        "verifier": null,
+        "speaker": null,
+        "morpheme_break": "aist-oto-ino-yii-wa ann-yi Piitaakii-yi",
+        "modifier": {
+          "first_name": "Joel",
+          "last_name": "Dunham",
+          "role": "administrator",
+          "id": 1
+        },
+        "speaker_comments": ""
+      },
+      {
+        "status": "tested",
+        "files": [],
+        "elicitor": null,
+        "form_id": 25105,
+        "tags": [],
+        "elicitation_method": null,
+        "translations": [
+          {
+            "transcription": "He came to see Piitaakii.",
+            "grammaticality": "",
+            "id": 25214
+          }
+        ],
+        "syntax": "",
+        "morpheme_break_ids": [
+          [
+            [
+              [
+                353,
+                "to.speaker",
+                "adt"
+              ]
+            ],
+            [
+              [
+                148,
+                "go.to.do",
+                "adt"
+              ]
+            ],
+            [
+              [
+                3597,
+                "see",
+                "avta"
+              ]
+            ],
+            [
+              [
+                14666,
+                "DIR",
+                "thm"
+              ]
+            ],
+            [
+              [
+                14624,
+                "PROX.SG",
+                "num"
+              ]
+            ]
+          ],
+          [
+            [
+              [
+                402,
+                "DEM",
+                "drt"
+              ]
+            ],
+            [
+              [
+                14634,
+                "OBV.SG",
+                "num"
+              ]
+            ]
+          ],
+          [
+            [],
+            []
+          ]
+        ],
+        "syntactic_category": null,
+        "grammaticality": "",
+        "syntactic_category_string": "adt-adt-avta-thm-num drt-num ?-num",
+        "datetime_modified": "2015-09-01T17:53:35",
+        "morpheme_gloss_ids": [
+          [
+            [
+              [
+                353,
+                "aist",
+                "adt"
+              ]
+            ],
+            [
+              [
+                148,
+                "oto",
+                "adt"
+              ]
+            ],
+            [
+              [
+                3597,
+                "ino",
+                "avta"
+              ]
+            ],
+            [
+              [
+                14666,
+                "yii",
+                "thm"
+              ]
+            ],
+            [
+              [
+                14624,
+                "wa",
+                "num"
+              ]
+            ]
+          ],
+          [
+            [
+              [
+                402,
+                "ann",
+                "drt"
+              ]
+            ],
+            [
+              [
+                14634,
+                "yi",
+                "num"
+              ]
+            ]
+          ],
+          [
+            [],
+            [
+              [
+                14634,
+                "yi",
+                "num"
+              ]
+            ]
+          ]
+        ],
+        "date_elicited": null,
+        "phonetic_transcription": "",
+        "morpheme_gloss": "to.speaker-go.to.do-see-DIR-PROX.SG DEM-OBV.SG eagle.woman-OBV.SG",
+        "id": 34611,
+        "semantics": "",
+        "break_gloss_category": "aist|to.speaker|adt-oto|go.to.do|adt-ino|see|avta-yii|DIR|thm-wa|PROX.SG|num ann|DEM|drt-yi|OBV.SG|num Piitaakii|eagle.woman|?-yxi|OBV.SG|num",
+        "datetime_entered": "2015-08-31T20:35:11",
+        "UUID": "3b484bd6-86b0-49b0-a587-ba2d32c800c7",
+        "narrow_phonetic_transcription": "",
+        "transcription": "Áístotoinoyiiwa anni Piitaakiiyi.",
+        "enterer": {
+          "first_name": "Joel",
+          "last_name": "Dunham",
+          "role": "administrator",
+          "id": 1
+        },
+        "comments": "",
+        "source": null,
+        "verifier": null,
+        "speaker": null,
+        "morpheme_break": "aist-oto-ino-yii-wa ann-yi Piitaakii-yxi",
+        "modifier": {
+          "first_name": "Joel",
+          "last_name": "Dunham",
+          "role": "administrator",
+          "id": 1
+        },
+        "speaker_comments": ""
+      },
+      {
+        "status": "tested",
+        "files": [],
+        "elicitor": null,
+        "form_id": 25105,
+        "tags": [],
+        "elicitation_method": null,
+        "translations": [
+          {
+            "transcription": "He came to see Piitaakii.",
+            "grammaticality": "",
+            "id": 25214
+          }
+        ],
+        "syntax": "",
+        "morpheme_break_ids": [
+          [
+            [
+              [
+                353,
+                "to.speaker",
+                "adt"
+              ]
+            ],
+            [
+              [
+                148,
+                "go.to.do",
+                "adt"
+              ]
+            ],
+            [
+              [
+                3597,
+                "see",
+                "avta"
+              ]
+            ],
+            [
+              [
+                14666,
+                "DIR",
+                "thm"
+              ]
+            ],
+            [
+              [
+                14624,
+                "PROX.SG",
+                "num"
+              ]
+            ]
+          ],
+          [
+            [
+              [
+                402,
+                "DEM",
+                "drt"
+              ]
+            ],
+            [
+              [
+                14634,
+                "OBV.SG",
+                "num"
+              ]
+            ]
+          ],
+          [
+            [],
+            [
+              [
+                14634,
+                "OBV.SG",
+                "num"
+              ]
+            ]
+          ]
+        ],
+        "syntactic_category": null,
+        "grammaticality": "",
+        "syntactic_category_string": "adt-adt-avta-thm-num drt-num ?-num",
+        "datetime_modified": "2015-08-31T20:35:11",
+        "morpheme_gloss_ids": [
+          [
+            [
+              [
+                353,
+                "aist",
+                "adt"
+              ]
+            ],
+            [
+              [
+                148,
+                "oto",
+                "adt"
+              ]
+            ],
+            [
+              [
+                3597,
+                "ino",
+                "avta"
+              ]
+            ],
+            [
+              [
+                14666,
+                "yii",
+                "thm"
+              ]
+            ],
+            [
+              [
+                14624,
+                "wa",
+                "num"
+              ]
+            ]
+          ],
+          [
+            [
+              [
+                402,
+                "ann",
+                "drt"
+              ]
+            ],
+            [
+              [
+                14634,
+                "yi",
+                "num"
+              ]
+            ]
+          ],
+          [
+            [],
+            [
+              [
+                14634,
+                "yi",
+                "num"
+              ]
+            ]
+          ]
+        ],
+        "date_elicited": null,
+        "phonetic_transcription": "",
+        "morpheme_gloss": "to.speaker-go.to.do-see-DIR-PROX.SG DEM-OBV.SG eagle.woman-OBV.SG",
+        "id": 34610,
+        "semantics": "",
+        "break_gloss_category": "aist|to.speaker|adt-oto|go.to.do|adt-ino|see|avta-yii|DIR|thm-wa|PROX.SG|num ann|DEM|drt-yi|OBV.SG|num Piitaakii|eagle.woman|?-yi|OBV.SG|num",
+        "datetime_entered": "2015-08-31T20:35:11",
+        "UUID": "3b484bd6-86b0-49b0-a587-ba2d32c800c7",
+        "narrow_phonetic_transcription": "",
+        "transcription": "Áístotoinoyiiwa anni Piitaakiiyi.",
+        "enterer": {
+          "first_name": "Joel",
+          "last_name": "Dunham",
+          "role": "administrator",
+          "id": 1
+        },
+        "comments": "",
+        "source": null,
+        "verifier": null,
+        "speaker": null,
+        "morpheme_break": "aist-oto-ino-yii-wa ann-yi Piitaakii-yi",
+        "modifier": {
+          "first_name": "Joel",
+          "last_name": "Dunham",
+          "role": "administrator",
+          "id": 1
+        },
+        "speaker_comments": ""
+      }
+    ],
+    "form": {
+      "files": [],
+      "syntax": "",
+      "morpheme_break_ids": [
+        [
+          [
+            [
+              353,
+              "to.speaker",
+              "adt"
+            ]
+          ],
+          [
+            [
+              148,
+              "go.to.do",
+              "adt"
+            ]
+          ],
+          [
+            [
+              3597,
+              "see",
+              "avta"
+            ]
+          ],
+          [
+            [
+              14666,
+              "DIR",
+              "thm"
+            ]
+          ],
+          [
+            [
+              14624,
+              "PROX.SG",
+              "num"
+            ]
+          ]
+        ],
+        [
+          [
+            [
+              402,
+              "DEM",
+              "drt"
+            ]
+          ],
+          [
+            [
+              14634,
+              "OBV.SG",
+              "num"
+            ]
+          ]
+        ],
+        [
+          [
+            [
+              25107,
+              "eagle.woman",
+              "PN"
+            ]
+          ],
+          [
+            [
+              14634,
+              "OBV.SG",
+              "num"
+            ]
+          ]
+        ]
+      ],
+      "grammaticality": "",
+      "datetime_modified": "2015-09-04T01:01:13",
+      "morpheme_gloss_ids": [
+        [
+          [
+            [
+              353,
+              "aist",
+              "adt"
+            ]
+          ],
+          [
+            [
+              148,
+              "oto",
+              "adt"
+            ]
+          ],
+          [
+            [
+              3597,
+              "ino",
+              "avta"
+            ]
+          ],
+          [
+            [
+              14666,
+              "yii",
+              "thm"
+            ]
+          ],
+          [
+            [
+              14624,
+              "wa",
+              "num"
+            ]
+          ]
+        ],
+        [
+          [
+            [
+              402,
+              "ann",
+              "drt"
+            ]
+          ],
+          [
+            [
+              14634,
+              "yi",
+              "num"
+            ]
+          ]
+        ],
+        [
+          [
+            [
+              25107,
+              "piitaakii",
+              "PN"
+            ]
+          ],
+          [
+            [
+              14634,
+              "yi",
+              "num"
+            ]
+          ]
+        ]
+      ],
+      "date_elicited": null,
+      "morpheme_gloss": "to.speaker-go.to.do-see-DIR-PROX.SG DEM-OBV.SG eagle.woman-OBV.SG",
+      "id": 25105,
+      "datetime_entered": "2015-08-31T20:35:11",
+      "transcription": "Áístotoinoyiiawa anni Piitaakiiyi.",
+      "enterer": {
+        "first_name": "Joel",
+        "last_name": "Dunham",
+        "role": "administrator",
+        "id": 1
+      },
+      "comments": "",
+      "source": null,
+      "verifier": null,
+      "speaker": null,
+      "speaker_comments": "",
+      "status": "tested",
+      "elicitor": null,
+      "break_gloss_category": "aist|to.speaker|adt-oto|go.to.do|adt-ino|see|avta-yii|DIR|thm-wa|PROX.SG|num ann|DEM|drt-yi|OBV.SG|num piitaakii|eagle.woman|PN-yi|OBV.SG|num",
+      "tags": [],
+      "elicitation_method": null,
+      "translations": [
+        {
+          "transcription": "He came to see Piitaakii.",
+          "grammaticality": "",
+          "id": 25214
+        }
+      ],
+      "syntactic_category": null,
+      "phonetic_transcription": "",
+      "semantics": "",
+      "UUID": "3b484bd6-86b0-49b0-a587-ba2d32c800c7",
+      "narrow_phonetic_transcription": "",
+      "syntactic_category_string": "adt-adt-avta-thm-num drt-num PN-num",
+      "morpheme_break": "aist-oto-ino-yii-wa ann-yi piitaakii-yi",
+      "modifier": {
+        "first_name": "Joel",
+        "last_name": "Dunham",
+        "role": "administrator",
+        "id": 1
+      }
     }
   }
 
