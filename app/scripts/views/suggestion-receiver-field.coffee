@@ -66,6 +66,7 @@ define [
       @closeSuggestionsAnimate()
       @suggestionsVisible = false
       @toggleSuggestionsButtonState()
+      @hideSuggestionsButtonCheck()
       @suggestedValues = []
 
     # Due to combinatoric explosion, we can get too many suggestions, so we

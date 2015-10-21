@@ -450,7 +450,12 @@ define [
           # @recognizerMorphology.applyUp wordsToRecognize
 
     # These are the fields that our parse suggestions will be directed to.
-    getTargetFields: -> ['morpheme_break', 'morpheme_gloss']
+    getTargetFields: ->
+      [
+        'transcription',
+        'phonetic_transcription',
+        'narrow_phonetic_transcription'
+      ]
 
 
     ############################################################################
