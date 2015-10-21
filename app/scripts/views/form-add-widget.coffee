@@ -21,6 +21,7 @@ define [
   './required-select-field'
   './date-field'
   './morpheme-break-field'
+  './morpheme-gloss-field'
   './../models/form'
   './../utils/globals'
 ], (ResourceAddWidgetView, TextareaFieldView, RelationalSelectFieldView,
@@ -33,8 +34,8 @@ define [
   TranscriptionGrammaticalityFieldView, TranslationsFieldView,
   PersonSelectFieldView, UserSelectFieldView, SourceSelectFieldView,
   SourceSelectViaSearchFieldView, FilesSelectViaSearchFieldView,
-  RequiredSelectFieldView, DateFieldView, MorphemeBreakFieldView, FormModel,
-  globals) ->
+  RequiredSelectFieldView, DateFieldView, MorphemeBreakFieldView,
+  MorphemeGlossFieldView, FormModel, globals) ->
 
 
   class StatusSelectFieldView extends RequiredSelectFieldView
@@ -141,7 +142,7 @@ define [
       phonetic_transcription:        TranscriptionBaseFieldView
       transcription:                 TranscriptionGrammaticalityFieldView255
       morpheme_break:                MorphemeBreakFieldView
-      morpheme_gloss:                TextareaFieldView255
+      morpheme_gloss:                MorphemeGlossFieldView
       syntax:                        TextareaFieldView1023
       semantics:                     TextareaFieldView1023
       translations:                  TranslationsFieldView
