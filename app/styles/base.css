@@ -151,7 +151,9 @@ button.help-button
 .form-translations-data div.dative-tooltip,
 .form-translations-data span.dative-tooltip,
 .dative-field-label.dative-tooltip,
-.header-title-content
+.header-title-content,
+.select-for-import,
+.deselect-for-import
 {
     cursor: pointer;
 }
@@ -558,7 +560,9 @@ div.dative-page-header-title
 
 .dative-form-object.expanded:focus,
 .dative-shadowed-widget.expanded:focus,
-.dative-shadowed-widget.jquery-theme-image-container:focus
+.dative-shadowed-widget.jquery-theme-image-container:focus,
+.select-for-import:focus,
+.deselect-for-import:focus
 {
     /*outline: none !important;*/
     /*box-shadow: 0 0 10px orange !important;*/
@@ -779,6 +783,13 @@ label.dative-field-label
   max-width: 25%;
   min-width: 25%;
   /* opacity: 0.6; */
+}
+
+ul.fieldset.importer-fieldset label.dative-field-label
+{
+  width: 75%;
+  max-width: 75%;
+  min-width: 75%;
 }
 
 ul.fieldset select[name="elicitation_method"],
@@ -1703,7 +1714,10 @@ i.boolean-icon.false
   color: red;
 }
 
-i.boolean-icon.true
+i.boolean-icon.true,
+div.import-no-errors,
+div.import-no-warnings,
+.ui-state-ok
 {
   color: green;
 }
@@ -2542,5 +2556,96 @@ button.toggle-suggestions
 {
   font-size: inherit;
   font-family: inherit;
+}
+
+
+div.import-preview-table
+{
+  margin-top: 1em;
+}
+
+div.import-preview-table-row
+{
+  white-space: nowrap;
+}
+
+div.import-preview-table-header-cell
+{
+  vertical-align: top;
+}
+
+div.import-preview-table-cell
+{
+  vertical-align: baseline;
+}
+
+div.import-preview-table-cell,
+div.import-preview-table-header-cell
+{
+  padding: 5px;
+  min-height: 2em;
+  margin: 0px !important;
+  text-align: left;
+}
+
+div.import-preview-table-cell,
+div.import-preview-table-header-cell
+{
+  display: inline-block;
+}
+
+div.import-preview-table-header-cell
+{
+  text-align: left;
+  vertical-align: middle;
+}
+
+div.import-preview-table-cell
+{
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+div.import-controls-container,
+div.warnings-container,
+div.errors-container
+{
+  padding: 5px;
+}
+
+button.import-preview-row-button
+{
+  position: relative;
+  top: -0.4em;
+  margin-left: 0.25em;
+}
+
+i.column-alert
+{
+  position: relative;
+  top: 0.6em;
+  margin: 0.25em;
+  padding: 0.25em;
+}
+
+.import-preview-controls-cell
+{
+  width: 225px;
+}
+
+div.import-warning,
+div.import-error,
+h1.warnings-header,
+h1.errors-header
+{
+  padding: 0.25em;
+  margin: 0.25em;
+  display: inline-block;
+}
+
+div.import-warning,
+div.import-error
+{
+  margin-left: 2em;
 }
 

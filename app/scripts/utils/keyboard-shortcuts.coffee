@@ -85,5 +85,8 @@ define [], ->
   ,
     shortcut: 'ctrl+f'
     event: 'request:filesBrowse'
+  ,
+    shortcut: 'ctrl+q'
+    event: 'request:formsImport'
   ]
 

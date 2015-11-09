@@ -65,12 +65,16 @@
       <li class="center">
         <button
           class="add-resource-button dative-tooltip"
-          <% if @addUpdateType is 'add': %>
+          <% if @forImport: %>
+              title='Import this <%= @resourceNameHuman %>'
+            >Import</button>
+          <% else if @addUpdateType is 'add': %>
               title='Create this new <%= @resourceNameHuman %>'
+            >Save</button>
           <% else: %>
               title='Save changes to this <%= @resourceNameHuman %>'
+            >Save</button>
           <% end %>
-          >Save</button>
 
         <% if @editableSecondaryAttributes.length > 0: %>
             <button

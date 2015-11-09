@@ -71,6 +71,7 @@ define [
         @updateView = new @resourceAddWidgetView
           model: @model,
           addUpdateType: @addUpdateType
+          forImport: @forImport
         @updateViewRendered = false
 
     getFileDataView: ->
@@ -155,6 +156,7 @@ define [
         settingsViewVisible: false
         fileDataViewVisible: false
         searchPatternsObject: null
+        forImport: false
       _.extend defaults, options
       for key, value of defaults
         @[key] = value

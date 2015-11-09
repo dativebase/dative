@@ -230,6 +230,10 @@ define (require) ->
   snake2regular = (string) ->
     string.replace /_/g, ' '
 
+  # "regular case" to "snake_case"
+  regular2snake = (string) ->
+    string.toLowerCase().replace(/( )/g, '_')
+
   # "camelCase" to "snake_case"
   camel2snake = (string) ->
     string
@@ -444,6 +448,7 @@ define (require) ->
   snake2camel: snake2camel
   snake2hyphen: snake2hyphen
   snake2regular: snake2regular
+  regular2snake: regular2snake
   camel2snake: camel2snake
   camel2regular: camel2regular
   camel2regularUpper: camel2regularUpper

@@ -63,6 +63,12 @@
               ><i class='fa fa-fw fa-download'></i>
       </button>
 
+      <% if @importable: %>
+        <button class="import-resource-collection dative-tooltip"
+                title="Import <%= @resourceNamePluralHuman %>"
+            ><i class='fa fa-fw fa-upload'></i></button>
+      <% end %>
+
       <button class="toggle-all-labels dative-tooltip"
               title="<%= @resourceNameHuman %> labels are off; click here to
               turn them on">labels:

@@ -52,6 +52,7 @@ define [
       @secondaryDataVisible = false
       @listenToEvents()
       @addUpdateType = options.addUpdateType or 'add'
+      @forImport = options.forImport or false
       @submitAttempted = false
 
       # TODO: if this is an "add"-type form, then the original model copy
@@ -63,14 +64,7 @@ define [
     copyModel: (inputModel) ->
       newModel = new @resourceModel()
       for attr, val of @model.attributes
-
         toClone = inputModel.get attr
-        if (toClone instanceof ResourceModel)
-          console.log "calling `utils.clone` on `inputModel.get(attr)` in
-            `ResourceAddWidgetView` this is what we are trying to clone (the
-            #{attr} of the `inputModel`):"
-          console.log inputModel.get(attr)
-
         inputValue = @utils.clone inputModel.get(attr)
         newModel.set attr, inputValue
       newModel
@@ -174,6 +168,7 @@ define [
         resourceNameHuman: @utils.camel2regular @resourceName
         editableSecondaryAttributes: @editableSecondaryAttributes
         indefiniteDeterminer: @utils.indefiniteDeterminer
+        forImport: @forImport
       @$el
         .attr 'id', @model.cid
         .html @template(context)
@@ -209,6 +204,7 @@ define [
     ]
 
     modelAltered: ->
+      if @forImport then return true
       for attr, val of @model.attributes
         if attr not in @clientSideUnalterableAttributes
           originalValue = @originalModelCopy.get attr

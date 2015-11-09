@@ -36,6 +36,9 @@
             <li class='requires-authentication'>
                 <a data-event="request:formsBrowse">Browse</a>
             </li>
+            <li class='requires-authentication'>
+                <a data-event="request:formsImport">Import</a>
+            </li>
         </ul>
     </li>
 

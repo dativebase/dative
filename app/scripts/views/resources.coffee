@@ -87,6 +87,7 @@ define [
       'click .toggle-search': 'toggleResourceSearchViewAnimate'
       'click .corpus-display': 'displayCorpus'
       'click .export-resource-collection': 'exportResourceCollection'
+      'click .import-resource-collection': 'importResourceCollection'
       'click .search-display-check': 'showResourceSearchViewAnimate'
       'keydown': 'keyboardShortcuts'
       'keyup': 'keyup'
@@ -98,6 +99,10 @@ define [
     exportResourceCollection: (event) ->
       if event then @stopEvent event
       Backbone.trigger 'openExporterDialog', collection: @collection
+
+    importResourceCollection: (event) ->
+      if event then @stopEvent event
+      Backbone.trigger 'openImporterDialog'
 
     displayCorpus: ->
       @corpusView = new SubcorpusView model: @corpus
@@ -133,6 +138,7 @@ define [
         pluralizeByNum: @utils.pluralizeByNum
         paginator: @paginator
         searchable: @searchable
+        importable: @importable
         canCreateNew: @getCanCreateNew()
 
     listenToEvents: ->
@@ -887,6 +893,13 @@ define [
             my: "left+130 center"
             at: "right center"
             collision: "flipfit"
+      @$('button.import-resource-collection')
+        .button()
+        .tooltip
+          position:
+            my: "left+130 center"
+            at: "right center"
+            collision: "flipfit"
       @$('button.toggle-all-labels')
         .button()
         .tooltip
@@ -1284,4 +1297,8 @@ define [
         @resourceSearchView.render()
         @rendered @resourceSearchView
         @resourceSearchViewRendered = true
+
+    # Set `@importable` to `true` if there is an interface for importing data
+    # to create resources of this type.
+    importable: false
 

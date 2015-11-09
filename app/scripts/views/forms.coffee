@@ -65,3 +65,5 @@ define [
     searchViewClass: SearchWidgetView
     searchModelClass: SearchModel
 
+    importable: true
+

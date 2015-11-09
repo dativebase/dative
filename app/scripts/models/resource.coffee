@@ -54,6 +54,7 @@ define [
     # `undefined`.
     # TODO: I think a "form submit" action results in this method being called
     # many times too many (i.e., redundantly).
+    # TODO: why is the `options` parameter necessary here?
     validate: (attributes, options) ->
       attributes = attributes or @attributes
       errors = {}

@@ -1,0 +1,115 @@
+<div class='dative-importer-dialog'>
+    <div class="dative-importer-dialog-content-container">
+
+        <div class="dative-importer-dialog-import">
+
+            <i class='import-spinner fa fa-fw fa-circle-o-notch fa-spin'></i>
+
+            <ul class='fieldset importer-fieldset'>
+
+                <li class='dative-form-field'>
+                    <div class='dative-field-label-container'>
+                        <label for='import_button'
+                            class='dative-field-label dative-tooltip'
+                            title='Choose a file to import'
+                    >Import file</label></div>
+                    <div class='dative-field-input-container'>
+                        <button
+                            class='choose-import-file-button
+                                ui-corner-all
+                                dative-tooltip
+                                dative-input-field'
+                            title='Choose a file to import'
+                            >Choose file</button>
+                        <span class='import-file-name'></span>
+                        <div class='file-upload-container'>
+                            <div class='file-upload-status'>Uploading file data ...</div>
+                            <div class='file-upload-progress-bar'></div>
+                        </div>
+                        <!-- this is the hidden input tag -->
+                        <div
+                            style='height: 0px;width:0px; overflow:hidden;'
+                            ><input
+                                type="file"
+                                name='file-upload-input'
+                                tabindex='999'
+                                /></div>
+                    </div>
+                </li>
+
+                <li class='dative-form-field'>
+                    <div
+                    class='dative-field-label-container'>
+                        <label for='import_type'
+                            class='dative-field-label dative-tooltip'
+                            title='Select the format of your input file'
+                    >Import file format</label></div>
+                    <div
+                    class='dative-field-input-container'>
+                        <select
+                            name='import_type'
+                            class='import-type dative-tooltip'
+                            title='Choose an import type'>
+                            <% for type, data of @importTypes: %>
+                                <option value='<%= type %>'
+                                    ><%= data.label %></option>
+                            <% end %>
+                        </select></div>
+                </li>
+
+            </ul>
+
+        </div>
+
+        <div class="dative-importer-dialog-preview">
+            <div class='import-controls-container'>
+                <button
+                    class='import-selected-button
+                        ui-corner-all
+                        dative-tooltip'
+                    title='Click to import all selected forms'
+                    ><i class='import-selected-button-text'>Import Selected</i><i
+                        class='fa fa-fw fa-upload'></i></button>
+                <button
+                    class='view-selected-button
+                        ui-corner-all
+                        dative-tooltip'
+                    title='View the selected rows as Dative forms (IGT display)'
+                    >View Selected</button>
+                <button
+                    class='validate-selected-button
+                        ui-corner-all
+                        dative-tooltip'
+                    title='Check for issues/errors in all selected rows'
+                    >Validate Selected</button>
+            </div>
+
+            <div class='errors-container general-errors-container
+                invisible'>
+                <h1 class='errors-header ui-state-error ui-corner-all'
+                    ><i class='errors-header-icon fa fa-fw
+                    fa-exclamation-triangle'></i
+                    ><span class='errors-header-text'>Errors</span></h1>
+                <div class='errors-inner-container'></div>
+            </div>
+
+            <div class='warnings-container general-warnings-container
+                invisible'>
+                <h1 class='warnings-header ui-state-highlight ui-corner-all'
+                    ><i class='warnings-header-icon fa fa-fw
+                    fa-exclamation-triangle'></i
+                    ><span class='warnings-header-text'>Warnings</span></h1>
+                <div class='warnings-inner-container'></div>
+            </div>
+
+            <div class='import-preview-table'>
+                <div class='import-preview-table-head'></div>
+                <div class='import-preview-table-body'></div>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<div class='dative-importer-dialog-target'><div>
+

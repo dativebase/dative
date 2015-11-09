@@ -40,6 +40,10 @@ define [
 
     listenToEvents: ->
 
+      @listenTo Backbone, 'csvFormDisplayAsIGTFail', @csvFormDisplayAsIGTFail
+      @listenTo Backbone, 'csvFormValidateFail', @csvFormValidateFail
+      @listenTo Backbone, 'csvFormImportFail', @csvFormImportFail
+
       @listenTo Backbone, 'updateParserTaskSetSuccess', @updateParserTaskSetSuccess
       @listenTo Backbone, 'updateParserTaskSetFail', @updateParserTaskSetFail
 
@@ -618,6 +622,37 @@ define [
         title: "Parser-related tasks update fail"
         content: "Oops. Something went wrong while trying to save your
           parser-related tasks."
+        type: 'error'
+      @renderNotification notification
+
+    csvImportError: ->
+      notification = new NotificationView
+        title: "CSV Import Error"
+        content: "An error occurred when attempting to import your CSV file."
+        type: 'error'
+      @renderNotification notification
+
+    csvFormDisplayAsIGTFail: ->
+      notification = new NotificationView
+        title: "CSV Form Display Error"
+        content: "Sorry, we cannot display this CSV row as a Dative form.
+          Please make sure that it passes validation."
+        type: 'error'
+      @renderNotification notification
+
+    csvFormImportFail: ->
+      notification = new NotificationView
+        title: "CSV Form Import Error"
+        content: "Sorry, we were not able to import this CSV row as a Dative
+        form. Please make sure that it passes validation."
+        type: 'error'
+      @renderNotification notification
+
+    csvFormValidateFail: ->
+      notification = new NotificationView
+        title: "CSV Form Validate Error"
+        content: "Sorry, we were not able to validate this CSV row as a Dative
+          form."
         type: 'error'
       @renderNotification notification
 
