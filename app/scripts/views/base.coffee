@@ -273,7 +273,7 @@ define [
 
     # Returns true if a resource add or update widget has focus.
     addUpdateResourceWidgetHasFocus: ->
-      @$('.add-resource-widget, .update-resource-widget')
+      @$('.add-resource-widget, .update-resource-widget, .resources-import-view')
         .find(':focus').length > 0
 
     # Fix rounded borders so that adjacently nested rounded borders <divs> don't

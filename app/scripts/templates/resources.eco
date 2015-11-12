@@ -64,8 +64,9 @@
       </button>
 
       <% if @importable: %>
-        <button class="import-resource-collection dative-tooltip"
-                title="Import <%= @resourceNamePluralHuman %>"
+        <button class="toggle-import dative-tooltip"
+                title="click here to open the interface for
+                    importing <%= @resourceNamePluralHuman %>"
             ><i class='fa fa-fw fa-upload'></i></button>
       <% end %>
 
@@ -92,6 +93,12 @@
 
   <% if @searchable: %>
       <div class='resource-search-view dative-new-item dative-resource-object
+        dative-widget-center dative-shadowed-widget ui-widget ui-widget-content
+        ui-corner-all'></div>
+  <% end %>
+
+  <% if @importable: %>
+      <div class='resources-import-view dative-new-item dative-resource-object
         dative-widget-center dative-shadowed-widget ui-widget ui-widget-content
         ui-corner-all'></div>
   <% end %>

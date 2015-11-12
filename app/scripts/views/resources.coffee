@@ -66,6 +66,7 @@ define [
       @collection = new @resourcesCollection()
       @newResourceView = @getNewResourceView()
       @resourceSearchView = @getResourceSearchView()
+      @resourcesImportView = @getResourcesImportView()
       @newResourceViewVisible = false
       @resourceSearchViewVisible = false
       @resourceSearchViewRendered = false
@@ -74,6 +75,7 @@ define [
     onClose: ->
       @newResourceViewRendered = false
       @resourceSearchViewRendered = false
+      @resourcesImportViewRendered = false
 
     events:
       'focus input, textarea, .ui-selectmenu-button, button, .ms-container': 'inputFocused'
@@ -87,7 +89,7 @@ define [
       'click .toggle-search': 'toggleResourceSearchViewAnimate'
       'click .corpus-display': 'displayCorpus'
       'click .export-resource-collection': 'exportResourceCollection'
-      'click .import-resource-collection': 'importResourceCollection'
+      'click .toggle-import': 'toggleResourcesImportViewAnimate'
       'click .search-display-check': 'showResourceSearchViewAnimate'
       'keydown': 'keyboardShortcuts'
       'keyup': 'keyup'
@@ -99,10 +101,6 @@ define [
     exportResourceCollection: (event) ->
       if event then @stopEvent event
       Backbone.trigger 'openExporterDialog', collection: @collection
-
-    importResourceCollection: (event) ->
-      if event then @stopEvent event
-      Backbone.trigger 'openImporterDialog'
 
     displayCorpus: ->
       @corpusView = new SubcorpusView model: @corpus
@@ -118,6 +116,7 @@ define [
       @renderResourceSearchView()
       @newResourceViewVisibility()
       @resourceSearchViewVisibility()
+      @resourcesImportViewVisibility()
       if @weNeedToFetchResourcesAgain()
         @fetchResourcesLastPage = true
         @fetchResourcesPageToCollection()
@@ -188,10 +187,14 @@ define [
 
       @listenToNewResourceView()
       if @searchable then @listenToResourceSearchView()
+      if @importable then @listenToResourcesImportView()
 
     listenToResourceSearchView: ->
       @listenTo @resourceSearchView, 'hideMe', @hideResourceSearchViewAnimate
       @listenTo @resourceSearchView, 'browseReturn', @returnToBrowsingAll
+
+    listenToResourcesImportView: ->
+      @listenTo @resourcesImportView, 'hideMe', @hideResourcesImportViewAnimate
 
     # User wants to stop browsing search results and simply browse all forms in
     # the database.
@@ -252,6 +255,12 @@ define [
           model: searchModel
           dataLabelsVisible: @dataLabelsVisible
           expanded: @allResourcesExpanded
+      else
+        null
+
+    getResourcesImportView: ->
+      if @importable
+        new @importViewClass()
       else
         null
 
@@ -893,7 +902,7 @@ define [
             my: "left+130 center"
             at: "right center"
             collision: "flipfit"
-      @$('button.import-resource-collection')
+      @$('button.toggle-import')
         .button()
         .tooltip
           position:
@@ -1298,7 +1307,93 @@ define [
         @rendered @resourceSearchView
         @resourceSearchViewRendered = true
 
+
+    ############################################################################
+    # Show, hide and toggle the resources import widget view
+    ############################################################################
+
+    # Make the ResourcesImportView visible or not, depending on its last state.
+    resourcesImportViewVisibility: ->
+      if @resourcesImportViewVisible
+        @showResourcesImportView()
+      else
+        @hideResourcesImportView()
+
+    hideResourcesImportView: ->
+      @setResourcesImportViewButtonShow()
+      @resourcesImportViewVisible = false
+      @$('.resources-import-view').hide()
+
+    showResourcesImportView: ->
+      if not @resourcesImportViewRendered
+        @renderResourcesImportView()
+      @setResourcesImportViewButtonHide()
+      @resourcesImportViewVisible = true
+      @$('.resources-import-view').show()
+
+    hideResourcesImportViewAnimate: ->
+      @setResourcesImportViewButtonShow()
+      @resourcesImportViewVisible = false
+      @$('.resources-import-view').slideUp
+        complete: =>
+          @resourcesImportView.closeAllTooltips()
+          @focusLastResource()
+          @scrollToFocusedInput()
+
+    showResourcesImportViewAnimate: ->
+      if not @resourcesImportViewRendered
+        @renderResourcesImportView()
+      @setResourcesImportViewButtonHide()
+      @resourcesImportViewVisible = true
+      @$('.resources-import-view').slideDown
+        complete: =>
+          @focusFirstResourcesImportViewTextarea()
+          @scrollToFocusedInput()
+
+    focusFirstResourcesImportViewTextarea: ->
+      @$('.resources-import-view textarea').first().focus().select()
+
+    toggleResourcesImportViewAnimate: ->
+      console.log 'toggleResourcesImportViewAnimate'
+      if @$('.resources-import-view').is ':visible'
+        @hideResourcesImportViewAnimate()
+      else
+        @showResourcesImportViewAnimate()
+
+    setResourcesImportViewButtonState: ->
+      if @resourcesImportViewVisible
+        @setResourcesImportViewButtonHide()
+      else
+        @setResourcesImportViewButtonShow()
+
+    setResourcesImportViewButtonShow: ->
+      @$('button.toggle-import')
+        .tooltip
+          content: "click here to open the interface for importing across
+            #{@resourceNamePluralHuman}"
+
+    # The resource add view show "+" button is disabled when the view is visible; to
+    # hide the view, you click on the ^ button on the view itself.
+    setResourcesImportViewButtonHide: ->
+      @$('button.toggle-import')
+        .tooltip
+          content: "click here to hide the interface for importing across
+            #{@resourceNamePluralHuman}"
+
+    # Render the Resources Import view.
+    renderResourcesImportView: ->
+      if @importable
+        @resourcesImportView.setElement @$('.resources-import-view').first()
+        @resourcesImportView.render()
+        @rendered @resourcesImportView
+        @resourcesImportViewRendered = true
+
     # Set `@importable` to `true` if there is an interface for importing data
     # to create resources of this type.
     importable: false
+
+    # If this resource is importable, then set `@importViewClass` to a view
+    # class for creating importing files to create resources of the relevant
+    # type.
+    importViewClass: null
 

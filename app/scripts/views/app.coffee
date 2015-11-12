@@ -143,6 +143,7 @@ define [
     el: '#dative-client-app'
 
     initialize: (options) ->
+      @preventParentScroll()
       @getApplicationSettings options
       globals.applicationSettings = @applicationSettings
       @overrideFieldDBNotificationHooks()
@@ -157,6 +158,55 @@ define [
       @setTheme()
       Backbone.history.start()
       @showHomePageView()
+
+    # Calling this method will cause all scrollable <div>s with the class
+    # .Scrollable, to prevent (x and y axis) scroll propagation to parent divs.
+    # This is good because (with a trackpad, at least), there is often an
+    # annoying "over-scrolling" effect, which, in the x-axis can trigger the
+    # browser's forward or back button events, which is highly undesirable.
+    # See http://stackoverflow.com/a/16324762/992730
+    preventParentScroll: ->
+      $(document).on('DOMMouseScroll mousewheel', '.Scrollable', (ev) ->
+        $this = $ this
+        scrollTop = @scrollTop
+        scrollLeft = @scrollLeft
+        scrollHeight = @scrollHeight
+        scrollWidth = @scrollWidth
+        height = $this.height()
+        width = $this.width()
+        if ev.type is 'DOMMouseScroll'
+          delta = ev.originalEvent.detail * -40
+        else
+          delta = ev.originalEvent.wheelDelta
+        up = delta > 0
+        prevent = ->
+          ev.stopPropagation()
+          ev.preventDefault()
+          ev.returnValue = false
+          false
+        result = true
+        deltaX = ev.originalEvent.wheelDeltaX
+        if (not up) and -delta > scrollHeight - height - scrollTop
+          $this.scrollTop scrollHeight
+          if deltaX then $this.scrollLeft(@scrollLeft - deltaX)
+          result = prevent()
+        else if up and delta > scrollTop
+          $this.scrollTop(0)
+          if deltaX then $this.scrollLeft(@scrollLeft - deltaX)
+          result = prevent()
+        if deltaX
+          left = deltaX > 0
+          if (not left) and -deltaX > scrollWidth - width - scrollLeft
+            $this.scrollLeft scrollWidth
+            $this.scrollTop(@scrollTop - delta)
+            result = prevent()
+          else if left and deltaX > scrollLeft
+            $this.scrollLeft(0)
+            $this.scrollTop(@scrollTop - delta)
+            result = prevent()
+        result
+      )
+
 
     events:
       'click': 'bodyClicked'

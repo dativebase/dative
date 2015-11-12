@@ -420,7 +420,8 @@ div.dative-page-header-title
 
 .dative-paginated-item,
 .dative-new-item,
-.resource-search-view
+.resource-search-view,
+.resources-import-view
 {
   margin-top: 1em;
   margin-bottom: 1em;
@@ -2561,47 +2562,48 @@ button.toggle-suggestions
 
 div.import-preview-table
 {
-  margin-top: 1em;
+  /*margin: 1em 3em 0 1em;*/
+  margin: 1em;
+  height: 500px;
+  /*width: 100%;*/
+  overflow: scroll;
+}
+
+div.import-preview-table-wrapper
+{
+  border: 1px solid;
+  box-shadow: inset 0px 0px 20px 2px rgba(0,0,0,0.6);
 }
 
 div.import-preview-table-row
 {
   white-space: nowrap;
+  display: inline-block;
+  border: 1px solid black;
+  margin-top: -1px;
+  padding-bottom: -10px;
 }
 
 div.import-preview-table-header-cell
 {
   vertical-align: top;
-}
-
-div.import-preview-table-cell
-{
-  vertical-align: baseline;
-}
-
-div.import-preview-table-cell,
-div.import-preview-table-header-cell
-{
   padding: 5px;
-  min-height: 2em;
-  margin: 0px !important;
-  text-align: left;
+}
+
+div.import-preview-table-cell
+{
+  vertical-align: middle;
+  padding: 5px;
 }
 
 div.import-preview-table-cell,
 div.import-preview-table-header-cell
 {
-  display: inline-block;
-}
-
-div.import-preview-table-header-cell
-{
+  border-left: 1px solid black;
+  min-height: 32px;
+  margin: 0px 0px -1px -1px !important;
   text-align: left;
-  vertical-align: middle;
-}
-
-div.import-preview-table-cell
-{
+  display: inline-block;
   overflow: hidden;
   text-overflow: ellipsis;
 }
@@ -2647,5 +2649,13 @@ div.import-warning,
 div.import-error
 {
   margin-left: 2em;
+}
+
+.import-file-meta
+{
+  font-size: 12pt;
+  position: relative;
+  top: 0.15em;
+  margin-left: 0.5em;
 }
 

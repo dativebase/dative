@@ -4,11 +4,12 @@ define [
   './search'
   './search-add-widget'
   './search-widget'
+  './csv-import'
   './../collections/forms'
   './../models/form'
   './../models/search'
 ], (ResourcesView, FormView, SearchView, SearchAddWidgetView, SearchWidgetView,
-  FormsCollection, FormModel, SearchModel) ->
+  CSVImportView, FormsCollection, FormModel, SearchModel) ->
 
   class SearchAddWidgetSearchEmphasizedView extends SearchAddWidgetView
 
@@ -66,4 +67,6 @@ define [
     searchModelClass: SearchModel
 
     importable: true
+
+    importViewClass: CSVImportView
 
