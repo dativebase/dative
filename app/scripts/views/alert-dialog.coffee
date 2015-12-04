@@ -33,6 +33,7 @@ define [
 
     render: ->
       @$el.append @template()
+      @$target = @$ '.dative-alert-dialog-target'
       @dialogify()
       @setupButtons()
       @focusOkButton()
@@ -64,8 +65,9 @@ define [
         title: 'Alert'
         width: 400
         create: =>
-          @$('.dative-alert-dialog-target').first().find('button').attr('tabindex', 0)
-            .end()
+          @fontAwesomateCloseIcon()
+          @$('.dative-alert-dialog-target')
+            .first().find('button').attr('tabindex', 0).end()
         open: ->
 
     tooltipify: ->
@@ -91,26 +93,28 @@ define [
 
     triggerConfirmEvent: ->
       if @confirmEvent
+        confirmEvent = @confirmEvent
+        @confirmEvent = null
         eventTarget = @getEventTarget()
         if @prompt
           @confirmArgument = @getPromptInput()
         if @confirmArgument
-          eventTarget.trigger @confirmEvent, @confirmArgument
+          eventTarget.trigger confirmEvent, @confirmArgument
           @confirmArgument = null
         else
-          eventTarget.trigger @confirmEvent
-        @confirmEvent = null
+          eventTarget.trigger confirmEvent
       @setPromptInput('')
 
     triggerCancelEvent: ->
       if @cancelEvent
+        cancelEvent = @cancelEvent
+        @cancelEvent = null
         eventTarget = @getEventTarget()
         if @cancelArgument
-          eventTarget.trigger @cancelEvent, @cancelArgument
-          @confirmArgument = null
+          eventTarget.trigger cancelEvent, @cancelArgument
+          @cancelArgument = null
         else
-          eventTarget.trigger @cancelEvent
-        @cancelEvent = null
+          eventTarget.trigger cancelEvent
       @setPromptInput('')
 
     dialogOpen: (options) ->
@@ -118,7 +122,7 @@ define [
       @$('.dative-alert-dialog textarea').hide()
 
       if options.text then @setText options.text
-      if options.confirm then @showCancelButton()
+      if options.confirm then @showCancelButton() else @hideCancelButton()
       if options.prompt then @showPromptInput()
       if options.confirmEvent then @confirmEvent = options.confirmEvent
       if options.cancelEvent then @cancelEvent = options.cancelEvent

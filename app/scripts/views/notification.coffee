@@ -54,4 +54,6 @@ define [
       else if @type is 'warning'
         @$el.addClass 'ui-state-highlight'
         @$('.icon').addClass 'fa fa-fw fa-exclamation-circle'
+      else if @type is 'success'
+        @$('.icon').addClass 'fa fa-fw fa-check-circle ui-state-ok'
 

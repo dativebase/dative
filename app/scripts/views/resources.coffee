@@ -164,6 +164,10 @@ define [
       @listenTo Backbone, "add#{@resourceNameCapitalized}Fail",
         @scrollToFirstValidationError
 
+      @listenTo Backbone,
+        "browseAll#{@resourceNamePluralCapitalized}AfterImport",
+        @browseAllAfterImport
+
       @listenTo @paginationMenuTopView, 'paginator:changeItemsPerPage',
         @changeItemsPerPage
       @listenTo @paginationMenuTopView, 'paginator:showFirstPage',
@@ -202,6 +206,10 @@ define [
     # that.
     returnToBrowsingAll: ->
       @deleteSearch()
+      @fetchResourcesLastPage = true
+      @fetchResourcesPageToCollection()
+
+    browseAllAfterImport: ->
       @fetchResourcesLastPage = true
       @fetchResourcesPageToCollection()
 
@@ -1369,7 +1377,7 @@ define [
     setResourcesImportViewButtonShow: ->
       @$('button.toggle-import')
         .tooltip
-          content: "click here to open the interface for importing across
+          content: "click here to open the interface for importing
             #{@resourceNamePluralHuman}"
 
     # The resource add view show "+" button is disabled when the view is visible; to
@@ -1377,7 +1385,7 @@ define [
     setResourcesImportViewButtonHide: ->
       @$('button.toggle-import')
         .tooltip
-          content: "click here to hide the interface for importing across
+          content: "click here to hide the interface for importing
             #{@resourceNamePluralHuman}"
 
     # Render the Resources Import view.

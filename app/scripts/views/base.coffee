@@ -433,7 +433,7 @@ define [
     # containing all of the resource names that have changed.
     storeOptionsDataGlobally: (data) ->
       changed = []
-      if @model.get('id') # The OLD's GET /<resources>/<id>/edit case
+      if @model and @model.get('id') # The OLD's GET /<resources>/<id>/edit case
         data = data.data
       for attr, val of data
         if globals.has attr

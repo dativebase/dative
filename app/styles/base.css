@@ -1353,6 +1353,12 @@ div.dative-display
   line-height: 125%;
 }
 
+.dative-help-dialog pre
+{
+  font-family: monospace;
+  margin: 2em;
+}
+
 .dative-help-dialog .help-content h1,
 .dative-help-dialog .help-content h2,
 .dative-help-dialog .help-content h3,
@@ -1710,7 +1716,8 @@ i.boolean-icon
   font-family: FontAwesome;
 }
 
-i.boolean-icon.false
+i.boolean-icon.false,
+.ui-state-error-color
 {
   color: red;
 }
@@ -1858,7 +1865,6 @@ div.filter-expression-operator,
 div.filter-expression
 {
   white-space: nowrap;
-  /*border: 1px solid black;*/
 }
 
 div.operand select,
@@ -2569,7 +2575,9 @@ div.import-preview-table
   overflow: scroll;
 }
 
-div.import-preview-table-wrapper
+div.import-preview-table-wrapper,
+div.general-errors-list-wrapper,
+div.general-warnings-list-wrapper
 {
   border: 1px solid;
   box-shadow: inset 0px 0px 20px 2px rgba(0,0,0,0.6);
@@ -2579,9 +2587,21 @@ div.import-preview-table-row
 {
   white-space: nowrap;
   display: inline-block;
-  border: 1px solid black;
+  border: 1px solid;
   margin-top: -1px;
   padding-bottom: -10px;
+}
+
+div.import-preview-table-row.import-preview-table-header-row
+{
+  margin-top: 0px;
+}
+
+div.import-preview-table-header-cell button,
+div.import-preview-table-header-cell .ui-selectmenu-button
+{
+  position: relative;
+  top: 3px;
 }
 
 div.import-preview-table-header-cell
@@ -2596,30 +2616,37 @@ div.import-preview-table-cell
   padding: 5px;
 }
 
+div.import-preview-table-row-under
+{
+  border-top: 1px solid;
+  padding-left: 8em;
+}
+
 div.import-preview-table-cell,
 div.import-preview-table-header-cell
 {
-  border-left: 1px solid black;
-  min-height: 32px;
-  margin: 0px 0px -1px -1px !important;
+  border-left: 1px solid;
+  min-height: 36px;
+  max-height: 36px;
+  margin: 0px 0px -1px -1px;
   text-align: left;
   display: inline-block;
   overflow: hidden;
-  text-overflow: ellipsis;
 }
 
 div.import-controls-container,
 div.warnings-container,
 div.errors-container
 {
-  padding: 5px;
+  /*padding: 5px;*/
+  margin: 5px 0;
 }
 
 button.import-preview-row-button
 {
-  position: relative;
+  /* position: relative;
   top: -0.4em;
-  margin-left: 0.25em;
+  margin-left: 0.25em; */
 }
 
 i.column-alert
@@ -2630,18 +2657,35 @@ i.column-alert
   padding: 0.25em;
 }
 
-.import-preview-controls-cell
+.import-preview-controls-cell,
+.form-for-import-select-cell
 {
-  width: 225px;
+  width: 240px;
+  max-width: 240px;
+  min-width: 240px;
+}
+
+div.import-warning,
+div.import-error
+{
+  margin: 0.5em;
+}
+
+h1.warnings-header,
+h1.no-warnings-header,
+h1.errors-header,
+h1.no-errors-header
+{
 }
 
 div.import-warning,
 div.import-error,
 h1.warnings-header,
-h1.errors-header
+h1.no-warnings-header,
+h1.errors-header,
+h1.no-errors-header
 {
   padding: 0.25em;
-  margin: 0.25em;
   display: inline-block;
 }
 
@@ -2657,5 +2701,92 @@ div.import-error
   position: relative;
   top: 0.15em;
   margin-left: 0.5em;
+}
+
+.deselect-for-import,
+.select-for-import
+{
+  position: relative;
+  top: 4px;
+}
+
+.csv-value-cell.ui-state-highlight
+{
+  margin-right: -4px;
+  margin-top: -1px;
+}
+
+.csv-value-cell
+{
+  font-size: 12pt;
+}
+
+.csv-value-cell-text
+{
+  line-height: 36px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.csv-value-cell-text:focus
+{
+  text-overflow: clip;
+}
+
+.cell-focused
+{
+  border: 2px double black !important;
+  margin-bottom: 0px !important;
+  margin-right: -3px !important;
+  min-height: 31px !important;
+  max-height: 31px !important;
+  height: 31px !important;
+}
+
+.import-spinner-container
+{
+  font-size: 12pt;
+  top: 0.1em;
+  right: 0.25em;
+  position: relative;
+}
+
+div.index-cell
+{
+  font-size: 12pt;
+  width: 5em !important;
+  min-width: 5em !important;
+  max-width: 5em !important;
+  line-height: 36px;
+  text-align: right;
+}
+
+ul.general-warnings-list,
+ul.general-errors-list
+{
+  margin: 0.25em 1em 0 1em;
+  max-height: 10em;
+  overflow-y: scroll;
+}
+
+.import-preview-table-row-display-container
+{
+  width: 630px;
+  white-space: initial;
+}
+
+button.toggle-errors,
+button.toggle-warnings
+{
+  position: relative;
+  top: -3px;
+}
+
+div.csv-row-spinner
+{
+  display: inline-block;
+  position: relative;
+  min-width: 2em;
+  height: 1.5em;
 }
 

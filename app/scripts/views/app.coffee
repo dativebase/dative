@@ -13,7 +13,6 @@ define [
   './help-dialog'
   './resource-displayer-dialog'
   './exporter-dialog'
-  './importer-dialog'
   './home'
 
   './application-settings'
@@ -100,7 +99,7 @@ define [
 ], (Backbone, FieldDB, Workspace, BaseView, ResourceView, MainMenuView,
   NotifierView, LoginDialogView, RegisterDialogView, AlertDialogView,
   TasksDialogView, HelpDialogView, ResourceDisplayerDialogView,
-  ExporterDialogView, ImporterDialogView, HomePageView,
+  ExporterDialogView, HomePageView,
 
   ApplicationSettingsView, CollectionsView, CorporaView,
   ElicitationMethodsView, FilesView, FormsView, LanguageModelsView,
@@ -245,8 +244,9 @@ define [
       @listenTo Backbone, 'showResourceInDialog', @showResourceInDialog
       @listenTo Backbone, 'showResourceModelInDialog',
         @showResourceModelInDialog
+      @listenTo Backbone, 'closeAllResourceDisplayerDialogs',
+        @closeAllResourceDisplayerDialogs
       @listenTo Backbone, 'openExporterDialog', @openExporterDialog
-      @listenTo Backbone, 'openImporterDialog', @openImporterDialog
       @listenTo Backbone, 'routerNavigateRequest', @routerNavigateRequest
       @listenToResources()
 
@@ -306,7 +306,6 @@ define [
       @helpDialog = new HelpDialogView()
       @notifier = new NotifierView(@myResources)
       @exporterDialog = new ExporterDialogView()
-      @importerDialog = new ImporterDialogView()
       @getResourceDisplayerDialogs()
 
     renderPersistentSubviews: ->
@@ -319,7 +318,6 @@ define [
       @renderResourceDisplayerDialogs()
       @notifier.setElement(@$('#notifier-container')).render()
       @exporterDialog.setElement(@$('#exporter-dialog-container')).render()
-      @importerDialog.setElement(@$('#importer-dialog-container')).render()
 
       @rendered @mainMenuView
       @rendered @loginDialog
@@ -328,7 +326,6 @@ define [
       @rendered @tasksDialog
       @rendered @notifier
       @rendered @exporterDialog
-      @rendered @importerDialog
 
     renderHelpDialog: ->
       @helpDialog.render()
@@ -1114,6 +1111,11 @@ define [
     getResourceViewClassFromResourceName: (resourceName) ->
       @myResources[resourceName].resourceViewClass
 
+    # Close all resource displayer dialogs.
+    closeAllResourceDisplayerDialogs: ->
+      for int in [1..@maxNoResourceDisplayerDialogs]
+        @["resourceDisplayerDialog#{int}"].dialogClose()
+
     # Create a view for the passed in `resourceModel` and render it in the
     # application-wide `@resourceDisplayerDialog`.
     showResourceModelInDialog: (resourceModel, resourceName) ->
@@ -1134,7 +1136,4 @@ define [
     openExporterDialog: (options) ->
       @exporterDialog.setToBeExported options
       @exporterDialog.dialogOpen()
-
-    openImporterDialog: (options) ->
-      @importerDialog.dialogOpen()
 

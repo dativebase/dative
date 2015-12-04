@@ -1,35 +1,24 @@
 define [
   './base'
-  './form'
+  './csv-import-row'
+  './csv-import-header'
   './exporter-collection-csv'
   './../models/form'
   './../models/file'
+  './../models/tag'
+  './../models/elicitation-method'
+  './../models/user'
+  './../models/source'
+  './../models/speaker'
+  './../models/syntactic-category'
   './../collections/forms'
+  './../collections/tags'
   './../utils/globals'
   './../templates/csv-import'
-], (BaseView, FormView, ExporterCollectionCSVView, FormModel, FileModel,
-  FormsCollection, globals, importerTemplate) ->
-
-  # TODO: create Backbone.View sub-classes for CSV rows: there is too much raw
-  # HTML and jQuery hairiness in here.
-  # TODO: reduce the `.html` calls by using document fragments.
-
-  # Specialized `FormView` sub-class that doesn't allow export or settings and
-  # also has an "Import" button instead of a "Save" button.
-  class FormViewForImport extends FormView
-
-    excludedActions: [
-      'history'
-      'controls'
-      'data'
-      'settings'
-      'export'
-    ]
-
-    initialize: (options) ->
-      options.forImport = true
-      super options
-
+], (BaseView, CSVImportRowView, CSVImportHeaderView, ExporterCollectionCSVView,
+  FormModel, FileModel, TagModel, ElicitationMethodModel, UserModel,
+  SourceModel, SpeakerModel, SyntacticCategoryModel, FormsCollection,
+  TagsCollection, globals, importerTemplate) ->
 
   # Importer View
   # -------------
@@ -43,240 +32,341 @@ define [
   #
   # Other features:
   #
-  # - preview of to-be-imported forms
+  # - spreadsheet-like (i.e., tabular) preview of to-be-imported forms
   # - validation (based on FormModel.validate)
-  # - warnings of "un-parse-able" string data (e.g., source values that cannot
-  #   be parsed to objects)
-  # - table display of CSV import with editable cells (so that warnings can be
-  #   turned off and validation cleared)
-  # - selective import: manually select subset of forms in import file for
-  #   finalized import.
+  # - warnings of "un-parse-able" string data (e.g., source strings that cannot
+  #   be parsed to source objects)
+  # - selective import: user can manually select a subset of forms to import.
+  #
+  # TODO:
+  #
+  # - Create button that hides (destroys?) all already-imported rows.
+  #
+  # - Allow users to Shift-click ranges of rows to select them. (Maybe?)
+  #
+  # - Create an escape hatch (abort) after clicking "Import Selected".
+  #
+  # - If there are id values in the CSV import file, we may want to ask the
+  #   user if they want to UPDATE the relevant forms, as opposed to creating
+  #   them.
+  #
+  # - Cell tables may appear to have no content after editing. Trim their text
+  #   and scroll left on the blur action.
+  #
+  # - Consider only rendering the row views for the rows that are visible in
+  #   the overflow container. If the import file is large, then rendering
+  #   thousands of views will stall the browser. The disadvantage to this
+  #   approach is that we will need to listen for scroll events and render row
+  #   views in response. Similarly, the "Preview Selected" button should only
+  #   request preview dispays from the rows visible within the scrollable
+  #   container and request additional previews as rows become visible upon
+  #   scroll events. See http://stackoverflow.com/questions/487073/check-if-element-is-visible-after-scrolling
+  #
+  # - grammaticality validation. (Requires app settings having been fetched
+  #   from server first.)
+  #
+  # - Help dialog is not scrolling to "Importing Forms". Is this a general issue?
+
 
   class CSVImportView extends BaseView
 
     template: importerTemplate
 
     initialize: ->
-      @hasBeenRendered = false
-      @warnings = {}
-      @errors = {}
+
+      # Set vars to hold validation data.
+      @defaultValidationState()
+
+      # This collection is passed to our row view instances so that they can
+      # give it to their form model instances for create (POST) requests.
       @formsCollection = new FormsCollection()
-      @renderedFormViews = {}
+
+      # Will hold the array that is built from the CSV file to be imported.
       @importCSVArray = null
+
+      # Will hold the file object given to us by the file API.
       @fileBLOB = null
-      @filenames = {}
-      @formObjects = {}
 
+      # List of unique filenames strings that we may need to search for. This
+      # is necessary if any of our rows contains values in the "files" column.
+      # We centralize the file search in this parent class (as opposed to
+      # having each row view perform its own request against file resources.)
+      @filenames = []
+
+      # Maps filename strings to file objects. This is populated after a
+      # successful search over file resources.
+      @filenames2objects = {}
+
+      # Array of `CSVImportRowView` instances that control the display and
+      # logic of CSV rows to be imported.
+      @rowViews = []
+
+      # A `CSVImportHeaderView` instance. This holds the <select>s for labeling
+      # the CSV columns with form attribute names.
+      @headerView = null
+
+      # An array of column labels for each column in the CSV file.
+      @columnLabels = []
+
+      # For performing searches over file resources.
       @dummyFileModel = new FileModel()
-      @listenTo @dummyFileModel, 'searchSuccess', @fileSearchSuccess
-      @listenTo @dummyFileModel, 'searchFail', @fileSearchFail
 
-      # These are used to get the possible values for form relational fields
-      # and to get info on what fields are user-editable.
+      # This is used to get the possible values for a form's relational fields,
+      # e.g., the array of users for enterer values.
       @dummyFormModel = new FormModel()
-      @dummyFormView = new FormView model: @dummyFormModel
-      @listenTo @dummyFormModel, 'getNewFormDataSuccess',
-        @getStringToObjectMappers
+
+      # If this is `true`, then success on a request to
+      # `@dummyFormModel.getNewResourceData()` will result in
+      # `validateSelected` being called.
+      @validateAfterGettingNewFormData = false
+
+      # If this is `true`, then validating all selected rows will, when done,
+      # call `@searchForDuplicates`, which, in turn, will call
+      # `@importSelected`
+      @importPostValidation = false
+
+      @listenToEvents()
 
       # Since we will be importing forms, we need the data from the server that
       # tells us what the relational values of forms can be, i.e., possible
       # speakers, users, etc. Assuming the call to `getNewResourceData` is
       # successful, the `globals` `Backbone.Model` instance will have
       # attributes for `speakers`, etc.
-      @dummyFormView.model.getNewResourceData()
+      @dummyFormModel.getNewResourceData()
 
-      @listenTo Backbone, 'importer:toggle', @toggle
-      @listenTo Backbone, 'importer:openTo', @openTo
+      # We haven't asked any of our row views to render/display their
+      # `FormView` previews yet.
+      @previewsVisible = false
+
+      # An array of form objects representing possible duplicates of the forms
+      # we are about to import.
+      @duplicatesFound = []
+
+      # Holds a TagModel instance; each import request creates one of these so
+      # that all forms imported can be tagged with it.
+      @importTag = null
+
+    # Set validation-related variables to defaults.
+    defaultValidationState: ->
+      @warnings = []
+      @rowWarnings = {}
+      @errors = []
+      @rowErrors = {}
+      @solutions = {}
+
+    listenToEvents: ->
+      super
+
+      # React to the form model trying to get its relational data.
+      @listenTo @dummyFormModel, 'getNewFormDataSuccess',
+        @getStringToObjectMappers
+      @listenTo @dummyFormModel, 'getNewFormDataFail',
+        @getNewFormDataFail
+
+      # React to the form model searching for duplicates.
+      @listenTo @dummyFormModel, 'searchSuccess', @searchForDuplicatesSuccess
+      @listenTo @dummyFormModel, 'searchFail', @searchForDuplicatesFail
+
+      # React to the file model trying to perform a search.
+      @listenTo @dummyFileModel, 'searchSuccess', @fileSearchSuccess
+      @listenTo @dummyFileModel, 'searchFail', @fileSearchFail
+
+      # The alert/confirm dialog may trigger this, if the user really wants to
+      # show a lot of previews.
+      @listenTo Backbone, 'showPreviews', @showPreviews
+
+      @listenToRowViews()
+      @listenToHeaderView()
+
+      # If a search for duplicates fails and the user clicks "Ok" on the
+      # confirm dialog that pops up, then we proceed with importing all of the
+      # selected rows.
+      @listenTo @, 'importSelected', @importSelected
+
+      # There are several exit points during an import where the import can be
+      # canceled. The confirm dialog will trigger this event in those cases.
+      # Cases:
+      # - search for duplicates has failed.
+      # - import tag creation has failed.
+      @listenTo @, 'cancelImportSelected', @cancelImportSelected
+
+      # If the user has clicked "Import Selected" and decides to continue the
+      # import despite the fact that there are errors and/or warnings, then
+      # 'searchForDuplicates' will be triggered by the confirm dialog.
+      @listenTo @, 'searchForDuplicates', @searchForDuplicates
+
+      # If we have found duplicates for a row and the user wants to
+      # import anyway, this event will be triggered by the confirm dialog.
+      @listenTo @, 'importDespiteDuplicates', @importDespiteDuplicates
+
+      @listenTo @, 'dontImportBecauseDuplicates', @dontImportBecauseDuplicates
+
+      # If we have failed to create an "import tag" and the user wants to
+      # import anyway, this event will be triggered by the confirm dialog.
+      @listenTo @, 'importDespiteNoImportTag', @importDespiteNoImportTag
+
+    listenToRowViews: ->
+      for view in @rowViews
+        @listenTo view, 'focusCell', @focusCell
+        @listenTo view, 'rowSelected', @allSelectedButtonsState
+        @listenTo view, 'rowDeselected', @allSelectedButtonsState
+
+    # A row view has told us it wants cell `coords[1]` of row `coords[0]` to be
+    # focused.
+    focusCell: (coords) ->
+      try
+        @rowViews[coords[0]].focusCell coords[1]
+
+    listenToHeaderView: ->
+      if @headerView
+        @listenTo @headerView, 'columnWidthsChanged', @setColumnWidths
+        @listenTo @headerView, 'columnLabelsChanged', @columnLabelsChanged
 
     events:
       'click .choose-import-file-button':         'clickFileUploadInput'
       'change [name=file-upload-input]':          'handleFileSelect'
       'click button.select-all-for-import':       'selectAllFormsForImport'
       'click button.select-none-for-import':      'deselectAllFormsForImport'
-      'click i.select-for-import':                'selectFormForImport'
-      'click i.deselect-for-import':              'deselectFormForImport'
-      'keydown i.select-for-import':              'keydownSelectFormForImport'
-      'keydown i.deselect-for-import':            'keydownDeselectFormForImport'
-      'selectmenuchange .column-header':          'columnHeaderChanged'
-      'click button.import-csv-row':              'importSingleCSVRow'
-      'click button.view-csv-row':                'viewSingleCSVRow'
-      'click button.validate-csv-row':            'validateSingleCSVRow'
-      'click button.import-selected-button':      'importSelectedCSVRows'
-      'click button.view-selected-button':        'viewSelectedCSVRows'
-      'click button.validate-selected-button':    'validateSelectedCSVRows'
+      'click button.import-selected-button':      'importSelectedPreflight'
+      'click button.preview-selected-button':     'togglePreviews'
+      'click button.validate-selected-button':    'validateSelected'
       'click button.hide-import-widget':          'hideMe'
       'click button.discard-file-button':         'discardFile'
+      'click button.import-solution':             'performImportSolution'
+      'click button.toggle-errors':               'toggleErrors'
+      'click button.toggle-warnings':             'toggleWarnings'
+      'click button.import-help':                 'openImportHelp'
+
+    # Tell the Help dialog to open itself and search for "importing forms"
+    # and scroll to the second match. WARN: this is brittle because if the help
+    # HTML changes, then the second match may not be what we want.
+    openImportHelp: ->
+      Backbone.trigger(
+        'helpDialog:openTo',
+        searchTerm: 'importing forms'
+        scrollToIndex: 0
+      )
+
+    toggleErrors: ->
+      $container = @$ 'div.general-errors-list-wrapper'
+      if $container.is ':visible'
+        $container.slideUp()
+        @$('button.toggle-errors i')
+          .removeClass 'fa-caret-down'
+          .addClass 'fa-caret-right'
+      else
+        $container.slideDown()
+        @$('button.toggle-errors i')
+          .removeClass 'fa-caret-right'
+          .addClass 'fa-caret-down'
+
+    toggleWarnings: ->
+      $container = @$ 'div.general-warnings-list-wrapper'
+      if $container.is ':visible'
+        $container.slideUp()
+        @$('button.toggle-warnings i')
+          .removeClass 'fa-caret-down'
+          .addClass 'fa-caret-right'
+      else
+        $container.slideDown()
+        @$('button.toggle-warnings i')
+          .removeClass 'fa-caret-right'
+          .addClass 'fa-caret-down'
+
+    # Map the names of resources that we can create to metadata about them.
+    creatableResources:
+      tag:
+        modelClass: TagModel
+        coreAttribute: 'name'
+      elicitationMethod:
+        modelClass: ElicitationMethodModel
+        coreAttribute: 'name'
+      user:
+        modelClass: UserModel
+        coreAttribute: 'first_name'
+      source:
+        modelClass: SourceModel
+        coreAttribute: 'author'
+      speaker:
+        modelClass: SpeakerModel
+        coreAttribute: 'first_name'
+      syntacticCategory:
+        modelClass: SyntacticCategoryModel
+        coreAttribute: 'name'
+      file:
+        modelClass: FileModel
+        coreAttribute: 'name'
+
+    # This method is called when a Warning/Error's "solution" button is
+    # clicked. We try to "perform the solution", which, at this point, can only
+    # mean creating a new resource model and asking the app view to display it
+    # in a dialog box so that the user can create it.
+    performImportSolution: (event) ->
+      solutionId = @$(event.currentTarget).attr('data-solution-id')
+      if solutionId
+        solution = @solutions[solutionId]
+        if solution
+          if solution.resource of @creatableResources
+            meta = @creatableResources[solution.resource]
+            resourceModelClass = meta.modelClass
+            coreAttribute = meta.coreAttribute
+            resourceModel = new resourceModelClass
+            resourceModel.set coreAttribute, solution.val
+            @listenToOnce resourceModel,
+              "add#{@utils.capitalize solution.resource}Success",
+              @resourceCreated
+            Backbone.trigger 'showResourceModelInDialog', resourceModel,
+              solution.resource
+          else
+            console.log "Sorry, we are unable to create a #{solution.resource}"
+        else
+          console.log "Sorry, we cannot find a solution for this warning/error"
+      else
+        console.log 'Sorry, there is no action tied to this button'
+
+    # We have created a resource so we re-run validation indirectly by first
+    # updating our related resources.
+    resourceCreated: (resourceModel) ->
+      @validateAfterGettingNewFormData = true
+      @dummyFormModel.getNewResourceData()
 
     # User has clicked on the "X" button next to the "Choose File" button,
     # indicating that they no longer want to import from this file.
     discardFile: ->
-      @spin()
+      @spin 'discarding CSV file'
       x = =>
         @clearFileMetadata()
         @$('.import-preview-table-head').html ''
         @$('.import-preview-table-body').html ''
         @fileBLOB = null
         @importCSVArray = null
-        @closeRenderedFormViews()
+        @closeRowViews()
         @$('.dative-importer-preview').slideUp()
         @$('button.discard-file-button').hide()
         @stopSpin()
       setTimeout x, 5
 
+    # Close all of our row views.
+    closeRowViews: ->
+      while @rowViews.length
+        rowView = @rowViews.pop()
+        rowView.close()
+        @stopListening rowView
+        @closed rowView
+
     hideMe: -> @trigger 'hideMe'
-
-    # Display the errors for a specific row, given its index.
-    displayErrorsForRow: (rowIndex) ->
-      @displayWarningsOrErrorsForRow 'error', rowIndex
-
-    # Display the warnings for a specific row, given its index.
-    displayWarningsForRow: (rowIndex) ->
-      @displayWarningsOrErrorsForRow 'warning', rowIndex
-
-    # Display the warnings/errors (based on `type`) for a specific row, given
-    # its index.
-    displayWarningsOrErrorsForRow: (type, rowIndex) ->
-      stateClass = if type is 'error' then 'error' else 'highlight'
-      $container = @$("div.import-preview-table-row-#{type}s-container.\
-        form-for-import-#{rowIndex}")
-      $container.show()
-      array = @["#{type}s"][rowIndex]
-      if array and array.length > 0
-        len = array.length
-        $container
-          .find(".#{type}s-header")
-            .addClass "ui-state-#{stateClass}"
-            .removeClass "ui-state-ok"
-            .find(".#{type}s-header-icon")
-              .addClass 'fa-exclamation-triangle'
-              .removeClass 'fa-check-circle'
-              .end()
-            .find(".#{type}s-header-text")
-              .text("#{len} #{@utils.pluralizeByNum type, len}")
-              .end()
-            .end()
-          .find(".#{type}s-inner-container").html(
-            @["get#{@utils.capitalize type}HTML"](array))
-      else
-        $container
-          .find(".#{type}s-header")
-            .removeClass "ui-state-#{stateClass}"
-            .addClass "ui-state-ok"
-            .find(".#{type}s-header-icon")
-              .removeClass 'fa-exclamation-triangle'
-              .addClass 'fa-check-circle'
-              .end()
-            .find(".#{type}s-header-text")
-              .text("No #{@utils.pluralize type}")
-              .end()
-            .end()
-          .find(".#{type}s-inner-container").html ''
-
-    # Display the errors stored in `@errors`
-    displayGeneralErrors: ->
-      @displayGeneralWarningsOrErrors 'error'
-
-    # Display the warnings stored in `@warnings`
-    displayGeneralWarnings: ->
-      @displayGeneralWarningsOrErrors 'warning'
-
-    # Display the warnings or errors stored in `@warnings` or in `@errors`,
-    # based on the value of `type`.
-    displayGeneralWarningsOrErrors: (type) ->
-      stateClass = if type is 'error' then 'error' else 'highlight'
-      $container = @$ ".general-#{type}s-container"
-      $container.show()
-        .find(".#{type}s-inner-container").html ''
-      lengths = (a.length for a in _.values(@["#{type}s"]))
-      count = _.reduce(lengths, ((memo, num) -> memo + num), 0)
-
-      rowIssues = {}
-      for locus, issueArray of @["#{type}s"]
-        if locus isnt 'general'
-          for issue in issueArray
-            if issue.msg of rowIssues
-              rowIssues[issue.msg].rows.push locus
-            else
-              rowIssues[issue.msg] =
-                solution: issue.solution
-                rows: [locus]
-      newRowIssues = []
-      for issueMsg, issue of rowIssues
-        newRowIssues.push
-          solution: issue.solution
-          msg: "#{issueMsg}
-            (#{@utils.pluralizeByNum 'row', issue.rows.length}
-            #{issue.rows.join ', '})"
-
-      if 'general' of @["#{type}s"]
-        for issue in @["#{type}s"].general
-          newRowIssues.push issue
-
-      if newRowIssues.length > 0
-        $container.find(".#{type}s-inner-container")
-          .html @["get#{@utils.capitalize type}HTML"](newRowIssues)
-
-      if count > 0
-        $container.find(".#{type}s-header")
-          .addClass "ui-state-#{stateClass}"
-          .removeClass 'ui-state-ok'
-          .find(".#{type}s-header-text")
-            .text "#{count}
-              #{@utils.pluralizeByNum @utils.capitalize(type), count}"
-            .end()
-          .find(".#{type}s-header-icon")
-            .addClass 'fa-exclamation-triangle'
-            .removeClass 'fa-check-circle'
-      else
-        $container.find(".#{type}s-header")
-          .removeClass "ui-state-#{stateClass}"
-          .addClass 'ui-state-ok'
-          .find(".#{type}s-header-text")
-            .text "No #{@utils.capitalize type}s"
-            .end()
-          .find(".#{type}s-header-icon")
-            .removeClass 'fa-exclamation-triangle'
-            .addClass 'fa-check-circle'
 
     hideGeneralWarningsAndErrors: ->
       @$('.general-errors-container').hide()
       @$('.general-warnings-container').hide()
-
-    getWarningHTML: (warningsArray) ->
-      warnings = ['<ul class="import-warnings-list">']
-      for warning in warningsArray
-        if warning.solution
-          warnings.push "<li><div class='import-warning ui-state-highlight
-            ui-corner-all'><i class='fa fa-fw fa-exclamation-triangle'
-            ></i>#{warning.msg}<button class='solution-button'
-            >#{warning.solution.name}</button></div></li>"
-        else
-          warnings.push "<li><div class='import-warning ui-state-highlight
-            ui-corner-all'><i class='fa fa-fw fa-exclamation-triangle'
-            ></i>#{warning.msg}</div></li>"
-      warnings.push '</ul>'
-      warnings.join '\n'
-
-    getErrorHTML: (errorsArray) ->
-      errors = ['<ul class="import-errors-list">']
-      for error in errorsArray
-        errors.push "<li><div class='import-error ui-state-error ui-corner-all'
-          ><i class='fa fa-fw fa-exclamation-triangle'></i>#{error.msg}</div></li>"
-      errors.push '</ul>'
-      errors.join '\n'
-
-    getNoErrorsHTML: -> "<i class='fa fa-fw fa-check-circle'></i>
-      <span>No errors</span>"
-
-    getNoWarningsHTML: -> "<i class='fa fa-fw fa-check-circle'></i>
-      <span>No warnings</span>"
 
     # Create an object attribute that keys to objects which in turn map string
     # representations of relational values to the corresponding object
     # representations. E.g., objects that map things like 'Joel Dunham' to
     # `{first_name: 'Joel', ...}`, etc. These objects are used to "parse" user
     # input values for "elicitor", etc. in CSV import files.
-    getStringToObjectMappers: ->
+    getStringToObjectMappers: (data) ->
+      @storeOptionsDataGlobally data
       @stringToObjectMappers = {}
       for attr, meta of @relationalAttributesMeta
         mapper = []
@@ -288,6 +378,14 @@ define [
             ExporterCollectionCSVView::[meta.toStringConverter] optionObject
           mapper.push [stringRep, optionObject]
         @stringToObjectMappers[attr] = mapper
+      if @validateAfterGettingNewFormData
+        @validateAfterGettingNewFormData = false
+        for rowView in @rowViews
+          rowView.stringToObjectMappers = @stringToObjectMappers
+        @validateSelected()
+
+    getNewFormDataFail: ->
+      @validateAfterGettingNewFormData = false
 
     # This object maps the names of relational form attributes to metadata
     # about them; specifically, to their options attribute in `globals` and to
@@ -313,488 +411,663 @@ define [
         optionsAttribute: 'users'
         toStringConverter: 'personToString'
 
-    # The user has clicked on the "Import" button of a CSV form row.
-    importSingleCSVRow: (event) ->
-      if _.isNumber event
-        formIndex = event
+    importSelectedVarsDefaultState: ->
+      @importsSucceeded = 0
+      @importsFailed = 0
+      @importsAbortedBecauseDuplicates = 0
+      @importTag = null
+
+    # This method is called when the "Import Selected" button is clicked.
+    # It ultimately imports all of the CSV rows that are selected.
+    importSelectedPreflight: ->
+      @disableAllControls()
+      @importSelectedVarsDefaultState()
+      selectedRows = (r for r in @rowViews when r.selected)
+      if selectedRows.length > 0
+        @importPostValidation = true
+        @validateSelected()
       else
-        formIndex = @getFormIndexFromViewClickEvent event
-        if formIndex is null
-          Backbone.trigger 'csvFormImportFail'
-          return
-      formObject = @getFormObjectFromCSVRowIndex formIndex
-      if formObject is null
-        Backbone.trigger 'csvFormImportFail'
-        return
+        @enableAllControls()
+        # It should not be possible to get here: the UI should disable the
+        # import button when none are selected.
+        console.log 'there are no selected rows to import!'
 
-    importSelectedCSVRows: ->
-      console.log 'you want to IMPORT all selected rows'
-      # for row, index of csvRows
-      #   @importSingleCSVRow index
+    # We have validated all of the rows and we have performed a duplicates
+    # search. Now we create a special tag just for this import, a tag that will
+    # be assigned to each form that we create in this multi-import. This will
+    # make it easier for users to track how data have been created in the
+    # system.
+    importSelected: ->
+      @spin 'Importing selected and valid rows'
+      @createImportTag()
 
-    # The user has clicked on the "Validate" button of a CSV form row.
-    validateSingleCSVRow: (event) ->
-      if _.isNumber event
-        formIndex = event
+    # Create a special tag just for this import. Its name is "_import " followed
+    # by the current Unix timestamp. It als
+    createImportTag: ->
+      now = new Date()
+      humanNow = @utils.humanDatetime now
+      importer = globals.applicationSettings.get 'loggedInUser'
+      tag = new TagModel(
+        {
+          name: "_import #{now.getTime()}"
+          description: "This tag was given automatically to all forms that were
+            imported by #{importer.first_name} #{importer.last_name} on
+            #{humanNow}, using the CSV file “#{@fileBLOB.name}”."
+        },
+        {collection: new TagsCollection()}
+      )
+      @listenToOnce tag, 'addTagSuccess', @importTagCreateSuccess
+      @listenToOnce tag, 'addTagFail', @importTagCreateFail
+      tag.collection.addResource tag
+
+    # We have succeeded in creating an import tag. We set it to `@importTag`
+    # and will use it to tag all of the forms that we import in this batch.
+    importTagCreateSuccess: (tagModel) ->
+      @importTag = tagModel
+      @importSelectedContinue()
+
+    # We failed to create an import tag (for some reason). Right now we are
+    # just going to proceed with the import without it.
+    importTagCreateFail: ->
+      @importTag = null
+      @alertUserOfImportTagCreateFail()
+
+    # We have, for some reason, failed to create an import tag. Display a
+    # confirm dialog which lets the user abort the import because of this
+    # failure to create the import tag.
+    alertUserOfImportTagCreateFail: ->
+      options =
+        text: "An error occurred when trying to create a special tag for the
+          forms that you are trying to import. Click “Ok” to proceed with
+          the import anyway, i.e., without an “import tag”. Click
+          “Cancel” to cancel the import."
+        confirm: true
+        confirmEvent: 'importDespiteNoImportTag'
+        cancelEvent: 'cancelImportSelected'
+        eventTarget: @
+      Backbone.trigger 'openAlertDialog', options
+
+    # The user has chosen to continue with the import, despite the fact that we
+    # were not able to create an import tag.
+    importDespiteNoImportTag: -> @importSelectedContinue()
+
+    # Now, really, we begin importing all of the valid and selected rows in
+    # sequence. This is called after the attempt to create the import tag.
+    importSelectedContinue: ->
+      @rowToImportIndex = 0
+      @importRow()
+
+    importRow: ->
+      Backbone.trigger 'closeAllResourceDisplayerDialogs'
+      rowToImport = @rowViews[@rowToImportIndex]
+      # `undefined` means there is now rowView at the current index and
+      # therefore we are done with the import selected task.
+      if rowToImport is undefined
+        @importSelectedDone()
       else
-        formIndex = @getFormIndexFromViewClickEvent event
-        if formIndex is null
-          Backbone.trigger 'csvFormValidateFail'
-          return
-      formObject = @getFormObjectFromCSVRowIndexAndFix formIndex
-      if formObject is null
-        Backbone.trigger 'csvFormValidateFail'
-        return null
-      @displayErrorsForRow formIndex
-      @displayWarningsForRow formIndex
-      formObject
+        if rowToImport.selected and rowToImport.valid
+          duplicates = @getDuplicatesForRow rowToImport
+          if duplicates.length > 0
+            @alertUserOfDuplicatesForRow rowToImport, duplicates
+          else
+            @importRowForReal()
+        # This row cannot be imported, so we increment the index and recur.
+        else
+          @importNextRow()
 
-    disableAllControls: ->
-      console.log 'disabling all controls'
-      @$('button').button 'disable'
-      @$('select').selectmenu 'option', 'disabled', true
+    # Open a confirm dialog that notifies the user that potential duplicates
+    # have been found for the row at `@rowToImportIndex`. The button that the
+    # user clicks determines whether to proceed with the import of the row in
+    # question, or whether to move on to the next row.
+    alertUserOfDuplicatesForRow: (row, duplicates) ->
+      row.displayDuplicatesInDialogBoxes duplicates
+      duplicatesCount = duplicates.length
+      options =
+        text: "We found #{duplicatesCount} possible
+          #{@utils.pluralizeByNum 'duplicate', duplicatesCount} for the form in
+          row #{row.rowIndex + 1} (See the dialog box(es).) Click “Ok” to
+          proceed with the import anyway. Click “Cancel” to not import this
+          row and move on to the next one."
+        confirm: true
+        confirmEvent: 'importDespiteDuplicates'
+        cancelEvent: 'dontImportBecauseDuplicates'
+        eventTarget: @
+      Backbone.trigger 'openAlertDialog', options
 
-    enableAllControls: ->
-      console.log 'enabling all controls'
-      @$('button').button 'enable'
-      @$('select').selectmenu 'option', 'disabled', false
+    # Move on to trying to import the next row; the current row has possible
+    # duplicates already on the server and the user has elected not to import
+    # it.
+    dontImportBecauseDuplicates: ->
+      @importsAbortedBecauseDuplicates += 1
+      @rowViews[@rowToImportIndex].setImportStateCanceledBecauseDuplicates()
+      @importNextRow()
 
-    searchForFilenames: ->
-      filenames = _.keys @filenames
-      search =
-        filter: ["or", [
-          ["File", "filename", "in", filenames]
-          ["File", "name", "in", filenames]]]
-        order_by: ["File", "id", "desc"]
-      paginator = {page:1, items_per_page: filenames.length}
-      @dummyFileModel.search search, paginator
+    # Import the next row.
+    importNextRow: ->
+      @rowToImportIndex += 1
+      @importRow()
 
-    fileSearchFail: (responseJSON) ->
-      @validateSelectedCSVRowsFinal()
+    # Import the current row, despite the fact that we have found possible
+    # duplicates of it already on the server.
+    importDespiteDuplicates: -> @importRowForReal()
 
-    fileSearchSuccess: (responseJSON) ->
-      if responseJSON.paginator.count > 0
-        files = responseJSON.items
-        for index, formObject of @formObjects
-          if formObject.files.length > 0
-            newFilesArray = []
-            for filename in formObject.files
-              fileObject = _.findWhere files, filename: filename
-              if not fileObject
-                fileObject = _.findWhere files, name: filename
-              if fileObject
-                newFilesArray.push fileObject
-              else
-                warningObject =
-                  msg: "Unable to find a file with (file)name “#{filename}”"
-                  solution:
-                    name: "Create file named #{filename}"
-                    perform: do (filename) =>
-                      -> @createResource filename, 'files'
-                @addToWarnings index, warningObject
-            formObject.files = newFilesArray
-      @validateSelectedCSVRowsFinal()
+    # We know that the row at `@rowToImportIndex` is selected and valid and the
+    # user has given us the go-ahead to import despite any duplicates that may
+    # exist. Therefore, we tell the row to import/create itself and we wait to
+    # hear that that request has terminated, whereupon we initiate import of
+    # the next row.
+    importRowForReal: ->
+      Backbone.trigger 'closeAllResourceDisplayerDialogs'
+      rowToImport = @rowViews[@rowToImportIndex]
+      @rowToImportIndex += 1
+      @listenToOnce rowToImport, 'importAttemptTerminated',
+        @importAttemptTerminated
+      if @importTag
+        # TODO/WARNING: this can trigger an error because somehow/sometimes
+        # (how?) the tags attribute of a form model can be something other than
+        # an array. How can this possibly happen? It shouldn't be able to
+        # happen.
+        try
+          rowToImport.model.get('tags').push(
+            id: @importTag.get('id')
+            name: @importTag.get('name')
+          )
+        catch
+          tags = rowToImport.model.get('tags')
+          console.log tags
+          console.log @utils.type(tags)
+      rowToImport.issueCreateRequest()
 
-    validateSelectedCSVRowsFinal: ->
-      @displayGeneralWarnings()
-      @displayGeneralErrors()
-      @buttonify()
+    # A CSV row view is telling us that an import/create request to the server
+    # has terminated. `success` is a boolean that indicates if the attempt was
+    # successful (`true`) or a failure (`false`).
+    importAttemptTerminated: (success) ->
+      if success
+        @importsSucceeded += 1
+      else
+        @importsFailed += 1
+      @importRow()
+
+    # Return the duplicates that correspond to `row`.
+    getDuplicatesForRow: (row) ->
+      if @duplicatesFound.length > 0
+        matcher = {
+          transcription: row.model.get('transcription').normalize('NFD')
+          phonetic_transcription:
+            row.model.get('phonetic_transcription').normalize('NFD')
+          narrow_phonetic_transcription:
+            row.model.get('narrow_phonetic_transcription').normalize('NFD')
+          transcription: row.model.get('transcription').normalize('NFD')
+          morpheme_break: row.model.get('morpheme_break').normalize('NFD')
+          morpheme_gloss: row.model.get('morpheme_gloss').normalize('NFD')
+          grammaticality: row.model.get('grammaticality').normalize('NFD')
+        }
+        tmp = _.where @duplicatesFound, matcher
+        duplicates = []
+        translations = row.model.get 'translations'
+        for potDup in tmp
+          transTranscrsThere = true
+          transGramsThere = true
+          potDupTransTranscrs = (t.transcription for t in potDup.translations)
+          potDupTransGrams = (t.grammaticality for t in potDup.translations)
+          for translation in translations
+            if (translation.transcription.normalize('NFD') not in
+            potDupTransTranscrs)
+              transTranscrsThere = false
+            if (translation.grammaticality.normalize('NFD') not in
+            potDupTransGrams)
+              transGramsThere = false
+          if transTranscrsThere and transGramsThere
+            duplicates.push potDup
+        duplicates
+      else
+        []
+
+    # This is called when the "Import Selected" task has completed because
+    # there are no more rows to import.
+    importSelectedDone: ->
+      @stopSpin()
+      @enableAllControls()
+      @alertImportSummary()
+      # Triggering the following event will cause the `FormsBrowseView`
+      # instance to navigate to the last page and update its pagination info
+      # according to the current state of the database.
+      Backbone.trigger 'browseAllFormsAfterImport'
+
+    # Alert the user that we've finished attempting to import all of the
+    # selected rows. Summarize what has been accomplished. Note that the
+    # complicated-looking logic here is just for creating a nice human-readable
+    # report based on counts of successes, failures and
+    # aborts-due-to-duplicates.
+    alertImportSummary: ->
+      switch @importsSucceeded
+        when 1 then verbSuccess = 'was'
+        else verbSuccess = 'were'
+      switch @importsAbortedBecauseDuplicates
+        when 1 then verbAbort = 'was'
+        else verbAbort = 'were'
+      importAttempts = @importsSucceeded + @importsFailed +
+        @importsAbortedBecauseDuplicates
+      alertMsg = "You have attempted to import
+        #{@utils.number2word importAttempts}
+        #{@utils.pluralizeByNum 'form', importAttempts}."
+      if @importsSucceeded > 0
+        alertMsg = "#{alertMsg}
+          #{@utils.capitalize @utils.number2word(@importsSucceeded)} import
+          #{@utils.pluralizeByNum 'attempt', @importsSucceeded} #{verbSuccess}
+          successful."
+      else
+        alertMsg = "#{alertMsg} No import attempts were successful."
+      if @importsFailed > 0
+        alertMsg = "#{alertMsg}
+          #{@utils.capitalize @utils.number2word(@importsFailed)} import
+          #{@utils.pluralizeByNum 'attempt', @importsFailed} failed."
+      if @importsAbortedBecauseDuplicates > 0
+        alertMsg = "#{alertMsg}
+          #{@utils.capitalize @utils.number2word(@importsAbortedBecauseDuplicates)}
+          import
+          #{@utils.pluralizeByNum 'attempt', @importsAbortedBecauseDuplicates}
+          #{verbAbort} aborted because probable duplicates were found."
+      if @importTag and @importsSucceeded > 0
+        if @importsSucceeded is 1
+          alertMsg = "#{alertMsg} The imported form has the tag
+            “#{@importTag.get('name')}”."
+        else
+          alertMsg = "#{alertMsg} All imported forms have the tag
+            “#{@importTag.get('name')}”."
+      options =
+        text: alertMsg
+        confirm: false
+      Backbone.trigger 'openAlertDialog', options
+
+    cancelImportSelected: ->
       @stopSpin()
       @enableAllControls()
 
-    validateSelectedCSVRows: ->
-      @spin()
+    # Gather all of the search filters (arrays) from all of the selected and
+    # valid rows and issue one search request for duplicates. Both success and
+    # failure may result in `@importSelected()` being called.
+    searchForDuplicates: ->
+      @duplicatesFound = []
+      disjuncts = []
+      for row in @rowViews
+        if row.selected and row.valid
+          disjuncts.push row.getCheckForDuplicatesFilter()
+      if disjuncts.length > 0
+        search =
+          filter: ['or', disjuncts]
+          order_by: ['Form', 'id', 'desc']
+        # WARNING: allowing 10,000 results may be a very bad idea ...
+        paginator = {page: 1, items_per_page: 10000}
+        @dummyFormModel.search search, paginator
+      else
+        @importSelected()
+
+    searchForDuplicatesSuccess: (responseJSON) ->
+      console.log 'found duplicates'
+      if responseJSON.paginator.count > 0
+        @duplicatesFound = responseJSON.items
+      else
+        @duplicatesFound = []
+      @importSelected()
+
+    searchForDuplicatesFail: (error) ->
+      @duplicatesFound = []
+      @notifyUserOfDuplicatesSearchFail()
+
+    # Open a confirm dialog that notifies the user that search for possible
+    # duplicates failed. They may, nevertheless, choose to continue with the
+    # import.
+    notifyUserOfDuplicatesSearchFail: ->
+      options =
+        text: "An error occured when attempting to search for duplicates for
+          the selected forms. Click “Ok” to proceed with the import,
+          understanding that you may be duplicating existing forms as a
+          result. Click “Cancel” to abort the import."
+        confirm: true
+        confirmEvent: 'importSelected'
+        cancelEvent: 'cancelImportSelected'
+        eventTarget: @
+      Backbone.trigger 'openAlertDialog', options
+
+    purviewSelector: '.dative-widget-header, .dative-importer-import,
+      .import-controls.container, .general-errors-container,
+      .general-warnings-container'
+
+    disableAllControls: ->
+      @$(@purviewSelector)
+        .find('button').button('disable').end()
+        .find('select').selectmenu 'option', 'disabled', true
+      @headerView.disableAllControls()
+      # for rowView in @rowViews
+      #   rowView.disableAllControls()
+
+    enableAllControls: ->
+      @$(@purviewSelector)
+        .find('button').button('enable').end()
+        .find('select').selectmenu 'option', 'disabled', false
+      @headerView.enableAllControls()
+      # for rowView in @rowViews
+      #   rowView.enableAllControls()
+
+    searchForFilenames: ->
+      @getFilenamesFromRowViews()
+      if @filenames.length > 0
+        search =
+          filter: ["or", [
+            ["File", "filename", "in", @filenames]
+            ["File", "name", "in", @filenames]]]
+          order_by: ["File", "id", "desc"]
+        paginator = {page:1, items_per_page: @filenames.length}
+        @dummyFileModel.search search, paginator
+      else
+        @validateSelectedMiddle()
+
+    fileSearchFail: (responseJSON) ->
+      @validateSelectedFinal()
+
+    fileSearchSuccess: (responseJSON) ->
+      @filenames2objects = {}
+      if responseJSON.paginator.count > 0
+        files = responseJSON.items
+        for fo in files
+          if fo.filename
+            @filenames2objects[fo.filename] = fo
+          if fo.name and fo.name isnt fo.filename
+            @filenames2objects[fo.name] = fo
+      @validateSelectedMiddle()
+
+    # Aggregate all of the filenames from all of the selected row views.
+    getFilenamesFromRowViews: ->
+      filenames = {}
+      for rowView in @rowViews
+        if rowView.selected
+          for filename in rowView.getFilenames()
+            filenames[filename] = null
+      @filenames = _.keys filenames
+
+    # User has clicked the "Validate Selected" button.
+    validateSelected: ->
+      @spin 'validating'
+      @defaultValidationState()
       @disableAllControls()
-      x = =>
-        @$('.import-preview-table-body .import-preview-table-row')
-          .each (index, row) =>
-            if @$(row).find('.deselect-for-import').length > 0
-              formObject = @validateSingleCSVRow index
-              if formObject then @formObjects[index] = formObject
-        if _.keys(@filenames).length > 0
-          @searchForFilenames()
+      @hideValidationContainers()
+      # Instead of having all row views search for their own filenames on the
+      # server, we collect them all in this method and search for them in bulk.
+      # Success/failure in this request triggers a method that resolves the
+      # validation.
+      @searchForFilenames()
+
+    # We have a map from filename strings to file objects, so we can continue
+    # with CSV row validation. Give the map to each row view and trigger their
+    # `@validate` methods, gathering any warnings and errors in the process.
+    validateSelectedMiddle: ->
+      for rowView, index in @rowViews
+        if rowView.selected
+          rowView.filenames2objects = @filenames2objects
+          [rowWarnings, rowErrors, solutions] = rowView.validate()
+          for warning in rowWarnings
+            @addToRowWarnings warning, rowView.rowIndex
+          for error in rowErrors
+            @addToRowErrors error, rowView.rowIndex
+          for solutionName, solutionMeta of solutions
+            @addToSolutions solutionName, solutionMeta
+      [@warnings, @errors] = @headerView.validate()
+      @validateSelectedFinal()
+
+    # Terminate the "Validate Selected" request.
+    validateSelectedFinal: ->
+      @displayWarnings()
+      @displayErrors()
+      @buttonify()
+      @stopSpin()
+      @enableAllControls()
+      if @importPostValidation
+        @importPostValidation = false
+        validRows = (r for r in @rowViews when r.valid)
+        if validRows.length > 0
+          [warnCount, errorCount] = @getWarningsErrorsCounts()
+          if warnCount > 0 or errorCount > 0
+            @alertUserOfWarningsErrors warnCount, errorCount
+          else
+            @searchForDuplicates()
         else
-          @validateSelectedCSVRowsFinal()
+          @enableAllControls()
+          @stopSpin()
+          Backbone.trigger 'csvFormImportNoneValid'
 
-      # For some strange reason this negligible timeout is needed in order to
-      # force the spinner to appear. Without it, it seems that jQuery puts it
-      # into a queue of DOM manipulations that it performs in one go.
-      setTimeout x, 50
+    getWarningsErrorsCounts: ->
+      [
+        (@warnings.length + _.keys(@rowWarnings).length)
+        (@errors.length + _.keys(@rowErrors).length)
+      ]
 
-    # The user has clicked on the "View" button of a CSV form row. So, we
-    # attempt to display the to-be-imported form using a `FormViewForImport`
-    # instance.
-    viewSingleCSVRow: (event) ->
-      formIndex = @getFormIndexFromViewClickEvent event
-      if formIndex is null
-        Backbone.trigger 'csvFormDisplayAsIGTFail'
-        return
-      selector = ".import-preview-table-row-display-container.\
-        form-for-import-#{formIndex}"
-      $displayContainer = @$(selector).first()
-      if $displayContainer.is ':visible'
-        $displayContainer.slideUp()
-        @viewAsIGTButtonStateClosed formIndex
-        return
+    # Display a confirm dialog which lets the user abort the import if
+    # they want to first deal with the warnings and errors.
+    alertUserOfWarningsErrors: (warnCount, errorCount) ->
+      if warnCount > 0 and errorCount > 0
+        msg = "We have found #{errorCount}
+          #{@utils.pluralizeByNum 'error', errorCount} and #{warnCount}
+          #{@utils.pluralizeByNum 'warning', warnCount} in this CSV file."
+      else if errorCount > 0
+        msg = "We have found #{errorCount}
+          #{@utils.pluralizeByNum 'error', errorCount} in this CSV file."
+      else if warnCount > 0
+        msg = "We have found #{warnCount}
+          #{@utils.pluralizeByNum 'warning', warnCount} in this CSV file."
+      options =
+        text: "#{msg} Click “Ok” to proceed with the import anyway. Click
+          “Cancel” to cancel the import and resolve the errors and warnings."
+        confirm: true
+        confirmEvent: 'searchForDuplicates'
+        cancelEvent: 'cancelImportSelected'
+        eventTarget: @
+      Backbone.trigger 'openAlertDialog', options
+
+    hideValidationContainers: ->
+      @$('.general-errors-container').hide()
+      @$('.general-warnings-container').hide()
+
+    displayWarnings: ->
+      @$('button.toggle-warnings i')
+        .removeClass 'fa-caret-down'
+        .addClass 'fa-caret-right'
+      @$('.general-warnings-container').show()
+      warningsCount = @warnings.length
+      rowWarningsCount = _.keys(@rowWarnings).length
+      if warningsCount > 0 or rowWarningsCount > 0
+        totalWarningsCount = warningsCount + rowWarningsCount
+        warningsWord = @utils.pluralizeByNum 'Warning', totalWarningsCount
+        @$('h1.warnings-header').show().find('.warnings-header-text')
+          .text "#{totalWarningsCount} #{warningsWord}"
+        @$('button.toggle-warnings').show()
+        @$('h1.no-warnings-header').hide()
+        @displayIndividualWarnings()
       else
-        $displayContainer.slideDown()
-        @viewAsIGTButtonStateOpen formIndex
-      if formIndex of @renderedFormViews then return
-      formObject = @getFormObjectFromCSVRowIndexAndFix formIndex
+        @$('h1.warnings-header').hide()
+        @$('button.toggle-warnings').hide()
+        @$('div.general-warnings-list-wrapper').hide()
+        @$('h1.no-warnings-header').show()
 
-      if formObject is null
-        Backbone.trigger 'csvFormDisplayAsIGTFail'
-        return null
-
-      @displayErrorsForRow formIndex
-      @displayWarningsForRow formIndex
-
-      # Create the Dative-native instance and display it beneath the CSV row.
-      formModel = new FormModel formObject, collection: @formsCollection
-      formView = new FormViewForImport model: formModel
-      formView.expanded = true
-      formView.dataLabelsVisible = true
-      formView.effectuateExpanded()
-      $displayContainer.html formView.render().el
-      @rendered formView
-      @renderedFormViews[formIndex] = formView
-      do (formIndex) =>
-        @listenTo formView, "newFormView:hide",
-          => @hideFormView formIndex
-
-    # The user has clicked on the "X" button of a `FormViewForImport` instance
-    # so we hide the enclosing <div>.
-    hideFormView: (formIndex) ->
-      if formIndex of @renderedFormViews
-        selector = ".import-preview-table-row-display-container.\
-          form-for-import-#{formIndex}"
-        @$(selector).first().slideUp()
-
-    closeRenderedFormViews: ->
-      for index, formView of @renderedFormViews
-        formView.close()
-        @closed formView
-      @renderedFormViews = {}
-
-    viewSelectedCSVRows: ->
-      console.log 'you want to VIEW all selected rows'
-
-    # First get the index of the to-be-imported form, given the click event
-    # from clicking that form's CSV row's "View" button.
-    getFormIndexFromViewClickEvent: (event) ->
-      try
-        formIndex = Number(@$(event.currentTarget).data('index'))
-      catch
-        formIndex = null
-      if _.isNaN formIndex then formIndex = null
-      formIndex
-
-    # Given the index of a form row within a CSV table, return the form as an
-    # object while also fixing/validating it: i.e., by removing uneditable
-    # attributes and fixing relational values. Note: the methods called in here
-    # have side effects that will change the instance variable `@warnings`.
-    getFormObjectFromCSVRowIndexAndFix: (formIndex) ->
-      formObject = @getFormObjectFromCSVRowIndex formIndex
-      formObject = @removeUneditableAttributes formObject, formIndex
-      formObject = @fixDateElicited formObject
-      formObject = @fixTranslations formObject
-      formObject = @manyToOneStringToObject formObject, formIndex
-      formObject = @manyToManyStringToArray formObject, formIndex
-      formModel = new FormModel(formObject)
-      errors = formModel.validate()
-      if errors
-        for attr, errorMsg of errors
-          errorObject =
-            msg: "#{attr}: #{errorMsg}"
-            solution: @getErrorSolution errorMsg
-          @addToErrors formIndex, errorObject
-      formObject
-
-    # Return an object that represents a solution to a warning or an error.
-    # This object needs to have a string 'name' attribute and a 'perform'
-    # method that is a function that performs the solution, usually the
-    # creation of some related resource, e.g., a tag.
-    getErrorSolution: (errorMsg) ->
-      onsole.log "find a solution for #{errorMsg}"
-      name: 'Fix it!'
-      perform: ->
-
-    # Given the index of a form row within a CSV table, return the form as an
-    # object.
-    getFormObjectFromCSVRowIndex: (formIndex) ->
-      formArray = @importCSVArray[formIndex]
-      if not formArray then return null
-      columnLabels = @getColumnLabels()
-      formObject = {}
-      for value, index in formArray
-        label = columnLabels[index]
-        if label
-          formObject[label] = value
-      formObject
-
-    # Remove the uneditable form attributes (e.g., id) from a (to-be-imported)
-    # form object.
-    removeUneditableAttributes: (formObject, formIndex) ->
-      uneditableAttributes = []
-      for attr of formObject
-        if attr not in @dummyFormModel.editableAttributes
-          delete formObject[attr]
-          uneditableAttributes.push attr
-      for attr in uneditableAttributes
-        warningObject =
-          msg: "Values in the “#{@utils.snake2regular attr}” column will
-            not be imported."
-          solution: null
-        @addToWarnings 'general', warningObject
-      formObject
-
-    addToWarnings: (index, warning) ->
-      if index of @warnings
-        if not _.findWhere(@warnings[index], msg: warning.msg)
-          @warnings[index].push warning
+    displayErrors: ->
+      @$('button.toggle-errors i')
+        .removeClass 'fa-caret-down'
+        .addClass 'fa-caret-right'
+      @$('.general-errors-container').show()
+      errorsCount = @errors.length
+      rowErrorsCount = _.keys(@rowErrors).length
+      if errorsCount > 0 or rowErrorsCount > 0
+        totalErrorsCount = errorsCount + rowErrorsCount
+        errorsWord = @utils.pluralizeByNum 'Error', totalErrorsCount
+        @$('h1.errors-header').show().find('.errors-header-text')
+          .text "#{totalErrorsCount} #{errorsWord}"
+        @$('button.toggle-errors').show()
+        @$('h1.no-errors-header').hide()
+        @displayIndividualErrors()
       else
-        @warnings[index] = [warning]
+        @$('h1.errors-header').hide()
+        @$('button.toggle-errors').hide()
+        @$('div.general-errors-list-wrapper').hide()
+        @$('h1.no-errors-header').show()
 
-    addToErrors: (index, error) ->
-      if index of @errors
-        if not _.findWhere(@errors[index], msg: error.msg)
-          @errors[index].push error
-      else
-        @errors[index] = [error]
-
-    # Convert translations-as-string to translations-as-array-of-objects.
-    # Note: assumes that translations are delimited by a semicolon. This is
-    # potentially a problematic assumption and should be user-configurable.
-    # TODO: Dative NEEDS to request the web service's settings as soon as login
-    # occurs; this is needed elsewhere, but here it's relevant for getting the
-    # possible grammaticality values.
-    fixTranslations: (formObject) ->
-      grammaticalities = ['*', '?', '#']
-      if 'translations' of formObject
-        translationsString = formObject.translations
-        translationsArray = (t.trim() for t in translationsString.split(';'))
-        newTranslations = []
-        for translationString in translationsArray
-          if translationString.length > 1 and
-          translationString[0] in grammaticalities
-            newTranslations.push
-              transcription: translationString[1...]
-              grammaticality: translationString[0]
-          else
-            newTranslations.push
-              transcription: translationString
-              grammaticality: ''
-        formObject.translations = newTranslations
-      formObject
-
-    # Convert user-supplied yyyy-mm-dd dates to dd/mm/yyyy format.
-    fixDateElicited: (formObject) ->
-      if formObject.date_elicited
-        formObject.date_elicited =
-          @utils.convertDateISO2mdySlash formObject.date_elicited
-      formObject
-
-    # Try to convert many-to-one string values to objects. Delete these values
-    # if this is not possible.
-    manyToOneStringToObject: (formObject, formIndex) ->
-      for attr, val of formObject
-        if val and attr in @dummyFormModel.manyToOneAttributes
-          if attr of @stringToObjectMappers
-            # For some reason, the pre-generated string reps of object values
-            # are sometimes wrapped in double quotation marks (?!) ... hence
-            # the odd predicate in the list comprehension below.
-            matches = (p for p in @stringToObjectMappers[attr] \
-              when p[0] in [val, "\"#{val}\""])
-            if matches.length > 0
-              formObject[attr] = matches[0][1]
-            else
-              warningObject =
-                msg: "Unable to use “#{val}” as a value for the many-to-one
-                  attribute #{attr}"
-                solution:
-                  name: "Create #{val}"
-                  perform: do (val, attr) =>
-                    -> @createResource val, attr
-              @addToWarnings formIndex, warningObject
-              delete formObject[attr]
-          else
-            warningObject =
-              msg: "Unable to use “#{val}” as a value for the many-to-one
-                attribute #{attr}"
-              solution:
-                name: "Create #{val}"
-                perform: do (val, attr) =>
-                  -> @createResource val, attr
-            @addToWarnings formIndex, warningObject
-            delete formObject[attr]
-      formObject
-
-    createResource: (val, attr) ->
-      console.log "You want to create a resource for the form attribute #{attr}
-        using the string value #{val}"
-
-    # Try to convert many-to-many string values to arrays of objects. Delete
-    # these values if this is not possible.
-    manyToManyStringToArray: (formObject, formIndex) ->
-      for attr, val of formObject
-        if val and attr in @dummyFormModel.manyToManyAttributes
-          if attr is 'tags'
-            formObject = @parseTagsString formObject, attr, val, formIndex
-          else if attr is 'files'
-            formObject = @parseFilesString formObject, attr, val, formIndex
-          else
-            warningObject =
-              msg: "Unable to use “#{val}” as a value for the many-to-many
-                attribute #{attr}"
-              solution:
-                name: "Create #{val}"
-                perform: do (val, attr) =>
-                  -> @createResource val, attr
-            @addToWarnings formIndex, warningObject
-            delete formObject[attr]
-      formObject
-
-    # Parse a string representation of an array of tags-as-objects. Assume that
-    # commas delimit tags and require that tags exist as a resource in the
-    # system already.
-    parseTagsString: (formObject, attr, val, formIndex) ->
-      attrArray = (e.trim() for e in val.split ',')
-      tagsForFormToBeImported = []
-      unrecognizedTags = []
-      existingTags = globals.get('tags').data
-      for tagName in attrArray
-        tagObject = _.findWhere existingTags, {name: tagName}
-        if tagObject
-          tagsForFormToBeImported.push tagObject
+    # Display the errors for this row.
+    displayIndividualErrors: ->
+      $container = @$ 'ul.general-errors-list'
+      fragment = document.createDocumentFragment()
+      $template = @$('li.import-error-list-item').first()
+      for msg, errorObject of @rowErrors
+        rows = (i + 1 for i in errorObject.rows)
+        $error = $template.clone().find('.error-text')
+          .text("#{msg} (#{@utils.pluralizeByNum 'row', rows.length}
+            #{rows.join ', '})").end()
+        if errorObject.solution
+          $error.find('button.error-solution').show()
+            .attr 'data-solution-id', errorObject.solution.id
+            .button label: @utils.camel2regular(errorObject.solution.name)
         else
-          unrecognizedTags.push tagName
-      if tagsForFormToBeImported.length > 0
-        formObject.tags = tagsForFormToBeImported
+          $error.find('button.error-solution').hide()
+        fragment.appendChild $error.get(0)
+      for msg in @errors
+        $error = $template.clone()
+          .find('.error-text').text(msg).end()
+          .find('button.error-solution').hide().end()
+        fragment.appendChild $error.get(0)
+      $container.html(fragment)
+      @$('div.general-errors-list-wrapper').hide()
+
+    # Display the warnings for this row.
+    displayIndividualWarnings: ->
+      $container = @$ 'ul.general-warnings-list'
+      fragment = document.createDocumentFragment()
+      $template = @$('li.import-warning-list-item').first()
+      for msg, warningObject of @rowWarnings
+        rows = (i + 1 for i in warningObject.rows)
+        $warning = $template.clone().find('.warning-text')
+          .text("#{msg} (#{@utils.pluralizeByNum 'row', rows.length}
+            #{rows.join ', '})").end()
+        if warningObject.solution
+          $warning.find('button.warning-solution').show()
+            .attr 'data-solution-id', warningObject.solution.id
+            .button label: @utils.camel2regular(warningObject.solution.name)
+        else
+          $warning.find('button.warning-solution').hide()
+        fragment.appendChild $warning.get(0)
+      for msg in @warnings
+        $warning = $template.clone()
+          .find('.warning-text').text(msg).end()
+          .find('button.warning-solution').hide().end()
+        fragment.appendChild $warning.get(0)
+      $container.html(fragment)
+      @$('div.general-warnings-list-wrapper').hide()
+
+    addToRowWarnings: (warning, rowIndex) ->
+      if warning.msg of @rowWarnings
+        @rowWarnings[warning.msg].rows.push rowIndex
       else
-        warningObject =
-          msg: "Unable to use “#{val}” as a value for the many-to-many
-            attribute #{attr}"
-          solution:
-            name: "Create #{val}"
-            perform: do (val, attr) =>
-              -> @createResource val, attr
-        @addToWarnings formIndex, warningObject
-        delete formObject.tags
-      for tag in unrecognizedTags
-        warningObject =
-          msg: "Unable to recognize the tag “#{tag}” in “#{val}”."
-          solution:
-            name: "Create #{val}"
-            perform: do (val, attr) =>
-              -> @createResource val, attr
-        @addToWarnings formIndex, warningObject
-      formObject
+        @rowWarnings[warning.msg] =
+          solution: warning.solution
+          rows: [rowIndex]
 
-    # Parse a string representation of for a CSV row's `files` column. Assume
-    # it is a comma-delimited list of filenames. Save the filenames for later
-    # processing.
-    # FOX
-    parseFilesString: (formObject, attr, val, formIndex) ->
-      filenameArray = (fn.trim() for fn in val.split ',')
-      formObject.files = filenameArray
-      for fn in filenameArray
-        @filenames[fn] = null
-      formObject
+    addToRowErrors: (error, rowIndex) ->
+      if error.msg of @rowErrors
+        @rowErrors[error.msg].rows.push rowIndex
+      else
+        @rowErrors[error.msg] =
+          solution: error.solution
+          rows: [rowIndex]
 
-    # Return an object that maps column indices to the user-selected form field
-    # labels, e.g., {n: 'transcription'} indicates that the nth row contains
-    # transcription values.
-    getColumnLabels: ->
-      labels = {}
-      @$('select.column-header').each (index, element) =>
-        $element = @$ element
-        label = $element.val()
-        columnIndex = $element.attr('name').split('_')[1]
-        labels[columnIndex] = label
-      labels
+    addToSolutions: (solutionName, solutionMeta) ->
+      if solutionMeta.id not of @solutions
+        solutionMeta.name = solutionName
+        @solutions[solutionMeta.id] = solutionMeta
+
+    togglePreviews: ->
+      if @previewsVisible
+        @previewsVisible = false
+        @setPreviewSelectedButtonStateClosed()
+        for rowView in @rowViews
+          if rowView.selected
+            rowView.hidePreview()
+      else
+        selectedCount = (v for v in @rowViews when v.selected).length
+        # If we are about to preview very many rows/forms, prompt the user for
+        # confirmation first because this can cause a big slowdown.
+        if selectedCount > 100
+          @showPreviewsConfirm selectedCount
+        else
+          @showPreviews()
+
+    showPreviewsConfirm: (selectedCount) ->
+      options =
+        text: "Generating previews for all #{selectedCount} rows may take a very
+          long time and may slow down your computer. Do you really want to do
+          this?"
+        confirm: true
+        confirmEvent: "showPreviews"
+      Backbone.trigger 'openAlertDialog', options
+
+    showPreviews: ->
+      @previewsVisible = true
+      @setPreviewSelectedButtonStateOpen()
+      for rowView in @rowViews
+        if rowView.selected then rowView.showPreview()
+
+    setPreviewSelectedButtonStateClosed: ->
+      @$('button.preview-selected-button')
+        .button label: 'Preview Selected'
+        .tooltip content: 'View the selected rows as Dative forms (IGT display)'
+
+    setPreviewSelectedButtonStateOpen: ->
+      @$('button.preview-selected-button')
+        .button label: 'Hide Previews'
+        .tooltip content: 'Hide the previews'
 
     # Update the state of all of the buttons that operate over all selected CSV
     # rows, i.e, "Import All", "View All" and "Validate All". The "Import"
     # button indicates how many form rows are selected for import; we disable the
     # buttons if no rows are selected.
     allSelectedButtonsState: ->
-      selectedCount = @$('i.deselect-for-import').length
-      totalCount = @importCSVArray.length
+      selectedCount = (v for v in @rowViews when v.selected).length
+      totalCount = @rowViews.length
       @$('.import-selected-button-text').text "Import Selected (#{selectedCount} of
         #{totalCount})"
       if selectedCount is 0
         @$('button.import-selected-button').button 'disable'
-        @$('button.view-selected-button').button 'disable'
+        @$('button.preview-selected-button').button 'disable'
         @$('button.validate-selected-button').button 'disable'
       else
         @$('button.import-selected-button').button 'enable'
-        @$('button.view-selected-button').button 'enable'
+        @$('button.preview-selected-button').button 'enable'
         @$('button.validate-selected-button').button 'enable'
 
     selectAllFormsForImport: ->
-      @$('i.select-for-import')
-        .removeClass 'fa-square select-for-import'
-        .addClass 'fa-check-square deselect-for-import'
+      for rowView in @rowViews
+        rowView.select()
       @allSelectedButtonsState()
 
     deselectAllFormsForImport: ->
-      @$('i.deselect-for-import')
-        .addClass 'fa-square select-for-import'
-        .removeClass 'fa-check-square deselect-for-import'
-      @allSelectedButtonsState()
-
-    # <Return> and <SpaceBar> on a focused row toggle that row's selected-ness.
-    keydownSelectFormForImport: (event) ->
-      if event.which in [13, 32]
-        @stopEvent event
-        @selectFormForImport event
-
-    keydownDeselectFormForImport: (event) ->
-      if event.which in [13, 32]
-        @stopEvent event
-        @deselectFormForImport event
-
-    # A selected form has a checkbox icon.
-    selectFormForImport: (event) ->
-      @$(event.currentTarget).first()
-        .removeClass 'fa-square select-for-import'
-        .addClass 'fa-check-square deselect-for-import'
-        .focus()
-      @allSelectedButtonsState()
-
-    # A de-selected form has an empty box icon.
-    deselectFormForImport: (event) ->
-      @$(event.currentTarget).first()
-        .removeClass 'fa-check-square deselect-for-import'
-        .addClass 'fa-square select-for-import'
-        .focus()
+      for rowView in @rowViews
+        rowView.deselect()
       @allSelectedButtonsState()
 
     # Programmatically click the hidden button that open's the browser's "find
     # file" dialog.
     clickFileUploadInput: ->
-      #<i class='import-spinner fa fa-fw fa-circle-o-notch fa-spin'></i>
       @$('[name=file-upload-input]').click()
 
     render: ->
-      @hasBeenRendered = true
       @$el.append @template(importTypes: @importTypes)
       @$target = @$ '.dative-importer-target'
       @guify()
-      @progressBarify()
       @$('div.dative-importer-preview').hide()
       @$('button.discard-file-button').hide()
-      @$('div.import-preview-table-wrapper')
-        .css("border-color", @constructor.jQueryUIColors().defBo)
+      @$('div.import-preview-table-wrapper, div.general-warnings-list-wrapper, 
+        div.general-errors-list-wrapper')
+          .css("border-color", @constructor.jQueryUIColors().defBo)
       @
 
     tooltipify: ->
       @$('.dative-tooltip').tooltip position: @tooltipPositionLeft()
-
-    defaultPosition: ->
-      my: "center"
-      at: "center"
-      of: @$target.first().parent().parent()
 
     # Make the import type select into a jQuery selectmenu.
     # NOTE: the functions triggered by the open and close events are a hack so
@@ -817,19 +1090,18 @@ define [
       @selectmenuify 'select.import-type'
       @tooltipify()
 
-    # TODO: is this even being used?
-    progressBarify: ->
-      @$('.file-upload-container').hide()
-      @$('.file-upload-progress-bar').first().progressbar()
-
     spinnerOptions: ->
-      _.extend BaseView::spinnerOptions(), {left: '-35%'}
+      _.extend BaseView::spinnerOptions(), {left: '-55%'}
 
-    spin: ->
-      @$('.spinner-container').first().spin @spinnerOptions()
+    spin: (text='') ->
+      @$('.spinner-container').first()
+        .text text
+        .spin @spinnerOptions()
 
     stopSpin: ->
-      @$('.spinner-container').first().spin false
+      @$('.spinner-container').first()
+        .text ''
+        .spin false
 
     # We only allow CSV imports right now.
     importTypes:
@@ -843,6 +1115,14 @@ define [
     # Note: the attributes of the `fileBLOB` object are `name`, `type`, `size`,
     # `lastModified` (timestamp), and `lastModifiedDate` (`Date` instance).
     handleFileSelect: (event) ->
+      if @fileBLOB
+        @defaultValidationState()
+        @clearFileMetadata()
+        @fileBLOB = null
+        @importCSVArray = null
+        @closeRowViews()
+        @previewsVisible = false
+        @setPreviewSelectedButtonStateClosed()
       fileBLOB = event.target.files[0]
       if fileBLOB
         importType = @$('select.import-type').val()
@@ -859,13 +1139,15 @@ define [
           reader.onloadend = (event) => @fileDataLoadEnd event
           reader.onerror = (event) => @fileDataLoadError event
           reader.onload = (event) => @fileDataLoadSuccess event
-          @spin()
+          @spin 'loading file'
           do (reader) =>
             x = => reader.readAsText @fileBLOB
             setTimeout x, 50
       else
         Backbone.trigger 'fileSelectError'
 
+    # Next to the "Choose file" button, display the file's name, its size and
+    # it line count, if it has been CSV-parsed.
     displayFileMetadata: ->
       if @importCSVArray
         @$('span.import-file-name').text "#{@fileBLOB.name}
@@ -894,10 +1176,8 @@ define [
       Backbone.trigger 'fileSelectInvalidName', errorMessage
 
     fileDataLoadStart: (event) ->
-      @warnings = {}
-      @errors = {}
-      @filenames = {}
-      @formObjects = {}
+      @defaultValidationState()
+      @filenames = []
       @hideGeneralWarningsAndErrors()
       $previewDiv = @$ '.dative-importer-preview'
       if not $previewDiv.is ':visible' then $previewDiv.show()
@@ -912,11 +1192,15 @@ define [
     fileDataLoadSuccess: (event) ->
       fileData = event.target.result
       try
-        @importCSVArray = @parseCSV fileData
-        @$('.discard-file-button').show()
-        @displayCSVImportAsTable()
-        @displayFileMetadata()
         @stopSpin()
+        x = =>
+          @spin 'parsing CSV file'
+          @importCSVArray = @parseCSV fileData
+          @$('.discard-file-button').show()
+          @displayAsTable()
+          @displayFileMetadata()
+          @stopSpin()
+        setTimeout x, 5
       catch
         Backbone.trigger 'importError'
         @stopSpin()
@@ -925,216 +1209,96 @@ define [
     # corresponding (OLD) form attributes. This works only if the CSV file
     # contains a header line (i.e., line 1) that contains names that match OLD
     # form attribute names, e.g., "transcription", "translations", etc.
-    mapCSVColumnsToFormAttributes: ->
+    getColumnLabelsFromCSVFile: ->
       formAttributes = FormModel::defaults()
-      headerMap = {}
+      @columnLabels = []
       @firstLineIsHeader = true
-      for headerValue, index in @importCSVArray[0]
+      for headerValue in @importCSVArray[0]
         if headerValue of formAttributes
-          headerMap[index] = headerValue
+          @columnLabels.push headerValue
         else if headerValue.toLowerCase() of formAttributes
-          headerMap[index] = headerValue.toLowerCase()
+          @columnLabels.push headerValue.toLowerCase()
         else if @utils.regular2snake(headerValue) of formAttributes
-          headerMap[index] = @utils.regular2snake headerValue
+          @columnLabels.push @utils.regular2snake headerValue
         else
-          headerMap[index] = null
+          @columnLabels.push null
           # If any column header is unrecognizable, we categorize the import
           # file has not having a header line. We still use any headers we may
           # have gleaned though.
           @firstLineIsHeader = false
       if @firstLineIsHeader then @importCSVArray = @importCSVArray[1...]
-      [headerMap, formAttributes]
 
-    # Return a <select> that contains all of the possible attributes of a(n
-    # OLD) form resource. The user will use this to choose where the values in
-    # a specific column should go.
-    getFormAttributesSelect: (formAttributes, columnName, index) ->
-      select = ["<select
-        class='column-header dative-tooltip'
-        name='column_#{index}'
-        title='Choose the form field label that the values in this column
-               belong to'
-               ><option value=''>Please select a form field label.</option>"]
-      # Get case-insensitive sorted form attributes as array.
-      formAttributes = _.keys(formAttributes)
-        .sort (a, b) -> a.toLowerCase().localeCompare(b.toLowerCase())
-      for formAttribute in formAttributes
-        if formAttribute is columnName
-          select.push "<option value='#{formAttribute}' selected
-            >#{@utils.snake2regular formAttribute}</option>"
-        else
-          select.push "<option value='#{formAttribute}'
-            >#{@utils.snake2regular formAttribute}</option>"
-      select.push '</select>'
-      select.join '\n'
+    # Display the imported CSV file in a big table.
+    displayAsTable: ->
+      @getColumnLabelsFromCSVFile()
 
-    # HTML for the "Select All" button.
-    selectAllButton: -> "<button class='select-all-for-import ui-corner-all'
-      >Select All</button>"
+      @getHeaderView()
+      @renderHeaderView()
+      @listenToHeaderView()
 
-    # HTML for the "De-select All" button.
-    selectNoneButton: -> "<button class='select-none-for-import ui-corner-all'
-      >De-select All</button>"
+      @getRowViews()
+      @renderRowViews()
+      @listenToRowViews()
 
-    # HTML for the "De-select" checkbox.
-    deselectCheckbox: (index) -> "<i class='fa fa-2x fa-check-square
-      deselect-for-import ui-corner-all' tabindex='0'></i>"
-
-    # "Import" button for a single CSV row.
-    importButton: (index) -> "<button class='import-csv-row dative-tooltip
-      import-preview-row-button'
-      data-index='#{index}' title='Import just this form'>Import</button>"
-
-    # "View" (as IGT `FormViewForImport`) button.
-    viewAsIGTButton: (index) -> "<button class='view-csv-row dative-tooltip
-      import-preview-row-button'
-      data-index='#{index}' title='View this form in IGT format'>View</button>"
-
-    # "Validate" button for a single CSV row.
-    validateButton: (index) -> "<button class='validate-csv-row dative-tooltip
-      import-preview-row-button'
-      data-index='#{index}' title='Check for potential warnings and errors
-      prior to importing this row'>Validate</button>"
-
-    viewAsIGTButtonStateClosed: (formIndex) ->
-      @$(".form-for-import-#{formIndex} button.view-csv-row")
-        .button label: 'View'
-        .tooltip content: 'View this form in IGT format'
-
-    viewAsIGTButtonStateOpen: (formIndex) ->
-      @$(".form-for-import-#{formIndex} button.view-csv-row")
-        .button label: 'Hide'
-        .tooltip content: 'Hide the IGT-formatted display of this form'
-
-    # Display the imported CSV file in a big table (made up of <div> elements).
-    displayCSVImportAsTable: ->
-      [headerMap, formAttributes] =
-        @mapCSVColumnsToFormAttributes @importCSVArray
-      @displayCSVTableHeader headerMap, formAttributes
-      @displayCSVTableBody()
-      @$('.import-preview-table-cell, .import-preview-table-row')
-        .css("border-color", @constructor.jQueryUIColors().defBo)
-      @buttonify()
+      @headerView.columnHeaderChanged()
       @tooltipify()
-      @columnHeaderChanged()
       @allSelectedButtonsState()
 
-    # Display the header row of the CSV table in the DOM. Param `headerMap`
-    # maps column indices to column labels. Param `formAttributes` is an object
-    # whose keys are form attributes names, i.e., field labels.
-    displayCSVTableHeader: (headerMap, formAttributes) ->
-      headerRow = ["<div class='import-preview-table-row'>
-        <div class='import-preview-table-header-cell
-                    import-preview-controls-cell'
-        >#{@selectAllButton()}#{@selectNoneButton()}</div>"]
-      for value, index in @importCSVArray[0]
-        columnName = headerMap[index]
-        selectElement =
-          @getFormAttributesSelect formAttributes, columnName, index
-        columnAlert = @getColumnAlert index, columnName
-        headerRow.push "<div class='import-preview-table-header-cell'
-          >#{selectElement}#{columnAlert}</div>"
-      headerRow.push "</div>"
+    getHeaderView: ->
+      @headerView = new CSVImportHeaderView
+        columnLabels: @columnLabels
+
+    renderHeaderView: ->
       @$('.dative-importer-preview div.import-preview-table').first()
         .find 'div.import-preview-table-head'
-        .html headerRow.join('\n')
-      @selectmenuify 'select.column-header'
+        .html @headerView.render().el
+      @rendered @headerView
 
-    # Display the body rows of the CSV table in the DOM.
-    displayCSVTableBody: ->
-      body = []
-      for line, rowIndex in @importCSVArray
-        body.push "<div tabindex='0'
-          class='import-preview-table-row form-for-import-#{rowIndex}'
-          ><div class='form-for-import-select-cell import-preview-table-cell
-            cell-0'
-          >#{@deselectCheckbox()}
-           #{@importButton rowIndex}
-           #{@viewAsIGTButton rowIndex}
-           #{@validateButton rowIndex}</div>"
-        for value, colIndex in line
-          body.push "<div class='import-preview-table-cell
-            cell-#{colIndex + 1}' contenteditable='true'>#{value}</div>"
-        body.push "</div>
-          <div class='import-preview-table-row-errors-container
-            form-for-import-#{rowIndex} errors-container invisible'>
-              <h1 class='errors-header ui-state-error ui-corner-all'
-                  ><i class='errors-header-icon fa fa-fw
-                  fa-exclamation-triangle'></i
-                  ><span class='errors-header-text'>Errors</span></h1>
-              <div class='errors-inner-container'></div>
-            </div>
-          <div class='import-preview-table-row-warnings-container
-            form-for-import-#{rowIndex} warnings-container invisible'>
-              <h1 class='warnings-header ui-state-highlight ui-corner-all'
-                  ><i class='warnings-header-icon fa fa-fw
-                  fa-exclamation-triangle'></i
-                  ><span class='warnings-header-text'>Warnings</span></h1>
-              <div class='warnings-inner-container'></div>
-            </div>
-          <div class='import-preview-table-row-display-container invisible
-            form-for-import-#{rowIndex}'></div>"
-      @$('.dative-importer-preview').show()
+    snake2regular: (str) ->
+      if str is null then 'no label' else @utils.snake2regular str
+
+    getRowViews: ->
+      if @rowViews.length > 0 then @closeCSVTableRowViews()
+      columnLabelsHuman = (@snake2regular(l) for l in @columnLabels)
+      for line, index in @importCSVArray
+        rowView = new CSVImportRowView
+          line: line
+          rowIndex: index
+          columnLabels: @columnLabels
+          columnLabelsHuman: columnLabelsHuman
+          stringToObjectMappers: @stringToObjectMappers
+          formsCollection: @formsCollection
+        @rowViews.push rowView
+
+    closeCSVTableRowViews: ->
+      for view in @rowViews
+        view.close()
+        @stopListening view
+        @closed view
+      @rowViews = []
+
+    # Render the row views, one for each line in the to-be-imported CSV file.
+    renderRowViews: ->
+      fragment = document.createDocumentFragment()
+      for view in @rowViews
+        fragment.appendChild view.render().el
+        @rendered view
       @$('.dative-importer-preview div.import-preview-table').first()
         .find 'div.import-preview-table-body'
-        .html body.join('\n')
+        .html fragment
 
-    # Return HTML for an <i> tag that alerts the user about warnings and errors
-    # wrt their chosen column header.
-    getColumnAlert: (index, columnName) ->
-      class_ = "class='column-alert column-#{index} ui-corner-all fa fa-fw
-                fa-exclamation-triangle ui-state-highlight invisible
-                dative-tooltip'"
-      if columnName
-        "<i #{class_} title='Values in this column will not be imported because
-          users cannot specify “#{@utils.snake2regular columnName}” values;
-          they can only be specified by the system.'></i>"
-      else
-        "<i #{class_} title='Values in this column will not be imported; please
-          choose a form field label for this column.'></i>"
-
-    # The user-specified value in a column header select box has changed: based
-    # on this, we activate/deactivate the column and alter its width.
-    columnHeaderChanged: ->
-      @setColumnActivities()
-      @setColumnWidths()
-
-    # Set the columns widths of the "table" (made up of <div>s), based on the
+    # Set the column widths of the "table" (made up of <div>s), based on the
     # widths of the header cells. This is called whenever a selectmenu option
     # is changed in a header cell.
-    setColumnWidths: ->
-      $divTable = @$ 'div.import-preview-table'
-      widths = {}
-      $divTable.find('div.import-preview-table-row:first').children().each(
-        (index, element) =>
-          width = @$(element)[0].getBoundingClientRect().width - 11
-          widths[index] = width
-      )
-      for index, width of widths
-        $divTable.find("div.import-preview-table-cell.cell-#{index}").css
-            'min-width': "#{width}px"
-            'max-width': "#{width}px"
+    setColumnWidths: (widths) ->
+      for rowView in @rowViews
+        rowView.setWidths widths
 
-    # Enable/disable the column based on its user-specified label. If the label
-    # corresponds to a non-editable form attribute, e.g., `modifier` or `id`,
-    # then we change the display the column to indicate that it is "disabled",
-    # i.e., that it won't be included in the import.
-    setColumnActivities: ->
-      columnLabels = @getColumnLabels()
-      for index, columnLabel of columnLabels
-        index = Number index
-        @$("i.column-alert.column-#{index}").tooltip
-          content: "Values in this column will not be imported because
-            users cannot specify “#{@utils.snake2regular columnLabel}”
-            values; they can only be specified by the system."
-        if columnLabel in @dummyFormModel.editableAttributes
-          @$("div.import-preview-table-cell.cell-#{index + 1}")
-            .removeClass 'ui-state-disabled'
-          @$("i.column-alert.column-#{index}").hide()
-        else
-          @$("div.import-preview-table-cell.cell-#{index + 1}")
-            .addClass 'ui-state-disabled'
-          @$("i.column-alert.column-#{index}").show()
+    columnLabelsChanged: (labels) ->
+      @columnLabels = labels
+      columnLabelsHuman = (@snake2regular(l) for l in @columnLabels)
+      for rowView in @rowViews
+        rowView.columnLabelsChanged @columnLabels, columnLabelsHuman
 
     # Parse a CSV string into an array of arrays.
     # This is a pretty cool implementation, but it's extremely slow with large
@@ -1175,62 +1339,4 @@ define [
           if ',' is chars[c] then ++c
         if chars[c] in ['\r', '\n'] then ++c
       (row for row in table when row.length > 0)
-
-    # WARNING: DEPRECATED. Using `parseCSV` above instead.
-    # Parse a CSV string into an array of arrays. The default delimiter
-    # is the comma, but this be overriden in the `stringDelimiter` argument.
-    # See http://stackoverflow.com/a/1293163
-    csv2array: (stringData, stringDelimiter) ->
-
-      # Check to see if the delimiter is defined. If not, then default to comma.
-      stringDelimiter = stringDelimiter or ','
-
-      # Create a regular expression to parse the CSV values.
-      regexString = "(\\#{stringDelimiter}|\\r?\\n|\\r|^)\
-        (?:\"([^\"]*(?:\"\"[^\"]*)*)\"|\
-        ([^\"\\#{stringDelimiter}\\r\\n]*))"
-      regexPattern = new RegExp regexString, "gi"
-
-      # Create an array to hold our data. Give the array a default empty first
-      # row.
-      arrayData = [[]]
-
-      # Create an array to hold our individual pattern matching groups.
-      arrayMatches = null
-
-      # Keep looping over the regular expression matches until we can no longer
-      # find a match.
-      while (arrayMatches = regexPattern.exec(stringData))
-
-        # Get the delimiter that was found.
-        stringMatchedDelimiter = arrayMatches[1]
-
-        # Check to see if the given delimiter has a length (is not the start of
-        # string) and if it matches field delimiter. If it does not, then we
-        # know that this delimiter is a row delimiter.
-        if stringMatchedDelimiter.length and
-        stringMatchedDelimiter isnt stringDelimiter
-          # Since we have reached a new row of data, add an empty row to our
-          # data array.
-          arrayData.push []
-
-        # Now that we have our delimiter out of the way, let's check to see
-        # which kind of value we captured (quoted or unquoted).
-        if arrayMatches[2]
-          # We found a quoted value. When we capture this value, unescape any
-          # double quotes.
-          regex = new RegExp "\"\"", "g"
-          stringMatchedValue = arrayMatches[2].replace(regex, '"')
-        else
-          # We found a non-quoted value.
-          stringMatchedValue = arrayMatches[3]
-
-        # Now that we have our value string, let's add it to the data array.
-        arrayData[arrayData.length - 1].push stringMatchedValue
-
-      # Return the parsed data.
-      arrayData
-      lineLength = arrayData[0].length
-      (l for l in arrayData when l.length is lineLength)
-
 

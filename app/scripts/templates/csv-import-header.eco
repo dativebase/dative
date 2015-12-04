@@ -1,0 +1,49 @@
+<div class='index-cell import-preview-table-header-cell'></div>
+
+<div class='import-preview-table-header-cell import-preview-controls-cell'>
+
+    <button class='select-all-for-import ui-corner-all'>Select All</button>
+
+    <button class='select-none-for-import ui-corner-all'>De-select All</button>
+
+</div>
+
+<% for label in @columnLabels: %>
+
+    <div class='import-preview-table-header-cell import-preview-values-cell'>
+
+        <select
+            class='column-header dative-tooltip'
+            title='Choose the form field label that the values in this column
+                belong to'>
+            <option value=''>Please select a form field label.</option>
+            <% for formAttribute in @sortedFormAttributes: %>
+                <% if formAttribute is label: %>
+                    <option value='<%= formAttribute %>' selected
+                        ><%= @snake2regular formAttribute %></option>
+                <% else: %>
+                    <option value='<%= formAttribute %>'
+                        ><%= @snake2regular formAttribute %></option>
+                <% end %>
+            <% end %>
+        </select>
+
+        <% if label: %>
+            <i  class='column-alert ui-corner-all fa fa-fw
+                    fa-exclamation-triangle ui-state-highlight invisible
+                    dative-tooltip'
+                title='Values in this column will not be imported because
+                    users cannot specify “<%= @snake2regular label %>” values;
+                    they can only be specified by the system.'></i>
+        <% else: %>
+            <i  class='column-alert ui-corner-all fa fa-fw
+                    fa-exclamation-triangle ui-state-highlight invisible
+                    dative-tooltip'
+                title='Values in this column will not be imported; please choose a
+                    form field label for this column.'></i>
+        <% end %>
+
+    </div>
+
+<% end %>
+

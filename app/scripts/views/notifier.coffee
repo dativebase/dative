@@ -43,6 +43,8 @@ define [
       @listenTo Backbone, 'csvFormDisplayAsIGTFail', @csvFormDisplayAsIGTFail
       @listenTo Backbone, 'csvFormValidateFail', @csvFormValidateFail
       @listenTo Backbone, 'csvFormImportFail', @csvFormImportFail
+      @listenTo Backbone, 'csvFormImportSuccess', @csvFormImportSuccess
+      @listenTo Backbone, 'csvFormImportNoneValid', @csvFormImportNoneValid
 
       @listenTo Backbone, 'updateParserTaskSetSuccess', @updateParserTaskSetSuccess
       @listenTo Backbone, 'updateParserTaskSetFail', @updateParserTaskSetFail
@@ -640,12 +642,20 @@ define [
         type: 'error'
       @renderNotification notification
 
-    csvFormImportFail: ->
+    csvFormImportFail: (rowIndex) ->
       notification = new NotificationView
         title: "CSV Form Import Error"
-        content: "Sorry, we were not able to import this CSV row as a Dative
-        form. Please make sure that it passes validation."
+        content: "Sorry, we were not able to import CSV row #{rowIndex} as a
+          Dative form."
         type: 'error'
+      @renderNotification notification
+
+    csvFormImportSuccess: (rowIndex, formId) ->
+      notification = new NotificationView
+        title: "CSV Form Import Success"
+        content: "CSV row #{rowIndex} was successfully imported. The resulting
+          form has id #{formId}."
+        type: 'success'
       @renderNotification notification
 
     csvFormValidateFail: ->
@@ -653,6 +663,14 @@ define [
         title: "CSV Form Validate Error"
         content: "Sorry, we were not able to validate this CSV row as a Dative
           form."
+        type: 'error'
+      @renderNotification notification
+
+    csvFormImportNoneValid: ->
+      notification = new NotificationView
+        title: "No Valid Rows to Import"
+        content: "Sorry, the current import file contains no valid rows so
+          nothing can be imported."
         type: 'error'
       @renderNotification notification
 

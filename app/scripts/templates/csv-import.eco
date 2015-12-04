@@ -14,9 +14,9 @@
 
   <div class='button-container-right'>
 
-    <span class="spinner-container"></span>
+    <span class="spinner-container import-spinner-container"></span>
 
-    <button class='help dative-tooltip'
+    <button class='import-help dative-tooltip'
           title='help with importing forms'
         ><i class='fa fa-fw fa-question'></i>
     </button>
@@ -56,10 +56,6 @@
                                 dative-input-field'
                             title='Discard this file'
                             ><i class='fa fa-fw fa-times'></i></button>
-                        <div class='file-upload-container'>
-                            <div class='file-upload-status'>Uploading file data ...</div>
-                            <div class='file-upload-progress-bar'></div>
-                        </div>
                         <!-- this is the hidden input tag -->
                         <div
                             style='height: 0px;width:0px; overflow:hidden;'
@@ -71,7 +67,8 @@
                     </div>
                 </li>
 
-                <li class='dative-form-field'>
+                <!-- INVISIBLE until/ in case we support other, non-CSV, import formats -->
+                <li class='dative-form-field invisible'>
                     <div
                     class='dative-field-label-container'>
                         <label for='import_type'
@@ -105,11 +102,11 @@
                     ><i class='import-selected-button-text'>Import Selected</i><i
                         class='fa fa-fw fa-upload'></i></button>
                 <button
-                    class='view-selected-button
+                    class='preview-selected-button
                         ui-corner-all
                         dative-tooltip'
                     title='View the selected rows as Dative forms (IGT display)'
-                    >View Selected</button>
+                    >Preview Selected</button>
                 <button
                     class='validate-selected-button
                         ui-corner-all
@@ -120,20 +117,45 @@
 
             <div class='errors-container general-errors-container
                 invisible'>
+
                 <h1 class='errors-header ui-state-error ui-corner-all'
                     ><i class='errors-header-icon fa fa-fw
-                    fa-exclamation-triangle'></i
+                        fa-exclamation-triangle'></i
                     ><span class='errors-header-text'>Errors</span></h1>
-                <div class='errors-inner-container'></div>
+
+                <button class='toggle-errors' ><i class='fa fa-fw
+                    fa-caret-right'></i></button>
+
+                <h1 class='no-errors-header ui-state-ok ui-corner-all invisible'
+                    ><i class='no-errors-header-icon fa fa-fw
+                        fa-check-circle'></i
+                    ><span class='no-errors-header-text'>No Errors</span></h1>
+
+                <div class='general-errors-list-wrapper ui-corner-all'>
+                    <ul class='general-errors-list Scrollable'></ul>
+                </div>
             </div>
 
             <div class='warnings-container general-warnings-container
                 invisible'>
+
                 <h1 class='warnings-header ui-state-highlight ui-corner-all'
                     ><i class='warnings-header-icon fa fa-fw
-                    fa-exclamation-triangle'></i
-                    ><span class='warnings-header-text'>Warnings</span></h1>
-                <div class='warnings-inner-container'></div>
+                        fa-exclamation-triangle'></i
+                    ><span class='warnings-header-text'>Warnings</span>
+                  </h1>
+
+                <button class='toggle-warnings' ><i class='fa fa-fw
+                    fa-caret-right'></i></button>
+
+                <h1 class='no-warnings-header ui-state-ok ui-corner-all invisible'
+                    ><i class='no-warnings-header-icon fa fa-fw
+                        fa-check-circle'></i
+                    ><span class='no-warnings-header-text'>No Warnings</span></h1>
+
+                <div class='general-warnings-list-wrapper ui-corner-all'>
+                    <ul class='general-warnings-list Scrollable'></ul>
+                </div>
             </div>
 
             <div class='import-preview-table-wrapper ui-corner-all'>
@@ -145,5 +167,25 @@
         </div>
 
     </div>
+</div>
+
+<div class='import-templates' style='display: none;'>
+
+    <li class='import-warning-list-item'>
+        <div class='import-warning ui-state-highlight ui-corner-all'>
+            <i class='fa fa-fw fa-exclamation-triangle'></i>
+            Warning: <span class='warning-text'></span>
+        </div>
+        <button class='warning-solution import-solution'></button>
+    </li>
+
+    <li class='import-error-list-item'>
+        <div class='import-error ui-state-error ui-corner-all'>
+            <i class='fa fa-fw fa-exclamation-triangle'></i>
+            Error: <span class='error-text'></span>
+        </div>
+        <button class='error-solution import-solution'></button>
+    </li>
+
 </div>
 

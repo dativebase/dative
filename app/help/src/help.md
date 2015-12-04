@@ -570,7 +570,103 @@ The following form fields can be configured to have validation:
 ## Forms<a data-name="forms"></a>
 
 The form is the primary resource type in Dative. It is a textual representation
-of a morpheme, word, phrase, or sentence.
+of a morpheme, word, phrase, or sentence. Forms can be associated to any number
+of files and they can be used to build corpora and texts (i.e., collections).
+
+
+### Importing Forms<a data-name="importing-forms"></a>
+
+You can import CSV files into Dative. CSV, i.e., comma-separated values, is a
+file format that most spreadsheet applications (e.g., Excel) can export to.
+Each line of a CSV file represents one “thing” and the attributes of that
+thing are separated by commas. To import a CSV file into Dative, each line
+should represent a form and the strings between commas on each line should be
+the values of attributes for your forms. The first line may be a header row
+which labels the columns, i.e., the form attributes. The very simple example
+CSV file below can be imported into Dative.
+
+```
+transcription,translations
+chien,dog
+chat,cat
+oiseau,bird
+```
+
+To open the import interface, click the import button (<i class="fa fa-fw
+fa-upload"></i>) at the top of the forms browse interface. Click “Choose
+file” and select a CSV file from your computer. The CSV file will be parsed
+and displayed as a table. The example CSV file shown above would be displayed
+as in the screenshot below.
+
+![screenshot of importing a simple CSV file](/images/help/simple-csv-import-500.png)
+
+To import all of the forms encoded in the CSV file, make sure that all of the
+rows of the table are selected (<i class="fa fa-fw fa-check-square"></i>) and
+click the “Import Selected” button. When this button is clicked, Dative
+will first validate all of the selected rows and then attempt, for each row in
+sequence, to create a form for that row and save it to the server. If errors or
+warnings are found, or if the database already contains forms that are very
+similar to a row you are attempting to import (“duplicates”), you may be
+prompted for input on how to proceed.
+
+Note that the topmost row of the CSV preview table contains select menus that
+allow you to specify the form attribute that corresponds to the column in
+question. In the above example, the values in the first column will be used to
+create form transcriptions and those in the second column will be used for
+translations.
+
+If a column is labeled using a non-writable form attribute (e.g.,
+“enterer”, which only the system can specify), then the import interface
+will notify you of this and will warn you, when you validate, that the values
+in these columns will not be imported.
+
+You can alter the values in the cells of the table by double-clicking them.
+
+Some form attributes are not simply strings but are resources in their own
+right. A form's “source” value and its “tags” value are examples of
+this. If Dative cannot identify an existing resource (or existing resources)
+that match(es) the string value in your CSV file, it will display a warning and
+will help you to create a corresponding resource (or resources), if you want
+to. For example, consider the case where the tags value of one of the rows in
+your CSV file contains the string “restricted, pied-piping” and the
+database contains a tag named “restricted” but not one with the name
+“pied-piping”. In this case, a warning will appear (see below), which both
+explains that no “pied-piping” tag was found and provides a button to help
+you with creating the appropriate tag.
+
+![screenshot of creating a tag during import](/images/help/import-create-tag-500.png)
+
+Each row in your CSV file can be independently validated, previewed and
+imported, using the correspondingly named buttons within the row. The
+“Validate” button will report back on whether there are any issues that may
+affect import. If there are errors, then it will not be possible to import the
+row. The “Preview” button will display the row as a form using the standard
+form display used throughout Dative. The “Import” button will, if the row
+passes validation, send a create request to the server so that a form is
+created, based on the information held within the row in question.
+
+The validate, preview, and import actions can also be performed across *all
+selected rows*. A row is selected if it is displaying <i class="fa fa-fw
+fa-check-square"></i>. It is not selected if it is displaying <i class="fa fa-fw
+fa-square"></i>. The “Select All” causes all of the rows to be selected and
+the “De-select All” button causes all of the rows to be de-selected. When
+you validate or import all of the selected rows, Dative will consolidate all of
+the warnings and errors found and will display them above the import preview table.
+
+One thing to be aware of is that clicking “Preview All” on a large CSV file
+(i.e., one having more than 100 rows) will cause your browser to work very
+slowly. Dative will warn you about this and ask for confirmation before
+proceeding with a preview selected request on large files.
+
+Dative will check for duplicates before importing a row. If a possible
+duplicate is found, the system will ask for confirmation before proceeding with
+the importation of a row that is potentially a duplicate of an existing form.
+
+You may at any time choose another CSV file to base an import on by clicking on
+the “Choose file” button again. You can also click the <i class="fa fa-fw
+fa-times"></i> button next to the name of the currently loaded file in order to
+discard that file, i.e., have Dative close and clean up its representation of
+it.
 
 
 

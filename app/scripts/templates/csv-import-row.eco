@@ -1,0 +1,93 @@
+<div
+    tabindex='0'
+    class='import-preview-table-row'>
+
+    <div class='index-cell import-preview-table-cell'>
+        <div class='csv-row-spinner'></div>
+        <span class='csv-row-index'><%= @rowIndex + 1 %></span>
+    </div>
+
+    <div class='form-for-import-select-cell import-preview-table-cell'>
+
+        <% if @selected: %>
+            <i class='fa fa-2x fa-check-square deselect-for-import
+                ui-corner-all' tabindex='0'></i>
+        <% else: %>
+            <i class='fa fa-2x fa-square select-for-import
+                ui-corner-all' tabindex='0'></i>
+        <% end %>
+
+        <button class='import-csv-row dative-tooltip import-preview-row-button'
+            title='Import just this form'
+            >Import<i class='import-status fa fa-fw'
+                      style='display: none;'></i></button>
+
+        <button class='preview-row dative-tooltip import-preview-row-button'
+            title='View this form in IGT format'>Preview</button>
+
+        <% if @valid is null: %>
+            <button class='validate-csv-row dative-tooltip
+                import-preview-row-button' title='Check for potential warnings
+                and errors prior to importing this row.'
+                >Validate<i class='validation-status fa fa-fw'
+                    style='display: none;'></i></button>
+        <% else if @valid is true: %>
+            <button class='validate-csv-row dative-tooltip
+                import-preview-row-button' title='Check for potential warnings
+                and errors prior to importing this row.'
+                >Validate<i class='validation-status fa fa-fw fa-check-circle
+                    ui-state-ok'></i></button>
+        <% else if @valid is false: %>
+            <button class='validate-csv-row dative-tooltip
+                import-preview-row-button' title='Check for potential warnings
+                and errors prior to importing this row.'
+                >Validate<i class='validation-status fa fa-fw fa-times-circle
+                    ui-state-error-color'></i></button>
+        <% end %>
+
+    </div>
+
+    <% for value, index in @line: %>
+        <div class='import-preview-table-cell csv-value-cell'
+            tabindex='0' title='<%= @columnLabelsHuman[index] %>'
+            ><div class='csv-value-cell-text'><%= value %></div></div>
+    <% end %>
+
+    <div class='import-preview-table-row-under invisible'>
+
+        <div class='import-preview-table-row-errors-container errors-container
+                    invisible'>
+            <ul class='import-errors-list'></ul>
+        </div>
+
+        <div class='import-preview-table-row-warnings-container warnings-container
+                    invisible'>
+            <ul class='import-warnings-list'></ul>
+        </div>
+
+        <div class='import-preview-table-row-display-container invisible'></div>
+
+    </div>
+
+</div>
+
+<div class='import-templates' style='display: none;'>
+
+    <li class='import-warning-list-item'>
+        <div class='import-warning ui-state-highlight ui-corner-all'>
+            <i class='fa fa-fw fa-exclamation-triangle'></i>
+            Warning: <span class='warning-text'></span>
+        </div>
+        <button class='warning-solution import-solution'></button>
+    </li>
+
+    <li class='import-error-list-item'>
+        <div class='import-error ui-state-error ui-corner-all'>
+            <i class='fa fa-fw fa-exclamation-triangle'></i>
+            Error: <span class='error-text'></span>
+        </div>
+        <button class='error-solution import-solution'></button>
+    </li>
+
+</div>
+
