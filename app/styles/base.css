@@ -2719,6 +2719,7 @@ div.import-error
 .csv-value-cell
 {
   font-size: 12pt;
+  position: relative;
 }
 
 .csv-value-cell-text
@@ -2731,6 +2732,24 @@ div.import-error
 .csv-value-cell-text:focus
 {
   text-overflow: clip;
+}
+
+.csv-value-cell-text[contenteditable=true]
+{
+  position: absolute;
+  top: -5px;
+  left: -5px;
+  width: 300px;
+  height: 150px;
+  overflow-y: scroll;
+  text-overflow: initial;
+  background-color: rgb(255, 255, 255);
+  white-space: initial;
+  opacity: 1;
+  z-index: 999;
+  padding: 0.5em;
+  border-width: 1px;
+  border-style: solid;
 }
 
 .cell-focused

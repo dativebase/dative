@@ -27,12 +27,8 @@ define [
   # Import Row View
   # ---------------
   #
-  # View for a single CSV row for form import.
-  #
-  # TODO: dblclick a cell and then press Tab: this deletes the cell's contents.
-  # This shouldn't happen.
-  # TODO: when we change widths we need to also change title attrs to match the
-  # column header ...
+  # Controls a single CSV (table) row for form import. Controls the row's
+  # "import", "preview" and "validate" buttons.
 
   class CSVImportRowView extends BaseView
 
@@ -205,7 +201,12 @@ define [
 
     # When a cell's text loses focus, it is no longer editable.
     cellTextBlurred: (event) ->
-      @$(event.currentTarget).attr 'contenteditable', 'false'
+      $cellText = @$ event.currentTarget
+      $cellText
+        .text $cellText.text().trim()
+        .attr 'contenteditable', 'false'
+        .removeClass 'ui-corner-all'
+        .closest('.csv-value-cell').css 'overflow', 'hidden'
 
     # The keyup event after a <Tab> press should not propagate because the
     # `ResourcesView` parent class does weird scroll stuff in response to that.
@@ -276,8 +277,12 @@ define [
     # will be replaced by the character of the keydown event.
     editCell: (event) ->
       $cell = @$(event.currentTarget)
+      $cell.css 'overflow', 'initial'
       $cellText = $cell.find('.csv-value-cell-text').first()
-      $cellText.attr('contenteditable', 'true').focus()
+      $cellText
+        .attr 'contenteditable', 'true'
+        .addClass('ui-corner-all')
+        .focus()
       @selectText $cellText
 
     # Select all of the text in the jQuery element `$cellText`.
@@ -330,7 +335,7 @@ define [
     # Give theme-appropriate border colors to bordered elements.
     bordercolors: ->
       @$('.import-preview-table-cell, .import-preview-table-row,
-        .import-preview-table-row-under')
+        .import-preview-table-row-under, .csv-value-cell-text')
           .css("border-color", @constructor.jQueryUIColors().defBo)
 
     clearErrorsAndWarningsInDOM: ->
