@@ -277,6 +277,7 @@ define [
     # will be replaced by the character of the keydown event.
     editCell: (event) ->
       $cell = @$(event.currentTarget)
+      if $cell.hasClass 'ui-state-disabled' then return
       $cell.css 'overflow', 'initial'
       $cellText = $cell.find('.csv-value-cell-text').first()
       $cellText
