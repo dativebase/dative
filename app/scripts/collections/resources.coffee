@@ -151,7 +151,8 @@ define [
       else
         errors = responseJSON.errors or {}
         if utils.type(errors) is 'object'
-          resource.trigger "add#{@resourceNameCapitalized}Fail", errors.error
+          # resource.trigger "add#{@resourceNameCapitalized}Fail", errors.error
+          resource.trigger "add#{@resourceNameCapitalized}Fail", errors
           for attribute, error of errors
             resource.trigger "validationError:#{attribute}", error
         else

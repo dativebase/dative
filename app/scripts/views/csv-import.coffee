@@ -40,6 +40,11 @@ define [
   #
   # TODO:
   #
+  # - Dialogs that ask users whether they want to import despite duplicates:
+  #   i. the buttons need to have better names than "Ok" and "Cancel"
+  #   ii. there should be buttons for "Import All Duplicates", "Skip All
+  #       Duplicates"
+  #
   # - Create button that hides (destroys?) all already-imported rows.
   #
   # - Allow users to Shift-click ranges of rows to select them. (Maybe?)
@@ -49,9 +54,6 @@ define [
   # - If there are id values in the CSV import file, we may want to ask the
   #   user if they want to UPDATE the relevant forms, as opposed to creating
   #   them.
-  #
-  # - Cell tables may appear to have no content after editing. Trim their text
-  #   and scroll left on the blur action.
   #
   # - Consider only rendering the row views for the rows that are visible in
   #   the overflow container. If the import file is large, then rendering
@@ -66,6 +68,13 @@ define [
   #   from server first.)
   #
   # - Help dialog is not scrolling to "Importing Forms". Is this a general issue?
+  #
+  # - allow users to use the import interface as an input interface; i.e., allow
+  #   them to create a new row and enter text to input data.
+  #
+  # - the row view and the preview's FormView view should be doubly binded to
+  #   the model: when you change the row, it should change the formview and
+  #   vice versa.
 
 
   class CSVImportView extends BaseView

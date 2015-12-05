@@ -644,7 +644,16 @@ define [
       ["and", conjuncts]
 
     # The import (i.e., create/POST) request to the server failed.
-    addFormFail: (error, formModel) ->
+    # Here we add the server's errors to our own and display them. We must have
+    # missed something if client-side validation passed...
+    addFormFail: (errors) ->
+      if errors
+        for attr, errorMsg of errors
+          @addToErrors(
+            msg: "#{attr}: #{errorMsg}"
+            solution: null
+          )
+      @displayWarningsAndErrors()
       Backbone.trigger 'csvFormImportFail', (@rowIndex + 1)
       @trigger 'importAttemptTerminated', false
       @setImportStateFailed()
