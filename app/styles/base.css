@@ -1428,6 +1428,11 @@ div.dative-display
   margin-left: 2em;
 }
 
+.html-snippet em
+{
+  font-style: italic;
+}
+
 .dative-help-dialog .help-content strong,
 .html-snippet strong,
 .parser-settings span.bold
