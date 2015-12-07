@@ -101,6 +101,15 @@
                     title='Click to import all selected forms'
                     ><i class='import-selected-button-text'>Import Selected</i><i
                         class='fa fa-fw fa-upload'></i></button>
+
+                <button
+                    class='stop-import-selected-button
+                        invisible
+                        ui-corner-all
+                        dative-tooltip'
+                    title='Stop the current importi'
+                    >Stop Importing<i class='fa fa-fw fa-stop'></i></button>
+
                 <button
                     class='preview-selected-button
                         ui-corner-all

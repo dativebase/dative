@@ -30,6 +30,11 @@ define [
   # strings. That is, it will try to identify an existing user that corresponds
   # to an elicitor string like 'Joel Dunham'.
   #
+  # **Note:** the import progresses row-by-row, in sequence. This view does not
+  # make (potentially) hundreds of simultaneous create/POST requests. It may be
+  # desirable to implement a compromise where batches of n (= 10 ?) rows are
+  # imported simultaneously.
+  #
   # Other features:
   #
   # - spreadsheet-like (i.e., tabular) preview of to-be-imported forms
@@ -45,11 +50,11 @@ define [
   #   ii. there should be buttons for "Import All Duplicates", "Skip All
   #       Duplicates"
   #
+  # - Create an escape hatch (abort) after clicking "Import Selected".
+  #
   # - Create button that hides (destroys?) all already-imported rows.
   #
   # - Allow users to Shift-click ranges of rows to select them. (Maybe?)
-  #
-  # - Create an escape hatch (abort) after clicking "Import Selected".
   #
   # - If there are id values in the CSV import file, we may want to ask the
   #   user if they want to UPDATE the relevant forms, as opposed to creating
@@ -155,6 +160,10 @@ define [
       # that all forms imported can be tagged with it.
       @importTag = null
 
+      # Clicking the "Stop Importing" button sets this to `true` and the
+      # current import will halt when no request is pending.
+      @stopCurrentImportAtNextOpportunity = false
+
     # Set validation-related variables to defaults.
     defaultValidationState: ->
       @warnings = []
@@ -237,6 +246,7 @@ define [
       'click button.select-all-for-import':       'selectAllFormsForImport'
       'click button.select-none-for-import':      'deselectAllFormsForImport'
       'click button.import-selected-button':      'importSelectedPreflight'
+      'click button.stop-import-selected-button': 'stopCurrentImportSelected'
       'click button.preview-selected-button':     'togglePreviews'
       'click button.validate-selected-button':    'validateSelected'
       'click button.hide-import-widget':          'hideMe'
@@ -503,11 +513,17 @@ define [
     # Now, really, we begin importing all of the valid and selected rows in
     # sequence. This is called after the attempt to create the import tag.
     importSelectedContinue: ->
+      @showStopButton()
       @rowToImportIndex = 0
       @importRow()
 
     importRow: ->
       Backbone.trigger 'closeAllResourceDisplayerDialogs'
+      # Cancel/stop the import if the user has clicked the "Stop Importing"
+      # button recently".
+      if @stopCurrentImportAtNextOpportunity
+        @stopCurrentImportAtNextOpportunity = false
+        @__stopCurrentImportSelected()
       rowToImport = @rowViews[@rowToImportIndex]
       # `undefined` means there is now rowView at the current index and
       # therefore we are done with the import selected task.
@@ -632,23 +648,41 @@ define [
       else
         []
 
+    # User has clicked the "Stop Importing" button. Since requests may be in
+    # progress, we make a note to stop the import at the next chance we get.
+    stopCurrentImportSelected: -> @stopCurrentImportAtNextOpportunity = true
+
+    # Private method for actually stopping the import. Logic elsewhere calls
+    # this when no requests are pending.
+    __stopCurrentImportSelected: -> @importSelectedDone true
+
     # This is called when the "Import Selected" task has completed because
     # there are no more rows to import.
-    importSelectedDone: ->
+    # If `midwayAbort` is true, it means that the user has aborted/canceled the
+    # import without waiting for it to complete.
+    importSelectedDone: (midwayAbort=false) ->
       @stopSpin()
       @enableAllControls()
-      @alertImportSummary()
+      @hideStopButton()
+      @alertImportSummary midwayAbort
       # Triggering the following event will cause the `FormsBrowseView`
       # instance to navigate to the last page and update its pagination info
       # according to the current state of the database.
       Backbone.trigger 'browseAllFormsAfterImport'
+
+    hideStopButton: ->
+      @$('.stop-import-selected-button').hide()
+
+    showStopButton: ->
+      console.log 'in show stop button'
+      @$('.stop-import-selected-button').show()
 
     # Alert the user that we've finished attempting to import all of the
     # selected rows. Summarize what has been accomplished. Note that the
     # complicated-looking logic here is just for creating a nice human-readable
     # report based on counts of successes, failures and
     # aborts-due-to-duplicates.
-    alertImportSummary: ->
+    alertImportSummary: (midwayAbort=false) ->
       switch @importsSucceeded
         when 1 then verbSuccess = 'was'
         else verbSuccess = 'were'
@@ -660,6 +694,8 @@ define [
       alertMsg = "You have attempted to import
         #{@utils.number2word importAttempts}
         #{@utils.pluralizeByNum 'form', importAttempts}."
+      if midwayAbort
+        alertMsg = "You have CANCELLED the import mid-process. #{alertMsg}"
       if @importsSucceeded > 0
         alertMsg = "#{alertMsg}
           #{@utils.capitalize @utils.number2word(@importsSucceeded)} import
