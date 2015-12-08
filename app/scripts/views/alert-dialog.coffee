@@ -4,11 +4,16 @@ define [
   './../templates/alert-dialog'
 ], (Backbone, BaseView, alertDialogTemplate) ->
 
-  # AlertDialogView
-  # ---------------
+  # Alert Dialog View
+  # -----------------
   #
-  # This is a dialog box for alerting the user of something. It should disable
-  # rest of the UI until the user clicks "Ok" or some such thing.
+  # This is a dialog box for alerting the user of something and possibly
+  # getting input from them, typically to "Ok" or "Cancel" a decision. It is
+  # modal, i.e., it disables the rest of the UI until closed.
+  #
+  # By passing certain options to `@dialogOpen`, you can control what buttons
+  # and inputs are present in the alert and which events they trigger and on
+  # what target.
 
   class AlertDialogView extends BaseView
 
@@ -49,6 +54,18 @@ define [
         autoOpen: false
         appendTo: @$('.dative-alert-dialog-target').first()
         buttons: [
+            text: 'Cancel All'
+            class: 'cancel-all dative-tooltip'
+            click: =>
+              @dialogClose()
+              @triggerCancelAllEvent()
+          ,
+            text: 'Ok All'
+            class: 'ok-all dative-tooltip'
+            click: =>
+              @dialogClose()
+              @triggerConfirmAllEvent()
+          ,
             text: 'Cancel'
             class: 'cancel dative-tooltip'
             click: =>
@@ -117,19 +134,46 @@ define [
           eventTarget.trigger cancelEvent
       @setPromptInput('')
 
+    triggerCancelAllEvent: ->
+      if @cancelAllEvent
+        cancelAllEvent = @cancelAllEvent
+        @cancelAllEvent = null
+        eventTarget = @getEventTarget()
+        eventTarget.trigger cancelAllEvent
+      @setPromptInput('')
+
+    triggerConfirmAllEvent: ->
+      if @confirmAllEvent
+        confirmAllEvent = @confirmAllEvent
+        @confirmAllEvent = null
+        eventTarget = @getEventTarget()
+        eventTarget.trigger confirmAllEvent
+      @setPromptInput('')
+
+    triggerSpecialButtonEvent: ->
+      if @specialButtonEvent
+        specialButtonEvent = @specialButtonEvent
+        @specialButtonEvent = null
+        eventTarget = @getEventTarget()
+        eventTarget.trigger specialButtonEvent
+      @setPromptInput('')
+
     dialogOpen: (options) ->
       @prompt = false
       @$('.dative-alert-dialog textarea').hide()
-
       if options.text then @setText options.text
+      @specialButton options
       if options.confirm then @showCancelButton() else @hideCancelButton()
       if options.prompt then @showPromptInput()
       if options.confirmEvent then @confirmEvent = options.confirmEvent
       if options.cancelEvent then @cancelEvent = options.cancelEvent
       if options.confirmArgument then @confirmArgument = options.confirmArgument
-      if options.eventTarget
-        @eventTarget = options.eventTarget
+      if options.eventTarget then @eventTarget = options.eventTarget
       if options.cancelArgument then @cancelArgument = options.cancelArgument
+      @setConfirmButtonText options.confirmButtonText
+      @setCancelButtonText options.cancelButtonText
+      @confirmAllButton options
+      @cancelAllButton options
       focusButton = options.focusButton or 'cancel'
       Backbone.trigger 'alert-dialog:open'
       if focusButton is 'ok'
@@ -138,8 +182,76 @@ define [
         @$('.dative-alert-dialog').on("dialogopen", => @focusCancelButton())
       @$('.dative-alert-dialog').first().dialog 'open'
 
+    setConfirmButtonText: (confirmButtonText) ->
+      if confirmButtonText
+        @$('button.ok').button label: confirmButtonText
+      else
+        @$('button.ok').button label: 'Ok'
+
+    setCancelButtonText: (cancelButtonText) ->
+      if cancelButtonText
+        @$('button.cancel').button label: cancelButtonText
+      else
+        @$('button.cancel').button label: 'Cancel'
+
+    setConfirmAllButtonText: (confirmAllButtonText) ->
+      if confirmAllButtonText
+        @$('button.ok-all').button label: confirmAllButtonText
+      else
+        @$('button.ok-all').button label: 'Ok All'
+
+    setCancelAllButtonText: (cancelAllButtonText) ->
+      if cancelAllButtonText
+        @$('button.cancel-all').button label: cancelAllButtonText
+      else
+        @$('button.cancel-all').button label: 'Cancel All'
+
+    confirmAllButton: (options) ->
+      if options.confirmAllEvent
+        @confirmAllEvent = options.confirmAllEvent
+        @setConfirmAllButtonText options.confirmAllButtonText
+        @showConfirmAllButton()
+      else
+        @confirmAllEvent = null
+        @hideConfirmAllButton()
+
+    cancelAllButton: (options) ->
+      if options.cancelAllEvent
+        @cancelAllEvent = options.cancelAllEvent
+        @showCancelAllButton()
+        @setCancelAllButtonText options.cancelAllButtonText
+      else
+        @cancelAllEvent = null
+        @hideCancelAllButton()
+
+    specialButton: (options) ->
+      if options.specialButtonEvent
+        @specialButtonEvent = options.specialButtonEvent
+        @specialButtonText = options.specialButtonText
+        @addSpecialButton()
+      else
+        @destroySpecialButton()
+        @specialButtonEvent = null
+        @specialButtonText = null
+
+    destroySpecialButton: ->
+      buttons = @$('.dative-alert-dialog').first().dialog 'option', 'buttons'
+      if buttons.length > 4
+        @$('.dative-alert-dialog').first().dialog 'option', 'buttons', buttons[1..]
+
+    addSpecialButton: ->
+      buttons = @$('.dative-alert-dialog').first().dialog 'option', 'buttons'
+      buttons.unshift
+        click: =>
+          @dialogClose()
+          @triggerSpecialButtonEvent()
+        text: @specialButtonText
+      @$('.dative-alert-dialog').first().dialog 'option', 'buttons', buttons
+
     setupButtons: ->
       @hideCancelButton()
+      @hideCancelAllButton()
+      @hideConfirmAllButton()
 
     showCancelButton: ->
       @$('.dative-alert-dialog-target button.cancel').show()
@@ -150,6 +262,18 @@ define [
 
     hideCancelButton: ->
       @$('.dative-alert-dialog-target button.cancel').hide()
+
+    hideCancelAllButton: ->
+      @$('.dative-alert-dialog-target button.cancel-all').hide()
+
+    showCancelAllButton: ->
+      @$('.dative-alert-dialog-target button.cancel-all').show()
+
+    hideConfirmAllButton: ->
+      @$('.dative-alert-dialog-target button.ok-all').hide()
+
+    showConfirmAllButton: ->
+      @$('.dative-alert-dialog-target button.ok-all').show()
 
     setText: (text) ->
       @$('.dative-alert-dialog-target .dative-alert-text').text text

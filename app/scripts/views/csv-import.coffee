@@ -7,7 +7,7 @@ define [
   './../models/file'
   './../models/tag'
   './../models/elicitation-method'
-  './../models/user'
+  './../models/user-old'
   './../models/source'
   './../models/speaker'
   './../models/syntactic-category'
@@ -45,12 +45,16 @@ define [
   #
   # TODO:
   #
-  # - Dialogs that ask users whether they want to import despite duplicates:
-  #   i. the buttons need to have better names than "Ok" and "Cancel"
-  #   ii. there should be buttons for "Import All Duplicates", "Skip All
-  #       Duplicates"
+  # - The AppView needs to sometimes prevent the user from navigating away from
+  #   a page. In this case, if the user nagivates away during an in-progress
+  #   import, the app view should catch this and prompt the user to confirm
+  #   that they want to stop the import in its tracks. Maybe in the future we
+  #   can always keep the forms browse view open (as a special) view and that
+  #   way all of its child views (including the import view) can continue to
+  #   run.
   #
-  # - Create an escape hatch (abort) after clicking "Import Selected".
+  # - offer to close the file after import has completed. It holds a lot of
+  #   memory.
   #
   # - Create button that hides (destroys?) all already-imported rows.
   #
@@ -164,6 +168,14 @@ define [
       # current import will halt when no request is pending.
       @stopCurrentImportAtNextOpportunity = false
 
+      # Setting this to true will cause the importer to silently import
+      # possible duplicates without alerting the user.
+      @importAllDespiteDuplicatesState = false
+
+      # Setting this to true will cause the importer to silently skip over
+      # possible duplicates without alerting the user.
+      @skipAllDuplicatesState = false
+
     # Set validation-related variables to defaults.
     defaultValidationState: ->
       @warnings = []
@@ -222,6 +234,22 @@ define [
       # If we have failed to create an "import tag" and the user wants to
       # import anyway, this event will be triggered by the confirm dialog.
       @listenTo @, 'importDespiteNoImportTag', @importDespiteNoImportTag
+
+      # This is called by the duplicates alert dialog when the user clicks
+      # "Skip All Duplicates". It causes the importer to stop alerting the user
+      # to possible duplicates and just silently skips them.
+      @listenTo @, 'skipAllDuplicates', @skipAllDuplicates
+
+      # This is called by the duplicates alert dialog when the user clicks
+      # "Import All Anyway". It causes the importer to stop alerting the user
+      # to possible duplicates and just imports everything.
+      @listenTo @, 'importAllDespiteDuplicates', @importAllDespiteDuplicates
+
+      # This is triggered by the alert dialog when the user clicks the "Stop
+      # Import" button there. We call the private method here because there
+      # will be no request whose termination we must wait for; we can just
+      # cancel the import and report the summary right away.
+      @listenTo @, 'stopCurrentImportSelected', @__stopCurrentImportSelected
 
     listenToRowViews: ->
       for view in @rowViews
@@ -524,6 +552,7 @@ define [
       if @stopCurrentImportAtNextOpportunity
         @stopCurrentImportAtNextOpportunity = false
         @__stopCurrentImportSelected()
+        return
       rowToImport = @rowViews[@rowToImportIndex]
       # `undefined` means there is now rowView at the current index and
       # therefore we are done with the import selected task.
@@ -531,11 +560,17 @@ define [
         @importSelectedDone()
       else
         if rowToImport.selected and rowToImport.valid
-          duplicates = @getDuplicatesForRow rowToImport
-          if duplicates.length > 0
-            @alertUserOfDuplicatesForRow rowToImport, duplicates
-          else
+          if @importAllDespiteDuplicatesState
             @importRowForReal()
+          else
+            duplicates = @getDuplicatesForRow rowToImport
+            if duplicates.length > 0
+              if @skipAllDuplicatesState
+                @dontImportBecauseDuplicates()
+              else
+                @alertUserOfDuplicatesForRow rowToImport, duplicates
+            else
+              @importRowForReal()
         # This row cannot be imported, so we increment the index and recur.
         else
           @importNextRow()
@@ -550,12 +585,31 @@ define [
       options =
         text: "We found #{duplicatesCount} possible
           #{@utils.pluralizeByNum 'duplicate', duplicatesCount} for the form in
-          row #{row.rowIndex + 1} (See the dialog box(es).) Click “Ok” to
-          proceed with the import anyway. Click “Cancel” to not import this
-          row and move on to the next one."
+          row #{row.rowIndex + 1}. See the dialog box(es). Click “Import
+          Anyway” to import this row despite possible duplication. Click
+          “Skip Duplicate” to avoid importing this row and move on to the
+          next one. Click “Import All Anyway” to import this and all
+          subsequent possible duplicates. Click “Skip All Duplicates” to
+          avoid importing this and any subsequent duplicate rows. Click “Stop
+          Importing” to abort the import."
+
         confirm: true
+
         confirmEvent: 'importDespiteDuplicates'
+        confirmButtonText: 'Import Anyway'
+
+        confirmAllEvent: 'importAllDespiteDuplicates'
+        confirmAllButtonText: 'Import All Anyway'
+
         cancelEvent: 'dontImportBecauseDuplicates'
+        cancelButtonText: 'Skip Duplicate'
+
+        cancelAllEvent: 'skipAllDuplicates'
+        cancelAllButtonText: 'Skip All Duplicates'
+
+        specialButtonEvent: 'stopCurrentImportSelected'
+        specialButtonText: 'Stop Importing'
+
         eventTarget: @
       Backbone.trigger 'openAlertDialog', options
 
@@ -567,6 +621,13 @@ define [
       @rowViews[@rowToImportIndex].setImportStateCanceledBecauseDuplicates()
       @importNextRow()
 
+    # Move on to trying to import the next row; the current row has possible
+    # duplicates already on the server and the user has elected not to import
+    # it.
+    skipAllDuplicates: ->
+      @skipAllDuplicatesState = true
+      @dontImportBecauseDuplicates()
+
     # Import the next row.
     importNextRow: ->
       @rowToImportIndex += 1
@@ -575,6 +636,11 @@ define [
     # Import the current row, despite the fact that we have found possible
     # duplicates of it already on the server.
     importDespiteDuplicates: -> @importRowForReal()
+
+    # Import the current row and all subsequent possible duplicates.
+    importAllDespiteDuplicates: ->
+      @importAllDespiteDuplicatesState = true
+      @importRowForReal()
 
     # We know that the row at `@rowToImportIndex` is selected and valid and the
     # user has given us the go-ahead to import despite any duplicates that may
@@ -598,10 +664,17 @@ define [
             name: @importTag.get('name')
           )
         catch
-          tags = rowToImport.model.get('tags')
-          console.log tags
-          console.log @utils.type(tags)
+          tags = [
+            id: @importTag.get('id')
+            name: @importTag.get('name')
+          ]
+          rowToImport.model.set 'tags', tags
+      @scrollToRow rowToImport
       rowToImport.issueCreateRequest()
+
+    scrollToRow: (rowToImport) ->
+      # @scrollToElement rowToImport.$el, @$('.import-preview-table').first()
+      rowToImport.$('button.import-csv-row').first().focus()
 
     # A CSV row view is telling us that an import/create request to the server
     # has terminated. `success` is a boolean that indicates if the attempt was
@@ -650,11 +723,14 @@ define [
 
     # User has clicked the "Stop Importing" button. Since requests may be in
     # progress, we make a note to stop the import at the next chance we get.
-    stopCurrentImportSelected: -> @stopCurrentImportAtNextOpportunity = true
+    stopCurrentImportSelected: ->
+      @stopCurrentImportAtNextOpportunity = true
 
     # Private method for actually stopping the import. Logic elsewhere calls
     # this when no requests are pending.
-    __stopCurrentImportSelected: -> @importSelectedDone true
+    __stopCurrentImportSelected: ->
+      Backbone.trigger 'closeAllResourceDisplayerDialogs'
+      @importSelectedDone true
 
     # This is called when the "Import Selected" task has completed because
     # there are no more rows to import.
@@ -665,17 +741,20 @@ define [
       @enableAllControls()
       @hideStopButton()
       @alertImportSummary midwayAbort
+      @resetImportDefaults()
       # Triggering the following event will cause the `FormsBrowseView`
       # instance to navigate to the last page and update its pagination info
       # according to the current state of the database.
       Backbone.trigger 'browseAllFormsAfterImport'
 
-    hideStopButton: ->
-      @$('.stop-import-selected-button').hide()
+    resetImportDefaults: ->
+      @stopCurrentImportAtNextOpportunity = false
+      @importAllDespiteDuplicatesState = false
+      @skipAllDuplicatesState = false
 
-    showStopButton: ->
-      console.log 'in show stop button'
-      @$('.stop-import-selected-button').show()
+    hideStopButton: -> @$('.stop-import-selected-button').hide()
+
+    showStopButton: -> @$('.stop-import-selected-button').show()
 
     # Alert the user that we've finished attempting to import all of the
     # selected rows. Summarize what has been accomplished. Note that the
@@ -695,7 +774,7 @@ define [
         #{@utils.number2word importAttempts}
         #{@utils.pluralizeByNum 'form', importAttempts}."
       if midwayAbort
-        alertMsg = "You have CANCELLED the import mid-process. #{alertMsg}"
+        alertMsg = "You have CANCELED the import mid-process. #{alertMsg}"
       if @importsSucceeded > 0
         alertMsg = "#{alertMsg}
           #{@utils.capitalize @utils.number2word(@importsSucceeded)} import
@@ -725,6 +804,7 @@ define [
         confirm: false
       Backbone.trigger 'openAlertDialog', options
 
+    # FOX
     cancelImportSelected: ->
       @stopSpin()
       @enableAllControls()
@@ -749,7 +829,6 @@ define [
         @importSelected()
 
     searchForDuplicatesSuccess: (responseJSON) ->
-      console.log 'found duplicates'
       if responseJSON.paginator.count > 0
         @duplicatesFound = responseJSON.items
       else
@@ -901,12 +980,15 @@ define [
         msg = "We have found #{warnCount}
           #{@utils.pluralizeByNum 'warning', warnCount} in this CSV file."
       options =
-        text: "#{msg} Click “Ok” to proceed with the import anyway. Click
-          “Cancel” to cancel the import and resolve the errors and warnings."
+        text: "#{msg} Click “Import Anyway” to proceed with the import
+          despite the warnings/errors. Click “Cancel Import” to abort the import
+          and resolve the errors and warnings first."
         confirm: true
         confirmEvent: 'searchForDuplicates'
         cancelEvent: 'cancelImportSelected'
         eventTarget: @
+        confirmButtonText: 'Import Anyway'
+        cancelButtonText: 'Cancel Import'
       Backbone.trigger 'openAlertDialog', options
 
     hideValidationContainers: ->
@@ -968,7 +1050,7 @@ define [
         if errorObject.solution
           $error.find('button.error-solution').show()
             .attr 'data-solution-id', errorObject.solution.id
-            .button label: @utils.camel2regular(errorObject.solution.name)
+            .button label: errorObject.solution.name
         else
           $error.find('button.error-solution').hide()
         fragment.appendChild $error.get(0)
@@ -993,7 +1075,7 @@ define [
         if warningObject.solution
           $warning.find('button.warning-solution').show()
             .attr 'data-solution-id', warningObject.solution.id
-            .button label: @utils.camel2regular(warningObject.solution.name)
+            .button label: warningObject.solution.name
         else
           $warning.find('button.warning-solution').hide()
         fragment.appendChild $warning.get(0)

@@ -55,7 +55,7 @@
                                 dative-tooltip
                                 dative-input-field'
                             title='Discard this file'
-                            ><i class='fa fa-fw fa-times'></i></button>
+                            ><i class='fa fa-fw fa-trash'></i></button>
                         <!-- this is the hidden input tag -->
                         <div
                             style='height: 0px;width:0px; overflow:hidden;'
