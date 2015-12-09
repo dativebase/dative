@@ -96,6 +96,12 @@ define [
       # server after a check for duplicates has returned no duplicates.
       @issueCreateRequestIfNoDuplicates = false
 
+      # When set to `true`, this var will prevent the triggering of the
+      # `Backbone`-wide event that causes the row import success notification
+      # to pop up. With multi-row imports, such notifications are too
+      # resource-intensive.
+      @silentAddFormSuccess = false
+
       # We listen to ourself for an 'issueCreateRequest' event; the
       # alert/confirm dialog may trigger this when a user clicks "Ok",
       # consenting to perform an import despite the existence of possible
@@ -409,7 +415,7 @@ define [
           if error.solution
             $error.find('button.error-solution').show()
               .attr 'data-solution-id', error.solution.id
-              .button label: @utils.camel2regular(error.solution.name)
+              .button label: error.solution.name
           else
             $error.find('button.error-solution').hide()
           fragment.appendChild $error.get(0)
@@ -430,7 +436,7 @@ define [
           if warning.solution
             $warning.find('button.warning-solution').show()
               .attr 'data-solution-id', warning.solution.id
-              .button label: @utils.camel2regular(warning.solution.name)
+              .button label: warning.solution.name
           else
             $warning.find('button.warning-solution').hide()
           fragment.appendChild $warning.get(0)
@@ -648,6 +654,7 @@ define [
     # Here we add the server's errors to our own and display them. We must have
     # missed something if client-side validation passed...
     addFormFail: (errors) ->
+      @silentAddFormSuccess = false
       if errors
         for attr, errorMsg of errors
           @addToErrors(
@@ -661,15 +668,18 @@ define [
       @stopSpin()
 
     # The import (i.e., create/POST) request to the server succeeded.
-    # TODO: should we prevent re-imports somehow?
     addFormSuccess: (formModel) ->
-      Backbone.trigger 'csvFormImportSuccess', (@rowIndex + 1),
-        formModel.get('id')
+      if @silentAddFormSuccess
+        @silentAddFormSuccess = false
+      else
+        Backbone.trigger 'csvFormImportSuccess', (@rowIndex + 1),
+          formModel.get('id')
       @trigger 'importAttemptTerminated', true
       @setImportStateSucceeded()
       @stopSpin()
 
     addFormStart: ->
+
     addFormEnd: ->
 
     setImportStateFailed: ->
@@ -777,7 +787,7 @@ define [
     # form attribute `attr` using the value `val`.
     getCreateResourceSolution: (attr, val) ->
       resource = @attr2resource attr
-      name = "Create #{resource} “#{val}”"
+      name = "Create #{@utils.camel2regular resource} “#{val}”"
       if name not of @solutions
         @solutions[name] =
           id: @guid()

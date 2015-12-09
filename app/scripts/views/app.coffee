@@ -156,6 +156,7 @@ define [
       @render()
       @setTheme()
       Backbone.history.start()
+      @preventNavigationState = false
       @showHomePageView()
 
     # Calling this method will cause all scrollable <div>s with the class
@@ -220,7 +221,38 @@ define [
       @matchWindowDimensions()
       @
 
+    # Another view has asked us to prevent navigation, i.e., the changing of
+    # the currently displayed view in the main page. The `msg` is the message
+    # that we display in the "Prevent Navigation" confirm dialog.
+    setPreventNavigation: (msg) ->
+      @preventNavigationState = true
+      @preventNavigationMsg = msg
+
+    # Unset our instance vars related to preventing navigation.
+    unsetPreventNavigation: ->
+      @preventNavigationState = false
+      @preventNavigationMsg = null
+
+    # Display the confirm dialog that asks the user whether they really want to
+    # navigate away from the current page.
+    displayPreventNavigationAlert: ->
+      console.log 'in displayPreventNavigationAlert'
+      if @preventNavigationMsg
+        msg = @preventNavigationMsg
+      else
+        msg = 'Do you really want to navigate away from the current page? Click
+          “Ok” to continue with navigation. Click “Cancel” to stay on
+          the current page.'
+      options =
+        confirm: false
+        text: msg
+      Backbone.trigger 'openAlertDialog', options
+
     listenToEvents: ->
+      @listenTo Backbone, 'setPreventNavigation', @setPreventNavigation
+      @listenTo Backbone, 'unsetPreventNavigation', @unsetPreventNavigation
+      @listenTo Backbone, 'preventNavigation', @preventNavigation
+
       @listenTo @mainMenuView, 'request:home', @showHomePageView
       @listenTo @mainMenuView, 'request:openLoginDialogBox', @toggleLoginDialog
       @listenTo @mainMenuView, 'request:toggleHelpDialogBox', @toggleHelpDialog
@@ -249,6 +281,10 @@ define [
       @listenTo Backbone, 'openExporterDialog', @openExporterDialog
       @listenTo Backbone, 'routerNavigateRequest', @routerNavigateRequest
       @listenToResources()
+
+
+    # FOX
+    # @listenToResources()
 
     routerNavigateRequest: (route) -> @router.navigate route
 
@@ -444,6 +480,7 @@ define [
       @applicationSettings.get 'loggedIn'
 
     showHomePageView: ->
+      if @preventNavigationState then @displayPreventNavigationAlert(); return
       if @homePageView and @visibleView is @homePageView then return
       @router.navigate 'home'
       @closeVisibleView()
@@ -462,6 +499,7 @@ define [
     # the singular camelCase name of a resource as its first argument; e.g.,
     # `@showResourcesView 'elicitationMethod'`.
     showResourcesView: (resourceName, options={}) ->
+      if @preventNavigationState then @displayPreventNavigationAlert(); return
       o = @showResourcesViewSetDefaultOptions resourceName, options
       names = @getResourceNames resourceName
       myViewAttr = "#{names.plural}View"
@@ -491,6 +529,7 @@ define [
     # the application. This is what happens when you navigate to, e.g.,
     # /#form/123.
     showResourceView: (resourceName, resourceId, options={}) ->
+      if @preventNavigationState then @displayPreventNavigationAlert(); return
       o = @showResourceViewSetDefaultOptions resourceName, options
       names = @getResourceNames resourceName
       myViewAttr = "#{resourceName}View"

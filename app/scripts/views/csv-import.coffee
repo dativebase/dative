@@ -45,13 +45,10 @@ define [
   #
   # TODO:
   #
-  # - The AppView needs to sometimes prevent the user from navigating away from
-  #   a page. In this case, if the user nagivates away during an in-progress
-  #   import, the app view should catch this and prompt the user to confirm
-  #   that they want to stop the import in its tracks. Maybe in the future we
-  #   can always keep the forms browse view open (as a special) view and that
-  #   way all of its child views (including the import view) can continue to
-  #   run.
+  # - grammaticality validation. (Requires app settings having been fetched
+  #   from server first.)
+  #
+  # - length validation: otherwise things may be silently truncated.
   #
   # - offer to close the file after import has completed. It holds a lot of
   #   memory.
@@ -64,17 +61,20 @@ define [
   #   user if they want to UPDATE the relevant forms, as opposed to creating
   #   them.
   #
-  # - Consider only rendering the row views for the rows that are visible in
-  #   the overflow container. If the import file is large, then rendering
-  #   thousands of views will stall the browser. The disadvantage to this
-  #   approach is that we will need to listen for scroll events and render row
-  #   views in response. Similarly, the "Preview Selected" button should only
-  #   request preview dispays from the rows visible within the scrollable
-  #   container and request additional previews as rows become visible upon
-  #   scroll events. See http://stackoverflow.com/questions/487073/check-if-element-is-visible-after-scrolling
+  # - PERFORMANCE!:
   #
-  # - grammaticality validation. (Requires app settings having been fetched
-  #   from server first.)
+  #   - Consider only rendering the row views for the rows that are visible in
+  #     the overflow container. If the import file is large, then rendering
+  #     thousands of views will stall the browser. The disadvantage to this
+  #     approach is that we will need to listen for scroll events and render row
+  #     views in response. Similarly, the "Preview Selected" button should only
+  #     request preview dispays from the rows visible within the scrollable
+  #     container and request additional previews as rows become visible upon
+  #     scroll events. See http://stackoverflow.com/questions/487073/check-if-element-is-visible-after-scrolling
+  #
+  #   - Searching for duplicates in bulk will break the OLD's search mechanism
+  #     if you have too many (i.e., thousands) of dis/conjuncts. We therefore
+  #     need to perform this search in batches.
   #
   # - Help dialog is not scrolling to "Importing Forms". Is this a general issue?
   #
@@ -485,6 +485,12 @@ define [
     # make it easier for users to track how data have been created in the
     # system.
     importSelected: ->
+      # Here we ask the master `AppView` instance to prevent the user from
+      # navigating away during an in-progress import.
+      msg = 'You are in the middle of importing a number of CSV rows and cannot
+        navigate to a different page until the import ends or you stop it
+        manually.'
+      Backbone.trigger 'setPreventNavigation', msg
       @spin 'Importing selected and valid rows'
       @createImportTag()
 
@@ -510,6 +516,9 @@ define [
     # We have succeeded in creating an import tag. We set it to `@importTag`
     # and will use it to tag all of the forms that we import in this batch.
     importTagCreateSuccess: (tagModel) ->
+      # Triggering this event is necessary for the new tag to be registered by
+      # `globals`.
+      Backbone.trigger "addTagSuccess", tagModel
       @importTag = tagModel
       @importSelectedContinue()
 
@@ -669,11 +678,14 @@ define [
             name: @importTag.get('name')
           ]
           rowToImport.model.set 'tags', tags
-      @scrollToRow rowToImport
+      # @scrollToRow rowToImport
+      rowToImport.silentAddFormSuccess = true
       rowToImport.issueCreateRequest()
 
+    # Scrolling to the row that is currently being imported is nice because it
+    # keeps it in view, however, it makes it very difficult to access the "Stop
+    # Importing", so I'm not using this until it can be improved.
     scrollToRow: (rowToImport) ->
-      # @scrollToElement rowToImport.$el, @$('.import-preview-table').first()
       rowToImport.$('button.import-csv-row').first().focus()
 
     # A CSV row view is telling us that an import/create request to the server
@@ -746,6 +758,7 @@ define [
       # instance to navigate to the last page and update its pagination info
       # according to the current state of the database.
       Backbone.trigger 'browseAllFormsAfterImport'
+      Backbone.trigger 'unsetPreventNavigation'
 
     resetImportDefaults: ->
       @stopCurrentImportAtNextOpportunity = false
@@ -804,7 +817,6 @@ define [
         confirm: false
       Backbone.trigger 'openAlertDialog', options
 
-    # FOX
     cancelImportSelected: ->
       @stopSpin()
       @enableAllControls()
@@ -813,6 +825,7 @@ define [
     # valid rows and issue one search request for duplicates. Both success and
     # failure may result in `@importSelected()` being called.
     searchForDuplicates: ->
+      @disableAllControlsButStop()
       @duplicatesFound = []
       disjuncts = []
       for row in @rowViews
@@ -865,6 +878,12 @@ define [
       @headerView.disableAllControls()
       # for rowView in @rowViews
       #   rowView.disableAllControls()
+
+    disableAllControlsButStop: ->
+      @disableAllControls()
+      @$(@purviewSelector)
+        .find('button.stop-import-selected-button')
+        .button('enable')
 
     enableAllControls: ->
       @$(@purviewSelector)
@@ -945,7 +964,6 @@ define [
       @displayErrors()
       @buttonify()
       @stopSpin()
-      @enableAllControls()
       if @importPostValidation
         @importPostValidation = false
         validRows = (r for r in @rowViews when r.valid)
@@ -959,6 +977,8 @@ define [
           @enableAllControls()
           @stopSpin()
           Backbone.trigger 'csvFormImportNoneValid'
+      else
+        @enableAllControls()
 
     getWarningsErrorsCounts: ->
       [
