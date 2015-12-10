@@ -45,8 +45,6 @@ define [
   #
   # TODO:
   #
-  # - import options: translation delimiter, etc.
-  #
   # - length validation: otherwise things may be silently truncated.
   #
   # - offer to close the file after import has completed. It holds a lot of
@@ -177,6 +175,8 @@ define [
       # possible duplicates without alerting the user.
       @skipAllDuplicatesState = false
 
+      @defaultImportOptionsState()
+
     # Set validation-related variables to defaults.
     defaultValidationState: ->
       @warnings = []
@@ -184,6 +184,12 @@ define [
       @errors = []
       @rowErrors = {}
       @solutions = {}
+
+    # Vars for how we handle imports.
+    defaultImportOptionsState: ->
+      @parseTranslations = true
+      @translationDelimiter = ';'
+      @identifyTranslationCompatibilities = true
 
     listenToEvents: ->
       super
@@ -284,6 +290,58 @@ define [
       'click button.toggle-errors':               'toggleErrors'
       'click button.toggle-warnings':             'toggleWarnings'
       'click button.import-help':                 'openImportHelp'
+      'click button.import-options-button':       'toggleOptions'
+      'click i.parse-translations':               'toggleParseTranslations'
+      'click i.identify-translation-compatibilities':
+        'toggleIdentifyTranslationCompatibilities'
+      'input input[name=translation_delimiter]':  'setTranslationDelimiter'
+
+    # Update all row views with the current import options values.
+    updateRowViewsWithImportOptions: ->
+      for view in @rowViews
+        view.parseTranslations = @parseTranslations
+        view.identifyTranslationCompatibilities = @identifyTranslationCompatibilities
+        view.translationDelimiter = @translationDelimiter
+
+    setTranslationDelimiter: ->
+      newDelimiter = @$('input[name=translation_delimiter]').first().val()
+      if newDelimiter
+        @translationDelimiter = newDelimiter
+      else
+        @translationDelimiter = ';'
+      @updateRowViewsWithImportOptions()
+
+    toggleParseTranslations: ->
+      $checkBox = @$ 'i.parse-translations'
+      if $checkBox.hasClass 'fa-check-square'
+        $checkBox.removeClass 'fa-check-square'
+        $checkBox.addClass 'fa-square'
+        @parseTranslations = false
+      else
+        $checkBox.removeClass 'fa-square'
+        $checkBox.addClass 'fa-check-square'
+        @parseTranslations = true
+      @updateRowViewsWithImportOptions()
+
+    toggleIdentifyTranslationCompatibilities: ->
+      $checkBox = @$ 'i.identify-translation-compatibilities'
+      if $checkBox.hasClass 'fa-check-square'
+        $checkBox.removeClass 'fa-check-square'
+        $checkBox.addClass 'fa-square'
+        @identifyTranslationCompatibilities = false
+      else
+        $checkBox.removeClass 'fa-square'
+        $checkBox.addClass 'fa-check-square'
+        @identifyTranslationCompatibilities = true
+      @updateRowViewsWithImportOptions()
+
+    # Toggle the visibility of the options <div>.
+    toggleOptions: ->
+      $optionsContainer = @$ '.import-options-container'
+      if $optionsContainer.is ':visible'
+        $optionsContainer.slideUp()
+      else
+        $optionsContainer.slideDown()
 
     # Tell the Help dialog to open itself and search for "importing forms"
     # and scroll to the second match. WARN: this is brittle because if the help
@@ -1229,18 +1287,24 @@ define [
       @$('[name=file-upload-input]').click()
 
     render: ->
-      @$el.append @template(importTypes: @importTypes)
+      @$el.append @template(
+        importTypes: @importTypes
+        parseTranslations: @parseTranslations
+        translationDelimiter: @translationDelimiter
+        identifyTranslationCompatibilities: @identifyTranslationCompatibilities
+      )
       @$target = @$ '.dative-importer-target'
       @guify()
       @$('div.dative-importer-preview').hide()
       @$('button.discard-file-button').hide()
       @$('div.import-preview-table-wrapper, div.general-warnings-list-wrapper, 
-        div.general-errors-list-wrapper')
+        div.general-errors-list-wrapper, input[name=translation_delimiter]')
           .css("border-color", @constructor.jQueryUIColors().defBo)
       @
 
     tooltipify: ->
-      @$('.dative-tooltip').tooltip position: @tooltipPositionLeft()
+      # @$('.dative-tooltip').tooltip position: @tooltipPositionLeft()
+      @$('.dative-tooltip').tooltip()
 
     # Make the import type select into a jQuery selectmenu.
     # NOTE: the functions triggered by the open and close events are a hack so
@@ -1443,6 +1507,9 @@ define [
           columnLabelsHuman: columnLabelsHuman
           stringToObjectMappers: @stringToObjectMappers
           formsCollection: @formsCollection
+          translationDelimiter: @translationDelimiter
+          parseTranslations: @parseTranslations
+          identifyTranslationCompatibilities: @identifyTranslationCompatibilities
         @rowViews.push rowView
 
     closeCSVTableRowViews: ->

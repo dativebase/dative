@@ -153,7 +153,8 @@ button.help-button
 .dative-field-label.dative-tooltip,
 .header-title-content,
 .select-for-import,
-.deselect-for-import
+.deselect-for-import,
+.fa-dative-checkbox
 {
     cursor: pointer;
 }
@@ -563,7 +564,8 @@ div.dative-page-header-title
 .dative-shadowed-widget.expanded:focus,
 .dative-shadowed-widget.jquery-theme-image-container:focus,
 .select-for-import:focus,
-.deselect-for-import:focus
+.deselect-for-import:focus,
+.fa-dative-checkbox:focus
 {
     /*outline: none !important;*/
     /*box-shadow: 0 0 10px orange !important;*/
@@ -2709,7 +2711,8 @@ div.import-error
 }
 
 .deselect-for-import,
-.select-for-import
+.select-for-import,
+.fa-dative-checkbox
 {
   position: relative;
   top: 4px;
@@ -2823,5 +2826,23 @@ div.import-report-count
 {
   display: inline-block;
   margin-right: 1em;
+}
+
+div.import-options-container
+{
+  padding: 1em;
+}
+
+div.import-options-container li
+{
+  margin: 1em;
+}
+
+input[name=translation_delimiter]
+{
+  width: 1em;
+  border: 1px solid;
+  line-height: 1.5em;
+  padding-left: 0.5em;
 }
 

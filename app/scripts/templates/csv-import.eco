@@ -94,6 +94,7 @@
 
         <div class="dative-importer-preview">
             <div class='import-controls-container'>
+
                 <button
                     class='import-selected-button
                         ui-corner-all
@@ -116,12 +117,63 @@
                         dative-tooltip'
                     title='View the selected rows as Dative forms (IGT display)'
                     >Preview Selected</button>
+
                 <button
                     class='validate-selected-button
                         ui-corner-all
                         dative-tooltip'
                     title='Check for issues/errors in all selected rows'
                     >Validate Selected</button>
+
+                <button
+                    class='import-options-button
+                        ui-corner-all
+                        dative-tooltip'
+                    title='Configure options for how import works'
+                    >Options ...</button>
+
+            </div>
+
+            <div class='import-options-container invisible'>
+
+                <ul>
+
+                    <li class='dative-tooltip' title='If checked, Dative will try
+                        to identify multiple translations in the translations
+                        column, using the “translation delimiter” below.'>
+                        <% if @parseTranslations: %>
+                            <i class='fa fa-2x fa-check-square parse-translations
+                                fa-dative-checkbox ui-corner-all' tabindex='0'></i>
+                        <% else: %>
+                            <i class='fa fa-2x fa-square parse-translations
+                                fa-dative-checkbox ui-corner-all' tabindex='0'></i>
+                        <% end %>
+                        parse translations</li>
+
+                    <li class='dative-tooltip' title='If checked, Dative will
+                        attempt to identify compatibility prefixes on
+                        translations, e.g., the “*” at the beginning of “*dog”.'>
+                        <% if @identifyTranslationCompatibilities: %>
+                            <i class='fa fa-2x fa-check-square fa-dative-checkbox
+                                identify-translation-compatibilities ui-corner-all'
+                                tabindex='0'></i>
+                        <% else: %>
+                            <i class='fa fa-2x fa-check-square fa-dative-checkbox
+                                identify-translation-compatibilities ui-corner-all'
+                                tabindex='0'></i>
+                        <% end %>
+                        identify compatibility prefixes in translations</li>
+
+                    <li class='dative-tooltip' title='Enter a character that
+                        Dative should use for the translation delimiter; this
+                        is the character that separates individual translations.'>
+                        <input type='text' name='translation_delimiter'
+                            maxlength='1' class='ui-corner-all'
+                            value='<%= @translationDelimiter %>' />
+                        translation delimiter</li>
+
+                </ul>
+
             </div>
 
             <div class='import-report-container'>

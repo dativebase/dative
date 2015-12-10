@@ -36,6 +36,8 @@ define [
 
     initialize: (options) ->
 
+      @getImportOptions options
+
       # An array of strings representing the row from the CSV file, given to us
       # by our parent.
       @line = options.line
@@ -114,6 +116,21 @@ define [
       # possible duplicates.
       @listenTo @, 'cancelCreateRequestBecauseDuplicates',
         @cancelCreateRequestBecauseDuplicates
+
+    # Get config from our parent about how we should perform imports.
+    getImportOptions: (options) ->
+      if 'translationDelimiter' of options
+        @translationDelimiter = options.translationDelimiter
+      else
+        @translationDelimiter = ';'
+      if 'parseTranslations' of options
+        @parseTranslations = options.parseTranslations
+      else
+        @parseTranslations = true
+      if 'identifyTranslationCompatibilities' of options
+        @identifyTranslationCompatibilities = options.identifyTranslationCompatibilities
+      else
+        @identifyTranslationCompatibilities = true
 
     issueCreateRequestFromEvent: -> @issueCreateRequest()
 
@@ -257,12 +274,8 @@ define [
           else
             @focusCellRight event
           @stopEvent event
-        when 13 # Shift+Enter goes up, Enter goes down.
+        when 13
           @editCell event
-          # if event.shiftKey
-          #   @focusCellAbove event
-          # else
-          #   @focusCellBelow event
           @stopEvent event
         else
           if event.which in @editKeys # alphanumeric keys and space lead to editing.
@@ -514,24 +527,26 @@ define [
     showPreview: ->
       $parentContainer = @$ '.import-preview-table-row-under'
       $container = @$ '.import-preview-table-row-display-container'
-      if @valid is null then @validate()
+      #if @valid is null then @validate()
+      @validate()
       @previewButtonStateOpen()
-      if @valid and @previewRendered
-        $parentContainer.show()
-        $container.slideDown()
-      else
-        @closeExistingFormView()
-        @formView = new FormViewForImport model: @model
-        @formView.expanded = true
-        @formView.dataLabelsVisible = true
-        @formView.effectuateExpanded()
-        @listenTo @formView, "newFormView:hide", @hidePreview
-        $parentContainer.show()
-        $container.hide()
-          .html @formView.render().el
-          .slideDown()
-        @rendered @formView
-        @previewRendered = true
+      # if @valid and @previewRendered
+      #   $parentContainer.show()
+      #   $container.slideDown()
+      # else
+
+      @closeExistingFormView()
+      @formView = new FormViewForImport model: @model
+      @formView.expanded = true
+      @formView.dataLabelsVisible = true
+      @formView.effectuateExpanded()
+      @listenTo @formView, "newFormView:hide", @hidePreview
+      $parentContainer.show()
+      $container.hide()
+        .html @formView.render().el
+        .slideDown()
+      @rendered @formView
+      @previewRendered = true
 
     spinnerOptions: ->
       _.extend BaseView::spinnerOptions(), {left: '0%', top: '75%'}
@@ -770,22 +785,34 @@ define [
       [translationString[grammaticality.length..], grammaticality]
 
     # Convert translations-as-string to translations-as-array-of-objects.
-    # Note: assumes that translations are delimited by a semicolon. This is
-    # potentially a problematic assumption and should be user-configurable.
+    # Here is where we use the options that the user specifies in the interface
+    # opened by the "Options ..." button in the parent CSVImportView interface.
     fixTranslations: ->
-      # Get valid grammaticality values, sorted from longest to shortest.
-      grammaticalities = @getGrammaticalities().sort (x, y) -> y.length - x.length
-      if 'translations' of @object
-        translationsString = @object.translations
-        translationsArray = (t.trim() for t in translationsString.split(';'))
-        newTranslations = []
-        for translationString in translationsArray
-          [transcription, grammaticality] =
-            @parseTranslationString translationString, grammaticalities
-          newTranslations.push
-            transcription: transcription
-            grammaticality: grammaticality
-        @object.translations = newTranslations
+      if @parseTranslations
+        # Get valid grammaticality values, sorted from longest to shortest.
+        if @identifyTranslationCompatibilities
+          grammaticalities = @getGrammaticalities().sort (x, y) -> y.length - x.length
+        if 'translations' of @object
+          translationsString = @object.translations
+          translationsArray = (t.trim() for t in \
+            translationsString.split(@translationDelimiter))
+          newTranslations = []
+          for translationString in translationsArray
+            if @identifyTranslationCompatibilities
+              [transcription, grammaticality] =
+                @parseTranslationString translationString, grammaticalities
+            else
+              transcription = translationString
+              grammaticality = ''
+            newTranslations.push
+              transcription: transcription
+              grammaticality: grammaticality
+          @object.translations = newTranslations
+      else
+        @object.translations = [
+          transcription: @object.translations
+          grammaticality: ''
+        ]
 
     # Given a form field label (`attr`), return a resource name.
     attr2resource: (attr) ->
@@ -849,15 +876,6 @@ define [
                 id: id
             @addToWarnings warningObject
             delete @object[attr]
-
-    # Create a resource on the server, given the string `val` and the Form
-    # attribute `attr`.
-    # TODO: this shouldn't be a method. The purpose of this is so that warnings
-    # and errors can come with buttons that, when clicked, cause us to try to
-    # fix the warning/error, e.g., by creating a tag or other resource.
-    createResource: (val, attr) ->
-      console.log "You want to create a resource for the form attribute #{attr}
-        using the string value #{val}"
 
     # Try to convert many-to-many string values to arrays of objects. Delete
     # these values if this is not possible.
