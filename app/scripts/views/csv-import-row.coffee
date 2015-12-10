@@ -225,7 +225,11 @@ define [
     # Note: I was for a while only stopping propagation when the event was not
     # an arrow key: `if event.which not in [37..40]. However, true spreadsheet
     # behaviour is more complex than that ...
-    cellTextKeyboard: (event) -> event.stopPropagation()
+    cellTextKeyboard: (event) ->
+      if event.which is 27
+        @$(event.currentTarget).blur().closest('.csv-value-cell').focus()
+      else
+        event.stopPropagation()
 
     # Respond to keydown events in a cell: arrow keys and (Shift+)Tab/Enter
     # focus adjacent keys, as per regular spreadsheet app behavior.
@@ -254,10 +258,11 @@ define [
             @focusCellRight event
           @stopEvent event
         when 13 # Shift+Enter goes up, Enter goes down.
-          if event.shiftKey
-            @focusCellAbove event
-          else
-            @focusCellBelow event
+          @editCell event
+          # if event.shiftKey
+          #   @focusCellAbove event
+          # else
+          #   @focusCellBelow event
           @stopEvent event
         else
           if event.which in @editKeys # alphanumeric keys and space lead to editing.
