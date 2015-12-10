@@ -1296,15 +1296,14 @@ define [
     setResourceSearchViewButtonShow: ->
       @$('button.toggle-search')
         .tooltip
-          content: "click here to open the interface for searching across
-            #{@resourceNamePluralHuman}"
+          content: "Search across #{@resourceNamePluralHuman}"
 
     # The resource add view show "+" button is disabled when the view is visible; to
     # hide the view, you click on the ^ button on the view itself.
     setResourceSearchViewButtonHide: ->
       @$('button.toggle-search')
         .tooltip
-          content: "click here to hide the interface for searching across
+          content: "Hide interface for searching across
             #{@resourceNamePluralHuman}"
 
     # Render the Resource Search view.
@@ -1377,16 +1376,14 @@ define [
     setResourcesImportViewButtonShow: ->
       @$('button.toggle-import')
         .tooltip
-          content: "click here to open the interface for importing
-            #{@resourceNamePluralHuman}"
+          content: "Import #{@resourceNamePluralHuman}"
 
     # The resource add view show "+" button is disabled when the view is visible; to
     # hide the view, you click on the ^ button on the view itself.
     setResourcesImportViewButtonHide: ->
       @$('button.toggle-import')
         .tooltip
-          content: "click here to hide the interface for importing
-            #{@resourceNamePluralHuman}"
+          content: "Hide interface for importing #{@resourceNamePluralHuman}"
 
     # Render the Resources Import view.
     renderResourcesImportView: ->

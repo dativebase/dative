@@ -53,8 +53,7 @@
 
       <% if @searchable: %>
         <button class="toggle-search dative-tooltip"
-                title="click here to open the interface for searching across
-                    <%= @resourceNamePluralHuman %>"
+                title="Search across <%= @resourceNamePluralHuman %>"
             ><i class='fa fa-fw fa-search'></i></button>
       <% end %>
 
@@ -65,8 +64,7 @@
 
       <% if @importable: %>
         <button class="toggle-import dative-tooltip"
-                title="click here to open the interface for
-                    importing <%= @resourceNamePluralHuman %>"
+                title="Import <%= @resourceNamePluralHuman %>"
             ><i class='fa fa-fw fa-upload'></i></button>
       <% end %>
 
