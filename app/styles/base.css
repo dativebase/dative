@@ -2814,3 +2814,14 @@ div.csv-row-spinner
   height: 1.5em;
 }
 
+div.import-report-container
+{
+  padding: 0.5em;
+}
+
+div.import-report-count
+{
+  display: inline-block;
+  margin-right: 1em;
+}
+

@@ -107,7 +107,7 @@
                         invisible
                         ui-corner-all
                         dative-tooltip'
-                    title='Stop the current importi'
+                    title='Stop the current import'
                     >Stop Importing<i class='fa fa-fw fa-stop'></i></button>
 
                 <button
@@ -123,6 +123,26 @@
                     title='Check for issues/errors in all selected rows'
                     >Validate Selected</button>
             </div>
+
+            <div class='import-report-container'>
+
+                <div class='import-success-count import-report-count'>
+                    <i class='fa fa-fw fa-check-circle ui-state-ok'></i>
+                    <span class='import-success-count-count'>0 successful imports</span>
+                </div>
+
+                <div class='import-fail-count import-report-count'>
+                    <i class='fa fa-fw fa-times-circle ui-state-error-color'></i>
+                    <span class='import-fail-count-count'>0 failed imports</span>
+                </div>
+
+                <div class='import-abort-count import-report-count'>
+                    <i class='fa fa-fw fa-exclamation-circle'></i>
+                    <span class='import-abort-count-count'>0 aborted imports</span>
+                </div>
+
+            </div>
+
 
             <div class='errors-container general-errors-container
                 invisible'>

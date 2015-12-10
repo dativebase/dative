@@ -707,7 +707,7 @@ define [
     headerForEmptyDataSet: ->
       @$('.no-resources')
         .show()
-        .text "There are no #{@resourceNamePlural} to display"
+        .text "There are no #{@resourceNamePluralHuman} to display"
       @$('.pagination-info').hide()
       @$('button.expand-all').button 'disable'
       @$('button.collapse-all').button 'disable'

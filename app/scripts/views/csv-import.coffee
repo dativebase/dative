@@ -94,6 +94,8 @@ define [
       # Set vars to hold validation data.
       @defaultValidationState()
 
+      @hideImportReportContainer()
+
       # This collection is passed to our row view instances so that they can
       # give it to their form model instances for create (POST) requests.
       @formsCollection = new FormsCollection()
@@ -466,6 +468,8 @@ define [
     # This method is called when the "Import Selected" button is clicked.
     # It ultimately imports all of the CSV rows that are selected.
     importSelectedPreflight: ->
+      @resetImportReportContainer()
+      @showImportReportContainer()
       @disableAllControls()
       @importSelectedVarsDefaultState()
       selectedRows = (r for r in @rowViews when r.selected)
@@ -626,6 +630,7 @@ define [
     # it.
     dontImportBecauseDuplicates: ->
       @importsAbortedBecauseDuplicates += 1
+      @updateImportReportContainer()
       @rowViews[@rowToImportIndex].setImportStateCanceledBecauseDuplicates()
       @importNextRow()
 
@@ -695,7 +700,28 @@ define [
         @importsSucceeded += 1
       else
         @importsFailed += 1
+      @updateImportReportContainer()
       @importRow()
+
+    updateImportReportContainer: ->
+      @$('.import-success-count-count')
+        .text "#{@utils.integerWithCommas @importsSucceeded} successful imports"
+      @$('.import-fail-count-count')
+        .text "#{@utils.integerWithCommas @importsFailed} failed imports"
+      @$('.import-abort-count-count')
+        .text "#{@utils.integerWithCommas @importsAbortedBecauseDuplicates}
+          aborted imports"
+
+    resetImportReportContainer: ->
+      @$('.import-success-count-count').text '0 successful imports'
+      @$('.import-fail-count-count').text '0 failed imports'
+      @$('.import-abort-count-count').text '0 aborted imports'
+
+    hideImportReportContainer: ->
+      @$('.import-report-container').hide()
+
+    showImportReportContainer: ->
+      @$('.import-report-container').show()
 
     # Return the duplicates that correspond to `row`.
     getDuplicatesForRow: (row) ->
@@ -751,6 +777,7 @@ define [
       @stopSpin()
       @enableAllControls()
       @hideStopButton()
+      @updateImportReportContainer()
       @alertImportSummary midwayAbort
       @resetImportDefaults()
       # Triggering the following event will cause the `FormsBrowseView`
@@ -1343,6 +1370,8 @@ define [
           @spin 'parsing CSV file'
           @importCSVArray = @parseCSV fileData
           @$('.discard-file-button').show()
+          @resetImportReportContainer()
+          @hideImportReportContainer()
           @displayAsTable()
           @displayFileMetadata()
           @stopSpin()
