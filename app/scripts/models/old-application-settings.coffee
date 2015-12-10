@@ -80,7 +80,6 @@ define ['./resource'], (ResourceModel) ->
         else null
 
     realISOLanguageId: (value) ->
-      console.log "check if #{value} is a real ISO 639-3 language Id"
       if value.trim()
         if value in @languageRefNames
           null

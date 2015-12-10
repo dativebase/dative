@@ -743,28 +743,43 @@ define [
         @object.date_elicited =
           @utils.convertDateISO2mdySlash @object.date_elicited
 
+    getGrammaticalities: ->
+      result = ['*', '?', '#']
+      if globals.oldApplicationSettings
+        try
+          grammaticalities =
+            globals.oldApplicationSettings.get('grammaticalities').split(',')
+          result = grammaticalities
+      result
+
+    # Parse `translationString` to a grammaticality prefix and a transcription
+    # suffix.
+    parseTranslationString: (translationString, grammaticalities) ->
+      grammaticality = ''
+      for gr in grammaticalities
+        if @utils.startsWith translationString, gr
+          grammaticality = gr
+          break
+      if grammaticality.length is translationString.length
+        grammaticality = ''
+      [translationString[grammaticality.length..], grammaticality]
+
     # Convert translations-as-string to translations-as-array-of-objects.
     # Note: assumes that translations are delimited by a semicolon. This is
     # potentially a problematic assumption and should be user-configurable.
-    # TODO: Dative NEEDS to request the web service's settings as soon as login
-    # occurs; this is needed elsewhere, but here it's relevant for getting the
-    # possible grammaticality values.
     fixTranslations: ->
-      grammaticalities = ['*', '?', '#']
+      # Get valid grammaticality values, sorted from longest to shortest.
+      grammaticalities = @getGrammaticalities().sort (x, y) -> y.length - x.length
       if 'translations' of @object
         translationsString = @object.translations
         translationsArray = (t.trim() for t in translationsString.split(';'))
         newTranslations = []
         for translationString in translationsArray
-          if translationString.length > 1 and
-          translationString[0] in grammaticalities
-            newTranslations.push
-              transcription: translationString[1...]
-              grammaticality: translationString[0]
-          else
-            newTranslations.push
-              transcription: translationString
-              grammaticality: ''
+          [transcription, grammaticality] =
+            @parseTranslationString translationString, grammaticalities
+          newTranslations.push
+            transcription: transcription
+            grammaticality: grammaticality
         @object.translations = newTranslations
 
     # Given a form field label (`attr`), return a resource name.

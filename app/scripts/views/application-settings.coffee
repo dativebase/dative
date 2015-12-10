@@ -4,15 +4,16 @@ define [
   './servers'
   './active-server'
   './old-application-settings-resource'
+  './../models/old-application-settings'
   './../collections/old-application-settings'
   './../utils/globals'
   './../templates/application-settings'
 ], (Backbone, BaseView, ServersView, ActiveServerView,
-  OLDApplicationSettingsResourceView, OLDApplicationSettingsCollection,
-  globals, applicationSettingsTemplate) ->
+  OLDApplicationSettingsResourceView, OLDApplicationSettingsModel,
+  OLDApplicationSettingsCollection, globals, applicationSettingsTemplate) ->
 
   # Application Settings View
-  # ----------------------------------------------------------------------------
+  # -------------------------
   #
   # View for viewing and modifying the settings of this Dative application.
   # These settings are currently divided into 3 sections/parts:
@@ -97,8 +98,7 @@ define [
 
     addOLDApplicationSettingsSuccess: (model) ->
       console.log 'the general app settings view knows that a new OLD app
-        settings was successfully created. this is the model ...'
-      console.log model
+        settings was successfully created.'
 
     # Note the strange spellings of the events triggered here; just go along
     # with it ...

@@ -64,6 +64,7 @@ define [
   './../models/language'
   './../models/morphological-parser'
   './../models/morphology'
+  './../models/old-application-settings'
   './../models/orthography'
   './../models/page'
   './../models/phonology'
@@ -84,6 +85,7 @@ define [
   './../collections/morphological-parsers'
   './../collections/morphologies'
   './../collections/orthographies'
+  './../collections/old-application-settings'
   './../collections/pages'
   './../collections/phonologies'
   './../collections/searches'
@@ -114,17 +116,17 @@ define [
 
   ApplicationSettingsModel, CollectionModel, ElicitationMethodModel, FileModel,
   FormModel, LanguageModelModel, LanguageModel, MorphologicalParserModel,
-  MorphologyModel, OrthographyModel, PageModel, PhonologyModel, SearchModel,
-  SourceModel, SpeakerModel, SubcorpusModel, SyntacticCategoryModel, TagModel,
-  UserModel,
+  MorphologyModel, OLDApplicationSettingsModel, OrthographyModel, PageModel,
+  PhonologyModel, SearchModel, SourceModel, SpeakerModel, SubcorpusModel,
+  SyntacticCategoryModel, TagModel, UserModel,
 
   CollectionsCollection, ElicitationMethodsCollection, FilesCollection,
   FormsCollection, LanguageModelsCollection, LanguagesCollection,
   MorphologicalParsersCollection, MorphologiesCollection,
-  OrthographiesCollection, PagesCollection, PhonologiesCollection,
-  SearchesCollection, SourcesCollection, SpeakersCollection,
-  SubcorporaCollection, SyntacticCategoriesCollection, TagsCollection,
-  UsersCollection,
+  OrthographiesCollection, OLDApplicationSettingsCollection, PagesCollection,
+  PhonologiesCollection, SearchesCollection, SourcesCollection,
+  SpeakersCollection, SubcorporaCollection, SyntacticCategoriesCollection,
+  TagsCollection, UsersCollection,
 
   globals, appTemplate) ->
 
@@ -152,6 +154,7 @@ define [
       @router = new Workspace
         resources: @myResources
         mainMenuView: @mainMenuView
+      @oldApplicationSettingsCollection = new OLDApplicationSettingsCollection()
       @listenToEvents()
       @render()
       @setTheme()
@@ -216,6 +219,7 @@ define [
         setTimeout ->
           console.clear()
         , 2000
+      @loggedIn()
       @$el.html @template()
       @renderPersistentSubviews()
       @matchWindowDimensions()
@@ -236,7 +240,6 @@ define [
     # Display the confirm dialog that asks the user whether they really want to
     # navigate away from the current page.
     displayPreventNavigationAlert: ->
-      console.log 'in displayPreventNavigationAlert'
       if @preventNavigationMsg
         msg = @preventNavigationMsg
       else
@@ -281,10 +284,35 @@ define [
       @listenTo Backbone, 'openExporterDialog', @openExporterDialog
       @listenTo Backbone, 'routerNavigateRequest', @routerNavigateRequest
       @listenToResources()
+      @listenToOLDApplicationSettingsCollection()
 
+    # Note the strange spellings of the events triggered here; just go along
+    # with it ...
+    listenToOLDApplicationSettingsCollection: ->
+      @listenTo Backbone, 'fetchOldApplicationSettingsesEnd',
+        @fetchOLDApplicationSettingsEnd
+      @listenTo Backbone, 'fetchOldApplicationSettingsesStart',
+        @fetchOLDApplicationSettingsStart
+      @listenTo Backbone, 'fetchOldApplicationSettingsesSuccess',
+        @fetchOLDApplicationSettingsSuccess
+      @listenTo Backbone, 'fetchOldApplicationSettingsesFail',
+        @fetchOLDApplicationSettingsFail
 
-    # FOX
-    # @listenToResources()
+    fetchOLDApplicationSettingsEnd: ->
+
+    fetchOLDApplicationSettingsStart: ->
+
+    fetchOLDApplicationSettingsSuccess: ->
+      if @oldApplicationSettingsCollection.length > 0
+        globals.oldApplicationSettings = @oldApplicationSettingsCollection
+          .at(@oldApplicationSettingsCollection.length - 1)
+      else
+        console.log 'This OLD has no app settings!?'
+        globals.oldApplicationSettings = null
+
+    fetchOLDApplicationSettingsFail: ->
+      console.log 'FAILED to get OLD app settings'
+      globals.oldApplicationSettings = null
 
     routerNavigateRequest: (route) -> @router.navigate route
 
@@ -407,7 +435,9 @@ define [
             @applicationSettings.set 'fieldDBApplication',
               FieldDB.FieldDBObject.application
           @showCorporaView()
-        when 'OLD' then @showFormsView()
+        when 'OLD'
+          @oldApplicationSettingsCollection.fetchResources()
+          @showFormsView()
         else console.log 'Error: you logged in to a non-FieldDB/non-OLD server
           (?).'
 
@@ -477,7 +507,13 @@ define [
           @applicationSettings.set 'loggedIn', true
           @applicationSettings.set 'loggedInUserRoles',
             fieldDBApp.authentication.user.roles
-      @applicationSettings.get 'loggedIn'
+      loggedIn = @applicationSettings.get 'loggedIn'
+      if loggedIn then @getOLDApplicationSettings()
+      loggedIn
+
+    getOLDApplicationSettings: ->
+      if @activeServerType() is 'OLD'
+        @oldApplicationSettingsCollection.fetchResources()
 
     showHomePageView: ->
       if @preventNavigationState then @displayPreventNavigationAlert(); return

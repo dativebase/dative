@@ -441,6 +441,7 @@ define [
           if not _.isEqual(globals.get(attr).data, val)
             changed.push attr
             globals.get(attr).data = val
+            globals.trigger "change:#{attr}"
         else
           changed.push attr
           attrVal =

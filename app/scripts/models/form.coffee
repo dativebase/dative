@@ -79,6 +79,7 @@ define [
         when 'transcription' then @validOLDTranscription
         when 'translations' then @validOLDTranslations
         when 'date_elicited' then @validateOLDDateElicited
+        when 'grammaticality' then @inGrammaticalities
         else null
 
     validOLDTranscription: (value) ->
@@ -88,6 +89,20 @@ define [
       error = null
       if (t for t in value when t.transcription.trim()).length is 0
         error = 'Please enter one or more translations'
+      error
+
+    # The standard FormAddWidgetView prevents impossible grammaticalities but
+    # the import interface makes it possible for the user to enter whatever
+    # they want.
+    inGrammaticalities: (value) ->
+      error = null
+      if value # '' for grammaticality is always ok
+        if globals.oldApplicationSettings
+          try
+            grammaticalities =
+              globals.oldApplicationSettings.get('grammaticalities').split(',')
+            if value not in grammaticalities
+              error = "Valid grammaticalities are: #{grammaticalities.join ', '}"
       error
 
     validateOLDDateElicited: (value) ->

@@ -251,3 +251,16 @@ define [
       ]
       options
 
+    # The FormAddWidgetView has a special render method; it refreshes all of
+    # its field views with newly retrieved `options`. This is a bit of a hack/
+    # overkill. The purpose is so that the grammaticality options in the
+    # relevant select menus will have the current options when an OLD app
+    # settings is updated.
+    render: ->
+      super
+      options = @getOptions()
+      for fv in @fieldViews()
+        fv.options = options
+        fv.refresh()
+      @
+

@@ -119,6 +119,8 @@ define [
 
       @listenTo Backbone, 'updateOldApplicationSettingsFail',
         (arg) => @updateResourceFail arg, 'applicationSettings'
+      @listenTo Backbone, 'addOldApplicationSettingsSuccess',
+        @updateOLDApplicationSettingsSuccess
 
       @listenToCRUDResources()
 
@@ -672,5 +674,13 @@ define [
         content: "Sorry, the current import file contains no valid rows so
           nothing can be imported."
         type: 'error'
+      @renderNotification notification
+
+    updateOLDApplicationSettingsSuccess: ->
+      notification = new NotificationView
+        title: 'OLD Application Settings updated'
+        content: "You have successfully updated the application settings for
+          the OLD server at
+          #{globals.applicationSettings.get('activeServer').get 'url'}."
       @renderNotification notification
 

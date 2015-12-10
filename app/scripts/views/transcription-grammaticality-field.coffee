@@ -1,7 +1,8 @@
 define [
   './transcription-base-field'
   './select-textarea-input'
-], (TranscriptionBaseFieldView, SelectTextareaInputView) ->
+  './../utils/globals'
+], (TranscriptionBaseFieldView, SelectTextareaInputView, globals) ->
 
   # Transcription Grammaticality Field View
   # ---------------------------------------
@@ -10,6 +11,13 @@ define [
   # <textarea>. (Compare to the similar utterance-judgement-field view.)
 
   class TranscriptionGrammaticalityFieldView extends TranscriptionBaseFieldView
+
+    listenToEvents: ->
+      super
+      # If the available grammaticality options change in `globals` we refresh
+      # ourselves so that that change is reflected in the grammaticality selectmenu.
+      # TODO: why isn't this working?
+      @listenTo globals, "change:grammaticalities", @refresh
 
     getMarginLeft: -> if @addUpdateType is 'add' then '34.5%' else '37.5%'
 

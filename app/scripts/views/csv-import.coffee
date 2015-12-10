@@ -45,8 +45,7 @@ define [
   #
   # TODO:
   #
-  # - grammaticality validation. (Requires app settings having been fetched
-  #   from server first.)
+  # - import options: translation delimiter, etc.
   #
   # - length validation: otherwise things may be silently truncated.
   #

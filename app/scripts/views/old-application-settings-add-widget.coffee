@@ -37,6 +37,7 @@ define [
       super options
 
 
+
   # Field view for specifying a language name or (ISO 639-3) three-leter Id
   # such that changes to the "counterpart" value may cause changes to the value
   # controlled by this field view.
@@ -84,11 +85,18 @@ define [
       else
         @systemSetVal = true
         @userSetVal = false
-      @events["autocompleteselect .#{@context.class}"] = 'userSetToModel'
-      @events['change'] = 'userSetToModel'
-      @events['input'] = 'userSetToModel'
-      @events['selectmenuchange'] = 'userSetToModel'
-      @events['menuselect'] = 'userSetToModel'
+      # @events["autocompleteselect .#{@context.class}"] = 'userSetToModel'
+      # @events['change'] = 'userSetToModel'
+      # @events['input'] = 'userSetToModel'
+      # @events['selectmenuchange'] = 'userSetToModel'
+      # @events['menuselect'] = 'userSetToModel'
+
+    events:
+      'autocompleteselect': 'userSetToModel'
+      'change':             'userSetToModel'
+      'input':              'userSetToModel'
+      'selectmenuchange':   'userSetToModel'
+      'menuselect':         'userSetToModel'
 
     # We divide our `setToModel` API into one for the system and one for the
     # user so that we can keep track of who set to the model and allow the user
@@ -170,7 +178,6 @@ define [
 
     getCounterpartMapper: ->
       @context.options.languageIdsToRefNames
-
 
   # This is a selectmenu-based field for the `_validation`-suffixed attributes.
   class ValidationSelectFieldView extends RequiredSelectFieldView
@@ -329,7 +336,16 @@ define [
       options.languageRefNamesToIds = @getLanguageRefNamesToIds()
       options
 
+    # We have successfully created a new OLD application settings resource.
     addResourceSuccess: ->
       super
+
+      # Here we are storing our new grammaticalities in `globals`.
+      grammaticalities = @model.get('grammaticalities').split ','
+      grammaticalitiesData =
+        data:
+          grammaticalities: grammaticalities
+      @storeOptionsDataGlobally grammaticalitiesData
+
       @originalModelCopy = @copyModel @model
 
