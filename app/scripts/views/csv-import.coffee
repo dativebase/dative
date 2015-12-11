@@ -42,10 +42,11 @@ define [
   # - warnings of "un-parse-able" string data (e.g., source strings that cannot
   #   be parsed to source objects)
   # - selective import: user can manually select a subset of forms to import.
-  #
+
   # TODO:
   #
-  # - length validation: otherwise things may be silently truncated.
+  # - improve validation:
+  #   - configurable date validation (i.e., choosable formats for date elicited)
   #
   # - offer to close the file after import has completed. It holds a lot of
   #   memory.

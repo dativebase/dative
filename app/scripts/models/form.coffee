@@ -79,11 +79,40 @@ define [
         when 'transcription' then @validOLDTranscription
         when 'translations' then @validOLDTranslations
         when 'date_elicited' then @validateOLDDateElicited
+        # The following validators are redundant when a FormAddWidgetView is
+        # used because its field views have forced-choice select menus and
+        # max-length inputs. But they do become necessary during CSV import.
         when 'grammaticality' then @inGrammaticalities
+        when 'phonetic_transcription' then @max255Chars
+        when 'narrow_phonetic_transcription' then @max255Chars
+        when 'morpheme_break' then @max255Chars
+        when 'grammaticality' then @max255Chars
+        when 'morpheme_gloss' then @max255Chars
+        when 'syntax' then @max1023Chars
+        when 'semantics' then @max1023Chars
+        when 'status' then @inStatuses
         else null
 
+    max255Chars: (value) ->
+      if value.length > 255 then return '255 characters max'
+      null
+
+    max1023Chars: (value) ->
+      if value.length > 1023 then return '1023 characters max'
+      null
+
+    inStatuses: (value) ->
+      if value in ['', 'tested', 'requires testing']
+        null
+      else
+        'Only the values “tested” and “requires testing” are permitted'
+
     validOLDTranscription: (value) ->
-      @requiredString value
+      result = @requiredString value
+      if result is null
+        @max255Chars value
+      else
+        result
 
     validOLDTranslations: (value) ->
       error = null
