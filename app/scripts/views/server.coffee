@@ -126,7 +126,6 @@ define [
         .tooltip content: 'make this server the active one'
 
     activateServer: ->
-      console.log 'activateServer of ServerView'
       # The ApplicationSettingsView changes the active server.
       Backbone.trigger 'activateServer', @model.get('id')
 

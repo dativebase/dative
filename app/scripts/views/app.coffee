@@ -69,6 +69,7 @@ define [
   './../models/page'
   './../models/phonology'
   './../models/search'
+  './../models/server'
   './../models/source'
   './../models/speaker'
   './../models/subcorpus'
@@ -89,6 +90,7 @@ define [
   './../collections/pages'
   './../collections/phonologies'
   './../collections/searches'
+  './../collections/servers'
   './../collections/sources'
   './../collections/speakers'
   './../collections/subcorpora'
@@ -117,16 +119,16 @@ define [
   ApplicationSettingsModel, CollectionModel, ElicitationMethodModel, FileModel,
   FormModel, LanguageModelModel, LanguageModel, MorphologicalParserModel,
   MorphologyModel, OLDApplicationSettingsModel, OrthographyModel, PageModel,
-  PhonologyModel, SearchModel, SourceModel, SpeakerModel, SubcorpusModel,
-  SyntacticCategoryModel, TagModel, UserModel,
+  PhonologyModel, SearchModel, ServerModel, SourceModel, SpeakerModel,
+  SubcorpusModel, SyntacticCategoryModel, TagModel, UserModel,
 
   CollectionsCollection, ElicitationMethodsCollection, FilesCollection,
   FormsCollection, LanguageModelsCollection, LanguagesCollection,
   MorphologicalParsersCollection, MorphologiesCollection,
   OrthographiesCollection, OLDApplicationSettingsCollection, PagesCollection,
-  PhonologiesCollection, SearchesCollection, SourcesCollection,
-  SpeakersCollection, SubcorporaCollection, SyntacticCategoriesCollection,
-  TagsCollection, UsersCollection,
+  PhonologiesCollection, SearchesCollection, ServersCollection,
+  SourcesCollection, SpeakersCollection, SubcorporaCollection,
+  SyntacticCategoriesCollection, TagsCollection, UsersCollection,
 
   globals, appTemplate) ->
 
@@ -146,6 +148,10 @@ define [
     initialize: (options) ->
       @preventParentScroll()
       @getApplicationSettings options
+      @fetchServers()
+
+    # Continue initialization after fetching servers.json
+    initializeContinue: ->
       globals.applicationSettings = @applicationSettings
       @overrideFieldDBNotificationHooks()
       @initializePersistentSubviews()
@@ -478,6 +484,39 @@ define [
         @applicationSettings = options.applicationSettings
       else
         @applicationSettings = new ApplicationSettingsModel()
+
+    # We have fetched the default servers array from the server hosting this
+    # Dative.
+    addDefaultServers: (serversArray) ->
+      serverModelsArray = []
+      for s in serversArray
+        s.id = @guid()
+        serverModelsArray.push(new ServerModel(s))
+      serversCollection = new ServersCollection(serverModelsArray)
+      activeServer = serversCollection.at 0
+      @applicationSettings.set 'servers', serversCollection
+      @applicationSettings.set 'activeServer', activeServer
+      @applicationSettings.save()
+      @initializeContinue()
+
+    # Fetch servers.json. This is a JSON object that contains an array of
+    # server objects. This allows the default list of (OLD/FieldDB) servers
+    # that this Dative knows about to be specified at runtime.
+    fetchServers: ->
+      if @applicationSettings.usingDefaults
+        url = 'servers.json'
+        $.ajax
+          url: url
+          type: 'GET'
+          dataType: 'json'
+          error: (jqXHR, textStatus, errorThrown) ->
+            console.log "Ajax request for #{url} threw an error:
+              #{errorThrown}"
+            @initializeContinue()
+          success: (serversArray, textStatus, jqXHR) =>
+            @addDefaultServers serversArray
+      else
+        @initializeContinue()
 
     # Size the #appview div relative to the window size
     matchWindowDimensions: ->

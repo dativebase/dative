@@ -364,8 +364,14 @@ module.exports = (grunt) ->
       unicodedatajson:
         src: 'UnicodeData.json'
         dest: '.tmp/'
+      serversjson:
+        src: 'servers.json'
+        dest: '.tmp/'
       unicodedatajsondist:
         src: 'UnicodeData.json'
+        dest: 'dist/'
+      serversjsondist:
+        src: 'servers.json'
         dest: 'dist/'
       dist:
         files: [
@@ -384,6 +390,7 @@ module.exports = (grunt) ->
             'help/html/help.html'
             './../package.json'
             './../.tmp/UnicodeData.json'
+            './../.tmp/servers.json'
             'images/{,*/}*.{webp,gif,png,jpg}' # added png so that my jQuery images in /images would copy over, cf. imagemin headache
             'styles/fonts/{,*/}*.*'
             'bower_components/sass-bootstrap/fonts/*.*'
@@ -544,6 +551,7 @@ module.exports = (grunt) ->
         'copy:coffee'
         'copy:packagejson'
         'copy:unicodedatajson'
+        'copy:serversjson'
         'coffee:serve'
         'coffee:test'
         #'createDefaultTemplate'
@@ -561,6 +569,7 @@ module.exports = (grunt) ->
       'copy:coffee'
       'copy:packagejson'
       'copy:unicodedatajson'
+      'copy:serversjson'
       'coffee:serve'
       #'createDefaultTemplate'
       #'jst'
@@ -598,6 +607,7 @@ module.exports = (grunt) ->
     'copy:coffee' # copy all .coffee files in app/scripts/ to .tmp/scripts/
     'copy:packagejson'
     'copy:unicodedatajson'
+    'copy:serversjson'
     'coffee:dist' # convert all .coffee files in .tmp/scripts to .js in situ
 
     # eco: convert all .eco files in app/scripts/templates/ to .js files in
@@ -669,6 +679,7 @@ module.exports = (grunt) ->
     'copy:dist'
 
     'copy:unicodedatajsondist'
+    'copy:serversjsondist'
   ]
 
   grunt.registerTask 'default', ['jshint', 'test', 'build']

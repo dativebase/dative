@@ -239,7 +239,9 @@ define [
           JSON.parse(localStorage.getItem(@localStorageKey))
         applicationSettingsObject = @backbonify applicationSettingsObject
         @set applicationSettingsObject
+        @usingDefaults = false
       else
+        @usingDefaults = true
         @save()
 
     # Logout
@@ -434,6 +436,8 @@ define [
 
     defaults: ->
 
+      # Moving to specifying default servers at runtime using servers.json
+
       server1Object = new FieldDB.Connection(FieldDB.Connection.defaultConnection('localhost'))
       server1 =
         new ServerModel
@@ -476,10 +480,11 @@ define [
           corpusServerURL: null
           website: 'http://www.onlinelinguisticdatabase.org'
 
-      if window.location.hostname in ["localhost", '127.0.0.1']
-        servers = new ServersCollection([server1, server2, server3, server4])
-      else
-        servers = new ServersCollection([server3, server4])
+      # if window.location.hostname in ["localhost", '127.0.0.1']
+      #   servers = new ServersCollection([server1, server2, server3, server4])
+      # else
+      #   servers = new ServersCollection([server3, server4])
+      servers = new ServersCollection([server2])
 
       parserTaskSetModel = new ParserTaskSetModel()
 
