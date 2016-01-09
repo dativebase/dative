@@ -339,6 +339,9 @@ define [
     renderDisplayViewsPost: ->
       @interlinearize()
 
+    interlinearizedHasContent: ->
+      @$('div.igt-tables-container').first().html().length > 0
+
     # Transform the display of the form IGT attributes into an interlinear,
     # columnarly aligned display. This is done by creating a <table> for each
     # multi-field line in the IGT display.
@@ -606,8 +609,7 @@ define [
         leftIndent = @igtMaxIndentations * @igtRowStepIndent
 
     clearIGTTables: ->
-      # $('div.igt-tables-container').remove()
-      $('div.igt-tables-container').html ''
+      @$('div.igt-tables-container').html ''
 
     # Write the IGT data to the DOM as a series of IGT tables. There is one
     # table for each line of IGT, i.e., one table for each columnarly aligned
