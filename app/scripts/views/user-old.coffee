@@ -74,6 +74,7 @@ define [
           'history'
           'controls'
           'data'
+          'settings'
           'delete'
           'duplicate'
         ]
@@ -82,6 +83,7 @@ define [
           'history'
           'controls'
           'data'
+          'settings'
           'update'
           'delete'
           'duplicate'
