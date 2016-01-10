@@ -736,7 +736,7 @@ data structures. Stay tuned.</li>
 </div>
 <script>
 
-if (FieldDB && FieldDB.FieldDBObject && FieldDB.FieldDBObject.application && FieldDB.FieldDBObject.application.brand) {
+if ((typeof FieldDB !== 'undefined') && FieldDB && FieldDB.FieldDBObject && FieldDB.FieldDBObject.application && FieldDB.FieldDBObject.application.brand) {
   var brand = FieldDB.FieldDBObject.application.brand;
   var website = FieldDB.FieldDBObject.application.website;
 } else {

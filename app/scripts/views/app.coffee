@@ -1,6 +1,6 @@
 define [
   'backbone'
-  'FieldDB'
+  # 'FieldDB'
   './../routes/router'
   './base'
   './resource'
@@ -100,7 +100,7 @@ define [
 
   './../utils/globals'
   './../templates/app'
-], (Backbone, FieldDB, Workspace, BaseView, ResourceView, MainMenuView,
+], (Backbone, Workspace, BaseView, ResourceView, MainMenuView,
   NotifierView, LoginDialogView, RegisterDialogView, AlertDialogView,
   TasksDialogView, HelpDialogView, ResourceDisplayerDialogView,
   ExporterDialogView, HomePageView,
@@ -153,7 +153,7 @@ define [
     # Continue initialization after fetching servers.json
     initializeContinue: ->
       globals.applicationSettings = @applicationSettings
-      @overrideFieldDBNotificationHooks()
+      # @overrideFieldDBNotificationHooks()
       @initializePersistentSubviews()
       @resourceModel = null # this and the next attribute are for displaying a single resource in the main page.
       @resourcesCollection = null
@@ -280,7 +280,7 @@ define [
       @listenTo Backbone, 'authenticate:mustconfirmidentity',
         @authenticateConfirmIdentity
       @listenTo Backbone, 'logoutSuccess', @logoutSuccess
-      @listenTo Backbone, 'useFieldDBCorpus', @useFieldDBCorpus
+      # @listenTo Backbone, 'useFieldDBCorpus', @useFieldDBCorpus
       @listenTo Backbone, 'applicationSettings:changeTheme', @changeTheme
       @listenTo Backbone, 'showResourceInDialog', @showResourceInDialog
       @listenTo Backbone, 'showResourceModelInDialog',

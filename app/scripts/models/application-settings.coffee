@@ -7,9 +7,9 @@ define [
   './../collections/servers'
   './../utils/utils'
   './../utils/globals'
-  'FieldDB'
+  # 'FieldDB'
 ], (BaseModel, ServerModel, ParserTaskSetModel, MorphologyModel,
-  LanguageModelModel, ServersCollection, utils, globals, FieldDB) ->
+  LanguageModelModel, ServersCollection, utils, globals) ->
 
   # Application Settings Model
   # --------------------------
@@ -27,8 +27,8 @@ define [
 
     initialize: ->
       @fetch()
-      fieldDBTempApp = new (FieldDB.App)(@get('fieldDBApplication'))
-      fieldDBTempApp.authentication.eventDispatcher = Backbone
+      # fieldDBTempApp = new (FieldDB.App)(@get('fieldDBApplication'))
+      # fieldDBTempApp.authentication.eventDispatcher = Backbone
       @listenTo Backbone, 'authenticate:login', @authenticate
       @listenTo Backbone, 'authenticate:logout', @logout
       @listenTo Backbone, 'authenticate:register', @register
@@ -438,6 +438,7 @@ define [
 
       # Moving to specifying default servers at runtime using servers.json
 
+      ###
       server1Object = new FieldDB.Connection(FieldDB.Connection.defaultConnection('localhost'))
       server1 =
         new ServerModel
@@ -449,16 +450,6 @@ define [
           website: server1Object.website
           corpusServerURL: server1Object.corpusUrl
 
-      server2 =
-        new ServerModel
-          id: @guid()
-          name: 'OLD Local Development'
-          type: 'OLD'
-          url: 'http://127.0.0.1:5000'
-          serverCode: null
-          corpusServerURL: null
-          website: 'http://www.onlinelinguisticdatabase.org'
-
       server3Object = new FieldDB.Connection(FieldDB.Connection.defaultConnection('lingsync'))
       server3 =
         new ServerModel
@@ -469,6 +460,17 @@ define [
           serverCode: server3Object.serverLabel
           corpusServerURL: server3Object.corpusUrl
           website: server3Object.website
+      ###
+
+      server2 =
+        new ServerModel
+          id: @guid()
+          name: 'OLD Local Development'
+          type: 'OLD'
+          url: 'http://127.0.0.1:5000'
+          serverCode: null
+          corpusServerURL: null
+          website: 'http://www.onlinelinguisticdatabase.org'
 
       server4 =
         new ServerModel
@@ -497,7 +499,8 @@ define [
       username: ''
       password: '' # TODO trigger authenticate:mustconfirmidentity instead of storing the password in localStorage
       servers: servers
-      serverTypes: ['FieldDB', 'OLD']
+      # serverTypes: ['FieldDB', 'OLD']
+      serverTypes: ['OLD']
       fieldDBServerCodes: [
         'localhost'
         'testing'
