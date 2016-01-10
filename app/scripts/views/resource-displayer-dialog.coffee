@@ -137,7 +137,8 @@ define [
         maxHeight: @maxHeight
         create: =>
           @fontAwesomateCloseIcon()
-        close: => @closeInner()
+        close: =>
+          @closeInner()
         open: (event, ui) =>
           @moveToTop()
         resizeStart: =>
@@ -151,6 +152,10 @@ define [
 
     closeInner: ->
       if @resourceView
+        # The CSVImportView listens for this event so that it knows when a user
+        # has closed a dialog containing a (view containing a) model the the
+        # user may have wanted to create in order to solve an import warning. 
+        @resourceView.model.trigger 'resourceDisplayerDialogHoldingModelClosed'
         @stopListening @resourceView.model
         @resourceView.close()
         @closed @resourceView

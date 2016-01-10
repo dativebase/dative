@@ -2803,7 +2803,8 @@ ul.general-errors-list
 }
 
 button.toggle-errors,
-button.toggle-warnings
+button.toggle-warnings,
+button.fix-all-warnings
 {
   position: relative;
   top: -3px;

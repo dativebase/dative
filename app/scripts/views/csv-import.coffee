@@ -45,8 +45,7 @@ define [
 
   # TODO:
   #
-  # - improve validation:
-  #   - configurable date validation (i.e., choosable formats for date elicited)
+  # - interface for fixing all fixable warnings, i.e., create tag for '...'
   #
   # - offer to close the file after import has completed. It holds a lot of
   #   memory.
@@ -58,6 +57,9 @@ define [
   # - If there are id values in the CSV import file, we may want to ask the
   #   user if they want to UPDATE the relevant forms, as opposed to creating
   #   them.
+  #
+  # - configurable date validation: let user choose among formats for date
+  #   elicited
   #
   # - PERFORMANCE!:
   #
@@ -290,12 +292,62 @@ define [
       'click button.import-solution':             'performImportSolution'
       'click button.toggle-errors':               'toggleErrors'
       'click button.toggle-warnings':             'toggleWarnings'
+      'click button.fix-all-warnings':            'fixAllWarnings'
       'click button.import-help':                 'openImportHelp'
       'click button.import-options-button':       'toggleOptions'
       'click i.parse-translations':               'toggleParseTranslations'
       'click i.identify-translation-compatibilities':
         'toggleIdentifyTranslationCompatibilities'
       'input input[name=translation_delimiter]':  'setTranslationDelimiter'
+
+    # User has clicked "Fix all warnings" button. We find all warnings with
+    # solutions and put them in a queue. Then we help the user to fix them one
+    # by one.
+    fixAllWarnings: ->
+      @solutionsQueue = []
+      for msg, warningObject of @rowWarnings
+        if warningObject.solution
+          solution = @solutions[warningObject.solution.id]
+          if solution
+            @solutionsQueue.push solution
+      @performNextSolution()
+
+    # Perform the first solution in the `@solutionsQueue`.
+    performNextSolution: ->
+      solution = @solutionsQueue.shift()
+      if solution
+        if solution.resource of @creatableResources
+          meta = @creatableResources[solution.resource]
+          resourceModelClass = meta.modelClass
+          coreAttribute = meta.coreAttribute
+          resourceModel = new resourceModelClass
+          resourceModel.set coreAttribute, solution.val
+          # The resource creation may succeed, fail, or the user may abort it.
+          # In any of these cases, we move on to performing the next solution.
+          @listenToOnce resourceModel,
+            "add#{@utils.capitalize solution.resource}Success",
+            @performNextSolution
+          @listenToOnce resourceModel,
+            "add#{@utils.capitalize solution.resource}Fail",
+            @performNextSolution
+          @listenToOnce resourceModel,
+            'resourceDisplayerDialogHoldingModelClosed', @performNextSolution
+          Backbone.trigger 'showResourceModelInDialog', resourceModel,
+            solution.resource
+        else
+          console.log "Sorry, we are unable to create a #{solution.resource}"
+          @performNextSolution()
+      else
+        @allSolutionsPerformed()
+
+    # We have created all of the resources needed for this import (or, at
+    # least, we have given the user the opportunity to create them), so we
+    # re-run validation indirectly by first updating our related resources.
+    # TODO: alert and summarize what was accomplished
+    # TODO: hide "Fix all warnings" button if there are no warnings with solutions.
+    allSolutionsPerformed: ->
+      @validateAfterGettingNewFormData = true
+      @dummyFormModel.getNewResourceData()
 
     # Update all row views with the current import options values.
     updateRowViewsWithImportOptions: ->
@@ -1113,11 +1165,13 @@ define [
         @$('h1.warnings-header').show().find('.warnings-header-text')
           .text "#{totalWarningsCount} #{warningsWord}"
         @$('button.toggle-warnings').show()
+        @$('button.fix-all-warnings').show()
         @$('h1.no-warnings-header').hide()
         @displayIndividualWarnings()
       else
         @$('h1.warnings-header').hide()
         @$('button.toggle-warnings').hide()
+        @$('button.fix-all-warnings').hide()
         @$('div.general-warnings-list-wrapper').hide()
         @$('h1.no-warnings-header').show()
 

@@ -229,6 +229,9 @@
                 <button class='toggle-warnings' ><i class='fa fa-fw
                     fa-caret-right'></i></button>
 
+                <button class='fix-all-warnings dative-tooltip' title='Fix all
+                    fixable warnings' >Fix all warnings</button>
+
                 <h1 class='no-warnings-header ui-state-ok ui-corner-all invisible'
                     ><i class='no-warnings-header-icon fa fa-fw
                         fa-check-circle'></i
