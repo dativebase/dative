@@ -1,25 +1,28 @@
 [![Build Status](https://travis-ci.org/FieldDB/dative.svg?branch=master)](https://travis-ci.org/FieldDB/dative)
-# Dative: a GUI for FieldDB and the OLD
-
+# Dative
 
 ## Description
 
-Dative is a browser-based application for linguistic fieldwork and language
-documentation.
+Dative is a graphical interface for linguistic fieldwork and language
+documentation applications. At present, Dative works with the [Online
+Linguistic Database (OLD)](http://www.onlinelinguisticdatabase.org).
 
-Its high-level goals are:
 
-- to interface with multiple server-side backends (FieldDB corpora, OLDs)
-- to incorporate the best parts of existing linguistic fieldwork database
-  application GUIs:
+## Features
 
-  - [Spreadsheet](http://app.lingsync.org/)
-  - [Prototype](https://chrome.google.com/webstore/detail/placeholder/eeipnabdeimobhlkfaiohienhibfcfpa)
-  - [OLD](http://www.onlinelinguisticdatabase.org)
-  - [FLEx](http://fieldworks.sil.org/flex/)
-  - [EOPAS](http://www.eopas.org/)
+- Collaboration and data sharing
+- Advanced and smart search
+- Automatic morpheme cross-referencing
+- Build morphological parsers and phonologies
+- CSV import
+- Text creation
+- Media file (i.e., audio, video, image)-to-text association.
+- User access control
+- Documentation
+- Open source
 
-![Gratuitous screenshot](dative-screenshot.png)
+![Screenshot of Dative](dative-screenshot.png)
+
 
 ## For Developers
 
@@ -104,59 +107,4 @@ To generate the docco HTML docs using the comments in your source files:
 The above command generates files in the docs/ directory. Because docco
 overwrites files of the same name in different directories, I have configured
 the Gruntfile to rename each file for doc generation using the file's path.
-
-
-
-#### Compass/Sass Complications
-
-Long story short: we are not currently using Compass/Sass/SCSS.
-
-The default grunt file from the Backbone Yo generator uses the
-grunt-contrib-compass Grunt plugin to convert SCSS/Sass files to CSS. This
-requires that Ruby, Sass, and Compass >=0.12.2 be installed. If you're on OS X
-or Linux you probably already have Ruby installed; test with ruby -v in your
-terminal.
-
-I have been unable to successfully install Compass on Debian. Following
-http://www.rosehosting.com/blog/install-ruby-sass-and-compass/, I did the
-following:
-
-    $ sudo apt-get install rubygems
-    $ sudo gem install compass
-
-I can find compass in /var/lib/gems/1.8/gems/compass-0.12.7/bin/compass; however,
-the Grunt tasks are unable to locate it (despite how I alter my $PATH).
-
-On other Unix systems (with Ruby installed), successfully installing Compass
-and Sass may be as easy as running:
-
-    $ sudo gem update --system && gem install compass
-
-I had no trouble installing Compass/Sass on my Mac OS X system and running the
-default Yo Backbone generator's Gruntfile. However, since Debian is not
-cooperating with Ruby/Compass, I have (at present) commented out the calls to
-the compass Grunt task in the Gruntfile. If we decide that using SCSS is
-important at a later time, it may be necessary to delve into this
-Debian/Compass issue further.
-
-
-### Coding Conventions
-
-The [CoffeeScript styleguide](https://github.com/polarmobile/coffeescript-style-guide)
-should be followed. Adherence to the second principle of *The Zen of Python* is
-advised: "Explicit is better than implicit."
-
-A baseline test for decent CoffeeScript is to run `grunt lint` and ensure that
-there are no errors. For now I have configured grunt-coffeelint to allow
-implicit parentheses but issue warnings. It may be a good idea to change these
-warnings to errors if the code becomes unreadable.
-
-For articles on how CoffeeScript can encourage the creation of unreadable
-code, see:
-
-- http://ceronman.com/2012/09/17/coffeescript-less-typing-bad-readability/
-- http://ryanflorence.com/2011/case-against-coffeescript/
-
-
-
 
