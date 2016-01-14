@@ -26,7 +26,7 @@ Linguistic Database (OLD)](http://www.onlinelinguisticdatabase.org).
 
 ## For Developers
 
-Dative is open source, just beginning, and under active development.
+Dative is open source and under active development.
 
 
 ### Technologies
