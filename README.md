@@ -5,7 +5,8 @@
 
 Dative is a graphical interface for linguistic fieldwork and language
 documentation applications. At present, Dative works with the [Online
-Linguistic Database (OLD)](http://www.onlinelinguisticdatabase.org).
+Linguistic Database (OLD)](http://www.onlinelinguisticdatabase.org). For more
+information, see the [Dative web site](http://www.dative.ca).
 
 
 ## Features
