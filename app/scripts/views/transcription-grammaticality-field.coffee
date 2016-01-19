@@ -19,6 +19,16 @@ define [
       # TODO: why isn't this working?
       @listenTo globals, "change:grammaticalities", @refresh
 
+      # One of our fellow transcription-type fields is telling us to validate.
+      @listenTo @model, 'transcriptionShouldValidate', @validate
+
+    setToModel: ->
+      super
+      if @submitAttempted
+        @model.trigger 'phoneticTranscriptionShouldValidate'
+        @model.trigger 'narrowPhoneticTranscriptionShouldValidate'
+        @model.trigger 'morphemeBreakShouldValidate'
+
     getMarginLeft: -> if @addUpdateType is 'add' then '34.5%' else '37.5%'
 
     # Override this in a subclass to swap in a new input view, e.g., one based

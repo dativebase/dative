@@ -11,6 +11,8 @@ define [
   './utterance-judgement-field'
   './comments-field'
   './transcription-base-field'
+  './phonetic-transcription-field'
+  './narrow-phonetic-transcription-field'
   './transcription-grammaticality-field'
   './translations-field'
   './person-select-field'
@@ -31,6 +33,7 @@ define [
   SyntacticCategorySelectFieldWithAddButtonView,
   UserSelectFieldWithAddButtonView, MultiElementTagFieldView,
   UtteranceJudgementFieldView, CommentsFieldView, TranscriptionBaseFieldView,
+  PhoneticTranscriptionFieldView, NarrowPhoneticTranscriptionFieldView,
   TranscriptionGrammaticalityFieldView, TranslationsFieldView,
   PersonSelectFieldView, UserSelectFieldView, SourceSelectFieldView,
   SourceSelectViaSearchFieldView, FilesSelectViaSearchFieldView,
@@ -138,8 +141,8 @@ define [
       comments:                      CommentsFieldView
 
     attribute2fieldViewOLD:
-      narrow_phonetic_transcription: TranscriptionBaseFieldView
-      phonetic_transcription:        TranscriptionBaseFieldView
+      narrow_phonetic_transcription: PhoneticTranscriptionFieldView
+      phonetic_transcription:        NarrowPhoneticTranscriptionFieldView
       transcription:                 TranscriptionGrammaticalityFieldView255
       morpheme_break:                MorphemeBreakFieldView
       morpheme_gloss:                MorphemeGlossFieldView

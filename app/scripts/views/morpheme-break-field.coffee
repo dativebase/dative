@@ -134,6 +134,9 @@ define [
       # resizing our .suggestions <div>.
       @listenTo @model, 'textareaWidthResize', @resizeAndPositionSuggestionsDiv
 
+      # One of our fellow transcription-type fields is telling us to validate.
+      @listenTo @model, 'morphemeBreakShouldValidate', @validate
+
       # If we have any FST-based models for morpheme break processing, this
       # method will cause us to listen to their relevant events.
       @listenToFSTModels()
@@ -169,6 +172,13 @@ define [
       @triggerSuggestions()
       @systemSuggested = false
       @alertIncongruity()
+
+    setToModel: ->
+      super
+      if @submitAttempted
+        @model.trigger 'transcriptionShouldValidate'
+        @model.trigger 'phoneticTranscriptionShouldValidate'
+        @model.trigger 'narrowPhoneticTranscriptionShouldValidate'
 
 
     ############################################################################

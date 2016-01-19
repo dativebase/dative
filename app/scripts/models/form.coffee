@@ -76,22 +76,49 @@ define [
 
     getValidatorOLD: (attribute) ->
       switch attribute
-        when 'transcription' then @validOLDTranscription
+        when 'transcription' then @requiredTranscriptionType
+        when 'phonetic_transcription' then @requiredTranscriptionType
+        when 'narrow_phonetic_transcription' then @requiredTranscriptionType
+        when 'morpheme_break' then @requiredTranscriptionType
         when 'translations' then @validOLDTranslations
         when 'date_elicited' then @validateOLDDateElicited
         # The following validators are redundant when a FormAddWidgetView is
         # used because its field views have forced-choice select menus and
         # max-length inputs. But they do become necessary during CSV import.
         when 'grammaticality' then @inGrammaticalities
-        when 'phonetic_transcription' then @max255Chars
-        when 'narrow_phonetic_transcription' then @max255Chars
-        when 'morpheme_break' then @max255Chars
         when 'grammaticality' then @max255Chars
         when 'morpheme_gloss' then @max255Chars
         when 'syntax' then @max1023Chars
         when 'semantics' then @max1023Chars
         when 'status' then @inStatuses
         else null
+
+    # Every form must have one of transcription, phonetic_transcription,
+    # narrow_phonetic_transcription or morpheme_break.
+    requiredTranscriptionType: (value) ->
+      if (not @get('transcription').trim()) and
+      (not @get('morpheme_break').trim()) and
+      (not @get('phonetic_transcription').trim()) and
+      (not @get('narrow_phonetic_transcription').trim())
+        msg = 'Please enter a value in one of the following fields:
+          transcription, morpheme break, phonetic transcription or narrow
+          phonetic transcription'
+        {
+          transcription: msg
+          morpheme_break: msg
+          phonetic_transcription: msg
+          narrow_phonetic_transcription: msg
+        }
+      else
+        @max255Chars value
+
+    # No longer being used now that we're using `requiredTranscriptionType`.
+    validOLDTranscription: (value) ->
+      result = @requiredString value
+      if result is null
+        @max255Chars value
+      else
+        result
 
     max255Chars: (value) ->
       if value.length > 255 then return '255 characters max'
@@ -106,13 +133,6 @@ define [
         null
       else
         'Only the values “tested” and “requires testing” are permitted'
-
-    validOLDTranscription: (value) ->
-      result = @requiredString value
-      if result is null
-        @max255Chars value
-      else
-        result
 
     validOLDTranslations: (value) ->
       error = null
