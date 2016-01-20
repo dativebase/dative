@@ -2437,50 +2437,59 @@ div.big-button-text
   width: 90%;
 }
 
-.attribute-visibility-container
+.attribute-visibility-container,
+.sticky-attributes-container
 {
   margin: 3em;
 }
 
-.attribute-visibility-container .attribute-name
+.sticky-attributes-container i.stickiness-checkbox
 {
-  /* text-align: right; */
+  cursor: pointer;
 }
 
-.attribute-visibility-container .attribute-visibility
+.attribute-visibility-container .attribute-visibility,
+.sticky-attributes-container .attribute-stickiness
 {
   vertical-align: top;
 }
 
-.attribute-visibility-container .attribute-name
+.attribute-visibility-container .attribute-name,
+.sticky-attributes-container .attribute-name
 {
   width: 75%;
   margin-left: 1em;
 }
 
-.attribute-visibility-container .attribute-visibility
+.attribute-visibility-container .attribute-visibility,
+.sticky-attributes-container .attribute-stickiness
 {
   width: 20%;
 }
 
 .attribute-visibility-container .attribute-name,
-.attribute-visibility-container .attribute-visibility
+.attribute-visibility-container .attribute-visibility,
+.sticky-attributes-container .attribute-name,
+.sticky-attributes-container .attribute-stickiness
 {
   display: inline-block;
 }
 
-.attribute-visibility-container .hidden
+.attribute-visibility-container .hidden,
+.sticky-attributes-container .hidden
 {
   opacity: 0.4;
 }
 
-.attribute-visibility-container .attribute-name span
+.attribute-visibility-container .attribute-name span,
+.sticky-attributes-container .attribute-name span
 {
   position: relative;
   top: 0.25em;
 }
 
 .attribute-visibilities-attributes,
+.sticky-attributes-attributes,
 .parser-settings
 {
   max-height: 20em;
@@ -2495,7 +2504,8 @@ div.big-button-text
 
 .settings-container p
 {
-  display: inline-block;
+  /*display: inline-block;*/
+  display: inline;
 }
 
 .settings-container h1
@@ -2584,7 +2594,10 @@ div.import-preview-table
 
 div.import-preview-table-wrapper,
 div.general-errors-list-wrapper,
-div.general-warnings-list-wrapper
+div.general-warnings-list-wrapper,
+.attribute-visibilities-attributes,
+.sticky-attributes-attributes,
+.parser-settings
 {
   border: 1px solid;
   box-shadow: inset 0px 0px 20px 2px rgba(0,0,0,0.6);

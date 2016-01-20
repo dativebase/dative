@@ -622,6 +622,28 @@ define [
 
         forms:
 
+          # Array of form attributes that are "sticky", i.e., that will stick
+          # around and whose values in the most recent add request will be the
+          # defaults for subsequent add requests.
+          stickyAttributes: []
+
+          # Array of form attributes that *may* be specified as "sticky".
+          possiblyStickyAttributes: [
+            'date_elicited'
+            'elicitation_method'
+            'elicitor'
+            'source'
+            'speaker'
+            'status'
+            'syntactic_category'
+            'tags'
+          ]
+
+          # This will be populated by the resources collection upon successful
+          # add requests. It will map attribute names in `stickyAttributes`
+          # above to their values in the most recent successful add request.
+          pastValues: {}
+
           # These objects define metadata on the fields of form resources.
           # Note that there are separate metadata objects for OLD fields and
           # for FieldDB fields.

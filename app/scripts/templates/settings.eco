@@ -30,25 +30,7 @@
     <div class="settings-container">
 
 
-        <% if @resourceName is 'form': %>
-
-            <div class='parsers dative-widget-center'>
-
-                <h1>Parser, Phonology &amp; Morphology Tasks</h1>
-
-                <button class='toggle-parser-task-set dative-tooltip'
-                        title='toggle controls for assigning tasks to parsers,
-                               phonologies and morphologies '
-                        ><i class='fa fa-fw fa-caret-right'></i></button>
-
-                <p>Assign form-related tasks to parsers, phonologies and
-                    morphologies.</p>
-
-                <div class='parser-task-set-container'></div>
-            </div>
-
-        <% end %>
-
+        <!-- Field Visibilities -->
 
         <div class="attribute-visibilities dative-widget-center">
 
@@ -61,7 +43,7 @@
 
             <p>Control the visibility of <%= @resourceName %> fields.</p>
 
-            <div class="attribute-visibilities-attributes">
+            <div class="attribute-visibilities-attributes Scrollable ui-corner-all">
 
             <% for attribute in @resourceFields: %>
                 <div class="attribute-visibility-container dative-widget-center">
@@ -98,6 +80,75 @@
             </div>
 
         </div>
+
+
+        <!-- "Sticky" Fields: those whose values stick around -->
+
+        <div class="sticky-attributes dative-widget-center">
+
+            <h1>Sticky Fields</h1>
+
+            <button class="toggle-sticky-attributes dative-tooltip"
+                    title="toggle controls for specifying sticky fields"
+                ><i class="fa fa-fw fa-caret-right"></i>
+            </button>
+
+            <p>Specify which fields should be sticky, i.e., which should have
+                their previously entered values pre-entered when creating new
+                <%= @resourceNamePlural %>.</p>
+
+            <div class="sticky-attributes-attributes Scrollable ui-corner-all">
+
+            <% for attribute in @possiblyStickyAttributes: %>
+                <div class="sticky-attributes-container dative-widget-center">
+
+                    <div class='attribute-stickiness
+                        attribute-stickiness-<%= @utils.snake2hyphen attribute %>'
+                     >
+                      <% if attribute in @stickyAttributes: %>
+                          <i data-attr='<%= attribute %>'
+                            class='stickiness-checkbox fa fa-2x fa-check-square'></i>
+                      <% else: %>
+                          <i data-attr='<%= attribute %>'
+                            class='stickiness-checkbox fa fa-2x fa-square'></i>
+                      <% end %>
+                    </div>
+
+                    <div class='attribute-name large-unicode-font
+                                attribute-<%= @utils.snake2hyphen attribute %>'>
+                        <span><%= @utils.snake2regular attribute %></span>
+                    </div>
+
+                </div>
+            <% end %>
+
+            </div>
+
+        </div>
+
+
+        <!-- Morphological Parser Tasks -->
+
+        <% if @resourceName is 'form': %>
+
+            <div class='parsers dative-widget-center'>
+
+                <h1>Parser, Phonology &amp; Morphology Tasks</h1>
+
+                <button class='toggle-parser-task-set dative-tooltip'
+                        title='toggle controls for assigning tasks to parsers,
+                               phonologies and morphologies '
+                        ><i class='fa fa-fw fa-caret-right'></i></button>
+
+                <p>Assign form-related tasks to parsers, phonologies and
+                    morphologies.</p>
+
+                <div class='parser-task-set-container'></div>
+            </div>
+
+        <% end %>
+
+
 
     </div>
 

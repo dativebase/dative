@@ -147,6 +147,17 @@ define [
       resource.trigger "add#{@resourceNameCapitalized}End"
       if xhr.status is 200
         resource.set responseJSON
+        # Remember the values of the "sticky" attributes of the resource that
+        # we just added so that subsequent adds will have those values as
+        # defaults.
+        resourcesSettings = globals.applicationSettings.get('resources')
+        resourceSettings = resourcesSettings[@resourceNamePlural]
+        if resourceSettings
+          resourceSettings.pastValues = {}
+          stickyAttributes = resourceSettings.stickyAttributes or []
+          for attr in stickyAttributes
+            resourceSettings.pastValues[attr] = resource.get(attr)
+        globals.applicationSettings.save()
         resource.trigger "add#{@resourceNameCapitalized}Success", resource
       else
         errors = responseJSON.errors or {}

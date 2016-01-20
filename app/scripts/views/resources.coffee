@@ -168,6 +168,12 @@ define [
         "browseAll#{@resourceNamePluralCapitalized}AfterImport",
         @browseAllAfterImport
 
+      # We know that the list of sticky attributes in application settings has
+      # just changed. We need to intelligently update @resourceView.
+      # Not listening for this right now. May not need to.
+      # @listenTo Backbone, 'attributeStickinessChange',
+      #   @attributeStickinessChange
+
       @listenTo @paginationMenuTopView, 'paginator:changeItemsPerPage',
         @changeItemsPerPage
       @listenTo @paginationMenuTopView, 'paginator:showFirstPage',
@@ -247,13 +253,35 @@ define [
     # though we pass the collection to the resource view's model, the
     # collection will not contain that model.
     getNewResourceView: (newResourceModel) ->
-      newResourceModel = newResourceModel or
-        new @resourceModel({}, collection: @collection)
+      newResourceModel = newResourceModel or @getNewResourceModel()
       new @resourceView
         headerTitle: "New #{@utils.camel2regular @resourceNameCapitalized}"
         model: newResourceModel
         dataLabelsVisible: @dataLabelsVisible
         expanded: @allResourcesExpanded
+
+    # We know that the list of sticky attributes in application settings has
+    # just changed. We need to intelligently update `@resourceView`.
+    # Or do we? Leaving this as is for now ...
+    attributeStickinessChange: ->
+      console.log 'We know that the list of sticky attributes in application
+        settings has just changed. We need to intelligently update
+        @resourceView'
+
+    # Get a fresh resource model for the "Add a Resource" widget. If
+    # application settings has past values for us, set them on the model.
+    getNewResourceModel: ->
+      model = new @resourceModel({}, collection: @collection)
+      resourcesSettings = globals.applicationSettings.get('resources')
+      resourceSettings = resourcesSettings[@resourceNamePlural]
+      if resourceSettings
+        # If our app setting is missing this attribute (because it is from an
+        # older version of Dative), we add it here.
+        if 'pastValues' not of resourceSettings
+          resourceSettings.pastValues = {}
+          globals.applicationSettings.save()
+        model.set resourceSettings.pastValues
+      return model
 
     getResourceSearchView: ->
       if @searchable
@@ -1361,7 +1389,6 @@ define [
       @$('.resources-import-view textarea').first().focus().select()
 
     toggleResourcesImportViewAnimate: ->
-      console.log 'toggleResourcesImportViewAnimate'
       if @$('.resources-import-view').is ':visible'
         @hideResourcesImportViewAnimate()
       else

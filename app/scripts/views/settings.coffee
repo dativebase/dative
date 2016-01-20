@@ -20,6 +20,7 @@ define [
       @resourceName = options.resourceName or 'form'
       @resourceNamePlural = @utils.pluralize @resourceName
       @iTriggeredVisibilityChange = false
+      @iTriggeredStickinessChange = false
       @resourceName = options?.resourceName or ''
       @activeServerType = @getActiveServerType()
       @attributeVisibilitiesVisible = false
@@ -28,6 +29,27 @@ define [
     listenToEvents: ->
       super
       @listenTo Backbone, 'fieldVisibilityChange', @fieldVisibilityChange
+      @listenTo Backbone, 'attributeStickinessChange', @attributeStickinessChange
+
+    # This is triggered when this settings view (or another one) changes the
+    # stickiness setting of a resource attribute (i.e., field). If we triggered
+    # this event, we don't do anything but reset our "I triggered this event"
+    # state. Otherwise we sync our display with the current app settings state.
+    attributeStickinessChange: (resource) ->
+      if @utils.pluralize(@resourceName) is resource
+        if @iTriggeredStickinessChange
+          @iTriggeredStickinessChange = false
+        else
+          stickyAttributes = @getStickyAttributes()
+          @$('i.stickiness-checkbox').each (i, e) =>
+            if @$(e).data('attr') in stickyAttributes
+              @$(e)
+                .addClass 'fa-check-square'
+                .removeClass 'fa-square'
+            else
+              @$(e)
+                .addClass 'fa-square'
+                .removeClass 'fa-check-square'
 
     # This is triggered when this settings view (or another one) changes the
     # visibility setting of a resource field. If we triggered this event, we
@@ -53,8 +75,10 @@ define [
       'keydown':                           'keydown'
       'click button.settings-help':        'openSettingsHelp'
       'selectmenuchange':                  'visibilitySettingChanged'
+      'click .stickiness-checkbox':        'stickinessChanged'
       'click button.toggle-attribute-visibilities':
         'toggleAttributeVisibilities'
+      'click button.toggle-sticky-attributes': 'toggleAttributeStickinesses'
 
     # When the user changes the selectmenu value for a field, we alter the
     # `hidden` array for that resource in `globals.applicationSettings`
@@ -84,6 +108,33 @@ define [
         console.log "unable to access the fields metadata for
           #{@resourceNamePlural}"
 
+    # The user has clicked on a "change attribute stickiness" checkbox.
+    stickinessChanged: (event) ->
+      $target = @$ event.target
+      attribute = $target.data 'attr'
+      stickyAttributes = @getStickyAttributes()
+      if $target.hasClass 'fa-square'
+        $target
+          .removeClass 'fa-square'
+          .addClass 'fa-check-square'
+      else
+        $target
+          .removeClass 'fa-check-square'
+          .addClass 'fa-square'
+      @setStickyAttributes()
+
+    setStickyAttributes: ->
+      resourceMeta = globals.applicationSettings
+        .get('resources')[@resourceNamePlural]
+      if resourceMeta
+        resourceMeta.stickyAttributes = []
+        @$('.stickiness-checkbox').each (i, e) =>
+          if @$(e).hasClass 'fa-check-square'
+            resourceMeta.stickyAttributes.push @$(e).data('attr')
+        globals.applicationSettings.save()
+        @iTriggeredStickinessChange = true
+        Backbone.trigger 'attributeStickinessChange', @resourceNamePlural
+
     # Tell the Help dialog to open itself and search for
     # "<resource-name-plural> settings" and scroll to the second match. WARN:
     # this is brittle because if the help HTML changes, then the second match
@@ -101,6 +152,7 @@ define [
       @guify()
       @listenToEvents()
       @attributeVisibilitiesVisibility()
+      @attributeStickinessesVisibility()
       @
 
     getFieldCategories: ->
@@ -128,22 +180,66 @@ define [
       resourceFields = _.keys(resourceFields)
         .sort (a, b) -> a.toLowerCase().localeCompare(b.toLowerCase())
 
+    # Return the array of form attribute names that are specified as "sticky"
+    # in application settings.
+    getStickyAttributes: ->
+      resourceMeta = globals.applicationSettings
+        .get('resources')[@resourceNamePlural]
+      if resourceMeta
+        # If our app setting is missing this attribute (because it is from an
+        # older version of Dative), we add it here.
+        if 'stickyAttributes' not of resourceMeta
+          resourceMeta.stickyAttributes = []
+          globals.applicationSettings.save()
+        resourceMeta.stickyAttributes
+      else
+        []
+
+    # Return the array of form attribute names that are *may* be specified as
+    # "sticky" in application settings.
+    getPossiblyStickyAttributes: ->
+      resourceMeta = globals.applicationSettings
+        .get('resources')[@resourceNamePlural]
+      if resourceMeta
+        # If our app setting is missing this attribute (because it is from an
+        # older version of Dative), we add it here.
+        if 'possiblyStickyAttributes' not of resourceMeta
+          resourceMeta.possiblyStickyAttributes = [
+            'date_elicited'
+            'elicitation_method'
+            'elicitor'
+            'source'
+            'speaker'
+            'status'
+            'syntactic_category'
+            'tags'
+          ]
+          globals.applicationSettings.save()
+        resourceMeta.possiblyStickyAttributes
+      else
+        []
+
     getHeaderTitle: -> 'Settings'
 
     html: ->
       fieldCategories = @getFieldCategories()
       context =
         resourceName: @resourceName
+        resourceNamePlural: @resourceNamePlural
         headerTitle: @getHeaderTitle()
         activeServerType: @activeServerType
         resourceFields: @getResourceFields fieldCategories
         utils: @utils
         fieldCategories: fieldCategories
+        stickyAttributes: @getStickyAttributes()
+        possiblyStickyAttributes: @getPossiblyStickyAttributes()
       @$el.html @template(context)
 
     guify: ->
       @fixRoundedBorders() # defined in BaseView
       @$el.css 'border-color': @constructor.jQueryUIColors().defBo
+      @$('.attribute-visibilities-attributes,.sticky-attributes-attributes')
+        .css 'border-color': @constructor.jQueryUIColors().defBo
       @$('button').button()
       @$('select').selectmenu width: 'auto'
       @tooltipify()
@@ -203,6 +299,32 @@ define [
           .addClass 'fa-caret-down'
       else
         @$('button.toggle-attribute-visibilities i')
+          .removeClass 'fa-caret-down'
+          .addClass 'fa-caret-right'
+
+    attributeStickinessesVisibility: ->
+      if @attributeStickinessesVisible
+        @$('.sticky-attributes-attributes').show()
+      else
+        @$('.sticky-attributes-attributes').hide()
+      @setAttributeStickinessesToggleButtonState()
+
+    toggleAttributeStickinesses: ->
+      if @attributeStickinessesVisible
+        @attributeStickinessesVisible = false
+        @$('.sticky-attributes-attributes').slideUp()
+      else
+        @attributeStickinessesVisible = true
+        @$('.sticky-attributes-attributes').slideDown()
+      @setAttributeStickinessesToggleButtonState()
+
+    setAttributeStickinessesToggleButtonState: ->
+      if @attributeStickinessesVisible
+        @$('button.toggle-sticky-attributes i')
+          .removeClass 'fa-caret-right'
+          .addClass 'fa-caret-down'
+      else
+        @$('button.toggle-sticky-attributes i')
           .removeClass 'fa-caret-down'
           .addClass 'fa-caret-right'
 
