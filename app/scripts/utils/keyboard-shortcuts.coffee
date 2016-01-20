@@ -17,7 +17,7 @@ define [], ->
     shortcut: 'ctrl+p'
     event: 'request:pagesBrowse'
   ,
-    shortcut: 'ctrl+c'
+    shortcut: 'alt+c'
     old:
       event: 'request:subcorporaBrowse'
     fielddb:
@@ -35,7 +35,7 @@ define [], ->
     shortcut: 'ctrl+b'
     event: 'request:formsBrowse'
   ,
-    shortcut: 'ctrl+x'
+    shortcut: 'alt+x'
     event: 'request:phonologiesBrowse'
   ,
     shortcut: 'ctrl+m'
@@ -65,7 +65,7 @@ define [], ->
     shortcut: 'ctrl+g'
     event: 'request:tagsBrowse'
   ,
-    shortcut: 'ctrl+v'
+    shortcut: 'alt+v'
     event: 'request:syntacticCategoriesBrowse'
   ,
     shortcut: 'ctrl+n'
