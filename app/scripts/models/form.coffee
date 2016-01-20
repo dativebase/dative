@@ -87,7 +87,7 @@ define [
         # max-length inputs. But they do become necessary during CSV import.
         when 'grammaticality' then @inGrammaticalities
         when 'grammaticality' then @max255Chars
-        when 'morpheme_gloss' then @max255Chars
+        when 'morpheme_gloss' then @max510Chars
         when 'syntax' then @max1023Chars
         when 'semantics' then @max1023Chars
         when 'status' then @inStatuses
@@ -110,7 +110,7 @@ define [
           narrow_phonetic_transcription: msg
         }
       else
-        @max255Chars value
+        @max510Chars value
 
     # No longer being used now that we're using `requiredTranscriptionType`.
     validOLDTranscription: (value) ->
@@ -122,6 +122,10 @@ define [
 
     max255Chars: (value) ->
       if value.length > 255 then return '255 characters max'
+      null
+
+    max510Chars: (value) ->
+      if value.length > 510 then return '510 characters max'
       null
 
     max1023Chars: (value) ->
@@ -609,10 +613,10 @@ define [
       # receive, if different.
 
       # ATTRIBUTE                         EXP TYPE  NOTES & VALIDATION
-      transcription: ""                 # <string>  (required, max length = 255)
-      phonetic_transcription: ""        # <string>  (max length = 255)
-      narrow_phonetic_transcription: "" # <string>  (max length = 255)
-      morpheme_break: ""                # <string>  (max length = 255; sequence
+      transcription: ""                 # <string>  (max length = 510)
+      phonetic_transcription: ""        # <string>  (max length = 510)
+      narrow_phonetic_transcription: "" # <string>  (max length = 510)
+      morpheme_break: ""                # <string>  (max length = 510; sequence
                                         #            of morpheme shapes and
                                         #            delimiters; equivalent to
                                         #            FieldDB `morphemes`.)
@@ -623,7 +627,7 @@ define [
                                         #            server-side
                                         #            application_settings
                                         #            resources.)
-      morpheme_gloss: ""                # <string>  (max length = 255; sequence
+      morpheme_gloss: ""                # <string>  (max length = 510; sequence
                                         #            of morpheme glosses and
                                         #            delimiters; # equivalent
                                         #            to FieldDB `gloss`.)
@@ -734,7 +738,7 @@ define [
                                         #            modified; format and
                                         #            construction same as
                                         #            `datetime_entered`.)
-      syntactic_category_string: ""     # <string>  (max length = 255; sequence
+      syntactic_category_string: ""     # <string>  (max length = 510; sequence
                                         #            of morpheme categories and
                                         #            delimiters; isomorphic to
                                         #            `morpheme_break` and

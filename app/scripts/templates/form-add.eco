@@ -15,19 +15,19 @@
         </select>
         <textarea rows="1" name="transcription" class="transcription ui-corner-all
         form-add-input" id="transcription"
-        maxlength="255"><%= @transcription %></textarea>
+        maxlength="510"><%= @transcription %></textarea>
       </li>
 
       <li>
         <label for="morpheme_break">Morpheme Break</label>
         <textarea name="morpheme_break" id="morpheme_break" class="ui-corner-all"
-        maxlength="255"><%= @morpheme_break %></textarea>
+        maxlength="510"><%= @morpheme_break %></textarea>
       </li>
 
       <li>
         <label for="morpheme_gloss">Morpheme Gloss</label>
         <textarea name="morpheme_gloss" id="morpheme_gloss" class="ui-corner-all"
-        maxlength="255"><%= @morpheme_gloss %></textarea>
+        maxlength="510"><%= @morpheme_gloss %></textarea>
       </li>
 
       <li>
@@ -36,7 +36,7 @@
           id="translations0grammaticality" class="grammaticality">
         </select>
         <textarea name="translations-0.transcription"
-          id="translations0transcription" maxlength="255"
+          id="translations0transcription"
           class="translation ui-corner-all"
           <% if @translations[0]: %>
             ><%= @translations[0].transcription %></textarea>

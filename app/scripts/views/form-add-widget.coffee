@@ -53,13 +53,6 @@ define [
   # Field sub-classes with max lengths
   ##############################################################################
 
-  class TextareaFieldView255 extends TextareaFieldView
-
-    initialize: (options) ->
-      options.domAttributes =
-        maxlength: 255
-      super options
-
   class TextareaFieldView1023 extends TextareaFieldView
 
     initialize: (options) ->
@@ -67,11 +60,11 @@ define [
         maxlength: 1023
       super options
 
-  class TranscriptionGrammaticalityFieldView255 extends TranscriptionGrammaticalityFieldView
+  class TranscriptionGrammaticalityFieldView510 extends TranscriptionGrammaticalityFieldView
 
     initialize: (options) ->
       options.domAttributes =
-        maxlength: 255
+        maxlength: 510
       super options
 
 
@@ -143,7 +136,7 @@ define [
     attribute2fieldViewOLD:
       narrow_phonetic_transcription: PhoneticTranscriptionFieldView
       phonetic_transcription:        NarrowPhoneticTranscriptionFieldView
-      transcription:                 TranscriptionGrammaticalityFieldView255
+      transcription:                 TranscriptionGrammaticalityFieldView510
       morpheme_break:                MorphemeBreakFieldView
       morpheme_gloss:                MorphemeGlossFieldView
       syntax:                        TextareaFieldView1023
