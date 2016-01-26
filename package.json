@@ -1,6 +1,6 @@
 {
   "name": "dative",
-  "version": "3.39.19",
+  "version": "3.39.21",
   "dependencies": {},
   "devDependencies": {
     "connect-livereload": "~0.3.2",
