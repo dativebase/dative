@@ -111,7 +111,7 @@ define [
         if not parseButtonDisabled then @disableParseButton()
 
     parse: ->
-      input = @$('textarea[name=parse]').val()
+      input = @$('textarea[name=parse]').val().trim().split /\s+/
       @model.parse input
 
     parseStart: ->
