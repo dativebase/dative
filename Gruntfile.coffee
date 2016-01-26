@@ -386,7 +386,7 @@ module.exports = (grunt) ->
           src: [
             '*.{ico,txt}'
             '.htaccess'
-            'favicon.ico'
+            'favicon.png'
             'help/html/help.html'
             './../package.json'
             './../.tmp/UnicodeData.json'
