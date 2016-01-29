@@ -30,8 +30,9 @@ define [
           @reset @getDativeResourceModelsFromOLDObjects(responseJSON)
         Backbone.trigger 'fetchOldApplicationSettingsesSuccess'
       else
+        # Failure to retrieve application settings indicates that we are not
+        # logged in. `AppView` hears the following event and sets its
+        # `@loggedIn` to `false` in response.
         Backbone.trigger 'fetchOldApplicationSettingsesFail',
           'failed to fetch all OLD application settings resources'
-        console.log 'GET request to /#{@getServerSideResourceName()} failed;
-          reason: unknown'
 

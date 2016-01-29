@@ -22,7 +22,8 @@ define [
     template: relatedModelRepresentationTemplate
 
     valueFormatter: (value) ->
-      console.log "RelatedModelRepresentationView's valueFormatter called on #{value}"
+      # console.log "RelatedModelRepresentationView's valueFormatter called on..."
+      # console.log JSON.stringify(value)
       try
         value.name
       catch

@@ -89,7 +89,10 @@ define [
     # Attempt to authenticate with the passed-in credentials
     authenticate: (username, password) ->
       if @get('activeServer')?.get('type') is 'FieldDB'
-        @authenticateFieldDBAuthService username: username, password: password, authUrl: @get('activeServer')?.get('url')
+        @authenticateFieldDBAuthService
+          username: username
+          password: password
+          authUrl: @get('activeServer')?.get('url')
       else
         @authenticateOLD username: username, password: password
 
@@ -108,7 +111,6 @@ define [
           if responseJSON.authenticated is true
             @set
               username: credentials.username
-              password: credentials.password
               loggedIn: true
               loggedInUser: responseJSON.user
             @save()
@@ -321,6 +323,8 @@ define [
       else
         @checkIfLoggedInOLD()
 
+    # Check with the OLD if we are logged in. We ask for the speakers. and
+    # trigger 'authenticateFail' if we can't get them.
     checkIfLoggedInOLD: ->
       taskId = @guid()
       Backbone.trigger('longTask:register', 'checking if already logged in',

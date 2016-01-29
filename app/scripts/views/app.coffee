@@ -319,6 +319,10 @@ define [
     fetchOLDApplicationSettingsFail: ->
       console.log 'FAILED to get OLD app settings'
       globals.oldApplicationSettings = null
+      # Failing to fetch the application settings of an OLD is an indication
+      # from the server that we are not logged in.
+      @applicationSettings.set 'loggedIn', false
+      @applicationSettings.save()
 
     routerNavigateRequest: (route) -> @router.navigate route
 
@@ -538,17 +542,26 @@ define [
 
     closeVisibleView: -> if @visibleView then @closeView @visibleView
 
+    # Check if our application settings still thinks we're logged in.
     loggedIn: ->
+      @loggedInFieldDB()
+      loggedIn = @applicationSettings.get 'loggedIn'
+      if loggedIn then @getOLDApplicationSettings()
+      loggedIn
+
+    # Check if FieldDB thinks we're logged in to a FieldDB. If it does, set
+    # `@loggedIn` to `true`, else `false`.
+    loggedInFieldDB: ->
       if @applicationSettings.get('fieldDBApplication')
         fieldDBApp = @applicationSettings.get 'fieldDBApplication'
-        if fieldDBApp.authentication and fieldDBApp.authentication.user and
+        if fieldDBApp.authentication and
+        fieldDBApp.authentication.user and
         fieldDBApp.authentication.user.authenticated
           @applicationSettings.set 'loggedIn', true
           @applicationSettings.set 'loggedInUserRoles',
             fieldDBApp.authentication.user.roles
-      loggedIn = @applicationSettings.get 'loggedIn'
-      if loggedIn then @getOLDApplicationSettings()
-      loggedIn
+        else
+          @applicationSettings.set 'loggedIn', false
 
     getOLDApplicationSettings: ->
       if @activeServerType() is 'OLD'
