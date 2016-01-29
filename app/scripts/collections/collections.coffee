@@ -13,6 +13,11 @@ define [
     resourceName: 'collection'
     model: CollectionModel
 
-
-
+    # When an OLD collection resource is added/updated and its contents contain
+    # bad form references, the attribute will be "forms", though from Dative's
+    # perspective it should be "contents".
+    errorAttributeTransformer: (errorAttribute) ->
+      if errorAttribute == 'forms'
+        return 'contents'
+      errorAttribute
 

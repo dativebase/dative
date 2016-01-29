@@ -162,10 +162,12 @@ define [
       else
         errors = responseJSON.errors or {}
         if utils.type(errors) is 'object'
-          # TODO: each of the following 2 lines is needed in different contexts; find solution!
+          # TODO: each of the following 2 lines is needed in different
+          # contexts; find solution!
           resource.trigger "add#{@resourceNameCapitalized}Fail", errors.error
           # resource.trigger "add#{@resourceNameCapitalized}Fail", errors
           for attribute, error of errors
+            attribute = @errorAttributeTransformer attribute
             resource.trigger "validationError:#{attribute}", error
         else
           resource.trigger "add#{@resourceNameCapitalized}Fail", errors
@@ -222,10 +224,19 @@ define [
         error = responseJSON.error
         resource.trigger "update#{@resourceNameCapitalized}Fail", error, resource
         for attribute, error of errors
+          attribute = @errorAttributeTransformer attribute
           resource.trigger "validationError:#{attribute}", error
         console.log "PUT request to /#{@getServerSideResourceName()} failed (status
           not 200) ..."
         console.log errors
+
+    # This is provided so that we can transform the resource attribute
+    # associated with a particular error to another attribute in sub-classes.
+    # For instance, when an OLD collection resource is added/updated and its
+    # contents contain bad form references, the attribute will be "forms",
+    # though from Dative's perspective it should be "contents".
+    errorAttributeTransformer: (errorAttribute) ->
+      return errorAttribute
 
 
     ############################################################################
