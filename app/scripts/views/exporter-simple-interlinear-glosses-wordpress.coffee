@@ -110,6 +110,20 @@ define [
       if @errors then Backbone.trigger 'sigExportError'
       tmp.join '\n\n'
 
+    # If it looks like the translation is enclosed in quotation marks of some
+    # kind, leave it be; otherwise, enclose it in single Unicode left and right
+    # quotation mark characters.
+    quoteTranslation: (translation) ->
+      first = translation[0]
+      last = translation[translation.length - 1]
+      if (first == "'" and last == "'") or
+      (first == '"' and last == '"') or
+      (first == '\u2018' and last == '\u2019') or
+      (first == '\u201C' and last == '\u201D')
+        translation
+      else
+        "\u2018#{translation}\u2019"
+
     # Return the model object's data in the Simple Interlinear Glosses WordPress
     # format.
     getModelInSIGFormat: (model) ->
@@ -132,6 +146,6 @@ define [
             igtVals.push val
       translations = []
       for t in model['translations']
-        translations.push "#{t['grammaticality']}#{t['transcription']}"
+        translations.push "#{t['grammaticality']}#{@quoteTranslation t['transcription']}"
       "[gloss]#{igtVals.join '\n'}[/gloss]\n#{translations.join '\n'}"
 
