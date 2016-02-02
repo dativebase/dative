@@ -1340,6 +1340,11 @@ div.dative-display
   font-size: 120%;
 }
 
+.exporter-export-content
+{
+  padding: 1em;
+}
+
 .dative-exporter-dialog .dative-exporter-dialog-content pre,
 .exporter-export-content pre
 {
@@ -2604,6 +2609,7 @@ div.general-errors-list-wrapper,
 div.general-warnings-list-wrapper,
 div.html-content-field-wrapper,
 div.collection-contents-preview-wrapper,
+div.exporter-export-content-pre-container,
 .attribute-visibilities-attributes,
 .sticky-attributes-attributes,
 .parser-settings

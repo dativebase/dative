@@ -70,6 +70,8 @@ define [
         position: @tooltipPositionRight('+100')
       @$(@contentContainerSelector()).hide()
       @$('.exporter-settings').hide()
+      @$('.exporter-export-content-pre-container')
+        .css 'border-color': @constructor.jQueryUIColors().defBo
 
     listenToEvents: ->
       super
@@ -131,12 +133,13 @@ define [
 
     # Add a "Select All" button to the exporter's controls <div>.
     selectAllButton: ->
-      button = "<button class='select-all dative-tooltip'
-        title='Select all of the text of this export'
-        >Select all</button>"
-      @$('.exporter-export-controls').append button
-      @$('.exporter-export-controls button.select-all').button()
-      @$('.exporter-export-controls .dative-tooltip').tooltip()
+      if @$('button.select-all').length == 0
+        button = "<button class='select-all dative-tooltip'
+          title='Select all of the text of this export'
+          >Select all</button>"
+        @$('.exporter-export-controls').append button
+        @$('.exporter-export-controls button.select-all').button()
+        @$('.exporter-export-controls .dative-tooltip').tooltip()
 
     clearExportContent: ->
       @$('.exporter-export-content').html ''

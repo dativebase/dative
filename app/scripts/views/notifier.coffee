@@ -116,6 +116,7 @@ define [
         @resourceModelAlreadyDisplayedInDialog
       @listenTo Backbone, 'resourceAlreadySelected', @resourceAlreadySelected
       @listenTo Backbone, 'csvExportError', @csvExportError
+      @listenTo Backbone, 'sigExportError', @sigExportError
 
       @listenTo Backbone, 'updateOldApplicationSettingsFail',
         (arg) => @updateResourceFail arg, 'applicationSettings'
@@ -611,6 +612,14 @@ define [
         content: "At least one error occurred while generating your CSV export.
           Search the generated CSV file for 'ERROR' to determine which resource
           and resource attribute caused the error."
+        type: 'warning'
+      @renderNotification notification
+
+    sigExportError: ->
+      notification = new NotificationView
+        title: 'Simple Interlinear Glosses Export Error'
+        content: "At least one error occurred while generating your Simple
+          Interlinear Glosses export."
         type: 'warning'
       @renderNotification notification
 
