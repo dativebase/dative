@@ -1,6 +1,6 @@
 {
   "name": "dative",
-  "version": "3.39.21",
+  "version": "3.41.02",
   "dependencies": {
     "sass-bootstrap": "~3.0.2",
     "jquery": "~2.1.1",
