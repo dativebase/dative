@@ -326,23 +326,29 @@ define [
     #    "paginator": { ... }
     #  }
     # TODO: the default `order_by` should not reference the Form model ...
-    getSearchPayload: (query, paginator) ->
+    getSearchPayload: (query, paginator, paginate=true) ->
       paginator = paginator or {page: 1, items_per_page: 10}
       if 'order_by' not of query then query.order_by = ['Form', 'id', 'asc']
-      query: query
-      paginator: paginator
+      if paginate
+        query: query
+        paginator: paginator
+      else
+        query: query
 
     # This may need to be overridden in sub-classes, cf. the complication of
     # searching across corpora in the OLD.
     getSearchURL: ->
       "#{@getOLDURL()}/#{@getServerSideResourceName()}"
 
-    search: (query, paginator=null) ->
+    # Perform a search over this type of resource; if a paginator is supplied,
+    # it will be used, otherwise a default (page 1, 10 ipp) will be used.
+    # Setting `paginate` to `false` will result in no pagination.
+    search: (query, paginator=null, paginate=true) ->
       @trigger "searchStart"
       @constructor.cors.request(
         method: 'SEARCH'
         url: @getSearchURL()
-        payload: @getSearchPayload query, paginator
+        payload: @getSearchPayload query, paginator, paginate
         onload: (responseJSON, xhr) =>
           @trigger "searchEnd"
           if xhr.status is 200

@@ -2,6 +2,7 @@
   rows='1'
   name='<%= @name %>'
   class='<%= @class %>
+         Scrollable
          ui-corner-all
          form-add-input
          dative-tooltip

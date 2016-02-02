@@ -1,0 +1,39 @@
+<div class="collection-contents-preview-container">
+
+    <div class="c-contents-buttons">
+
+        <button class="c-contents-preview"
+                title="View a preview of the contents of this collection,
+                    with referenced forms displayed in their normal way."
+                ><i class="fa fa-fw fa-eye"></i></button>
+
+        <button class="c-contents-refresh"
+                title="Refresh the preview of the contents of this collection."
+                ><i class="fa fa-fw fa-refresh"></i></button>
+
+    </div>
+
+    <textarea
+        rows='1'
+        name='<%= @name %>'
+        class='<%= @class %>
+            Scrollable
+            ui-corner-all
+            form-add-input
+            dative-tooltip
+            dative-input-field
+            textarea-only
+            script-textarea'
+        <% for attribute, value of @domAttributes: %>
+            <%= attribute %>="<%= value %>"
+        <% end %>
+        title='<%= @title %>'
+        ><%= @value %></textarea>
+
+    <div class="collection-contents-preview-wrapper invisible ui-corner-all">
+        <div class="collection-contents-preview Scrollable"></div>
+    </div>
+
+</div>
+
+

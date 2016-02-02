@@ -589,6 +589,7 @@ span.dative-triangle-icon,
 /*** Form input styles ***/
 
 ul.fieldset,
+div.collection-contents-preview .form-container ul.fieldset,
 div.dative-field-display-representation-container.html-snippet .form-container ul.fieldset,
 div.dative-field-display-representation-container.html-snippet .file-container ul.fieldset
 {
@@ -601,6 +602,7 @@ div.dative-field-display-representation-container.html-snippet .file-container u
 }
 
 div.dative-field-display-representation-container.html-snippet .form-container ul.fieldset > li,
+div.collection-contents-preview .form-container ul.fieldset > li,
 div.dative-field-display-representation-container.html-snippet .file-container ul.fieldset > li
 {
     list-style-type: none;
@@ -1502,6 +1504,7 @@ span.dative-pagin-item-index,
 p.paragraph-widget,
 .large-unicode-font *,
 div.dative-field-display-representation-container.html-snippet .form-container .large-unicode-font *,
+div.collection-contents-preview .form-container .large-unicode-font *,
 div.dative-field-display-representation-container.html-snippet .file-container .large-unicode-font *
 {
   font-size: 14pt;
@@ -1509,6 +1512,7 @@ div.dative-field-display-representation-container.html-snippet .file-container .
 }
 
 div.dative-field-display-representation-container.html-snippet .form-container *,
+div.collection-contents-preview .form-container *,
 div.dative-field-display-representation-container.html-snippet .file-container *
 {
   font-family: 'Trebuchet MS', Tahoma, Verdana, Arial, sans-serif;
@@ -1556,6 +1560,10 @@ div.dative-field-display-representation-container.html-snippet .form-container .
 div.dative-field-display-representation-container.html-snippet .form-container .linguistic-data-entry-form ul.fieldset input,
 div.dative-field-display-representation-container.html-snippet .form-container .linguistic-data-entry-form ul.fieldset .ui-selectmenu-button,
 div.dative-field-display-representation-container.html-snippet .form-container .linguistic-data-entry-form ul.fieldset label,
+div.collection-contents-preview .form-container .linguistic-data-entry-form ul.fieldset textarea,
+div.collection-contents-preview .form-container .linguistic-data-entry-form ul.fieldset input,
+div.collection-contents-preview .form-container .linguistic-data-entry-form ul.fieldset .ui-selectmenu-button,
+div.collection-contents-preview .form-container .linguistic-data-entry-form ul.fieldset label,
 div.dative-field-display-representation-container.html-snippet .file-container .linguistic-data-entry-form ul.fieldset textarea,
 div.dative-field-display-representation-container.html-snippet .file-container .linguistic-data-entry-form ul.fieldset input,
 div.dative-field-display-representation-container.html-snippet .file-container .linguistic-data-entry-form ul.fieldset .ui-selectmenu-button,
@@ -2576,25 +2584,26 @@ button.toggle-suggestions
   right: 1px;
 }
 
-.dative-field-representation-container.html-snippet *
+.dative-field-representation-container.html-snippet *,
+div.collection-contents-preview *
 {
   font-size: inherit;
   font-family: inherit;
 }
 
-
-div.import-preview-table
+div.import-preview-table,
+div.html-content-field
 {
-  /*margin: 1em 3em 0 1em;*/
   margin: 1em;
   height: 500px;
-  /*width: 100%;*/
   overflow: scroll;
 }
 
 div.import-preview-table-wrapper,
 div.general-errors-list-wrapper,
 div.general-warnings-list-wrapper,
+div.html-content-field-wrapper,
+div.collection-contents-preview-wrapper,
 .attribute-visibilities-attributes,
 .sticky-attributes-attributes,
 .parser-settings
@@ -2858,5 +2867,53 @@ input[name=translation_delimiter]
   border: 1px solid;
   line-height: 1.5em;
   padding-left: 0.5em;
+}
+
+.collection-contents-preview-container
+{
+  display: relative;
+}
+
+.collection-contents-preview-wrapper
+{
+  width: 97.5%;
+  margin-top: 0.25em;
+}
+
+.collection-contents-preview
+{
+  height: 16.5em;
+  padding: 7px 10px 5px 10px;
+  font-size: 16px;
+  overflow: scroll;
+  /*line-height: normal;*/
+  white-space: pre-wrap;
+}
+
+div.c-contents-buttons
+{
+  display: inline-block;
+  position: absolute;
+  top: 0.4em;
+  left: 15em;
+}
+
+div.collection-contents-preview div.form-container
+{
+  white-space: normal;
+  margin-top: 0;
+  margin-bottom: -1em;
+}
+
+div.collection-contents-preview div.form-container .resource-secondary-data label,
+div.collection-contents-preview div.form-container .resource-primary-data label
+{
+  padding: 0 !important;
+  margin: 0 !important;
+}
+
+div.collection-contents-preview div.form-container > i
+{
+  margin-left: 0.25em;
 }
 

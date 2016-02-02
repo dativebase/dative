@@ -214,10 +214,10 @@ define [
       return false
 
     submitForm: (event) ->
+      if event then @stopEvent event
       if @modelAltered()
         @submitAttempted = true
         @propagateSubmitAttempted()
-        @stopEvent event
         @setToModel()
         @disableForm()
         clientSideValidationErrors = @model.validate()
@@ -319,7 +319,8 @@ define [
     # Tell the Help dialog to open itself and search for "adding a resource" and
     # scroll to the second match. WARN: this is brittle because if the help
     # HTML changes, then the second match may not be what we want...
-    openResourceAddHelp: ->
+    openResourceAddHelp: (event) ->
+      if event then @stopEvent event
       if @addUpdateType is 'add'
         searchTerm = "adding a #{@resourceName}"
       else
@@ -504,13 +505,15 @@ define [
         .tooltip position: @tooltipPositionLeft('-90')
 
     # Reset the model to its default state.
-    clear: ->
+    clear: (event) ->
+      if event then @stopEvent event
       @model.set @getEmptyModelObject()
       @refresh()
 
     # Undo the (unsaved!) changes to the resource (made presumably via the update
     # interface): restore the model to its pre-modified state.
-    undoChanges: ->
+    undoChanges: (event) ->
+      if event then @stopEvent event
       for attr, val of @originalModelCopy.attributes
         @model.set attr, @originalModelCopy.get(attr)
       @refresh()
@@ -546,7 +549,9 @@ define [
     ############################################################################
 
     # The ResourcesView will handle this hiding.
-    hideSelf: -> @trigger "#{@resourceName}AddView:hide"
+    hideSelf: (event) ->
+      if event then @stopEvent event
+      @trigger "#{@resourceName}AddView:hide"
 
     # If the secondary data fields should be visible, show them; otherwise no.
     secondaryDataVisibility: ->
@@ -589,7 +594,8 @@ define [
       else
         @showSecondaryData()
 
-    toggleSecondaryDataAnimate: ->
+    toggleSecondaryDataAnimate: (event) ->
+      if event then @stopEvent event
       if @secondaryDataVisible
         @hideSecondaryDataAnimate()
       else

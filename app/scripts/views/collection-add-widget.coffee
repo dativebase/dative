@@ -3,7 +3,7 @@ define [
   './textarea-field'
   './select-field'
   './relational-select-field'
-  './script-field'
+  './collection-contents-view'
   './date-field'
   './person-select-field'
   './user-select-field'
@@ -14,7 +14,7 @@ define [
   './user-select-field-with-add-button'
   './../models/collection'
 ], (ResourceAddWidgetView, TextareaFieldView, SelectFieldView,
-  RelationalSelectFieldView, ScriptFieldView, DateFieldView,
+  RelationalSelectFieldView, CollectionContentsFieldView, DateFieldView,
   PersonSelectFieldView, UserSelectFieldView, SourceSelectFieldView,
   MultiElementTagFieldView, SourceSelectViaSearchFieldView,
   SpeakerSelectFieldWithAddButtonView, UserSelectFieldWithAddButtonView
@@ -72,7 +72,7 @@ define [
 
     attribute2fieldView:
       name:            TextareaFieldView255
-      content:         ScriptFieldView
+      contents:        CollectionContentsFieldView
       markup_language: MarkupLanguageFieldView
       type:            CollectionTypeFieldView
       date_elicited:   DateFieldView

@@ -31,6 +31,8 @@ define [
     resourceName2viewAndModel: {}
 
     postRender: ->
+      @$('div.html-content-field-wrapper')
+        .css("border-color", @constructor.jQueryUIColors().defBo)
 
     template: HTMLSnippetRepresentationTemplate
 

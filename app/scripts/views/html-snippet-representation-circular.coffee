@@ -34,6 +34,8 @@ define [
 
     postRender: ->
       @$('.link-to-resource.dative-tooltip').tooltip()
+      @$('div.html-content-field-wrapper')
+        .css("border-color", @constructor.jQueryUIColors().defBo)
 
     requestResourceFromServer: (event) ->
       $target = $ event.currentTarget

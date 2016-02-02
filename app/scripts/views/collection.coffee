@@ -40,8 +40,7 @@ define [
     excludedActions: ['controls', 'data', 'duplicate']
 
 
-
-  class MyHTMLSnippetFieldDisplayCircularView extends HTMLSnippetFieldDisplayCircularView
+  class CollectionHTMLFieldDisplayView extends HTMLSnippetFieldDisplayCircularView
 
     # Default is to call `set` on the model any time a field input changes.
     events: {}
@@ -57,8 +56,28 @@ define [
     initialize: (options) ->
       super options
       @dummyFileModel = new FileModel()
+      @dummyFormModel = new FormModel()
       @filesCollection = new FilesCollection()
       @formsCollection = new FormsCollection()
+
+      # Machinery for requesting referenced forms.
+
+      # All of the form ids whose forms we have requested from the server.
+      @formIdsRequested = []
+
+      # Maps form ids to the form objects that we have received from the server.
+      @formObjects = {}
+
+      # An array of form ids that we are requesting in the current fetch, if
+      # applicable.
+      @formIdsInCurrentFetch = []
+
+      # Array of form ids constituting the queue of form ids that we need
+      # to fetch.
+      @formIdsToFetchQueue = []
+
+      # Set this to true when a search for forms is currently in progress.
+      @formFetchInProgress = false
 
     resourceName: 'collection'
 
@@ -68,17 +87,78 @@ define [
 
     resourceAddWidgetView: CollectionAddWidgetView
 
-    getHeaderTitle: -> @getTruncatedTitleAndId()
+    getHeaderTitle: -> @getTruncatedTitle()
+
+    # Add the form ids in `formIdsToFetch` to our queue of forms to fetch
+    # `@formIdsToFetchQueue`.
+    addReferencedFormsToFetchQueue: (formIdsToFetch) ->
+      for id in formIdsToFetch
+        if id not in @formIdsRequested and id not in @formIdsToFetchQueue
+          @formIdsToFetchQueue.push id
+      if not @formFetchInProgress
+        @fetchFormIdsInQueue()
+
+    # Issue a SEARCH request looking for forms whose ids match those listed in
+    # our queue `@formIdsToFetchQueue`.
+    fetchFormIdsInQueue: ->
+      @formIdsInCurrentFetch = (id for id in @formIdsToFetchQueue)
+      # If there's nothing to fetch, abort.
+      if @formIdsInCurrentFetch.length == 0
+        return
+      search =
+        filter: ["Form", "id", "in", @formIdsInCurrentFetch]
+        order_by: ["Form", "id", "desc" ]
+      # Redefine our queue; this will probably be [], although the user may
+      # have added new references between this statement and the first one in
+      # this method.
+      @formIdsToFetchQueue = (id for id in @formIdsToFetchQueue when id \
+        not in @formIdsInCurrentFetch)
+      @dummyFormModel.search search, null, false # `false` means no pagination
+      @formFetchInProgress = true
+      # Keep a record of the forms we have already requested.
+      for id in @formIdsInCurrentFetch
+        @formIdsRequested.push id
+
+    formSearchStart: ->
+
+    formSearchEnd: ->
+      @formFetchInProgress = false
+
+    formSearchFail: (responseJSON) ->
+      console.log 'something went wrong when searching for forms by their id
+        references.'
+      console.log responseJSON
+
+    formSearchSuccess: (responseJSON) ->
+      retrievedIds = (f['id'] for f in responseJSON)
+      for id in @formIdsInCurrentFetch
+        # Mapping an id to `null` indicates an invalid id.
+        if id not in retrievedIds
+          @formObjects[id] = null
+      for formObj in responseJSON
+        @formObjects[formObj['id']] = formObj
+      @model.trigger 'formObjectsChanged', @formObjects
+      # Perform another fetch/search if we're not already.
+      if not @formFetchInProgress then @fetchFormIdsInQueue()
 
     listenToEvents: ->
       super
       @listenTo @model, 'formsFetchedForDisplay', @displayForms
       @listenTo @model, 'displayReferencedFiles', @fetchReferencedFiles
 
+      # The contents value is telling us what forms are referenced in it.
+      @listenTo @model, 'addReferencedFormsToFetchQueue',
+        @addReferencedFormsToFetchQueue
+
       @listenTo @dummyFileModel, "searchStart", @fileSearchStart
       @listenTo @dummyFileModel, "searchEnd", @fileSearchEnd
       @listenTo @dummyFileModel, "searchFail", @fileSearchFail
       @listenTo @dummyFileModel, "searchSuccess", @fileSearchSuccess
+
+      @listenTo @dummyFormModel, "searchStart", @formSearchStart
+      @listenTo @dummyFormModel, "searchEnd", @formSearchEnd
+      @listenTo @dummyFormModel, "searchFail", @formSearchFail
+      @listenTo @dummyFormModel, "searchSuccess", @formSearchSuccess
 
     # The DisplayCollectionFilesControlView has asked us to display the files
     # that are referenced in the `content` value. First step is to get the id
@@ -87,7 +167,6 @@ define [
       fileIds = []
       @$('.file-container').each (index, element) =>
         fileIds.push Number(@$(element).attr('data-id'))
-      console.log fileIds
       search =
         filter: ["File", "id", "in", fileIds]
         order_by: ["File", "id", "desc" ]
@@ -121,8 +200,6 @@ define [
           @rendered fileView
         else
           $element.html "There is no file with id #{fileId}"
-          console.log "TODO: warn user that we could not find a file with id
-            #{fileId}"
 
     displayForms: (formsArray) ->
       # formsArray = @model.get 'forms'
@@ -144,15 +221,17 @@ define [
     # Return a string consisting of the value of the model's `title` attribute
     # truncated to 40 chars, and the model's id. Note: this is probably not
     # general enough a method to be in this base class.
-    getTruncatedTitleAndId: ->
+    getTruncatedTitle: ->
       title = @model.get 'title'
       id = @model.get 'id'
       if title
         truncatedTitle = title[0..35]
         if truncatedTitle isnt title then title = "#{truncatedTitle}..."
+        title
+      else if id
+        "Collection #{id}"
       else
-        title = ''
-      if id then "#{title} (id #{id})" else title
+        "Unsaved Collection"
 
     # Attributes that are always displayed.
     primaryAttributes: [
@@ -192,6 +271,6 @@ define [
       source: SourceFieldDisplayView
       tags: ArrayOfRelatedTagsFieldDisplayView
       files: ArrayOfRelatedFilesFieldDisplayView
-      html: MyHTMLSnippetFieldDisplayCircularView
+      html: CollectionHTMLFieldDisplayView
 
 
