@@ -147,5 +147,5 @@ define [
       translations = []
       for t in model['translations']
         translations.push "#{t['grammaticality']}#{@quoteTranslation t['transcription']}"
-      "[gloss]#{igtVals.join '\n'}[/gloss]\n#{translations.join '\n'}"
+      "[gloss]#{igtVals.join '\n'}[/gloss]#{translations.join '\n'}"
 
