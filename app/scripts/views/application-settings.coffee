@@ -55,6 +55,10 @@ define [
         scrollToIndex: 1
       )
 
+    saveServers: ->
+      @model.set 'serversModified', true
+      @setModelFromGUI()
+
     setModelFromGUI: ->
       # We don't want to change the active server if we are logged in with it.
       if not @loggedIn()
@@ -91,6 +95,7 @@ define [
       @undelegateEvents()
       @listenTo Backbone, 'activateServer', @activateServer
       @listenTo Backbone, 'removeServerView', @setModelFromGUI
+      @listenTo Backbone, 'saveServers', @saveServers
       @listenTo Backbone, "addOldApplicationSettingsSuccess",
         @addOLDApplicationSettingsSuccess
       @listenToOLDApplicationSettingsCollection()

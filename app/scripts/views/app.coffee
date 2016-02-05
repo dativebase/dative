@@ -261,6 +261,7 @@ define [
       @listenTo Backbone, 'setPreventNavigation', @setPreventNavigation
       @listenTo Backbone, 'unsetPreventNavigation', @unsetPreventNavigation
       @listenTo Backbone, 'preventNavigation', @preventNavigation
+      @listenTo Backbone, 'mergeNewServers', @mergeNewServers
 
       @listenTo @mainMenuView, 'request:home', @showHomePageView
       @listenTo @mainMenuView, 'request:openLoginDialogBox', @toggleLoginDialog
@@ -492,35 +493,86 @@ define [
     # We have fetched the default servers array from the server hosting this
     # Dative.
     addDefaultServers: (serversArray) ->
-      serverModelsArray = []
-      for s in serversArray
-        s.id = @guid()
-        serverModelsArray.push(new ServerModel(s))
-      serversCollection = new ServersCollection(serverModelsArray)
-      activeServer = serversCollection.at 0
-      @applicationSettings.set 'servers', serversCollection
-      @applicationSettings.set 'activeServer', activeServer
-      @applicationSettings.save()
+
+      # TESTING: DELETE THESE LINES
+      # @applicationSettings.set 'lastSeenServersFromDative', null
+      # @applicationSettings.save()
+
+      # If the user has manually modified their locally stored list of servers,
+      # we won't overwrite that with what Dative gives them in servers.json.
+      # However, we will prompt them to see if they want to merge the new stuff
+      # from Dative into what they have.
+      if @applicationSettings.get('serversModified')
+        @promptServersMerge serversArray
+      else
+        serverModelsArray = []
+        for s in serversArray
+          s.id = @guid()
+          serverModelsArray.push(new ServerModel(s))
+        serversCollection = new ServersCollection(serverModelsArray)
+        activeServer = serversCollection.at 0
+        @applicationSettings.set 'servers', serversCollection
+        @applicationSettings.set 'activeServer', activeServer
+        @applicationSettings.save()
       @initializeContinue()
+
+    # Display a confirm dialog that describes the servers that Dative knows
+    # about but which they don't and ask the user whether they want to add
+    # these servers to their list of servers.
+    promptServersMerge: (serversArray) ->
+      # `lastSeen` is the array of servers that we were prompted to merge last
+      # time. We don't want to keep pestering the user to merge the same array
+      # of servers.
+      lastSeen = @applicationSettings.get 'lastSeenServersFromDative'
+      if not _.isEqual(serversArray, lastSeen)
+        @applicationSettings.set 'lastSeenServersFromDative', serversArray
+        @applicationSettings.save()
+        existingServerNames = []
+        @applicationSettings.get('servers').each (m) ->
+          existingServerNames.push m.get('name')
+        newServers = (s for s in serversArray when s['name'] not in
+          existingServerNames)
+        if newServers.length > 0
+          newServerNames = "“#{(s['name'] for s in newServers).join '”, “'}”"
+          if newServers.length == 1
+            msg = "Dative knows about the OLD server #{newServerNames} but you
+              don't. Would you like to add the server #{newServerNames} to your
+              list of known servers?"
+          else
+            msg = "Dative knows about the following servers that you don't:
+              #{newServerNames}. Would you like to add these servers to your
+              list of known servers?"
+          options =
+            text: msg
+            confirm: true
+            confirmEvent: "mergeNewServers"
+            confirmArgument: newServers
+          setTimeout (-> Backbone.trigger 'openAlertDialog', options), 1000
+
+    # The user has confirmed that they want to merge the new servers in
+    # `newServers` into their current client-side list of servers.
+    mergeNewServers: (newServers) ->
+      serversCollection = @applicationSettings.get 'servers'
+      for s in newServers
+        s.id = @guid()
+        serversCollection.add(new ServerModel(s))
+      @applicationSettings.save()
 
     # Fetch servers.json. This is a JSON object that contains an array of
     # server objects. This allows the default list of (OLD/FieldDB) servers
     # that this Dative knows about to be specified at runtime.
     fetchServers: ->
-      if @applicationSettings.usingDefaults
-        url = 'servers.json'
-        $.ajax
-          url: url
-          type: 'GET'
-          dataType: 'json'
-          error: (jqXHR, textStatus, errorThrown) ->
-            console.log "Ajax request for #{url} threw an error:
-              #{errorThrown}"
-            @initializeContinue()
-          success: (serversArray, textStatus, jqXHR) =>
-            @addDefaultServers serversArray
-      else
-        @initializeContinue()
+      url = 'servers.json'
+      $.ajax
+        url: url
+        type: 'GET'
+        dataType: 'json'
+        error: (jqXHR, textStatus, errorThrown) ->
+          console.log "Ajax request for #{url} threw an error:
+            #{errorThrown}"
+          @initializeContinue()
+        success: (serversArray, textStatus, jqXHR) =>
+          @addDefaultServers serversArray
 
     # Size the #appview div relative to the window size
     matchWindowDimensions: ->

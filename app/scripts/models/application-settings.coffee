@@ -421,7 +421,8 @@ define [
       serverModelsArray = ((new ServerModel(s)) for s in appSetObj.servers)
       appSetObj.servers = new ServersCollection(serverModelsArray)
       activeServer = appSetObj.activeServer
-      appSetObj.activeServer = appSetObj.servers.get activeServer.id
+      if activeServer
+        appSetObj.activeServer = appSetObj.servers.get activeServer.id
 
       longRunningTasks = appSetObj.longRunningTasks
       for task in appSetObj.longRunningTasks
@@ -502,6 +503,17 @@ define [
       baseDBURL: null
       username: ''
       password: '' # TODO trigger authenticate:mustconfirmidentity instead of storing the password in localStorage
+
+      # This gets set to `true` as soon as the user makes modifications to the
+      # list of servers. This allows us to avoid over-writing the
+      # user-specified servers with those supplied by Dative in servers.json.
+      serversModified: false
+
+      # This contains the array of objects contstituting the last set of
+      # servers that Dative has sent us. We use this to decide whether to
+      # prompt/annoy the user to merge these servers into their own.
+      lastSeenServersFromDative: null
+
       servers: servers
       # serverTypes: ['FieldDB', 'OLD']
       serverTypes: ['OLD']

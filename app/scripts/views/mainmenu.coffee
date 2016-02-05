@@ -158,7 +158,10 @@ define [
     # 1. Bind shortcut keystrokes to the appropriate events.
     # 2. Modify the menu items so that shortcut abbreviations are displayed.
     keyboardShortcuts: ->
-      activeServerType = @getActiveServerType().toLowerCase()
+      try
+        activeServerType = @getActiveServerType().toLowerCase()
+      catch
+        activeServerType = 'old'
       $(document).off 'keydown'
       for keyboardShortcut in keyboardShortcuts
         shortcut = keyboardShortcut.shortcut

@@ -16,6 +16,7 @@ define [
       @applicationSettingsModel = globals.applicationSettings
       @serverTypes = @applicationSettingsModel.get 'serverTypes'
       @serverCodes = @applicationSettingsModel.get 'fieldDBServerCodes'
+      @savePending = false
 
     events:
       'keydown button.delete-server': 'deleteServerKeys'
@@ -24,9 +25,8 @@ define [
       'click button.activate-server': 'activateServer'
       'selectmenuchange': 'toggleServerCodeSelect'
 
-      'keyup input': 'setModelFromGUI'
+      'input input': 'setModelFromGUI'
       'selectmenuchange': 'setModelFromGUI'
-      #'click': 'setModelFromGUI'
 
     listenToEvents: ->
       @stopListening()
@@ -64,6 +64,18 @@ define [
     setModelFromGUI: ->
       @$('input, select').each (index, element) =>
         @model.set $(element).attr('name'), $(element).val()
+      # If a change occurs on a server, we auto-save to localStorage after a
+      # 3-second delay.
+      if not @savePending
+        @savePending = true
+        setTimeout (=> @triggerSave()), 3000
+
+    # Trigger a 'saveServers' event which will cause the
+    # `ApplicationSettingsView` to save all server settings to localStorage
+    # and, crucially, document the fact that we have modified the servers.
+    triggerSave: ->
+      @savePending = false
+      Backbone.trigger 'saveServers'
 
     render: ->
       @html()
