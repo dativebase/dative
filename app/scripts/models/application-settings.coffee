@@ -239,12 +239,36 @@ define [
       if localStorage.getItem @localStorageKey
         applicationSettingsObject =
           JSON.parse(localStorage.getItem(@localStorageKey))
+        applicationSettingsObject = @fix applicationSettingsObject
         applicationSettingsObject = @backbonify applicationSettingsObject
         @set applicationSettingsObject
         @usingDefaults = false
       else
         @usingDefaults = true
         @save()
+
+    # Fix the application settings, if necessary. This is necessary when Dative
+    # has been updated but the user's application settings object, as persisted
+    # in their `localStorage`, was built using an older version of Dative. If
+    # the app settings are out-of-date, then Dative may break.
+    # Note: `aso` is the Application Settings Object.
+    # The `ns` (namespace) param is good for debugging.
+    fix: (aso, defaults=null, ns='') ->
+      defaults = defaults or @defaults()
+      if 'attributes' of defaults
+        defaults = defaults.attributes
+      for attr, defval of defaults
+        if attr not of aso
+          aso[attr] = defval
+        # Recursively call `@fix` if the default val is an object.
+        else if ((@utils.type(defval) == 'object') and
+        not ((defval instanceof Backbone.Model) or
+        (defval instanceof Backbone.Collection)))
+          aso[attr] = @fix aso[attr], defval, "#{ns}.#{attr}"
+      for attr of aso
+        if attr not of defaults
+          delete aso[attr]
+      return aso
 
     # Logout
     #=========================================================================
@@ -436,38 +460,14 @@ define [
 
       appSetObj
 
+    ############################################################################
     # Defaults
-    #=========================================================================
+    ############################################################################
 
     defaults: ->
 
-      # Moving to specifying default servers at runtime using servers.json
-
-      ###
-      server1Object = new FieldDB.Connection(FieldDB.Connection.defaultConnection('localhost'))
-      server1 =
-        new ServerModel
-          id: @guid()
-          name: server1Object.userFriendlyServerName
-          type: 'FieldDB'
-          url: server1Object.authUrl
-          serverCode: server1Object.serverLabel # should be "localhost"
-          website: server1Object.website
-          corpusServerURL: server1Object.corpusUrl
-
-      server3Object = new FieldDB.Connection(FieldDB.Connection.defaultConnection('lingsync'))
-      server3 =
-        new ServerModel
-          id: @guid()
-          name: server3Object.userFriendlyServerName
-          type: 'FieldDB'
-          url: server3Object.authUrl
-          serverCode: server3Object.serverLabel
-          corpusServerURL: server3Object.corpusUrl
-          website: server3Object.website
-      ###
-
-      server2 =
+      # Default servers are provided at runtime using servers.json
+      server =
         new ServerModel
           id: @guid()
           name: 'OLD Local Development'
@@ -477,21 +477,7 @@ define [
           corpusServerURL: null
           website: 'http://www.onlinelinguisticdatabase.org'
 
-      server4 =
-        new ServerModel
-          id: @guid()
-          name: 'OLD'
-          type: 'OLD'
-          url: 'http://www.onlinelinguisticdatabase.org'
-          serverCode: null
-          corpusServerURL: null
-          website: 'http://www.onlinelinguisticdatabase.org'
-
-      # if window.location.hostname in ["localhost", '127.0.0.1']
-      #   servers = new ServersCollection([server1, server2, server3, server4])
-      # else
-      #   servers = new ServersCollection([server3, server4])
-      servers = new ServersCollection([server2])
+      servers = new ServersCollection([server])
 
       parserTaskSetModel = new ParserTaskSetModel()
 
@@ -502,7 +488,6 @@ define [
       loggedInUserRoles: []
       baseDBURL: null
       username: ''
-      password: '' # TODO trigger authenticate:mustconfirmidentity instead of storing the password in localStorage
 
       # This gets set to `true` as soon as the user makes modifications to the
       # list of servers. This allows us to avoid over-writing the
