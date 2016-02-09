@@ -70,8 +70,9 @@ require [
     window.debugMode = false
 
     $ ->
-      # Backbone.history.start()
       app = new AppView()
       window.onbeforeunload = ->
         app.close()
+        window.location.href += window.location.hash
+        window.location.reload()
 

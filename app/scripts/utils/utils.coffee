@@ -263,6 +263,16 @@ define (require) ->
       .toLowerCase()
       .trim()
 
+  hyphen2camel = (string) ->
+    array = (x for x in string.split('-') when x)
+    if array.length == 0
+      ''
+    else if array.length == 1
+      array[0]
+    else
+      "#{array[0]}#{("#{b[0].toUpperCase()}#{b[1...]}" for b in \
+        array[1...]).join('')}"
+
   capitalize = (string) ->
     try
       "#{string[0].toUpperCase()}#{string[1..-1]}"
@@ -471,6 +481,7 @@ define (require) ->
   camel2regular: camel2regular
   camel2regularUpper: camel2regularUpper
   camel2hyphen: camel2hyphen
+  hyphen2camel: hyphen2camel
   capitalize: capitalize
   encloseIfNotAlready: encloseIfNotAlready
   log: log

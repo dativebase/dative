@@ -150,9 +150,19 @@ define [
       super
 
     initialize: (options) ->
+      @setHash()
       @preventParentScroll()
       @getApplicationSettings options
       @fetchServers()
+
+    # If the user navigates to a particular part of the app using the hash
+    # string, then we want to remember that hash and navigate to it.
+    setHash: ->
+      hash = window.location.hash
+      if hash
+        @hash = @utils.hyphen2camel hash[1...]
+      else
+        @hash = null
 
     # Continue initialization after fetching servers.json
     initializeContinue: ->
@@ -170,7 +180,14 @@ define [
       @setTheme()
       Backbone.history.start()
       @preventNavigationState = false
-      @showHomePageView()
+      @navigate()
+
+    # Only navigate home if there is no hash string in the URL. This seems to
+    # be sufficient to ensure that refreshing on, say the forms browse page
+    # ('#forms') will result in that page being re-rendered.
+    navigate: ->
+      if not @hash
+        @showHomePageView()
 
     # Calling this method will cause all scrollable <div>s with the class
     # .Scrollable, to prevent (x and y axis) scroll propagation to parent divs.
