@@ -498,10 +498,6 @@ define [
     # Dative.
     addDefaultServers: (serversArray) ->
 
-      # TESTING: DELETE THESE LINES
-      # @applicationSettings.set 'lastSeenServersFromDative', null
-      # @applicationSettings.save()
-
       # If the user has manually modified their locally stored list of servers,
       # we won't overwrite that with what Dative gives them in servers.json.
       # However, we will prompt them to see if they want to merge the new stuff
@@ -514,9 +510,14 @@ define [
           s.id = @guid()
           serverModelsArray.push(new ServerModel(s))
         serversCollection = new ServersCollection(serverModelsArray)
-        activeServer = serversCollection.at 0
         @applicationSettings.set 'servers', serversCollection
-        @applicationSettings.set 'activeServer', activeServer
+        try
+          activeServer = @applicationSettings.get('activeServer').get('name')
+          newActiveServer = serversCollection.findWhere name: activeServer
+          @applicationSettings.set 'activeServer', newActiveServer
+        catch e
+          activeServer = serversCollection.at 0
+          @applicationSettings.set 'activeServer', activeServer
         @applicationSettings.save()
       @initializeContinue()
 
