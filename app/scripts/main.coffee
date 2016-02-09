@@ -72,4 +72,6 @@ require [
     $ ->
       # Backbone.history.start()
       app = new AppView()
+      window.onbeforeunload = ->
+        app.close()
 

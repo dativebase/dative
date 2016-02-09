@@ -145,6 +145,10 @@ define [
     template: appTemplate
     el: '#dative-client-app'
 
+    close: ->
+      @closeVisibleView()
+      super
+
     initialize: (options) ->
       @preventParentScroll()
       @getApplicationSettings options

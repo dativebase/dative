@@ -298,7 +298,7 @@ define [
       "#{@resourceName}Over#{@targetResourceNamePluralCapitalized}Data"
 
     render: ->
-      if @checkForRelatedResourceData() is 'exit' then return
+      @checkForRelatedResourceData()
       @searchFieldView = @getSearchFieldView()
       @html()
       @guify()
