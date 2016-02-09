@@ -384,6 +384,8 @@ define [
             (options={}) => @showResourcesView resourceName, options
           @listenTo @mainMenuView, "request:#{resourceName}Add",
             => @showNewResourceView resourceName
+          @listenTo @mainMenuView, "request:#{resourcePlural}Import",
+            => @showImportView resourceName
           if config.params?.searchable is true
             @listenTo Backbone, "request:#{resourcePlural}BrowseSearchResults",
               (options={}) => @showResourcesView resourceName, options
@@ -683,6 +685,7 @@ define [
         @[myViewAttr] = @instantiateResourcesView resourceName, o
       @visibleView = @[myViewAttr]
       @showNewResourceViewOption o
+      @showImportInterfaceOption o
       @searchableOption o
       @corpusElementOption o
       @renderVisibleView taskId
@@ -799,6 +802,7 @@ define [
           searchable: true
           corpusElement: true
           needsActiveFieldDBCorpus: true
+          importable: true
 
       languageModel:
         resourcesViewClass: LanguageModelsView
@@ -902,6 +906,19 @@ define [
         @["show#{@utils.capitalize resourcePlural}View"]
           showNewResourceView: true
 
+    # Show the ResourcesView subclass for `resourceName` but also make sure
+    # that the "Import resources" subview is rendered too.
+    showImportView: (resourceName) ->
+      console.log 'here'
+      if not @loggedIn() then return
+      resourcePlural = @utils.pluralize resourceName
+      myViewAttr = "#{resourcePlural}View"
+      if @[myViewAttr] and @visibleView is @[myViewAttr]
+        @visibleView.toggleResourcesImportViewAnimate()
+      else
+        @["show#{@utils.capitalize resourcePlural}View"]
+          showImportInterface: true
+
     # Return camelCase `resourceName` in a bunch of other forms that are useful
     # for dynamically displaying/manipulating that resource.
     getResourceNames: (resourceName) ->
@@ -975,6 +992,11 @@ define [
       if o.showNewResourceView
         @visibleView.newResourceViewVisible = true
         @visibleView.weShouldFocusFirstAddViewInput = true
+
+    showImportInterfaceOption: (o) ->
+      if o.showImportInterface
+        if o.importable
+          @visibleView.resourcesImportViewVisible = true
 
     # Alter a searchable resources view so that it has (or lacks) a search
     # object when rendered.

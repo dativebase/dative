@@ -875,6 +875,8 @@ define [
         @focusLastFocusedElement()
       else if @weShouldFocusFirstAddViewInput
         @focusFirstNewResourceViewTextarea()
+      else if @resourcesImportViewVisible
+        @focusFirstResourcesImportViewButton()
       else
         @focusLastResource()
       @scrollToFocusedInput()
@@ -1382,11 +1384,12 @@ define [
       @resourcesImportViewVisible = true
       @$('.resources-import-view').slideDown
         complete: =>
-          @focusFirstResourcesImportViewTextarea()
+          @focusFirstResourcesImportViewButton()
           @scrollToFocusedInput()
 
-    focusFirstResourcesImportViewTextarea: ->
-      @$('.resources-import-view textarea').first().focus().select()
+    focusFirstResourcesImportViewButton: ->
+      @$('.resources-import-view button.choose-import-file-button')
+        .first().focus().select()
 
     toggleResourcesImportViewAnimate: ->
       if @$('.resources-import-view').is ':visible'
