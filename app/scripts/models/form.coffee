@@ -163,7 +163,7 @@ define [
         null
       else
         if not @validDate value
-          'Please enter a valid date in dd/mm/yyyy format'
+          'Please enter a valid date in mm/dd/yyyy format'
         else
           null
 
@@ -172,9 +172,9 @@ define [
     validDate: (date) ->
       date_regex = ///
         ^
-        ( 0 [1-9] | 1 \d | 2 \d | 3 [01] )
-        \/
         ( 0 [1-9] | 1 [0-2] )
+        \/
+        ( 0 [1-9] | 1 \d | 2 \d | 3 [01] )
         \/
         [0-2] \d{3}
         $
