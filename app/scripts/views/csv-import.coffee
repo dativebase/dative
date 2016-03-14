@@ -1398,7 +1398,7 @@ define [
     # We only allow CSV imports right now.
     importTypes:
       csv:
-        mimeTypes: ['text/csv']
+        mimeTypes: ['text/csv', 'application/vnd.ms-excel']
         label: 'CSV'
 
     # Handle the user selecting a file from their file system. In the
