@@ -1,12 +1,22 @@
 <div id='dative-page-header' class='ui-widget-header ui-corner-top'>
 
-  <div class='dative-page-header-title'>Dative Home Page</div>
+    <% if @header: %>
+        <div class='dative-page-header-title'><%= @header %></div>
+    <% else: %>
+        <div class='dative-page-header-title'>Dative Home Page</div>
+    <% end %>
 
 </div>
 
-<div id='dative-page-body'>
-  <p class='paragraph-widget ui-corner-all'>Welcome to Dative, an application for linguistic
-  fieldwork.</p>
+<div id='dative-page-body' class='large-unicode-font'>
+    <% if @html: %>
+        <div class='html-snippet homepage'>
+            <%- @html %>
+        </div>
+    <% else: %>
+        <p class='paragraph-widget ui-corner-all'>Welcome to Dative, an
+            application for linguistic fieldwork.</p>
+    <% end %>
 </div>
 
 

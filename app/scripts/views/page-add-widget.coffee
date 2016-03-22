@@ -5,8 +5,9 @@ define [
   './relational-select-field'
   './script-field'
   './../models/page'
+  './../utils/globals'
 ], (ResourceAddWidgetView, TextareaFieldView, SelectFieldView,
-  RelationalSelectFieldView, ScriptFieldView, PageModel) ->
+  RelationalSelectFieldView, ScriptFieldView, PageModel, globals) ->
 
 
   class TextareaFieldView255 extends TextareaFieldView
@@ -55,5 +56,13 @@ define [
       'content'
     ]
 
+    updateResourceSuccess: ->
+      # If this page was named 'home' but now it's not, we update the
+      # application setttings' homepage.
+      if @originalModelCopy.get('name') == 'home' and
+      @model.get('name') != 'home'
+        globals.applicationSettings.set 'homepage', null
+        globals.applicationSettings.save()
+      super
 
 

@@ -498,3 +498,62 @@ define [
           globals.unicodeCharMap = unicodeCharMap
           if callback then callback()
 
+    # This method takes a string `value` (presumably a string of HTML) and
+    # replaces all references to OLD entities within it with appropriate HTML
+    # elements. It is then the job of any view that displays this to make the
+    # resulting HTML elements behave correctly, i.e., set their innerHTML to
+    # resource view representations or whatever.
+    resourceReferenceFormatter: (value) ->
+      try
+        value
+          .replace(/(form|file|collection)\((\d+)\)\(([^\(]+)\)/g,
+            ($0, resourceName, resourceId, anchorName) ->
+              "<a href='javascript:;'
+                title='click here to view this #{resourceName} in the page'
+                class='link-to-resource dative-tooltip'
+                data-resource-name='#{resourceName}'
+                data-resource-id='#{resourceId}'
+                >#{anchorName}</a>"
+          )
+          .replace(/(form|file)\[(\d+)\]/g,
+            ($0, resourceName, resourceId) ->
+              "<div class='#{resourceName}-container' data-id='#{resourceId}'
+                >#{resourceName} #{resourceId}</div>"
+          )
+      catch
+        ''
+
+    # Request from the server the resource that is referenced in the HTML
+    # element that is associated with `event`. The event may, for example, be a
+    # click event.
+    requestResourceFromServer: (event) ->
+      $target = $ event.currentTarget
+      resourceName = $target.attr 'data-resource-name'
+      resourceId = $target.attr 'data-resource-id'
+      uniqueIdentifier = "#{resourceName}-#{resourceId}"
+      anchorName = $target.text()
+      [viewClass, modelClass] = @getLinkedToViewAndModel resourceName
+      if viewClass
+        model = new modelClass()
+        event = "fetch#{@utils.capitalize resourceName}Success"
+        do (event, viewClass, model) =>
+          @listenToOnce model, event, (modelObject) ->
+            model.set modelObject
+            view = new viewClass(model: model)
+            Backbone.trigger 'showResourceInDialog', view
+        model.fetchResource resourceId
+      else
+        console.log "Sorry, we don't have views and models for #{resourceName}
+          resources yet."
+
+    # Given a resource name `resourceName`, return an array whose first element
+    # is is a standard Backbone view class for that resource and whose second
+    # element is the Backbone model class for that resource.
+    getLinkedToViewAndModel: (resourceName) ->
+      resourceName2viewAndModel = @resourceName2viewAndModel or {}
+      console.log resourceName2viewAndModel
+      if resourceName of @resourceName2viewAndModel
+        @resourceName2viewAndModel[resourceName]
+      else
+        [null, null]
+

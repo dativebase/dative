@@ -2,9 +2,9 @@ define [
   './resource'
   './page-add-widget'
   './date-field-display'
-  './html-snippet-display'
+  './html-snippet-display-circular'
 ], (ResourceView, PageAddWidgetView, DateFieldDisplayView,
-  HTMLSnippetFieldDisplayView) ->
+  HTMLSnippetFieldDisplayViewCircular) ->
 
   # Page View
   # ---------
@@ -32,5 +32,5 @@ define [
     # Map attribute names to display view class names.
     attribute2displayView:
       datetime_modified: DateFieldDisplayView
-      html: HTMLSnippetFieldDisplayView
+      html: HTMLSnippetFieldDisplayViewCircular
 

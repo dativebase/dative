@@ -113,6 +113,7 @@ define [
               username: credentials.username
               loggedIn: true
               loggedInUser: responseJSON.user
+              homepage: responseJSON.homepage
             @save()
             Backbone.trigger 'authenticateSuccess'
           else
@@ -294,7 +295,7 @@ define [
           (xhr.status is 401 and
           responseJSON.error is "Authentication is required to access this
           resource.")
-            @set 'loggedIn', false
+            @set loggedIn: false, homepage: null
             @save()
             Backbone.trigger 'logoutSuccess'
           else
@@ -486,6 +487,11 @@ define [
       loggedIn: false
       loggedInUser: null
       loggedInUserRoles: []
+
+      # An OLD will send an object representing the home page when a user
+      # successfully logs in, if there is such a page named 'home'.
+      homepage: null
+
       baseDBURL: null
       username: ''
 

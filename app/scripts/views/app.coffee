@@ -452,7 +452,7 @@ define [
       @closeVisibleView()
       @corporaView = null
       @usersView = null # TODO: all of these collection views should be DRY-ly emptied upon logout ...
-      @showHomePageView()
+      @showHomePageView true
 
     activeServerType: ->
       try
@@ -605,6 +605,16 @@ define [
         @$('#appview').css height: $(window).height() - 50
 
     renderVisibleView: (taskId=null) ->
+      try
+        @__renderVisibleView__ taskId
+      catch
+        try
+          @__renderVisibleView__ taskId
+        catch
+          try
+            @__renderVisibleView__ taskId
+
+    __renderVisibleView__: (taskId=null) ->
       if (@visibleView instanceof ResourceView)
         @$('#appview')
           .css 'overflow-y', 'scroll'
@@ -643,12 +653,19 @@ define [
       if @activeServerType() is 'OLD'
         @oldApplicationSettingsCollection.fetchResources()
 
-    showHomePageView: ->
+    showHomePageView: (logout=false) ->
       if @preventNavigationState then @displayPreventNavigationAlert(); return
-      if @homePageView and @visibleView is @homePageView then return
+      if (not logout) and @homePageView and (@visibleView is @homePageView)
+        return
       @router.navigate 'home'
       @closeVisibleView()
       if not @homePageView then @homePageView = new HomePageView()
+      serversideHomepage = @applicationSettings.get 'homepage'
+      if serversideHomepage
+        @homePageView.setHTML(serversideHomepage.html,
+          serversideHomepage.heading)
+      else
+        @homePageView.setHTML null, null
       @visibleView = @homePageView
       @renderVisibleView()
 

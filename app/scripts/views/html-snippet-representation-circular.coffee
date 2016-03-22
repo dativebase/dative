@@ -3,10 +3,12 @@ define [
   './related-model-representation'
   './form'
   './file'
+  './collection'
   './../models/form'
   './../models/file'
+  './../models/collection'
 ], (HTMLSnippetRepresentationView, RelatedModelRepresentationView, FormView,
-  FileView, FormModel, FileModel) ->
+  FileView, CollectionView, FormModel, FileModel, CollectionModel) ->
 
 
   # HTML Snippet Representation View
@@ -28,39 +30,16 @@ define [
     events:
       'click .link-to-resource': 'requestResourceFromServer'
 
-    resourceName2viewAndModel:
-      form: [FormView, FormModel]
-      file: [FileView, FileModel]
+    initialize: (@context) ->
+      @resourceName2viewAndModel =
+        form: [FormView, FormModel]
+        file: [FileView, FileModel]
+        collection: [CollectionView, CollectionModel]
+      super
 
     postRender: ->
       @$('.link-to-resource.dative-tooltip').tooltip()
       @$('div.html-content-field-wrapper')
         .css("border-color", @constructor.jQueryUIColors().defBo)
-
-    requestResourceFromServer: (event) ->
-      $target = $ event.currentTarget
-      resourceName = $target.attr 'data-resource-name'
-      resourceId = $target.attr 'data-resource-id'
-      uniqueIdentifier = "#{resourceName}-#{resourceId}"
-      anchorName = $target.text()
-      [viewClass, modelClass] = @getLinkedToViewAndModel resourceName
-      if viewClass
-        model = new modelClass()
-        view = new viewClass(model: model)
-        view.displayResourceInDialog = (modelObject) ->
-          view.model.set modelObject
-          Backbone.trigger 'showResourceInDialog', @, @$el
-        event = "fetch#{@utils.capitalize resourceName}Success"
-        view.listenToOnce model, event, view.displayResourceInDialog
-        model.fetchResource resourceId
-      else
-        console.log "Sorry, we don't have views and models for #{resourceName}
-          resources yet."
-
-    getLinkedToViewAndModel: (resourceName) ->
-      if resourceName of @resourceName2viewAndModel
-        @resourceName2viewAndModel[resourceName]
-      else
-        [null, null]
 
 

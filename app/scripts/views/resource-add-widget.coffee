@@ -42,9 +42,6 @@ define [
       @callRenderAfterNewResourceDataSuccess = false
       @primaryFieldViews = []
       @secondaryFieldViews = []
-      # Maps attributes to the FieldView instance that have been constructed for
-      # them. Useful for saving state.
-      @attribute2fieldViewInstance = {}
       @resourceNameCapitalized = @utils.capitalize @resourceName
       @resourceNamePlural = @utils.pluralize @resourceName
       @resourceNamePluralCapitalized = @utils.capitalize @resourceNamePlural
@@ -362,14 +359,11 @@ define [
         model: @model
         options: @getOptions() # These are the OLD-specific <select> options relevant to the resource, cf. GET requests to <resource_name_plural>/new
         addUpdateType: @addUpdateType
-      if attribute of @attribute2fieldViewInstance
-        result = @attribute2fieldViewInstance[attribute]
-      else if attribute of @attribute2fieldView
+      if attribute of @attribute2fieldView
         MyFieldView = @attribute2fieldView[attribute]
         result = new MyFieldView params
       else # the default field view is a(n expandable) textarea.
         result = new TextareaFieldView params
-      @attribute2fieldViewInstance[attribute] = result
       result
 
     # Put the appropriate FieldView instances in `@primaryFieldViews` and.

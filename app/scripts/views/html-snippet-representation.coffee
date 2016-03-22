@@ -37,24 +37,7 @@ define [
     template: HTMLSnippetRepresentationTemplate
 
     valueFormatter: (value) ->
-      try
-        value
-          .replace(/(form|file)\((\d+)\)\(([^\(]+)\)/g,
-            ($0, resourceName, resourceId, anchorName) ->
-              "<a href='javascript:;'
-                title='click here to view this #{resourceName} in the page'
-                class='link-to-resource dative-tooltip'
-                data-resource-name='#{resourceName}'
-                data-resource-id='#{resourceId}'
-                >#{anchorName}</a>"
-          )
-          .replace(/(form|file)\[(\d+)\]/g,
-            ($0, resourceName, resourceId) ->
-              "<div class='#{resourceName}-container' data-id='#{resourceId}'
-                >#{resourceName} #{resourceId}</div>"
-          )
-      catch
-        ''
+      @resourceReferenceFormatter value
 
     signalInabilityToLink: ->
       console.log 'Non-circular HTML snippet representation does not embed

@@ -1,4 +1,7 @@
-define ['./resource'], (ResourceModel) ->
+define [
+    './resource'
+    './../utils/globals'
+  ], (ResourceModel, globals) ->
 
   # Page Model
   # ----------
@@ -38,4 +41,12 @@ define ['./resource'], (ResourceModel) ->
       switch attribute
         when 'name' then @requiredString
         else null
+
+    # If the home page is deleted, we need to tell the application settings
+    # about that.
+    destroyResourceOnloadHandler: (responseJSON, xhr) ->
+      if xhr.status is 200 and responseJSON.name == 'home'
+        globals.applicationSettings.set 'homepage', null
+        globals.applicationSettings.save()
+      super responseJSON, xhr
 
