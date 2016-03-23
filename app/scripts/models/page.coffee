@@ -48,5 +48,6 @@ define [
       if xhr.status is 200 and responseJSON.name == 'home'
         globals.applicationSettings.set 'homepage', null
         globals.applicationSettings.save()
+        Backbone.trigger 'homePageChanged'
       super responseJSON, xhr
 

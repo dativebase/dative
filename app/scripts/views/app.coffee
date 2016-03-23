@@ -313,6 +313,7 @@ define [
       @listenTo Backbone, 'routerNavigateRequest', @routerNavigateRequest
       @listenToResources()
       @listenToOLDApplicationSettingsCollection()
+      @listenTo Backbone, 'homePageChanged', @homePageChanged
 
     # Note the strange spellings of the events triggered here; just go along
     # with it ...
@@ -668,6 +669,10 @@ define [
         @homePageView.setHTML null, null
       @visibleView = @homePageView
       @renderVisibleView()
+
+    homePageChanged: ->
+      if @homePageView
+        @homePageView.contentChanged()
 
     ############################################################################
     # Show resources view machinery

@@ -63,6 +63,7 @@ define [
       @model.get('name') != 'home'
         globals.applicationSettings.set 'homepage', null
         globals.applicationSettings.save()
+        Backbone.trigger 'homePageChanged'
       super
 
 
