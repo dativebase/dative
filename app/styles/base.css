@@ -36,13 +36,14 @@ div#mainmenu
 {
 }
 
-#appview
+#appview,
+#appview-dialog
 {
     margin: 10px auto;
     width: 900px;
 }
 
-#dative-page-body
+.dative-page-body
 {
     margin-top: 1em;
     margin-bottom: 1em;
@@ -77,9 +78,9 @@ button.help-button
     width: 900px;
 }
 
-#dative-page-header,
-#dative-page-header.dative-two-part-header > div.dative-forms-view-header,
-#dative-page-header.dative-two-part-header > div.dative-two-part-header-part-one,
+.dative-page-header,
+.dative-page-header.dative-two-part-header > div.dative-forms-view-header,
+.dative-page-header.dative-two-part-header > div.dative-two-part-header-part-one,
 .dative-widget-header {
     font-weight: normal;
     text-align: center;
@@ -91,13 +92,13 @@ button.help-button
     position: relative;
 }
 
-#dative-page-header.dative-two-part-header > div.dative-forms-view-header,
-#dative-page-header.dative-two-part-header > div.dative-two-part-header-part-one
+.dative-page-header.dative-two-part-header > div.dative-forms-view-header,
+.dative-page-header.dative-two-part-header > div.dative-two-part-header-part-one
 {
     border-bottom: none;
 }
 
-#dative-page-header.dative-two-part-header
+.dative-page-header.dative-two-part-header
 {
     height: 75px;
     padding: 0;
@@ -116,8 +117,8 @@ button.help-button
 
 .dative-widget-header button,
 .dative-widget-header select+div,
-#dative-page-header button,
-#dative-page-header select+div {
+.dative-page-header button,
+.dative-page-header select+div {
     margin: 1px;
 }
 
@@ -429,12 +430,14 @@ div.dative-page-header-title
   width: 90%;
 }
 
-.dative-resource-displayer-dialog .dative-paginated-item
+.dative-resource-displayer-dialog .dative-paginated-item,
+.dative-resources-displayer-dialog .dative-paginated-item
 {
   width: 96%;
 }
 
-.ui-dialog.dative-resource-displayer-dialog-widget .ui-dialog-content
+.ui-dialog.dative-resource-displayer-dialog-widget .ui-dialog-content,
+.ui-dialog.dative-resources-displayer-dialog-widget .ui-dialog-content
 {
   padding: 0.5em 0.5em;
 }
@@ -532,12 +535,18 @@ div.dative-page-header-title
     padding: 5px;
 }
 
+#appview-dialog
+{
+  height: 800px;
+}
+
 .dative-login-dialog-widget,
 .dative-register-dialog-widget,
 .dative-help-dialog-widget,
 .dative-alert-dialog-widget,
 .dative-exporter-dialog-widget,
 #appview,
+#appview-dialog,
 .progress-widget,
 .notification,
 .corpus-widget,
@@ -1190,8 +1199,8 @@ div.server-config-widget > div.dative-widget-header > div.dative-widget-header-t
 div.add-form-widget > div.dative-widget-header > div.dative-widget-header-title,
 div.dative-form-object > div.dative-widget-header > div.dative-widget-header-title,
 div.update-form-widget > div.dative-widget-header > div.dative-widget-header-title,
-div#dative-page-header > div.dative-page-header-title,
-div#dative-page-header > div.dative-forms-view-header > div.dative-page-header-title,
+div.dative-page-header > div.dative-page-header-title,
+div.dative-page-header > div.dative-forms-view-header > div.dative-page-header-title,
 div.container-center,
 div.button-container-center
 {
@@ -1961,6 +1970,7 @@ button.make-not-not i
 }
 
 .dative-resource-displayer-dialog-widget.ui-dialog .ui-dialog-title,
+.dative-resources-displayer-dialog-widget.ui-dialog .ui-dialog-title,
 .dative-help-dialog-widget.ui-dialog .ui-dialog-title
 {
   width: auto !important;

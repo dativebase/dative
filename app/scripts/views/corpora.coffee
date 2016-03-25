@@ -107,7 +107,7 @@ define [
         @createCorpusView.show()
       else
         @createCorpusView.hide()
-      @$('div#dative-page-body').first().scroll => @closeAllTooltips()
+      @$('div.dative-page-body').first().scroll => @closeAllTooltips()
       @setFocus()
       @fixRoundedBorders()
       Backbone.trigger 'longTask:deregister', taskId
@@ -158,7 +158,7 @@ define [
 
     # The special `onClose` event is called by `close` in base.coffee upon close
     onClose: ->
-      @$('div#dative-page-body').first().unbind 'scroll'
+      @$('div.dative-page-body').first().unbind 'scroll'
 
     setCollectionFromGUI: ->
       updatedCorpusModels = []

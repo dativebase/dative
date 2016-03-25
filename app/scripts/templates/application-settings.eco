@@ -1,4 +1,4 @@
-<div id='dative-page-header' class='ui-widget-header ui-corner-top'>
+<div class='dative-page-header ui-widget-header ui-corner-top'>
 
     <div class='button-container-left'>
         <button class="all-settings dative-tooltip"
@@ -20,7 +20,7 @@
 
 </div>
 
-<div id='dative-page-body'>
+<div class='dative-page-body'>
 
     <div class='application-settings-big-buttons'>
 

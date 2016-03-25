@@ -10,7 +10,7 @@
                 <a data-event="request:home">Home</a>
             </li>
             <li class="requires-authentication">
-                <a data-event="request:pagesBrowse">Pages</a>
+                <a data-event="request:pagesBrowse" data-meta="true">Pages</a>
             </li>
             <li class='requires-authentication fielddb'>
                 <a data-event="request:corporaBrowse">Corpora</a>
@@ -31,10 +31,10 @@
                 <a data-event="request:formAdd">Add</a>
             </li>
             <li class='requires-authentication'>
-                <a data-event="request:searchesBrowse">Saved Searches</a>
+                <a data-event="request:searchesBrowse" data-meta="true">Saved Searches</a>
             </li>
             <li class='requires-authentication'>
-                <a data-event="request:formsBrowse">Browse</a>
+                <a data-event="request:formsBrowse" data-meta="true">Browse</a>
             </li>
             <li class='requires-authentication'>
                 <a data-event="request:formsImport">Import</a>
@@ -48,7 +48,7 @@
               <a data-event="request:subcorpusAdd">Add</a>
             </li>
             <li class='requires-authentication'>
-              <a data-event="request:subcorporaBrowse">Browse</a>
+              <a data-event="request:subcorporaBrowse" data-meta="true">Browse</a>
             </li>
         </ul>
     </li>
@@ -56,36 +56,36 @@
     <li class='requires-authentication old'><a>Resources</a>
         <ul class='ui-corner-bottom'>
             <li class='requires-authentication'>
-              <a data-event="request:filesBrowse">Files</a>
+              <a data-event="request:filesBrowse" data-meta="true">Files</a>
             </li>
             <li class='requires-authentication'>
-              <a data-event="request:collectionsBrowse">Collections</a>
+              <a data-event="request:collectionsBrowse" data-meta="true">Collections</a>
             </li>
             <li class='requires-authentication'>
-              <a data-event="request:usersBrowse">Users</a>
+              <a data-event="request:usersBrowse" data-meta="true">Users</a>
             </li>
             <li class='requires-authentication'>
-                <a data-event="request:elicitationMethodsBrowse"
+                <a data-event="request:elicitationMethodsBrowse" data-meta="true"
                     >Elicitation Methods</a>
             </li>
             <li class='requires-authentication'>
-                <a data-event="request:tagsBrowse">Tags</a>
+                <a data-event="request:tagsBrowse" data-meta="true">Tags</a>
             </li>
             <li class='requires-authentication'>
-                <a data-event="request:syntacticCategoriesBrowse"
+                <a data-event="request:syntacticCategoriesBrowse" data-meta="true"
                     >Categories</a>
             </li>
             <li class='requires-authentication'>
-                <a data-event="request:languagesBrowse">Languages</a>
+                <a data-event="request:languagesBrowse" data-meta="true">Languages</a>
             </li>
             <li class='requires-authentication'>
-                <a data-event="request:orthographiesBrowse">Orthographies</a>
+                <a data-event="request:orthographiesBrowse" data-meta="true">Orthographies</a>
             </li>
             <li class='requires-authentication'>
-                <a data-event="request:speakersBrowse">Speakers</a>
+                <a data-event="request:speakersBrowse" data-meta="true">Speakers</a>
             </li>
             <li class='requires-authentication'>
-                <a data-event="request:sourcesBrowse">Sources</a>
+                <a data-event="request:sourcesBrowse" data-meta="true">Sources</a>
             </li>
         </ul>
     </li>
@@ -93,16 +93,16 @@
     <li class='requires-authentication old'><a>Analysis</a>
         <ul class='ui-corner-bottom'>
             <li class='requires-authentication'
-              ><a data-event="request:phonologiesBrowse">Phonologies</a>
+              ><a data-event="request:phonologiesBrowse" data-meta="true">Phonologies</a>
             </li>
             <li class='requires-authentication'
-              ><a data-event="request:morphologiesBrowse">Morphologies</a>
+              ><a data-event="request:morphologiesBrowse" data-meta="true">Morphologies</a>
             </li>
             <li class='requires-authentication'
-              ><a data-event="request:languageModelsBrowse">Language Models</a>
+              ><a data-event="request:languageModelsBrowse" data-meta="true">Language Models</a>
             </li>
             <li class='requires-authentication'
-              ><a data-event="request:morphologicalParsersBrowse"
+              ><a data-event="request:morphologicalParsersBrowse" data-meta="true"
                   >Morphological Parsers</a>
             </li>
         </ul>

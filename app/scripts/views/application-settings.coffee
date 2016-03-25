@@ -129,7 +129,7 @@ define [
       @$('.application-settings-interfaces').hide()
       @hideAllSettingsButton()
       @$('.big-button').first().focus()
-      @$('#dative-page-body').scroll => @closeAllTooltips()
+      @$('.dative-page-body').first().scroll => @closeAllTooltips()
       @
 
     renderServersView: ->
@@ -278,5 +278,5 @@ define [
 
     # The special `onClose` event is called by `close` in base.coffee upon close
     onClose: ->
-      @$('div#dative-page-body').first().unbind 'scroll'
+      @$('div.dative-page-body').first().unbind 'scroll'
 

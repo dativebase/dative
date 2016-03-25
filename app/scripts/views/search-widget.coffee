@@ -62,6 +62,16 @@ define [
       dative-widget-center ui-widget ui-widget-content ui-corner-all'
     template: searchWidgetTemplate
 
+    initialize: (@collection=null) ->
+      @searchType = 'advanced'
+      @smartQueryTargetResourceModels = []
+      @smartQueryPreviewViews = []
+      @getNames()
+      @mixinSearchAddWidgetView()
+      @model = new @searchModelClass()
+      @targetModel = new @targetModelClass()
+      @listenToEvents()
+
     events:
       'click .search-button': 'search'
       'click .count-button': 'count'
@@ -105,7 +115,8 @@ define [
     # refreshes the relevant resources browse view.
     search: ->
       if @searchType is 'advanced'
-        Backbone.trigger(
+        if @collection then target = @collection else target = Backbone
+        target.trigger(
           "request:#{@targetResourceNamePlural}BrowseSearchResults",
           search: @model.get('search'))
       else
@@ -257,16 +268,6 @@ define [
         searchTerm: "searching #{@targetResourceNamePlural}"
         scrollToIndex: 1
       )
-
-    initialize: ->
-      @searchType = 'advanced'
-      @smartQueryTargetResourceModels = []
-      @smartQueryPreviewViews = []
-      @getNames()
-      @mixinSearchAddWidgetView()
-      @model = new @searchModelClass()
-      @targetModel = new @targetModelClass()
-      @listenToEvents()
 
     getNames: ->
       @targetResourceNameCapitalized = @utils.capitalize @targetResourceName

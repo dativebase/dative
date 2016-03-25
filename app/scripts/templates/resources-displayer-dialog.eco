@@ -1,0 +1,13 @@
+<div class='dative-resources-displayer-dialog'>
+
+  <div class="resources-displayer-content-container">
+      <div id='appview-dialog' class="resources-displayer-content ui-widget ui-widget-content
+        ui-corner-all"></div>
+
+  </div>
+
+</div>
+
+<div class='dative-resources-displayer-dialog-target'><div>
+
+

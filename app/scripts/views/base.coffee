@@ -88,12 +88,12 @@ define [
 
     utils: utils
 
-    # Cause #dative-page-header to maintain a constant height relative to the
+    # Cause .dative-page-header to maintain a constant height relative to the
     # window height.
     matchHeights: ->
-      pageBody = @$ '#dative-page-body'
+      pageBody = @$('.dative-page-body').first()
       parent = @$(pageBody).parent()
-      pageHeader = @$ '#dative-page-header'
+      pageHeader = @$('.dative-page-header').first()
       marginTop = parseInt pageBody.css('margin-top')
       marginBottom = parseInt pageBody.css('margin-bottom')
       @_matchHeights pageBody, parent, pageHeader, marginTop, marginBottom
@@ -136,9 +136,9 @@ define [
       top: '50%'
       left: '98%'
 
-    spin: -> @$('#dative-page-header').spin @spinnerOptions()
+    spin: -> @$('.dative-page-header').first().spin @spinnerOptions()
 
-    stopSpin: -> @$('#dative-page-header').spin false
+    stopSpin: -> @$('.dative-page-header').first().spin false
 
 
     # Logic for remembering and re-focusing the last focused element.
@@ -194,8 +194,8 @@ define [
       # does nof fix the issue.
       # @$('input, button, .ui-selectmenu-button').stop('fx', true, false)
 
-      pageBodySelector = @pageBodySelector or '#dative-page-body'
-      $pageBody = @$ pageBodySelector
+      pageBodySelector = @pageBodySelector or '.dative-page-body'
+      $pageBody = @$(pageBodySelector).first()
 
       try
         $element = $ event.currentTarget
@@ -204,7 +204,7 @@ define [
       @scrollToElement $element, $pageBody
 
     scrollToElement: ($element, $pageBody) ->
-      $pageBody = $pageBody or @$('#dative-page-body')
+      $pageBody = $pageBody or @$('.dative-page-body').first()
 
       # Find the desired `scrollTop`, i.e., the pixel value we should pass to
       # `$.scrollTop` in order get our focused element where we want it.
@@ -248,15 +248,15 @@ define [
               $element.tooltip 'open'
 
     scrollToTop: ->
-      @$('#dative-page-body').animate
+      @$('.dative-page-body').first().animate
         scrollTop: 0
         250
         'swing'
 
     scrollToBottom: ->
-      $pageBody = @$ '#dative-page-body'
+      $pageBody = @$('.dative-page-body').first()
       pageBodyHeight = $pageBody.height()
-      @$('#dative-page-body').animate
+      @$('.dative-page-body').first().animate
         scrollTop: pageBodyHeight
         250
         'swing'
@@ -281,7 +281,7 @@ define [
     # because Dative can dynamically change the CSS to different jQueryUI
     # themese, which would mess up a static CSS file. (HACK WARN.)
     fixRoundedBorders: ->
-      selector = '#dative-page-header, .ui-widget > .ui-widget-header'
+      selector = '.dative-page-header, .ui-widget > .ui-widget-header'
       @$(selector).each (index, element) =>
         @fixRoundedBorder element
 

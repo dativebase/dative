@@ -12,6 +12,7 @@ define [
   './tasks-dialog'
   './help-dialog'
   './resource-displayer-dialog'
+  './resources-displayer-dialog'
   './exporter-dialog'
   './home'
 
@@ -103,7 +104,7 @@ define [
 ], (Backbone, Workspace, BaseView, ResourceView, MainMenuView,
   NotifierView, LoginDialogView, RegisterDialogView, AlertDialogView,
   TasksDialogView, HelpDialogView, ResourceDisplayerDialogView,
-  ExporterDialogView, HomePageView,
+  ResourcesDisplayerDialogView, ExporterDialogView, HomePageView,
 
   ApplicationSettingsView, CollectionsView, CorporaView,
   ElicitationMethodsView, FilesView, FormsView, LanguageModelsView,
@@ -383,6 +384,8 @@ define [
                 newItemsPerPage
           @listenTo @mainMenuView, "request:#{resourcePlural}Browse",
             (options={}) => @showResourcesView resourceName, options
+          @listenTo @mainMenuView, "meta:request:#{resourcePlural}Browse",
+            (options={}) => @showResourcesViewInDialog resourceName, options
           @listenTo @mainMenuView, "request:#{resourceName}Add",
             => @showNewResourceView resourceName
           @listenTo @mainMenuView, "request:#{resourcePlural}Import",
@@ -406,6 +409,7 @@ define [
       @notifier = new NotifierView(@myResources)
       @exporterDialog = new ExporterDialogView()
       @getResourceDisplayerDialogs()
+      @resourcesDisplayerDialog = new ResourcesDisplayerDialogView()
 
     renderPersistentSubviews: ->
       @mainMenuView.setElement(@$('#mainmenu')).render()
@@ -417,6 +421,8 @@ define [
       @renderResourceDisplayerDialogs()
       @notifier.setElement(@$('#notifier-container')).render()
       @exporterDialog.setElement(@$('#exporter-dialog-container')).render()
+      @resourcesDisplayerDialog.setElement(
+        @$('#resources-dialog-container')).render()
 
       @rendered @mainMenuView
       @rendered @loginDialog
@@ -425,6 +431,46 @@ define [
       @rendered @tasksDialog
       @rendered @notifier
       @rendered @exporterDialog
+      @rendered @resourcesDisplayerDialog
+
+    # Render (and perhaps instantiate) a view over a collection of resources in
+    # a modal dialog.
+    # This method works in conjunction with the metadata in the `@myResources`
+    # object; CRUCIALLY, only resources with an attribute in that object can be
+    # shown using this method. The simplest case is to call this method with
+    # the singular camelCase name of a resource as its first argument; e.g.,
+    # `@showResourcesView 'elicitationMethod'`.
+    showResourcesViewInDialog: (resourceName, options={}) ->
+      console.log 'showResourcesViewInDialog called in AppView'
+      o = @showResourcesViewSetDefaultOptions resourceName, options
+      names = @getResourceNames resourceName
+      myViewAttr = "#{names.plural}ViewInDialog"
+      if o.authenticationRequired and not @loggedIn() then return
+      if o.searchable and o.search
+        @closeVisibleViewInDialog()
+        @visibleViewInDialog = null
+      if @[myViewAttr] and @visibleViewInDialog is @[myViewAttr]
+        if @resourcesDisplayerDialog.isOpen()
+          return
+      # taskId = @guid()
+      # Backbone.trigger 'longTask:register', "Opening #{names.regPlur} view",
+      #   taskId
+      @closeVisibleViewInDialog()
+      if @[myViewAttr]
+        if @fieldDBCorpusHasChanged(myViewAttr, o)
+          @closeView @[myViewAttr]
+          @[myViewAttr] = @instantiateResourcesView resourceName, o
+      else
+        @[myViewAttr] = @instantiateResourcesView resourceName, o
+      @visibleViewInDialog = @[myViewAttr]
+      console.log '@visibleViewInDialog'
+      console.log @visibleViewInDialog
+      # @showNewResourceViewOption o
+      # @showImportInterfaceOption o
+      # @searchableOption o
+      # @corpusElementOption o
+      # @renderVisibleView taskId
+      @resourcesDisplayerDialog.showResourcesView @visibleViewInDialog
 
     renderHelpDialog: ->
       @helpDialog.render()
@@ -628,6 +674,9 @@ define [
       @rendered @visibleView
 
     closeVisibleView: -> if @visibleView then @closeView @visibleView
+
+    closeVisibleViewInDialog: ->
+      if @visibleViewInDialog then @closeView @visibleViewInDialog
 
     # Check if our application settings still thinks we're logged in.
     loggedIn: ->

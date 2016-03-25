@@ -1,7 +1,7 @@
 <div class='focusable-top' tabindex='0'></div>
 
-<div id='dative-page-header'
-  class='ui-widget-header ui-corner-top dative-two-part-header'>
+<div class='dative-page-header ui-widget-header ui-corner-top
+    dative-two-part-header'>
 
   <div class='dative-resources-view-header dative-two-part-header-part-one'>
 
@@ -87,7 +87,7 @@
 
 </div>
 
-<div id='dative-page-body'>
+<div class='dative-page-body'>
 
   <% if @searchable: %>
       <div class='resource-search-view dative-new-item dative-resource-object

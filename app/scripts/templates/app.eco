@@ -9,6 +9,7 @@
 <div id='help-dialog-container'></div>
 <div id='exporter-dialog-container'></div>
 <div id='importer-dialog-container'></div>
+<div id='resources-dialog-container'></div>
 <div id='resource-displayer-dialog-container-1'></div>
 <div id='resource-displayer-dialog-container-2'></div>
 <div id='resource-displayer-dialog-container-3'></div>

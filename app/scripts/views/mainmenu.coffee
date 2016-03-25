@@ -37,7 +37,13 @@ define [
     triggerMenuAction: (event) ->
       @$('.sf-menu').superclick 'reset'
       event.stopPropagation()
-      @trigger $(event.target).attr('data-event')
+      $target = $ event.target
+      # Menu items with a data-meta attribute can be clicked while holding down
+      # the meta key in order to open in a dialog window.
+      if $target.attr('data-meta') and event.metaKey
+        @trigger "meta:#{$target.attr('data-event')}"
+      else
+        @trigger $target.attr('data-event')
 
     events:
 
@@ -200,7 +206,10 @@ define [
           if type is 'normal'
             event.preventDefault()
             event.stopPropagation()
-            @trigger eventName
+            if event.metaKey
+              @trigger "meta:#{eventName}"
+            else
+              @trigger eventName
           else
             Backbone.trigger 'disabledKeyboardShortcut', shortcutString
 

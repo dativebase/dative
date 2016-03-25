@@ -124,7 +124,7 @@ define [
         @refreshPage()
       @listenToEvents()
       @setFocus()
-      @$('#dative-page-body').scroll => @closeAllTooltips()
+      @$('.dative-page-body').first().scroll => @closeAllTooltips()
       Backbone.trigger 'longTask:deregister', taskId
       @
 
@@ -140,17 +140,30 @@ define [
         importable: @importable
         canCreateNew: @getCanCreateNew()
 
+    browseSearchResults: (options) ->
+      if @searchable
+        if options.search
+          smartSearch = options.smartSearch or null
+          @setSearch options.search, smartSearch
+        else
+          @deleteSearch()
+      @render()
+
     listenToEvents: ->
       super
 
-      @listenTo Backbone, "fetch#{@resourceNamePluralCapitalized}Start",
+      @listenTo @collection, "fetch#{@resourceNamePluralCapitalized}Start",
         @fetchResourcesStart
-      @listenTo Backbone, "fetch#{@resourceNamePluralCapitalized}End",
+      @listenTo @collection, "fetch#{@resourceNamePluralCapitalized}End",
         @fetchResourcesEnd
-      @listenTo Backbone, "fetch#{@resourceNamePluralCapitalized}Fail",
+      @listenTo @collection, "fetch#{@resourceNamePluralCapitalized}Fail",
         @fetchResourcesFail
-      @listenTo Backbone, "fetch#{@resourceNamePluralCapitalized}Success",
+      @listenTo @collection, "fetch#{@resourceNamePluralCapitalized}Success",
         @fetchResourcesSuccess
+
+      @listenTo @collection,
+        "request:#{@resourceNamePlural}BrowseSearchResults",
+        @browseSearchResults
 
       @listenTo Backbone, "destroy#{@resourceNameCapitalized}Success",
         @destroyResourceSuccess
@@ -285,12 +298,7 @@ define [
 
     getResourceSearchView: ->
       if @searchable
-        searchModel = new @searchModelClass({}, collection: @collection)
-        new @searchViewClass
-          headerTitle: "Search #{@resourceNamePluralCapitalized}"
-          model: searchModel
-          dataLabelsVisible: @dataLabelsVisible
-          expanded: @allResourcesExpanded
+        new @searchViewClass @collection
       else
         null
 
@@ -862,11 +870,9 @@ define [
       _.extend BaseView::spinnerOptions(), {top: '50%', left: '-10%'}
 
     spin: ->
-      # @$('#dative-page-header').spin @spinnerOptions()
       @$('.spinner-anchor').first().spin @spinnerOptions()
 
     stopSpin: ->
-      # @$('#dative-page-header').spin false
       @$('.spinner-anchor').first().spin false
 
     setFocus: ->

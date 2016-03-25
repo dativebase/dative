@@ -83,7 +83,7 @@ define [
       _.extend params, @model.toJSON()
       @$el.html @template(params)
       @matchHeights()
-      body = $('#dative-page-body')
+      body = $('.dative-page-body').first()
       @_populateSelectFields body
       @_guify body
       @_addModel body

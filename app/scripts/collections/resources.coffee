@@ -51,7 +51,7 @@ define [
     # FieldDB case:
     # See http://online-linguistic-database.readthedocs.org/en/latest/interface.html#get-resources
     fetchResources: (options) ->
-      Backbone.trigger "fetch#{@resourceNamePluralCapitalized}Start"
+      @trigger "fetch#{@resourceNamePluralCapitalized}Start"
       @model.cors.request(
         method: @getResourcesHTTPMethod()
         url: @getResourcesPaginationURL options
@@ -59,8 +59,8 @@ define [
         onload: (responseJSON) =>
           @fetchResourcesOnloadHandler responseJSON
         onerror: (responseJSON) =>
-          Backbone.trigger "fetch#{@resourceNamePluralCapitalized}End"
-          Backbone.trigger "fetch#{@resourceNamePluralCapitalized}Fail",
+          @trigger "fetch#{@resourceNamePluralCapitalized}End"
+          @trigger "fetch#{@resourceNamePluralCapitalized}Fail",
             "error in fetching #{@getServerSideResourceName()}"
           console.log "Error in GET request to /#{@getServerSideResourceName()}"
       )
@@ -95,19 +95,19 @@ define [
     # expects an OLD backend. See `collections/forms.coffee` for a FieldDB
     # override/fork.
     fetchResourcesOnloadHandler: (responseJSON) ->
-      Backbone.trigger "fetch#{@resourceNamePluralCapitalized}End"
+      @trigger "fetch#{@resourceNamePluralCapitalized}End"
       if 'items' of responseJSON
         @add @getDativeResourceModelsFromOLDObjects(responseJSON.items)
-        Backbone.trigger "fetch#{@resourceNamePluralCapitalized}Success",
+        @trigger "fetch#{@resourceNamePluralCapitalized}Success",
           responseJSON.paginator
       # The OLD returns `[]` if there are no resources. This is
       # inconsistent and should probably be changed OLD-side.
       else if utils.type(responseJSON) is 'array' and
       responseJSON.length is 0
-        Backbone.trigger "fetch#{@resourceNamePluralCapitalized}Success"
+        @trigger "fetch#{@resourceNamePluralCapitalized}Success"
       else
         reason = responseJSON.reason or 'unknown'
-        Backbone.trigger "fetch#{@resourceNamePluralCapitalized}Fail",
+        @trigger "fetch#{@resourceNamePluralCapitalized}Fail",
           "failed to fetch all #{@getServerSideResourceName()}; reason:
             #{reason}"
         console.log "GET request to /#{@getServerSideResourceName()} failed; reason:

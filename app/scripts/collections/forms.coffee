@@ -32,18 +32,18 @@ define [
     # Method to handle the `onload` event of a CORS request to fetch a
     # page of datums from a FieldDB server.
     fetchResourcesOnloadHandlerFieldDB: (responseJSON) ->
-      Backbone.trigger "fetch#{@resourceNamePluralCapitalized}End"
+      @trigger "fetch#{@resourceNamePluralCapitalized}End"
       if responseJSON.rows
         @add @getDativeFormModelsFromFieldDBObjects(responseJSON)
         # The view that listens to `fetchFieldDBFormsSuccess` needs as
         # argument a "paginator", which in this case just means an object
         # with a `count` attribute.
         paginator = count: responseJSON.total_rows
-        Backbone.trigger("fetch#{@resourceNamePluralCapitalized}Success",
+        @trigger("fetch#{@resourceNamePluralCapitalized}Success",
           paginator)
       else
         reason = responseJSON.reason or 'unknown'
-        Backbone.trigger("fetch#{@resourceNamePluralCapitalized}Fail",
+        @trigger("fetch#{@resourceNamePluralCapitalized}Fail",
           "Failed in fetching the data. #{reason}")
         console.log "request to datums_chronological failed; reason: #{reason}"
 
