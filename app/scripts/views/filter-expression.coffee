@@ -521,10 +521,15 @@ define [
 
     # Make <select>s into jQuery selectmenus.
     selectmenuify: ($context) ->
-      $context.find('select')
-        .selectmenu width: 'auto'
-        .each (index, element) =>
-          @transferClassAndTitle @$(element) # so we can tooltipify the selectmenu
+      x = =>
+        $context.find('select').each (index, element) =>
+          $element = @$ element
+          if $element.html().trim()
+            $element.selectmenu width: 'auto'
+            @transferClassAndTitle $element # so we can tooltipify the selectmenu
+      # For some reason putting the delay on this makes these filter expression
+      # selectmenus work in dialog boxes; they don't otherwise (z-index issue).
+      setTimeout x, 5
 
     # Show/hide various action buttons for the non-terminal node of this filter
     # expression, depending on its state.
