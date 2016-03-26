@@ -3,9 +3,10 @@ define [
   './exporter-collection-csv'
   './exporter-json'
   './exporter-simple-interlinear-glosses-wordpress'
+  './exporter-ids'
   './../templates/exporter-dialog'
 ], (BaseView, ExporterCollectionCSVView, ExporterJSONView,
-  ExporterSIGPluginView, exporterDialogTemplate) ->
+  ExporterSIGPluginView, ExporterIdsView, exporterDialogTemplate) ->
 
   # Exporter Dialog View
   # --------------------
@@ -19,6 +20,7 @@ define [
       ExporterCollectionCSVView
       ExporterJSONView
       ExporterSIGPluginView
+      ExporterIdsView
     ]
 
     template: exporterDialogTemplate

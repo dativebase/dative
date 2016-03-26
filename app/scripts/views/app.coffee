@@ -463,8 +463,6 @@ define [
       else
         @[myViewAttr] = @instantiateResourcesView resourceName, o
       @visibleViewInDialog = @[myViewAttr]
-      console.log '@visibleViewInDialog'
-      console.log @visibleViewInDialog
       # @showNewResourceViewOption o
       # @showImportInterfaceOption o
       # @searchableOption o

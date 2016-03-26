@@ -3,7 +3,7 @@ define [
   './../templates/exporter'
 ], (BaseView, exporterTemplate) ->
 
-  # Base calss for creating exporter views. An exporter view exports
+  # Base class for creating exporter views. An exporter view exports
   # a single resource or a collections thereof. It defines an interface for
   # selecting (and perhaps customizing) the export as well as the logic for
   # querying the server (if necessary) and formatting the data for export.
