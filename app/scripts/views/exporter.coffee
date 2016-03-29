@@ -39,6 +39,10 @@ define [
     # NOTE: exporter settings have not yet been implemented.
     hasSettings: -> false
 
+    # Render a settings interface for this exporter, if applicable. This only
+    # makes sense if `@hasSettings()` returns truthy.
+    renderSettings: ->
+
     contentSelector: -> '.exporter-export-content'
     contentContainerSelector: -> '.exporter-export-content-container'
 
@@ -55,6 +59,7 @@ define [
       @listenToEvents()
       @html()
       @guify()
+      @renderSettings()
       @
 
     html: ->
@@ -193,7 +198,7 @@ define [
       if $target.is ':visible'
         $target.slideUp()
       else
-        $target.slideDown().html 'hey there'
+        $target.slideDown()
 
     disableExportButton: ->
       @$('button.export').button 'disable'

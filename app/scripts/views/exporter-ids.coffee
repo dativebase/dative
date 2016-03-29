@@ -37,6 +37,32 @@ define [
       @clearControls()
       @selectAllButton()
 
+    hasSettings: -> true
+
+    # Render the settings interface. Lets user choose between "comma" and
+    # "newline" delimited formats.
+    renderSettings: ->
+      @$('.exporter-settings').html(
+        "<ul>
+          <li>
+            <label for='export_format'>format</label>
+            <select name='export_format'>
+              <option value='comma'>1, 2, 3, ...</option>
+              <option value='newline'>form[1] form[2] form[3] ...</option>
+            </select>
+          </li>
+        </ul>"
+      )
+      x = =>
+        @$('select[name=export_format]').selectmenu width: 'auto'
+      setTimeout x, 5 # Delay is a hack to make in-dialog selectmenus work.
+
+    # Return the user-specified export settings. If the <select> value is
+    # 'newline' it means ids should be 'form[1]\nform[2]\n' etc. Otherwise,
+    # they are comma-delimited.
+    getSettings: ->
+      format: @$('select[name=export_format]').val()
+
     export: ->
       @$(@contentContainerSelector()).slideDown()
       $contentContainer = @$ @contentSelector()
@@ -75,5 +101,8 @@ define [
         if model instanceof Backbone.Model
           model = model.attributes
         result.push model.id
-      result.join ', '
+      if @getSettings().format is 'newline'
+        "form[#{result.join ']\n\nform['}]"
+      else
+        result.join ', '
 
