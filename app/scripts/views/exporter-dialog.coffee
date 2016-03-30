@@ -4,9 +4,11 @@ define [
   './exporter-json'
   './exporter-simple-interlinear-glosses-wordpress'
   './exporter-ids'
+  './exporter-latex'
   './../templates/exporter-dialog'
 ], (BaseView, ExporterCollectionCSVView, ExporterJSONView,
-  ExporterSIGPluginView, ExporterIdsView, exporterDialogTemplate) ->
+  ExporterSIGPluginView, ExporterIdsView, ExporterLaTeXView,
+  exporterDialogTemplate) ->
 
   # Exporter Dialog View
   # --------------------
@@ -18,6 +20,7 @@ define [
 
     registeredExporterClasses: [
       ExporterCollectionCSVView
+      ExporterLaTeXView
       ExporterJSONView
       ExporterSIGPluginView
       ExporterIdsView

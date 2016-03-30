@@ -2397,6 +2397,12 @@ a.morpheme-link-perfect-match
   line-height: 1.5em;
 }
 
+.exporter-settings-label
+{
+  position: relative;
+  top: 0.4em;
+}
+
 .exporter-export-content
 {
   line-height: 2em;

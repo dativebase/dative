@@ -103,6 +103,7 @@ define [
           @$el.hide()
       else
         @$el.hide()
+      @listenToEvents()
 
     # Make the input `collection` the "target" of this exporter, i.e., the
     # thing to be exported. Update the interface based on this fact.

@@ -45,7 +45,8 @@ define [
       @$('.exporter-settings').html(
         "<ul>
           <li>
-            <label for='export_format'>format</label>
+            <label class='exporter-settings-label'
+              for='export_format'>format</label>
             <select name='export_format'>
               <option value='comma'>1, 2, 3, ...</option>
               <option value='newline'>form[1] form[2] form[3] ...</option>
