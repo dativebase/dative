@@ -433,43 +433,6 @@ define [
       @rendered @exporterDialog
       @rendered @resourcesDisplayerDialog
 
-    # Render (and perhaps instantiate) a view over a collection of resources in
-    # a modal dialog.
-    # This method works in conjunction with the metadata in the `@myResources`
-    # object; CRUCIALLY, only resources with an attribute in that object can be
-    # shown using this method. The simplest case is to call this method with
-    # the singular camelCase name of a resource as its first argument; e.g.,
-    # `@showResourcesView 'elicitationMethod'`.
-    showResourcesViewInDialog: (resourceName, options={}) ->
-      console.log 'showResourcesViewInDialog called in AppView'
-      o = @showResourcesViewSetDefaultOptions resourceName, options
-      names = @getResourceNames resourceName
-      myViewAttr = "#{names.plural}ViewInDialog"
-      if o.authenticationRequired and not @loggedIn() then return
-      if o.searchable and o.search
-        @closeVisibleViewInDialog()
-        @visibleViewInDialog = null
-      if @[myViewAttr] and @visibleViewInDialog is @[myViewAttr]
-        if @resourcesDisplayerDialog.isOpen()
-          return
-      # taskId = @guid()
-      # Backbone.trigger 'longTask:register', "Opening #{names.regPlur} view",
-      #   taskId
-      @closeVisibleViewInDialog()
-      if @[myViewAttr]
-        if @fieldDBCorpusHasChanged(myViewAttr, o)
-          @closeView @[myViewAttr]
-          @[myViewAttr] = @instantiateResourcesView resourceName, o
-      else
-        @[myViewAttr] = @instantiateResourcesView resourceName, o
-      @visibleViewInDialog = @[myViewAttr]
-      # @showNewResourceViewOption o
-      # @showImportInterfaceOption o
-      # @searchableOption o
-      # @corpusElementOption o
-      # @renderVisibleView taskId
-      @resourcesDisplayerDialog.showResourcesView @visibleViewInDialog
-
     renderHelpDialog: ->
       @helpDialog.render()
       @rendered @helpDialog
@@ -758,6 +721,29 @@ define [
       @searchableOption o
       @corpusElementOption o
       @renderVisibleView taskId
+
+    # Render (and perhaps instantiate) a view over a collection of resources *in
+    # a modal dialog.* Compare to `showResourcesView`.
+    showResourcesViewInDialog: (resourceName, options={}) ->
+      o = @showResourcesViewSetDefaultOptions resourceName, options
+      names = @getResourceNames resourceName
+      myViewAttr = "#{names.plural}ViewInDialog"
+      if o.authenticationRequired and not @loggedIn() then return
+      if o.searchable and o.search
+        @closeVisibleViewInDialog()
+        @visibleViewInDialog = null
+      if @[myViewAttr] and @visibleViewInDialog is @[myViewAttr]
+        if @resourcesDisplayerDialog.isOpen()
+          return
+      @closeVisibleViewInDialog()
+      if @[myViewAttr]
+        if @fieldDBCorpusHasChanged(myViewAttr, o)
+          @closeView @[myViewAttr]
+          @[myViewAttr] = @instantiateResourcesView resourceName, o
+      else
+        @[myViewAttr] = @instantiateResourcesView resourceName, o
+      @visibleViewInDialog = @[myViewAttr]
+      @resourcesDisplayerDialog.showResourcesView @visibleViewInDialog
 
     # Show the resource of type `resourceName` with id `id` in the main page of
     # the application. This is what happens when you navigate to, e.g.,
