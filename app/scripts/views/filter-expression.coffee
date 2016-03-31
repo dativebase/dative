@@ -487,10 +487,6 @@ define [
       @$el.html @template(context)
       @bordercolorify()
       $filterExpressionTable = @$('.filter-expression-table').first()
-      @selectmenuify $filterExpressionTable
-      if @filterExpression.length is 4
-        @$('select.sub-attribute').hide()
-        @$('.ui-selectmenu-button.sub-attribute').hide()
       $filterExpressionTable
         .find('textarea').autosize().end()
         .find('button').button().end()
@@ -506,6 +502,15 @@ define [
       @hideActionWidget()
       @actionButtonsVisibility()
       @listenToEvents()
+      # We delay both selectmenu-fication and hiding in order for them to work
+      # correctly within dialog widgets.
+      x = => @selectmenuify $filterExpressionTable
+      y = =>
+        if @filterExpression.length is 4
+          @$('select.sub-attribute').hide()
+          @$('.ui-selectmenu-button.sub-attribute').hide()
+      setTimeout x, 1
+      setTimeout y, 2
       @
 
     # We filter out some of the relations exposed by the OLD; this is because
@@ -519,17 +524,11 @@ define [
       catch
         []
 
-    # Make <select>s into jQuery selectmenus.
     selectmenuify: ($context) ->
-      x = =>
-        $context.find('select').each (index, element) =>
-          $element = @$ element
-          if $element.html().trim()
-            $element.selectmenu width: 'auto'
-            @transferClassAndTitle $element # so we can tooltipify the selectmenu
-      # For some reason putting the delay on this makes these filter expression
-      # selectmenus work in dialog boxes; they don't otherwise (z-index issue).
-      setTimeout x, 5
+      $context.find('select')
+        .selectmenu width: 'auto'
+        .each (index, element) =>
+          @transferClassAndTitle @$(element) # so we can tooltipify the selectmenu
 
     # Show/hide various action buttons for the non-terminal node of this filter
     # expression, depending on its state.
