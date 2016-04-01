@@ -67,8 +67,8 @@ define [
         filter: [
           @getTargetResourceNameCapitalized()
           @targetResourcePrimaryAttribute
-          'like'
-          '%'
+          'regex'
+          ''
         ]
         order_by: [
           @getTargetResourceNameCapitalized()
@@ -219,9 +219,9 @@ define [
           term = term[1...]
         if term.length > 1 and term[term.length - 1] is '%'
           term = term[...-1]
-        regex = @escapeRegexChars(term).replace(/_/g, '.').replace(/%/g, '.*')
+        regex = @utils.escapeRegexChars(term).replace(/_/g, '.').replace(/%/g, '.*')
       else if relation is '='
-        regex = "^#{@escapeRegexChars term}$"
+        regex = "^#{@utils.escapeRegexChars term}$"
       else if relation is 'in'
         regex = "(?:^#{term.join ')$|(?:^'})$"
       else
@@ -233,14 +233,4 @@ define [
         regex.normalize 'NFD'
       catch
         regex
-
-    # Cf. http://stackoverflow.com/a/9310752/992730
-    escapeRegexChars: (input) ->
-      try
-        input.replace /[-[\]{}()*+?.,\\^$|#]/g, "\\$&"
-      catch
-        try
-          String(input).replace /[-[\]{}()*+?.,\\^$|#]/g, "\\$&"
-        catch
-          input
 

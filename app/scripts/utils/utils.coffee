@@ -452,6 +452,17 @@ define (require) ->
       when 12 then 'twelve'
       else integerWithCommas number
 
+  # Cf. http://stackoverflow.com/a/9310752/992730
+  escapeRegexChars = (input) ->
+    try
+      input.replace /[-[\]{}()*+?.,\\^$|#]/g, "\\$&"
+    catch
+      try
+        String(input).replace /[-[\]{}()*+?.,\\^$|#]/g, "\\$&"
+      catch
+        input
+
+  escapeRegexChars: escapeRegexChars
   number2word: number2word
   singleSpace: singleSpace
   unique: unique

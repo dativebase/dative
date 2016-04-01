@@ -158,9 +158,8 @@ define [
       'input .value':                    'valueChanged'
 
     valueChanged: (event) ->
-      @stopEvent event
-      $valueTextarea = @$('textarea.value').first()
-      value = $valueTextarea.val()
+      if event then @stopEvent event
+      value = @$('textarea.value').first().val()
       if @filterExpression.length is 5
         if @filterExpression[3] is 'in'
           @filterExpression[4] = @jsonParse value
@@ -313,7 +312,7 @@ define [
       @hideActionWidgetAnimate()
       operator = @filterExpression[0]
       if operator in ['or', 'and'] or
-      (operator is 'not' and @filterExpression.legnth is 1)
+      (operator is 'not' and @filterExpression.length is 1)
         newFilterExpression = @getDefaultFilterExpression()
         if operator in ['or', 'and']
           @filterExpression[1].push newFilterExpression
@@ -327,7 +326,7 @@ define [
         @triggerChanged()
 
     getDefaultFilterExpression: ->
-      [@targetResourceNameCapitalized , @primaryAttribute, 'like', '%']
+      [@targetResourceNameCapitalized , @primaryAttribute, 'regex', '']
 
     # Change the operator to a boolean, i.e., 'and' or 'or'.
     makeOperatorBoolean: (boolean) ->
