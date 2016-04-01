@@ -179,19 +179,40 @@ define [
       catch
         value
 
+    # The relation selectmenu of the filter expression has changed.
     relationChanged: (event) ->
       @stopEvent event
-      $relationSelect = @$('select.relation').first()
-      relation = $relationSelect.val()
-      if @filterExpression.length is 5
-        @filterExpression[3] = relation
+      relation = @$('select.relation').first().val()
+      @syncWithRelation relation
+      # the "is (not) null" relations imply no sub-attribute and no pattern
+      # value.
+      if relation in ['is null', 'is not null']
+        if relation is 'is null'
+          @filterExpression.splice 2, 3, '=', null
+        else
+          @filterExpression.splice 2, 3, '!=', null
       else
-        @filterExpression[2] = relation
+        if @filterExpression.length is 5
+          @filterExpression[3] = relation
+        else
+          @filterExpression[2] = relation
       @triggerChanged()
+
+    # Selecting the special relations 'is null' and 'is not null' causes the
+    # value <textarea> as well as any sub-attribute selectmenu to become hidden.
+    syncWithRelation: (value=null) ->
+      if not value then value = @$('select.relation').first().val()
+      if value in ['is null', 'is not null']
+        @$('textarea.value').first().hide()
+        @$('.ui-selectmenu-button.sub-attribute').first().hide()
+      else
+        @$('textarea.value').first().show()
+        @syncAttributeSubattributeSelects()
 
     attributeChanged: (event) ->
       @stopEvent event
       @syncAttributeSubattributeSelects()
+      @syncWithRelation()
       attribute = @$('select.attribute').first().val()
       @filterExpression[1] = attribute
       $subAttributeSelect = @$('select.sub-attribute').first()
@@ -502,16 +523,19 @@ define [
       @hideActionWidget()
       @actionButtonsVisibility()
       @listenToEvents()
-      # We delay both selectmenu-fication and hiding in order for them to work
-      # correctly within dialog widgets.
-      x = => @selectmenuify $filterExpressionTable
-      y = =>
-        if @filterExpression.length is 4
-          @$('select.sub-attribute').hide()
-          @$('.ui-selectmenu-button.sub-attribute').hide()
-      setTimeout x, 1
-      setTimeout y, 2
+      @selectmenuAndVisibility $filterExpressionTable
       @
+
+    # Make the selects into select menus and hide the sub-attribute select if
+    # it's not relevant.
+    selectmenuAndVisibility: ($filterExpressionTable) ->
+      @selectmenuify $filterExpressionTable
+      if @filterExpression.length is 4
+        @$('select.sub-attribute').hide()
+        @$('.ui-selectmenu-button.sub-attribute').hide()
+        if @filterExpression[2] in ['=', '!='] and
+        @filterExpression[3] is null
+          @$('textarea.value').first().hide()
 
     # We filter out some of the relations exposed by the OLD; this is because
     # some of them are redundant and have ugly names, e.g., ugly "__ne__" is
@@ -521,6 +545,7 @@ define [
         key = "#{@targetResourceName}_search_parameters"
         relations = _.keys options[key].relations
         (r for r in relations when r isnt 'regexp' and '_' not in r)
+          .concat(['is null', 'is not null'])
       catch
         []
 

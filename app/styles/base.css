@@ -2946,3 +2946,8 @@ div.collection-contents-preview div.form-container > i
   margin-left: 0.25em;
 }
 
+.ui-selectmenu-open
+{
+  z-index: 9999 !important;
+}
+

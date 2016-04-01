@@ -71,6 +71,13 @@
                         <% [myModel, myAttribute, mySubattribute, myRelation, myValue] = @filterExpression %>
                     <% else: %>
                         <% [myModel, myAttribute, myRelation, myValue] = @filterExpression %>
+                        <% if myValue is null: %>
+                            <% if myRelation is '=': %>
+                                <% myRelation = 'is null' %>
+                            <% else if myRelation is '!=': %>
+                                <% myRelation = 'is not null' %>
+                            <% end %>
+                        <% end %>
                     <% end %>
 
                     <select name='attribute' class='attribute dative-tooltip'
