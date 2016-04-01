@@ -5,9 +5,10 @@ define [
   './exporter-simple-interlinear-glosses-wordpress'
   './exporter-ids'
   './exporter-latex'
+  './dialog-base'
   './../templates/exporter-dialog'
 ], (BaseView, ExporterCollectionCSVView, ExporterJSONView,
-  ExporterSIGPluginView, ExporterIdsView, ExporterLaTeXView,
+  ExporterSIGPluginView, ExporterIdsView, ExporterLaTeXView, DialogBaseView,
   exporterDialogTemplate) ->
 
   # Exporter Dialog View
@@ -29,13 +30,18 @@ define [
     template: exporterDialogTemplate
 
     initialize: ->
+      @atTop = false
       @getExporterViews()
       @hasBeenRendered = false
+      @moveToTop = DialogBaseView::moveToTop
+      @moveToBottom = DialogBaseView::moveToBottom
       @listenTo Backbone, 'exporterDialog:toggle', @toggle
       @listenTo Backbone, 'exporterDialog:openTo', @openTo
+      @listenTo Backbone, 'dialogs:moveToBottom', @moveToBottom
 
     events:
       'dialogdragstart': 'closeAllTooltips'
+      'mousedown': 'moveToTop'
 
     render: ->
       @hasBeenRendered = true
@@ -64,7 +70,7 @@ define [
       height = $(window).height() * 0.8
       width = $(window).width() * 0.6
       @$('.dative-exporter-dialog').dialog
-        modal: true
+        # modal: true
         position: @defaultPosition()
         hide: {effect: 'fade'}
         show: {effect: 'fade'}
@@ -79,6 +85,8 @@ define [
           @tooltipify()
         close: =>
           @closeAllTooltips()
+        open: (event, ui) =>
+          @moveToTop()
 
     # Select/highlight all of the export text.
     selectAllExportText: ->

@@ -25,13 +25,13 @@ define [
     getDialogWidgetClass: -> 'dative-resource-displayer-dialog-widget'
 
     initialize: (options) ->
+      super
       @index = options?.index or 1
-      @atTop = false
       @resourceView = null
       @setDimensions()
       @listenTo Backbone, 'resourceDisplayerDialog:toggle', @toggle
       @listenTo Backbone, 'resourceDisplayerDialog:show', @showResourceView
-      @listenTo Backbone, 'resourceDisplayerDialog:moveToBottom', @moveToBottom
+      @listenTo Backbone, 'dialogs:moveToBottom', @moveToBottom
 
     # We override `DialogBaseView`'s events object because we add two new
     # events.
@@ -162,19 +162,6 @@ define [
         @resourceView = null
       @closeAllTooltips()
       @timestamp = 0
-
-    # Move the dialog to the top of the stack via its z-index CSS.
-    moveToTop: ->
-      @atTop = true
-      Backbone.trigger 'resourceDisplayerDialog:moveToBottom'
-      @$('.ui-dialog').css 'z-index', 110
-
-    # Move the dialog to the bottom of the stack via its z-index CSS.
-    moveToBottom: ->
-      if @atTop
-        @atTop = false
-      else
-        @$('.ui-dialog').css 'z-index', 100
 
     # Expand the dialog to its last dimensions and place it in its last
     # location. NOTE: we override the `DialogBaseView`'s method because we want

@@ -18,6 +18,9 @@ define [
 
   class DialogBaseView extends BaseView
 
+    initialize: (options) ->
+      @atTop = false
+
     # This is the class selector of the <div> in the template that becomes
     # dialogified.
     getDialogClassSelector: -> '. ...'
@@ -147,4 +150,17 @@ define [
       my: 'right bottom'
       at: 'right bottom'
       of: window
+
+    # Move the dialog to the top of the stack via its z-index CSS.
+    moveToTop: ->
+      @atTop = true
+      Backbone.trigger 'dialogs:moveToBottom'
+      @$('.ui-dialog').css 'z-index', 110
+
+    # Move the dialog to the bottom of the stack via its z-index CSS.
+    moveToBottom: ->
+      if @atTop
+        @atTop = false
+      else
+        @$('.ui-dialog').css 'z-index', 100
 

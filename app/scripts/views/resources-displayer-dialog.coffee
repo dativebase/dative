@@ -31,13 +31,12 @@ define [
     getMaxHeight: (windowHeight) -> windowHeight * 0.95
 
     initialize: (options) ->
-      @atTop = false
+      super
       @resourcesView = null
       @setDimensions()
-
       @listenTo Backbone, 'resourcesDisplayerDialog:toggle', @toggle
       @listenTo Backbone, 'resourcesDisplayerDialog:show', @showResourcesView
-      @listenTo Backbone, 'resourcesDisplayerDialog:moveToBottom', @moveToBottom
+      @listenTo Backbone, 'dialogs:moveToBottom', @moveToBottom
 
     # We override `DialogBaseView`'s events object because we add two new
     # events.
@@ -134,26 +133,12 @@ define [
       )
 
     closeInner: ->
-      console.log 'closeInner called'
       if @resourcesView
         @resourcesView.close()
         @closed @resourcesView
         @resourcesView = null
       @closeAllTooltips()
       @timestamp = 0
-
-    # Move the dialog to the top of the stack via its z-index CSS.
-    moveToTop: ->
-      @atTop = true
-      Backbone.trigger 'resourcesDisplayerDialog:moveToBottom'
-      @$('.ui-dialog').css 'z-index', 110
-
-    # Move the dialog to the bottom of the stack via its z-index CSS.
-    moveToBottom: ->
-      if @atTop
-        @atTop = false
-      else
-        @$('.ui-dialog').css 'z-index', 100
 
     # Expand the dialog to its last dimensions and place it in its last
     # location. NOTE: we override the `DialogBaseView`'s method because we want
