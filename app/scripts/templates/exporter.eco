@@ -10,11 +10,11 @@
         <div class='exporter-controls'>
             <% if @hasSettings: %>
                 <button class='exporter-settings-button dative-tooltip'
-                    title='Click to reveal settings for configuring this export'
+                    title='Reveal/hide settings for configuring this export'
                     ><i class='fa fa-fw fa-cogs'></i></button>
             <% end %>
             <button class='export dative-tooltip'
-                title='Click to generate an export using this exporter'
+                title='Generate an export using this exporter'
                 >Export</button>
         </div>
 

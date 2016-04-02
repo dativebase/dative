@@ -58,8 +58,8 @@ define [
     render: ->
       @listenToEvents()
       @html()
-      @guify()
       @renderSettings()
+      @guify()
       @
 
     html: ->
@@ -137,6 +137,8 @@ define [
     clearControls: ->
       @$('.exporter-export-controls').html ''
 
+    selectAllButtonDefaultHidden: -> false
+
     # Add a "Select All" button to the exporter's controls <div>.
     selectAllButton: ->
       if @$('button.select-all').length == 0
@@ -146,6 +148,8 @@ define [
         @$('.exporter-export-controls').append button
         @$('.exporter-export-controls button.select-all').button()
         @$('.exporter-export-controls .dative-tooltip').tooltip()
+        if @selectAllButtonDefaultHidden()
+          @$('button.select-all').hide()
 
     clearExportContent: ->
       @$('.exporter-export-content').html ''

@@ -18,7 +18,6 @@ define [
         if @collection.corpus
           "LaTeX export of the forms in corpus “#{@collection.corpus.name}.”"
         else if @collection.search
-          console.log @collection.search
           if @collection.search.name
             "LaTeX export of the #{@collection.resourceNamePlural} in search
               “#{@collection.search.name}.”"
@@ -47,25 +46,40 @@ define [
     renderSettings: ->
       @$('.exporter-settings').html(
         "<ul>
+
           <li>
             <label class='exporter-settings-label'
               for='igt_package'>IGT package</label>
             <select name='igt_package'>
               <option value='expex'>ExPex</option>
+              <option value='gb4e'>gb4e</option>
               <option value='covington'>Covington</option>
             </select>
           </li>
+
+          <li>
+            <label class='exporter-settings-label dative-tooltip'
+              title='Choose whether you want to download your export as a file
+                or copy-and-paste it as text.'
+              for='download_format'>Download format</label>
+            <select name='download_format'>
+              <option value='file'>File</option>
+              <option value='text'>Text</option>
+            </select>
+          </li>
+
         </ul>"
       )
-      x = =>
-        @$('select[name=igt_package]').selectmenu width: 'auto'
-      setTimeout x, 5 # Delay is a hack to make in-dialog selectmenus work.
+      @$('select').selectmenu width: 'auto'
+
+    selectAllButtonDefaultHidden: -> true
 
     # Return the user-specified export settings. If the <select> value is
     # 'newline' it means ids should be 'form[1]\nform[2]\n' etc. Otherwise,
     # they are comma-delimited.
     getSettings: ->
       igtPackage: @$('select[name=igt_package]').val()
+      downloadFormat: @$('select[name=download_format]').val()
       secondaryData: true # TODO: get option from user
       reference: true # TODO: get option from user
 
@@ -75,6 +89,19 @@ define [
     fetchCollectionForms: ->
       @model.fetchResource @model.id
 
+    events:
+      'click .export': 'export'
+      'click .exporter-settings-button': 'toggleSettingsInterface'
+      'click .select-all': 'selectAllExportText'
+      'selectmenuchange': 'settingsChanged'
+
+    settingsChanged: ->
+      downloadFormat = @getSettings().downloadFormat
+      $selectAllButton = @$ 'button.select-all'
+      if downloadFormat is 'file' and $selectAllButton.is(':visible')
+        $selectAllButton.hide()
+      else if downloadFormat is 'text' and $selectAllButton.is(':hidden')
+        $selectAllButton.show()
 
     listenToEvents: ->
       super
@@ -145,8 +172,36 @@ define [
         return
       [title, author] = @getTitleAuthor()
       latex = @getCollectionAsLaTeX collectionArray, title, author
-      $contentContainer.html "<pre>#{latex}</pre>"
+      settings = @getSettings()
+      if settings.downloadFormat is 'file'
+        @createFile latex
+      else
+        $contentContainer.html "<pre>#{latex}</pre>"
       @selectAllButton()
+
+    # Save the string of LaTeX as a file.
+    createFile: (latex) ->
+      mimeType = 'application/x-latex; charset=utf-8;'
+      blob = new Blob [latex], {type: mimeType}
+      url = URL.createObjectURL blob
+      if @collection.corpus
+        name = "corpus-of-#{@collection.resourceNamePlural}-\
+          #{(new Date()).toISOString()}.tex"
+      else if @collection.search
+        name = "search-over-#{@collection.resourceNamePlural}-\
+          #{(new Date()).toISOString()}.tex"
+      else
+        name = "#{@collection.resourceNamePlural}-\
+          #{(new Date()).toISOString()}.tex"
+      anchor = "<a href='#{url}'
+        class='export-link dative-tooltip'
+        type='#{mimeType}'
+        title='Click to download your export file'
+        download='#{name}'
+        target='_blank'
+        ><i class='fa fa-fw fa-file-o'></i>#{name}</a>"
+      @$('.exporter-export-content').html anchor
+      @$('.export-link.dative-tooltip').tooltip()
 
     # A particular OLD collection resource has been fetched. We export it as a
     # sequence of form references. Converting reStructuredText or Markdown to
@@ -187,12 +242,14 @@ define [
       for formObject in forms
         result.push @getModelAsLaTeX(formObject, settings)
       result.push "\n\n\\end{document}\n"
-      if @errors then Backbone.trigger 'csvExportError'
+      if @errors then Backbone.trigger 'latexExportError'
       result.join '\n'
 
     getModelAsLaTeX: (model, settings) ->
       if settings.igtPackage is 'expex'
         @expexFormFormatter model, settings
+      else if settings.igtPackage is 'gb4e'
+        @gb4eFormFormatter model, settings
       else
         @covingtonFormFormatter model, settings
 
@@ -236,6 +293,16 @@ define [
       trailingCitation.push ')}'
       trailingCitation.join ''
 
+    getTranslationsString: (translations) ->
+      result = []
+      for translation in translations
+        if translation.grammaticality
+          result.push("#{@escapeLaTeX translation.grammaticality}~\
+            `#{@escapeLaTeX translation.transcription}'")
+        else
+          result.push("`#{@escapeLaTeX translation.transcription}'")
+      result.join '\\\\\n\t\t'
+
     # Return a XeLaTeX representation of a form using the ExPex package to put
     # the words into IGT formatted examples.
     expexFormFormatter: (form, settings) ->
@@ -263,11 +330,7 @@ define [
             result.push "\n\t\t\\glb #{@escapeLaTeX val}//"
         if form.morpheme_gloss
           result.push "\n\t\t\\glb #{@escapeLaTeX form.morpheme_gloss}//"
-        translations = []
-        for translation in form.translations
-          translations.push("#{@escapeLaTeX translation.grammaticality}\
-            `#{@escapeLaTeX translation.transcription}'")
-        translations = translations.join '\\\\\n\t\t'
+        translations = @getTranslationsString form.translations
         result = result.concat([
           "\n\t\t\\glft #{translations}#{trailingCitation}//"
           '\n\t\\endgl'
@@ -292,12 +355,8 @@ define [
       if not form
         result.push('\t\\item WARNING: BAD FORM REFERENCE')
       else
+        translations = @getTranslationsString form.translations
         # If the Form has a morphological analysis, use Covington for IGT
-        translations = []
-        for translation in form.translations
-          translations.push("#{@escapeLaTeX translation.grammaticality}\
-            `#{@escapeLaTeX translation.transcription}'")
-        translations = translations.join '\\\\ \n\t\t'
         if form.morpheme_break and form.morpheme_gloss
           result = result.concat([
             '\t\\item'
@@ -322,6 +381,62 @@ define [
             @xelatexSecondaryData(form, settings.reference)
           ])
       result.push('\n\\end{examples}')
+      result.join ''
+
+    # Return a XeLaTeX representation of a form using the gb4e package to
+    # put the words into IGT formatted examples.
+    gb4eFormFormatter: (form, settings) ->
+      result = ['\n\n\\begin{exe}\n']
+      if not form
+        result.push('\t\\ex WARNING: BAD FORM REFERENCE')
+      else
+        # If the Form has a morphological analysis, use gb4e for IGT
+        translations = @getTranslationsString form.translations
+        possibleLines = (x for x in [
+          form.narrow_phonetic_transcription.trim()
+          form.phonetic_transcription.trim()
+          form.transcription.trim()
+          form.morpheme_break.trim()
+        ] when x)
+        gloss = @escapeLaTeX form.morpheme_gloss.trim()
+        if form.grammaticality
+          result.push "\t\\ex[#{form.grammaticality}]{"
+          rb = '}'
+        else
+          result.push "\t\\ex"
+          rb = ''
+        if possibleLines.length > 1
+          if gloss
+            result = result.concat([
+              "\n\t\t\\glll #{@escapeLaTeX possibleLines[0]}\\\\"
+              "\n\t\t#{@escapeLaTeX possibleLines[1]}\\\\"
+              "\n\t\t#{gloss}\\\\"
+              "\n\t\t\\trans #{translations}#{rb}"
+            ])
+          else
+            result = result.concat([
+              "\n\t\t\\gll #{@escapeLaTeX possibleLines[0]}\\\\"
+              "\n\t\t#{@escapeLaTeX possibleLines[1]}\\\\"
+              "\n\t\t\\trans #{translations}#{rb}"
+            ])
+        else
+          if gloss
+            result = result.concat([
+              "\n\t\t\\gll #{@escapeLaTeX possibleLines[0]}\\\\"
+              "\n\t\t#{gloss}\\\\"
+              "\n\t\t\\trans #{translations}#{rb}"
+            ])
+          else
+            result = result.concat([
+              "\n\t\t #{@escapeLaTeX possibleLines[0]}\\\\"
+              "\n\t\t #{translations}#{rb}"
+            ])
+        # if settings.secondaryData
+        #   result = result.concat([
+        #     '\n',
+        #     @xelatexSecondaryData(form, settings.reference)
+        #   ])
+      result.push('\n\\end{exe}')
       result.join ''
 
     # Return the form's comments, speaker comments and a reference as a LaTeX
