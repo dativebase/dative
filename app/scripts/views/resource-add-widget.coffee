@@ -157,19 +157,20 @@ define [
 
     # Write the initial HTML to the page.
     html: ->
-      context =
-        addUpdateType: @addUpdateType
-        headerTitle: @getHeaderTitle()
-        activeServerType: @getActiveServerType()
-        resourceName: @resourceName
-        resourceNameHuman: @utils.camel2regular @resourceName
-        editableSecondaryAttributes: @editableSecondaryAttributes
-        indefiniteDeterminer: @utils.indefiniteDeterminer
-        forImport: @forImport
       @$el
         .attr 'id', @model.cid
-        .html @template(context)
+        .html @template(@getContext())
         .addClass @addUpdateType
+
+    getContext: ->
+      addUpdateType: @addUpdateType
+      headerTitle: @getHeaderTitle()
+      activeServerType: @getActiveServerType()
+      resourceName: @resourceName
+      resourceNameHuman: @utils.camel2regular @resourceName
+      editableSecondaryAttributes: @editableSecondaryAttributes
+      indefiniteDeterminer: @utils.indefiniteDeterminer
+      forImport: @forImport
 
     getHeaderTitle: ->
       if @addUpdateType is 'add'
@@ -394,15 +395,29 @@ define [
       @renderPrimaryFieldViews()
       @renderSecondaryFieldViews()
 
+    # Return an array of ints indicating where vertical spacers should occur
+    # between field views.
+    spacerIndices: -> []
+
     renderPrimaryFieldViews: ->
       $primaryDataUL = @$ @primaryDataSelector
-      for fieldView in @primaryFieldViews
+      spacerIndices = @spacerIndices()
+      for fieldView, index in @primaryFieldViews
+        if index in spacerIndices
+          spacer = document.createElement 'div'
+          spacer.className = 'display-view-spacer'
+          $primaryDataUL.append spacer
         $primaryDataUL.append fieldView.render().el
         @rendered fieldView
 
     renderSecondaryFieldViews: ->
       $secondaryDataUL = @$ @secondaryDataSelector
-      for fieldView in @secondaryFieldViews
+      spacerIndices = @spacerIndices()
+      for fieldView, index in @secondaryFieldViews
+        if index in spacerIndices
+          spacer = document.createElement 'div'
+          spacer.className = 'display-view-spacer'
+          $secondaryDataUL.append spacer
         $secondaryDataUL.append fieldView.render().el
         @rendered fieldView
 

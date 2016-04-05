@@ -90,6 +90,7 @@ define [
         @controlsView = new @controlsViewClass
           model: @model
           resourceName: @resourceName
+          resourceNameHumanReadable: @resourceNameHumanReadable()
         @controlsViewRendered = false
 
     getSettingsView: ->
@@ -433,16 +434,30 @@ define [
     # on display views, e.g., interlinearize (see form-base.coffee).
     renderDisplayViewsPost: ->
 
+    # Return an array of ints indicating where vertical spacers should occur
+    # between field display views.
+    spacerIndices: -> []
+
     renderPrimaryDisplayViews: ->
       container = document.createDocumentFragment()
-      for displayView in @primaryDisplayViews
+      spacerIndices = @spacerIndices()
+      for displayView, index in @primaryDisplayViews
+        if index in spacerIndices
+          spacer = document.createElement 'div'
+          spacer.className = 'display-view-spacer'
+          container.appendChild spacer
         container.appendChild displayView.render().el
         @rendered displayView
       @$('div.resource-primary-data').append container
 
     renderSecondaryDisplayViews: ->
       container = document.createDocumentFragment()
-      for displayView in @secondaryDisplayViews
+      spacerIndices = @spacerIndices()
+      for displayView, index in @secondaryDisplayViews
+        if index in spacerIndices
+          spacer = document.createElement 'div'
+          spacer.className = 'display-view-spacer'
+          container.appendChild spacer
         container.appendChild displayView.render().el
         @rendered displayView
       @$('div.resource-secondary-data').first().append container

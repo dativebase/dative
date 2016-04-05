@@ -25,7 +25,7 @@
     <div class='application-settings-big-buttons'>
 
         <div class='big-button ui-corner-all servers dative-tooltip'
-             title='Click to configure the LingSync/OLD servers that you want to
+             title='Configure the OLD servers that you want to
                 connect to'
             ><div class='big-button-text'>Servers</div>
             <div class='big-button-icon'>
@@ -34,7 +34,7 @@
         </div>
 
         <div class='big-button ui-corner-all appearance dative-tooltip'
-             title='Click to change how your Dative looks'
+             title='Change how your Dative looks'
             ><div class='big-button-text'>Appearance</div>
             <div class='big-button-icon'>
                 <i class='fa fa-picture-o fa-4x fa-fw fa-align-center'></i>
@@ -42,8 +42,9 @@
         </div>
 
         <% if @loggedIn is true: %>
+
             <div class='big-button ui-corner-all server-settings dative-tooltip'
-                title='Click to configure the settings of the OLD server that you
+                title='Configure the settings of the OLD server that you
                     are logged in to'
                 ><div class='big-button-text'>Server Settings</div>
                 <div class='big-button-icon'>
@@ -51,6 +52,16 @@
                     <i class='fa fa-cogs fa-4x fa-fw fa-align-center'></i>
                 </div>
             </div>
+
+            <div class='big-button ui-corner-all input-validation dative-tooltip'
+                title='Control the possible values of certain form fields'
+                ><div class='big-button-text'>Input Validation</div>
+                <div class='big-button-icon'>
+                    <i class='fa fa-check-circle fa-4x fa-fw fa-align-center'></i>
+                    <i class='fa fa-times-circle fa-4x fa-fw fa-align-center'></i>
+                </div>
+            </div>
+
         <% end %>
 
     </div>
@@ -89,8 +100,8 @@
         </div>
 
         <div class='server-settings-interface ui-corner-all
-            dative-shadowed-widget dative-widget-center ui-widget
-            ui-widget-content application-settings-interface'></div>
+            dative-paginated-item dative-shadowed-widget dative-widget-center
+            ui-widget ui-widget-content application-settings-interface'></div>
 
     </div>
 

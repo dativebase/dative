@@ -6,7 +6,7 @@
   <div class='button-container-left'>
 
     <button class="hide-controls-widget dative-tooltip"
-            title="hide this <%= @resourceName %> controls widget">
+            title="hide this <%= @resourceNameHumanReadable %> controls widget">
       <i class='fa fa-times fa-fw'></i>
     </button>
 
@@ -18,7 +18,7 @@
 
     <button class='controls-help dative-tooltip'
             title='help with using the controls of this
-              <%= @resourceName %>'
+              <%= @resourceNameHumanReadable %>'
     ><i class='fa fa-fw fa-question'></i>
     </button>
 

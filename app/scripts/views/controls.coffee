@@ -23,6 +23,8 @@ define [
 
     initialize: (options) ->
       @resourceName = options?.resourceName or ''
+      @resourceNameHumanReadable =
+        options?.resourceNameHumanReadable or @resourceName
       @activeServerType = @getActiveServerType()
       @getActionViews()
       @listenToEvents()
@@ -60,6 +62,7 @@ define [
     html: ->
       context =
         resourceName: @resourceName
+        resourceNameHumanReadable: @resourceNameHumanReadable
         headerTitle: 'Controls'
         activeServerType: @activeServerType
       @$el.html @template(context)

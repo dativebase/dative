@@ -217,7 +217,8 @@ td.dative-field-label-cell
 .dative-field-display-representation-container,
 .dative-field-display-label-container,
 .dative-pagin-item-index-cell,
-div.resource-as-row-cell.text
+div.resource-as-row-cell.text,
+table.character-names-table
 {
   font-family: 'GentiumPlus', serif;
 }
@@ -1646,7 +1647,9 @@ div.new-form-view
 
 div.update-form-widget,
 div.dative-paginated-item .dative-widget-center,
-div.dative-new-item .dative-widget-center
+div.dative-new-item .dative-widget-center,
+div.controls-container .dative-widget-center,
+div.controls-widget.dative-widget-center
 {
   width: 98%;
   margin-top: 1em;
@@ -1659,7 +1662,8 @@ div.dative-new-item .dative-widget-center
 }
 
 div.dative-paginated-item .dative-widget-header-title,
-div.dative-new-item .dative-widget-header-title
+div.dative-new-item .dative-widget-header-title,
+.application-settings-interfaces .dative-widget-header-title
 {
   /*font-size: 115%;*/
   font-size: 125%;
@@ -2954,5 +2958,49 @@ div.collection-contents-preview div.form-container > i
 .ui-selectmenu-open
 {
   z-index: 9999 !important;
+}
+
+.display-view-spacer
+{
+  height: 1em;
+}
+
+.update-resource-widget .display-view-spacer
+{
+  height: 3em;
+}
+
+.test-validation-results
+{
+  display: inline-block;
+  position: relative;
+  top: -0.85em;
+  left: -0.5em;
+}
+
+.textarea-control-label
+{
+  margin-bottom: 0.5em;
+  display: inline-block;
+}
+
+div.character-names-table-container
+{
+  max-height: 20em;
+  overflow-y: scroll;
+  margin: 1em 0;
+  border: 1px solid;
+}
+
+table.character-names-table
+{
+  font-size: 14pt;
+}
+
+table.character-names-table tr th,
+table.character-names-table tr td
+{
+  padding: 0.25em 1em;
+  text-align: left;
 }
 

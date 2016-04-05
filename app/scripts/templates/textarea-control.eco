@@ -1,0 +1,19 @@
+<% if @textareaLabel: %>
+    <label
+        class='textarea-control-label dative-tooltip'
+        title='<%= @textareaLabelTitle %>'
+        for='<%= @textareaName %>'><%= @textareaLabel %></label>
+<% end %>
+<textarea
+    maxlength='500'
+    rows='1'
+    name='<%= @textareaName %>'
+    class='ui-corner-all
+           form-add-input
+           dative-tooltip
+           dative-input-field
+           control-input'
+    title='<%= @textareaTitle %>'
+></textarea>
+<div class='<%= @resultsContainerClass %>'></div>
+

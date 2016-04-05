@@ -4,13 +4,56 @@ define [
   './servers'
   './active-server'
   './old-application-settings-resource'
+  './old-application-settings-add-widget'
+  './input-validation'
   './../models/old-application-settings'
   './../collections/old-application-settings'
   './../utils/globals'
   './../templates/application-settings'
 ], (Backbone, BaseView, ServersView, ActiveServerView,
-  OLDApplicationSettingsResourceView, OLDApplicationSettingsModel,
+  OLDApplicationSettingsResourceView, OLDApplicationSettingsAddWidgetView,
+  InputValidationView, OLDApplicationSettingsModel,
   OLDApplicationSettingsCollection, globals, applicationSettingsTemplate) ->
+
+
+  class MyOLDApplicationSettingsAddWidgetView extends OLDApplicationSettingsAddWidgetView
+
+    # Attributes that are always displayed.
+    primaryAttributes: [
+      'object_language_name'
+      'object_language_id'
+
+      'metalanguage_name'
+      'metalanguage_id'
+      # 'metalanguage_inventory'
+
+      'unrestricted_users'
+    ]
+
+    spacerIndices: -> [2, 4]
+
+
+  class MyOLDApplicationSettingsResourceView extends OLDApplicationSettingsResourceView
+
+    resourceAddWidgetView: MyOLDApplicationSettingsAddWidgetView
+
+    # Attributes that are always displayed.
+    primaryAttributes: [
+      'object_language_name'
+      'object_language_id'
+
+      'metalanguage_name'
+      'metalanguage_id'
+      # 'metalanguage_inventory' # This isn't used right now, and it's just
+      # confusing.
+
+      'unrestricted_users'
+
+      'datetime_modified'
+    ]
+
+    spacerIndices: -> [2, 4, 5]
+
 
   # Application Settings View
   # -------------------------
@@ -39,6 +82,7 @@ define [
       'click .big-button.servers': 'showServersInterface'
       'click .big-button.appearance': 'showAppearanceInterface'
       'click .big-button.server-settings': 'showServerSettingsInterface'
+      'click .big-button.input-validation': 'showInputValidationInterface'
       'click .jquery-theme-image-container': 'changeJQueryUITheme'
       'click .application-settings-help': 'applicationSettingsHelp'
       'keydown .big-button': 'keydownBigButton'
@@ -77,6 +121,8 @@ define [
         @$(event.currentTarget).click()
 
     initialize: ->
+      @viewToDisplayOLDApplicationSettings =
+        'OLDApplicationSettingsResourceView'
       @serversView = new ServersView
         collection: @model.get('servers')
         serverTypes: @model.get('serverTypes')
@@ -237,6 +283,17 @@ define [
       @$('.appearance-interface').show()
 
     showServerSettingsInterface: ->
+      @viewToDisplayOLDApplicationSettings =
+        'OLDApplicationSettingsResourceView'
+      @showOnlyInterfaces()
+      @hideInterfaces()
+      if globals.unicodeCharMap
+        @oldApplicationSettingsCollection.fetchResources()
+      else
+        @fetchUnicodeData(=> @oldApplicationSettingsCollection.fetchResources())
+
+    showInputValidationInterface: ->
+      @viewToDisplayOLDApplicationSettings = 'InputValidationView'
       @showOnlyInterfaces()
       @hideInterfaces()
       if globals.unicodeCharMap
@@ -267,12 +324,26 @@ define [
           .at(@oldApplicationSettingsCollection.length - 1)
       else
         lastModel = new OLDApplicationSettingsModel()
+      if @viewToDisplayOLDApplicationSettings is 'InputValidationView'
+        @renderInputValidationView lastModel
+      else
+        @renderOLDApplicationSettingsResourceView lastModel
+
+    renderOLDApplicationSettingsResourceView: (model) ->
       @oldApplicationSettingsResourceView =
-        new OLDApplicationSettingsResourceView model: lastModel
+        new MyOLDApplicationSettingsResourceView model: model
       @oldApplicationSettingsResourceView
         .setElement @$('.server-settings-interface').first()
       @oldApplicationSettingsResourceView.render()
       @rendered @oldApplicationSettingsResourceView
+
+    renderInputValidationView: (model) ->
+      @inputValidationView =
+        new InputValidationView model: model
+      @inputValidationView
+        .setElement @$('.server-settings-interface').first()
+      @inputValidationView.render()
+      @rendered @inputValidationView
 
     loggedIn: -> @model.get 'loggedIn'
 

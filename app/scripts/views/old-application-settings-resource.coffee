@@ -94,7 +94,7 @@ define [
   # For displaying individual OLD application settings models/resources.
   #
   # *Note/Important:* an OLD application settings is a special type of
-  # resources. These resources shold not be updated (although the OLD *does*,
+  # resource. These resources shold not be updated (although the OLD *does*,
   # technically allow that.) Instead, an update should really (though
   # unbeknownst to the user) involve creation of a new application settings
   # object based on the current one. The current application settings is the
@@ -114,6 +114,7 @@ define [
     initialize: (options) ->
       options.dataLabelsVisible = true
       options.expanded = true
+      options.labelsAlwaysVisible = true
       super options
 
     # Users should not be able to delete or duplicate an OLD application
@@ -125,6 +126,7 @@ define [
       'delete'
       'duplicate'
       'settings'
+      'export'
     ]
 
     mainPageViewable: -> false

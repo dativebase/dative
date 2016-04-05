@@ -570,62 +570,44 @@ define ['./utils'], (utils) ->
             writing in the metalanguage.'
 
         orthographic_validation:
-          eng: 'This value determines whether and, if so, how values input into
-            the transcription field should be validated against the storage
-            orthography. If set to “None”, then no validation will be
-            performed. If set to “Warning”, then the system will alert
-            users when their transcriptions cannot be written using the storage
-            orthography. If set to “Error”, then invalid transcriptions
-            will not be permitted.'
+          eng: 'How to validate user input in the “transcription” field.
+            “None” means no validation. “Warning” means a warning is
+            generated when a user tries invalid input. “Error” means
+            invalid input is forbidden.'
 
         narrow_phonetic_inventory:
-          eng: 'Narrow phonetic inventory: a comma-delimited list of graphemes
+          eng: 'A comma-delimited list of graphemes
             that should be used when entering data into the narrow phonetic
             transcription field.'
 
         narrow_phonetic_validation:
-          eng: 'Narrow phonetic validation: this value determines whether and,
-            if so, how values input into the narrow phonetic transcription
-            field should be validated against the narrow phonetic inventory.
-            If set to “None”, then no validation will be performed. If
-            set to “Warning”, then the system will alert users when their
-            narrow phonetic transcriptions cannot be written using the narrow
-            phonetic inventory. If set to “Error”, then invalid narrow
-            phonetic transcriptions will not be permitted.'
+          eng: 'How to validate user input in the “narrow phonetic
+            transcription” field.  “None” means no validation.
+            “Warning” means a warning is generated when a user tries
+            invalid input. “Error” means invalid input is forbidden.'
 
         broad_phonetic_inventory:
-          eng: 'Broad phonetic inventory: a comma-delimited list of graphemes
+          eng: 'A comma-delimited list of graphemes
             that should be used when entering data into the phonetic
             transcription field.'
 
         broad_phonetic_validation:
-          eng: 'Broad phonetic validation: this value determines whether and,
-            if so, how values input into the phonetic transcription field
-            should be validated against the broad phonetic inventory. If set to
-            “None”, then no validation will be performed. If set to
-            “Warning”, then the system will alert users when their phonetic
-            transcriptions cannot be written using the broad phonetic
-            inventory. If set to “Error”, then invalid phonetic
-            transcriptions will not be permitted.'
+          eng: 'How to validate user input in the “phonetic
+            transcription” field.  “None” means no validation.
+            “Warning” means a warning is generated when a user tries
+            invalid input. “Error” means invalid input is forbidden.'
 
         morpheme_break_is_orthographic:
-          eng: 'Morpheme break is orthographic: if set to true, then the system
-            will assume that the data entered into the morpheme break field
-            should be written using the same orthography as is used in the
-            (orthographic) transcription field. If set to false, then the system
-            will assume that the phonemic inventory should be used for morpheme
-            break values.'
+          eng: 'The morpheme break is orthographic means that the morpheme
+            break field should be validated against the storage orthography.
+            If the morpheme break is not orthographic, that means that it
+            should be validated against the phonemic inventory.'
 
         morpheme_break_validation:
-          eng: 'Morpheme break validation: this value determines whether and,
-            if so, how values input into the morpheme break field should be
-            validated against the storage orthography (or against the phonemic
-            inventory, cf. the “morpheme break is orthographic” option.) If
-            set to “None”, then no validation will be performed. If set to
-            “Warning”, then the system will alert users when their morpheme
-            break transcriptions cannot be written using the relevant
-            orthography/inventory. If set to “Error”, then invalid morpheme
-            break transcriptions will not be permitted.'
+          eng: 'How to validate user input in the “morpheme
+            break” field. “None” means no validation.
+            “Warning” means a warning is generated when a user tries
+            invalid input. “Error” means invalid input is forbidden.'
 
         phonemic_inventory:
           eng: 'A comma-delimited list of phonemes/graphemes that should be
