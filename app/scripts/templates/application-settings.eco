@@ -33,14 +33,6 @@
             </div>
         </div>
 
-        <div class='big-button ui-corner-all appearance dative-tooltip'
-             title='Change how your Dative looks'
-            ><div class='big-button-text'>Appearance</div>
-            <div class='big-button-icon'>
-                <i class='fa fa-picture-o fa-4x fa-fw fa-align-center'></i>
-            </div>
-        </div>
-
         <% if @loggedIn is true: %>
 
             <div class='big-button ui-corner-all server-settings dative-tooltip'
@@ -63,6 +55,14 @@
             </div>
 
         <% end %>
+
+        <div class='big-button ui-corner-all appearance dative-tooltip'
+             title='Change how your Dative looks'
+            ><div class='big-button-text'>Appearance</div>
+            <div class='big-button-icon'>
+                <i class='fa fa-picture-o fa-4x fa-fw fa-align-center'></i>
+            </div>
+        </div>
 
     </div>
 
