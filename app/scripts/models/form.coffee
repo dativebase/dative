@@ -4,13 +4,9 @@ define [
 ], (ResourceModel, globals) ->
 
   # Form Model
-  # ---------------
+  # ----------
   #
-  # A Backbone model for Dative forms, i.e., OLD corpora.
-  #
-  # At present Dative `FormModel`s represent OLD corpora and have no
-  # equivalent in the FieldDB data structure. They are called "forms"
-  # because the term "corpora" is used for FieldDB corpora, which are different.
+  # A Backbone model for Dative forms.
 
   class FormModel extends ResourceModel
 
@@ -76,10 +72,10 @@ define [
 
     getValidatorOLD: (attribute) ->
       switch attribute
-        when 'transcription' then @requiredTranscriptionType
-        when 'phonetic_transcription' then @requiredTranscriptionType
-        when 'narrow_phonetic_transcription' then @requiredTranscriptionType
-        when 'morpheme_break' then @requiredTranscriptionType
+        when 'transcription' then @validOLDTranscription
+        when 'phonetic_transcription' then @validOLDPhoneticTranscription
+        when 'narrow_phonetic_transcription' then @validOLDNarrowPhoneticTranscription
+        when 'morpheme_break' then @validOLDMorphemeBreak
         when 'translations' then @validOLDTranslations
         when 'date_elicited' then @validateOLDDateElicited
         # The following validators are redundant when a FormAddWidgetView is
@@ -112,13 +108,53 @@ define [
       else
         @max510Chars value
 
-    # No longer being used now that we're using `requiredTranscriptionType`.
-    validOLDTranscription: (value) ->
-      result = @requiredString value
-      if result is null
-        @max255Chars value
+    # Validate the input `value` to an OLD transcription-type form attribute.
+    # This performs the input validation based on the settings in the OLD
+    # application settings, if applicable. If not, it defaults to
+    # `@requiredTranscriptionType`.
+    # The `validationAttr` param is something like 'orthographic_validation',
+    # i.e., an attribute of an OLD application settings model that holds a
+    # validation setting.
+    # The `attr` param must be someting like 'transcription', i.e., a string
+    # that `oldApplicationSettingsModel.getInputValidator` can return a
+    # validator for.
+    validOLDTranscriptionType: (value, validationAttr, attr) ->
+      validationSetting = globals.oldApplicationSettings
+        .get validationAttr
+      if validationSetting in ['Error', 'Warning']
+        validator = globals.oldApplicationSettings.getInputValidator attr
+        if validator
+          if validator.test value
+            @trigger "warning:#{validationAttr}"
+            @requiredTranscriptionType value
+          else
+            msg = "invalid given the input validation settings for #{attr}
+              values in this database"
+            if validationSetting is 'Error'
+              msg
+            else
+              @trigger "warning:#{validationAttr}", msg
+              @requiredTranscriptionType value
+        else
+          @requiredTranscriptionType value
       else
-        result
+        @requiredTranscriptionType value
+
+    validOLDTranscription: (value) ->
+      @validOLDTranscriptionType(value, 'orthographic_validation',
+        'transcription')
+
+    validOLDPhoneticTranscription: (value) ->
+      @validOLDTranscriptionType(value, 'broad_phonetic_validation',
+        'phonetic transcription')
+
+    validOLDNarrowPhoneticTranscription: (value) ->
+      @validOLDTranscriptionType(value, 'narrow_phonetic_validation',
+        'narrow phonetic transcription')
+
+    validOLDMorphemeBreak: (value) ->
+      @validOLDTranscriptionType(value, 'morpheme_break_validation',
+        'morpheme break')
 
     max255Chars: (value) ->
       if value.length > 255 then return '255 characters max'

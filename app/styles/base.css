@@ -1674,14 +1674,16 @@ div.dative-new-item .dative-widget-header-title,
   font-variant: small-caps;
 }
 
-.dative-field-validation-container
+.dative-field-validation-container,
+.dative-field-warnings-container
 {
   margin-top: 0.2em;
   width: 69.2%;
   margin-left: 26.7%;
 }
 
-.dative-field-validation-error
+.dative-field-validation-error,
+.dative-field-validation-warning
 {
   padding: 0.5em;
 }

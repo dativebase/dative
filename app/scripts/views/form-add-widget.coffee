@@ -134,8 +134,8 @@ define [
       comments:                      CommentsFieldView
 
     attribute2fieldViewOLD:
-      narrow_phonetic_transcription: PhoneticTranscriptionFieldView
-      phonetic_transcription:        NarrowPhoneticTranscriptionFieldView
+      narrow_phonetic_transcription: NarrowPhoneticTranscriptionFieldView
+      phonetic_transcription:        PhoneticTranscriptionFieldView
       transcription:                 TranscriptionGrammaticalityFieldView510
       morpheme_break:                MorphemeBreakFieldView
       morpheme_gloss:                MorphemeGlossFieldView

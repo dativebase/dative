@@ -31,6 +31,7 @@ define [
     editableAttributes: []
 
     initialize: (attributes, options) ->
+      @lastErrors = null
       @resourceNameCapitalized = @utils.capitalize @resourceName
       @resourceNamePlural = @utils.pluralize @resourceName
       @resourceNamePluralCapitalized = @utils.capitalize @resourceNamePlural
@@ -51,12 +52,14 @@ define [
 
     # Validate the model. If there are errors, returns an object with errored
     # attributes as keys and error messages as values; otherwise returns
-    # `undefined`.
-    # TODO: I think a "form submit" action results in this method being called
-    # many times too many (i.e., redundantly).
+    # `undefined`. Note that we cache/memoize the validation errors, based on
+    # the attributes being validated. This is because field views can call
+    # `@validate` many times.
     # TODO: why is the `options` parameter necessary here?
     validate: (attributes, options) ->
       attributes = attributes or @attributes
+      if @lastErrors isnt null and _.isEqual(@lastErrors.attributes, attributes)
+        return @lastErrors.errors
       errors = {}
       for attribute, value of attributes
         attributeValidator = @getValidator attribute
@@ -68,10 +71,12 @@ define [
                 errors[errorAttr] = errorMsg
             else
               errors[attribute] = error
+      @lastErrors = attributes: @utils.clone(attributes)
       if _.isEmpty errors
-        undefined
+        @lastErrors.errors = undefined
       else
-        errors
+        @lastErrors.errors = errors
+      @lastErrors.errors
 
     # Override this in subclasses for validation: return a `@validator` method
     # for the input `attribute`, or `null` if it shouldn't be validated.

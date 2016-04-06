@@ -111,6 +111,13 @@ define [
     serverSideResourceName: 'applicationsettings'
     resourceAddWidgetView: OLDApplicationSettingsAddWidgetView
 
+    # Only admins can update an OLD application settings.
+    # TODO: contributors and viewers should be able to specify stronger
+    # validation settings for themselves, if they want.
+    updatePermitted: ->
+      role = globals.applicationSettings.get('loggedInUser').role
+      if role is 'administrator' then true else false
+
     initialize: (options) ->
       options.dataLabelsVisible = true
       options.expanded = true

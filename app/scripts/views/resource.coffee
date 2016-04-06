@@ -392,9 +392,14 @@ define [
       resourceName: @resourceName
       resourceNameHumanReadable: @resourceNameHumanReadable
       excludedActions: @excludedActions
+      updatePermitted: @updatePermitted()
       showControlsWithNew: @showControlsWithNew
       secondaryDataFieldsLength: @getSecondaryDataFieldsLength()
       mainPageViewable: @mainPageViewable()
+
+    # Make this evaluate to `false` in the cases where you don't want a user to
+    # be able to update, e.g., because of insufficient permissions.
+    updatePermitted: -> true
 
     getSecondaryDataFieldsLength: -> @secondaryAttributes.length
 

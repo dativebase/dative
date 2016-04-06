@@ -2,10 +2,10 @@ define [
   './field'
   './suggestion-receiver-field'
   './../models/morphological-parser'
-  './../templates/field-suggestible'
+  './../templates/field-suggestible-warnings'
   './../utils/globals'
 ], (FieldView, SuggestionReceiverFieldView,  MorphologicalParserModel,
-  suggestibleFieldTemplate, globals) ->
+  suggestibleWarningsFieldTemplate, globals) ->
 
   # Transcription Base Field View
   # -----------------------------
@@ -45,7 +45,7 @@ define [
       'focusin .suggestion':   'hoverStateSuggestionOn'
       'focusout .suggestion':  'hoverStateSuggestionOff'
 
-    template: suggestibleFieldTemplate
+    template: suggestibleWarningsFieldTemplate
 
     initialize: (options) ->
       super options

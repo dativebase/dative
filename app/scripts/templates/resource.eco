@@ -58,7 +58,7 @@
       </button>
     <% end %>
 
-    <% if 'update' not in @excludedActions: %>
+    <% if 'update' not in @excludedActions and @updatePermitted: %>
       <button class="update-resource dative-tooltip"
         <% if @addUpdateType is 'add': %>
               title="edit the details of this <%= @resourceNameHumanReadable() %>"

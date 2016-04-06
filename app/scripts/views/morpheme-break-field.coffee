@@ -3,10 +3,10 @@ define [
   './suggestion-receiver-field'
   './../models/phonology'
   './../models/morphology'
-  './../templates/field-suggestible'
+  './../templates/field-suggestible-warnings'
   './../utils/globals'
 ], (TextareaFieldView, SuggestionReceiverFieldView, PhonologyModel,
-  MorphologyModel, suggestibleFieldTemplate, globals) ->
+  MorphologyModel, suggestibleWarningsFieldTemplate, globals) ->
 
   # Morpheme Break Field View
   # -------------------------
@@ -52,7 +52,7 @@ define [
       'focusin .suggestion':   'hoverStateSuggestionOn'
       'focusout .suggestion':  'hoverStateSuggestionOff'
 
-    template: suggestibleFieldTemplate
+    template: suggestibleWarningsFieldTemplate
 
     initialize: (options) ->
       super options
@@ -137,10 +137,22 @@ define [
       # One of our fellow transcription-type fields is telling us to validate.
       @listenTo @model, 'morphemeBreakShouldValidate', @validate
 
+      @listenTo @model, 'warning:morpheme_break_validation',
+        @invalidFieldValueWarning
+
       # If we have any FST-based models for morpheme break processing, this
       # method will cause us to listen to their relevant events.
       @listenToFSTModels()
       @listenForParserTaskSetChange()
+
+    # We have received a warning from our model that the morpheme break
+    # value is invalid.
+    invalidFieldValueWarning: (msg=null) ->
+      if msg
+        @$('.dative-field-warnings-container').show()
+        @$('.dative-field-validation-warning-message').text "Warning: #{msg}"
+      else
+        @$('.dative-field-warnings-container').hide()
 
     render: ->
       @lastInput = new Date()
@@ -179,6 +191,10 @@ define [
         @model.trigger 'transcriptionShouldValidate'
         @model.trigger 'phoneticTranscriptionShouldValidate'
         @model.trigger 'narrowPhoneticTranscriptionShouldValidate'
+      else
+        # We call validate on the model here just so that warning events can be
+        # triggered, if applicable.
+        @model.validate()
 
 
     ############################################################################

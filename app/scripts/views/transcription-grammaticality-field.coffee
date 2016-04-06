@@ -22,12 +22,28 @@ define [
       # One of our fellow transcription-type fields is telling us to validate.
       @listenTo @model, 'transcriptionShouldValidate', @validate
 
+      @listenTo @model, 'warning:orthographic_validation',
+        @invalidFieldValueWarning
+
+    # We have received a warning from our model that the transcription value is
+    # invalid.
+    invalidFieldValueWarning: (msg=null) ->
+      if msg
+        @$('.dative-field-warnings-container').show()
+        @$('.dative-field-validation-warning-message').text "Warning: #{msg}"
+      else
+        @$('.dative-field-warnings-container').hide()
+
     setToModel: ->
       super
       if @submitAttempted
         @model.trigger 'phoneticTranscriptionShouldValidate'
         @model.trigger 'narrowPhoneticTranscriptionShouldValidate'
         @model.trigger 'morphemeBreakShouldValidate'
+      else
+        # We call validate on the model here just so that warning events can be
+        # triggered, if applicable.
+        @model.validate()
 
     getMarginLeft: -> if @addUpdateType is 'add' then '34.5%' else '37.5%'
 

@@ -89,3 +89,114 @@ define ['./resource'], (ResourceModel) ->
       else
         null
 
+    ############################################################################
+    # Logic for Input Validation
+    ############################################################################
+
+    # These methods allow the OLD application settings' orthography, inventory
+    # and validation-related attributes to effect validation of transcription,
+    # phonetic transcription, and morpheme break values.
+
+    # Return a validator (a `RegExp` instance) that returns `true` if the input
+    # of the specified field is valid.
+    getInputValidator: (targetField) ->
+      switch targetField
+        when 'orthographic transcription'
+          @getOrthographicValidator()
+        when 'transcription'
+          @getOrthographicValidator()
+        when 'narrow phonetic transcription'
+          @getNarrowPhoneticValidator()
+        when 'narrow_phonetic_transcription'
+          @getNarrowPhoneticValidator()
+        when 'broad phonetic transcription'
+          @getBroadPhoneticValidator()
+        when 'phonetic_transcription'
+          @getBroadPhoneticValidator()
+        when 'phonetic transcription'
+          @getBroadPhoneticValidator()
+        else
+          @getMorphemeBreakValidator()
+
+    # Return a RegExp that validates orthographic transcription values. This
+    # allows:
+    # - graphs from the storage orthography,
+    # - capitalized graphs from the storage orthography,
+    # - punctuation characters, and
+    # - the space character
+    getOrthographicValidator: ->
+      inventory = @getInventoryFromStorageOrthography()
+      if inventory
+        graphs = inventory.split ','
+        escapedGraphs = (@utils.escapeRegexChars(g) for g in graphs)
+        punctuation =
+          (@utils.escapeRegexChars(p) for p in @get('punctuation').split(''))
+        capitalizedGraphs =
+          (@utils.escapeRegexChars(@utils.capitalize(g)) for g in graphs)
+        elements = escapedGraphs.concat punctuation, capitalizedGraphs
+        new RegExp "^(#{elements.join '|'}| )*$"
+      else
+        null
+
+    # Get an inventory string (i.e., an orthography) from the storage
+    # orthography object in application settings.
+    getInventoryFromStorageOrthography: ->
+      orthography = @get 'storage_orthography'
+      if orthography
+        orthography.orthography
+      else
+        null
+
+    # Return a RegExp that validates narrow phonetic transcription values. This
+    # allows:
+    # - graphs from the narrow phonetic inventory and
+    # - the space character
+    getNarrowPhoneticValidator: ->
+      inventory = @get 'narrow_phonetic_inventory'
+      if inventory
+        graphs = inventory.split ','
+        escapedGraphs = (@utils.escapeRegexChars(g) for g in graphs)
+        new RegExp "^(#{escapedGraphs.join '|'}| )*$"
+      else
+        null
+
+    # Return a RegExp that validates phonetic transcription values. This
+    # allows:
+    # - graphs from the broad phonetic inventory and
+    # - the space character
+    getBroadPhoneticValidator: ->
+      inventory = @get 'broad_phonetic_inventory'
+      if inventory
+        graphs = inventory.split ','
+        escapedGraphs = (@utils.escapeRegexChars(g) for g in graphs)
+        new RegExp "^(#{escapedGraphs.join '|'}| )*$"
+      else
+        null
+
+    # Return a RegExp that validates morpheme break values. This allows:
+    # - graphs from the storage orthography XOR phonemic inventory,
+    # - capitalized graphs from the storage orthography XOR phonemic inventory,
+    # - morpheme delimiters, and
+    # - the space character
+    getMorphemeBreakValidator: ->
+      if @get 'morpheme_break_is_orthographic'
+        inventory = @getInventoryFromStorageOrthography()
+      else
+        inventory = @get 'phonemic_inventory'
+      if inventory
+        graphs = inventory.split ','
+        escapedGraphs = (@utils.escapeRegexChars(g) for g in graphs)
+        delimiters =
+          (@utils.escapeRegexChars(d) for d in @get('morpheme_delimiters').split(','))
+        # A phonemic inventory should not have its graphs automatically
+        # capitalized since capitalization may have phonological meaning.
+        if @get 'morpheme_break_is_orthographic'
+          capitalizedGraphs =
+            (@utils.escapeRegexChars(@utils.capitalize(g)) for g in graphs)
+          elements = escapedGraphs.concat delimiters, capitalizedGraphs
+        else
+          elements = escapedGraphs.concat delimiters
+        new RegExp "^(#{elements.join '|'}| )*$"
+      else
+        null
+

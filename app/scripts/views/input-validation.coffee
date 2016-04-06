@@ -26,7 +26,6 @@ define [
       )
 
     getContext: ->
-      console.log 'GET CONTEXT'
       context = super
       context.resourceNameHuman = 'Input Validation settings'
       context
