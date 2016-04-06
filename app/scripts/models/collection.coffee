@@ -82,11 +82,36 @@ define ['./resource'], (ResourceModel) ->
         when 'url' then @urlFragment
         else null
 
-
     urlFragment: (value) ->
       if /^[a-zA-Z0-9_\/-]{0,255}$/.test value
         null
       else
         'Only a-z, A-Z, 0-9, _, /, and - are allowed in the url value.'
 
+    # The collection model overrides the resource model's `fetchResource`
+    # method so that it can pass GET params in the request. This is necessary
+    # because it allows us to request a LaTeX representation of the
+    # collection's contents from the server.
+    fetchResource: (id, payload=null) ->
+      @trigger "fetch#{@resourceNameCapitalized}Start"
+      @constructor.cors.request(
+        method: 'GET'
+        url: @getFetchResourceURL id, payload
+        onload: (responseJSON, xhr) =>
+          @fetchResourceOnloadHandler responseJSON, xhr
+        onerror: (responseJSON) =>
+          @trigger "fetch#{@resourceNameCapitalized}End"
+          error = responseJSON.error or 'No error message provided.'
+          @trigger "fetch#{@resourceNameCapitalized}Fail", error, @
+          console.log "Error in GET request to
+            /#{@getServerSideResourceName()}/#{@get 'id'} (onerror triggered)."
+      )
+
+    # Add `payload` to the URL as a GET query string.
+    getFetchResourceURL: (id, payload=null) ->
+      if payload
+        params = ("#{k}=#{v}" for k, v of payload).join '&'
+        "#{@getOLDURL()}/#{@getServerSideResourceName()}/#{id}?#{params}"
+      else
+        "#{@getOLDURL()}/#{@getServerSideResourceName()}/#{id}"
 

@@ -11,6 +11,17 @@ define [
   ExporterSIGPluginView, ExporterIdsView, ExporterLaTeXView, DialogBaseView,
   exporterDialogTemplate) ->
 
+
+  # This view exports collection models only, i.e., texts, as LaTeX.
+  # The definition of the new class is a necessary hack so that collections of
+  # collections do not display LaTeX as an export format option.
+
+  class ExporterLaTeXCollectionModelView extends ExporterLaTeXView
+
+    exportTypes: -> ['model']
+    exportResources: -> ['collection']
+
+
   # Exporter Dialog View
   # --------------------
   #
@@ -22,6 +33,7 @@ define [
     registeredExporterClasses: [
       ExporterCollectionCSVView
       ExporterLaTeXView
+      ExporterLaTeXCollectionModelView
       ExporterJSONView
       ExporterSIGPluginView
       ExporterIdsView

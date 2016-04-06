@@ -123,6 +123,7 @@ define [
       @clearExportContent()
       @updateDescription()
       @updateControls()
+      @renderSettings()
       @hideExportContent()
 
     hideExportContent: ->

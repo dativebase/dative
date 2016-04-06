@@ -6,6 +6,14 @@ define [
   # Exporter that exports collections of resources to LaTeX source files. It's
   # actually XeLaTeX because converting arbitrary Unicode characters to LaTeX
   # commands is impractical.
+  #
+  # TODOs:
+  #
+  # - fix the Covington exporter: it does weird things when, for example, there
+  #   is no transcription.
+  #
+  # - fix the redundancy involving the trailing citation and the reference in
+  #   the itemized list, esp. when using ExPex format.
 
   class ExporterLaTeXView extends ExporterView
 
@@ -33,7 +41,10 @@ define [
     # This array should contain 'collection' or 'model' or '*'
     exportTypes: -> ['*']
 
-    exportResources: -> ['form', 'collection']
+    # Note: there is a subclass `ExporterLaTeXCollectionModelView` defined in
+    # exporter-dialog.coffee which allows this class to be used to export
+    # collection (i.e., text) models.
+    exportResources: -> ['form']
 
     updateControls: ->
       @clearControls()
@@ -41,32 +52,42 @@ define [
 
     hasSettings: -> true
 
+    igtPackageHTML: ->
+      "<li>
+        <label class='exporter-settings-label'
+          for='igt_package'>IGT package</label>
+        <select name='igt_package'>
+          <option value='expex'>ExPex</option>
+          <option value='gb4e'>gb4e</option>
+          <option value='covington'>Covington</option>
+        </select>
+      </li>"
+
+    downloadFormatHTML: ->
+      "<li>
+        <label class='exporter-settings-label dative-tooltip'
+          title='Choose whether you want to download your export as a file
+            or copy-and-paste it as text.'
+          for='download_format'>Download format</label>
+        <select name='download_format'>
+          <option value='file'>File</option>
+          <option value='text'>Text</option>
+        </select>
+      </li>"
+
     # Render the settings interface. Lets user choose between "comma" and
     # "newline" delimited formats.
     renderSettings: ->
+      if @model and @model.resourceName is 'form'
+        downloadFormatHTML = ''
+      else
+        downloadFormatHTML = @downloadFormatHTML()
       @$('.exporter-settings').html(
         "<ul>
 
-          <li>
-            <label class='exporter-settings-label'
-              for='igt_package'>IGT package</label>
-            <select name='igt_package'>
-              <option value='expex'>ExPex</option>
-              <option value='gb4e'>gb4e</option>
-              <option value='covington'>Covington</option>
-            </select>
-          </li>
+          #{@igtPackageHTML()}
 
-          <li>
-            <label class='exporter-settings-label dative-tooltip'
-              title='Choose whether you want to download your export as a file
-                or copy-and-paste it as text.'
-              for='download_format'>Download format</label>
-            <select name='download_format'>
-              <option value='file'>File</option>
-              <option value='text'>Text</option>
-            </select>
-          </li>
+          #{downloadFormatHTML}
 
         </ul>"
       )
@@ -87,7 +108,7 @@ define [
     # `{forms: [{...}, ...], ...}`) when we make a GET request to
     # /oldcollections/<collection_id>
     fetchCollectionForms: ->
-      @model.fetchResource @model.id
+      @model.fetchResource @model.id, latex: 'true'
 
     events:
       'click .export': 'export'
@@ -184,7 +205,9 @@ define [
       mimeType = 'application/x-latex; charset=utf-8;'
       blob = new Blob [latex], {type: mimeType}
       url = URL.createObjectURL blob
-      if @collection.corpus
+      if @model
+        name = "collection-#{@model.id}-#{(new Date()).toISOString()}.tex"
+      else if @collection.corpus
         name = "corpus-of-#{@collection.resourceNamePlural}-\
           #{(new Date()).toISOString()}.tex"
       else if @collection.search
@@ -203,11 +226,31 @@ define [
       @$('.exporter-export-content').html anchor
       @$('.export-link.dative-tooltip').tooltip()
 
-    # A particular OLD collection resource has been fetched. We export it as a
-    # sequence of form references. Converting reStructuredText or Markdown to
-    # LaTeX needs to be done server-side. (OLD TODO.)
+    # A particular OLD collection resource (i.e., a text) has been fetched. If
+    # it has a 'latex' attribute, We export it as a document including its
+    # formatted prose. Otherwise, we export it as a sequence of form
+    # references.
+    # TODO: because of how the OLD currently works, we can only export a
+    # collection formatted via reStructuredText as a LaTeX document that
+    # includes the formatted prose of the collection.
     fetchCollectionSuccess: (collection) ->
       $contentContainer = @$ @contentSelector()
+      if collection.latex
+        latex = @getCollectionResourceContentsAsLaTeX collection
+      else
+        latex = @getCollectionResourceFormsAsLaTeX collection
+      settings = @getSettings()
+      if settings.downloadFormat is 'file'
+        @createFile latex
+      else
+        $contentContainer.html "<pre>#{latex}</pre>"
+      @selectAllButton()
+
+    # Return `collection` as a LaTeX string, treating the collection simply as
+    # a list of forms.
+    getCollectionResourceFormsAsLaTeX: (collection) ->
+      title = collection.title or "Collection #{collection.id}"
+      author = @getAuthorFromCollection collection
       regex = /form\[(\d+)\]/g
       forms = []
       while match = regex.exec(collection.contents)
@@ -215,11 +258,36 @@ define [
         form = _.findWhere(collection.forms, {id: id})
         if form
           forms.push form
+      @getCollectionAsLaTeX forms, title, author
+
+    # Return `collection` as a LaTeX string, in this case using the
+    # collection's 'latex' value as the basis of that LaTeX string; this value
+    # is generated server-side by the OLD, based on the contents_unpacked value.
+    getCollectionResourceContentsAsLaTeX: (collection) ->
+      @errors = false
       title = collection.title or "Collection #{collection.id}"
       author = @getAuthorFromCollection collection
-      latex = @getCollectionAsLaTeX forms, title, author
-      $contentContainer.html "<pre>#{latex}</pre>"
-      @selectAllButton()
+      settings = @getSettings()
+      result = [@xelatexPreamble(settings.igtPackage, title, author)]
+      regex = /form\{\[\}(\d+)\{\]\}/g
+      latex = collection.latex.replace(regex,
+        ((match, pmatch1) =>
+          @latexFormReference2Form(pmatch1, collection, settings)))
+      push = false
+      for line in latex.split('\n')
+        if push then result.push line
+        if line is '\\begin{document}'
+          push = true
+      if @errors then Backbone.trigger 'latexExportError'
+      result.join '\n'
+
+    latexFormReference2Form: (reference, collection, settings) ->
+      id = parseInt(reference)
+      form = _.findWhere(collection.forms, {id: id})
+      if form
+        @getModelAsLaTeX form, settings
+      else
+        "There is no form with id #{id}"
 
     getAuthorFromCollection: (collection) ->
       if collection.elicitor
