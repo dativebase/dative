@@ -517,7 +517,10 @@ define [
         if @addUpdateType is 'add'
           @labelWidth = 196.5
         else
-          @labelWidth = 181.8
+          if $('#appview').children('.dative-resource-widget').length > 0
+            @labelWidth = 262
+          else
+            @labelWidth = 181.8
 
       # Remove any information about IGT fields that are hidden.
       originalIGTMap = igtMap

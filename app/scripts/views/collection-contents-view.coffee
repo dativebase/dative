@@ -173,7 +173,10 @@ define [
       @$('.c-contents-buttons button').button().tooltip()
       @$('div.collection-contents-preview-wrapper')
         .css "border-color", @constructor.jQueryUIColors().defBo
-      if @addUpdateType is 'add'
+      # This is the case where the resource is taking up the entire appview div.
+      if $('#appview').children('.dative-resource-widget').length > 0
+        @$('.c-contents-buttons').css left: '18.3em'
+      else if @addUpdateType is 'add'
         @$('.c-contents-buttons').css left: '16.5em'
 
     getFieldLabelContainerClass: ->

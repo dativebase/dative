@@ -421,6 +421,15 @@ div.dative-page-header-title
     margin: 12px;
 }
 
+div#appview > .dative-paginated-item
+{
+  margin-top: -1px;
+  margin-left: -1px;
+  margin-bottom: 0;
+  width: 100%;
+  min-height: 100%;
+}
+
 .dative-paginated-item,
 .dative-new-item,
 .resource-search-view,
@@ -587,12 +596,15 @@ div.dative-page-header-title
 div.heading {
 }
 
-div.dative-widget-center {
+div.dative-widget-center
+{
     margin-right: auto;
     margin-left: auto;
 }
+
 span.dative-triangle-icon,
-.dative-icon {
+.dative-icon
+{
     position: absolute;
 }
 
@@ -3004,5 +3016,10 @@ table.character-names-table tr td
 {
   padding: 0.25em 1em;
   text-align: left;
+}
+
+.dative-error-page .dative-widget-body
+{
+  font-size: 15px;
 }
 

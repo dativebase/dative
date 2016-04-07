@@ -745,9 +745,10 @@ define [
       @visibleViewInDialog = @[myViewAttr]
       @resourcesDisplayerDialog.showResourcesView @visibleViewInDialog
 
-    # Show the resource of type `resourceName` with id `id` in the main page of
-    # the application. This is what happens when you navigate to, e.g.,
-    # /#form/123.
+    # Show the resource of type `resourceName` with id `resourceId` in the main
+    # page of the application. This is what happens when you navigate to, e.g.,
+    # /#form/123. This method also handles navigation to collections via their
+    # URL (i.e., path) values.
     showResourceView: (resourceName, resourceId, options={}) ->
       if @preventNavigationState then @displayPreventNavigationAlert(); return
       o = @showResourceViewSetDefaultOptions resourceName, options
@@ -762,24 +763,45 @@ define [
       if @resourceModel then @stopListening @resourceModel
       @resourceModel = new @myResources[resourceName].resourceModelClass(
         {}, {collection: @resourcesCollection})
-      # We have to listen and fetch here, which is different from
-      # `ResourcesView` sub-classes, which fetch their collections post-render.
-      @listenToOnce @resourceModel, "fetch#{names.capitalized}Fail",
-        @fetchResourceFail
-      @listenToOnce @resourceModel, "fetch#{names.capitalized}Success",
-        (resourceObject) =>
-          @fetchResourceSuccess resourceName, myViewAttr, resourceObject
-      @resourceModel.fetchResource resourceId
+
+      # Fetch a resource by its id value.
+      if _.isNumber(resourceId) or /^\d+$/.test(resourceId.trim())
+        # We have to listen and fetch here, which is different from
+        # `ResourcesView` sub-classes, which fetch their collections post-render.
+        @listenToOnce @resourceModel, "fetch#{names.capitalized}Fail",
+          (error, resourceModel) => @fetchResourceFail resourceName, resourceId
+        @listenToOnce @resourceModel, "fetch#{names.capitalized}Success",
+          (resourceObject) =>
+            @fetchResourceSuccess resourceName, myViewAttr, resourceObject
+        @resourceModel.fetchResource resourceId
+      # Fetch a collection by its url value.
+      else if resourceName is 'collection'
+        @listenToOnce @resourceModel, "searchFail",
+          (error) => @fetchResourceFail resourceName, resourceId, 'url'
+        @listenToOnce @resourceModel, "searchSuccess",
+          (responseJSON) =>
+            if @utils.type(responseJSON) is 'array' and responseJSON.length > 0
+              @fetchResourceSuccess resourceName, myViewAttr, responseJSON[0]
+            else
+              @fetchResourceFail resourceName, resourceId, 'url'
+        search =
+          filter: ["Collection", "url", "=", resourceId]
+          order_by: ["Form", "id", "desc" ]
+        @resourceModel.search search, null, false
+      else
+        @displayErrorPage "Sorry, there is no #{resourceName} with id
+          #{resourceId}"
 
     # We failed to fetch the resource model data from the server.
-    fetchResourceFail: (error, resourceModel) ->
-      console.log "Failed to fetch the following resource ..."
-      console.log error
-      console.log resourceModel
+    fetchResourceFail: (resourceName, resourceId, attr='id') ->
+      @stopListening @resourceModel
+      @displayErrorPage "Sorry, there is no #{resourceName} with #{attr}
+        #{resourceId}"
 
     # We succeeded in fetching the resource model data from the server,
     # so we render a `ResourceView` subclass for it.
     fetchResourceSuccess: (resourceName, myViewAttr, resourceObject) ->
+      @stopListening @resourceModel
       @resourceModel.set resourceObject
       @[myViewAttr] = new @myResources[resourceName].resourceViewClass
         model: @resourceModel
@@ -787,6 +809,24 @@ define [
         expanded: true
       @visibleView = @[myViewAttr]
       @renderVisibleView()
+
+    displayErrorPage: (msg=null) ->
+      @router.navigate "error"
+      @closeVisibleView()
+      if not msg then msg = 'Sorry, an error occurred.'
+      @$('#appview').html(@getErrorPageHTML('Error', msg))
+      @$('.dative-error-page')
+        .css "border-color", @constructor.jQueryUIColors().defBo
+
+    getErrorPageHTML: (header, content) ->
+      "<div class='dative-error-page dative-resource-widget dative-form-object
+        dative-paginated-item dative-widget-center ui-corner-all expanded'>
+        <div class='dative-widget-header ui-widget-header ui-corner-top'>
+          <div class='dative-widget-header-title
+            container-center'>#{header}</div>
+        </div>
+        <div class='dative-widget-body'>#{content}</div>
+      </div>"
 
     # We heard that a resource was destroyed. If the destroyed resource is the
     # one that we are currently displaying, then we hide it, close it, and
@@ -964,7 +1004,6 @@ define [
     # Show the ResourcesView subclass for `resourceName` but also make sure
     # that the "Import resources" subview is rendered too.
     showImportView: (resourceName) ->
-      console.log 'here'
       if not @loggedIn() then return
       resourcePlural = @utils.pluralize resourceName
       myViewAttr = "#{resourcePlural}View"
