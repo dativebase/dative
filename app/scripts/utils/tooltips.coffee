@@ -162,6 +162,19 @@ define ['./utils'], (utils) ->
 
     old:
 
+      keyboards:
+        name: name
+        description: description
+        id: id
+        datetime_modified: datetimeModified
+        enterer: enterer
+        modifier: modifier
+        datetime_entered: datetimeEntered
+
+        keyboard:
+          eng: "A mapping from keyboard key codes to Unicode characters or
+            strings."
+
       parserTaskSets:
 
         transcription_parser:

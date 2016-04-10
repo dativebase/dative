@@ -55,38 +55,54 @@
 
     <li class='requires-authentication old'><a>Resources</a>
         <ul class='ui-corner-bottom'>
-            <li class='requires-authentication'>
-              <a data-event="request:filesBrowse" data-meta="true">Files</a>
-            </li>
-            <li class='requires-authentication'>
-              <a data-event="request:collectionsBrowse" data-meta="true">Collections</a>
-            </li>
-            <li class='requires-authentication'>
-              <a data-event="request:usersBrowse" data-meta="true">Users</a>
-            </li>
-            <li class='requires-authentication'>
-                <a data-event="request:elicitationMethodsBrowse" data-meta="true"
-                    >Elicitation Methods</a>
-            </li>
-            <li class='requires-authentication'>
-                <a data-event="request:tagsBrowse" data-meta="true">Tags</a>
-            </li>
+
             <li class='requires-authentication'>
                 <a data-event="request:syntacticCategoriesBrowse" data-meta="true"
                     >Categories</a>
             </li>
+
+            <li class='requires-authentication'>
+              <a data-event="request:collectionsBrowse" data-meta="true">Collections</a>
+            </li>
+
+            <li class='requires-authentication'>
+                <a data-event="request:elicitationMethodsBrowse" data-meta="true"
+                    >Elicitation Methods</a>
+            </li>
+
+            <li class='requires-authentication'>
+              <a data-event="request:filesBrowse" data-meta="true">Files</a>
+            </li>
+
+            <li class='requires-authentication'>
+                <a data-event="request:keyboardsBrowse" data-meta="true"
+                    >Keyboards</a>
+            </li>
+
             <li class='requires-authentication'>
                 <a data-event="request:languagesBrowse" data-meta="true">Languages</a>
             </li>
+
             <li class='requires-authentication'>
                 <a data-event="request:orthographiesBrowse" data-meta="true">Orthographies</a>
             </li>
-            <li class='requires-authentication'>
-                <a data-event="request:speakersBrowse" data-meta="true">Speakers</a>
-            </li>
+
             <li class='requires-authentication'>
                 <a data-event="request:sourcesBrowse" data-meta="true">Sources</a>
             </li>
+
+            <li class='requires-authentication'>
+                <a data-event="request:speakersBrowse" data-meta="true">Speakers</a>
+            </li>
+
+            <li class='requires-authentication'>
+                <a data-event="request:tagsBrowse" data-meta="true">Tags</a>
+            </li>
+
+            <li class='requires-authentication'>
+              <a data-event="request:usersBrowse" data-meta="true">Users</a>
+            </li>
+
         </ul>
     </li>
 

@@ -1,0 +1,124 @@
+<div class='keyboard-table'>
+<% for keyCount, rowIndex in @keyboardLayout.rows: %>
+    <div class='keyboard-table-row row-<%= rowIndex %>'>
+
+    <% for colIndex in [0...keyCount]: %>
+        <% coord = "#{rowIndex}-#{colIndex}" %>
+        <% repr = @keyboardLayout.coord2repr[coord] %>
+        <% dim = @keyboardLayout.dimensions[coord] %>
+
+        <% if dim: %>
+
+            <!-- CASE: array of dimension objects (sub-keys) -->
+            <% if dim.length: %>
+                <div class='keyboard-table-cell-container ui-corner-all'>
+                    <% for subdim, subIndex in dim: %>
+                        <% subcoord = "#{coord}-#{subIndex}" %>
+                        <% repr = @keyboardLayout.coord2repr[subcoord] %>
+                        <% width = subdim.width * @keyboardLayout.ppi %>
+                        <% height = subdim.height * @keyboardLayout.ppi %>
+                        <% if height > 25 then spacerHeight = 0.4 * height else spacerHeight = 0 %>
+                        <div class='keyboard-table-cell coord-<%= subcoord %> ui-corner-all'
+                             style='width: <%= width %>px; height: <%= height %>px;'
+                             data-coord='<%= subcoord %>'>
+                            <div class='spacer-above-repr'
+                                 style='height: <%= spacerHeight %>px;'></div>
+                            <div class='key-repr keyboard-cell-repr'
+                                 ><%= repr[0] %></div>
+                            <div class='key-repr keyboard-cell-shift-repr'
+                                 style='display: none;'><%= repr[1] %></div>
+                            <div class='key-repr keyboard-cell-alt-repr'
+                                 style='display: none;'><%= repr[2] %></div>
+                            <div class='key-repr keyboard-cell-alt-shift-repr'
+                                 style='display: none;'><%= repr[3] %></div>
+                        </div>
+                    <% end %>
+                </div>
+
+            <!-- CASE: single dimension objects for single key -->
+            <% else: %>
+                <% width = dim.width * @keyboardLayout.ppi %>
+                <% height = dim.height * @keyboardLayout.ppi %>
+                <% if not repr[1] and height > 25 then style = ' style=\'margin-top: 1em;\'' else style = '' %>
+                <% if repr[0]?.length > 5 then fontSize = ' font-size: 75%;' else fontSize = '' %>
+                <% if height > 25 then spacerHeight = 0.4 * height else spacerHeight = 0 %>
+                <div class='keyboard-table-cell coord-<%= coord %> ui-corner-all'
+                     style='width: <%= width %>px; height: <%= height %>px;<%= fontSize %>'
+                     data-coord='<%= coord %>'>
+                    <div class='spacer-above-repr'
+                         style='height: <%= spacerHeight %>px;'></div>
+                    <div class='key-repr keyboard-cell-repr'
+                         ><%= repr[0] %></div>
+                    <div class='key-repr keyboard-cell-shift-repr'
+                         style='display: none;'><%= repr[1] %></div>
+                    <div class='key-repr keyboard-cell-alt-repr'
+                         style='display: none;'><%= repr[2] %></div>
+                    <div class='key-repr keyboard-cell-alt-shift-repr'
+                         style='display: none;'><%= repr[3] %></div>
+                </div>
+            <% end %>
+
+        <!-- CASE: default dimensions for single key -->
+        <% else: %>
+            <% width = @keyboardLayout.defaultDimensions.width * @keyboardLayout.ppi %>
+            <% height = @keyboardLayout.defaultDimensions.height * @keyboardLayout.ppi %>
+            <% if repr[0]?.length > 5 then fontSize = ' font-size: 75%;' else fontSize = '' %>
+            <% if height > 25 then spacerHeight = 0.4 * height else spacerHeight = 0 %>
+            <div class='keyboard-table-cell coord-<%= coord %> ui-corner-all'
+                 style='width: <%= width %>px; height: <%= height %>px;<%= fontSize %>'
+                 data-coord='<%= coord %>'>
+                 <div class='spacer-above-repr'
+                      style='height: <%= spacerHeight %>px;'></div>
+                <div class='key-repr keyboard-cell-repr'><%= repr[0] %></div>
+                <div class='key-repr keyboard-cell-shift-repr'
+                     style='display: none;'><%= repr[1] %></div>
+                <div class='key-repr keyboard-cell-alt-repr'
+                     style='display: none;'><%= repr[2] %></div>
+                <div class='key-repr keyboard-cell-alt-shift-repr'
+                     style='display: none;'><%= repr[3] %></div>
+            </div>
+        <% end %>
+
+    <% end %>
+
+    </div>
+<% end %>
+</div>
+
+<div class='keyboard-test-input-container'>
+    <textarea class='keyboard-test-input ui-corner-all'></textarea>
+</div>
+
+<div class='key-map-interface' style='display: none;'>
+
+    <div class='key-map-table ui-corner-all dative-shadowed-widget ui-widget ui-widget-content'>
+        <div class='key-map-table-header dative-widget-header ui-widget-header
+            ui-corner-top'>
+            <div class='dative-widget-header-title container-center'>
+                Key #<span class='key-map-table-keycode'></span>
+            </div>
+            <div class='button-container-left'>
+                <button class="hide-key-map-table dative-tooltip"
+                        title="hide key map interface">
+                    <i class='fa fa-times fa-fw'></i>
+                </button>
+            </div>
+        </div>
+        <div class='dative-widget-body'>
+            <% for mode in ['default', 'shift', 'alt', 'altshift']: %>
+            <% if mode is 'altshift' then label = 'alt+shift' else label = mode %>
+            <div class='key-mapping'>
+                <div class='key-mapping-label-container'>
+                    <label for='<%= mode %>' class='key-mapping-label'
+                        ><%= label %></label>
+                </div>
+                <textarea name='<%= mode %>' data-keycode=''
+                    maxlength='5'
+                    class='ui-corner-all key-mapping-value'></textarea>
+            </div>
+            <% end %>
+        </div>
+    </div>
+
+</div>
+

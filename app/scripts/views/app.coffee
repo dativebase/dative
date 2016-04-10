@@ -22,6 +22,7 @@ define [
   './elicitation-methods'
   './files'
   './forms'
+  './keyboards'
   './language-models'
   './languages'
   './morphological-parsers'
@@ -41,6 +42,7 @@ define [
   './elicitation-method'
   './file'
   './form'
+  './keyboard'
   './language-model'
   './language'
   './morphological-parser'
@@ -61,6 +63,7 @@ define [
   './../models/elicitation-method'
   './../models/file'
   './../models/form'
+  './../models/keyboard'
   './../models/language-model'
   './../models/language'
   './../models/morphological-parser'
@@ -82,6 +85,7 @@ define [
   './../collections/elicitation-methods'
   './../collections/files'
   './../collections/forms'
+  './../collections/keyboards'
   './../collections/language-models'
   './../collections/languages'
   './../collections/morphological-parsers'
@@ -107,25 +111,27 @@ define [
   ResourcesDisplayerDialogView, ExporterDialogView, HomePageView,
 
   ApplicationSettingsView, CollectionsView, CorporaView,
-  ElicitationMethodsView, FilesView, FormsView, LanguageModelsView,
-  LanguagesView, MorphologicalParsersView, MorphologiesView, OrthographiesView,
-  PagesView, PhonologiesView, SearchesView, SourcesView, SpeakersView,
-  SubcorporaView, SyntacticCategoriesView, TagsView, UsersView,
+  ElicitationMethodsView, FilesView, FormsView, KeyboardsView,
+  LanguageModelsView, LanguagesView, MorphologicalParsersView,
+  MorphologiesView, OrthographiesView, PagesView, PhonologiesView,
+  SearchesView, SourcesView, SpeakersView, SubcorporaView,
+  SyntacticCategoriesView, TagsView, UsersView,
 
-  CollectionView, ElicitationMethodView, FileView, FormView, LanguageModelView,
-  LanguageView, MorphologicalParserView, MorphologyView, OrthographyView,
-  PageView, PhonologyView, SearchView, SourceView, SpeakerView, SubcorpusView,
-  SyntacticCategoryView, TagView, UserView,
+  CollectionView, ElicitationMethodView, FileView, FormView, KeyboardView,
+  LanguageModelView, LanguageView, MorphologicalParserView, MorphologyView,
+  OrthographyView, PageView, PhonologyView, SearchView, SourceView,
+  SpeakerView, SubcorpusView, SyntacticCategoryView, TagView, UserView,
 
   ApplicationSettingsModel, CollectionModel, ElicitationMethodModel, FileModel,
-  FormModel, LanguageModelModel, LanguageModel, MorphologicalParserModel,
-  MorphologyModel, OLDApplicationSettingsModel, OrthographyModel, PageModel,
-  PhonologyModel, SearchModel, ServerModel, SourceModel, SpeakerModel,
-  SubcorpusModel, SyntacticCategoryModel, TagModel, UserModel,
+  FormModel, KeyboardModel, LanguageModelModel, LanguageModel,
+  MorphologicalParserModel, MorphologyModel, OLDApplicationSettingsModel,
+  OrthographyModel, PageModel, PhonologyModel, SearchModel, ServerModel,
+  SourceModel, SpeakerModel, SubcorpusModel, SyntacticCategoryModel, TagModel,
+  UserModel,
 
   CollectionsCollection, ElicitationMethodsCollection, FilesCollection,
-  FormsCollection, LanguageModelsCollection, LanguagesCollection,
-  MorphologicalParsersCollection, MorphologiesCollection,
+  FormsCollection, KeyboardsCollection, LanguageModelsCollection,
+  LanguagesCollection, MorphologicalParsersCollection, MorphologiesCollection,
   OrthographiesCollection, OLDApplicationSettingsCollection, PagesCollection,
   PhonologiesCollection, SearchesCollection, ServersCollection,
   SourcesCollection, SpeakersCollection, SubcorporaCollection,
@@ -898,6 +904,12 @@ define [
           corpusElement: true
           needsActiveFieldDBCorpus: true
           importable: true
+
+      keyboard:
+        resourcesViewClass: KeyboardsView
+        resourceViewClass: KeyboardView
+        resourceModelClass: KeyboardModel
+        resourcesCollectionClass: KeyboardsCollection
 
       languageModel:
         resourcesViewClass: LanguageModelsView

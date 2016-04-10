@@ -88,5 +88,8 @@ define [], ->
   ,
     shortcut: 'ctrl+q'
     event: 'request:formsImport'
+  ,
+    shortcut: 'alt+k'
+    event: 'request:keyboardsBrowse'
   ]
 

@@ -3023,3 +3023,122 @@ table.character-names-table tr td
   font-size: 15px;
 }
 
+.keyboard-table
+{
+  width: 560px;
+  margin: 0 auto;
+}
+
+.keyboard-table-row
+{
+  display: inline-block;
+  white-space: nowrap;
+  width: 524.531px;
+}
+
+.keyboard-table-row .keyboard-table-cell
+{
+  margin-right: 3.9px;
+}
+
+.keyboard-table-row.row-0 .keyboard-table-cell
+{
+  margin-right: 2px;
+}
+
+.keyboard-table-row.row-3 .keyboard-table-cell
+{
+  margin-right: 4.05px;
+}
+
+.keyboard-table-row.row-4 .keyboard-table-cell
+{
+  margin-right: 4.3px;
+}
+
+.keyboard-table-cell-container > .keyboard-table-cell
+{
+  vertical-align: top;
+  float: left;
+  margin-top: 0px;
+  margin-bottom: 0px;
+}
+
+.keyboard-table-cell-container
+{
+  width: 40px;
+}
+
+.keyboard-table-cell-container,
+.keyboard-table-cell
+{
+  display: inline-block;
+  margin-top: 2px;
+  margin-bottom: 2px;
+  text-align: center;
+  vertical-align: bottom;
+}
+
+.keyboard-table-cell
+{
+  border: 1px solid black;
+  cursor: pointer;
+  overflow: hidden;
+}
+
+.key-repr
+{
+  padding-top: 0.2em;
+}
+
+div.key-mapping-label-container
+{
+  display: inline-block;
+  width: 5em;
+  margin-bottom: 0.5em;
+}
+
+textarea.key-mapping-value
+{
+  display: inline-block;
+  width: 3em;
+}
+
+div.key-map-interface
+{
+  position: relative;
+}
+
+.add div.key-map-table
+{
+  left: -7em;
+}
+
+div.key-map-table
+{
+  position: absolute;
+  top: -22em;
+  left: -10em;
+  padding: 0 0 1em 0;
+  border: 1px solid black;
+  width: 12em;
+  max-width: 12em;
+}
+
+div.key-map-table .dative-widget-body
+{
+  padding-top: 1em;
+}
+
+textarea.keyboard-test-input
+{
+  width: 34.3em;
+}
+
+div.keyboard-test-input-container
+{
+  display: block;
+  width: 90%;
+  margin: 1em auto;
+}
+
