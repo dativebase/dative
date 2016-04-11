@@ -462,6 +462,16 @@ define (require) ->
       catch
         input
 
+  # Return the decimal number `decimal` has a hex string with left-padding 0s
+  # to minimum length 4.
+  decimal2hex = (decimal) ->
+    hex = Number(decimal).toString 16
+    if hex.length < 4
+      "#{Array(5 - hex.length).join '0'}#{hex}"
+    else
+      hex
+
+  decimal2hex: decimal2hex
   escapeRegexChars: escapeRegexChars
   number2word: number2word
   singleSpace: singleSpace

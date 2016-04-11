@@ -3082,8 +3082,12 @@ table.character-names-table tr td
 .keyboard-table-cell
 {
   border: 1px solid black;
-  cursor: pointer;
   overflow: hidden;
+}
+
+.keyboard-table-cell.editable
+{
+  cursor: pointer;
 }
 
 .key-repr
@@ -3140,5 +3144,15 @@ div.keyboard-test-input-container
   display: block;
   width: 90%;
   margin: 1em auto;
+}
+
+.key-edit-mode
+{
+  border-width: 2px;
+}
+
+.uneditable.keyboard-table-cell
+{
+  opacity: 0.6;
 }
 

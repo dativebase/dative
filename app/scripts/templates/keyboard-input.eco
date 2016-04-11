@@ -4,7 +4,8 @@
 
     <% for colIndex in [0...keyCount]: %>
         <% coord = "#{rowIndex}-#{colIndex}" %>
-        <% repr = @keyboardLayout.coord2repr[coord] %>
+        <% meta = @keyboardLayout.coord2meta[coord] %>
+        <% [editable, repr] = [meta?.editable, meta?.repr] %>
         <% dim = @keyboardLayout.dimensions[coord] %>
 
         <% if dim: %>
@@ -14,11 +15,18 @@
                 <div class='keyboard-table-cell-container ui-corner-all'>
                     <% for subdim, subIndex in dim: %>
                         <% subcoord = "#{coord}-#{subIndex}" %>
-                        <% repr = @keyboardLayout.coord2repr[subcoord] %>
+                        <% meta = @keyboardLayout.coord2meta[subcoord] %>
+                        <% [editable, repr] = [meta?.editable, meta?.repr] %>
                         <% width = subdim.width * @keyboardLayout.ppi %>
                         <% height = subdim.height * @keyboardLayout.ppi %>
                         <% if height > 25 then spacerHeight = 0.4 * height else spacerHeight = 0 %>
-                        <div class='keyboard-table-cell coord-<%= subcoord %> ui-corner-all'
+                        <% if editable: %>
+                        <div class='editable dative-tooltip keyboard-table-cell coord-<%= subcoord %> ui-corner-all'
+                             title='<%= meta.unicodeMetadata[0] %>. Double-click
+                                to edit.'
+                        <% else: %>
+                        <div class='uneditable keyboard-table-cell coord-<%= subcoord %> ui-corner-all'
+                        <% end %>
                              style='width: <%= width %>px; height: <%= height %>px;'
                              data-coord='<%= subcoord %>'>
                             <div class='spacer-above-repr'
@@ -42,7 +50,13 @@
                 <% if not repr[1] and height > 25 then style = ' style=\'margin-top: 1em;\'' else style = '' %>
                 <% if repr[0]?.length > 5 then fontSize = ' font-size: 75%;' else fontSize = '' %>
                 <% if height > 25 then spacerHeight = 0.4 * height else spacerHeight = 0 %>
-                <div class='keyboard-table-cell coord-<%= coord %> ui-corner-all'
+                <% if editable: %>
+                <div class='editable dative-tooltip keyboard-table-cell coord-<%= coord %> ui-corner-all'
+                     title='<%= meta.unicodeMetadata[0] %>. Double-click to
+                        edit.'
+                <% else: %>
+                <div class='uneditable keyboard-table-cell coord-<%= coord %> ui-corner-all'
+                <% end %>
                      style='width: <%= width %>px; height: <%= height %>px;<%= fontSize %>'
                      data-coord='<%= coord %>'>
                     <div class='spacer-above-repr'
@@ -64,7 +78,12 @@
             <% height = @keyboardLayout.defaultDimensions.height * @keyboardLayout.ppi %>
             <% if repr[0]?.length > 5 then fontSize = ' font-size: 75%;' else fontSize = '' %>
             <% if height > 25 then spacerHeight = 0.4 * height else spacerHeight = 0 %>
-            <div class='keyboard-table-cell coord-<%= coord %> ui-corner-all'
+            <% if editable: %>
+            <div class='editable dative-tooltip keyboard-table-cell coord-<%= coord %> ui-corner-all'
+                 title='<%= meta.unicodeMetadata[0] %>. Double-click to edit.'
+            <% else: %>
+            <div class='uneditable keyboard-table-cell coord-<%= coord %> ui-corner-all'
+            <% end %>
                  style='width: <%= width %>px; height: <%= height %>px;<%= fontSize %>'
                  data-coord='<%= coord %>'>
                  <div class='spacer-above-repr'
@@ -86,7 +105,9 @@
 </div>
 
 <div class='keyboard-test-input-container'>
-    <textarea class='keyboard-test-input ui-corner-all'></textarea>
+    <textarea class='dative-tooltip keyboard-test-input ui-corner-all'
+        title='Test the keyboard here'
+    ></textarea>
 </div>
 
 <div class='key-map-interface' style='display: none;'>

@@ -41,7 +41,7 @@ define [
           "  <tbody>"
         ]
         for grapheme in val
-          codePoint = @decimal2hex(grapheme.charCodeAt(0)).toUpperCase()
+          codePoint = @utils.decimal2hex(grapheme.charCodeAt(0)).toUpperCase()
           try
             name = globals.unicodeCharMap[codePoint] or 'Name unknown'
           catch
@@ -57,15 +57,6 @@ define [
           .css "border-color", @constructor.jQueryUIColors().defBo
       else
         @$(".#{@resultsContainerClass}").html ''
-
-    # Return the decimal number `decimal` has a hex string with left-padding 0s
-    # to minimum length 4.
-    decimal2hex: (decimal) ->
-      hex = Number(decimal).toString 16
-      if hex.length < 4
-        "#{Array(5 - hex.length).join '0'}#{hex}"
-      else
-        hex
 
     # Write the initial HTML to the page.
     html: ->

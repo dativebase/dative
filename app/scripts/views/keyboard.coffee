@@ -4,8 +4,9 @@ define [
   './date-field-display'
   './enterer-field-display'
   './modifier-field-display'
+  './../utils/globals'
 ], (ResourceView, KeyboardAddWidgetView, DateFieldDisplayView,
-  EntererFieldDisplayView, ModifierFieldDisplayView) ->
+  EntererFieldDisplayView, ModifierFieldDisplayView, globals) ->
 
   # Keyboard View
   # -------------
@@ -13,6 +14,12 @@ define [
   # For displaying individual keyboards.
 
   class KeyboardView extends ResourceView
+
+    render: ->
+      if globals.unicodeCharMap
+        super
+      else
+        @fetchUnicodeData(=> @render())
 
     resourceName: 'keyboard'
 

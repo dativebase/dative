@@ -1,13 +1,16 @@
 define [
   './input'
+  './../utils/globals'
   './../templates/keyboard-input'
-], (InputView, keyboardTemplate) ->
+], (InputView, globals, keyboardTemplate) ->
 
   # Keyboard Input View
   # -------------------
   #
-  # A view for a data input field that is a textarea for writing phonology
-  # keyboards.
+  # A view for an interface for configuring keyboards. This interface displays
+  # a visual representation of a keyboard and allows the user to alter how the
+  # keys behave. The user can also test this behaviour either by typing into a
+  # specific field or clicking the buttons/keys of the keyboard representation.
 
   class KeyboardInputView extends InputView
 
@@ -15,13 +18,20 @@ define [
 
     initialize: (@context) ->
 
-      # The 'keyboard' attribute is our keyboard map. It maps key codes to
-      # objects that encode how a particular keycode should behave, given what
-      # meta keys are being pressed simultaneously.
+      # The model's 'keyboard' attribute is our keyboard map. It maps key codes
+      # to objects that encode how a particular keycode should behave, given
+      # what meta keys are being pressed simultaneously.
       @keyboardMap = @model.get 'keyboard'
 
       @keyboardLayout = @getKeyboardLayout()
       @context.keyboardLayout = @keyboardLayout
+
+      # Callback var holds the id of the response to a setTimeout call. If a
+      # double-click event occurs on a visual keyboard key, then the handler
+      # will call `clearTimeout` on this var to prevent the single-click
+      # insertion of the key's character/string.
+      @cbVar1 = null
+      @cbVar2 = null
 
     render: ->
       @$el.html @template(@context)
@@ -58,7 +68,23 @@ define [
       # interface to that type of layout.
       keyboardLayout = @appleKeyboardLayout()
       keyboardLayout = @addKeycode2coord keyboardLayout
-      @updateKeyboardLayoutWithModelKeyboard keyboardLayout
+      keyboardLayout = @updateKeyboardLayoutWithModelKeyboard keyboardLayout
+      @updateKeyboardLayoutWithUnicodeMetadata keyboardLayout
+
+    # Update our `keyboardLayout` object so that its metadata object contains
+    # an array of strings that contain Unicode metadata about all of the
+    # values/representations for each key.
+    updateKeyboardLayoutWithUnicodeMetadata: (keyboardLayout) ->
+      for coord, meta of keyboardLayout.coord2meta
+        if meta.editable
+          unicodeMetadata = []
+          for repr in meta.repr
+            if repr
+              unicodeMetadata.push @unicodeMetadata(repr)
+            else
+              unicodeMetadata.push null
+          meta.unicodeMetadata = unicodeMetadata
+      keyboardLayout
 
     # Update our `keyboardLayout` object so that its key representations match
     # the mappings in `@keyboardMap`
@@ -67,9 +93,13 @@ define [
         coord = keyboardLayout.keycode2coord[keycode]
         if coord
           if keyMap.default
-            keyboardLayout.coord2repr[coord][0] = keyMap.default
+            keyboardLayout.coord2meta[coord].repr[0] = keyMap.default
           if keyMap.shift
-            keyboardLayout.coord2repr[coord][1] = keyMap.shift
+            keyboardLayout.coord2meta[coord].repr[1] = keyMap.shift
+          if keyMap.alt
+            keyboardLayout.coord2meta[coord].repr[2] = keyMap.alt
+          if keyMap.altshift
+            keyboardLayout.coord2meta[coord].repr[3] = keyMap.altshift
       keyboardLayout
 
     # Dynamically create an object that maps JavaScript key codes to the
@@ -85,12 +115,40 @@ define [
       'keydown': 'highlightKeyByKeycode'
       'keydown .keyboard-test-input': 'interceptKey'
       'keyup': 'dehighlightKeyByKeycode'
-      'focus .keyboard-table-cell': 'highlightFocusedKey'
-      'blur .keyboard-table-cell': 'dehighlightBlurredKey'
-      'dblclick .keyboard-table-cell': 'displayKeyEditInterface'
+      'mousedown .keyboard-table-cell': 'highlightFocusedKey'
+      'mouseup .keyboard-table-cell': 'dehighlightBlurredKey'
+      'click .keyboard-table-cell.editable': 'insertValue'
+      'dblclick .keyboard-table-cell.editable': 'displayKeyEditInterface'
+      'keydown .key-mapping-value': 'maybeHideKeyInterface'
       'input .key-mapping-value': 'keyMappingChanged'
       'click .hide-key-map-table': 'hideKeyInterface'
+      'blur': 'dehighlightAllKeys'
+      'focus .keyboard-table-cell': 'stopFocusPropagation'
 
+    # Logic elsewhere in this view handles modification of the
+    # `@model.get('keyboard')` object based on user actions. We return `null`
+    # here because we don't want an object with 'default' and 'shift'
+    # attributes to be set to the model. The only thing we alter is the
+    # `keyboard` object.
+    getValueFromDOM: -> null
+
+    refresh: (@context) ->
+      console.log 'keyboard input is being asked to refresh'
+      @initialize @context
+      @render()
+
+    stopFocusPropagation: (event) ->
+      @stopEvent event
+
+    # If user enters Esc or Enter in key interface, we hide it.
+    maybeHideKeyInterface: (event) ->
+      if event.which in [27, 13]
+        @stopEvent event
+        @hideKeyInterface()
+
+    # User has changed the value that corresponds to a given key in a given
+    # mode (i.e., default, shift, etc.). So, we update `@model.get('keyboard')`
+    # and we update the interface accordingly.
     keyMappingChanged: (event) ->
       $textarea = @$ event.currentTarget
       keycode = $textarea.data 'keycode'
@@ -111,18 +169,26 @@ define [
           @$(selector).find('.keyboard-cell-alt-repr').text keyMap.alt
         if keyMap.altshift isnt null
           @$(selector).find('.keyboard-cell-alt-shift-repr').text keyMap.altshift
-      else
       @updateKeyboardLayoutWithModelKeyboard @keyboardLayout
+      @updateKeyboardLayoutWithUnicodeMetadata @keyboardLayout
+      @model.trigger 'change'
 
+    # The default mapping for a key is `null` for every "mode".
     defaultKeyMap:
       default: null
       shift: null # shiftKey
       alt: null # altKey
       altshift: null # altKey and shiftKey
-      # ctrl: null # ctrlKey; TODO: allow user to override these? ...
-      # meta: null # metaKey; TODO: allow user to override these? ...
 
+    # Display the interface for editing how a specific key behaves when the
+    # user clicks it.
     displayKeyEditInterface: (event) ->
+      if @cbVar1
+        clearTimeout @cbVar1
+        @cbVar1 = null
+      if @cbVar2
+        clearTimeout @cbVar2
+        @cbVar2 = null
       @turnOffEditModeAll()
       @setKeyToEditMode event
       @stopEvent event
@@ -130,12 +196,14 @@ define [
       keyCoord = $key.data 'coord'
       keycode = @keyboardLayout.coord2keycode[keyCoord]
       keyMap = @keyboardMap[keycode]
-      keyRepr = @keyboardLayout.coord2repr[keyCoord]
+      keyRepr = @keyboardLayout.coord2meta[keyCoord].repr
       if not keyMap
         keyMap = @keyboardMap[keycode] = @utils.clone @defaultKeyMap
       @renderKeyInterface keyMap, keycode, keyRepr
       @showKeyInterface()
 
+    # Make the key edit interface contain the representation of the key that is
+    # encoded by `keyMap`, `keycode`, and `keyRepr`.
     renderKeyInterface: (keyMap, keycode, keyRepr) ->
       @$('.key-map-table-keycode').text keycode
       for mode, value of keyMap
@@ -148,49 +216,92 @@ define [
 
     showKeyInterface: (keyMap) ->
       @$('.key-map-interface').show()
+      @$('textarea.key-mapping-value').first().focus()
 
     hideKeyInterface: ->
       @$('.key-map-interface').hide()
       @turnOffEditModeAll()
 
     setKeyToEditMode: (event) ->
-      @$(event.currentTarget).addClass 'dative-shadowed-widget'
+      @$(event.currentTarget).addClass 'dative-shadowed-widget key-edit-mode'
 
-    highlightFocusedKey: (focusEvent) ->
-      @$(focusEvent.currentTarget).addClass 'ui-state-highlight'
+    highlightFocusedKey: (event) ->
+      @$(event.currentTarget).addClass 'ui-state-highlight'
 
-    dehighlightBlurredKey: (blurEvent) ->
-      @$(blurEvent.currentTarget).removeClass 'ui-state-highlight'
+    # User has single-clicked on a key so we insert the corresponding
+    # char/string into the .key-mapping-value textarea. The complication is to
+    # avoid inserting on a double-click; this is the reason for the
+    # instance-bound timeout-ed callbacks below.
+    insertValue: (event) ->
+      $key = @$ event.currentTarget
+      keyCoord = $key.data 'coord'
+      keycode = @keyboardLayout.coord2keycode[keyCoord]
+      keyMap = @keyboardMap[keycode]
+      $target = @$ '.keyboard-test-input'
+      if keyMap
+        values = [keyMap.default, keyMap.shift, keyMap.alt, keyMap.altshift]
+      else
+        values = @keyboardLayout.coord2meta[keyCoord]?.repr
+      value = null
+      if values
+        if event.shiftKey
+          if event.altKey
+            value = values[3]
+          else
+            value = values[1]
+        else if event.altKey
+          value = values[2]
+        else
+          value = values[0]
+      if value
+        cb = =>
+          @stopEvent event
+          $target.val($target.val() + value)
+          clearTimeout @cbVar1
+          clearTimeout @cbVar2
+          @cbVar1 = @cbVar2 = null
+        if @cbVar1
+          @cbVar2 = setTimeout cb, 500
+        else
+          @cbVar1 = setTimeout cb, 500
+      $target.focus()
+
+    dehighlightBlurredKey: (event) ->
+      @$(event.currentTarget).removeClass 'ui-state-highlight'
 
     dehighlightAllKeys: ->
       @$('.keyboard-table-cell').removeClass 'ui-state-highlight'
 
     turnOffEditModeAll: ->
-      @$('.keyboard-table-cell').removeClass 'dative-shadowed-widget'
+      @$('.keyboard-table-cell').removeClass 'dative-shadowed-widget key-edit-mode'
 
+    # The user has issued a keydown event from their physical keyboard while
+    # the .keyboard-test-input textarea was in focus. We intercept this event
+    # and insert our custom keyboard value into the textrea, if we have such a
+    # value in this keyboard resource.
     interceptKey: (event) ->
       @highlightKeyByKeycode event
       keyMap = @keyboardMap[event.which]
       $target = @$ '.keyboard-test-input'
+      value = null
       if keyMap
         if event.shiftKey
           if event.altKey
-            if keyMap.altshift
-              @stopEvent event
-              $target.val($target.val() + keyMap.altshift)
+            value = keyMap.altshift
           else
-            if keyMap.shift
-              @stopEvent event
-              $target.val($target.val() + keyMap.shift)
+            value = keyMap.shift
         else if event.altKey
-          if keyMap.alt
-            @stopEvent event
-            $target.val($target.val() + keyMap.alt)
+          value = keyMap.alt
         else
-          if keyMap.default
-            @stopEvent event
-            $target.val($target.val() + keyMap.default)
+          value = keyMap.default
+      if value
+        @stopEvent event
+        $target.val($target.val() + value)
 
+    # The user has issued a keydown/keyup event using their physical keyboard.
+    # We change what characters/strings our visual keyboard is displaying. This
+    # method makes it so that when the user holds down, e.g., the shift key,
+    # the "shift-mode" characters are displayed.
     showKeyReprsByMode: (event) ->
       if event.shiftKey
         if event.altKey
@@ -202,20 +313,32 @@ define [
       else
         @showDefaultReprs()
 
+    resetTooltips: (modeIndex) ->
+      @$('.keyboard-table-cell.editable').each (i, e) =>
+        $e = @$ e
+        coord = $e.data 'coord'
+        unicode = @keyboardLayout.coord2meta[coord].unicodeMetadata[modeIndex]
+        if unicode then unicode = "#{unicode}. " else unicode = ''
+        $e.tooltip content: "#{unicode}Double-click to edit."
+
     showDefaultReprs: ->
       @$('.key-repr').hide()
+      @resetTooltips 0
       @$('.keyboard-cell-repr').show()
 
     showAltShiftReprs: ->
       @$('.key-repr').hide()
+      @resetTooltips 3
       @$('.keyboard-cell-alt-shift-repr').show()
 
     showShiftReprs: ->
       @$('.key-repr').hide()
+      @resetTooltips 1
       @$('.keyboard-cell-shift-repr').show()
 
     showAltReprs: ->
       @$('.key-repr').hide()
+      @resetTooltips 2
       @$('.keyboard-cell-alt-repr').show()
 
     highlightKeyByKeycode: (event) ->
@@ -226,14 +349,35 @@ define [
 
     dehighlightKeyByKeycode: (event) ->
       @showKeyReprsByMode event
-      coord = @keyboardLayout.keycode2coord[event.which]
-      if coord
-        @$(".coord-#{coord}").removeClass 'ui-state-highlight'
+      # Command key on Mac behaves strangely in that it prevents keyup events
+      # from firing when those events correspond to key pressed when command is
+      # held down: here we detect it by key code and dehighlight all keys if
+      # a keyup is fired on it.
+      if event.which in [91, 93]
+        @dehighlightAllKeys()
+      else
+        coord = @keyboardLayout.keycode2coord[event.which]
+        if coord then @$(".coord-#{coord}").removeClass 'ui-state-highlight'
 
     # Make the border colors match the jQueryUI theme.
     bordercolorify: ->
       @$('textarea, input, .keyboard-table-cell, .key-map-table')
         .css "border-color", @constructor.jQueryUIColors().defBo
+
+    # Return a string that encodes the Unicode metadata of `string`. In
+    # particular, the metadata string lists the code points and names of the
+    # Unicode characters in `string`.
+    unicodeMetadata: (string) ->
+      meta = []
+      string = string.normalize 'NFD'
+      for char in string
+        codePoint = @utils.decimal2hex(char.charCodeAt(0)).toUpperCase()
+        try
+          name = globals.unicodeCharMap[codePoint] or 'Name unknown'
+        catch
+          name = 'Name unknown'
+        meta.push "U+#{codePoint} (#{name})"
+      meta.join ', '
 
     ############################################################################
     # Apple laptop keyboard layout dimensions
@@ -404,90 +548,90 @@ define [
       # 2. the with-shift value/repr
       # 3. the with-alt value/repr
       # 4. the with-alt+shift value/repr
-      coord2repr:
+      coord2meta:
 
-        '0-0': ['esc', null, null, null]
+        '0-0': editable: false, repr: ['esc', 'esc', null, null]
         # Must hold down Apple "fn" key to get the following codes
-        '0-1': ['F1', null, null, null]
-        '0-2': ['F2', null, null, null]
-        '0-3': ['F3', null, null, null]
-        '0-4': ['F4', null, null, null]
-        '0-5': ['F5', null, null, null]
-        '0-6': ['F6', null, null, null]
-        '0-7': ['F7', null, null, null]
-        '0-8': ['F8', null, null, null]
-        '0-9': ['F9', null, null, null]
-        '0-10': ['F10', null, null, null]
-        '0-11': ['F11', null, null, null]
-        '0-12': ['F12', null, null, null]
-        '0-13': ['', null, null, null]
+        '0-1': editable: true, repr: ['F1', null, null, null]
+        '0-2': editable: true, repr: ['F2', null, null, null]
+        '0-3': editable: true, repr: ['F3', null, null, null]
+        '0-4': editable: true, repr: ['F4', null, null, null]
+        '0-5': editable: true, repr: ['F5', null, null, null]
+        '0-6': editable: true, repr: ['F6', null, null, null]
+        '0-7': editable: true, repr: ['F7', null, null, null]
+        '0-8': editable: true, repr: ['F8', null, null, null]
+        '0-9': editable: true, repr: ['F9', null, null, null]
+        '0-10': editable: true, repr: ['F10', null, null, null]
+        '0-11': editable: false, repr: ['F11', null, null, null]
+        '0-12': editable: false, repr: ['F12', null, null, null]
+        '0-13': editable: false, repr: ['', '', null, null]
 
-        '1-0': ['`', '~', null, null]
-        '1-1': ['1', '!', null, null]
-        '1-2': ['2', '@', null, null]
-        '1-3': ['3', '#', null, null]
-        '1-4': ['4', '$', null, null]
-        '1-5': ['5', '%', null, null]
-        '1-6': ['6', '^', null, null]
-        '1-7': ['7', '&', null, null]
-        '1-8': ['8', '*', null, null]
-        '1-9': ['9', '(', null, null]
-        '1-10': ['0', ')', null, null]
-        '1-11': ['-', '_', null, null]
-        '1-12': ['=', '+', null, null]
-        '1-13': ['delete', null, null, null]
+        '1-0': editable: true, repr: ['`', '~', null, null]
+        '1-1': editable: true, repr: ['1', '!', null, null]
+        '1-2': editable: true, repr: ['2', '@', null, null]
+        '1-3': editable: true, repr: ['3', '#', null, null]
+        '1-4': editable: true, repr: ['4', '$', null, null]
+        '1-5': editable: true, repr: ['5', '%', null, null]
+        '1-6': editable: true, repr: ['6', '^', null, null]
+        '1-7': editable: true, repr: ['7', '&', null, null]
+        '1-8': editable: true, repr: ['8', '*', null, null]
+        '1-9': editable: true, repr: ['9', '(', null, null]
+        '1-10': editable: true, repr: ['0', ')', null, null]
+        '1-11': editable: true, repr: ['-', '_', null, null]
+        '1-12': editable: true, repr: ['=', '+', null, null]
+        '1-13': editable: false, repr: ['delete', 'delete', null, null]
 
-        '2-0': ['tab', null, null, null]
-        '2-1': ['q', 'Q', null, null]
-        '2-2': ['w', 'W', null, null]
-        '2-3': ['e', 'E', null, null]
-        '2-4': ['r', 'R', null, null]
-        '2-5': ['t', 'T', null, null]
-        '2-6': ['y', 'Y', null, null]
-        '2-7': ['u', 'U', null, null]
-        '2-8': ['i', 'I', null, null]
-        '2-9': ['o', 'O', null, null]
-        '2-10': ['p', 'P', null, null]
-        '2-11': ['[', '{', null, null]
-        '2-12': [']', '}', null, null]
-        '2-13': ['\\', '|', null, null]
+        '2-0': editable: false, repr: ['tab', 'tab', null, null]
+        '2-1': editable: true, repr: ['q', 'Q', null, null]
+        '2-2': editable: true, repr: ['w', 'W', null, null]
+        '2-3': editable: true, repr: ['e', 'E', null, null]
+        '2-4': editable: true, repr: ['r', 'R', null, null]
+        '2-5': editable: true, repr: ['t', 'T', null, null]
+        '2-6': editable: true, repr: ['y', 'Y', null, null]
+        '2-7': editable: true, repr: ['u', 'U', null, null]
+        '2-8': editable: true, repr: ['i', 'I', null, null]
+        '2-9': editable: true, repr: ['o', 'O', null, null]
+        '2-10': editable: true, repr: ['p', 'P', null, null]
+        '2-11': editable: true, repr: ['[', '{', null, null]
+        '2-12': editable: true, repr: [']', '}', null, null]
+        '2-13': editable: true, repr: ['\\', '|', null, null]
 
-        '3-0': ['caps lock', null, null, null]
-        '3-1': ['a', 'A', null, null]
-        '3-2': ['s', 'S', null, null]
-        '3-3': ['d', 'D', null, null]
-        '3-4': ['f', 'F', null, null]
-        '3-5': ['g', 'G', null, null]
-        '3-6': ['h', 'H', null, null]
-        '3-7': ['j', 'J', null, null]
-        '3-8': ['k', 'K', null, null]
-        '3-9': ['l', 'L', null, null]
-        '3-10': [';', ':', null, null]
-        '3-11': ["'", '"', null, null]
-        '3-12': ['return', 'enter', null, null]
+        '3-0': editable: false, repr: ['caps lock', 'caps lock', null, null]
+        '3-1': editable: true, repr: ['a', 'A', null, null]
+        '3-2': editable: true, repr: ['s', 'S', null, null]
+        '3-3': editable: true, repr: ['d', 'D', null, null]
+        '3-4': editable: true, repr: ['f', 'F', null, null]
+        '3-5': editable: true, repr: ['g', 'G', null, null]
+        '3-6': editable: true, repr: ['h', 'H', null, null]
+        '3-7': editable: true, repr: ['j', 'J', null, null]
+        '3-8': editable: true, repr: ['k', 'K', null, null]
+        '3-9': editable: true, repr: ['l', 'L', null, null]
+        '3-10': editable: true, repr: [';', ':', null, null]
+        '3-11': editable: true, repr: ["'", '"', null, null]
+        '3-12': editable: false, repr: ['return', 'enter', null, null]
 
-        '4-0': ['shift', null, null, null]
-        '4-1': ['z', 'Z', null, null]
-        '4-2': ['x', 'X', null, null]
-        '4-3': ['c', 'C', null, null]
-        '4-4': ['v', 'V', null, null]
-        '4-5': ['b', 'B', null, null]
-        '4-6': ['n', 'N', null, null]
-        '4-7': ['m', 'M', null, null]
-        '4-8': [',', '<', null, null]
-        '4-9': ['.', '>', null, null]
-        '4-10': ['/', '?', null, null]
-        '4-11': ['shift', null, null, null]
+        '4-0': editable: false, repr: ['shift', 'shift', null, null]
+        '4-1': editable: true, repr: ['z', 'Z', null, null]
+        '4-2': editable: true, repr: ['x', 'X', null, null]
+        '4-3': editable: true, repr: ['c', 'C', null, null]
+        '4-4': editable: true, repr: ['v', 'V', null, null]
+        '4-5': editable: true, repr: ['b', 'B', null, null]
+        '4-6': editable: true, repr: ['n', 'N', null, null]
+        '4-7': editable: true, repr: ['m', 'M', null, null]
+        '4-8': editable: true, repr: [',', '<', null, null]
+        '4-9': editable: true, repr: ['.', '>', null, null]
+        '4-10': editable: true, repr: ['/', '?', null, null]
+        '4-11': editable: false, repr: ['shift', 'shift', null, null]
 
-        '5-0': ['fn', null, null, null] # Apple fn key
-        '5-1': ['control', null, null, null]
-        '5-2': ['option', 'alt', null, null]
-        '5-3': ['command', '⌘', null, null]
-        '5-4': [' ', null, null, null]
-        '5-5': ['command', '⌘', null, null]
-        '5-6': ['option', 'alt', null, null]
-        '5-7': ['◀', null, null, null]
-        '5-8-0': ['▲', null, null, null]
-        '5-8-1': ['▼', null, null, null]
-        '5-9': ['▶', null, null, null]
+        '5-0': editable: false, repr: ['fn', 'fn', null, null] # Apple fn key
+        '5-1': editable: false, repr: ['control', 'control', null, null]
+        '5-2': editable: false, repr: ['alt', 'alt', null, null]
+        '5-3': editable: false, repr: ['command', 'command', null, null]
+        '5-4': editable: false, repr: [' ', ' ', null, null]
+        '5-5': editable: false, repr: ['command', 'command', null, null]
+        '5-6': editable: false, repr: ['alt', 'alt', null, null]
+        '5-7': editable: false, repr: ['◀', '◀', null, null]
+        '5-8-0': editable: false, repr: ['▲', '▲', null, null]
+        '5-8-1': editable: false, repr: ['▼', '▼', null, null]
+        '5-9': editable: false, repr: ['▶', '▶', null, null]
 

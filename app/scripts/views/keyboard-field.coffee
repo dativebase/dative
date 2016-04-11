@@ -19,3 +19,9 @@ define [
     getInputView: ->
       new KeyboardInputView @context
 
+    # We only need inputs on .key-mapping-value textareas to result in a
+    # setToModel
+    events:
+      'input textarea.key-mapping-value': 'setToModel'
+      'keydown textarea':                 'controlEnterSubmit'
+
