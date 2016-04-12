@@ -1,12 +1,14 @@
 define [
   './resource'
   './keyboard-add-widget'
+  './keyboard-field-display'
   './date-field-display'
   './enterer-field-display'
   './modifier-field-display'
   './../utils/globals'
-], (ResourceView, KeyboardAddWidgetView, DateFieldDisplayView,
-  EntererFieldDisplayView, ModifierFieldDisplayView, globals) ->
+], (ResourceView, KeyboardAddWidgetView, KeyboardFieldDisplayView,
+  DateFieldDisplayView, EntererFieldDisplayView, ModifierFieldDisplayView,
+  globals) ->
 
   # Keyboard View
   # -------------
@@ -14,6 +16,12 @@ define [
   # For displaying individual keyboards.
 
   class KeyboardView extends ResourceView
+
+    focus: ->
+
+    turnOnPrimaryDataTooltip: ->
+
+    showAndHighlightOnlyMe: ->
 
     render: ->
       if globals.unicodeCharMap
@@ -47,5 +55,6 @@ define [
       datetime_entered: DateFieldDisplayView
       enterer: EntererFieldDisplayView
       modifier: ModifierFieldDisplayView
+      keyboard: KeyboardFieldDisplayView
 
 

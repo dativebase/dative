@@ -21,5 +21,9 @@ define [
     resourcesCollection: KeyboardsCollection
     resourceModel: KeyboardModel
 
-
+    # Overriding this super-class method prevents the annoying scrolling that
+    # happens otherwise when you click on a keyboard key.
+    resourceFocused: (event) ->
+      if @$(event.target).hasClass 'dative-resource-widget'
+        @rememberFocusedElement event
 

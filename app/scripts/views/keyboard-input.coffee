@@ -11,6 +11,14 @@ define [
   # a visual representation of a keyboard and allows the user to alter how the
   # keys behave. The user can also test this behaviour either by typing into a
   # specific field or clicking the buttons/keys of the keyboard representation.
+  #
+  # NOTE: on a Mac (with certain keyboards, e.g., US or Canadian English ones),
+  # the Alt+Key combination sometimes results in a JavaScript key code that is
+  # different from that normally issued when Key is pressed. For example, the
+  # 'e' key has code 69 but 'alt+e' is code 229, presumably because alt+e
+  # results in an accute accent on the next key pressed. In order to get the
+  # true alt+e, you need to press ctrl+alt+e. This also happens with the
+  # U.S. keyboard. It happens with the keys for e, u, i, n, and `.
 
   class KeyboardInputView extends InputView
 
@@ -32,6 +40,10 @@ define [
       # insertion of the key's character/string.
       @cbVar1 = null
       @cbVar2 = null
+
+      # This means that the keyboard can be edited. In
+      # `KeyboardRepresentationView`, this is set to `false`.
+      @context.editable = true
 
     render: ->
       @$el.html @template(@context)
@@ -123,7 +135,8 @@ define [
       'input .key-mapping-value': 'keyMappingChanged'
       'click .hide-key-map-table': 'hideKeyInterface'
       'blur': 'dehighlightAllKeys'
-      'focus .keyboard-table-cell': 'stopFocusPropagation'
+      'focus': 'stopFocusPropagation'
+      #'focus .keyboard-table-cell': 'stopFocusPropagation'
 
     # Logic elsewhere in this view handles modification of the
     # `@model.get('keyboard')` object based on user actions. We return `null`
@@ -133,7 +146,6 @@ define [
     getValueFromDOM: -> null
 
     refresh: (@context) ->
-      console.log 'keyboard input is being asked to refresh'
       @initialize @context
       @render()
 
@@ -232,38 +244,50 @@ define [
     # char/string into the .key-mapping-value textarea. The complication is to
     # avoid inserting on a double-click; this is the reason for the
     # instance-bound timeout-ed callbacks below.
+    # TODO: BUG: clicking one of these keys results in a very annoying focus
+    # scroll.
+    # BUG 2: clicking an unmodified key most often does not result in the
+    # corresponding character being entered
     insertValue: (event) ->
+      # @stopEvent event
       $key = @$ event.currentTarget
       keyCoord = $key.data 'coord'
       keycode = @keyboardLayout.coord2keycode[keyCoord]
       keyMap = @keyboardMap[keycode]
       $target = @$ '.keyboard-test-input'
+      reprs = @keyboardLayout.coord2meta[keyCoord]?.repr
       if keyMap
         values = [keyMap.default, keyMap.shift, keyMap.alt, keyMap.altshift]
       else
-        values = @keyboardLayout.coord2meta[keyCoord]?.repr
+        values = reprs
       value = null
       if values
         if event.shiftKey
           if event.altKey
-            value = values[3]
+            value = values[3] or reprs[3]
           else
-            value = values[1]
+            value = values[1] or reprs[1]
         else if event.altKey
-          value = values[2]
+          value = values[2] or reprs[2]
         else
-          value = values[0]
+          value = values[0] or reprs[0]
       if value
         cb = =>
           @stopEvent event
-          $target.val($target.val() + value)
+          @insertValAtCursorPosition value, $target
           clearTimeout @cbVar1
           clearTimeout @cbVar2
           @cbVar1 = @cbVar2 = null
-        if @cbVar1
-          @cbVar2 = setTimeout cb, 500
+        if @context.editable
+          if @cbVar1
+            @cbVar2 = setTimeout cb, 500
+          else
+            @cbVar1 = setTimeout cb, 500
         else
-          @cbVar1 = setTimeout cb, 500
+          cb()
+      else
+        console.log 'no value'
+        console.log event
       $target.focus()
 
     dehighlightBlurredKey: (event) ->
@@ -280,6 +304,7 @@ define [
     # and insert our custom keyboard value into the textrea, if we have such a
     # value in this keyboard resource.
     interceptKey: (event) ->
+      event.stopPropagation()
       @highlightKeyByKeycode event
       keyMap = @keyboardMap[event.which]
       $target = @$ '.keyboard-test-input'
@@ -296,7 +321,24 @@ define [
           value = keyMap.default
       if value
         @stopEvent event
-        $target.val($target.val() + value)
+        @insertValAtCursorPosition value, $target
+
+    insertValAtCursorPosition: (value, $target) ->
+      #$target.val($target.val() + value)
+      targetDOM = $target.get 0
+      currentVal = $target.val()
+      cursorStart = targetDOM.selectionStart
+      cursorEnd = targetDOM.selectionEnd
+      newVal =
+        "#{currentVal[...cursorStart]}#{value}#{currentVal[cursorEnd...]}"
+      $target.val newVal
+      # For some reason, if we manually set the selection positions when this
+      # method call is triggered by a keyboard event, then this doesn't work.
+      cursorPosition = cursorStart + value.length
+      targetDOM.selectionStart = cursorPosition
+      targetDOM.selectionEnd = cursorPosition
+      # targetDOM.selectionEnd = (cursorStart + value.length)
+      targetDOM.focus()
 
     # The user has issued a keydown/keyup event using their physical keyboard.
     # We change what characters/strings our visual keyboard is displaying. This
@@ -314,12 +356,13 @@ define [
         @showDefaultReprs()
 
     resetTooltips: (modeIndex) ->
+      if @context.editable then msg = 'Double-click to edit.' else msg = ''
       @$('.keyboard-table-cell.editable').each (i, e) =>
         $e = @$ e
         coord = $e.data 'coord'
         unicode = @keyboardLayout.coord2meta[coord].unicodeMetadata[modeIndex]
         if unicode then unicode = "#{unicode}. " else unicode = ''
-        $e.tooltip content: "#{unicode}Double-click to edit."
+        $e.tooltip content: "#{unicode}#{msg}"
 
     showDefaultReprs: ->
       @$('.key-repr').hide()
@@ -550,7 +593,7 @@ define [
       # 4. the with-alt+shift value/repr
       coord2meta:
 
-        '0-0': editable: false, repr: ['esc', 'esc', null, null]
+        '0-0': editable: false, repr: ['esc', 'esc', 'esc', 'esc']
         # Must hold down Apple "fn" key to get the following codes
         '0-1': editable: true, repr: ['F1', null, null, null]
         '0-2': editable: true, repr: ['F2', null, null, null]
@@ -579,9 +622,9 @@ define [
         '1-10': editable: true, repr: ['0', ')', null, null]
         '1-11': editable: true, repr: ['-', '_', null, null]
         '1-12': editable: true, repr: ['=', '+', null, null]
-        '1-13': editable: false, repr: ['delete', 'delete', null, null]
+        '1-13': editable: false, repr: ['delete', 'delete', 'delete', 'delete']
 
-        '2-0': editable: false, repr: ['tab', 'tab', null, null]
+        '2-0': editable: false, repr: ['tab', 'tab', 'tab', 'tab']
         '2-1': editable: true, repr: ['q', 'Q', null, null]
         '2-2': editable: true, repr: ['w', 'W', null, null]
         '2-3': editable: true, repr: ['e', 'E', null, null]
@@ -596,7 +639,7 @@ define [
         '2-12': editable: true, repr: [']', '}', null, null]
         '2-13': editable: true, repr: ['\\', '|', null, null]
 
-        '3-0': editable: false, repr: ['caps lock', 'caps lock', null, null]
+        '3-0': editable: false, repr: ['caps lock', 'caps lock', 'caps lock', 'caps lock']
         '3-1': editable: true, repr: ['a', 'A', null, null]
         '3-2': editable: true, repr: ['s', 'S', null, null]
         '3-3': editable: true, repr: ['d', 'D', null, null]
@@ -608,9 +651,9 @@ define [
         '3-9': editable: true, repr: ['l', 'L', null, null]
         '3-10': editable: true, repr: [';', ':', null, null]
         '3-11': editable: true, repr: ["'", '"', null, null]
-        '3-12': editable: false, repr: ['return', 'enter', null, null]
+        '3-12': editable: false, repr: ['return', 'return', 'return', 'return']
 
-        '4-0': editable: false, repr: ['shift', 'shift', null, null]
+        '4-0': editable: false, repr: ['shift', 'shift', 'shift', 'shift']
         '4-1': editable: true, repr: ['z', 'Z', null, null]
         '4-2': editable: true, repr: ['x', 'X', null, null]
         '4-3': editable: true, repr: ['c', 'C', null, null]
@@ -621,17 +664,17 @@ define [
         '4-8': editable: true, repr: [',', '<', null, null]
         '4-9': editable: true, repr: ['.', '>', null, null]
         '4-10': editable: true, repr: ['/', '?', null, null]
-        '4-11': editable: false, repr: ['shift', 'shift', null, null]
+        '4-11': editable: false, repr: ['shift', 'shift', 'shift', 'shift']
 
-        '5-0': editable: false, repr: ['fn', 'fn', null, null] # Apple fn key
-        '5-1': editable: false, repr: ['control', 'control', null, null]
-        '5-2': editable: false, repr: ['alt', 'alt', null, null]
-        '5-3': editable: false, repr: ['command', 'command', null, null]
-        '5-4': editable: false, repr: [' ', ' ', null, null]
-        '5-5': editable: false, repr: ['command', 'command', null, null]
-        '5-6': editable: false, repr: ['alt', 'alt', null, null]
-        '5-7': editable: false, repr: ['◀', '◀', null, null]
-        '5-8-0': editable: false, repr: ['▲', '▲', null, null]
-        '5-8-1': editable: false, repr: ['▼', '▼', null, null]
-        '5-9': editable: false, repr: ['▶', '▶', null, null]
+        '5-0': editable: false, repr: ['fn', 'fn', 'fn', 'fn'] # Apple fn key
+        '5-1': editable: false, repr: ['control', 'control', 'control', 'control']
+        '5-2': editable: false, repr: ['alt', 'alt', 'alt', 'alt']
+        '5-3': editable: false, repr: ['command', 'command', 'command', 'command']
+        '5-4': editable: false, repr: [' ', ' ', ' ', ' ']
+        '5-5': editable: false, repr: ['command', 'command', 'command', 'command']
+        '5-6': editable: false, repr: ['alt', 'alt', 'alt', 'alt']
+        '5-7': editable: false, repr: ['◀', '◀', '◀', '◀']
+        '5-8-0': editable: false, repr: ['▲', '▲', '▲', '▲']
+        '5-8-1': editable: false, repr: ['▼', '▼', '▼', '▼']
+        '5-9': editable: false, repr: ['▶', '▶', '▶', '▶']
 

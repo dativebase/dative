@@ -21,9 +21,13 @@
                         <% height = subdim.height * @keyboardLayout.ppi %>
                         <% if height > 25 then spacerHeight = 0.4 * height else spacerHeight = 0 %>
                         <% if editable: %>
+                            <% if @editable: %>
+                                <% title = "#{meta.unicodeMetadata[0]}. Double-click to edit." %>
+                            <% else: %>
+                                <% title = "#{meta.unicodeMetadata[0]}." %>
+                            <% end %>
                         <div class='editable dative-tooltip keyboard-table-cell coord-<%= subcoord %> ui-corner-all'
-                             title='<%= meta.unicodeMetadata[0] %>. Double-click
-                                to edit.'
+                             title='<% title %>'
                         <% else: %>
                         <div class='uneditable keyboard-table-cell coord-<%= subcoord %> ui-corner-all'
                         <% end %>
@@ -51,9 +55,13 @@
                 <% if repr[0]?.length > 5 then fontSize = ' font-size: 75%;' else fontSize = '' %>
                 <% if height > 25 then spacerHeight = 0.4 * height else spacerHeight = 0 %>
                 <% if editable: %>
+                    <% if @editable: %>
+                        <% title = "#{meta.unicodeMetadata[0]}. Double-click to edit." %>
+                    <% else: %>
+                        <% title = "#{meta.unicodeMetadata[0]}." %>
+                    <% end %>
                 <div class='editable dative-tooltip keyboard-table-cell coord-<%= coord %> ui-corner-all'
-                     title='<%= meta.unicodeMetadata[0] %>. Double-click to
-                        edit.'
+                     title='<%= title %>'
                 <% else: %>
                 <div class='uneditable keyboard-table-cell coord-<%= coord %> ui-corner-all'
                 <% end %>
@@ -79,8 +87,13 @@
             <% if repr[0]?.length > 5 then fontSize = ' font-size: 75%;' else fontSize = '' %>
             <% if height > 25 then spacerHeight = 0.4 * height else spacerHeight = 0 %>
             <% if editable: %>
+                <% if @editable: %>
+                    <% title = "#{meta.unicodeMetadata[0]}. Double-click to edit." %>
+                <% else: %>
+                    <% title = "#{meta.unicodeMetadata[0]}." %>
+                <% end %>
             <div class='editable dative-tooltip keyboard-table-cell coord-<%= coord %> ui-corner-all'
-                 title='<%= meta.unicodeMetadata[0] %>. Double-click to edit.'
+                 title='<%= title %>'
             <% else: %>
             <div class='uneditable keyboard-table-cell coord-<%= coord %> ui-corner-all'
             <% end %>
@@ -127,15 +140,28 @@
         </div>
         <div class='dative-widget-body'>
             <% for mode in ['default', 'shift', 'alt', 'altshift']: %>
-            <% if mode is 'altshift' then label = 'alt+shift' else label = mode %>
+            <% if mode is 'altshift': %>
+                <% label = 'alt+shift'; title = ' and the alt and shift keys are being held down.' %>
+            <% else: %>
+                <% label = mode %>
+                <% if mode is 'alt': %>
+                    <% title = ' and the alt key is being held down.' %>
+                <% else if mode is 'shift': %>
+                    <% title = ' and the shift key is being held down.' %>
+                <% else: %>
+                    <% title = '.' %>
+                <% end %>
+            <% end %>
             <div class='key-mapping'>
                 <div class='key-mapping-label-container'>
                     <label for='<%= mode %>' class='key-mapping-label'
                         ><%= label %></label>
                 </div>
                 <textarea name='<%= mode %>' data-keycode=''
-                    maxlength='5'
-                    class='ui-corner-all key-mapping-value'></textarea>
+                    maxlength='5' title='Enter the character or string that
+                        should be produced when this key is pressed<%= title %>'
+                    class='dative-tooltip ui-corner-all key-mapping-value'
+                    ></textarea>
             </div>
             <% end %>
         </div>

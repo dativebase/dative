@@ -3027,6 +3027,12 @@ table.character-names-table tr td
 {
   width: 560px;
   margin: 0 auto;
+  font-size: 12px;
+}
+
+.keyboard-table-cell *
+{
+  font-size: 12px;
 }
 
 .keyboard-table-row
@@ -3093,6 +3099,7 @@ table.character-names-table tr td
 .key-repr
 {
   padding-top: 0.2em;
+  line-height: 12px;
 }
 
 div.key-mapping-label-container
@@ -3137,13 +3144,22 @@ div.key-map-table .dative-widget-body
 textarea.keyboard-test-input
 {
   width: 34.3em;
+  min-height: 1.5em;
+  font-size: 12pt;
+  font-family: 'GentiumPlus', serif;
+  padding: 7px 10px 5px 10px;
 }
 
 div.keyboard-test-input-container
 {
   display: block;
-  width: 90%;
+  width: 83%;
   margin: 1em auto;
+}
+
+.resource-add-form div.keyboard-test-input-container
+{
+  width: 90%;
 }
 
 .key-edit-mode
