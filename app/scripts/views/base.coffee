@@ -557,3 +557,18 @@ define [
       else
         [null, null]
 
+    insertValAtCursorPosition: (value, $target) ->
+      targetDOM = $target.get 0
+      currentVal = $target.val()
+      cursorStart = targetDOM.selectionStart
+      cursorEnd = targetDOM.selectionEnd
+      newVal =
+        "#{currentVal[...cursorStart]}#{value}#{currentVal[cursorEnd...]}"
+      $target.val newVal
+      # For some reason, if we manually set the selection positions when this
+      # method call is triggered by a keyboard event, then this doesn't work.
+      cursorPosition = cursorStart + value.length
+      targetDOM.selectionStart = cursorPosition
+      targetDOM.selectionEnd = cursorPosition
+      targetDOM.focus()
+

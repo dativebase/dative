@@ -11,13 +11,13 @@
         Browsing
         <span class='browse-set'
             >all <%= @resourceNamePluralHuman %></span>.
-        <span style='whites-pace: nowrap;'>
+        <span style='white-space: nowrap;'>
         Viewing
         <span class='resource-range'></span>
         of
         <span class='resource-count'></span>
         </span>
-        <span style='white-space: nowrap;'>
+        <span style='white-space: nowrap; display: inline-block;'>
         (page
         <span class='current-page'></span>
         of

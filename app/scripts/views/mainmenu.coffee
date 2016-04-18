@@ -2,12 +2,14 @@ define [
   'jquery'
   'backbone'
   './base'
+  './../models/keyboard'
   './../utils/globals'
   './../utils/keyboard-shortcuts'
   './../templates/mainmenu'
   'superclick'
   'supersubs'
-], ($, Backbone, BaseView, globals, keyboardShortcuts, mainmenuTemplate) ->
+], ($, Backbone, BaseView, KeyboardModel, globals,
+  keyboardShortcuts, mainmenuTemplate) ->
 
   # Main Menu View
   # --------------
@@ -26,6 +28,58 @@ define [
       @listenTo @model, 'change:activeServer', @activeFieldDBCorpusChanged
       @listenTo Backbone, 'bodyClicked', @closeSuperclick
       @listenTo Backbone, 'application-settings:jQueryUIThemeChanged', @jQueryUIThemeChanged
+      @listenTo Backbone, 'keyboardInUse', @setStateHasActiveKeyboard
+
+      # This is the keyboard that the user has chosen to be active throughout
+      # Dative. NOTE: this functionality is not yet implemented.
+      @systemWideKeyboard = null
+
+      # The currently active keyboard is the one that has been activated by the
+      # user having focused a specific field which has a keyboard associated
+      # with it.
+      @currentlyActiveKeyboard = null
+      @currentlyActiveKeyboardTarget = null
+
+    # A field has just gained focus and has signalled to the main menu that it
+    # has an active keyboard. We therefore update how our keyboard button looks.
+    setStateHasActiveKeyboard: (keyboardModel, $target) ->
+      if keyboardModel
+        @currentlyActiveKeyboard = keyboardModel
+        @currentlyActiveKeyboardTarget = $target
+        @$('.active-keyboard').addClass 'ui-state-highlight'
+          .css 'border-color', @constructor.jQueryUIColors().actBo
+          .tooltip(content:
+            "view the active keyboard “#{keyboardModel.name}”")
+      else
+        @setStateHasNoActiveKeyboard()
+
+    # A field with a keyboard has just lost focus and has signalled this fact
+    # to the main menu. We therefore reset our keyboard button to its default
+    # state. Note: we put a delay on this action so that clicking on the
+    # keyboard button when there IS an active keyboard can have the correct
+    # behaviour, i.e., displaying that active keyboard.
+    setStateHasNoActiveKeyboard: ->
+      cb = =>
+        @currentlyActiveKeyboard = null
+        @currentlyActiveKeyboardTarget = null
+        @$('.active-keyboard').removeClass 'ui-state-highlight'
+          .css 'border-color', @constructor.jQueryUIColors().defBa
+          .tooltip content: 'browse keyboards in a dialog window'
+      setTimeout cb, 100
+
+    # Our small keyboard icon button has just been clicked. If we have an
+    # active keyboard, show it; otherwise, render the keyboards browse
+    # interface in a dialog window.
+    showActiveKeyboard: (event) ->
+      if globals.unicodeCharMap
+        if @currentlyActiveKeyboard
+          keyboardModel = new KeyboardModel @currentlyActiveKeyboard
+          Backbone.trigger 'showEventBasedKeyboardInDialog', keyboardModel
+          @currentlyActiveKeyboardTarget.focus()
+        else
+          @trigger 'meta:request:keyboardsBrowse'
+      else
+        @fetchUnicodeData(=> @showActiveKeyboard())
 
     activeFieldDBCorpusChanged: ->
       @refreshLoggedInUser()
@@ -50,6 +104,7 @@ define [
       'click [data-event]': 'triggerMenuAction'
       'click a.dative-authenticated': 'toggleLoginDialog'
       'click a.dative-help': 'toggleHelpDialog'
+      'click a.active-keyboard': 'showActiveKeyboard'
 
       'mouseenter ul.sf-menu > li > ul > li': 'mouseEnteredMenuItem'
       'mouseenter ul.sf-menu > li > ul > li > a': 'mouseEnteredMenuItem'
@@ -136,6 +191,7 @@ define [
       @superclickify() # Superclick transmogrifies menu
 
       @helpButtonState()
+      @keyboardButtonState()
       @refreshLoginButton()
       @displayActiveCorpusName()
       @refreshLoggedInUser()
@@ -258,6 +314,12 @@ define [
 
     helpButtonState: ->
       @$('a.dative-help')
+        .button()
+        .css 'border-color', @constructor.jQueryUIColors().defBa
+        .tooltip()
+
+    keyboardButtonState: ->
+      @$('a.active-keyboard')
         .button()
         .css 'border-color', @constructor.jQueryUIColors().defBa
         .tooltip()

@@ -58,8 +58,15 @@ div#mainmenu
     font-size: 100%;
 }
 
+.active-keyboard
+{
+    padding: 1px;
+    bottom: 0.5em;
+}
+
 .dative-help,
-.dative-authenticated
+.dative-authenticated,
+.active-keyboard
 {
     width: 16px;
     height: 16px;
@@ -203,9 +210,19 @@ td.dative-field-label-cell
   width: 60%;
 }
 
+.keyboard-preferences-interface .dative-field-display-label-container
+{
+  width: 50%;
+}
+
 .dative-form-object .parser-task-set-container .dative-field-display-representation-container
 {
   width: 35%;
+}
+
+.keyboard-preferences-interface .dative-field-display-representation-container
+{
+  width: 45%;
 }
 
 .dative-form-object .dative-field-display-label-container
@@ -1071,13 +1088,15 @@ div.notifier
 }
 
 .dative-authenticated span.ui-button-text,
-.dative-help span.ui-button-text
+.dative-help span.ui-button-text,
+.active-keyboard span.ui-button-text
 {
     padding: 0;
 }
 
 .dative-authenticated span.ui-button-text i,
-.dative-help span.ui-button-text i
+.dative-help span.ui-button-text i,
+.active-keyboard span.ui-button-text i
 {
   right: 0.1em;
   position: relative;
@@ -1088,7 +1107,8 @@ div.notifier
   bottom: 0.05em;
 }
 
-.dative-authenticated span.ui-button-text i
+.dative-authenticated span.ui-button-text i,
+.active-keyboard span.ui-button-text i
 {
   bottom: 0.02em;
 }
@@ -3170,5 +3190,22 @@ div.keyboard-test-input-container
 .uneditable.keyboard-table-cell
 {
   opacity: 0.6;
+}
+
+div.keyboard-view-button-container
+{
+  position: relative;
+}
+
+button.toggle-keyboard
+{
+  position: absolute;
+  right: -2.4em;
+  top: 0.3em;
+}
+
+.add button.toggle-keyboard
+{
+  right: -1.2em;
 }
 

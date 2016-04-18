@@ -105,6 +105,26 @@ define [
       'keydown .ms-container': 'multiselectKeydown'
       'keydown textarea, input, .ui-selectmenu-button, .ms-container':
                                'controlEnterSubmit'
+      'focusin textarea':      'signalActiveKeyboard'
+
+    # This tells `MainMenuView` what the keyboard is for this field, if there
+    # is one. It also calls `@signalTextareaFocused()` in order to tell
+    # `AppView` that we are the focused field. This allows it to tell us when a
+    # user clicks a key on a UI keyboard.
+    signalActiveKeyboard: (event) ->
+      @signalTextareaFocused()
+      if @keyboard
+        # This tells `MainMenuView` to highlight the keyboard icon.
+        Backbone.trigger 'keyboardInUse', @keyboard, @$(event.currentTarget)
+      else
+        Backbone.trigger 'keyboardInUse', null
+
+    signalTextareaFocused: (event) ->
+      index = 0
+      @$('textarea').each (i, e) =>
+        if @$(e).is ':focus'
+          index = i
+      Backbone.trigger 'lastFocusedField', @, index
 
     render: ->
       @$el.html @template(@context)
@@ -145,6 +165,14 @@ define [
       for crucialAttribute in @getCrucialAttributes()
         @listenTo @model, "change:#{crucialAttribute}", @crucialAttributeChanged
       @listenTo Backbone, 'fieldVisibilityChange', @fieldVisibilityChange
+      # `AppView` triggers this in response to a user clicking on the UI key of
+      # an event-based keyboard.
+      @listenTo @, 'keyboardValue', @keyboardValue
+
+    # AppView is telling us that the user has clicked on a UI keyboard key and
+    # that we should insert the value `value` into our textarea.
+    keyboardValue: (value, index=0) ->
+      @insertValAtCursorPosition value, @$('textarea').eq(index)
 
     fieldVisibilityChange: (resource, attribute, visibility) ->
       if resource is @resource and attribute is @attribute
@@ -340,4 +368,47 @@ define [
         o.name
       catch
         'no text for option'
+
+    ############################################################################
+    # Keyboard-related Functionality
+    ############################################################################
+    #
+    # Not all field view subclasses make use of the following methods.
+
+    # Return the keyboard model that application settings has assigned to this
+    # field, if there is one.
+    getKeyboard: ->
+      keyboardPreferences =
+        globals.applicationSettings.get 'keyboardPreferenceSet'
+      if keyboardPreferences
+        keyboard = keyboardPreferences.get "#{@attribute}_keyboard"
+        if keyboard then keyboard else null
+      else
+        null
+
+    # A keydown event has occurred in our <textarea>. If we have a keyboard, we
+    # may stop that event and enter a char/string at our current cursor
+    # position using the keyboard.
+    keyboardInterceptTextareaKeydown: (event) ->
+      if @keyboard
+        keyboardMap = @keyboard.keyboard
+        keyMap = keyboardMap[event.which]
+        $target = @$('textarea').first()
+        value = null
+        if keyMap
+          if event.shiftKey
+            if event.altKey
+              value = keyMap.altshift
+            else
+              value = keyMap.shift
+          else if event.altKey
+            value = keyMap.alt
+          else
+            value = keyMap.default
+        if value
+          #@stopEvent event
+          event.preventDefault()
+          @insertValAtCursorPosition value, $target
+          @respondToInput() # We manually trigger this so that the parser/phonology-based suggestion system can still work.
+      @mixinMyControlEnterSubmit? event
 

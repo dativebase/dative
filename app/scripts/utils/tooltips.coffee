@@ -162,6 +162,26 @@ define ['./utils'], (utils) ->
 
     old:
 
+      keyboardPreferenceSets:
+
+        transcription_keyboard:
+          eng: '“Transcription keyboard”: the keyboard that you want to use
+            when entering data into the form transcription field.'
+
+        phonetic_transcription_keyboard:
+          eng: '“Phonetic transcription keyboard”: the keyboard that you
+            want to use when entering data into the form phonetic transcription
+            field.'
+
+        narrow_phonetic_transcription_keyboard:
+          eng: '“Narrow phonetic transcription keyboard”: the keyboard that
+            you want to use when entering data into the form narrow phonetic
+            transcription field.'
+
+        morpheme_break_keyboard:
+          eng: '“Morpheme break keyboard”: the keyboard that you want to use
+            when entering data into the form morpheme break field.'
+
       keyboards:
         name: name
         description: description

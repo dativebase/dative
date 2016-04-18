@@ -2,20 +2,21 @@ define [
   './base'
   './server'
   './parser-task-set'
+  './keyboard-preference-set'
   './morphology'
   './language-model'
   './../collections/servers'
   './../utils/utils'
   './../utils/globals'
   # 'FieldDB'
-], (BaseModel, ServerModel, ParserTaskSetModel, MorphologyModel,
-  LanguageModelModel, ServersCollection, utils, globals) ->
+], (BaseModel, ServerModel, ParserTaskSetModel, KeyboardPreferenceSetModel,
+  MorphologyModel, LanguageModelModel, ServersCollection, utils, globals) ->
 
   # Application Settings Model
   # --------------------------
   #
-  # Holds server configuration and (in the future) other stuff.
-  # Persisted in the browser using localStorage.
+  # Holds Dative's application settings. Persisted in the browser using
+  # localStorage.
   #
   # Also contains the authentication logic.
 
@@ -459,6 +460,9 @@ define [
 
       appSetObj.parserTaskSet = new ParserTaskSetModel(appSetObj.parserTaskSet)
 
+      appSetObj.keyboardPreferenceSet =
+        new KeyboardPreferenceSetModel(appSetObj.keyboardPreferenceSet)
+
       appSetObj
 
     ############################################################################
@@ -481,6 +485,8 @@ define [
       servers = new ServersCollection([server])
 
       parserTaskSetModel = new ParserTaskSetModel()
+
+      keyboardPreferenceSetModel = new KeyboardPreferenceSetModel()
 
       id: @guid()
       activeServer: servers.at 0
@@ -620,6 +626,8 @@ define [
       version: 'da'
 
       parserTaskSet: parserTaskSetModel
+
+      keyboardPreferenceSet: keyboardPreferenceSetModel
 
       # This object contains metadata about Dative resources, i.e., forms,
       # files, etc.

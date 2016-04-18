@@ -33,11 +33,13 @@ define [
 
     resourceAddWidgetView: KeyboardAddWidgetView
 
+    getHeaderTitle: -> "Keyboard “#{@model.get 'name'}”"
+
     # Attributes that are always displayed.
     primaryAttributes: [
-      'name'
-      'description'
+      # 'name'
       'keyboard'
+      'description'
     ]
 
     # Attributes that may be hidden.

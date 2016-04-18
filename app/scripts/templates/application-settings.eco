@@ -54,6 +54,14 @@
                 </div>
             </div>
 
+            <div class='big-button ui-corner-all keyboard-preferences dative-tooltip'
+                title='Configure Dative keyboards to be used on specific input fields'
+                ><div class='big-button-text'>Keyboard Preferences</div>
+                <div class='big-button-icon'>
+                    <i class='fa fa-keyboard-o fa-4x fa-fw fa-align-center'></i>
+                </div>
+            </div>
+
         <% end %>
 
         <div class='big-button ui-corner-all appearance dative-tooltip'
@@ -100,6 +108,10 @@
         </div>
 
         <div class='server-settings-interface ui-corner-all
+            dative-paginated-item dative-shadowed-widget dative-widget-center
+            ui-widget ui-widget-content application-settings-interface'></div>
+
+        <div class='keyboard-preferences-interface ui-corner-all
             dative-paginated-item dative-shadowed-widget dative-widget-center
             ui-widget ui-widget-content application-settings-interface'></div>
 

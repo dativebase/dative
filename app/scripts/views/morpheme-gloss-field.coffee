@@ -34,6 +34,7 @@ define [
       'mouseout .suggestion':  'hoverStateSuggestionOff'
       'focusin .suggestion':   'hoverStateSuggestionOn'
       'focusout .suggestion':  'hoverStateSuggestionOff'
+      'focusin textarea':      'signalActiveKeyboard'
 
     template: suggestibleFieldTemplate
 

@@ -38,6 +38,7 @@ define [
   './tags'
   './users'
 
+  './event-based-keyboard'
   './collection'
   './elicitation-method'
   './file'
@@ -117,10 +118,11 @@ define [
   SearchesView, SourcesView, SpeakersView, SubcorporaView,
   SyntacticCategoriesView, TagsView, UsersView,
 
-  CollectionView, ElicitationMethodView, FileView, FormView, KeyboardView,
-  LanguageModelView, LanguageView, MorphologicalParserView, MorphologyView,
-  OrthographyView, PageView, PhonologyView, SearchView, SourceView,
-  SpeakerView, SubcorpusView, SyntacticCategoryView, TagView, UserView,
+  EventBasedKeyboardView, CollectionView, ElicitationMethodView, FileView,
+  FormView, KeyboardView, LanguageModelView, LanguageView,
+  MorphologicalParserView, MorphologyView, OrthographyView, PageView,
+  PhonologyView, SearchView, SourceView, SpeakerView, SubcorpusView,
+  SyntacticCategoryView, TagView, UserView,
 
   ApplicationSettingsModel, CollectionModel, ElicitationMethodModel, FileModel,
   FormModel, KeyboardModel, LanguageModelModel, LanguageModel,
@@ -156,7 +158,21 @@ define [
       @closeVisibleView()
       super
 
+    # A `FieldView` has just told us that one of its <textarea>s was focused;
+    # `index` tells us which one.
+    setLastFocusedField: (fieldView, index=0) ->
+      @lastFocusedField = fieldView
+      @lastFocusedFieldIndex = index
+
+    # An event-based keyboard is telling us to alert the last focused field view
+    # that it should insert `value` at its current cursor position.
+    keyboardValueReceived: (value) ->
+      if @lastFocusedField
+        @lastFocusedField.trigger 'keyboardValue', value, @lastFocusedFieldIndex
+
     initialize: (options) ->
+      @lastFocusedField = null
+      @lastFocusedFieldIndex = 0
       @setHash()
       @preventParentScroll()
       @getApplicationSettings options
@@ -244,9 +260,18 @@ define [
         result
       )
 
-
     events:
       'click': 'bodyClicked'
+      'keydown': 'broadcastKeydown'
+      'keyup': 'broadcastKeyup'
+
+    broadcastKeydown: (event) ->
+      if @activeKeyboard
+        @activeKeyboard.trigger 'systemWideKeydown', event
+
+    broadcastKeyup: ->
+      if @activeKeyboard
+        @activeKeyboard.trigger 'systemWideKeyup', event
 
     render: ->
       if window.location.hostname is ['localhost', '127.0.0.1']
@@ -290,6 +315,8 @@ define [
       @listenTo Backbone, 'unsetPreventNavigation', @unsetPreventNavigation
       @listenTo Backbone, 'preventNavigation', @preventNavigation
       @listenTo Backbone, 'mergeNewServers', @mergeNewServers
+      @listenTo Backbone, 'lastFocusedField', @setLastFocusedField
+      @listenTo Backbone, 'keyboardValue', @keyboardValueReceived
 
       @listenTo @mainMenuView, 'request:home', @showHomePageView
       @listenTo @mainMenuView, 'request:openLoginDialogBox', @toggleLoginDialog
@@ -314,6 +341,8 @@ define [
       @listenTo Backbone, 'showResourceInDialog', @showResourceInDialog
       @listenTo Backbone, 'showResourceModelInDialog',
         @showResourceModelInDialog
+      @listenTo Backbone, 'showEventBasedKeyboardInDialog',
+        @showEventBasedKeyboardInDialog
       @listenTo Backbone, 'closeAllResourceDisplayerDialogs',
         @closeAllResourceDisplayerDialogs
       @listenTo Backbone, 'openExporterDialog', @openExporterDialog
@@ -1438,12 +1467,35 @@ define [
       isit
 
     getResourceViewClassFromResourceName: (resourceName) ->
-      @myResources[resourceName].resourceViewClass
+      if resourceName is 'eventBasedKeyboard'
+        EventBasedKeyboardView
+      else
+        @myResources[resourceName].resourceViewClass
 
     # Close all resource displayer dialogs.
     closeAllResourceDisplayerDialogs: ->
       for int in [1..@maxNoResourceDisplayerDialogs]
         @["resourceDisplayerDialog#{int}"].dialogClose()
+
+    # The main menu view is telling us that the user has clicked on the small
+    # keyboard icon in its top right. Note: we only display one active keyboard
+    # at a time since, logically, there can only be one.
+    showEventBasedKeyboardInDialog: (keyboardModel) ->
+      if @activeKeyboard
+        for int in [1..@maxNoResourceDisplayerDialogs]
+          rdd = @["resourceDisplayerDialog#{int}"]
+          if rdd.resourceView?.resourceName is 'keyboard'
+            rdd.dialogClose()
+      cb = =>
+        @activeKeyboard = keyboardModel
+        @showResourceModelInDialog @activeKeyboard, 'eventBasedKeyboard'
+        @listenToOnce @activeKeyboard,
+          'resourceDisplayerDialogHoldingModelClosed',
+          @activeKeyboardClosed
+      setTimeout cb, 600
+
+    activeKeyboardClosed: ->
+      @activeKeyboard = null
 
     # Create a view for the passed in `resourceModel` and render it in the
     # application-wide `@resourceDisplayerDialog`.

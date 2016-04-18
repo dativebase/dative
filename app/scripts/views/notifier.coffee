@@ -49,6 +49,9 @@ define [
       @listenTo Backbone, 'updateParserTaskSetSuccess', @updateParserTaskSetSuccess
       @listenTo Backbone, 'updateParserTaskSetFail', @updateParserTaskSetFail
 
+      @listenTo Backbone, 'updateKeyboardPreferenceSetSuccess', @updateKeyboardPreferenceSetSuccess
+      @listenTo Backbone, 'updateKeyboardPreferenceSetFail', @updateKeyboardPreferenceSetFail
+
       @listenTo Backbone, 'authenticateFail', @authenticateFail
       @listenTo Backbone, 'authenticateSuccess', @authenticateSuccess
 
@@ -171,6 +174,7 @@ define [
         title: "#{@utils.capitalize(@utils.camel2regular(resource))} created"
         content: "You have successfully created a new #{resource}. Its id is
           #{@getResourceId model, resource}."
+        type: 'success'
       @renderNotification notification
 
     searchResourceSuccess: (model, resource) ->
@@ -179,6 +183,7 @@ define [
           succeeded"
         content: "You have successfully performed a search over the
           #{@utils.camel2regular(@utils.capitalize(resource))}."
+        type: 'success'
       @renderNotification notification
 
     searchResourceFail: (errorMessage, resource) ->
@@ -196,6 +201,7 @@ define [
         title: "#{@utils.capitalize(@utils.camel2regular(resource))} updated"
         content: "You have successfully updated
           #{@utils.camel2regular(resource)} #{@getResourceId model, resource}."
+        type: 'success'
       @renderNotification notification
 
     addUpdateResourceFail: (error, type, resource) ->
@@ -232,6 +238,7 @@ define [
         content: "You have successfully deleted the
           #{@utils.camel2regular(resource)} with id
           #{@getResourceId model, resource}."
+        type: 'success'
       @renderNotification notification
 
 
@@ -269,6 +276,7 @@ define [
         title: "Parse success"
         content: "Your attempt to parse using morphological parser #{parserId}
           was successful; see the parses below the word input field."
+        type: 'success'
       @renderNotification notification
 
     morphologicalParserGenerateAndCompileFail: (error, parserId) ->
@@ -284,6 +292,7 @@ define [
         title: "Parser generate and compile success"
         content: "Your attempt to generate and compile the morphological parser
           #{parserId} was successful"
+        type: 'success'
       @renderNotification notification
 
     phonologyCompileFail: (error, phonologyId) ->
@@ -299,6 +308,7 @@ define [
         title: "Phonology compile success"
         content: "Your attempt to compile phonology #{phonologyId} was
           successful: #{message}"
+        type: 'success'
       @renderNotification notification
 
     phonologyApplyDownFail: (error, phonologyId) ->
@@ -314,6 +324,7 @@ define [
         title: "Phonologize success"
         content: "Your attempt to phonologize using phonology #{phonologyId}
           was successful; see the surface forms below the word input field."
+        type: 'success'
       @renderNotification notification
 
     phonologyRunTestsFail: (error, phonologyId) ->
@@ -330,6 +341,7 @@ define [
         content: "Your attempt to run the tests of phonology #{phonologyId}
           was successful; see the results in the table below the “Run
           Tests” button."
+        type: 'success'
       @renderNotification notification
 
     phonologyServeCompiledFail: (error, phonologyId) ->
@@ -346,6 +358,7 @@ define [
         content: "Your attempt to download the compiled binary file
           representing phonology #{phonologyId} was successful: click
           the link next to the button to download the file to your computer"
+        type: 'success'
       @renderNotification notification
 
     morphologyGenerateAndCompileFail: (error, morphologyId) ->
@@ -385,6 +398,7 @@ define [
         title: "Morphology compile success"
         content: "Your attempt to compile morphology #{morphologyId} was
           successful: #{message}"
+        type: 'success'
       @renderNotification notification
 
     registerFail: (reason) ->
@@ -398,6 +412,7 @@ define [
       notification = new NotificationView
         title: 'Registered'
         content: 'You have successfully created a new account'
+        type: 'success'
       @renderNotification notification
 
     authenticateFail: (errorObj) ->
@@ -411,6 +426,7 @@ define [
       notification = new NotificationView
         title: 'Logged in'
         content: 'You have successfully logged in.'
+        type: 'success'
       @renderNotification notification
 
     logoutFail: ->
@@ -424,6 +440,7 @@ define [
       notification = new NotificationView
         title: 'Logged out'
         content: 'You have successfully logged out.'
+        type: 'success'
       @renderNotification notification
 
     formSearchFail: (error, formSearchId) ->
@@ -439,6 +456,7 @@ define [
         title: 'Form search success'
         content: "You have successfully used the saved search with id
           #{formSearchId} to search."
+        type: 'success'
       @renderNotification notification
 
     fileSearchFail: (errorMessage) ->
@@ -462,6 +480,7 @@ define [
         title: 'Corpus count success'
         content: "You have successfully counted the number of forms in the
           corpus with id #{corpusId}."
+        type: 'success'
       @renderNotification notification
 
     resourceCountSuccess: (resourceName, count) ->
@@ -470,6 +489,7 @@ define [
           success"
         content: "Your search returns #{@utils.integerWithCommas count}
           results."
+        type: 'success'
       @renderNotification notification
 
     corpusBrowseFail: (error, corpusId) ->
@@ -485,6 +505,7 @@ define [
         title: 'Corpus browse success'
         content: "You have made a successful request to browse the forms in the
           corpus with id #{corpusId}."
+        type: 'success'
       @renderNotification notification
 
     generateAndCompileStart: (morphologyModel) ->
@@ -513,6 +534,7 @@ define [
         title: 'Morphology generate and compile request succeeded'
         content: "Your generate and compile request on morphology
           ##{morphologyModel.get('id')} was successful."
+        type: 'success'
       @renderNotification notification
 
     tooManyTasks: ->
@@ -628,6 +650,7 @@ define [
         title: "Parser-related tasks updated"
         content: "You have successfully updated your setting relating to tasks
           assigned to parsers, phonologies and/or morphologies"
+        type: 'success'
       @renderNotification notification
 
     updateParserTaskSetFail: (error) ->
@@ -635,6 +658,22 @@ define [
         title: "Parser-related tasks update fail"
         content: "Oops. Something went wrong while trying to save your
           parser-related tasks."
+        type: 'error'
+      @renderNotification notification
+
+    updateKeyboardPreferenceSetSuccess: (model) ->
+      notification = new NotificationView
+        title: "Keyboard preferences updated"
+        content: "You have successfully updated your preferences relating to
+          the assignment of keyboards to form input fields."
+        type: 'success'
+      @renderNotification notification
+
+    updateKeyboardPreferenceSetFail: (error) ->
+      notification = new NotificationView
+        title: "Keyboard preferences update fail"
+        content: "Oops. Something went wrong while trying to save your
+          keyboard preferences."
         type: 'error'
       @renderNotification notification
 
@@ -691,5 +730,6 @@ define [
         content: "You have successfully updated the application settings for
           the OLD server at
           #{globals.applicationSettings.get('activeServer').get 'url'}."
+        type: 'success'
       @renderNotification notification
 

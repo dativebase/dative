@@ -40,7 +40,7 @@ define [
       # New/different from `FieldView` super-class.
       'keydown input, .ui-selectmenu-button, .ms-container':
                                'controlEnterSubmit'
-      'keydown textarea':      'myControlEnterSubmit'
+      'keydown textarea':      'keyboardInterceptTextareaKeydown'
       'input':                 'respondToInput' # fires when an input, textarea or date-picker changes
       'keydown div.suggestion':
                                'suggestionsKeyboardControl'
@@ -51,6 +51,7 @@ define [
       'mouseout .suggestion':  'hoverStateSuggestionOff'
       'focusin .suggestion':   'hoverStateSuggestionOn'
       'focusout .suggestion':  'hoverStateSuggestionOff'
+      'focusin textarea':      'signalActiveKeyboard'
 
     template: suggestibleWarningsFieldTemplate
 
@@ -117,6 +118,8 @@ define [
       # Return an array of field names that we may target, i.e., send
       # suggestions to.
       @targetFields = @getTargetFields()
+
+      @keyboard = @getKeyboard()
 
     listenToEvents: ->
       super
@@ -226,7 +229,10 @@ define [
         'hideSuggestionsButtonCheck'
       ]
       for method in methodsWeWant
-        @[method] = SuggestionReceiverFieldView::[method]
+        if method is 'myControlEnterSubmit'
+          @mixinMyControlEnterSubmit = SuggestionReceiverFieldView::[method]
+        else
+          @[method] = SuggestionReceiverFieldView::[method]
 
     ############################################################################
     # Morpheme Break-specific suggestion receiver logic

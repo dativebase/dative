@@ -6,13 +6,14 @@ define [
   './old-application-settings-resource'
   './old-application-settings-add-widget'
   './input-validation'
+  './keyboard-preference-set'
   './../models/old-application-settings'
   './../collections/old-application-settings'
   './../utils/globals'
   './../templates/application-settings'
 ], (Backbone, BaseView, ServersView, ActiveServerView,
   OLDApplicationSettingsResourceView, OLDApplicationSettingsAddWidgetView,
-  InputValidationView, OLDApplicationSettingsModel,
+  InputValidationView, KeyboardPreferenceSetView, OLDApplicationSettingsModel,
   OLDApplicationSettingsCollection, globals, applicationSettingsTemplate) ->
 
 
@@ -59,18 +60,29 @@ define [
   # -------------------------
   #
   # View for viewing and modifying the settings of this Dative application.
-  # These settings are currently divided into 3 sections/parts:
+  # These settings are currently divided into 5 sections/parts:
   #
   # 1. Servers: the servers that we expect to be connecting to via this Dative
-  #    application. Currently, these are only persisted locally (LocalStorage).
+  #    application. These are persisted locally (in LocalStorage) but Dative
+  #    also sends us an array of them in servers.json which the user can merge
+  #    into their own list of servers, if they want.
   #
-  # 2. Appearance: choose the jQueryUI theme that you want. Choice is persisted
+  # 2. Server Settings: this is an interface to the settings of the OLD server
+  #    that the user is currently logged into. It allows the user to set/change
+  #    the object language and metalanguage name and ISO 639-3 Id values, as
+  #    well as the set of "unrestricted" users.
+  #
+  # 3. Input Validation: an interface to the settings (of the OLD that the user
+  #    is logged in to) that deal with what kind of values users can enter into
+  #    specific form fields.
+  #
+  # 4. Keyboard Preferences: client-side settings that allow users to assign
+  #    specific keyboard resources to particular form fields. E.g., an IPA
+  #    keyboard to the phonetic transcription field.
+  #
+  # 5. Appearance: choose the jQueryUI theme that you want. Choice is persisted
   #    in the app-wide `ApplicationSettingsModel` instance in LocalStorage
   #    (same one that is used to persist the server settings in (1)).
-  #
-  # 3. Server Settings: currently this is not yet implemented. When logged in
-  #    to an OLD web service, this should display the most recent OLD
-  #    application settings resource.
 
   class ApplicationSettingsView extends BaseView
 
@@ -83,6 +95,7 @@ define [
       'click .big-button.appearance': 'showAppearanceInterface'
       'click .big-button.server-settings': 'showServerSettingsInterface'
       'click .big-button.input-validation': 'showInputValidationInterface'
+      'click .big-button.keyboard-preferences': 'showKeyboardPreferencesInterface'
       'click .jquery-theme-image-container': 'changeJQueryUITheme'
       'click .application-settings-help': 'applicationSettingsHelp'
       'keydown .big-button': 'keydownBigButton'
@@ -281,6 +294,32 @@ define [
       @showOnlyInterfaces()
       @hideInterfaces()
       @$('.appearance-interface').show()
+
+    showKeyboardPreferencesInterface: ->
+      # We make sure we have the Unicode character map object before rendering
+      # the keyboard preferences interface since the referenced keyboard views
+      # won't render without it.
+      if not globals.unicodeCharMap
+        @fetchUnicodeData(=> @showKeyboardPreferencesInterface())
+        return
+      @showOnlyInterfaces()
+      @hideInterfaces()
+      if not @keyboardPreferenceSetView
+        @initializeKeyboardPreferenceSetView()
+      @renderKeyboardPreferenceSetView()
+      @$('.keyboard-preferences-interface').show()
+
+    renderKeyboardPreferenceSetView: ->
+      @keyboardPreferenceSetView.setElement(
+        @$('.keyboard-preferences-interface').first())
+      @keyboardPreferenceSetView.render()
+      @rendered @keyboardPreferenceSetView
+
+    initializeKeyboardPreferenceSetView: ->
+      keyboardPreferenceSetModel =
+        globals.applicationSettings.get 'keyboardPreferenceSet'
+      @keyboardPreferenceSetView =
+        new KeyboardPreferenceSetView model: keyboardPreferenceSetModel
 
     showServerSettingsInterface: ->
       @viewToDisplayOLDApplicationSettings =

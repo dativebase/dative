@@ -212,6 +212,11 @@
 
 <div class='container-right'>
 
+    <a class='active-keyboard dative-tooltip'
+       title='browse keyboards in a dialog window'
+        ><i class='fa fa-keyboard-o fa-fw'></i>
+    </a>
+
   <a class="dative-help" title="help with using Dative">
     <i class='fa fa-question fa-fw'></i>
   </a>

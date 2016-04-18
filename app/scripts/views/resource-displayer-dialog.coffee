@@ -52,7 +52,9 @@ define [
       @
 
     getResourceViewTitle: ->
-      if @resourceView.model.get('id')
+      if @resourceView.resourceName is 'keyboard'
+        "Keyboard “#{@resourceView.model.get 'name'}”"
+      else if @resourceView.model.get('id')
         "#{@utils.capitalize @resourceView.resourceNameHumanReadable()}
           ##{@resourceView.model.get('id')}"
       else

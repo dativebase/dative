@@ -244,10 +244,6 @@ define [
     # char/string into the .key-mapping-value textarea. The complication is to
     # avoid inserting on a double-click; this is the reason for the
     # instance-bound timeout-ed callbacks below.
-    # TODO: BUG: clicking one of these keys results in a very annoying focus
-    # scroll.
-    # BUG 2: clicking an unmodified key most often does not result in the
-    # corresponding character being entered
     insertValue: (event) ->
       # @stopEvent event
       $key = @$ event.currentTarget
@@ -285,9 +281,6 @@ define [
             @cbVar1 = setTimeout cb, 500
         else
           cb()
-      else
-        console.log 'no value'
-        console.log event
       $target.focus()
 
     dehighlightBlurredKey: (event) ->
@@ -322,23 +315,6 @@ define [
       if value
         @stopEvent event
         @insertValAtCursorPosition value, $target
-
-    insertValAtCursorPosition: (value, $target) ->
-      #$target.val($target.val() + value)
-      targetDOM = $target.get 0
-      currentVal = $target.val()
-      cursorStart = targetDOM.selectionStart
-      cursorEnd = targetDOM.selectionEnd
-      newVal =
-        "#{currentVal[...cursorStart]}#{value}#{currentVal[cursorEnd...]}"
-      $target.val newVal
-      # For some reason, if we manually set the selection positions when this
-      # method call is triggered by a keyboard event, then this doesn't work.
-      cursorPosition = cursorStart + value.length
-      targetDOM.selectionStart = cursorPosition
-      targetDOM.selectionEnd = cursorPosition
-      # targetDOM.selectionEnd = (cursorStart + value.length)
-      targetDOM.focus()
 
     # The user has issued a keydown/keyup event using their physical keyboard.
     # We change what characters/strings our visual keyboard is displaying. This
