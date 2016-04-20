@@ -42,7 +42,7 @@
         </ul>
     </li>
 
-    <li class='requires-authentication old'><a>Corpora</a>
+    <li class='requires-authentication old hideable'><a>Corpora</a>
         <ul class='ui-corner-bottom'>
             <li class='requires-authentication'>
               <a data-event="request:subcorpusAdd">Add</a>
@@ -53,7 +53,7 @@
         </ul>
     </li>
 
-    <li class='requires-authentication old'><a>Resources</a>
+    <li class='requires-authentication old hideable'><a>Resources</a>
         <ul class='ui-corner-bottom'>
 
             <li class='requires-authentication'>
@@ -106,7 +106,7 @@
         </ul>
     </li>
 
-    <li class='requires-authentication old'><a>Analysis</a>
+    <li class='requires-authentication old hideable'><a>Analysis</a>
         <ul class='ui-corner-bottom'>
             <li class='requires-authentication'
               ><a data-event="request:phonologiesBrowse" data-meta="true">Phonologies</a>
@@ -188,14 +188,14 @@
 
     -->
 
-    <li><a>Help</a>
+    <li class='hideable'><a>Help</a>
         <ul class='ui-corner-bottom'>
             <li><a data-event="request:toggleHelpDialogBox">Help Page</a></li>
             <li><a >Version <%= @version %></a></li>
         </ul>
     </li>
 
-    <li><a>Account</a>
+    <li class='hideable'><a>Account</a>
         <ul class='ui-corner-bottom'>
             <!--
             <li><a>My Page</a></li>
@@ -205,6 +205,12 @@
             <li><a data-event="request:openLoginDialogBox">Login</a></li>
         </ul>
     </li>
+
+    <li class='menu-overflow' style='display: none;'>
+        <a><i class='fa fa-fw fa-angle-double-right'></i></a>
+        <ul class='ui-corner-bottom'></ul>
+    </li>
+
 </ul>
 
 <div class='container-center active-corpus-name'>

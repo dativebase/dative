@@ -120,19 +120,27 @@ define [
 
       'mouseenter ul.sf-menu > li > ul > li': 'mouseEnteredMenuItem'
       'mouseenter ul.sf-menu > li > ul > li > a': 'mouseEnteredMenuItem'
+      'mouseenter ul.sf-menu > li > ul > li > ul > li': 'mouseEnteredMenuItem'
+      'mouseenter ul.sf-menu > li > ul > li > ul > li > a': 'mouseEnteredMenuItem'
 
       'mouseleave ul.sf-menu > li > ul > li': 'mouseLeftMenuItem'
       'mouseleave ul.sf-menu > li > ul > li > a': 'mouseLeftMenuItem'
+      'mouseleave ul.sf-menu > li > ul > li > ul > li': 'mouseLeftMenuItem'
+      'mouseleave ul.sf-menu > li > ul > li > ul > li > a': 'mouseLeftMenuItem'
 
       'mousedown ul.sf-menu > li': 'mouseDownMenuItem'
       'mousedown ul.sf-menu > li > a': 'mouseDownMenuItem'
       'mousedown ul.sf-menu > li > ul > li': 'mouseDownMenuItem'
       'mousedown ul.sf-menu > li > ul > li > a': 'mouseDownMenuItem'
+      'mousedown ul.sf-menu > li > ul > li > ul > li': 'mouseDownMenuItem'
+      'mousedown ul.sf-menu > li > ul > li > ul > li > a': 'mouseDownMenuItem'
 
       'mouseup ul.sf-menu > li': 'mouseUpMenuItem'
       'mouseup ul.sf-menu > li > a': 'mouseUpMenuItem'
       'mouseup ul.sf-menu > li > ul > li': 'mouseUpMenuItem'
       'mouseup ul.sf-menu > li > ul > li > a': 'mouseUpMenuItem'
+      'mouseup ul.sf-menu > li > ul > li > ul > li': 'mouseUpMenuItem'
+      'mouseup ul.sf-menu > li > ul > li > ul > li > a': 'mouseUpMenuItem'
 
     loggedInChanged: ->
       @render()
@@ -193,12 +201,14 @@ define [
       @$el
         .css(@constructor.jQueryUIColors().def) # match jQueryUI colors
         .html @template(@model.attributes)
+      @copyHideableMenuItemsToOverflow()
       @setActivityAndVisibility()
 
-      # NOTE @jrwdunham @cesine: I moved to superclick because touchscreen devices
-      # don't support hover events, but apparently superfish does support touchscreen
-      # devices (see http://users.tpg.com.au/j_birch/plugins/superfish/) so maybe we
-      # should switch back.
+      # NOTE @jrwdunham @cesine: I moved to superclick because touchscreen
+      # devices don't support hover events, but apparently superfish does
+      # support touchscreen devices (see
+      # http://users.tpg.com.au/j_birch/plugins/superfish/) so maybe we should
+      # switch back.
       #@superfishify() # Superfish transmogrifies menu
       @superclickify() # Superclick transmogrifies menu
 
@@ -209,6 +219,43 @@ define [
       @refreshLoggedInUser()
       @keyboardShortcuts()
       @setStateHasActiveKeyboard()
+      @adjustToWindowDimensions()
+
+    adjustToWindowDimensions: ->
+      @hideMenuItemsBasedOnWindowDimensions $(window).width()
+      $(window).resize =>
+        @hideMenuItemsBasedOnWindowDimensions $(window).width()
+
+    # If the window gets too narrow, we hide the "hideable" menu items and
+    # display the overflow double right angle menu item >> which contains
+    # copies of those hideable menu items.
+    hideMenuItemsBasedOnWindowDimensions: (windowWidth) ->
+      console.log windowWidth
+      if windowWidth < 1237
+        if not @$('li.menu-overflow').is(':visible')
+          @$('ul.sf-menu > li.hideable').hide()
+          @$('li.menu-overflow').show()
+      else
+        if @$('li.menu-overflow').is ':visible'
+          @$('ul.sf-menu > li.hideable').show()
+          @$('li.menu-overflow').hide()
+      if windowWidth < 520
+        if @$('div.active-corpus-name').is ':visible'
+          @$('div.active-corpus-name').hide()
+      else
+        if not @$('div.active-corpus-name').is(':visible')
+          @$('div.active-corpus-name').show()
+
+    # We copy the hideable menu items' HTML to the menu-overflow menu item.
+    copyHideableMenuItemsToOverflow: ->
+      @$('li.hideable').clone().appendTo 'li.menu-overflow > ul'
+
+    # We copy the hideable menu items' HTML to the menu-overflow menu item.
+    copyHideableMenuItemsToOverflow_: ->
+      $overflow = @$('li.menu-overflow').first()
+      @$('li.hideable').each (i, e) =>
+        $overflow.append @$(e)[0].outerHTML
+        console.log @$(e)[0].outerHTML
 
     # Superfish jQuery plugin turns mainmenu <ul> into a menubar
     superfishify: ->
@@ -426,14 +473,24 @@ define [
         'ul.sf-menu > li > ul'
         'ul.sf-menu > li > ul > li'
         'ul.sf-menu > li > ul > li a'
+        'ul.sf-menu > li > ul > li > ul > li'
+        'ul.sf-menu > li > ul > li > ul > li a'
       ].join ', '
       @$(selector).css @constructor.jQueryUIColors().def
 
       selector = [
         'ul.sf-menu > li > ul > li:last-child',
         'ul.sf-menu > li > ul > li:last-child a'
+        'ul.sf-menu > li > ul > li > ul > li:last-child',
+        'ul.sf-menu > li > ul > li > ul > li:last-child a'
       ].join ', '
       @$(selector).addClass 'ui-corner-bottom sf-option-bottom'
+
+      selector = [
+        'ul.sf-menu > li > ul > li > ul > li:first-child',
+        'ul.sf-menu > li > ul > li > ul > li:first-child a'
+      ].join ', '
+      @$(selector).addClass 'ui-corner-tr sf-option-top'
 
     mouseEnteredMenuItem: (event) ->
       $(event.currentTarget).css @constructor.jQueryUIColors().hov
