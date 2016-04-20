@@ -665,7 +665,7 @@ define [
       notification = new NotificationView
         title: "Keyboard preferences updated"
         content: "You have successfully updated your preferences relating to
-          the assignment of keyboards to form input fields."
+          the assignment of keyboards to input fields."
         type: 'success'
       @renderNotification notification
 

@@ -10,9 +10,13 @@ define [
 
   class KeyboardPreferenceSetModel extends ResourceModel
 
-    # Transform plain objects into Backbone models for parsers, phonologies and
-    # morphologies.
+    # Transform plain keyboard objects into Backbone `KeyboardModel` instances.
     objects2models: ->
+
+      systemWideKeyboardObject = @get 'system_wide_keyboard'
+      if systemWideKeyboardObject
+        @set('system_wide_keyboard',
+          (new KeyboardModel(systemWideKeyboardObject)))
 
       transcriptionKeyboardObject = @get 'transcription_keyboard'
       if transcriptionKeyboardObject
@@ -43,6 +47,11 @@ define [
     defaults: ->
       id: @guid()
 
+      # A system-wide keyboard that will be used when entering data into any
+      # field. The field-specific keyboard listed below should trump this one
+      # when those fields are focused.
+      system_wide_keyboard: null
+
       # A keyboard for entering transcription values.
       transcription_keyboard: null
 
@@ -56,6 +65,7 @@ define [
       morpheme_break_keyboard: null
 
     editableAttributes: [
+      'system_wide_keyboard'
       'transcription_keyboard'
       'phonetic_transcription_keyboard'
       'narrow_phonetic_transcription_keyboard'

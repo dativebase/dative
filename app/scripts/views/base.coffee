@@ -572,3 +572,14 @@ define [
       targetDOM.selectionEnd = cursorPosition
       targetDOM.focus()
 
+    # If we have a system-wide keyboard stored in our client-side keyboard
+    # preference set, return it.
+    getSystemWideKeyboard: (receivedGlobals) ->
+      keyboardPreferences =
+        receivedGlobals.applicationSettings?.get? 'keyboardPreferenceSet'
+      if keyboardPreferences
+        keyboard = keyboardPreferences.get "system_wide_keyboard"
+        if keyboard then keyboard else null
+      else
+        null
+

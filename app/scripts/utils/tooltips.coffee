@@ -164,23 +164,25 @@ define ['./utils'], (utils) ->
 
       keyboardPreferenceSets:
 
+        system_wide_keyboard:
+          eng: 'The keyboard that you want to use, by default, when entering
+            data into any input field.'
+
         transcription_keyboard:
-          eng: '“Transcription keyboard”: the keyboard that you want to use
-            when entering data into the form transcription field.'
+          eng: 'The keyboard that you want to use when entering data into the
+            transcription fields of forms.'
 
         phonetic_transcription_keyboard:
-          eng: '“Phonetic transcription keyboard”: the keyboard that you
-            want to use when entering data into the form phonetic transcription
-            field.'
+          eng: 'The keyboard that you want to use when entering data into the
+            phonetic transcription fields of forms.'
 
         narrow_phonetic_transcription_keyboard:
-          eng: '“Narrow phonetic transcription keyboard”: the keyboard that
-            you want to use when entering data into the form narrow phonetic
-            transcription field.'
+          eng: 'The keyboard that you want to use when entering data into the
+            narrow phonetic transcription fields of forms.'
 
         morpheme_break_keyboard:
-          eng: '“Morpheme break keyboard”: the keyboard that you want to use
-            when entering data into the form morpheme break field.'
+          eng: 'The keyboard that you want to use when entering data into the
+            morpheme break fields of forms.'
 
       keyboards:
         name: name

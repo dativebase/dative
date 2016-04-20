@@ -21,12 +21,14 @@ define [
     resourceModel: KeyboardPreferenceSetModel
 
     attribute2fieldView:
+      system_wide_keyboard: KeyboardSelectViaSearchFieldView
       transcription_keyboard: KeyboardSelectViaSearchFieldView
       phonetic_transcription_keyboard: KeyboardSelectViaSearchFieldView
       narrow_phonetic_transcription_keyboard: KeyboardSelectViaSearchFieldView
       morpheme_break_keyboard: KeyboardSelectViaSearchFieldView
 
     primaryAttributes: [
+      'system_wide_keyboard'
       'transcription_keyboard'
       'phonetic_transcription_keyboard'
       'narrow_phonetic_transcription_keyboard'

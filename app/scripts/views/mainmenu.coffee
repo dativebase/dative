@@ -30,28 +30,35 @@ define [
       @listenTo Backbone, 'application-settings:jQueryUIThemeChanged', @jQueryUIThemeChanged
       @listenTo Backbone, 'keyboardInUse', @setStateHasActiveKeyboard
 
-      # This is the keyboard that the user has chosen to be active throughout
-      # Dative. NOTE: this functionality is not yet implemented.
-      @systemWideKeyboard = null
-
       # The currently active keyboard is the one that has been activated by the
       # user having focused a specific field which has a keyboard associated
       # with it.
-      @currentlyActiveKeyboard = null
-      @currentlyActiveKeyboardTarget = null
+      @activeKeyboard = null
+      @activeKeyboardTarget = null
+
+      # This will set our state to advertising the system-wide keyboard, if
+      # there is one.
+      @setStateHasActiveKeyboard()
 
     # A field has just gained focus and has signalled to the main menu that it
     # has an active keyboard. We therefore update how our keyboard button looks.
     setStateHasActiveKeyboard: (keyboardModel, $target) ->
       if keyboardModel
-        @currentlyActiveKeyboard = keyboardModel
-        @currentlyActiveKeyboardTarget = $target
+        @activeKeyboard = keyboardModel
+        @activeKeyboardTarget = $target
         @$('.active-keyboard').addClass 'ui-state-highlight'
           .css 'border-color', @constructor.jQueryUIColors().actBo
           .tooltip(content:
             "view the active keyboard “#{keyboardModel.name}”")
       else
-        @setStateHasNoActiveKeyboard()
+        @activeKeyboard = @getSystemWideKeyboard globals
+        if @activeKeyboard
+          @$('.active-keyboard').addClass 'ui-state-highlight'
+            .css 'border-color', @constructor.jQueryUIColors().actBo
+            .tooltip(content:
+              "view the system-wide keyboard “#{@activeKeyboard.name}”")
+        else
+          @setStateHasNoActiveKeyboard()
 
     # A field with a keyboard has just lost focus and has signalled this fact
     # to the main menu. We therefore reset our keyboard button to its default
@@ -60,8 +67,8 @@ define [
     # behaviour, i.e., displaying that active keyboard.
     setStateHasNoActiveKeyboard: ->
       cb = =>
-        @currentlyActiveKeyboard = null
-        @currentlyActiveKeyboardTarget = null
+        @activeKeyboard = null
+        @activeKeyboardTarget = null
         @$('.active-keyboard').removeClass 'ui-state-highlight'
           .css 'border-color', @constructor.jQueryUIColors().defBa
           .tooltip content: 'browse keyboards in a dialog window'
@@ -72,12 +79,17 @@ define [
     # interface in a dialog window.
     showActiveKeyboard: (event) ->
       if globals.unicodeCharMap
-        if @currentlyActiveKeyboard
-          keyboardModel = new KeyboardModel @currentlyActiveKeyboard
+        if @activeKeyboard
+          keyboardModel = new KeyboardModel @activeKeyboard
           Backbone.trigger 'showEventBasedKeyboardInDialog', keyboardModel
-          @currentlyActiveKeyboardTarget.focus()
+          if @activeKeyboardTarget then @activeKeyboardTarget.focus()
         else
-          @trigger 'meta:request:keyboardsBrowse'
+          @activeKeyboard = @getSystemWideKeyboard globals
+          if @activeKeyboard
+            keyboardModel = new KeyboardModel @activeKeyboard
+            Backbone.trigger 'showEventBasedKeyboardInDialog', keyboardModel
+          else
+            @trigger 'meta:request:keyboardsBrowse'
       else
         @fetchUnicodeData(=> @showActiveKeyboard())
 
@@ -196,6 +208,7 @@ define [
       @displayActiveCorpusName()
       @refreshLoggedInUser()
       @keyboardShortcuts()
+      @setStateHasActiveKeyboard()
 
     # Superfish jQuery plugin turns mainmenu <ul> into a menubar
     superfishify: ->

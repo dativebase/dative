@@ -176,7 +176,15 @@ define [
       @setHash()
       @preventParentScroll()
       @getApplicationSettings options
+      @activeKeyboard = @getSystemWideKeyboard()
       @fetchServers()
+
+    getSystemWideKeyboard: ->
+      systemWideKeyboard = super globals
+      if systemWideKeyboard
+        new KeyboardModel systemWideKeyboard
+      else
+        null
 
     # If the user navigates to a particular part of the app using the hash
     # string, then we want to remember that hash and navigate to it.
@@ -1486,6 +1494,7 @@ define [
           rdd = @["resourceDisplayerDialog#{int}"]
           if rdd.resourceView?.resourceName is 'keyboard'
             rdd.dialogClose()
+            rdd.resourceView = null
       cb = =>
         @activeKeyboard = keyboardModel
         @showResourceModelInDialog @activeKeyboard, 'eventBasedKeyboard'
@@ -1494,8 +1503,7 @@ define [
           @activeKeyboardClosed
       setTimeout cb, 600
 
-    activeKeyboardClosed: ->
-      @activeKeyboard = null
+    activeKeyboardClosed: -> @activeKeyboard = @getSystemWideKeyboard()
 
     # Create a view for the passed in `resourceModel` and render it in the
     # application-wide `@resourceDisplayerDialog`.

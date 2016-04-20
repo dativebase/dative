@@ -27,6 +27,11 @@ define [
     nullResourceAsString: (resource) -> 'not specified'
 
 
+  class SystemWideKeyboardFieldDisplayView extends TranscriptionKeyboardFieldDisplayView
+
+    attributeName: 'system_wide_keyboard'
+
+
   class PhoneticTranscriptionKeyboardFieldDisplayView extends TranscriptionKeyboardFieldDisplayView
 
     attributeName: 'phonetic_transcription_keyboard'
@@ -74,6 +79,7 @@ define [
 
     # Attributes that are always displayed.
     primaryAttributes: [
+      'system_wide_keyboard'
       'transcription_keyboard'
       'phonetic_transcription_keyboard'
       'narrow_phonetic_transcription_keyboard'
@@ -85,8 +91,11 @@ define [
 
     # Map attribute names to display view class names.
     attribute2displayView:
+      system_wide_keyboard: SystemWideKeyboardFieldDisplayView
       transcription_keyboard: TranscriptionKeyboardFieldDisplayView
-      phonetic_transcription_keyboard: PhoneticTranscriptionKeyboardFieldDisplayView
-      narrow_phonetic_transcription_keyboard: NarrowPhoneticTranscriptionKeyboardFieldDisplayView
+      phonetic_transcription_keyboard:
+        PhoneticTranscriptionKeyboardFieldDisplayView
+      narrow_phonetic_transcription_keyboard:
+        NarrowPhoneticTranscriptionKeyboardFieldDisplayView
       morpheme_break_keyboard: MorphemeBreakKeyboardFieldDisplayView
 

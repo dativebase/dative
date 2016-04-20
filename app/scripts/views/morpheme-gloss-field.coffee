@@ -23,7 +23,7 @@ define [
       # New/different from `FieldView` super-class.
       'keydown input, .ui-selectmenu-button, .ms-container':
                                'controlEnterSubmit'
-      'keydown textarea':      'myControlEnterSubmit'
+      'keydown textarea':      'keyboardInterceptTextareaKeydown'
       'input':                 'respondToInput' # fires when an input, textarea or date-picker changes
       'keydown div.suggestion':
                                'suggestionsKeyboardControl'
@@ -35,6 +35,16 @@ define [
       'focusin .suggestion':   'hoverStateSuggestionOn'
       'focusout .suggestion':  'hoverStateSuggestionOff'
       'focusin textarea':      'signalActiveKeyboard'
+
+    keyboardInterceptTextareaKeydown: (event) ->
+      $target = @$ ':focus'
+      if @keyboard
+        value = @getKeyboardValue event, $target
+        if value
+          event.preventDefault()
+          @insertValAtCursorPosition value, $target
+          @respondToInput() # We manually trigger this so that the parser/phonology-based suggestion system can still work.
+      @myControlEnterSubmit? event
 
     template: suggestibleFieldTemplate
 

@@ -40,7 +40,7 @@ define [
       # New/different from `FieldView` super-class.
       'keydown input, .ui-selectmenu-button, .ms-container':
                                'controlEnterSubmit'
-      'keydown textarea':      'keyboardInterceptTextareaKeydown'
+      'keydown textarea':      'keyboardInterceptTextareaKeydownSuggestible'
       'input':                 'respondToInput' # fires when an input, textarea or date-picker changes
       'keydown div.suggestion':
                                'suggestionsKeyboardControl'

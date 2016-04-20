@@ -95,6 +95,7 @@ define [
       @context = @getContext()
       @labelView = @getLabelView()
       @inputView = @getInputView()
+      @keyboard = @getKeyboard()
 
     # Default is to call `set` on the model any time a field input changes.
     events:
@@ -103,8 +104,9 @@ define [
       'selectmenuchange':      'setToModel' # fires when a selectmenu changes
       'menuselect':            'setToModel' # fires when the tags multi-select changes (not working?...)
       'keydown .ms-container': 'multiselectKeydown'
-      'keydown textarea, input, .ui-selectmenu-button, .ms-container':
+      'keydown input, .ui-selectmenu-button, .ms-container':
                                'controlEnterSubmit'
+      'keydown textarea':      'keyboardInterceptTextareaKeydown'
       'focusin textarea':      'signalActiveKeyboard'
 
     # This tells `MainMenuView` what the keyboard is for this field, if there
@@ -382,31 +384,53 @@ define [
         globals.applicationSettings.get 'keyboardPreferenceSet'
       if keyboardPreferences
         keyboard = keyboardPreferences.get "#{@attribute}_keyboard"
-        if keyboard then keyboard else null
+        if keyboard
+          keyboard
+        else
+          keyboard = keyboardPreferences.get 'system_wide_keyboard'
+          if keyboard then keyboard else null
       else
         null
+
+    # Given a keydown event `event`, return the value (char or string) that our
+    # `@keyboard` returns for that event. Note: this method assumes that the
+    # caller has already checked for an object-type `@keyboard` attribute.
+    getKeyboardValue: (event, $target) ->
+      keyboardMap = @keyboard.keyboard
+      keyMap = keyboardMap[event.which]
+      value = null
+      if keyMap
+        if event.shiftKey
+          if event.altKey
+            value = keyMap.altshift
+          else
+            value = keyMap.shift
+        else if event.altKey
+          value = keyMap.alt
+        else
+          value = keyMap.default
+      value
 
     # A keydown event has occurred in our <textarea>. If we have a keyboard, we
     # may stop that event and enter a char/string at our current cursor
     # position using the keyboard.
     keyboardInterceptTextareaKeydown: (event) ->
+      $target = @$ ':focus'
       if @keyboard
-        keyboardMap = @keyboard.keyboard
-        keyMap = keyboardMap[event.which]
-        $target = @$('textarea').first()
-        value = null
-        if keyMap
-          if event.shiftKey
-            if event.altKey
-              value = keyMap.altshift
-            else
-              value = keyMap.shift
-          else if event.altKey
-            value = keyMap.alt
-          else
-            value = keyMap.default
+        value = @getKeyboardValue event, $target
         if value
-          #@stopEvent event
+          event.preventDefault()
+          @insertValAtCursorPosition value, $target
+          @setToModel()
+      @controlEnterSubmit event
+
+    # Same as `keyboardInterceptTextareaKeydown` except built for
+    # transcription-type fields that respond to suggestions.
+    keyboardInterceptTextareaKeydownSuggestible: (event) ->
+      $target = @$ ':focus'
+      if @keyboard
+        value = @getKeyboardValue event, $target
+        if value
           event.preventDefault()
           @insertValAtCursorPosition value, $target
           @respondToInput() # We manually trigger this so that the parser/phonology-based suggestion system can still work.
