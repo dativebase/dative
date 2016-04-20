@@ -230,7 +230,6 @@ define [
     # display the overflow double right angle menu item >> which contains
     # copies of those hideable menu items.
     hideMenuItemsBasedOnWindowDimensions: (windowWidth) ->
-      console.log windowWidth
       if windowWidth < 1237
         if not @$('li.menu-overflow').is(':visible')
           @$('ul.sf-menu > li.hideable').hide()
@@ -249,13 +248,6 @@ define [
     # We copy the hideable menu items' HTML to the menu-overflow menu item.
     copyHideableMenuItemsToOverflow: ->
       @$('li.hideable').clone().appendTo 'li.menu-overflow > ul'
-
-    # We copy the hideable menu items' HTML to the menu-overflow menu item.
-    copyHideableMenuItemsToOverflow_: ->
-      $overflow = @$('li.menu-overflow').first()
-      @$('li.hideable').each (i, e) =>
-        $overflow.append @$(e)[0].outerHTML
-        console.log @$(e)[0].outerHTML
 
     # Superfish jQuery plugin turns mainmenu <ul> into a menubar
     superfishify: ->
