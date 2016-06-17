@@ -45,9 +45,16 @@ define [
     selectmenuify: ->
       disabled = if @loggedIn() then true else false
       @$('select.activeServer')
-        .selectmenu
+        .selectmenu(
           width: @width
           disabled: disabled
+        )
+        .data 'ui-selectmenu'
+        ._renderMenu = (ul,items) ->
+          # CSS class forces selectmenu to have a max-height.
+          ul.addClass 'activeServerSMUL'
+          for item in items
+            @_renderItemData ul, item
 
     render: ->
       context =

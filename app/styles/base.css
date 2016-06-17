@@ -849,6 +849,12 @@ ul.fieldset select[name="activeServer"] {
     max-width: 548px;
     min-width: 548px;
 }
+
+ul.ui-menu.activeServerSMUL
+{
+  max-height: 10em !important;
+}
+
 ul.fieldset select[name="tags"]+button {
     padding: 0px 0px 3px 9px;
 }
