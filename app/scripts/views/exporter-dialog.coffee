@@ -1,5 +1,6 @@
 define [
   './base'
+  './exporter-xml'
   './exporter-collection-csv'
   './exporter-json'
   './exporter-simple-interlinear-glosses-wordpress'
@@ -7,7 +8,7 @@ define [
   './exporter-latex'
   './dialog-base'
   './../templates/exporter-dialog'
-], (BaseView, ExporterCollectionCSVView, ExporterJSONView,
+], (BaseView, ExporterXMLView, ExporterCollectionCSVView, ExporterJSONView,
   ExporterSIGPluginView, ExporterIdsView, ExporterLaTeXView, DialogBaseView,
   exporterDialogTemplate) ->
 
@@ -31,6 +32,7 @@ define [
   class ExporterDialogView extends BaseView
 
     registeredExporterClasses: [
+      ExporterXMLView
       ExporterCollectionCSVView
       ExporterLaTeXView
       ExporterLaTeXCollectionModelView
