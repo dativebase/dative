@@ -59,7 +59,7 @@ require.config
     backbonelocalstorage: '../bower_components/backbone.localStorage/backbone.localStorage'
 
 require [
-    'views/app',
+    'views/app'
     'routes/router'
     'multiselect'
     'jqueryelastic'
@@ -70,6 +70,17 @@ require [
     window.debugMode = false
 
     $ ->
+
+      if 'serviceWorker' of navigator
+        navigator.serviceWorker.register('/sw.js').then((registration) ->
+          # Registration was successful
+          console.log 'ServiceWorker registration successful with
+            scope: ', registration.scope
+        ).catch((err) ->
+          # registration failed :(
+          console.log 'ServiceWorker registration failed: ', err
+        )
+
       app = new AppView()
       window.onbeforeunload = ->
         app.close()

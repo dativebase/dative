@@ -55,6 +55,9 @@ mv output bower.json
 echo "... setting version on dative package"
 sed 's/"version": "[^,]*"/"version": "'$SHORT_VERSION'"/' package.json  > output
 mv output package.json
+echo "... setting version on service worker (app/sw.js)"
+sed 's/VERSION = "[^,]*"/VERSION = "'$SHORT_VERSION'"/' app/sw.js > output
+mv output bower.json
 
 cp package.json dist/
 # echo "... setting Continuous Integration version on dative dist"
