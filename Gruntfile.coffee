@@ -109,6 +109,7 @@ module.exports = (grunt) ->
             ]
       dist:
         options:
+          port: 9002
           middleware: (connect) ->
             [mountFolder(connect, yeomanConfig.dist)]
 
@@ -478,6 +479,9 @@ module.exports = (grunt) ->
       setContinuousDeploymentVersion:
         cmd: ->
           return 'bash scripts/set_ci_version.sh'
+      setServiceWorkerCachePaths:
+        cmd: ->
+          return 'scripts/set-sw-cache-paths'
       symlinkFieldDBIfAvailable:
         cmd: ->
           return 'if [ -z ${FIELDDB_HOME} ]; ' +
@@ -539,6 +543,9 @@ module.exports = (grunt) ->
   grunt.registerTask 'server', (target) ->
     grunt.log.warn 'The `server` task has been deprecated. Use `grunt serve` to start a server.'
     grunt.task.run ['serve' + (target ? ':' + target : '')]
+
+  grunt.registerTask 'servebuild', ->
+      return grunt.task.run ['open:server', 'connect:dist:keepalive']
 
   grunt.registerTask 'serve', (target) ->
     if target is 'dist'
@@ -680,6 +687,10 @@ module.exports = (grunt) ->
 
     'copy:unicodedatajsondist'
     'copy:serversjsondist'
+
+    # Configure app/sw.js so that its urlsToCache array contains the URLs that
+    # we want our JS service worker to cache (for offline functionality).  #
+    'exec:setServiceWorkerCachePaths'
   ]
 
   grunt.registerTask 'default', ['jshint', 'test', 'build']

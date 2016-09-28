@@ -1,0 +1,94 @@
+#!/usr/bin/env python
+"""This script dynamically sets the ``urlsToCache`` in app/sw.js so that it
+lists the files that we want the service worker to cache for offline
+functionality in Dative builds.
+"""
+
+import os
+import pprint
+
+
+def get_here():
+    return os.path.abspath(os.path.basename(__file__))
+
+
+def get_dist():
+    return os.path.abspath(os.path.join(get_here(), '..', 'dist'))
+
+
+def get_app_path():
+    return os.path.abspath(os.path.join(get_here(), '..', 'app'))
+
+
+def get_urls_to_cache():
+    """This is where you can control what in dist/ to cache. Right now, we're
+    caching almost everything in there.
+    """
+    urls_to_cache = []
+    urls_to_cache += cache_files_in_dir('scripts')
+    urls_to_cache += cache_files_in_dir('styles')
+    urls_to_cache += cache_files_in_dir('help/html')
+    urls_to_cache += cache_files_in_dir('images/help')
+    urls_to_cache += cache_files_in_dir('images/jqueryui-theme-examples')
+    urls_to_cache += cache_files_in_dir(
+        'bower_components/jqueryui/themes/pepper-grinder')
+    urls_to_cache += [
+        '/404.html',
+        '/UnicodeData.json',
+        '/favicon.png',
+        '/index.html',
+        '/package.json',
+        '/robots.txt',
+        '/servers.json',
+        'http://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.4.0/css/font-awesome.css'
+    ]
+    return sorted(list(set(urls_to_cache)))
+
+
+def set_urls_to_cache(urls_to_cache):
+    """Write the dist/sw.js service worker file to contain the content of
+    app/sw.js, with the sole change being that the URLs in ``urls_to_cache``
+    are listed in the ``urlsToCache`` JavaScript array in that dist/sw.js file.
+    """
+    app_path = get_app_path()
+    service_worker_path = os.path.join(app_path, 'sw.js')
+    dist_sw_path = os.path.join(get_dist(), 'sw.js')
+    lines = []
+    with open(service_worker_path) as f:
+        for line in f:
+            if line.startswith('var urlsToCache = '):
+                lines.append('var urlsToCache = [\n')
+                for index, url in enumerate(urls_to_cache):
+                    if index == len(urls_to_cache) - 1:
+                        lines.append('  \'{0}\'\n'.format(url))
+                    else:
+                        lines.append('  \'{0}\',\n'.format(url))
+                lines.append('];\n\n')
+            else:
+                lines.append(line)
+    with open(dist_sw_path, 'w') as f:
+        f.write(''.join(lines))
+
+
+def cache_files_in_dir(subdir):
+    """Return a list of relative paths (from dist/) for all files in
+    dist/<subdir>/.
+    """
+    dist_path = get_dist()
+    path = os.path.join(dist_path, subdir)
+    urls = []
+    for root, dirs, files in os.walk(path):
+        for filename in files:
+            url = os.path.join(root, filename)
+            url = url.replace(dist_path, '', 1)
+            urls.append(url)
+    return urls
+
+
+def main():
+    urls_to_cache = get_urls_to_cache()
+    set_urls_to_cache(urls_to_cache)
+
+
+if __name__ == '__main__':
+    main()
