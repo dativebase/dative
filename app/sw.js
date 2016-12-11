@@ -10,7 +10,7 @@
 
 // This constant is set by scripts/set_ci_version.sh when the grunt task
 // 'build' is run.
-var VERSION = "";
+var VERSION = "4.34.10";
 
 var CACHE_NAME = 'dative-' + VERSION;
 
