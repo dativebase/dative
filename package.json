@@ -1,5 +1,12 @@
 {
   "name": "dative",
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/dativebase/dative.git"
+  },
+  "license": "Apache-2.0",
+  "description": "Dative is a graphical interface for linguistic fieldwork and language documentation applications. At present, Dative works with the Online Linguistic Database (OLD). For more information, see the Dative web site.",
+  "readme": "README.md",
   "version": "3.49.29",
   "dependencies": {},
   "devDependencies": {
@@ -29,6 +36,7 @@
     "grunt-regex-replace": "*",
     "grunt-requirejs": "~0.4.0",
     "grunt-rev": "~0.1.0",
+    "grunt-shell": "~2.1.0",
     "grunt-usemin": "~0.1.12",
     "jshint-stylish": "~0.1.5",
     "load-grunt-tasks": "~0.3.0",
