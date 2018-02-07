@@ -1,4 +1,4 @@
-FROM library/node:0.10
+FROM node:8
 
 # Install Bower & Grunt
 RUN npm install -g bower grunt-cli && \
@@ -6,7 +6,6 @@ RUN npm install -g bower grunt-cli && \
 
 ADD Gruntfile.coffee /usr/src/dative/Gruntfile.coffee
 ADD UnicodeData.json /usr/src/dative/UnicodeData.json
-ADD UnicodeData.txt /usr/src/dative/UnicodeData.txt
 ADD app /usr/src/dative/app
 ADD bower.json /usr/src/dative/bower.json
 ADD favicon.png /usr/src/dative/favicon.png
@@ -22,4 +21,4 @@ WORKDIR /usr/src/dative/test/
 RUN bower install
 
 WORKDIR /usr/src/dative/
-CMD ["grunt" "serve"]
+CMD grunt serve
