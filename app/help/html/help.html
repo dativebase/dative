@@ -83,7 +83,7 @@ one or an <a href="http://www.onlinelinguisticdatabase.org/">OLD</a> one.
 linguistic data to be stored and manipulated on web servers by multiple users
 at the same time.</p>
 <p>In order to log in to an OLD or {{FieldDB.FieldDBObject.application.brand}} web
-service, you must know the web service&#39;s URL and you must create a Dative
+service, you must know the web service’s URL and you must create a Dative
 “server” object for that web service in Dative’s
 <a href="#application-settings">application settings</a>.</p>
 <p>Dative is written in CoffeeScript (and HTML and CSS) using the Backbone
@@ -253,7 +253,7 @@ return the information in the input fields to their initial values, i.e., to
 the values that they had before you began making changes.</p>
 <h3 id="destroying-a-resource-a-data-name-destroy-resource-a-">Destroying a Resource<a data-name="destroy-resource"></a></h3>
 <p>To destroy (i.e., delete) a resource, click on the
-<i class="fa fa-trash fa-fw"></i> button at the top of the resource&#39;s interface.
+<i class="fa fa-trash fa-fw"></i> button at the top of the resource’s interface.
 Doing this will cause a confirm dialog to be displayed. You must click the
 “Ok” button in order to issue the destroy request. You may also click
 “Cancel” (or press Esc) in order to abort the destroy action.</p>
@@ -307,7 +307,7 @@ prefix in Blackfoot); and</p>
 </li>
 </ol>
 <p>Searches of arbitrary structural complexity can be created by using the “and”,
-“not”, “or”, or “...” buttons to create more boolean nodes or
+“not”, “or”, or “…” buttons to create more boolean nodes or
 change existing ones. By changing the select menus you can change the field
 that a given search condition is targeting or you can change the type of search
 from, say, a regular expression search (<em>regex</em>) to an exact match search (<em>=</em>).</p>
@@ -333,7 +333,7 @@ the resource field values that were matched by the specified search.</p>
 <h4 id="smart-search-a-data-name-smart-search-a-">Smart Search<a data-name="smart-search"></a></h4>
 <p>The smart search interface has a single search input. Dative tries to guess
 what you want to search for, given your input, and reports back on the type of
-searches it thinks you&#39;re after and how many results they would return. The
+searches it thinks you’re after and how many results they would return. The
 screenshot below shows an example of a smart search for “dog” and the
 suggestions that Dative has returned.</p>
 <p><img src="/images/help/smart-search-500.png" alt="screenshot of an advanced search"></p>
@@ -370,7 +370,7 @@ will cause the file to be downloaded to your computer.</p>
 OpenOffice or Google Sheets.</p>
 <p>JSON files can be parsed by most modern programming languages.</p>
 <h2 id="application-settings-a-data-name-application-settings-a-">Application Settings<a data-name="application-settings"></a></h2>
-<p>Dative&#39;s application settings allows you to:</p>
+<p>Dative’s application settings allows you to:</p>
 <ol>
 <li><p><i class="fa fa-fw fa-server"></i>
 <a href="#configuring-servers">Configure servers</a>, i.e., connections to
@@ -396,24 +396,24 @@ is defined by a name, a URL, a type
 (“{{FieldDB.FieldDBObject.application.brand}}” or “OLD”), and
 potentially a server code.</p>
 <p>To change the active server, simply select one of the existing servers from
-the <em>Active Server</em> select menu, or click on that server&#39;s
+the <em>Active Server</em> select menu, or click on that server’s
 <i class="fa fa-fw fa-toggle-off"></i> button. Note that you cannot change the
 active server while you are logged in to a server.</p>
 <p>To create a new server, click on the <i class="fa fa-fw fa-plus"></i> button to
 reveal the interface for creating a new one. In the new server form, enter a
-name, the server&#39;s URL, its type, and (if it’s a FieldDB-type server) its
+name, the server’s URL, its type, and (if it’s a FieldDB-type server) its
 server code. If you do not know which server code value to choose, then choose
 “production.” If you do not know which values to enter to create a new
 server, please contact your {{FieldDB.FieldDBObject.application.brand}} or OLD
 server administrator. Note that there is no “Save” button for creating
 servers: Dative saves all of your application settings changes automatically to
-your browser&#39;s local storage.</p>
+your browser’s local storage.</p>
 <p>To delete a server configuration, click its <i class="fa fa-fw fa-trash"></i>
 button. A confirm dialog will verify that you really want to proceed with the
 deletion.</p>
 <p>Note that you cannot delete or modify a server while it is the designated
 active one.</p>
-<h3 id="changing-dative-s-appearance-a-data-name-changing-appearance-a-">Changing Dative&#39;s Appearance<a data-name="changing-appearance"></a></h3>
+<h3 id="changing-dative-s-appearance-a-data-name-changing-appearance-a-">Changing Dative’s Appearance<a data-name="changing-appearance"></a></h3>
 <p>To change how Dative looks, simply click on one of the example form resources
 in the application settings appearance sub-section. The form examples
 illustrate how Dative will look using each of the possible visual themes.</p>
@@ -422,16 +422,16 @@ some things may be difficult or impossible to view using a particular theme.
 Two themes that are known to work well with Dative are “Pepper Grinder” and
 “Cupertino”.</p>
 <h3 id="configuring-server-settings-a-data-name-configuring-server-settings-a-">Configuring Server Settings<a data-name="configuring-server-settings"></a></h3>
-<p>At present, Dative only allows for the configuration of an OLD web server&#39;s
+<p>At present, Dative only allows for the configuration of an OLD web server’s
 application settings. Support for viewing and altering the settings of a
 {{FieldDB.FieldDBObject.application.brand}} web service will be available soon.</p>
 <p>The interface for configuring the settings of a server (i.e., a particular
 server-side web service) works very much like the standard
 <a href="#viewing-single-resource">resource interface described above</a>. Note that you
-must be an administrator in order to have permission to modify a web service&#39;s
+must be an administrator in order to have permission to modify a web service’s
 application settings.</p>
 <h4 id="configuring-old-server-settings-a-data-name-configuring-old-server-settings-a-">Configuring OLD Server Settings<a data-name="configuring-old-server-settings"></a></h4>
-<p>An OLD web service&#39;s application-wide settings are used to identify the
+<p>An OLD web service’s application-wide settings are used to identify the
 language being documented (the “object language”), the language used to
 document and analyze (the “metalanguage”), validation settings for various
 form transcription fields, and the set of users designated as “unrestricted”.</p>
@@ -442,7 +442,7 @@ service being configured, is specified via the <em>object language name</em> and
 latter must be an
 <a href="http://www-01.sil.org/iso639-3/codes.asp">ISO 639-3 three-letter language identifier code</a>.
 Luckily, the OLD and Dative contain a copy of the ISO 639-3 language database so
-that the application settings interface&#39;s input fields will help you to find the
+that the application settings interface’s input fields will help you to find the
 appropriate code for the language that you are documenting/analyzing. If the
 language categorization of ISO 639-3 standard is not suitable or appropriate for
 your language of documentation, then leave the object language id field blank.</p>
@@ -462,7 +462,7 @@ e.g., for collating a metalanguage-to-object-language dictionary interface to
 your Dative/OLD data.</p>
 <h5 id="form-field-validation">Form Field Validation</h5>
 <p><strong>Important Notice:</strong> form field validation is not yet implemented in Dative.
-That is, while you can specify inventories and validation settings via Dative&#39;s
+That is, while you can specify inventories and validation settings via Dative’s
 interface, they will have no effect at present.</p>
 <p>The following form fields can be configured to have validation:</p>
 <ul>
@@ -513,7 +513,7 @@ will notify you of this and will warn you, when you validate, that the values
 in these columns will not be imported.</p>
 <p>You can alter the values in the cells of the table by double-clicking them.</p>
 <p>Some form attributes are not simply strings but are resources in their own
-right. A form&#39;s “source” value and its “tags” value are examples of
+right. A form’s “source” value and its “tags” value are examples of
 this. If Dative cannot identify an existing resource (or existing resources)
 that match(es) the string value in your CSV file, it will display a warning and
 will help you to create a corresponding resource (or resources), if you want
@@ -554,19 +554,19 @@ it.</p>
 <h2 id="files-a-data-name-files-a-">Files<a data-name="files"></a></h2>
 <p>In Dative, a file resource represents a digital file, i.e., an audio or video
 recording, an image, or a textual file, such as a PDF.</p>
-<p>...</p>
+<p>…</p>
 <h2 id="texts-a-k-a-collections-a-data-name-texts-a-">Texts (a.k.a. Collections)<a data-name="texts"></a></h2>
 <p>A text resource reresents a text in the object language. A text may be a story
 or narrative or it may be a conversation, or even a record of an elicitation
 session. In Dative, a text is simply a sequence of forms and is specified as a
 sequence of references to forms.</p>
-<p>...</p>
+<p>…</p>
 <h2 id="corpora-a-data-name-corpora-a-">Corpora<a data-name="corpora"></a></h2>
 <p>A corpus is, like a text, also a sequence of forms. A corpus may be specified
 manually, i.e., by listing form references in the same way as a text is
 specified, or it may be specified by referencing a saved search.</p>
 <p>Corpora may be used in the construction of OLD morphologies and language models.</p>
-<p>...</p>
+<p>…</p>
 <h2 id="parsers-a-data-name-parsers-a-">Parsers<a data-name="parsers"></a></h2>
 <p>Dative provides an interface to the morphological parser creation tools of OLD
 web services. These tools allow users to construct morphological parsers using
@@ -578,7 +578,7 @@ parser creation are:</p>
 <li>morphologies</li>
 <li>phonologies</li>
 </ul>
-<p>...</p>
+<p>…</p>
 <h2 id="other-resources-a-data-name-other-resources-a-">Other Resources<a data-name="other-resources"></a></h2>
 <p>When logged in to an OLD web service, Dative provides standard resource-style
 interfaces to the following additional resources:</p>
@@ -702,7 +702,7 @@ equivalent here.</li>
 <li><p>How can I request new features or report bugs?</p>
 <ul>
 <li>At present, the best way to do this is by creating an issue on
-<a href="https://github.com/jrwdunham/dative/issues">Dative&#39;s GitHub issues page</a>.</li>
+<a href="https://github.com/jrwdunham/dative/issues">Dative’s GitHub issues page</a>.</li>
 </ul>
 </li>
 <li><p>Can I import my existing data into an OLD or
@@ -728,7 +728,7 @@ data structures. Stay tuned.</li>
 </li>
 <li><p>Are there any video tutorials on how to use Dative?</p>
 <ul>
-<li>Not yet. They&#39;re a comin&#39;.</li>
+<li>Not yet. They’re a comin’.</li>
 </ul>
 </li>
 </ol>
