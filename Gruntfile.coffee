@@ -576,7 +576,7 @@ module.exports = (grunt) ->
       'eco'
       #'compass:server'
       'connect:livereload'
-      'open:server'
+      #'open:server'
       'watch'
     ]
 
