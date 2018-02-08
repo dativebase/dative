@@ -4,15 +4,8 @@ FROM node:8
 RUN npm install -g bower grunt-cli && \
     echo '{ "allow_root": true }' > /root/.bowerrc
 
-ADD Gruntfile.coffee /usr/src/dative/Gruntfile.coffee
-ADD UnicodeData.json /usr/src/dative/UnicodeData.json
-ADD app /usr/src/dative/app
-ADD bower.json /usr/src/dative/bower.json
-ADD favicon.png /usr/src/dative/favicon.png
-ADD package.json /usr/src/dative/package.json
-ADD scripts /usr/src/dative/scripts
-ADD servers.json /usr/src/dative/servers.json
-ADD test /usr/src/dative/test
+COPY . /usr/src/dative
+ENV GIT_DIR=/usr/src/dative
 
 WORKDIR /usr/src/dative/
 RUN npm install
