@@ -281,7 +281,6 @@ module.exports = (grunt) ->
             spin: '../../<%= yeoman.app %>/bower_components/spin.js/spin'
             jqueryspin: '../../<%= yeoman.app %>/bower_components/spin.js/jquery.spin'
             perfectscrollbar: '../../<%= yeoman.app %>/bower_components/perfect-scrollbar/src/perfect-scrollbar'
-            fielddb: '../../<%= yeoman.app %>/bower_components/fielddb/fielddb'
             backbonerelational: '../../<%= yeoman.app %>/bower_components/backbone-relational/backbone-relational'
             backbonelocalstorage: '../../<%= yeoman.app %>/bower_components/backbone.localStorage/backbone.localStorage'
 
@@ -478,33 +477,6 @@ module.exports = (grunt) ->
       setContinuousDeploymentVersion:
         cmd: ->
           return 'bash scripts/set_ci_version.sh'
-      symlinkFieldDBIfAvailable:
-        cmd: ->
-          return 'if [ -z ${FIELDDB_HOME} ]; ' +
-          ' then ' +
-          ' echo "Not using the most recent FieldDB, some functions might not work.";' +
-          ' else ' +
-          ' echo "Symlinking FieldDB to your local dev version in $FIELDDB_HOME/FieldDB/fielddb.js";' +
-          ' rm app/bower_components/fielddb/fielddb.js;' +
-          ' ln -s $FIELDDB_HOME/FieldDB/fielddb.js app/bower_components/fielddb/fielddb.js;' +
-          ' fi '
-      updateFieldDB:
-        cmd: ->
-          return 'if [ -z ${FIELDDB_HOME} ]; ' +
-          ' then ' +
-          ' echo "Not using the most recent FieldDB, some functions might not work.";' +
-          ' else ' +
-          ' echo "Updating FieldDB in $FIELDDB_HOME/FieldDB/fielddb.js";' +
-          ' cd $FIELDDB_HOME;' +
-          ' git clone https://github.com/cesine/FieldDB.git;' +
-          ' cd $FIELDDB_HOME/FieldDB;' +
-          ' pwd; '+
-          ' git remote add cesine https://github.com/cesine/FieldDB.git;' +
-          ' git checkout master;' +
-          ' git pull cesine master;' +
-          ' npm install; ' +
-          ' grunt browserify:src; ' +
-          ' fi '
 
     rev:
       dist:
@@ -688,7 +660,7 @@ module.exports = (grunt) ->
 
   grunt.registerTask 'docs', ['clean:docs', 'clean:doctmp', 'copy:docco', 'docco', 'clean:doctmp']
 
-  grunt.registerTask 'deploy', ['exec:updateFieldDB', 'exec:symlinkFieldDBIfAvailable', 'jshint', 'build', 'exec:setContinuousDeploymentVersion']
+  grunt.registerTask 'deploy', ['jshint', 'build', 'exec:setContinuousDeploymentVersion']
 
   grunt.registerTask 'copydist', 'copy:dist'
   grunt.registerTask 'cleandist', 'clean:dist'

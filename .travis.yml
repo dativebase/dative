@@ -1,50 +1,17 @@
 language: node_js
 
 node_js:
-  - 0.12.10
-  - 4.3.0
-
-# Travis supports running a real browser (Firefox) with a virtual screen. Just update your .travis.yml to set up the virtual screen like this:
-# before_script:
-#   - export DISPLAY=:99.0
-#   - sh -e /etc/init.d/xvfb start
-
-# whitelist
-# branches:
-#  only:
-#    - master
-bundler_args: --retry 3
-
-notifications:
-  email:
-    recipients:
-      - lingsync-support@googlegroups.com
-    on_success: change
-    on_failure: always
-
-# env:
-#   matrix:
-    # see set_up_new_machine.sh
+  - 8.9.1
 
 before_install:
-  # Download and configure deps
-  - export TZ=Canada/Eastern # http://stackoverflow.com/questions/23371542/how-do-i-configure-travis-ci-to-use-the-correct-time-zone-for-a-rails-app
-  # - sudo apt-get install ncftp
+  - export TZ=Canada/Eastern
   - npm install -g grunt-cli
-  - npm install -g bower
+
+install:
+  - yarn
 
 script: grunt deploy
 
-env:
-  global:
-   - FIELDDB_HOME=$HOME
-   - secure: MFLi2VIIEDtmYXUwHYTdMelUVTiILNi2d66dqp7amyLIjSfsgypnmmtbH6NBnNEmZ9srpgrvJVym9tR+0JDvtmC1F/qhZyrLTF2K8schfe3M6+dHlMJDpiFgt4vmWkxnYTinRUXh5nb/Tvhtx8RydDW4JDeTZNyurfE6e7FqZ70=
-   - secure: FQG2Ix+HjfFe2s7KT8RDkb8vhXugWSVOBw/fcbkfSLRLMd9+13mQ/mQooo0HC+L9u9ZtfqVeqkEn0dJExej7heSkWFkUg2vKfyR3Mceyou5JdzXWUX3BUrbLAfAvkN4S6IGtO8Nxnbu88ghqw20uUHGeiKUDfjc9tuSPFxtqQBQ=
-   - secure: hE2iibDhUs1CwWVPkfvNz1l9chaZLF4dRJy4xJ+wejdvVCTgWgg2qTSllwYjRXZ8zwSEi9v5MVHng9z2+AGikuMl8i7yYzxFrBbzM5qIRqRonXlfNrJXx9ruMGKKBhffNtIwZAp1b7IxQaapQ3BXsoXbOp/z8wp3u0aX7DJa1Ck=
-
 after_success:
-  # on:
-  #   branch: master
-  #   condition: $TRAVIS_REPO_SLUG = FieldDB/dative
-    - touch "dist/deployed at `date`"
-    - '[ "${TRAVIS_PULL_REQUEST}" = "false" ] && [ "${TRAVIS_REPO_SLUG}" = "FieldDB/dative" ]  && ncftpput -R -v -u $USERNAME -p $PASSWORD $SERVER /beta dist/*'
+  - touch "dist/deployed at `date`"
+  - '[ "${TRAVIS_PULL_REQUEST}" = "false" ] && [ "${TRAVIS_REPO_SLUG}" = "FieldDB/dative" ]  && ncftpput -R -v -u $USERNAME -p $PASSWORD $SERVER /beta dist/*'

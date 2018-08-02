@@ -49,9 +49,6 @@ echo " Weeks: $WEEK_DIFF"
 echo "  ->    Version: $version"
 echo ""
 
-echo "... setting version on dative bower"
-sed 's/"version": "[^,]*"/"version": "'$SHORT_VERSION'"/' bower.json  > output
-mv output bower.json
 echo "... setting version on dative package"
 sed 's/"version": "[^,]*"/"version": "'$SHORT_VERSION'"/' package.json  > output
 mv output package.json

@@ -50,15 +50,14 @@ Then clone the dative repo and move into the clone:
     $ git clone https://github.com/jrwdunham/dative.git
     $ cd dative
 
-Then install the Node dependencies:
+Then install the dependencies:
 
-    $ npm install
+    $ yarn
 
-Then install the Bower dependencies for the app and the tests:
+Then optionally install the test dependencies:
 
-    $ bower install
     $ cd test
-    $ bower install
+    $ yarn
     $ cd ..
 
 
