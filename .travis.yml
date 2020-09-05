@@ -10,7 +10,7 @@ before_install:
   - npm install -g grunt-cli
 
 install:
-  - yarn
+  - yarn install
 
 script: grunt deploy
 
