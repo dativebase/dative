@@ -40,6 +40,23 @@ Dative is open source and under active development.
 
 ### Install
 
+Dative has become old and unloved. It is currently difficult to build. For this
+reason, I am releasing pre-built versions of Dative---i.e., directory structures
+each containing a single, concatenated and minified JavaScript file along with
+the needed static files (images, CSS, etc.) and dependency licenses---under
+subdirectories of ``releases/``.
+
+To test out a pre-built Dative, extract the release, move into its directory, and
+use Python to serve it locally at ``http://0.0.0.0:8000/``::
+
+    $ cd releases/
+    $ tar -zxvf release-<HASH>.tar.gz
+    $ cd release-<HASH>/
+    $ python3 -m http.server
+
+
+#### Original Install Instructions
+
 First, make sure you have NodeJS >= 0.10 installed. Then install the Grunt
 command line interface (CLI):
 
